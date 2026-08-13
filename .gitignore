@@ -19,6 +19,9 @@ wheels/
 .coverage
 htmlcov/
 
+# Code review graph cache
+.code-review-graph/
+
 # Model training
 checkpoints/
 runs/

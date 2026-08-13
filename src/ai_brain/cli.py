@@ -3,7 +3,10 @@ from __future__ import annotations
 import argparse
 import json
 from collections.abc import Sequence
+from pathlib import Path
 
+from ai_brain.data.generators import GENERATOR_NAMES
+from ai_brain.data.writer import generate_jsonl
 from ai_brain.model.config import tiny_config
 from ai_brain.model.smoke import run_model_smoke_step
 from ai_brain.model.tiny_transformer import TinyCausalTransformer
@@ -88,6 +91,35 @@ def build_parser() -> argparse.ArgumentParser:
         help="Sequence length for the model smoke step.",
     )
 
+    generate_data_parser = subparsers.add_parser(
+        "generate-data",
+        help="Generate a synthetic JSONL training dataset.",
+    )
+    generate_data_parser.add_argument(
+        "--output",
+        type=Path,
+        required=True,
+        help="Output JSONL file path.",
+    )
+    generate_data_parser.add_argument(
+        "--count",
+        type=int,
+        default=100,
+        help="Number of examples to generate.",
+    )
+    generate_data_parser.add_argument(
+        "--seed",
+        type=int,
+        default=1234,
+        help="Random seed for deterministic generation.",
+    )
+    generate_data_parser.add_argument(
+        "--task-type",
+        action="append",
+        choices=GENERATOR_NAMES,
+        help="Restrict generation to one task type. Can be repeated.",
+    )
+
     return parser
 
 
@@ -112,44 +144,50 @@ def main(argv: Sequence[str] | None = None) -> int:
         parameter_count = count_parameters(model)
         trainable_parameter_count = count_parameters(model, trainable_only=True)
 
-        print(
-            json.dumps(
-                {
-                    "model": "TinyCausalTransformer",
-                    "parameters": parameter_count,
-                    "parameters_human": format_parameter_count(parameter_count),
-                    "trainable_parameters": trainable_parameter_count,
-                    "trainable_parameters_human": format_parameter_count(
-                        trainable_parameter_count
-                    ),
-                    "config": {
-                        "vocab_size": config.vocab_size,
-                        "max_sequence_length": config.max_sequence_length,
-                        "d_model": config.d_model,
-                        "num_layers": config.num_layers,
-                        "num_heads": config.num_heads,
-                        "ffn_hidden_dim": config.ffn_hidden_dim,
-                        "dropout": config.dropout,
-                        "tie_embeddings": config.tie_embeddings,
-                    },
-                },
-                indent=2,
-                sort_keys=True,
-            )
-        )
+        result = {
+            "model": "TinyCausalTransformer",
+            "parameters": parameter_count,
+            "parameters_human": format_parameter_count(parameter_count),
+            "trainable_parameters": trainable_parameter_count,
+            "trainable_parameters_human": format_parameter_count(
+                trainable_parameter_count
+            ),
+            "config": {
+                "vocab_size": config.vocab_size,
+                "max_sequence_length": config.max_sequence_length,
+                "d_model": config.d_model,
+                "num_layers": config.num_layers,
+                "num_heads": config.num_heads,
+                "ffn_hidden_dim": config.ffn_hidden_dim,
+                "dropout": config.dropout,
+                "tie_embeddings": config.tie_embeddings,
+            },
+        }
+
+        print(json.dumps(result, indent=2, sort_keys=True))
         return 0
 
     if args.command == "model-smoke":
         info = get_device_info(prefer_cuda=not args.cpu)
-    result = run_model_smoke_step(
-        info,
-        config_name=args.config,
-        seed=args.seed,
-        batch_size=args.batch_size,
-        sequence_length=args.sequence_length,
-    )
-    print(json.dumps(result, indent=2, sort_keys=True))
-    return 0
+        result = run_model_smoke_step(
+            info,
+            config_name=args.config,
+            seed=args.seed,
+            batch_size=args.batch_size,
+            sequence_length=args.sequence_length,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-data":
+        result = generate_jsonl(
+            output_path=args.output,
+            count=args.count,
+            seed=args.seed,
+            task_types=args.task_type,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
 
     parser.error(f"Unknown command: {args.command}")
     return 2
