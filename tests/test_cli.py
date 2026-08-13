@@ -312,6 +312,48 @@ def test_generate_data_split_command_with_answer_format(tmp_path, capsys) -> Non
     )
 
 
+def test_generate_range_ablation_command(tmp_path, capsys) -> None:
+    output_dir = tmp_path / "m111"
+
+    exit_code = main(
+        [
+            "generate-range-ablation",
+            "--output-dir",
+            str(output_dir),
+            "--train-count",
+            "8",
+            "--eval-same-count",
+            "6",
+            "--eval-shifted-count",
+            "5",
+            "--train-seed",
+            "1000",
+            "--eval-same-seed",
+            "2000",
+            "--eval-shifted-seed",
+            "3000",
+            "--task-type",
+            "arithmetic.add",
+            "--answer-format",
+            "canonical_numeric",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    manifest = result["manifest"]
+
+    assert exit_code == 0
+    assert (output_dir / "train_same.jsonl").exists()
+    assert (output_dir / "eval_same.jsonl").exists()
+    assert (output_dir / "eval_shifted.jsonl").exists()
+    assert manifest["answer_format"] == "canonical_numeric"
+    assert manifest["splits"]["train_same"]["profile"] == "train_same"
+    assert manifest["splits"]["eval_same"]["profile"] == "eval_same"
+    assert manifest["splits"]["eval_shifted"]["profile"] == "eval_shifted"
+    assert manifest["quality_checks"]["no_train_eval_same_intersection"] is True
+
+
 def test_dataset_stats_command(tmp_path, capsys) -> None:
     output_path = tmp_path / "add.jsonl"
     main(

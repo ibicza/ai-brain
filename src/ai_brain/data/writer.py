@@ -115,6 +115,160 @@ def dataset_stats(
     }
 
 
+def generate_range_ablation(
+    *,
+    output_dir: Path,
+    train_count: int,
+    eval_same_count: int,
+    eval_shifted_count: int,
+    train_seed: int,
+    eval_same_seed: int,
+    eval_shifted_seed: int,
+    task_types: Sequence[GeneratorName] | None = None,
+    train_profile: GenerationProfileName = "train_same",
+    eval_same_profile: GenerationProfileName = "eval_same",
+    eval_shifted_profile: GenerationProfileName = "eval_shifted",
+    task_preset: str | None = None,
+    enforce_unique_prompts: bool = True,
+    answer_format: AnswerFormatName = "normal_answer",
+) -> dict[str, Any]:
+    allowed_task_types = tuple(task_types or GENERATOR_NAMES)
+
+    train_examples = _generate_examples_with_coverage(
+        count=train_count,
+        seed=train_seed,
+        task_types=allowed_task_types,
+        split_name="train",
+        profile=train_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+    )
+    train_prompts = {example.prompt for example in train_examples}
+    eval_same_examples = _generate_examples_with_coverage(
+        count=eval_same_count,
+        seed=eval_same_seed,
+        task_types=allowed_task_types,
+        split_name="eval",
+        profile=eval_same_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+        blocked_prompts=train_prompts,
+    )
+    eval_same_prompts = {example.prompt for example in eval_same_examples}
+    eval_shifted_examples = _generate_examples_with_coverage(
+        count=eval_shifted_count,
+        seed=eval_shifted_seed,
+        task_types=allowed_task_types,
+        split_name="eval",
+        profile=eval_shifted_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+        blocked_prompts=train_prompts | eval_same_prompts,
+    )
+
+    train_path = output_dir / "train_same.jsonl"
+    eval_same_path = output_dir / "eval_same.jsonl"
+    eval_shifted_path = output_dir / "eval_shifted.jsonl"
+    manifest_path = output_dir / "manifest.json"
+
+    write_jsonl(train_path, train_examples)
+    write_jsonl(eval_same_path, eval_same_examples)
+    write_jsonl(eval_shifted_path, eval_shifted_examples)
+
+    eval_shifted_prompts = {example.prompt for example in eval_shifted_examples}
+
+    train_stats = build_dataset_stats(
+        train_examples,
+        expected_task_types=allowed_task_types,
+    )
+    eval_same_stats = build_dataset_stats(
+        eval_same_examples,
+        expected_task_types=allowed_task_types,
+    )
+    eval_shifted_stats = build_dataset_stats(
+        eval_shifted_examples,
+        expected_task_types=allowed_task_types,
+    )
+
+    train_eval_same_intersection = sorted(train_prompts & eval_same_prompts)
+    train_eval_shifted_intersection = sorted(train_prompts & eval_shifted_prompts)
+    eval_same_shifted_intersection = sorted(eval_same_prompts & eval_shifted_prompts)
+
+    manifest = {
+        "version": 1,
+        "task_preset": task_preset,
+        "answer_format": answer_format,
+        "task_types": list(allowed_task_types),
+        "splits": {
+            "train_same": {
+                "path": train_path.name,
+                "count": train_count,
+                "seed": train_seed,
+                "profile": train_profile,
+                **train_stats,
+            },
+            "eval_same": {
+                "path": eval_same_path.name,
+                "count": eval_same_count,
+                "seed": eval_same_seed,
+                "profile": eval_same_profile,
+                **eval_same_stats,
+            },
+            "eval_shifted": {
+                "path": eval_shifted_path.name,
+                "count": eval_shifted_count,
+                "seed": eval_shifted_seed,
+                "profile": eval_shifted_profile,
+                **eval_shifted_stats,
+            },
+        },
+        "split_policy": {
+            "name": "stable_prompt_hash_mod_2",
+            "salt": _SPLIT_HASH_SALT,
+            "enforce_unique_prompts": enforce_unique_prompts,
+        },
+        "quality_checks": {
+            "train_eval_same_intersection_count": len(train_eval_same_intersection),
+            "train_eval_shifted_intersection_count": len(
+                train_eval_shifted_intersection
+            ),
+            "eval_same_shifted_intersection_count": len(eval_same_shifted_intersection),
+            "train_eval_same_intersection_sample": train_eval_same_intersection[:10],
+            "train_eval_shifted_intersection_sample": train_eval_shifted_intersection[
+                :10
+            ],
+            "eval_same_shifted_intersection_sample": eval_same_shifted_intersection[
+                :10
+            ],
+            "no_train_eval_same_intersection": not train_eval_same_intersection,
+            "no_train_eval_shifted_intersection": not train_eval_shifted_intersection,
+            "no_eval_same_shifted_intersection": not eval_same_shifted_intersection,
+            "all_task_types_present": (
+                train_stats["all_task_types_present"]
+                and eval_same_stats["all_task_types_present"]
+                and eval_shifted_stats["all_task_types_present"]
+            ),
+        },
+    }
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    return {
+        "output_dir": str(output_dir),
+        "train_same_path": str(train_path),
+        "eval_same_path": str(eval_same_path),
+        "eval_shifted_path": str(eval_shifted_path),
+        "manifest_path": str(manifest_path),
+        "task_preset": task_preset,
+        "answer_format": answer_format,
+        "manifest": manifest,
+    }
+
+
 def generate_data_split(
     *,
     output_dir: Path,
@@ -236,6 +390,7 @@ def _generate_examples_with_coverage(
     profile: GenerationProfileName = "train",
     enforce_unique_prompts: bool = True,
     answer_format: AnswerFormatName = "normal_answer",
+    blocked_prompts: set[str] | None = None,
 ) -> list[TrainingExample]:
     if count < 0:
         raise ValueError("count must be non-negative")
@@ -250,6 +405,7 @@ def _generate_examples_with_coverage(
 
     examples: list[TrainingExample] = []
     seen_prompts: set[str] = set()
+    blocked = blocked_prompts or set()
     attempt_limit = max(10_000, count * 200)
     attempts = 0
 
@@ -290,6 +446,9 @@ def _generate_examples_with_coverage(
             example.prompt,
             split_name,
         ):
+            continue
+
+        if example.prompt in blocked:
             continue
 
         if enforce_unique_prompts and example.prompt in seen_prompts:

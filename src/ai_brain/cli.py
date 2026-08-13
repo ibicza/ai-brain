@@ -9,7 +9,12 @@ from pathlib import Path
 from ai_brain.data.answer_format import ANSWER_FORMAT_NAMES
 from ai_brain.data.generators import GENERATION_PROFILES, GENERATOR_NAMES
 from ai_brain.data.presets import TASK_PRESETS, resolve_task_selection
-from ai_brain.data.writer import dataset_stats, generate_data_split, generate_jsonl
+from ai_brain.data.writer import (
+    dataset_stats,
+    generate_data_split,
+    generate_jsonl,
+    generate_range_ablation,
+)
 from ai_brain.eval.compare import compare_evals
 from ai_brain.eval.diagnostics import analyze_eval
 from ai_brain.eval.runner import eval_lm, generate_answer
@@ -270,6 +275,87 @@ def build_parser() -> argparse.ArgumentParser:
         help="Difficulty profile for the eval split.",
     )
     generate_split_parser.add_argument(
+        "--answer-format",
+        choices=ANSWER_FORMAT_NAMES,
+        default="normal_answer",
+        help="Answer/prompt formatting ablation for generated examples.",
+    )
+
+    range_ablation_parser = subparsers.add_parser(
+        "generate-range-ablation",
+        help="Generate train_same/eval_same/eval_shifted JSONL files and manifest.",
+    )
+    range_ablation_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory for train_same.jsonl, eval_same.jsonl, eval_shifted.jsonl, and manifest.json.",
+    )
+    range_ablation_parser.add_argument(
+        "--train-count",
+        type=int,
+        required=True,
+        help="Number of train_same examples to generate.",
+    )
+    range_ablation_parser.add_argument(
+        "--eval-same-count",
+        type=int,
+        required=True,
+        help="Number of eval_same examples to generate.",
+    )
+    range_ablation_parser.add_argument(
+        "--eval-shifted-count",
+        type=int,
+        required=True,
+        help="Number of eval_shifted examples to generate.",
+    )
+    range_ablation_parser.add_argument(
+        "--train-seed",
+        type=int,
+        required=True,
+        help="Random seed for train_same.",
+    )
+    range_ablation_parser.add_argument(
+        "--eval-same-seed",
+        type=int,
+        required=True,
+        help="Random seed for eval_same.",
+    )
+    range_ablation_parser.add_argument(
+        "--eval-shifted-seed",
+        type=int,
+        required=True,
+        help="Random seed for eval_shifted.",
+    )
+    range_ablation_parser.add_argument(
+        "--task-type",
+        action="append",
+        choices=GENERATOR_NAMES,
+        help="Restrict generation to one task type. Can be repeated.",
+    )
+    range_ablation_parser.add_argument(
+        "--task-preset",
+        help="Restrict generation to a focused task preset.",
+    )
+    range_ablation_parser.add_argument(
+        "--train-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="train_same",
+        help="Difficulty profile for train_same.",
+    )
+    range_ablation_parser.add_argument(
+        "--eval-same-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="eval_same",
+        help="Difficulty profile for eval_same.",
+    )
+    range_ablation_parser.add_argument(
+        "--eval-shifted-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="eval_shifted",
+        help="Difficulty profile for eval_shifted.",
+    )
+    range_ablation_parser.add_argument(
         "--answer-format",
         choices=ANSWER_FORMAT_NAMES,
         default="normal_answer",
@@ -789,6 +875,26 @@ def main(argv: Sequence[str] | None = None) -> int:
             task_types=task_types,
             train_profile=train_profile,
             eval_profile=eval_profile,
+            task_preset=task_preset,
+            answer_format=args.answer_format,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-range-ablation":
+        task_types, task_preset = _resolve_task_selection_or_exit(parser, args)
+        result = generate_range_ablation(
+            output_dir=args.output_dir,
+            train_count=args.train_count,
+            eval_same_count=args.eval_same_count,
+            eval_shifted_count=args.eval_shifted_count,
+            train_seed=args.train_seed,
+            eval_same_seed=args.eval_same_seed,
+            eval_shifted_seed=args.eval_shifted_seed,
+            task_types=task_types,
+            train_profile=args.train_profile,
+            eval_same_profile=args.eval_same_profile,
+            eval_shifted_profile=args.eval_shifted_profile,
             task_preset=task_preset,
             answer_format=args.answer_format,
         )

@@ -22,7 +22,15 @@ from ai_brain.data.templates import (
 )
 
 GeneratorName = str
-GenerationProfileName = Literal["train", "eval", "train_short", "eval_short"]
+GenerationProfileName = Literal[
+    "train",
+    "eval",
+    "train_short",
+    "eval_short",
+    "train_same",
+    "eval_same",
+    "eval_shifted",
+]
 
 
 @dataclass(frozen=True)
@@ -30,7 +38,13 @@ class GenerationProfile:
     name: GenerationProfileName
 
     def randint(self, rng: random.Random, low: int, high: int) -> int:
-        if self.name in {"train_short", "eval_short"} and (low, high) == (3, 5):
+        if self.name in {
+            "train_short",
+            "eval_short",
+            "train_same",
+            "eval_same",
+            "eval_shifted",
+        } and (low, high) == (3, 5):
             return rng.randint(3, 4)
 
         train_ranges = {
@@ -40,7 +54,7 @@ class GenerationProfile:
             (1, 20): (1, 30),
             (1, 10): (1, 15),
         }
-        if self.name in {"train", "train_short"}:
+        if self.name in {"train", "train_short", "train_same", "eval_same"}:
             train_low, train_high = train_ranges.get((low, high), (low, high))
             return rng.randint(train_low, train_high)
 
@@ -58,7 +72,7 @@ class GenerationProfile:
         return rng.randint(eval_low, eval_high)
 
     def sample_range(self, rng: random.Random, stop: int, count: int) -> list[int]:
-        if self.name in {"train", "train_short"}:
+        if self.name in {"train", "train_short", "train_same", "eval_same"}:
             return rng.sample(range(stop), count)
 
         if stop == 100:
@@ -74,11 +88,17 @@ TRAIN_PROFILE = GenerationProfile(name="train")
 EVAL_PROFILE = GenerationProfile(name="eval")
 TRAIN_SHORT_PROFILE = GenerationProfile(name="train_short")
 EVAL_SHORT_PROFILE = GenerationProfile(name="eval_short")
+TRAIN_SAME_PROFILE = GenerationProfile(name="train_same")
+EVAL_SAME_PROFILE = GenerationProfile(name="eval_same")
+EVAL_SHIFTED_PROFILE = GenerationProfile(name="eval_shifted")
 GENERATION_PROFILES: dict[GenerationProfileName, GenerationProfile] = {
     "train": TRAIN_PROFILE,
     "eval": EVAL_PROFILE,
     "train_short": TRAIN_SHORT_PROFILE,
     "eval_short": EVAL_SHORT_PROFILE,
+    "train_same": TRAIN_SAME_PROFILE,
+    "eval_same": EVAL_SAME_PROFILE,
+    "eval_shifted": EVAL_SHIFTED_PROFILE,
 }
 
 

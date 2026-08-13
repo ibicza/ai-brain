@@ -15,6 +15,7 @@ from ai_brain.data.writer import (
     dataset_stats,
     generate_data_split,
     generate_jsonl,
+    generate_range_ablation,
     read_jsonl,
     write_jsonl,
 )
@@ -64,6 +65,46 @@ def test_eval_profile_uses_harder_numeric_ranges() -> None:
     assert 0 <= train_example.metadata["b"] <= 30
     assert 20 <= eval_example.metadata["a"] <= 80
     assert 20 <= eval_example.metadata["b"] <= 80
+
+
+def test_same_and_shifted_profiles_use_expected_numeric_ranges() -> None:
+    train_same = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["arithmetic.add"],
+        profile="train_same",
+    )[0]
+    eval_same = generate_examples(
+        count=1,
+        seed=2234,
+        task_types=["arithmetic.add"],
+        profile="eval_same",
+    )[0]
+    eval_shifted = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["arithmetic.add"],
+        profile="eval_shifted",
+    )[0]
+
+    assert 0 <= train_same.metadata["a"] <= 30
+    assert 0 <= train_same.metadata["b"] <= 30
+    assert 0 <= eval_same.metadata["a"] <= 30
+    assert 0 <= eval_same.metadata["b"] <= 30
+    assert 20 <= eval_shifted.metadata["a"] <= 80
+    assert 20 <= eval_shifted.metadata["b"] <= 80
+
+
+def test_eval_shifted_keeps_sorting_short_lengths() -> None:
+    examples = generate_examples(
+        count=100,
+        seed=3400,
+        task_types=TASK_PRESETS["sorting_short"].task_types,
+        profile="eval_shifted",
+    )
+
+    assert max(len(example.metadata["numbers"]) for example in examples) <= 4
+    assert min(len(example.metadata["numbers"]) for example in examples) >= 3
 
 
 def test_generator_set_has_enough_first_stage_task_types() -> None:
@@ -848,4 +889,39 @@ def test_generate_data_split_manifest_records_answer_format(tmp_path: Path) -> N
     assert manifest["answer_format"] == "scratchpad"
     assert {example["metadata"]["answer_format"] for example in train_examples} == {
         "scratchpad"
+    }
+
+
+def test_generate_range_ablation_writes_three_disjoint_splits(tmp_path: Path) -> None:
+    output_dir = tmp_path / "range_ablation"
+
+    result = generate_range_ablation(
+        output_dir=output_dir,
+        train_count=12,
+        eval_same_count=9,
+        eval_shifted_count=8,
+        train_seed=1000,
+        eval_same_seed=2000,
+        eval_shifted_seed=3000,
+        task_types=["arithmetic.add", "arithmetic.subtract"],
+        task_preset="arithmetic",
+        answer_format="canonical_numeric",
+    )
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+    train = read_jsonl(output_dir / "train_same.jsonl")
+    eval_same = read_jsonl(output_dir / "eval_same.jsonl")
+    eval_shifted = read_jsonl(output_dir / "eval_shifted.jsonl")
+
+    assert result["answer_format"] == "canonical_numeric"
+    assert len(train) == 12
+    assert len(eval_same) == 9
+    assert len(eval_shifted) == 8
+    assert manifest["splits"]["train_same"]["profile"] == "train_same"
+    assert manifest["splits"]["eval_same"]["profile"] == "eval_same"
+    assert manifest["splits"]["eval_shifted"]["profile"] == "eval_shifted"
+    assert manifest["quality_checks"]["no_train_eval_same_intersection"] is True
+    assert manifest["quality_checks"]["no_train_eval_shifted_intersection"] is True
+    assert manifest["quality_checks"]["no_eval_same_shifted_intersection"] is True
+    assert {example["metadata"]["answer_format"] for example in train} == {
+        "canonical_numeric"
     }
