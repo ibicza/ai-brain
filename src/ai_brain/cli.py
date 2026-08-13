@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from ai_brain.data.generators import GENERATION_PROFILES, GENERATOR_NAMES
+from ai_brain.data.presets import TASK_PRESETS, resolve_task_selection
 from ai_brain.data.writer import dataset_stats, generate_data_split, generate_jsonl
 from ai_brain.eval.compare import compare_evals
 from ai_brain.eval.diagnostics import analyze_eval
@@ -188,9 +189,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Restrict generation to one task type. Can be repeated.",
     )
     generate_data_parser.add_argument(
+        "--task-preset",
+        help="Restrict generation to a focused task preset.",
+    )
+    generate_data_parser.add_argument(
         "--profile",
         choices=tuple(GENERATION_PROFILES),
-        default="train",
         help="Difficulty profile for generated examples.",
     )
 
@@ -235,15 +239,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Restrict generation to one task type. Can be repeated.",
     )
     generate_split_parser.add_argument(
+        "--task-preset",
+        help="Restrict generation to a focused task preset.",
+    )
+    generate_split_parser.add_argument(
         "--train-profile",
         choices=tuple(GENERATION_PROFILES),
-        default="train",
         help="Difficulty profile for the train split.",
     )
     generate_split_parser.add_argument(
         "--eval-profile",
         choices=tuple(GENERATION_PROFILES),
-        default="eval",
         help="Difficulty profile for the eval split.",
     )
 
@@ -639,6 +645,36 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _resolve_task_selection_or_exit(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> tuple[list[str] | None, str | None]:
+    try:
+        return resolve_task_selection(
+            task_preset=args.task_preset,
+            task_types=args.task_type,
+        )
+    except ValueError as error:
+        parser.error(str(error))
+
+
+def _default_generate_profile(task_preset: str | None) -> str:
+    if task_preset is None:
+        return "train"
+    return TASK_PRESETS[task_preset].default_profile
+
+
+def _default_train_profile(task_preset: str | None) -> str:
+    if task_preset is None:
+        return "train"
+    return TASK_PRESETS[task_preset].default_train_profile
+
+
+def _default_eval_profile(task_preset: str | None) -> str:
+    if task_preset is None:
+        return "eval"
+    return TASK_PRESETS[task_preset].default_eval_profile
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_stdout()
     parser = build_parser()
@@ -697,26 +733,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == "generate-data":
+        task_types, task_preset = _resolve_task_selection_or_exit(parser, args)
+        profile = args.profile or _default_generate_profile(task_preset)
         result = generate_jsonl(
             output_path=args.output,
             count=args.count,
             seed=args.seed,
-            task_types=args.task_type,
-            profile=args.profile,
+            task_types=task_types,
+            profile=profile,
+            task_preset=task_preset,
         )
         print(json.dumps(result, indent=2, sort_keys=True))
         return 0
 
     if args.command == "generate-data-split":
+        task_types, task_preset = _resolve_task_selection_or_exit(parser, args)
+        train_profile = args.train_profile or _default_train_profile(task_preset)
+        eval_profile = args.eval_profile or _default_eval_profile(task_preset)
         result = generate_data_split(
             output_dir=args.output_dir,
             train_count=args.train_count,
             eval_count=args.eval_count,
             train_seed=args.train_seed,
             eval_seed=args.eval_seed,
-            task_types=args.task_type,
-            train_profile=args.train_profile,
-            eval_profile=args.eval_profile,
+            task_types=task_types,
+            train_profile=train_profile,
+            eval_profile=eval_profile,
+            task_preset=task_preset,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0

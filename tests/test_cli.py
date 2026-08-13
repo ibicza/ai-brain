@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from ai_brain.cli import main
 
 
@@ -62,6 +64,81 @@ def test_generate_data_command_with_task_type(tmp_path, capsys) -> None:
     assert {example["task_type"] for example in loaded} == {"quantity.direct"}
 
 
+def test_generate_data_command_with_task_preset(tmp_path, capsys) -> None:
+    output_path = tmp_path / "quantity_direct.jsonl"
+
+    exit_code = main(
+        [
+            "generate-data",
+            "--output",
+            str(output_path),
+            "--count",
+            "12",
+            "--seed",
+            "3100",
+            "--task-preset",
+            "quantity_direct",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    loaded = [
+        json.loads(line)
+        for line in output_path.read_text(encoding="utf-8").splitlines()
+    ]
+
+    assert exit_code == 0
+    assert result["task_preset"] == "quantity_direct"
+    assert result["task_types"] == [
+        "quantity.direct",
+        "quantity.location_direct",
+        "quantity.known_zero",
+    ]
+    assert {example["task_type"] for example in loaded}.issubset(
+        set(result["task_types"])
+    )
+
+
+def test_generate_data_rejects_task_preset_with_task_type(capsys, tmp_path) -> None:
+    with pytest.raises(SystemExit):
+        main(
+            [
+                "generate-data",
+                "--output",
+                str(tmp_path / "bad.jsonl"),
+                "--task-preset",
+                "arithmetic",
+                "--task-type",
+                "arithmetic.add",
+            ]
+        )
+
+    captured = capsys.readouterr()
+
+    assert "Cannot use --task-preset together with --task-type." in captured.err
+
+
+def test_generate_data_rejects_unknown_task_preset(capsys, tmp_path) -> None:
+    with pytest.raises(SystemExit):
+        main(
+            [
+                "generate-data",
+                "--output",
+                str(tmp_path / "bad.jsonl"),
+                "--task-preset",
+                "foo",
+            ]
+        )
+
+    captured = capsys.readouterr()
+
+    assert (
+        "Unknown task preset: foo. Available presets: "
+        "arithmetic, quantity_direct, sorting_short, state_change"
+    ) in captured.err
+
+
 def test_generate_data_split_command(tmp_path, capsys) -> None:
     output_dir = tmp_path / "stage1"
 
@@ -103,6 +180,59 @@ def test_generate_data_split_command(tmp_path, capsys) -> None:
     assert manifest["splits"]["eval"]["duplicate_prompt_count"] == 0
     assert manifest["quality_checks"]["no_prompt_intersection"] is True
     assert manifest["quality_checks"]["all_task_types_present"] is True
+
+
+def test_generate_data_split_command_with_task_preset(tmp_path, capsys) -> None:
+    output_dir = tmp_path / "sorting_short"
+
+    exit_code = main(
+        [
+            "generate-data-split",
+            "--output-dir",
+            str(output_dir),
+            "--train-count",
+            "12",
+            "--eval-count",
+            "10",
+            "--train-seed",
+            "3400",
+            "--eval-seed",
+            "4400",
+            "--task-preset",
+            "sorting_short",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    manifest = result["manifest"]
+    train_examples = [
+        json.loads(line)
+        for line in (output_dir / "train.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    eval_examples = [
+        json.loads(line)
+        for line in (output_dir / "eval.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+
+    assert exit_code == 0
+    assert result["task_preset"] == "sorting_short"
+    assert manifest["task_preset"] == "sorting_short"
+    assert manifest["task_types"] == ["sorting.ascending", "sorting.descending"]
+    assert manifest["splits"]["train"]["profile"] == "train_short"
+    assert manifest["splits"]["eval"]["profile"] == "eval_short"
+    assert {
+        example["task_type"] for example in train_examples + eval_examples
+    }.issubset({"sorting.ascending", "sorting.descending"})
+    assert (
+        max(
+            len(example["metadata"]["numbers"])
+            for example in train_examples + eval_examples
+        )
+        <= 4
+    )
 
 
 def test_dataset_stats_command(tmp_path, capsys) -> None:

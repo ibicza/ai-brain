@@ -34,6 +34,7 @@ def generate_jsonl(
     seed: int,
     task_types: Sequence[GeneratorName] | None = None,
     profile: GenerationProfileName = "train",
+    task_preset: str | None = None,
 ) -> dict[str, Any]:
     examples = generate_examples(
         count=count,
@@ -49,6 +50,7 @@ def generate_jsonl(
         "count": count,
         "seed": seed,
         "profile": profile,
+        "task_preset": task_preset,
         "task_types": list(task_types) if task_types is not None else "all",
     }
 
@@ -117,6 +119,7 @@ def generate_data_split(
     task_types: Sequence[GeneratorName] | None = None,
     train_profile: GenerationProfileName = "train",
     eval_profile: GenerationProfileName = "eval",
+    task_preset: str | None = None,
     enforce_unique_prompts: bool = True,
 ) -> dict[str, Any]:
     allowed_task_types = tuple(task_types or GENERATOR_NAMES)
@@ -160,6 +163,7 @@ def generate_data_split(
 
     manifest = {
         "version": 1,
+        "task_preset": task_preset,
         "task_types": list(allowed_task_types),
         "splits": {
             "train": {
@@ -204,6 +208,7 @@ def generate_data_split(
         "train_path": str(train_path),
         "eval_path": str(eval_path),
         "manifest_path": str(manifest_path),
+        "task_preset": task_preset,
         "manifest": manifest,
     }
 

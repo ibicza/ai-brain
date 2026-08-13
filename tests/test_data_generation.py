@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from ai_brain.data.generators import GENERATOR_NAMES, generate_examples
+from ai_brain.data.presets import TASK_PRESETS, resolve_task_selection
 from ai_brain.data.schema import TrainingExample
 from ai_brain.data.templates import (
     CountedNoun,
@@ -407,3 +408,128 @@ def test_dataset_stats_reports_top_duplicate_prompts(tmp_path: Path) -> None:
             "task_type": "arithmetic.add",
         }
     ]
+
+
+def test_task_preset_registry_contains_required_presets() -> None:
+    assert set(TASK_PRESETS) == {
+        "arithmetic",
+        "quantity_direct",
+        "sorting_short",
+        "state_change",
+    }
+    assert TASK_PRESETS["quantity_direct"].task_types == (
+        "quantity.direct",
+        "quantity.location_direct",
+        "quantity.known_zero",
+    )
+    assert TASK_PRESETS["sorting_short"].default_train_profile == "train_short"
+    assert TASK_PRESETS["sorting_short"].default_eval_profile == "eval_short"
+
+
+def test_resolve_task_selection_expands_task_preset() -> None:
+    task_types, task_preset = resolve_task_selection(
+        task_preset="arithmetic",
+        task_types=None,
+    )
+
+    assert task_preset == "arithmetic"
+    assert task_types == list(TASK_PRESETS["arithmetic"].task_types)
+
+
+def test_resolve_task_selection_rejects_preset_with_task_type() -> None:
+    try:
+        resolve_task_selection(
+            task_preset="arithmetic",
+            task_types=["arithmetic.add"],
+        )
+    except ValueError as error:
+        assert str(error) == "Cannot use --task-preset together with --task-type."
+    else:
+        raise AssertionError("Expected ValueError")
+
+
+def test_resolve_task_selection_rejects_unknown_preset() -> None:
+    try:
+        resolve_task_selection(task_preset="foo", task_types=None)
+    except ValueError as error:
+        assert str(error) == (
+            "Unknown task preset: foo. Available presets: "
+            "arithmetic, quantity_direct, sorting_short, state_change"
+        )
+    else:
+        raise AssertionError("Expected ValueError")
+
+
+def test_generate_jsonl_accepts_task_preset_metadata(tmp_path: Path) -> None:
+    output_path = tmp_path / "quantity_direct.jsonl"
+    task_types = list(TASK_PRESETS["quantity_direct"].task_types)
+
+    result = generate_jsonl(
+        output_path=output_path,
+        count=12,
+        seed=3100,
+        task_types=task_types,
+        task_preset="quantity_direct",
+    )
+    examples = read_jsonl(output_path)
+
+    assert result["task_preset"] == "quantity_direct"
+    assert result["task_types"] == task_types
+    assert {example["task_type"] for example in examples}.issubset(set(task_types))
+
+
+def test_generate_data_split_accepts_task_preset_metadata(tmp_path: Path) -> None:
+    output_dir = tmp_path / "arithmetic"
+    task_types = list(TASK_PRESETS["arithmetic"].task_types)
+
+    result = generate_data_split(
+        output_dir=output_dir,
+        train_count=20,
+        eval_count=15,
+        train_seed=3200,
+        eval_seed=4200,
+        task_types=task_types,
+        task_preset="arithmetic",
+    )
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+
+    assert result["task_preset"] == "arithmetic"
+    assert result["manifest"]["task_preset"] == "arithmetic"
+    assert manifest["task_preset"] == "arithmetic"
+    assert manifest["task_types"] == task_types
+
+
+def test_each_task_preset_only_produces_allowed_task_types() -> None:
+    for preset in TASK_PRESETS.values():
+        examples = generate_examples(
+            count=80,
+            seed=9100,
+            task_types=preset.task_types,
+            profile=preset.default_profile,
+        )
+
+        assert {example.task_type for example in examples}.issubset(
+            set(preset.task_types)
+        )
+
+
+def test_sorting_short_uses_only_sorting_and_short_lengths() -> None:
+    short_examples = generate_examples(
+        count=100,
+        seed=3400,
+        task_types=TASK_PRESETS["sorting_short"].task_types,
+        profile="eval_short",
+    )
+    normal_examples = generate_examples(
+        count=100,
+        seed=3400,
+        task_types=TASK_PRESETS["sorting_short"].task_types,
+        profile="eval",
+    )
+
+    assert {example.task_type for example in short_examples}.issubset(
+        {"sorting.ascending", "sorting.descending"}
+    )
+    assert max(len(example.metadata["numbers"]) for example in short_examples) <= 4
+    assert min(len(example.metadata["numbers"]) for example in short_examples) >= 3
+    assert min(len(example.metadata["numbers"]) for example in normal_examples) >= 5

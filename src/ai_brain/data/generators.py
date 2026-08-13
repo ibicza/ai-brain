@@ -22,7 +22,7 @@ from ai_brain.data.templates import (
 )
 
 GeneratorName = str
-GenerationProfileName = Literal["train", "eval"]
+GenerationProfileName = Literal["train", "eval", "train_short", "eval_short"]
 
 
 @dataclass(frozen=True)
@@ -30,6 +30,9 @@ class GenerationProfile:
     name: GenerationProfileName
 
     def randint(self, rng: random.Random, low: int, high: int) -> int:
+        if self.name in {"train_short", "eval_short"} and (low, high) == (3, 5):
+            return rng.randint(3, 4)
+
         train_ranges = {
             (0, 30): (0, 50),
             (0, 20): (0, 30),
@@ -37,7 +40,7 @@ class GenerationProfile:
             (1, 20): (1, 30),
             (1, 10): (1, 15),
         }
-        if self.name == "train":
+        if self.name in {"train", "train_short"}:
             train_low, train_high = train_ranges.get((low, high), (low, high))
             return rng.randint(train_low, train_high)
 
@@ -55,7 +58,7 @@ class GenerationProfile:
         return rng.randint(eval_low, eval_high)
 
     def sample_range(self, rng: random.Random, stop: int, count: int) -> list[int]:
-        if self.name == "train":
+        if self.name in {"train", "train_short"}:
             return rng.sample(range(stop), count)
 
         if stop == 100:
@@ -69,9 +72,13 @@ class GenerationProfile:
 
 TRAIN_PROFILE = GenerationProfile(name="train")
 EVAL_PROFILE = GenerationProfile(name="eval")
+TRAIN_SHORT_PROFILE = GenerationProfile(name="train_short")
+EVAL_SHORT_PROFILE = GenerationProfile(name="eval_short")
 GENERATION_PROFILES: dict[GenerationProfileName, GenerationProfile] = {
     "train": TRAIN_PROFILE,
     "eval": EVAL_PROFILE,
+    "train_short": TRAIN_SHORT_PROFILE,
+    "eval_short": EVAL_SHORT_PROFILE,
 }
 
 
