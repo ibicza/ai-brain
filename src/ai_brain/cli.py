@@ -6,6 +6,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from ai_brain.data.answer_format import ANSWER_FORMAT_NAMES
 from ai_brain.data.generators import GENERATION_PROFILES, GENERATOR_NAMES
 from ai_brain.data.presets import TASK_PRESETS, resolve_task_selection
 from ai_brain.data.writer import dataset_stats, generate_data_split, generate_jsonl
@@ -203,6 +204,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=tuple(GENERATION_PROFILES),
         help="Difficulty profile for generated examples.",
     )
+    generate_data_parser.add_argument(
+        "--answer-format",
+        choices=ANSWER_FORMAT_NAMES,
+        default="normal_answer",
+        help="Answer/prompt formatting ablation for generated examples.",
+    )
 
     generate_split_parser = subparsers.add_parser(
         "generate-data-split",
@@ -257,6 +264,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--eval-profile",
         choices=tuple(GENERATION_PROFILES),
         help="Difficulty profile for the eval split.",
+    )
+    generate_split_parser.add_argument(
+        "--answer-format",
+        choices=ANSWER_FORMAT_NAMES,
+        default="normal_answer",
+        help="Answer/prompt formatting ablation for generated examples.",
     )
 
     dataset_stats_parser = subparsers.add_parser(
@@ -754,6 +767,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             task_types=task_types,
             profile=profile,
             task_preset=task_preset,
+            answer_format=args.answer_format,
         )
         print(json.dumps(result, indent=2, sort_keys=True))
         return 0
@@ -772,6 +786,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             train_profile=train_profile,
             eval_profile=eval_profile,
             task_preset=task_preset,
+            answer_format=args.answer_format,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0

@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from ai_brain.data.answer_format import apply_answer_format
 from ai_brain.data.generators import GENERATOR_NAMES, generate_examples
 from ai_brain.data.presets import TASK_PRESETS, resolve_task_selection
 from ai_brain.data.schema import TrainingExample
@@ -228,6 +229,122 @@ def test_state_change_subtract_subtracts_delta() -> None:
 
     assert example.task_type == "state_change.subtract"
     assert example.answer == str(example.metadata["start"] - example.metadata["delta"])
+
+
+def test_digit_spaced_format_spaces_numbers_but_keeps_case_prefix() -> None:
+    example = TrainingExample(
+        id="arithmetic.add:00000000",
+        task_type="arithmetic.add",
+        prompt="case 12. Add 53 + 43?",
+        answer="96",
+        metadata={"a": 53, "b": 43, "operation": "addition"},
+    )
+
+    formatted = apply_answer_format(example, "digit_spaced")
+
+    assert formatted.prompt == "case 12. Add 5 3 + 4 3?"
+    assert formatted.answer == "9 6"
+    assert formatted.metadata["answer_format"] == "digit_spaced"
+    assert formatted.metadata["original_prompt"] == example.prompt
+    assert formatted.metadata["original_answer"] == example.answer
+
+
+def test_scratchpad_format_addition_reports_digit_steps() -> None:
+    example = TrainingExample(
+        id="arithmetic.add:00000000",
+        task_type="arithmetic.add",
+        prompt="Add 53 + 43?",
+        answer="96",
+        metadata={"a": 53, "b": 43, "operation": "addition"},
+    )
+
+    formatted = apply_answer_format(example, "scratchpad")
+
+    assert formatted.answer == "ones: 3 + 3 = 6\ntens: 5 + 4 = 9\nanswer: 96"
+    assert formatted.metadata["answer_format"] == "scratchpad"
+
+
+def test_scratchpad_format_missing_addend_reports_missing_step() -> None:
+    example = TrainingExample(
+        id="arithmetic.missing_addend:00000000",
+        task_type="arithmetic.missing_addend",
+        prompt="5 + ? = 17. What is missing?",
+        answer="12",
+        metadata={"a": 5, "missing": 12, "total": 17},
+    )
+
+    formatted = apply_answer_format(example, "scratchpad")
+
+    assert formatted.answer == (
+        "known: 5\ntarget: 17\nmissing: 17 - 5 = 12\nanswer: 12"
+    )
+
+
+def test_scratchpad_format_double_step_reports_two_steps() -> None:
+    example = TrainingExample(
+        id="arithmetic.double_step:00000000",
+        task_type="arithmetic.double_step",
+        prompt="10 + 7 - 4",
+        answer="13",
+        metadata={"a": 10, "b": 7, "c": 4, "operation": "add_then_subtract"},
+    )
+
+    formatted = apply_answer_format(example, "scratchpad")
+
+    assert formatted.answer == "step 1: 10 + 7 = 17\nstep 2: 17 - 4 = 13\nanswer: 13"
+
+
+def test_scratchpad_format_sorting_reports_selection_steps() -> None:
+    example = TrainingExample(
+        id="sorting.ascending:00000000",
+        task_type="sorting.ascending",
+        prompt="Sort ascending: 92, 60, 85.",
+        answer="60, 85, 92",
+        metadata={"numbers": [92, 60, 85], "operation": "sort_ascending"},
+    )
+
+    formatted = apply_answer_format(example, "scratchpad")
+
+    assert formatted.answer == (
+        "numbers: 92, 60, 85\n"
+        "step 1: smallest is 60\n"
+        "remaining: 92, 85\n"
+        "step 2: smallest is 85\n"
+        "remaining: 92\n"
+        "step 3: smallest is 92\n"
+        "answer: 60, 85, 92"
+    )
+
+
+def test_scratchpad_format_state_change_reports_start_change_and_digits() -> None:
+    example = TrainingExample(
+        id="state_change.add:00000000",
+        task_type="state_change.add",
+        prompt="Vasya had 52. Got 30.",
+        answer="82",
+        metadata={"start": 52, "delta": 30, "operation": "state_add"},
+    )
+
+    formatted = apply_answer_format(example, "scratchpad")
+
+    assert formatted.answer == (
+        "start: 52\nchange: +30\nones: 2 + 0 = 2\ntens: 5 + 3 = 8\nanswer: 82"
+    )
+
+
+def test_reversed_answer_format_keeps_final_answer() -> None:
+    example = TrainingExample(
+        id="arithmetic.add:00000000",
+        task_type="arithmetic.add",
+        prompt="Add 53 + 43?",
+        answer="96",
+        metadata={"a": 53, "b": 43, "operation": "addition"},
+    )
+
+    formatted = apply_answer_format(example, "reversed_answer")
+
+    assert formatted.answer == "answer_reversed: 6 9\nanswer: 96"
+    assert formatted.metadata["answer_format"] == "reversed_answer"
 
 
 def test_state_change_other_subject_does_not_change_target() -> None:
@@ -474,6 +591,7 @@ def test_generate_jsonl_accepts_task_preset_metadata(tmp_path: Path) -> None:
     examples = read_jsonl(output_path)
 
     assert result["task_preset"] == "quantity_direct"
+    assert result["answer_format"] == "normal_answer"
     assert result["task_types"] == task_types
     assert {example["task_type"] for example in examples}.issubset(set(task_types))
 
@@ -495,7 +613,9 @@ def test_generate_data_split_accepts_task_preset_metadata(tmp_path: Path) -> Non
 
     assert result["task_preset"] == "arithmetic"
     assert result["manifest"]["task_preset"] == "arithmetic"
+    assert result["answer_format"] == "normal_answer"
     assert manifest["task_preset"] == "arithmetic"
+    assert manifest["answer_format"] == "normal_answer"
     assert manifest["task_types"] == task_types
 
 
@@ -533,3 +653,44 @@ def test_sorting_short_uses_only_sorting_and_short_lengths() -> None:
     assert max(len(example.metadata["numbers"]) for example in short_examples) <= 4
     assert min(len(example.metadata["numbers"]) for example in short_examples) >= 3
     assert min(len(example.metadata["numbers"]) for example in normal_examples) >= 5
+
+
+def test_generate_jsonl_applies_answer_format(tmp_path: Path) -> None:
+    output_path = tmp_path / "digit_spaced.jsonl"
+
+    result = generate_jsonl(
+        output_path=output_path,
+        count=5,
+        seed=1234,
+        task_types=["arithmetic.add"],
+        answer_format="digit_spaced",
+    )
+    examples = read_jsonl(output_path)
+
+    assert result["answer_format"] == "digit_spaced"
+    assert {example["metadata"]["answer_format"] for example in examples} == {
+        "digit_spaced"
+    }
+    assert all("original_answer" in example["metadata"] for example in examples)
+
+
+def test_generate_data_split_manifest_records_answer_format(tmp_path: Path) -> None:
+    output_dir = tmp_path / "scratchpad_split"
+
+    result = generate_data_split(
+        output_dir=output_dir,
+        train_count=12,
+        eval_count=9,
+        train_seed=1000,
+        eval_seed=2000,
+        task_types=["arithmetic.add", "arithmetic.subtract", "sorting.ascending"],
+        answer_format="scratchpad",
+    )
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+    train_examples = read_jsonl(output_dir / "train.jsonl")
+
+    assert result["answer_format"] == "scratchpad"
+    assert manifest["answer_format"] == "scratchpad"
+    assert {example["metadata"]["answer_format"] for example in train_examples} == {
+        "scratchpad"
+    }

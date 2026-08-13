@@ -64,6 +64,40 @@ def test_generate_data_command_with_task_type(tmp_path, capsys) -> None:
     assert {example["task_type"] for example in loaded} == {"quantity.direct"}
 
 
+def test_generate_data_command_with_answer_format(tmp_path, capsys) -> None:
+    output_path = tmp_path / "scratchpad.jsonl"
+
+    exit_code = main(
+        [
+            "generate-data",
+            "--output",
+            str(output_path),
+            "--count",
+            "3",
+            "--seed",
+            "1234",
+            "--task-type",
+            "arithmetic.add",
+            "--answer-format",
+            "scratchpad",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    loaded = [
+        json.loads(line)
+        for line in output_path.read_text(encoding="utf-8").splitlines()
+    ]
+
+    assert exit_code == 0
+    assert result["answer_format"] == "scratchpad"
+    assert {example["metadata"]["answer_format"] for example in loaded} == {
+        "scratchpad"
+    }
+    assert all("answer:" in example["answer"] for example in loaded)
+
+
 def test_generate_data_command_with_task_preset(tmp_path, capsys) -> None:
     output_path = tmp_path / "quantity_direct.jsonl"
 
@@ -174,6 +208,7 @@ def test_generate_data_split_command(tmp_path, capsys) -> None:
     assert (output_dir / "manifest.json").exists()
     assert manifest["splits"]["train"]["count"] == 12
     assert manifest["splits"]["eval"]["count"] == 9
+    assert manifest["answer_format"] == "normal_answer"
     assert manifest["splits"]["train"]["profile"] == "train"
     assert manifest["splits"]["eval"]["profile"] == "eval"
     assert manifest["splits"]["train"]["duplicate_prompt_count"] == 0
@@ -232,6 +267,48 @@ def test_generate_data_split_command_with_task_preset(tmp_path, capsys) -> None:
             for example in train_examples + eval_examples
         )
         <= 4
+    )
+
+
+def test_generate_data_split_command_with_answer_format(tmp_path, capsys) -> None:
+    output_dir = tmp_path / "reversed"
+
+    exit_code = main(
+        [
+            "generate-data-split",
+            "--output-dir",
+            str(output_dir),
+            "--train-count",
+            "8",
+            "--eval-count",
+            "6",
+            "--train-seed",
+            "1000",
+            "--eval-seed",
+            "2000",
+            "--task-type",
+            "arithmetic.add",
+            "--answer-format",
+            "reversed_answer",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    manifest = result["manifest"]
+    train_examples = [
+        json.loads(line)
+        for line in (output_dir / "train.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+
+    assert exit_code == 0
+    assert result["answer_format"] == "reversed_answer"
+    assert manifest["answer_format"] == "reversed_answer"
+    assert all(
+        example["metadata"]["answer_format"] == "reversed_answer"
+        for example in train_examples
     )
 
 

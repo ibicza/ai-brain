@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+from ai_brain.data.answer_format import AnswerFormatName, apply_answer_format
 from ai_brain.data.generators import (
     GENERATOR_NAMES,
     GenerationProfileName,
@@ -35,13 +36,17 @@ def generate_jsonl(
     task_types: Sequence[GeneratorName] | None = None,
     profile: GenerationProfileName = "train",
     task_preset: str | None = None,
+    answer_format: AnswerFormatName = "normal_answer",
 ) -> dict[str, Any]:
-    examples = generate_examples(
-        count=count,
-        seed=seed,
-        task_types=task_types,
-        profile=profile,
-    )
+    examples = [
+        apply_answer_format(example, answer_format)
+        for example in generate_examples(
+            count=count,
+            seed=seed,
+            task_types=task_types,
+            profile=profile,
+        )
+    ]
 
     write_jsonl(output_path, examples)
 
@@ -51,6 +56,7 @@ def generate_jsonl(
         "seed": seed,
         "profile": profile,
         "task_preset": task_preset,
+        "answer_format": answer_format,
         "task_types": list(task_types) if task_types is not None else "all",
     }
 
@@ -121,6 +127,7 @@ def generate_data_split(
     eval_profile: GenerationProfileName = "eval",
     task_preset: str | None = None,
     enforce_unique_prompts: bool = True,
+    answer_format: AnswerFormatName = "normal_answer",
 ) -> dict[str, Any]:
     allowed_task_types = tuple(task_types or GENERATOR_NAMES)
 
@@ -131,6 +138,7 @@ def generate_data_split(
         split_name="train",
         profile=train_profile,
         enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
     )
     eval_examples = _generate_examples_with_coverage(
         count=eval_count,
@@ -139,6 +147,7 @@ def generate_data_split(
         split_name="eval",
         profile=eval_profile,
         enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
     )
 
     train_path = output_dir / "train.jsonl"
@@ -164,6 +173,7 @@ def generate_data_split(
     manifest = {
         "version": 1,
         "task_preset": task_preset,
+        "answer_format": answer_format,
         "task_types": list(allowed_task_types),
         "splits": {
             "train": {
@@ -209,6 +219,7 @@ def generate_data_split(
         "eval_path": str(eval_path),
         "manifest_path": str(manifest_path),
         "task_preset": task_preset,
+        "answer_format": answer_format,
         "manifest": manifest,
     }
 
@@ -224,6 +235,7 @@ def _generate_examples_with_coverage(
     split_name: str | None = None,
     profile: GenerationProfileName = "train",
     enforce_unique_prompts: bool = True,
+    answer_format: AnswerFormatName = "normal_answer",
 ) -> list[TrainingExample]:
     if count < 0:
         raise ValueError("count must be non-negative")
@@ -271,6 +283,7 @@ def _generate_examples_with_coverage(
                 profile=profile,
             )
         )
+        example = apply_answer_format(example, answer_format)
         attempts += 1
 
         if split_name is not None and not _prompt_belongs_to_split(
