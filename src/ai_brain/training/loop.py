@@ -66,6 +66,8 @@ def evaluate_loss(
         )
         logits = model(batch["input_ids"])
         loss = compute_lm_loss(logits, batch["labels"])
+        if not torch.isfinite(loss):
+            raise ValueError(f"Non-finite eval loss: {loss.item()}")
         loss_value = float(loss.detach().cpu().item())
         if math.isfinite(loss_value):
             losses.append(loss_value)
@@ -159,16 +161,24 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         )
         logits = model(batch["input_ids"])
         loss = compute_lm_loss(logits, batch["labels"])
+        if not torch.isfinite(loss):
+            raise ValueError(f"Non-finite train loss at step {step}: {loss.item()}")
 
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
+        grad_norm = torch.nn.utils.clip_grad_norm_(
+            model.parameters(),
+            config.grad_clip_norm,
+        )
         optimizer.step()
 
         train_loss = float(loss.detach().cpu().item())
+        grad_norm_value = float(grad_norm.detach().cpu().item())
         last_metrics = {
             "step": step,
             "train_loss": train_loss,
             "lr": config.learning_rate,
+            "grad_norm": grad_norm_value,
         }
 
         if step % config.eval_every == 0 or step == config.steps:

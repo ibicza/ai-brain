@@ -391,6 +391,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Random seed.",
     )
     train_lm_parser.add_argument(
+        "--grad-clip-norm",
+        type=float,
+        default=1.0,
+        help="Maximum gradient norm for clipping.",
+    )
+    train_lm_parser.add_argument(
         "--eval-every",
         type=int,
         default=50,
@@ -569,6 +575,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sequence_length=args.sequence_length,
                 loss_mode=args.loss_mode,
                 learning_rate=args.learning_rate,
+                grad_clip_norm=args.grad_clip_norm,
                 seed=args.seed,
                 eval_every=args.eval_every,
                 eval_batches=args.eval_batches,

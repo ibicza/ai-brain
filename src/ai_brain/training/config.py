@@ -20,6 +20,7 @@ class TrainConfig:
     sequence_length: int = 256
     loss_mode: LossMode = "answer-only"
     learning_rate: float = 3e-4
+    grad_clip_norm: float = 1.0
     seed: int = 1234
     eval_every: int = 50
     eval_batches: int = 20
@@ -38,6 +39,8 @@ class TrainConfig:
             raise ValueError(f"Unknown loss_mode: {self.loss_mode}")
         if self.learning_rate <= 0:
             raise ValueError("learning_rate must be positive")
+        if self.grad_clip_norm <= 0:
+            raise ValueError("grad_clip_norm must be positive")
         if self.eval_every <= 0:
             raise ValueError("eval_every must be positive")
         if self.eval_batches <= 0:

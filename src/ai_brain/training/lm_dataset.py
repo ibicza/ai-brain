@@ -12,13 +12,15 @@ from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
 from ai_brain.language.tokenizer.special_tokens import (
     ANSWER_TOKEN,
     BOS_TOKEN,
+    END_TOKEN,
     EOS_TOKEN,
     PAD_TOKEN,
+    PROMPT_TOKEN,
 )
-from ai_brain.language.tokenizer.text_format import format_prompt_answer
 from ai_brain.training.config import LossMode
 
 IGNORE_INDEX = -100
+CACHE_FORMAT_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -26,6 +28,8 @@ class EncodedLmExample:
     input_ids: list[int]
     labels: list[int]
     attention_mask: list[int]
+    truncated: bool
+    supervised_token_count: int
 
 
 class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
@@ -74,23 +78,32 @@ def encode_lm_example(
     pad_id = _required_token_id(tokenizer, PAD_TOKEN)
     bos_id = _required_token_id(tokenizer, BOS_TOKEN)
     eos_id = _required_token_id(tokenizer, EOS_TOKEN)
-    answer_id = _required_token_id(tokenizer, ANSWER_TOKEN)
 
-    encoded_text = tokenizer.encode(format_prompt_answer(prompt, answer))
-    ids = [bos_id, *encoded_text, eos_id]
-    ids = ids[:sequence_length]
-    if ids[-1] != eos_id and len(ids) == sequence_length:
-        ids[-1] = eos_id
+    prefix_text = f"{PROMPT_TOKEN}\n{prompt.strip()}\n{ANSWER_TOKEN}\n"
+    answer_text = f"{answer.strip()}\n{END_TOKEN}"
 
-    labels = list(ids)
+    prefix_ids = [bos_id, *tokenizer.encode(prefix_text)]
+    answer_ids = [*tokenizer.encode(answer_text), eos_id]
+    ids = [*prefix_ids, *answer_ids]
+
     if loss_mode == "answer-only":
-        try:
-            answer_index = ids.index(answer_id)
-        except ValueError:
-            answer_index = len(ids)
-        labels[:answer_index] = [IGNORE_INDEX] * answer_index
-    elif loss_mode != "full":
+        labels = [IGNORE_INDEX] * len(prefix_ids) + answer_ids
+    elif loss_mode == "full":
+        labels = list(ids)
+    else:
         raise ValueError(f"Unknown loss_mode: {loss_mode}")
+
+    truncated = len(ids) > sequence_length
+    if truncated:
+        ids = ids[:sequence_length]
+        labels = labels[:sequence_length]
+
+    supervised_token_count = sum(label != IGNORE_INDEX for label in labels)
+    if loss_mode == "answer-only" and supervised_token_count == 0:
+        raise ValueError(
+            "No supervised tokens after truncation. "
+            "Increase sequence_length or shorten prompts."
+        )
 
     attention_mask = [1] * len(ids)
 
@@ -104,6 +117,8 @@ def encode_lm_example(
         input_ids=ids,
         labels=labels,
         attention_mask=attention_mask,
+        truncated=truncated,
+        supervised_token_count=supervised_token_count,
     )
 
 
@@ -157,10 +172,12 @@ def prepare_lm_dataset(
         dtype=torch.long,
     )
 
+    stats = _summarize_encoded_examples(examples)
     metadata = {
         **expected_metadata,
         "count": len(examples),
         "tokenizer_vocab_size": tokenizer.vocab_size,
+        **stats,
     }
     payload = {
         "input_ids": input_ids,
@@ -226,6 +243,20 @@ def _iter_jsonl_records(path: Path) -> list[dict[str, Any]]:
     return records
 
 
+def _summarize_encoded_examples(examples: list[EncodedLmExample]) -> dict[str, Any]:
+    supervised_counts = [example.supervised_token_count for example in examples]
+    truncated_count = sum(example.truncated for example in examples)
+    zero_supervised_count = sum(count == 0 for count in supervised_counts)
+    return {
+        "truncated_count": truncated_count,
+        "truncated_fraction": truncated_count / len(examples),
+        "min_supervised_token_count": min(supervised_counts),
+        "max_supervised_token_count": max(supervised_counts),
+        "avg_supervised_token_count": sum(supervised_counts) / len(supervised_counts),
+        "zero_supervised_count": zero_supervised_count,
+    }
+
+
 def _build_metadata(
     *,
     input_path: Path,
@@ -236,6 +267,7 @@ def _build_metadata(
     source_stat = input_path.stat()
     tokenizer_stat = tokenizer_path.stat()
     return {
+        "cache_format_version": CACHE_FORMAT_VERSION,
         "source": str(input_path),
         "source_size": source_stat.st_size,
         "source_mtime_ns": source_stat.st_mtime_ns,

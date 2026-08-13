@@ -303,6 +303,8 @@ def test_prepare_lm_dataset_and_train_lm_commands(tmp_path, capsys) -> None:
             "32",
             "--loss-mode",
             "answer-only",
+            "--grad-clip-norm",
+            "0.75",
             "--eval-every",
             "1",
             "--eval-batches",
@@ -318,5 +320,6 @@ def test_prepare_lm_dataset_and_train_lm_commands(tmp_path, capsys) -> None:
 
     assert train_exit_code == 0
     assert trained["final_step"] == 2
+    assert trained["last_metrics"]["grad_norm"] > 0
     assert (output_dir / "metrics.jsonl").exists()
     assert (output_dir / "checkpoints" / "step_000002.pt").exists()
