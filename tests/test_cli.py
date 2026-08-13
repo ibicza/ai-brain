@@ -143,3 +143,86 @@ def test_dataset_stats_command(tmp_path, capsys) -> None:
     assert result["all_task_types_present"] is True
     assert result["missing_task_types"] == []
     assert "top_duplicate_prompts" in result
+
+
+def test_train_tokenizer_and_tokenizer_info_commands(tmp_path, capsys) -> None:
+    input_path = tmp_path / "dataset.jsonl"
+    output_path = tmp_path / "tokenizer.json"
+    input_path.write_text(
+        json.dumps(
+            {
+                "prompt": "Sort 2, 1.",
+                "answer": "1, 2",
+                "task_type": "sorting.numbers",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    train_exit_code = main(
+        [
+            "train-tokenizer",
+            "--input",
+            str(input_path),
+            "--output",
+            str(output_path),
+            "--vocab-size",
+            "512",
+            "--min-frequency",
+            "1",
+        ]
+    )
+    train_output = json.loads(capsys.readouterr().out)
+
+    assert train_exit_code == 0
+    assert output_path.exists()
+    assert train_output["special_token_ids"]["<|pad|>"] == 0
+    assert train_output["special_token_ids"]["<|end|>"] == 6
+
+    info_exit_code = main(["tokenizer-info", "--tokenizer", str(output_path)])
+    info_output = json.loads(capsys.readouterr().out)
+
+    assert info_exit_code == 0
+    assert info_output["type"] == "byte_level_bpe"
+    assert info_output["tokenizer_path"] == str(output_path)
+    assert info_output["special_token_ids"] == train_output["special_token_ids"]
+
+
+def test_encode_text_and_decode_ids_commands(tmp_path, capsys) -> None:
+    input_path = tmp_path / "dataset.txt"
+    output_path = tmp_path / "tokenizer.json"
+    text = "<|prompt|>\nAdd 2 + 2.\n<|answer|>\n4\n<|end|>"
+    input_path.write_text(text, encoding="utf-8")
+    main(
+        [
+            "train-tokenizer",
+            "--input",
+            str(input_path),
+            "--output",
+            str(output_path),
+            "--vocab-size",
+            "512",
+            "--min-frequency",
+            "1",
+        ]
+    )
+    capsys.readouterr()
+
+    encode_exit_code = main(
+        ["encode-text", "--tokenizer", str(output_path), "--text", text]
+    )
+    encoded = json.loads(capsys.readouterr().out)
+
+    assert encode_exit_code == 0
+    assert encoded["ids"]
+    assert encoded["count"] == len(encoded["ids"])
+
+    ids = ",".join(str(token_id) for token_id in encoded["ids"])
+    decode_exit_code = main(
+        ["decode-ids", "--tokenizer", str(output_path), "--ids", ids]
+    )
+    decoded = json.loads(capsys.readouterr().out)
+
+    assert decode_exit_code == 0
+    assert decoded["text"] == text
+    assert decoded["count"] == len(encoded["ids"])
