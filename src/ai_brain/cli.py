@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
 from ai_brain.data.generators import GENERATION_PROFILES, GENERATOR_NAMES
 from ai_brain.data.writer import dataset_stats, generate_data_split, generate_jsonl
+from ai_brain.eval.compare import compare_evals
+from ai_brain.eval.diagnostics import analyze_eval
 from ai_brain.eval.runner import eval_lm, generate_answer
 from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
 from ai_brain.language.tokenizer.trainer import train_tokenizer
@@ -22,6 +25,65 @@ from ai_brain.runtime.device import (
 from ai_brain.training.config import LOSS_MODES, TrainConfig
 from ai_brain.training.lm_dataset import prepare_lm_dataset
 from ai_brain.training.loop import train_lm
+
+
+def _configure_stdout() -> None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+
+
+def _compact_task_rows(rows: list[dict]) -> list[dict]:
+    keep_keys = (
+        "task_type",
+        "count",
+        "normalized_exact_match",
+        "false_answer_rate",
+        "empty_prediction_rate",
+        "delta_normalized_exact_match",
+        "left_count",
+        "right_count",
+        "left_normalized_exact_match",
+        "right_normalized_exact_match",
+    )
+    return [{key: row[key] for key in keep_keys if key in row} for row in rows]
+
+
+def _compact_analyze_eval_result(result: dict) -> dict:
+    diagnostics = result["diagnostics"]
+    return {
+        "output_dir": result["output_dir"],
+        "diagnostics_path": result["diagnostics_path"],
+        "markdown_path": result["markdown_path"],
+        "overall": diagnostics["overall"],
+        "worst_task_types": _compact_task_rows(diagnostics["worst_task_types"]),
+        "best_task_types": _compact_task_rows(diagnostics["best_task_types"]),
+        "suspicious_task_types": _compact_task_rows(
+            diagnostics["suspicious_task_types"]
+        ),
+    }
+
+
+def _compact_compare_evals_result(result: dict) -> dict:
+    comparison = result["comparison"]
+    return {
+        "output_dir": result["output_dir"],
+        "comparison_path": result["comparison_path"],
+        "markdown_path": result["markdown_path"],
+        "left_label": comparison["left_label"],
+        "right_label": comparison["right_label"],
+        "overall": comparison["overall"],
+        "most_improved_task_types": _compact_task_rows(
+            comparison["most_improved_task_types"]
+        ),
+        "most_regressed_task_types": _compact_task_rows(
+            comparison["most_regressed_task_types"]
+        ),
+        "still_failed_task_types": _compact_task_rows(
+            comparison["still_failed_task_types"]
+        ),
+    }
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -512,10 +574,73 @@ def build_parser() -> argparse.ArgumentParser:
         help="Force CPU instead of CUDA.",
     )
 
+    analyze_eval_parser = subparsers.add_parser(
+        "analyze-eval",
+        help="Analyze eval-lm predictions and write diagnostics reports.",
+    )
+    analyze_eval_parser.add_argument(
+        "--predictions",
+        type=Path,
+        required=True,
+        help="predictions.jsonl path produced by eval-lm.",
+    )
+    analyze_eval_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory for diagnostics.json and diagnostics.md.",
+    )
+    analyze_eval_parser.add_argument(
+        "--top-k",
+        type=int,
+        default=20,
+        help="Number of top/worst/best records to include.",
+    )
+    analyze_eval_parser.add_argument(
+        "--max-samples-per-task",
+        type=int,
+        default=10,
+        help="Maximum error/correct samples stored per task type.",
+    )
+
+    compare_evals_parser = subparsers.add_parser(
+        "compare-evals",
+        help="Compare two eval-lm summary.json files.",
+    )
+    compare_evals_parser.add_argument(
+        "--left-summary",
+        type=Path,
+        required=True,
+        help="Left summary.json path.",
+    )
+    compare_evals_parser.add_argument(
+        "--right-summary",
+        type=Path,
+        required=True,
+        help="Right summary.json path.",
+    )
+    compare_evals_parser.add_argument(
+        "--left-label",
+        default="left",
+        help="Human label for the left eval.",
+    )
+    compare_evals_parser.add_argument(
+        "--right-label",
+        default="right",
+        help="Human label for the right eval.",
+    )
+    compare_evals_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory for comparison.json and comparison.md.",
+    )
+
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    _configure_stdout()
     parser = build_parser()
     args = parser.parse_args(argv)
 
@@ -696,6 +821,41 @@ def main(argv: Sequence[str] | None = None) -> int:
             cpu=args.cpu,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "analyze-eval":
+        result = analyze_eval(
+            predictions_path=args.predictions,
+            output_dir=args.output_dir,
+            top_k=args.top_k,
+            max_samples_per_task=args.max_samples_per_task,
+        )
+        print(
+            json.dumps(
+                _compact_analyze_eval_result(result),
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+
+    if args.command == "compare-evals":
+        result = compare_evals(
+            left_summary_path=args.left_summary,
+            right_summary_path=args.right_summary,
+            left_label=args.left_label,
+            right_label=args.right_label,
+            output_dir=args.output_dir,
+        )
+        print(
+            json.dumps(
+                _compact_compare_evals_result(result),
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+        )
         return 0
 
     parser.error(f"Unknown command: {args.command}")
