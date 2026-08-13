@@ -4,6 +4,7 @@ import random
 from collections.abc import Sequence
 
 from ai_brain.data.schema import TrainingExample
+from ai_brain.data.templates import COUNTED_NOUNS, PEOPLE, format_counted_noun
 
 GeneratorName = str
 
@@ -137,80 +138,32 @@ def generate_insufficient_info(rng: random.Random, index: int) -> TrainingExampl
 
 
 def generate_irrelevant_fact(rng: random.Random, index: int) -> TrainingExample:
-    variants = [
-        (
-            "Вася купил 3 мороженых.",
-            "Сколько мороженых есть у Вани?",
-            "Недостаточно информации: сказано про Васю, а вопрос про Ваню.",
-        ),
-        (
-            "Лена взяла 5 карандашей.",
-            "Сколько карандашей взяла Маша?",
-            "Недостаточно информации: сказано про Лену, а вопрос про Машу.",
-        ),
-        (
-            "Петя нашёл 2 монеты.",
-            "Сколько монет нашёл Коля?",
-            "Недостаточно информации: сказано про Петю, а вопрос про Колю.",
-        ),
-        (
-            "У Маши было 7 яблок.",
-            "Сколько яблок было у Даши?",
-            "Недостаточно информации: сказано про Машу, а вопрос про Дашу.",
-        ),
-        (
-            "В коробке лежало 4 кубика.",
-            "Сколько кубиков лежало в пакете?",
-            "Недостаточно информации: сказано про коробку, а вопрос про пакет.",
-        ),
-        (
-            "На столе стояли 3 чашки.",
-            "Сколько чашек стояло на полке?",
-            "Недостаточно информации: сказано про стол, а вопрос про полку.",
-        ),
-        (
-            "В саду росло 6 яблонь.",
-            "Сколько яблонь росло в лесу?",
-            "Недостаточно информации: сказано про сад, а вопрос про лес.",
-        ),
-        (
-            "В автобус вошли 8 человек.",
-            "Сколько человек вошло в поезд?",
-            "Недостаточно информации: сказано про автобус, а вопрос про поезд.",
-        ),
-        (
-            "У Оли было 10 рублей.",
-            "Сколько рублей было у Иры?",
-            "Недостаточно информации: сказано про Олю, а вопрос про Иру.",
-        ),
-        (
-            "В первой коробке лежало 9 конфет.",
-            "Сколько конфет лежало во второй коробке?",
-            "Недостаточно информации: сказано про первую коробку, а вопрос про вторую.",
-        ),
-        (
-            "Саша прочитал 12 страниц.",
-            "Сколько страниц прочитал Антон?",
-            "Недостаточно информации: сказано про Сашу, а вопрос про Антона.",
-        ),
-        (
-            "На синей тарелке лежало 5 печений.",
-            "Сколько печений лежало на красной тарелке?",
-            "Недостаточно информации: сказано про синюю тарелку, а вопрос про красную.",
-        ),
-    ]
+    fact_subject, question_subject = rng.sample(PEOPLE, 2)
+    noun = rng.choice(COUNTED_NOUNS)
+    count = rng.randint(1, 20)
 
-    fact, question, answer = rng.choice(variants)
+    counted_noun = format_counted_noun(count, noun)
+
+    fact = f"У {fact_subject.genitive} было {counted_noun}."
+    question = f"Сколько {noun.question} было у {question_subject.genitive}?"
 
     return TrainingExample(
         id=f"epistemic.irrelevant_fact:{index:08d}",
         task_type="epistemic.irrelevant_fact",
         prompt=f"{fact} {question}",
-        answer=answer,
+        answer=(
+            "Недостаточно информации: "
+            f"сказано про {fact_subject.accusative}, "
+            f"а вопрос про {question_subject.accusative}."
+        ),
         metadata={
             "known_fact": fact,
             "question": question,
             "epistemic_state": "irrelevant_fact",
+            "fact_subject": fact_subject.nominative,
+            "question_subject": question_subject.nominative,
+            "count": count,
+            "noun": noun.many,
         },
     )
 

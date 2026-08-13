@@ -3,6 +3,7 @@ from pathlib import Path
 
 from ai_brain.data.generators import GENERATOR_NAMES, generate_examples
 from ai_brain.data.schema import TrainingExample
+from ai_brain.data.templates import CountedNoun, format_counted_noun
 from ai_brain.data.writer import generate_jsonl
 
 
@@ -76,3 +77,31 @@ def test_generate_jsonl_writes_file(tmp_path: Path) -> None:
     first = json.loads(lines[0])
 
     assert set(first) == {"id", "task_type", "prompt", "answer", "metadata"}
+
+
+def test_counted_noun_formatting() -> None:
+    noun = CountedNoun(
+        one="яблоко",
+        few="яблока",
+        many="яблок",
+        question="яблок",
+    )
+
+    assert format_counted_noun(1, noun) == "1 яблоко"
+    assert format_counted_noun(2, noun) == "2 яблока"
+    assert format_counted_noun(5, noun) == "5 яблок"
+    assert format_counted_noun(11, noun) == "11 яблок"
+    assert format_counted_noun(21, noun) == "21 яблоко"
+
+
+def test_irrelevant_fact_has_different_subjects() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["epistemic.irrelevant_fact"],
+    )[0]
+
+    assert example.task_type == "epistemic.irrelevant_fact"
+    assert example.metadata["epistemic_state"] == "irrelevant_fact"
+    assert example.metadata["fact_subject"] != example.metadata["question_subject"]
+    assert example.answer.startswith("Недостаточно информации:")
