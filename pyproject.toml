@@ -1,0 +1,36 @@
+[project]
+name = "ai-brain"
+version = "0.1.0"
+description = "Experimental lifelong-learning reasoning model"
+readme = "README.md"
+authors = [
+    { name = "ibicza", email = "artiommatsuka@yandex.by" }
+]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy>=2.0,<3",
+    "torch==2.9.0",
+]
+
+[project.scripts]
+ai-brain = "ai_brain:main"
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu129", marker = "sys_platform == 'win32' or sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.2",
+]

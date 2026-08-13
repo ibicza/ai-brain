@@ -1,0 +1,24 @@
+# All text files are stored in Git with LF line endings.
+* text=auto eol=lf
+
+# Windows command files.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+
+*.zip binary
+*.7z binary
+
+# AI/model binaries should never be line-normalized.
+*.pt binary
+*.pth binary
+*.ckpt binary
+*.safetensors binary
+*.gguf binary

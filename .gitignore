@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+wheels/
+
+# Virtual environment
+.venv/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Test / lint caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Model training
+checkpoints/
+runs/
+artifacts/
+datasets/
+
+# Large model files
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
