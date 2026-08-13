@@ -5,6 +5,7 @@ import json
 from collections.abc import Sequence
 
 from ai_brain.model.config import tiny_config
+from ai_brain.model.smoke import run_model_smoke_step
 from ai_brain.model.tiny_transformer import TinyCausalTransformer
 from ai_brain.model.utils import count_parameters, format_parameter_count
 from ai_brain.runtime.device import (
@@ -51,6 +52,40 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser(
         "model-info",
         help="Show tiny model parameter information.",
+    )
+
+    model_smoke_parser = subparsers.add_parser(
+        "model-smoke",
+        help="Run a tiny Transformer forward/backward/optimizer step.",
+    )
+    model_smoke_parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="Force CPU instead of CUDA.",
+    )
+    model_smoke_parser.add_argument(
+        "--config",
+        choices=["debug", "tiny"],
+        default="debug",
+        help="Model config to use.",
+    )
+    model_smoke_parser.add_argument(
+        "--seed",
+        type=int,
+        default=1234,
+        help="Random seed for the model smoke step.",
+    )
+    model_smoke_parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=2,
+        help="Batch size for the model smoke step.",
+    )
+    model_smoke_parser.add_argument(
+        "--sequence-length",
+        type=int,
+        default=16,
+        help="Sequence length for the model smoke step.",
     )
 
     return parser
@@ -103,6 +138,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         )
         return 0
+
+    if args.command == "model-smoke":
+        info = get_device_info(prefer_cuda=not args.cpu)
+    result = run_model_smoke_step(
+        info,
+        config_name=args.config,
+        seed=args.seed,
+        batch_size=args.batch_size,
+        sequence_length=args.sequence_length,
+    )
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
 
     parser.error(f"Unknown command: {args.command}")
     return 2

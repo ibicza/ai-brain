@@ -36,3 +36,17 @@ def test_model_info_command(capsys) -> None:
     assert result["parameters"] > 0
     assert result["parameters"] == result["trainable_parameters"]
     assert result["config"]["d_model"] == 128
+
+
+def test_model_smoke_command_cpu(capsys) -> None:
+    exit_code = main(["model-smoke", "--cpu"])
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert result["model"] == "TinyCausalTransformer"
+    assert result["config_name"] == "debug"
+    assert result["device"] == "cpu"
+    assert result["logits_shape"] == [2, 16, 256]
+    assert result["parameters_changed"] is True
