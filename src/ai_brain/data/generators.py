@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import random
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
+from typing import Literal
 
 from ai_brain.data.schema import TrainingExample
 from ai_brain.data.templates import (
@@ -20,7 +22,72 @@ from ai_brain.data.templates import (
 )
 
 GeneratorName = str
-GeneratorFunction = Callable[[random.Random, int], TrainingExample]
+GenerationProfileName = Literal["train", "eval"]
+
+
+@dataclass(frozen=True)
+class GenerationProfile:
+    name: GenerationProfileName
+
+    def randint(self, rng: random.Random, low: int, high: int) -> int:
+        train_ranges = {
+            (0, 30): (0, 50),
+            (0, 20): (0, 30),
+            (0, 10): (0, 20),
+            (1, 20): (1, 30),
+            (1, 10): (1, 15),
+        }
+        if self.name == "train":
+            train_low, train_high = train_ranges.get((low, high), (low, high))
+            return rng.randint(train_low, train_high)
+
+        eval_ranges = {
+            (0, 99): (20, 199),
+            (0, 30): (20, 100),
+            (0, 20): (20, 80),
+            (0, 10): (20, 60),
+            (1, 20): (21, 100),
+            (1, 10): (11, 40),
+            (3, 5): (5, 8),
+            (0, 9999): (10_000, 99_999),
+        }
+        eval_low, eval_high = eval_ranges.get((low, high), (low, high))
+        return rng.randint(eval_low, eval_high)
+
+    def sample_range(self, rng: random.Random, stop: int, count: int) -> list[int]:
+        if self.name == "train":
+            return rng.sample(range(stop), count)
+
+        if stop == 100:
+            return rng.sample(range(20, 200), count)
+
+        if stop == 50:
+            return rng.sample(range(20, 120), count)
+
+        return rng.sample(range(stop), count)
+
+
+TRAIN_PROFILE = GenerationProfile(name="train")
+EVAL_PROFILE = GenerationProfile(name="eval")
+GENERATION_PROFILES: dict[GenerationProfileName, GenerationProfile] = {
+    "train": TRAIN_PROFILE,
+    "eval": EVAL_PROFILE,
+}
+
+
+def resolve_generation_profile(
+    profile: GenerationProfileName | GenerationProfile,
+) -> GenerationProfile:
+    if isinstance(profile, GenerationProfile):
+        return profile
+
+    try:
+        return GENERATION_PROFILES[profile]
+    except KeyError as error:
+        raise ValueError(f"Unknown generation profile: {profile}") from error
+
+
+GeneratorFunction = Callable[[random.Random, int, GenerationProfile], TrainingExample]
 
 
 def _pick_distinct_people(rng: random.Random, count: int) -> list[Person]:
@@ -67,12 +134,20 @@ def _insufficient_answer(reason: str) -> str:
     return f"Недостаточно информации: {reason}."
 
 
-def generate_comparison_max(rng: random.Random, index: int) -> TrainingExample:
-    a = rng.randint(0, 99)
-    b = rng.randint(0, 99)
+def _case_prefix(rng: random.Random, profile: GenerationProfile) -> str:
+    return f"case {profile.randint(rng, 0, 9999)}. "
+
+
+def generate_comparison_max(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a = profile.randint(rng, 0, 99)
+    b = profile.randint(rng, 0, 99)
 
     while b == a:
-        b = rng.randint(0, 99)
+        b = profile.randint(rng, 0, 99)
 
     templates = (
         "Что больше: {a} или {b}?",
@@ -85,18 +160,22 @@ def generate_comparison_max(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"comparison.max:{index:08d}",
         task_type="comparison.max",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(max(a, b)),
         metadata={"a": a, "b": b, "operation": "max"},
     )
 
 
-def generate_comparison_min(rng: random.Random, index: int) -> TrainingExample:
-    a = rng.randint(0, 99)
-    b = rng.randint(0, 99)
+def generate_comparison_min(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a = profile.randint(rng, 0, 99)
+    b = profile.randint(rng, 0, 99)
 
     while b == a:
-        b = rng.randint(0, 99)
+        b = profile.randint(rng, 0, 99)
 
     templates = (
         "Что меньше: {a} или {b}?",
@@ -109,15 +188,19 @@ def generate_comparison_min(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"comparison.min:{index:08d}",
         task_type="comparison.min",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(min(a, b)),
         metadata={"a": a, "b": b, "operation": "min"},
     )
 
 
-def generate_comparison_equality(rng: random.Random, index: int) -> TrainingExample:
-    a = rng.randint(0, 30)
-    b = a if rng.choice((True, False)) else rng.randint(0, 30)
+def generate_comparison_equality(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a = profile.randint(rng, 0, 30)
+    b = a if rng.choice((True, False)) else profile.randint(rng, 0, 30)
 
     if b != a:
         answer = "Нет."
@@ -134,14 +217,18 @@ def generate_comparison_equality(rng: random.Random, index: int) -> TrainingExam
     return TrainingExample(
         id=f"comparison.equality:{index:08d}",
         task_type="comparison.equality",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=answer,
         metadata={"a": a, "b": b, "operation": "equality", "equal": a == b},
     )
 
 
-def generate_comparison_three_max(rng: random.Random, index: int) -> TrainingExample:
-    numbers = rng.sample(range(100), 3)
+def generate_comparison_three_max(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    numbers = profile.sample_range(rng, 100, 3)
     joined = ", ".join(str(number) for number in numbers)
     templates = (
         "Какое число самое большое: {joined}?",
@@ -153,14 +240,18 @@ def generate_comparison_three_max(rng: random.Random, index: int) -> TrainingExa
     return TrainingExample(
         id=f"comparison.three_max:{index:08d}",
         task_type="comparison.three_max",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(max(numbers)),
         metadata={"numbers": numbers, "operation": "three_max"},
     )
 
 
-def generate_comparison_three_min(rng: random.Random, index: int) -> TrainingExample:
-    numbers = rng.sample(range(100), 3)
+def generate_comparison_three_min(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    numbers = profile.sample_range(rng, 100, 3)
     joined = ", ".join(str(number) for number in numbers)
     templates = (
         "Какое число самое маленькое: {joined}?",
@@ -172,14 +263,18 @@ def generate_comparison_three_min(rng: random.Random, index: int) -> TrainingExa
     return TrainingExample(
         id=f"comparison.three_min:{index:08d}",
         task_type="comparison.three_min",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(min(numbers)),
         metadata={"numbers": numbers, "operation": "three_min"},
     )
 
 
-def generate_sorting_ascending(rng: random.Random, index: int) -> TrainingExample:
-    numbers = rng.sample(range(50), rng.randint(3, 5))
+def generate_sorting_ascending(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    numbers = profile.sample_range(rng, 50, profile.randint(rng, 3, 5))
     joined = ", ".join(str(number) for number in numbers)
     answer_numbers = sorted(numbers)
     templates = (
@@ -192,14 +287,18 @@ def generate_sorting_ascending(rng: random.Random, index: int) -> TrainingExampl
     return TrainingExample(
         id=f"sorting.ascending:{index:08d}",
         task_type="sorting.ascending",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=", ".join(str(number) for number in answer_numbers),
         metadata={"numbers": numbers, "operation": "sort_ascending"},
     )
 
 
-def generate_sorting_descending(rng: random.Random, index: int) -> TrainingExample:
-    numbers = rng.sample(range(50), rng.randint(3, 5))
+def generate_sorting_descending(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    numbers = profile.sample_range(rng, 50, profile.randint(rng, 3, 5))
     joined = ", ".join(str(number) for number in numbers)
     answer_numbers = sorted(numbers, reverse=True)
     templates = (
@@ -212,13 +311,17 @@ def generate_sorting_descending(rng: random.Random, index: int) -> TrainingExamp
     return TrainingExample(
         id=f"sorting.descending:{index:08d}",
         task_type="sorting.descending",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=", ".join(str(number) for number in answer_numbers),
         metadata={"numbers": numbers, "operation": "sort_descending"},
     )
 
 
-def generate_order_before_after(rng: random.Random, index: int) -> TrainingExample:
+def generate_order_before_after(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     people = _pick_distinct_people(rng, 4)
     target_index = rng.randint(1, len(people) - 2)
     target = people[target_index]
@@ -238,7 +341,7 @@ def generate_order_before_after(rng: random.Random, index: int) -> TrainingExamp
     return TrainingExample(
         id=f"order.before_after:{index:08d}",
         task_type="order.before_after",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=answer,
         metadata={
             "people": [person.nominative for person in people],
@@ -248,9 +351,13 @@ def generate_order_before_after(rng: random.Random, index: int) -> TrainingExamp
     )
 
 
-def generate_addition(rng: random.Random, index: int) -> TrainingExample:
-    a = rng.randint(0, 20)
-    b = rng.randint(0, 20)
+def generate_addition(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a = profile.randint(rng, 0, 20)
+    b = profile.randint(rng, 0, 20)
     templates = (
         "Сколько будет {a} + {b}?",
         "К {a} прибавь {b}. Что получится?",
@@ -262,14 +369,18 @@ def generate_addition(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"arithmetic.add:{index:08d}",
         task_type="arithmetic.add",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(a + b),
         metadata={"a": a, "b": b, "operation": "addition"},
     )
 
 
-def generate_subtraction(rng: random.Random, index: int) -> TrainingExample:
-    a = rng.randint(0, 30)
+def generate_subtraction(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a = profile.randint(rng, 0, 30)
     b = rng.randint(0, a)
     templates = (
         "Сколько будет {a} - {b}?",
@@ -282,15 +393,19 @@ def generate_subtraction(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"arithmetic.subtract:{index:08d}",
         task_type="arithmetic.subtract",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(a - b),
         metadata={"a": a, "b": b, "operation": "subtraction"},
     )
 
 
-def generate_missing_addend(rng: random.Random, index: int) -> TrainingExample:
-    a = rng.randint(0, 20)
-    missing = rng.randint(0, 20)
+def generate_missing_addend(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a = profile.randint(rng, 0, 20)
+    missing = profile.randint(rng, 0, 20)
     total = a + missing
     templates = (
         "Какое число надо прибавить к {a}, чтобы получить {total}?",
@@ -302,23 +417,27 @@ def generate_missing_addend(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"arithmetic.missing_addend:{index:08d}",
         task_type="arithmetic.missing_addend",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(missing),
         metadata={"a": a, "missing": missing, "total": total},
     )
 
 
-def generate_compare_sum(rng: random.Random, index: int) -> TrainingExample:
-    a = rng.randint(0, 10)
-    b = rng.randint(0, 10)
-    c = rng.randint(0, 10)
-    d = rng.randint(0, 10)
+def generate_compare_sum(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a = profile.randint(rng, 0, 10)
+    b = profile.randint(rng, 0, 10)
+    c = profile.randint(rng, 0, 10)
+    d = profile.randint(rng, 0, 10)
     left = a + b
     right = c + d
 
     while right == left:
-        c = rng.randint(0, 10)
-        d = rng.randint(0, 10)
+        c = profile.randint(rng, 0, 10)
+        d = profile.randint(rng, 0, 10)
         right = c + d
 
     templates = (
@@ -331,15 +450,19 @@ def generate_compare_sum(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"arithmetic.compare_sum:{index:08d}",
         task_type="arithmetic.compare_sum",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(max(left, right)),
         metadata={"left": left, "right": right, "operation": "compare_sum"},
     )
 
 
-def generate_double_step(rng: random.Random, index: int) -> TrainingExample:
-    a = rng.randint(0, 20)
-    b = rng.randint(0, 10)
+def generate_double_step(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a = profile.randint(rng, 0, 20)
+    b = profile.randint(rng, 0, 10)
     c = rng.randint(0, a + b)
     templates = (
         "К {a} прибавь {b}, потом вычти {c}. Что получится?",
@@ -351,15 +474,19 @@ def generate_double_step(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"arithmetic.double_step:{index:08d}",
         task_type="arithmetic.double_step",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(a + b - c),
         metadata={"a": a, "b": b, "c": c, "operation": "add_then_subtract"},
     )
 
 
-def generate_arithmetic_progression(rng: random.Random, index: int) -> TrainingExample:
-    start = rng.randint(0, 20)
-    step = rng.randint(1, 10)
+def generate_arithmetic_progression(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    start = profile.randint(rng, 0, 20)
+    step = profile.randint(rng, 1, 10)
     length = 4
     numbers = [start + step * offset for offset in range(length)]
     answer = start + step * length
@@ -374,14 +501,18 @@ def generate_arithmetic_progression(rng: random.Random, index: int) -> TrainingE
     return TrainingExample(
         id=f"sequence.arithmetic_progression:{index:08d}",
         task_type="sequence.arithmetic_progression",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(answer),
         metadata={"start": start, "step": step, "length": length},
     )
 
 
-def generate_decreasing_progression(rng: random.Random, index: int) -> TrainingExample:
-    step = rng.randint(1, 10)
+def generate_decreasing_progression(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    step = profile.randint(rng, 1, 10)
     start = rng.randint(step * 5, step * 5 + 30)
     length = 4
     numbers = [start - step * offset for offset in range(length)]
@@ -397,15 +528,19 @@ def generate_decreasing_progression(rng: random.Random, index: int) -> TrainingE
     return TrainingExample(
         id=f"sequence.decreasing_progression:{index:08d}",
         task_type="sequence.decreasing_progression",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(answer),
         metadata={"start": start, "step": step, "length": length},
     )
 
 
-def generate_missing_middle(rng: random.Random, index: int) -> TrainingExample:
-    start = rng.randint(0, 20)
-    step = rng.randint(1, 10)
+def generate_missing_middle(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    start = profile.randint(rng, 0, 20)
+    step = profile.randint(rng, 1, 10)
     numbers = [start + step * offset for offset in range(4)]
     missing_index = rng.randint(1, 2)
     answer = numbers[missing_index]
@@ -424,13 +559,17 @@ def generate_missing_middle(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"sequence.missing_middle:{index:08d}",
         task_type="sequence.missing_middle",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=str(answer),
         metadata={"numbers": numbers, "missing_index": missing_index},
     )
 
 
-def generate_alternating_words(rng: random.Random, index: int) -> TrainingExample:
+def generate_alternating_words(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     first, second = rng.sample(COLORS, 2)
     sequence = [first, second, first, second]
     templates = (
@@ -443,13 +582,17 @@ def generate_alternating_words(rng: random.Random, index: int) -> TrainingExampl
     return TrainingExample(
         id=f"sequence.alternating_words:{index:08d}",
         task_type="sequence.alternating_words",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=first,
         metadata={"pattern": [first, second], "operation": "continue_alternation"},
     )
 
 
-def generate_repeat_pattern(rng: random.Random, index: int) -> TrainingExample:
+def generate_repeat_pattern(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     pattern = rng.sample(COLORS, 3)
     sequence = pattern + pattern[:2]
     templates = (
@@ -462,16 +605,20 @@ def generate_repeat_pattern(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"sequence.repeat_pattern:{index:08d}",
         task_type="sequence.repeat_pattern",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=pattern[2],
         metadata={"pattern": pattern, "operation": "repeat_pattern"},
     )
 
 
-def generate_direct_quantity(rng: random.Random, index: int) -> TrainingExample:
+def generate_direct_quantity(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
-    count = rng.randint(1, 20)
+    count = profile.randint(rng, 1, 20)
     fact, be_verb = _make_quantity_fact(subject, noun, count)
     question = _quantity_question(subject, noun)
 
@@ -494,11 +641,13 @@ def generate_direct_quantity(rng: random.Random, index: int) -> TrainingExample:
 
 
 def generate_quantity_irrelevant_subject(
-    rng: random.Random, index: int
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
 ) -> TrainingExample:
     fact_subject, question_subject = _pick_distinct_people(rng, 2)
     noun = rng.choice(COUNTED_NOUNS)
-    count = rng.randint(1, 20)
+    count = profile.randint(rng, 1, 20)
     fact, be_verb = _make_quantity_fact(fact_subject, noun, count)
     question = _quantity_question(question_subject, noun)
 
@@ -523,11 +672,13 @@ def generate_quantity_irrelevant_subject(
 
 
 def generate_quantity_object_mismatch(
-    rng: random.Random, index: int
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
 ) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     fact_noun, question_noun = _pick_distinct_nouns(rng, 2)
-    count = rng.randint(1, 20)
+    count = profile.randint(rng, 1, 20)
     fact, be_verb = _make_quantity_fact(subject, fact_noun, count)
     question = _quantity_question(subject, question_noun)
 
@@ -551,10 +702,14 @@ def generate_quantity_object_mismatch(
     )
 
 
-def generate_location_direct(rng: random.Random, index: int) -> TrainingExample:
+def generate_location_direct(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     location = rng.choice(LOCATIONS)
     noun = rng.choice(COUNTED_NOUNS)
-    count = rng.randint(1, 20)
+    count = profile.randint(rng, 1, 20)
     fact, be_verb = _make_location_quantity_fact(location, noun, count)
     question = _location_quantity_question(location, noun)
 
@@ -575,10 +730,14 @@ def generate_location_direct(rng: random.Random, index: int) -> TrainingExample:
     )
 
 
-def generate_location_mismatch(rng: random.Random, index: int) -> TrainingExample:
+def generate_location_mismatch(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     fact_location, question_location = _pick_distinct_locations(rng, 2)
     noun = rng.choice(COUNTED_NOUNS)
-    count = rng.randint(1, 20)
+    count = profile.randint(rng, 1, 20)
     fact, be_verb = _make_location_quantity_fact(fact_location, noun, count)
     question = _location_quantity_question(question_location, noun)
 
@@ -602,10 +761,14 @@ def generate_location_mismatch(rng: random.Random, index: int) -> TrainingExampl
     )
 
 
-def generate_time_past_unknown(rng: random.Random, index: int) -> TrainingExample:
+def generate_time_past_unknown(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
-    count = rng.randint(1, 20)
+    count = profile.randint(rng, 1, 20)
     fact, be_verb = _make_quantity_fact(subject, noun, count)
     fact = f"Вчера {fact[0].lower()}{fact[1:]}"
     question = f"Сколько {noun.question} у {subject.genitive} сейчас?"
@@ -627,11 +790,15 @@ def generate_time_past_unknown(rng: random.Random, index: int) -> TrainingExampl
     )
 
 
-def generate_state_change_add(rng: random.Random, index: int) -> TrainingExample:
+def generate_state_change_add(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
-    start = rng.randint(0, 20)
-    delta = rng.randint(1, 10)
+    start = profile.randint(rng, 0, 20)
+    delta = profile.randint(rng, 1, 10)
     fact, be_verb = _make_quantity_fact(subject, noun, start)
     change = f"{subject.dative} дали ещё {format_counted_noun_accusative(delta, noun)}."
     question = f"Сколько {noun.question} стало у {subject.genitive}?"
@@ -652,10 +819,14 @@ def generate_state_change_add(rng: random.Random, index: int) -> TrainingExample
     )
 
 
-def generate_state_change_subtract(rng: random.Random, index: int) -> TrainingExample:
+def generate_state_change_subtract(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
-    start = rng.randint(1, 20)
+    start = profile.randint(rng, 1, 20)
     delta = rng.randint(1, start)
     fact, be_verb = _make_quantity_fact(subject, noun, start)
     change = (
@@ -682,11 +853,12 @@ def generate_state_change_subtract(rng: random.Random, index: int) -> TrainingEx
 def generate_state_change_other_subject_no_change(
     rng: random.Random,
     index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
 ) -> TrainingExample:
     target, other = _pick_distinct_people(rng, 2)
     noun = rng.choice(COUNTED_NOUNS)
-    start = rng.randint(1, 20)
-    delta = rng.randint(1, 10)
+    start = profile.randint(rng, 1, 20)
+    delta = profile.randint(rng, 1, 10)
     fact, be_verb = _make_quantity_fact(target, noun, start)
     change = f"{other.dative} дали ещё {format_counted_noun_accusative(delta, noun)}."
     question = f"Сколько {noun.question} стало у {target.genitive}?"
@@ -711,11 +883,12 @@ def generate_state_change_other_subject_no_change(
 def generate_state_change_other_object_no_change(
     rng: random.Random,
     index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
 ) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     target_noun, other_noun = _pick_distinct_nouns(rng, 2)
-    start = rng.randint(1, 20)
-    delta = rng.randint(1, 10)
+    start = profile.randint(rng, 1, 20)
+    delta = profile.randint(rng, 1, 10)
     fact, be_verb = _make_quantity_fact(subject, target_noun, start)
     change = f"{subject.dative} дали ещё {format_counted_noun_accusative(delta, other_noun)}."
     question = f"Сколько {target_noun.question} стало у {subject.genitive}?"
@@ -738,11 +911,13 @@ def generate_state_change_other_object_no_change(
 
 
 def generate_state_change_insufficient_start(
-    rng: random.Random, index: int
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
 ) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
-    delta = rng.randint(1, 10)
+    delta = profile.randint(rng, 1, 10)
     change = f"{subject.dative} дали ещё {format_counted_noun_accusative(delta, noun)}."
     question = f"Сколько {noun.question} стало у {subject.genitive}?"
 
@@ -760,7 +935,11 @@ def generate_state_change_insufficient_start(
     )
 
 
-def generate_insufficient_info(rng: random.Random, index: int) -> TrainingExample:
+def generate_insufficient_info(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     item = rng.choice(OBJECT_PROPERTIES)
     templates = (
@@ -778,7 +957,7 @@ def generate_insufficient_info(rng: random.Random, index: int) -> TrainingExampl
     return TrainingExample(
         id=f"epistemic.insufficient_info:{index:08d}",
         task_type="epistemic.insufficient_info",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer="Недостаточно информации.",
         metadata={
             "epistemic_state": "unknown",
@@ -789,10 +968,14 @@ def generate_insufficient_info(rng: random.Random, index: int) -> TrainingExampl
     )
 
 
-def generate_irrelevant_fact(rng: random.Random, index: int) -> TrainingExample:
+def generate_irrelevant_fact(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     fact_subject, question_subject = _pick_distinct_people(rng, 2)
     noun = rng.choice(COUNTED_NOUNS)
-    count = rng.randint(1, 20)
+    count = profile.randint(rng, 1, 20)
     fact, be_verb = _make_quantity_fact(fact_subject, noun, count)
     question = _quantity_question(question_subject, noun)
 
@@ -816,7 +999,11 @@ def generate_irrelevant_fact(rng: random.Random, index: int) -> TrainingExample:
     )
 
 
-def generate_known_zero_quantity(rng: random.Random, index: int) -> TrainingExample:
+def generate_known_zero_quantity(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
     prompt = (
@@ -827,7 +1014,7 @@ def generate_known_zero_quantity(rng: random.Random, index: int) -> TrainingExam
     return TrainingExample(
         id=f"quantity.known_zero:{index:08d}",
         task_type="quantity.known_zero",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer="0",
         metadata={
             "epistemic_state": "known_zero",
@@ -837,7 +1024,11 @@ def generate_known_zero_quantity(rng: random.Random, index: int) -> TrainingExam
     )
 
 
-def generate_false_presupposition(rng: random.Random, index: int) -> TrainingExample:
+def generate_false_presupposition(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
     prompt = (
@@ -848,7 +1039,7 @@ def generate_false_presupposition(rng: random.Random, index: int) -> TrainingExa
     return TrainingExample(
         id=f"epistemic.false_presupposition:{index:08d}",
         task_type="epistemic.false_presupposition",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=(
             "Ложная предпосылка: "
             f"сказано, что у {subject.genitive} не было {noun.question}."
@@ -861,14 +1052,18 @@ def generate_false_presupposition(rng: random.Random, index: int) -> TrainingExa
     )
 
 
-def generate_contradiction(rng: random.Random, index: int) -> TrainingExample:
+def generate_contradiction(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
-    first_count = rng.randint(1, 20)
-    second_count = rng.randint(1, 20)
+    first_count = profile.randint(rng, 1, 20)
+    second_count = profile.randint(rng, 1, 20)
 
     while second_count == first_count:
-        second_count = rng.randint(1, 20)
+        second_count = profile.randint(rng, 1, 20)
 
     first_fact, _ = _make_quantity_fact(subject, noun, first_count)
     second_fact, _ = _make_quantity_fact(subject, noun, second_count)
@@ -877,7 +1072,7 @@ def generate_contradiction(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"epistemic.contradiction:{index:08d}",
         task_type="epistemic.contradiction",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer="Противоречие: для одного субъекта и предмета указаны разные количества.",
         metadata={
             "epistemic_state": "contradiction",
@@ -889,7 +1084,11 @@ def generate_contradiction(rng: random.Random, index: int) -> TrainingExample:
     )
 
 
-def generate_logic_transitive_height(rng: random.Random, index: int) -> TrainingExample:
+def generate_logic_transitive_height(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     high, middle, low = _pick_distinct_people(rng, 3)
     prompt = (
         f"{high.nominative} выше {middle.genitive}. "
@@ -899,7 +1098,7 @@ def generate_logic_transitive_height(rng: random.Random, index: int) -> Training
     return TrainingExample(
         id=f"logic.transitive_height:{index:08d}",
         task_type="logic.transitive_height",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=high.nominative,
         metadata={
             "relation": "higher_than",
@@ -910,7 +1109,11 @@ def generate_logic_transitive_height(rng: random.Random, index: int) -> Training
     )
 
 
-def generate_logic_all_category(rng: random.Random, index: int) -> TrainingExample:
+def generate_logic_all_category(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     rule = rng.choice(CATEGORY_RULES)
     templates = (
         "Все {member_many} — {category_many}. {example} — {member_one}. {example} — {category_one}?",
@@ -927,7 +1130,7 @@ def generate_logic_all_category(rng: random.Random, index: int) -> TrainingExamp
     return TrainingExample(
         id=f"logic.all_category:{index:08d}",
         task_type="logic.all_category",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer="Да.",
         metadata={
             "relation": "category_inclusion",
@@ -938,7 +1141,11 @@ def generate_logic_all_category(rng: random.Random, index: int) -> TrainingExamp
     )
 
 
-def generate_logic_negation(rng: random.Random, index: int) -> TrainingExample:
+def generate_logic_negation(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     noun = rng.choice(COUNTED_NOUNS)
     prompt = (
@@ -949,7 +1156,7 @@ def generate_logic_negation(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"logic.negation:{index:08d}",
         task_type="logic.negation",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer="Нет.",
         metadata={
             "operation": "negation",
@@ -959,7 +1166,11 @@ def generate_logic_negation(rng: random.Random, index: int) -> TrainingExample:
     )
 
 
-def generate_logic_and_or(rng: random.Random, index: int) -> TrainingExample:
+def generate_logic_and_or(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
     subject = rng.choice(PEOPLE)
     first_fact, second_fact = rng.choice(
         (
@@ -990,7 +1201,7 @@ def generate_logic_and_or(rng: random.Random, index: int) -> TrainingExample:
     return TrainingExample(
         id=f"logic.and_or:{index:08d}",
         task_type="logic.and_or",
-        prompt=prompt,
+        prompt=_case_prefix(rng, profile) + prompt,
         answer=answer,
         metadata={
             "operation": operator,
@@ -1050,8 +1261,10 @@ def generate_example(
     index: int,
     *,
     task_types: Sequence[GeneratorName] | None = None,
+    profile: GenerationProfileName | GenerationProfile = "train",
 ) -> TrainingExample:
     allowed_task_types = tuple(task_types or GENERATOR_NAMES)
+    generation_profile = resolve_generation_profile(profile)
 
     if not allowed_task_types:
         raise ValueError("task_types must not be empty")
@@ -1063,7 +1276,7 @@ def generate_example(
     except KeyError as error:
         raise ValueError(f"Unknown task type: {task_type}") from error
 
-    return generator(rng, index)
+    return generator(rng, index, generation_profile)
 
 
 def generate_examples(
@@ -1071,6 +1284,7 @@ def generate_examples(
     count: int,
     seed: int,
     task_types: Sequence[GeneratorName] | None = None,
+    profile: GenerationProfileName | GenerationProfile = "train",
 ) -> list[TrainingExample]:
     if count < 0:
         raise ValueError("count must be non-negative")
@@ -1078,5 +1292,6 @@ def generate_examples(
     rng = random.Random(seed)
 
     return [
-        generate_example(rng, index, task_types=task_types) for index in range(count)
+        generate_example(rng, index, task_types=task_types, profile=profile)
+        for index in range(count)
     ]

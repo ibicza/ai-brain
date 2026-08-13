@@ -14,6 +14,7 @@ from ai_brain.data.writer import (
     generate_data_split,
     generate_jsonl,
     read_jsonl,
+    write_jsonl,
 )
 
 
@@ -41,6 +42,26 @@ def test_generation_is_deterministic_for_same_seed() -> None:
     assert [example.to_dict() for example in first] == [
         example.to_dict() for example in second
     ]
+
+
+def test_eval_profile_uses_harder_numeric_ranges() -> None:
+    train_example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["arithmetic.add"],
+        profile="train",
+    )[0]
+    eval_example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["arithmetic.add"],
+        profile="eval",
+    )[0]
+
+    assert 0 <= train_example.metadata["a"] <= 30
+    assert 0 <= train_example.metadata["b"] <= 30
+    assert 20 <= eval_example.metadata["a"] <= 80
+    assert 20 <= eval_example.metadata["b"] <= 80
 
 
 def test_generator_set_has_enough_first_stage_task_types() -> None:
@@ -328,6 +349,11 @@ def test_generate_data_split_writes_manifest_and_disjoint_prompts(
     assert manifest["task_types"] == task_types
     assert manifest["quality_checks"]["prompt_intersection_count"] == 0
     assert manifest["quality_checks"]["all_task_types_present"] is True
+    assert manifest["split_policy"]["enforce_unique_prompts"] is True
+    assert manifest["splits"]["train"]["profile"] == "train"
+    assert manifest["splits"]["eval"]["profile"] == "eval"
+    assert manifest["splits"]["train"]["duplicate_prompt_count"] == 0
+    assert manifest["splits"]["eval"]["duplicate_prompt_count"] == 0
     assert manifest["splits"]["train"]["missing_task_types"] == []
     assert manifest["splits"]["eval"]["missing_task_types"] == []
 
@@ -351,3 +377,33 @@ def test_dataset_stats_counts_task_types_and_missing_types(tmp_path: Path) -> No
     assert stats["missing_task_types"] == ["arithmetic.subtract"]
     assert stats["all_task_types_present"] is False
     assert stats["duplicate_prompt_count"] >= 0
+
+
+def test_dataset_stats_reports_top_duplicate_prompts(tmp_path: Path) -> None:
+    output_path = tmp_path / "duplicates.jsonl"
+    duplicate = TrainingExample(
+        id="duplicate:00000000",
+        task_type="arithmetic.add",
+        prompt="same prompt",
+        answer="1",
+        metadata={"source": "test"},
+    )
+    unique = TrainingExample(
+        id="unique:00000000",
+        task_type="arithmetic.subtract",
+        prompt="different prompt",
+        answer="2",
+        metadata={"source": "test"},
+    )
+    write_jsonl(output_path, [duplicate, duplicate, unique])
+
+    stats = dataset_stats(input_path=output_path)
+
+    assert stats["duplicate_prompt_count"] == 1
+    assert stats["top_duplicate_prompts"] == [
+        {
+            "prompt": "same prompt",
+            "count": 2,
+            "task_type": "arithmetic.add",
+        }
+    ]

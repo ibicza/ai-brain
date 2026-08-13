@@ -5,7 +5,7 @@ import json
 from collections.abc import Sequence
 from pathlib import Path
 
-from ai_brain.data.generators import GENERATOR_NAMES
+from ai_brain.data.generators import GENERATION_PROFILES, GENERATOR_NAMES
 from ai_brain.data.writer import dataset_stats, generate_data_split, generate_jsonl
 from ai_brain.model.config import tiny_config
 from ai_brain.model.smoke import run_model_smoke_step
@@ -119,6 +119,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=GENERATOR_NAMES,
         help="Restrict generation to one task type. Can be repeated.",
     )
+    generate_data_parser.add_argument(
+        "--profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="train",
+        help="Difficulty profile for generated examples.",
+    )
 
     generate_split_parser = subparsers.add_parser(
         "generate-data-split",
@@ -160,6 +166,18 @@ def build_parser() -> argparse.ArgumentParser:
         choices=GENERATOR_NAMES,
         help="Restrict generation to one task type. Can be repeated.",
     )
+    generate_split_parser.add_argument(
+        "--train-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="train",
+        help="Difficulty profile for the train split.",
+    )
+    generate_split_parser.add_argument(
+        "--eval-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="eval",
+        help="Difficulty profile for the eval split.",
+    )
 
     dataset_stats_parser = subparsers.add_parser(
         "dataset-stats",
@@ -176,6 +194,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         choices=GENERATOR_NAMES,
         help="Expected task type. Can be repeated. Defaults to all known types.",
+    )
+    dataset_stats_parser.add_argument(
+        "--top-duplicates",
+        type=int,
+        default=20,
+        help="Maximum number of duplicate prompt records to include.",
     )
 
     return parser
@@ -243,6 +267,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             count=args.count,
             seed=args.seed,
             task_types=args.task_type,
+            profile=args.profile,
         )
         print(json.dumps(result, indent=2, sort_keys=True))
         return 0
@@ -255,6 +280,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             train_seed=args.train_seed,
             eval_seed=args.eval_seed,
             task_types=args.task_type,
+            train_profile=args.train_profile,
+            eval_profile=args.eval_profile,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
@@ -263,6 +290,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         result = dataset_stats(
             input_path=args.input,
             expected_task_types=args.task_type,
+            top_duplicate_limit=args.top_duplicates,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0

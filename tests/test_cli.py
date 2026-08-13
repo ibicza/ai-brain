@@ -43,6 +43,8 @@ def test_generate_data_command_with_task_type(tmp_path, capsys) -> None:
             "1234",
             "--task-type",
             "quantity.direct",
+            "--profile",
+            "eval",
         ]
     )
 
@@ -52,6 +54,7 @@ def test_generate_data_command_with_task_type(tmp_path, capsys) -> None:
 
     assert exit_code == 0
     assert result["count"] == 5
+    assert result["profile"] == "eval"
     assert len(lines) == 5
 
     loaded = [json.loads(line) for line in lines]
@@ -94,6 +97,10 @@ def test_generate_data_split_command(tmp_path, capsys) -> None:
     assert (output_dir / "manifest.json").exists()
     assert manifest["splits"]["train"]["count"] == 12
     assert manifest["splits"]["eval"]["count"] == 9
+    assert manifest["splits"]["train"]["profile"] == "train"
+    assert manifest["splits"]["eval"]["profile"] == "eval"
+    assert manifest["splits"]["train"]["duplicate_prompt_count"] == 0
+    assert manifest["splits"]["eval"]["duplicate_prompt_count"] == 0
     assert manifest["quality_checks"]["no_prompt_intersection"] is True
     assert manifest["quality_checks"]["all_task_types_present"] is True
 
@@ -122,6 +129,8 @@ def test_dataset_stats_command(tmp_path, capsys) -> None:
             str(output_path),
             "--task-type",
             "arithmetic.add",
+            "--top-duplicates",
+            "5",
         ]
     )
 
@@ -133,3 +142,4 @@ def test_dataset_stats_command(tmp_path, capsys) -> None:
     assert result["task_type_counts"] == {"arithmetic.add": 5}
     assert result["all_task_types_present"] is True
     assert result["missing_task_types"] == []
+    assert "top_duplicate_prompts" in result

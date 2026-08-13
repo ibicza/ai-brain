@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 from collections import Counter
@@ -9,6 +10,7 @@ from typing import Any
 
 from ai_brain.data.generators import (
     GENERATOR_NAMES,
+    GenerationProfileName,
     GeneratorName,
     generate_example,
     generate_examples,
@@ -31,11 +33,13 @@ def generate_jsonl(
     count: int,
     seed: int,
     task_types: Sequence[GeneratorName] | None = None,
+    profile: GenerationProfileName = "train",
 ) -> dict[str, Any]:
     examples = generate_examples(
         count=count,
         seed=seed,
         task_types=task_types,
+        profile=profile,
     )
 
     write_jsonl(output_path, examples)
@@ -44,6 +48,7 @@ def generate_jsonl(
         "output_path": str(output_path),
         "count": count,
         "seed": seed,
+        "profile": profile,
         "task_types": list(task_types) if task_types is not None else "all",
     }
 
@@ -57,6 +62,7 @@ def build_dataset_stats(
     examples: Sequence[TrainingExample | dict[str, Any]],
     *,
     expected_task_types: Sequence[GeneratorName] | None = None,
+    top_duplicate_limit: int = 20,
 ) -> dict[str, Any]:
     expected = tuple(expected_task_types or GENERATOR_NAMES)
     task_type_counts = Counter(
@@ -75,6 +81,10 @@ def build_dataset_stats(
         "all_task_types_present": not missing_task_types,
         "unique_prompt_count": len(unique_prompts),
         "duplicate_prompt_count": len(prompts) - len(unique_prompts),
+        "top_duplicate_prompts": _get_top_duplicate_prompts(
+            examples,
+            limit=top_duplicate_limit,
+        ),
     }
 
 
@@ -82,9 +92,14 @@ def dataset_stats(
     *,
     input_path: Path,
     expected_task_types: Sequence[GeneratorName] | None = None,
+    top_duplicate_limit: int = 20,
 ) -> dict[str, Any]:
     examples = read_jsonl(input_path)
-    stats = build_dataset_stats(examples, expected_task_types=expected_task_types)
+    stats = build_dataset_stats(
+        examples,
+        expected_task_types=expected_task_types,
+        top_duplicate_limit=top_duplicate_limit,
+    )
 
     return {
         "input_path": str(input_path),
@@ -100,6 +115,9 @@ def generate_data_split(
     train_seed: int,
     eval_seed: int,
     task_types: Sequence[GeneratorName] | None = None,
+    train_profile: GenerationProfileName = "train",
+    eval_profile: GenerationProfileName = "eval",
+    enforce_unique_prompts: bool = True,
 ) -> dict[str, Any]:
     allowed_task_types = tuple(task_types or GENERATOR_NAMES)
 
@@ -107,13 +125,17 @@ def generate_data_split(
         count=train_count,
         seed=train_seed,
         task_types=allowed_task_types,
+        split_name="train",
+        profile=train_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
     )
-    train_prompts = {example.prompt for example in train_examples}
     eval_examples = _generate_examples_with_coverage(
         count=eval_count,
         seed=eval_seed,
         task_types=allowed_task_types,
-        blocked_prompts=train_prompts,
+        split_name="eval",
+        profile=eval_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
     )
 
     train_path = output_dir / "train.jsonl"
@@ -144,14 +166,21 @@ def generate_data_split(
                 "path": train_path.name,
                 "count": train_count,
                 "seed": train_seed,
+                "profile": train_profile,
                 **train_stats,
             },
             "eval": {
                 "path": eval_path.name,
                 "count": eval_count,
                 "seed": eval_seed,
+                "profile": eval_profile,
                 **eval_stats,
             },
+        },
+        "split_policy": {
+            "name": "stable_prompt_hash_mod_2",
+            "salt": _SPLIT_HASH_SALT,
+            "enforce_unique_prompts": enforce_unique_prompts,
         },
         "quality_checks": {
             "prompt_intersection_count": len(prompt_intersection),
@@ -179,12 +208,17 @@ def generate_data_split(
     }
 
 
+_SPLIT_HASH_SALT = "ai-brain-m46-v1"
+
+
 def _generate_examples_with_coverage(
     *,
     count: int,
     seed: int,
     task_types: Sequence[GeneratorName],
-    blocked_prompts: set[str] | None = None,
+    split_name: str | None = None,
+    profile: GenerationProfileName = "train",
+    enforce_unique_prompts: bool = True,
 ) -> list[TrainingExample]:
     if count < 0:
         raise ValueError("count must be non-negative")
@@ -198,15 +232,18 @@ def _generate_examples_with_coverage(
     scheduled_task_types = covered_task_types[: min(count, len(covered_task_types))]
 
     examples: list[TrainingExample] = []
-    blocked = set(blocked_prompts or ())
-    attempt_limit = max(1000, count * 100)
+    seen_prompts: set[str] = set()
+    attempt_limit = max(10_000, count * 200)
     attempts = 0
 
     while len(examples) < count:
         if attempts >= attempt_limit:
             raise RuntimeError(
-                "Could not generate a prompt-disjoint dataset split "
-                f"after {attempt_limit} attempts"
+                "Could not generate enough unique prompts "
+                f"for split={split_name!r}, profile={profile!r}: "
+                f"accepted {len(examples)} of {count} examples "
+                f"after {attempt_limit} attempts. "
+                "Expand generator ranges or lower the requested count."
             )
 
         task_type = (
@@ -215,18 +252,77 @@ def _generate_examples_with_coverage(
             else None
         )
         example = (
-            generate_example(rng, len(examples), task_types=[task_type])
+            generate_example(
+                rng,
+                len(examples),
+                task_types=[task_type],
+                profile=profile,
+            )
             if task_type is not None
-            else generate_example(rng, len(examples), task_types=task_types)
+            else generate_example(
+                rng,
+                len(examples),
+                task_types=task_types,
+                profile=profile,
+            )
         )
         attempts += 1
 
-        if example.prompt in blocked:
+        if split_name is not None and not _prompt_belongs_to_split(
+            example.prompt,
+            split_name,
+        ):
             continue
 
+        if enforce_unique_prompts and example.prompt in seen_prompts:
+            continue
+
+        seen_prompts.add(example.prompt)
         examples.append(example)
 
     return examples
+
+
+def _get_top_duplicate_prompts(
+    examples: Sequence[TrainingExample | dict[str, Any]],
+    *,
+    limit: int,
+) -> list[dict[str, Any]]:
+    if limit <= 0:
+        return []
+
+    prompt_counts = Counter(
+        _get_example_field(example, "prompt") for example in examples
+    )
+    prompt_task_types: dict[str, str] = {}
+    for example in examples:
+        prompt = _get_example_field(example, "prompt")
+        prompt_task_types.setdefault(prompt, _get_example_field(example, "task_type"))
+
+    return [
+        {
+            "prompt": prompt,
+            "count": count,
+            "task_type": prompt_task_types[prompt],
+        }
+        for prompt, count in prompt_counts.most_common(limit)
+        if count > 1
+    ]
+
+
+def _prompt_belongs_to_split(prompt: str, split_name: str) -> bool:
+    if split_name not in {"train", "eval"}:
+        raise ValueError(f"Unknown split name: {split_name}")
+
+    digest = hashlib.blake2b(
+        f"{_SPLIT_HASH_SALT}\0{prompt}".encode(),
+        digest_size=8,
+    ).digest()
+    bucket = int.from_bytes(digest, "big") % 2
+
+    return (split_name == "train" and bucket == 0) or (
+        split_name == "eval" and bucket == 1
+    )
 
 
 def _get_example_field(example: TrainingExample | dict[str, Any], field: str) -> Any:
