@@ -18,7 +18,9 @@ from ai_brain.eval.runner import eval_lm
 from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
 from ai_brain.language.tokenizer.special_tokens import END_TOKEN, EOS_TOKEN
 from ai_brain.language.tokenizer.text_format import format_prompt_answer
-from ai_brain.model.config import ModelConfig
+from ai_brain.model.config import ModelConfig, recurrent_debug_config
+from ai_brain.model.factory import build_model
+from ai_brain.model.recurrent_transformer import RecurrentCausalTransformer
 from ai_brain.model.tiny_transformer import TinyCausalTransformer
 
 
@@ -143,6 +145,70 @@ def test_load_checkpoint_model_for_inference(tmp_path) -> None:
     assert isinstance(model, TinyCausalTransformer)
     assert model.training is False
     assert checkpoint["step"] == 1
+
+
+def test_load_old_checkpoint_without_model_type_for_inference(tmp_path) -> None:
+    tokenizer_path, checkpoint_path = _make_tokenizer_and_checkpoint(tmp_path)
+    checkpoint = torch.load(checkpoint_path, map_location="cpu")
+    checkpoint["model_config"].pop("model_type", None)
+    torch.save(checkpoint, checkpoint_path)
+
+    model, loaded_checkpoint = load_model_for_inference(
+        checkpoint_path=checkpoint_path,
+        tokenizer_path=tokenizer_path,
+        device=torch.device("cpu"),
+    )
+
+    assert isinstance(model, TinyCausalTransformer)
+    assert model.training is False
+    assert loaded_checkpoint["step"] == 1
+
+
+def test_load_recurrent_checkpoint_for_inference(tmp_path) -> None:
+    tokenizer_path = tmp_path / "tokenizer.json"
+    checkpoint_path = tmp_path / "recurrent_checkpoint.pt"
+    tokenizer = ByteLevelBpeTokenizer.train(
+        [
+            format_prompt_answer(record["prompt"], record["answer"])
+            for record in _records()
+        ],
+        vocab_size=512,
+        min_frequency=1,
+    )
+    tokenizer.save(tokenizer_path)
+
+    model_config = recurrent_debug_config()
+    model_config = ModelConfig(
+        **{
+            **asdict(model_config),
+            "vocab_size": tokenizer.vocab_size,
+            "max_sequence_length": 32,
+        }
+    )
+    model = build_model(model_config)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    torch.save(
+        {
+            "step": 1,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "model_config": asdict(model_config),
+            "train_config": {"loss_mode": "answer-only"},
+            "tokenizer_path": str(tokenizer_path),
+            "last_metrics": {"train_loss": 1.0},
+        },
+        checkpoint_path,
+    )
+
+    loaded_model, checkpoint = load_model_for_inference(
+        checkpoint_path=checkpoint_path,
+        tokenizer_path=tokenizer_path,
+        device=torch.device("cpu"),
+    )
+
+    assert isinstance(loaded_model, RecurrentCausalTransformer)
+    assert loaded_model.training is False
+    assert checkpoint["model_config"]["model_type"] == "recurrent"
 
 
 def test_eval_lm_writes_predictions_and_summary(tmp_path) -> None:

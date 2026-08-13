@@ -14,9 +14,9 @@ from ai_brain.eval.diagnostics import analyze_eval
 from ai_brain.eval.runner import eval_lm, generate_answer
 from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
 from ai_brain.language.tokenizer.trainer import train_tokenizer
-from ai_brain.model.config import tiny_config
+from ai_brain.model.config import MODEL_CONFIG_NAMES, get_named_model_config
+from ai_brain.model.factory import build_model, model_class_name
 from ai_brain.model.smoke import run_model_smoke_step
-from ai_brain.model.tiny_transformer import TinyCausalTransformer
 from ai_brain.model.utils import count_parameters, format_parameter_count
 from ai_brain.runtime.device import (
     format_device_info,
@@ -121,9 +121,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Random seed for the smoke training step.",
     )
 
-    subparsers.add_parser(
+    model_info_parser = subparsers.add_parser(
         "model-info",
-        help="Show tiny model parameter information.",
+        help="Show model parameter information.",
+    )
+    model_info_parser.add_argument(
+        "--config",
+        choices=MODEL_CONFIG_NAMES,
+        default="tiny",
+        help="Model config to inspect.",
     )
 
     model_smoke_parser = subparsers.add_parser(
@@ -137,7 +143,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     model_smoke_parser.add_argument(
         "--config",
-        choices=["debug", "tiny"],
+        choices=MODEL_CONFIG_NAMES,
         default="debug",
         help="Model config to use.",
     )
@@ -419,7 +425,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     train_lm_parser.add_argument(
         "--config",
-        choices=["debug", "tiny"],
+        choices=MODEL_CONFIG_NAMES,
         default="debug",
         help="Model architecture preset.",
     )
@@ -692,13 +698,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == "model-info":
-        config = tiny_config()
-        model = TinyCausalTransformer(config)
+        config = get_named_model_config(args.config)
+        model = build_model(config)
         parameter_count = count_parameters(model)
         trainable_parameter_count = count_parameters(model, trainable_only=True)
 
         result = {
-            "model": "TinyCausalTransformer",
+            "model": model_class_name(config),
+            "model_type": config.model_type,
+            "config_name": args.config,
             "parameters": parameter_count,
             "parameters_human": format_parameter_count(parameter_count),
             "trainable_parameters": trainable_parameter_count,
@@ -714,6 +722,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "ffn_hidden_dim": config.ffn_hidden_dim,
                 "dropout": config.dropout,
                 "tie_embeddings": config.tie_embeddings,
+                "input_layers": config.input_layers,
+                "recurrent_layers": config.recurrent_layers,
+                "recurrent_cycles": config.recurrent_cycles,
+                "output_layers": config.output_layers,
             },
         }
 

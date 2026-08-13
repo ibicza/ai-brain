@@ -8,8 +8,8 @@ import torch
 import torch.nn.functional as F
 
 from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
-from ai_brain.model.smoke import get_named_model_config
-from ai_brain.model.tiny_transformer import TinyCausalTransformer
+from ai_brain.model.config import get_named_model_config
+from ai_brain.model.factory import build_model, model_class_name
 from ai_brain.runtime.device import get_device_info
 from ai_brain.training.batching import sample_batch
 from ai_brain.training.checkpoint import save_checkpoint
@@ -45,7 +45,7 @@ def compute_lm_loss(logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
 @torch.no_grad()
 def evaluate_loss(
     *,
-    model: TinyCausalTransformer,
+    model: torch.nn.Module,
     dataset,
     batch_size: int,
     batches: int,
@@ -132,13 +132,14 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
     if device_info.is_cuda:
         torch.cuda.manual_seed_all(config.seed)
 
-    model = TinyCausalTransformer(model_config).to(device)
+    model = build_model(model_config).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
     generator = torch.Generator().manual_seed(config.seed)
 
     metrics_path = config.output_dir / "metrics.jsonl"
     train_config_payload = {
         "train_config": config.to_dict(),
+        "model": model_class_name(model_config),
         "model_config": asdict(model_config),
         "device": str(device),
         "device_name": device_info.name,

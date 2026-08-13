@@ -4,20 +4,10 @@ from typing import Any
 
 import torch
 
-from ai_brain.model.config import ModelConfig, debug_config, tiny_config
-from ai_brain.model.tiny_transformer import TinyCausalTransformer
+from ai_brain.model.config import get_named_model_config
+from ai_brain.model.factory import build_model, model_class_name
 from ai_brain.model.utils import count_parameters, format_parameter_count
 from ai_brain.runtime.device import DeviceInfo, get_device_info
-
-
-def get_named_model_config(name: str) -> ModelConfig:
-    if name == "debug":
-        return debug_config()
-
-    if name == "tiny":
-        return tiny_config()
-
-    raise ValueError(f"Unknown model config: {name}")
 
 
 def run_model_smoke_step(
@@ -41,7 +31,7 @@ def run_model_smoke_step(
     if info.is_cuda:
         torch.cuda.manual_seed_all(seed)
 
-    model = TinyCausalTransformer(config).to(info.device)
+    model = build_model(config).to(info.device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
 
     input_ids = torch.randint(
@@ -82,7 +72,8 @@ def run_model_smoke_step(
     parameter_count = count_parameters(model)
 
     return {
-        "model": "TinyCausalTransformer",
+        "model": model_class_name(config),
+        "model_type": config.model_type,
         "config_name": config_name,
         "device": str(info.device),
         "device_name": info.name,

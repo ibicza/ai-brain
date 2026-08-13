@@ -325,6 +325,43 @@ def test_train_lm_smoke_writes_metrics_and_checkpoint(tmp_path) -> None:
     assert checkpoint["train_config"]["loss_mode"] == "answer-only"
 
 
+def test_train_lm_can_train_recurrent_debug(tmp_path) -> None:
+    records = _records()
+    train_path = tmp_path / "train.jsonl"
+    eval_path = tmp_path / "eval.jsonl"
+    output_dir = tmp_path / "recurrent_run"
+    cache_dir = tmp_path / "tokenized"
+    _write_jsonl(train_path, records)
+    _write_jsonl(eval_path, records)
+    _tokenizer, tokenizer_path = _train_tokenizer(tmp_path, records)
+
+    result = train_lm(
+        TrainConfig(
+            train_path=train_path,
+            eval_path=eval_path,
+            tokenizer_path=tokenizer_path,
+            output_dir=output_dir,
+            model_config_name="recurrent_debug",
+            steps=2,
+            batch_size=2,
+            sequence_length=32,
+            loss_mode="answer-only",
+            eval_every=1,
+            eval_batches=1,
+            save_every=2,
+            cache_dir=cache_dir,
+            cpu=True,
+        )
+    )
+
+    checkpoint_path = output_dir / "checkpoints" / "step_000002.pt"
+    checkpoint = torch.load(checkpoint_path, map_location="cpu")
+
+    assert result["model_config"]["model_type"] == "recurrent"
+    assert checkpoint["model_config"]["model_type"] == "recurrent"
+    assert checkpoint["model_config"]["recurrent_cycles"] == 2
+
+
 def test_train_lm_uses_grad_clip(tmp_path, monkeypatch) -> None:
     records = _records()
     train_path = tmp_path / "train.jsonl"

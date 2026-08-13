@@ -8,8 +8,7 @@ import torch
 from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
 from ai_brain.language.tokenizer.special_tokens import BOS_TOKEN, END_TOKEN, EOS_TOKEN
 from ai_brain.language.tokenizer.text_format import format_inference_prompt
-from ai_brain.model.config import ModelConfig
-from ai_brain.model.tiny_transformer import TinyCausalTransformer
+from ai_brain.model.factory import build_model, model_config_from_checkpoint
 from ai_brain.training.checkpoint import load_checkpoint
 
 
@@ -18,7 +17,7 @@ def load_model_for_inference(
     checkpoint_path: Path,
     tokenizer_path: Path,
     device: torch.device,
-) -> tuple[TinyCausalTransformer, dict[str, Any]]:
+) -> tuple[torch.nn.Module, dict[str, Any]]:
     checkpoint = load_checkpoint(checkpoint_path, map_location=device)
     checkpoint_tokenizer_path = checkpoint.get("tokenizer_path")
     if checkpoint_tokenizer_path is not None:
@@ -30,8 +29,8 @@ def load_model_for_inference(
                 f"{checkpoint_tokenizer_path!r}, CLI provided {str(tokenizer_path)!r}"
             )
 
-    model_config = ModelConfig(**checkpoint["model_config"])
-    model = TinyCausalTransformer(model_config)
+    model_config = model_config_from_checkpoint(checkpoint)
+    model = build_model(model_config)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.to(device)
     model.eval()
@@ -51,7 +50,7 @@ def build_inference_input_ids(
 
 @torch.no_grad()
 def generate_greedy(
-    model: TinyCausalTransformer,
+    model: torch.nn.Module,
     input_ids: torch.Tensor,
     *,
     max_new_tokens: int,
@@ -87,7 +86,7 @@ def generate_greedy(
 
 def generate_answer_ids(
     *,
-    model: TinyCausalTransformer,
+    model: torch.nn.Module,
     tokenizer: ByteLevelBpeTokenizer,
     prompt: str,
     max_new_tokens: int,

@@ -13,8 +13,16 @@ class ModelConfig:
     ffn_hidden_dim: int = 512
     dropout: float = 0.0
     tie_embeddings: bool = True
+    model_type: str = "tiny"
+    input_layers: int = 1
+    recurrent_layers: int = 1
+    recurrent_cycles: int = 1
+    output_layers: int = 0
 
     def validate(self) -> None:
+        if self.model_type not in {"tiny", "recurrent"}:
+            raise ValueError("model_type must be 'tiny' or 'recurrent'")
+
         if self.vocab_size <= 0:
             raise ValueError("vocab_size must be positive")
 
@@ -23,9 +31,6 @@ class ModelConfig:
 
         if self.d_model <= 0:
             raise ValueError("d_model must be positive")
-
-        if self.num_layers <= 0:
-            raise ValueError("num_layers must be positive")
 
         if self.num_heads <= 0:
             raise ValueError("num_heads must be positive")
@@ -39,6 +44,23 @@ class ModelConfig:
         if not 0.0 <= self.dropout < 1.0:
             raise ValueError("dropout must be in [0.0, 1.0)")
 
+        if self.model_type == "tiny":
+            if self.num_layers <= 0:
+                raise ValueError("num_layers must be positive")
+            return
+
+        if self.input_layers < 0:
+            raise ValueError("input_layers must be non-negative")
+
+        if self.recurrent_layers != 1:
+            raise ValueError("recurrent_layers must be 1 for the shared recurrent core")
+
+        if self.recurrent_cycles <= 0:
+            raise ValueError("recurrent_cycles must be positive")
+
+        if self.output_layers < 0:
+            raise ValueError("output_layers must be non-negative")
+
 
 def tiny_config() -> ModelConfig:
     return ModelConfig(
@@ -50,6 +72,7 @@ def tiny_config() -> ModelConfig:
         ffn_hidden_dim=512,
         dropout=0.0,
         tie_embeddings=True,
+        model_type="tiny",
     )
 
 
@@ -63,4 +86,66 @@ def debug_config() -> ModelConfig:
         ffn_hidden_dim=128,
         dropout=0.0,
         tie_embeddings=True,
+        model_type="tiny",
     )
+
+
+def recurrent_debug_config() -> ModelConfig:
+    return ModelConfig(
+        vocab_size=256,
+        max_sequence_length=256,
+        d_model=64,
+        num_layers=1,
+        num_heads=4,
+        ffn_hidden_dim=128,
+        dropout=0.0,
+        tie_embeddings=True,
+        model_type="recurrent",
+        input_layers=1,
+        recurrent_layers=1,
+        recurrent_cycles=2,
+        output_layers=1,
+    )
+
+
+def recurrent_tiny_config() -> ModelConfig:
+    return ModelConfig(
+        vocab_size=1024,
+        max_sequence_length=256,
+        d_model=128,
+        num_layers=1,
+        num_heads=4,
+        ffn_hidden_dim=512,
+        dropout=0.0,
+        tie_embeddings=True,
+        model_type="recurrent",
+        input_layers=1,
+        recurrent_layers=1,
+        recurrent_cycles=4,
+        output_layers=1,
+    )
+
+
+MODEL_CONFIG_NAMES: tuple[str, ...] = (
+    "debug",
+    "tiny",
+    "recurrent_debug",
+    "recurrent_tiny",
+)
+
+
+def get_named_model_config(name: str) -> ModelConfig:
+    if name == "debug":
+        return debug_config()
+
+    if name == "tiny":
+        return tiny_config()
+
+    if name == "recurrent_debug":
+        return recurrent_debug_config()
+
+    if name == "recurrent_tiny":
+        return recurrent_tiny_config()
+
+    available = ", ".join(MODEL_CONFIG_NAMES)
+    raise ValueError(f"Unknown model config: {name}. Available configs: {available}")
