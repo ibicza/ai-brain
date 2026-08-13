@@ -7,6 +7,11 @@ from types import SimpleNamespace
 import torch
 
 from ai_brain.cli import main
+from ai_brain.eval.final_answer import (
+    extract_final_answer,
+    final_answers_match,
+    normalize_final_answer,
+)
 from ai_brain.eval.generation import generate_greedy, load_model_for_inference
 from ai_brain.eval.metrics import summarize_predictions
 from ai_brain.eval.normalize import (
@@ -98,6 +103,56 @@ def test_normalize_answer() -> None:
 def test_extract_generated_answer_until_end() -> None:
     assert extract_generated_answer(f"5\n{END_TOKEN}") == "5"
     assert extract_generated_answer(f"<|answer|> 7 \n{EOS_TOKEN}") == "7"
+
+
+def test_extract_final_answer_falls_back_to_normal_answer() -> None:
+    assert extract_final_answer("  134  ") == "134"
+
+
+def test_extract_final_answer_uses_answer_marker() -> None:
+    assert extract_final_answer("ones: 1 + 3 = 4\nanswer: 134") == "134"
+
+
+def test_extract_final_answer_last_marker_wins() -> None:
+    text = "answer: 120\ntrace corrected\nFINAL: 134"
+
+    assert extract_final_answer(text) == "134"
+
+
+def test_extract_final_answer_uses_out_marker() -> None:
+    text = "P0 1 3 C0 -> S4 C0\nOUT 1 3 4"
+
+    assert extract_final_answer(text) == "1 3 4"
+
+
+def test_extract_final_answer_stops_at_special_token() -> None:
+    text = f"OUT 1 3 4\n{END_TOKEN}\nOUT 0"
+
+    assert extract_final_answer(text) == "1 3 4"
+
+
+def test_final_normalization_matches_digit_spaced_single_number() -> None:
+    assert normalize_final_answer("1 3 4") == "134"
+    assert final_answers_match("answer: 134", "OUT 1 3 4")
+
+
+def test_final_normalization_does_not_collapse_sorting_list() -> None:
+    assert normalize_final_answer("1, 3, 4") == "1, 3, 4"
+    assert not final_answers_match("OUT 134", "OUT 1, 3, 4")
+
+
+def test_scratchpad_final_answer_matches_with_different_trace() -> None:
+    expected = "ones: 1 + 3 = 4\ntens: 7 + 6 = 13\nanswer: 134"
+    predicted = "ones: wrong\ntens: wrong\nanswer: 134"
+
+    assert final_answers_match(expected, predicted)
+
+
+def test_scratchpad_final_answer_detects_wrong_final() -> None:
+    expected = "ones: 1 + 3 = 4\nanswer: 134"
+    predicted = "ones: 1 + 3 = 4\nanswer: 135"
+
+    assert not final_answers_match(expected, predicted)
 
 
 def test_generate_greedy_stops_on_end_or_eos() -> None:
@@ -233,8 +288,14 @@ def test_eval_lm_writes_predictions_and_summary(tmp_path) -> None:
     summary = json.loads((output_dir / "summary.json").read_text(encoding="utf-8"))
 
     assert result["summary"]["count"] == 2
+    first_prediction = json.loads(predictions[0])
+
     assert len(predictions) == 2
     assert summary["overall"]["count"] == 2
+    assert "final_normalized_exact_match" in summary["overall"]
+    assert "final_expected" in first_prediction
+    assert "final_predicted" in first_prediction
+    assert "final_normalized_exact_match" in first_prediction
     assert "arithmetic.add" in summary["by_task_type"]
     assert "epistemic" in summary
 
@@ -260,6 +321,7 @@ def test_eval_metrics_by_task_type() -> None:
     )
 
     assert summary["overall"]["exact_match"] == 0.5
+    assert summary["overall"]["final_normalized_exact_match"] == 0.5
     assert summary["by_group"]["arithmetic"]["count"] == 2
     assert summary["by_task_type"]["arithmetic.add"]["normalized_exact_match"] == 0.5
 

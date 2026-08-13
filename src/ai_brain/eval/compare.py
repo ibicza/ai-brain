@@ -113,6 +113,16 @@ def _compare_metric_slice(
 ) -> dict[str, Any]:
     left_normalized = _float_metric(left, "normalized_exact_match")
     right_normalized = _float_metric(right, "normalized_exact_match")
+    left_final = _float_metric(
+        left,
+        "final_normalized_exact_match",
+        fallback_key="normalized_exact_match",
+    )
+    right_final = _float_metric(
+        right,
+        "final_normalized_exact_match",
+        fallback_key="normalized_exact_match",
+    )
     left_false_answer = _float_metric(left, "false_answer_rate")
     right_false_answer = _float_metric(right, "false_answer_rate")
     return {
@@ -121,15 +131,26 @@ def _compare_metric_slice(
         "left_normalized_exact_match": left_normalized,
         "right_normalized_exact_match": right_normalized,
         "delta_normalized_exact_match": right_normalized - left_normalized,
+        "left_final_normalized_exact_match": left_final,
+        "right_final_normalized_exact_match": right_final,
+        "delta_final_normalized_exact_match": right_final - left_final,
         "left_false_answer_rate": left_false_answer,
         "right_false_answer_rate": right_false_answer,
         "delta_false_answer_rate": right_false_answer - left_false_answer,
     }
 
 
-def _float_metric(stats: dict[str, Any], key: str) -> float:
+def _float_metric(
+    stats: dict[str, Any],
+    key: str,
+    *,
+    fallback_key: str | None = None,
+) -> float:
+    value = stats.get(key)
+    if value is None and fallback_key is not None:
+        value = stats.get(fallback_key)
     try:
-        return float(stats.get(key, 0.0))
+        return float(value if value is not None else 0.0)
     except (TypeError, ValueError):
         return 0.0
 
@@ -165,6 +186,12 @@ def _render_comparison_markdown(comparison: dict[str, Any]) -> str:
                 overall["delta_normalized_exact_match"],
             ),
             _metric_row(
+                "Final Normalized EM",
+                overall["left_final_normalized_exact_match"],
+                overall["right_final_normalized_exact_match"],
+                overall["delta_final_normalized_exact_match"],
+            ),
+            _metric_row(
                 "False Answer Rate",
                 overall["left_false_answer_rate"],
                 overall["right_false_answer_rate"],
@@ -173,8 +200,8 @@ def _render_comparison_markdown(comparison: dict[str, Any]) -> str:
             "",
             "## By Group",
             "",
-            "| Group | Left Count | Right Count | Left Norm EM | Right Norm EM | Delta |",
-            "|---|---:|---:|---:|---:|---:|",
+            "| Group | Left Count | Right Count | Left Norm EM | Right Norm EM | Delta | Left Final Norm EM | Right Final Norm EM | Final Delta |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
         ]
     )
     for group, stats in comparison["by_group"].items():
@@ -200,8 +227,8 @@ def _append_task_table(
             "",
             f"## {title}",
             "",
-            "| Task Type | Left Count | Right Count | Left Norm EM | Right Norm EM | Delta |",
-            "|---|---:|---:|---:|---:|---:|",
+            "| Task Type | Left Count | Right Count | Left Norm EM | Right Norm EM | Delta | Left Final Norm EM | Right Final Norm EM | Final Delta |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
         ]
     )
     for row in rows:
@@ -213,7 +240,10 @@ def _comparison_row(label: str, stats: dict[str, Any]) -> str:
         f"| {label} | {stats['left_count']} | {stats['right_count']} | "
         f"{_fmt_rate(stats['left_normalized_exact_match'])} | "
         f"{_fmt_rate(stats['right_normalized_exact_match'])} | "
-        f"{_fmt_delta(stats['delta_normalized_exact_match'])} |"
+        f"{_fmt_delta(stats['delta_normalized_exact_match'])} | "
+        f"{_fmt_rate(stats['left_final_normalized_exact_match'])} | "
+        f"{_fmt_rate(stats['right_final_normalized_exact_match'])} | "
+        f"{_fmt_delta(stats['delta_final_normalized_exact_match'])} |"
     )
 
 

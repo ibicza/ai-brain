@@ -40,12 +40,27 @@ def _summarize_slice(predictions: list[dict[str, Any]]) -> dict[str, Any]:
             "count": 0,
             "exact_match": 0.0,
             "normalized_exact_match": 0.0,
+            "final_exact_match": 0.0,
+            "final_normalized_exact_match": 0.0,
             "false_answer_rate": 0.0,
         }
 
     exact_count = sum(bool(prediction["exact_match"]) for prediction in predictions)
     normalized_count = sum(
         bool(prediction["normalized_exact_match"]) for prediction in predictions
+    )
+    final_exact_count = sum(
+        bool(prediction.get("final_exact_match", prediction["exact_match"]))
+        for prediction in predictions
+    )
+    final_normalized_count = sum(
+        bool(
+            prediction.get(
+                "final_normalized_exact_match",
+                prediction["normalized_exact_match"],
+            )
+        )
+        for prediction in predictions
     )
     false_answer_count = sum(
         bool(prediction["false_answer"]) for prediction in predictions
@@ -54,6 +69,8 @@ def _summarize_slice(predictions: list[dict[str, Any]]) -> dict[str, Any]:
         "count": count,
         "exact_match": exact_count / count,
         "normalized_exact_match": normalized_count / count,
+        "final_exact_match": final_exact_count / count,
+        "final_normalized_exact_match": final_normalized_count / count,
         "false_answer_count": false_answer_count,
         "false_answer_rate": false_answer_count / count,
     }

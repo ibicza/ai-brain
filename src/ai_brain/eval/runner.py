@@ -6,6 +6,7 @@ from typing import Any
 
 import torch
 
+from ai_brain.eval.final_answer import extract_final_answer, normalize_final_answer
 from ai_brain.eval.generation import generate_answer_ids, load_model_for_inference
 from ai_brain.eval.metrics import summarize_predictions, task_group
 from ai_brain.eval.normalize import (
@@ -110,6 +111,12 @@ def eval_lm(
                 expected=expected,
                 predicted=predicted,
             )
+            final_expected = extract_final_answer(expected)
+            final_predicted = extract_final_answer(predicted)
+            final_exact_match = final_predicted == final_expected
+            final_normalized_exact_match = normalize_final_answer(
+                final_predicted
+            ) == normalize_final_answer(final_expected)
             prediction = {
                 "id": str(record.get("id", f"{record['task_type']}:{index:06d}")),
                 "task_type": str(record["task_type"]),
@@ -121,6 +128,10 @@ def eval_lm(
                 "tokens_generated": len(generated_ids),
                 "exact_match": exact_match,
                 "normalized_exact_match": normalized_exact_match,
+                "final_expected": final_expected,
+                "final_predicted": final_predicted,
+                "final_exact_match": final_exact_match,
+                "final_normalized_exact_match": final_normalized_exact_match,
                 "false_answer": false_answer,
             }
             predictions.append(prediction)

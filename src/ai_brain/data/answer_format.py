@@ -10,6 +10,7 @@ AnswerFormatName = Literal[
     "digit_spaced",
     "scratchpad",
     "reversed_answer",
+    "canonical_numeric",
 ]
 
 ANSWER_FORMAT_NAMES: tuple[AnswerFormatName, ...] = (
@@ -17,6 +18,7 @@ ANSWER_FORMAT_NAMES: tuple[AnswerFormatName, ...] = (
     "digit_spaced",
     "scratchpad",
     "reversed_answer",
+    "canonical_numeric",
 )
 
 _CASE_PREFIX_RE = re.compile(r"case \d+\.")
@@ -38,6 +40,9 @@ def apply_answer_format(
 
     if answer_format == "reversed_answer":
         return _format_reversed_answer(example, answer_format)
+
+    if answer_format == "canonical_numeric":
+        return _format_canonical_numeric(example, answer_format)
 
     raise ValueError(f"Unknown answer format: {answer_format}")
 
@@ -83,6 +88,210 @@ def _format_reversed_answer(
         answer=_space_digits(example.answer[::-1]),
         metadata=_format_metadata(example, answer_format),
     )
+
+
+def _format_canonical_numeric(
+    example: TrainingExample,
+    answer_format: AnswerFormatName,
+) -> TrainingExample:
+    return TrainingExample(
+        id=example.id,
+        task_type=example.task_type,
+        prompt=example.prompt,
+        answer=_canonical_numeric_answer(example),
+        metadata=_format_metadata(example, answer_format),
+    )
+
+
+def _canonical_numeric_answer(example: TrainingExample) -> str:
+    metadata = example.metadata
+
+    if example.task_type == "arithmetic.add":
+        return _canonical_add(
+            metadata["a"],
+            metadata["b"],
+            op="OP ADD",
+            a_label="A",
+            b_label="B",
+            out_label="OUT",
+        )
+
+    if example.task_type == "arithmetic.subtract":
+        return _canonical_sub(
+            metadata["a"],
+            metadata["b"],
+            op="OP SUB",
+            a_label="A",
+            b_label="B",
+            out_label="OUT",
+        )
+
+    if example.task_type == "arithmetic.missing_addend":
+        total = metadata["total"]
+        known = metadata["a"]
+        return "\n".join(
+            [
+                "OP MISS_ADD",
+                f"KNOWN {_spaced_number(known)}",
+                f"TARGET {_spaced_number(total)}",
+                "AS SUB TARGET KNOWN",
+                *_canonical_sub_rows(total, known),
+                f"OUT {_spaced_number(total - known)}",
+            ]
+        )
+
+    if example.task_type == "arithmetic.double_step":
+        a = metadata["a"]
+        b = metadata["b"]
+        c = metadata["c"]
+        mid = a + b
+        answer = mid - c
+        return "\n".join(
+            [
+                "OP DOUBLE",
+                f"A {_spaced_number(a)}",
+                f"B {_spaced_number(b)}",
+                f"C {_spaced_number(c)}",
+                "STEP1 ADD",
+                *_canonical_add_rows(a, b),
+                f"MID {_spaced_number(mid)}",
+                "STEP2 SUB",
+                *_canonical_sub_rows(mid, c),
+                f"OUT {_spaced_number(answer)}",
+            ]
+        )
+
+    if example.task_type == "arithmetic.compare_sum":
+        if all(key in metadata for key in ("a", "b", "c", "d")):
+            a = metadata["a"]
+            b = metadata["b"]
+            c = metadata["c"]
+            d = metadata["d"]
+            left = a + b
+            right = c + d
+            return "\n".join(
+                [
+                    "OP COMP_SUM",
+                    "LEFT ADD",
+                    f"A {_spaced_number(a)}",
+                    f"B {_spaced_number(b)}",
+                    *_canonical_add_rows(a, b),
+                    f"LEFT_OUT {_spaced_number(left)}",
+                    "RIGHT ADD",
+                    f"A {_spaced_number(c)}",
+                    f"B {_spaced_number(d)}",
+                    *_canonical_add_rows(c, d),
+                    f"RIGHT_OUT {_spaced_number(right)}",
+                    _canonical_compare_line(left, right),
+                    f"OUT {_spaced_number(max(left, right))}",
+                ]
+            )
+        left = metadata["left"]
+        right = metadata["right"]
+        return "\n".join(
+            [
+                "OP COMP_SUM",
+                f"LEFT_OUT {_spaced_number(left)}",
+                f"RIGHT_OUT {_spaced_number(right)}",
+                _canonical_compare_line(left, right),
+                f"OUT {_spaced_number(max(left, right))}",
+            ]
+        )
+
+    if example.task_type == "state_change.add":
+        start = metadata["start"]
+        delta = metadata["delta"]
+        return "\n".join(
+            [
+                "OP STATE_ADD",
+                "SUBJ SAME",
+                "OBJ SAME",
+                f"START {_spaced_number(start)}",
+                f"CHANGE {_spaced_number(delta)}",
+                *_canonical_add_rows(start, delta),
+                f"OUT {_spaced_number(start + delta)}",
+            ]
+        )
+
+    if example.task_type == "state_change.subtract":
+        start = metadata["start"]
+        delta = metadata["delta"]
+        return "\n".join(
+            [
+                "OP STATE_SUB",
+                "SUBJ SAME",
+                "OBJ SAME",
+                f"START {_spaced_number(start)}",
+                f"CHANGE {_spaced_number(delta)}",
+                *_canonical_sub_rows(start, delta),
+                f"OUT {_spaced_number(start - delta)}",
+            ]
+        )
+
+    if example.task_type == "state_change.other_subject_no_change":
+        start = metadata["start"]
+        return "\n".join(
+            [
+                "OP STATE_NO_CHANGE",
+                "SUBJ DIFF",
+                "OBJ SAME",
+                f"GIVEN {_spaced_number(start)}",
+                f"OUT {_spaced_number(start)}",
+            ]
+        )
+
+    if example.task_type == "state_change.other_object_no_change":
+        start = metadata["start"]
+        return "\n".join(
+            [
+                "OP STATE_NO_CHANGE",
+                "SUBJ SAME",
+                "OBJ DIFF",
+                f"GIVEN {_spaced_number(start)}",
+                f"OUT {_spaced_number(start)}",
+            ]
+        )
+
+    if example.task_type == "state_change.insufficient_start":
+        return "\n".join(["OP STATE_UNKNOWN_START", f"OUT {example.answer}"])
+
+    if example.task_type in {"sorting.ascending", "sorting.descending"}:
+        return _canonical_sorting(
+            metadata["numbers"],
+            reverse=example.task_type == "sorting.descending",
+        )
+
+    if example.task_type == "quantity.direct":
+        count = metadata["count"]
+        return "\n".join(
+            [
+                "OP COPY_QTY",
+                "SUBJ SAME",
+                "OBJ SAME",
+                f"N {_spaced_number(count)}",
+                f"OUT {_spaced_number(count)}",
+            ]
+        )
+
+    if example.task_type == "quantity.location_direct":
+        count = metadata["count"]
+        return "\n".join(
+            [
+                "OP COPY_LOC_QTY",
+                "LOC SAME",
+                "OBJ SAME",
+                f"N {_spaced_number(count)}",
+                f"OUT {_spaced_number(count)}",
+            ]
+        )
+
+    if example.task_type == "quantity.known_zero":
+        return "OP KNOWN_ZERO\nOUT 0"
+
+    if example.answer.isdecimal():
+        return f"OP COPY_NUM\nOUT {_spaced_number(int(example.answer))}"
+
+    return f"OP TEXT\nOUT {example.answer}"
 
 
 def _scratchpad_answer(example: TrainingExample) -> str:
@@ -249,6 +458,109 @@ def _sorting_scratchpad(numbers: list[int], *, reverse: bool) -> str:
 
     lines.append(f"answer: {_join_numbers(ordered)}")
     return "\n".join(lines)
+
+
+def _canonical_add(
+    a: int,
+    b: int,
+    *,
+    op: str,
+    a_label: str,
+    b_label: str,
+    out_label: str,
+) -> str:
+    return "\n".join(
+        [
+            op,
+            f"{a_label} {_spaced_number(a)}",
+            f"{b_label} {_spaced_number(b)}",
+            *_canonical_add_rows(a, b),
+            f"{out_label} {_spaced_number(a + b)}",
+        ]
+    )
+
+
+def _canonical_add_rows(a: int, b: int) -> list[str]:
+    digits_a = _reversed_digits(a)
+    digits_b = _reversed_digits(b)
+    carry = 0
+    rows: list[str] = []
+    for index in range(max(len(digits_a), len(digits_b))):
+        left = digits_a[index] if index < len(digits_a) else 0
+        right = digits_b[index] if index < len(digits_b) else 0
+        total = left + right + carry
+        digit = total % 10
+        next_carry = total // 10
+        rows.append(f"P{index} {left} {right} C{carry} -> S{digit} C{next_carry}")
+        carry = next_carry
+    return rows
+
+
+def _canonical_sub(
+    a: int,
+    b: int,
+    *,
+    op: str,
+    a_label: str,
+    b_label: str,
+    out_label: str,
+) -> str:
+    return "\n".join(
+        [
+            op,
+            f"{a_label} {_spaced_number(a)}",
+            f"{b_label} {_spaced_number(b)}",
+            *_canonical_sub_rows(a, b),
+            f"{out_label} {_spaced_number(a - b)}",
+        ]
+    )
+
+
+def _canonical_sub_rows(a: int, b: int) -> list[str]:
+    digits_a = _reversed_digits(a)
+    digits_b = _reversed_digits(b)
+    borrow = 0
+    rows: list[str] = []
+    for index in range(max(len(digits_a), len(digits_b))):
+        top = digits_a[index] if index < len(digits_a) else 0
+        bottom = digits_b[index] if index < len(digits_b) else 0
+        adjusted_top = top - borrow
+        next_borrow = 0
+        if adjusted_top < bottom:
+            adjusted_top += 10
+            next_borrow = 1
+        rows.append(
+            f"P{index} {top} {bottom} B{borrow} -> "
+            f"S{adjusted_top - bottom} B{next_borrow}"
+        )
+        borrow = next_borrow
+    return rows
+
+
+def _canonical_compare_line(left: int, right: int) -> str:
+    operator = ">" if left > right else "<"
+    return f"COMPARE {_spaced_number(left)} {operator} {_spaced_number(right)}"
+
+
+def _canonical_sorting(numbers: list[int], *, reverse: bool) -> str:
+    ordered = sorted(numbers, reverse=reverse)
+    op = "OP SORT_DESC" if reverse else "OP SORT_ASC"
+    selector = "MAX" if reverse else "MIN"
+    return "\n".join(
+        [
+            op,
+            "N " + " | ".join(_spaced_number(number) for number in numbers),
+            *(
+                f"S{index} {selector} {_spaced_number(number)}"
+                for index, number in enumerate(ordered)
+            ),
+            f"OUT {_join_numbers(ordered)}",
+        ]
+    )
+
+
+def _spaced_number(value: int) -> str:
+    return _space_digits(str(value))
 
 
 def _space_digits_in_text(text: str) -> str:

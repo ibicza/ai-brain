@@ -347,6 +347,156 @@ def test_reversed_answer_format_outputs_reversed_digits_only() -> None:
     assert formatted.metadata["answer_format"] == "reversed_answer"
 
 
+def test_canonical_numeric_addition_uses_lsd_first_carry_rows() -> None:
+    example = TrainingExample(
+        id="arithmetic.add:00000000",
+        task_type="arithmetic.add",
+        prompt="Add 71 + 63?",
+        answer="134",
+        metadata={"a": 71, "b": 63, "operation": "addition"},
+    )
+
+    formatted = apply_answer_format(example, "canonical_numeric")
+
+    assert formatted.answer == (
+        "OP ADD\nA 7 1\nB 6 3\nP0 1 3 C0 -> S4 C0\nP1 7 6 C0 -> S3 C1\nOUT 1 3 4"
+    )
+    assert formatted.metadata["answer_format"] == "canonical_numeric"
+
+
+def test_canonical_numeric_subtraction_uses_borrow_rows() -> None:
+    example = TrainingExample(
+        id="arithmetic.subtract:00000000",
+        task_type="arithmetic.subtract",
+        prompt="52 - 18",
+        answer="34",
+        metadata={"a": 52, "b": 18, "operation": "subtraction"},
+    )
+
+    formatted = apply_answer_format(example, "canonical_numeric")
+
+    assert formatted.answer == (
+        "OP SUB\nA 5 2\nB 1 8\nP0 2 8 B0 -> S4 B1\nP1 5 1 B1 -> S3 B0\nOUT 3 4"
+    )
+
+
+def test_canonical_numeric_missing_addend_uses_subtraction() -> None:
+    example = TrainingExample(
+        id="arithmetic.missing_addend:00000000",
+        task_type="arithmetic.missing_addend",
+        prompt="49 + blank = 70",
+        answer="21",
+        metadata={"a": 49, "missing": 21, "total": 70},
+    )
+
+    formatted = apply_answer_format(example, "canonical_numeric")
+
+    assert formatted.answer == (
+        "OP MISS_ADD\n"
+        "KNOWN 4 9\n"
+        "TARGET 7 0\n"
+        "AS SUB TARGET KNOWN\n"
+        "P0 0 9 B0 -> S1 B1\n"
+        "P1 7 4 B1 -> S2 B0\n"
+        "OUT 2 1"
+    )
+
+
+def test_canonical_numeric_double_step_reports_mid_and_out() -> None:
+    example = TrainingExample(
+        id="arithmetic.double_step:00000000",
+        task_type="arithmetic.double_step",
+        prompt="45 + 49 - 42",
+        answer="52",
+        metadata={"a": 45, "b": 49, "c": 42, "operation": "add_then_subtract"},
+    )
+
+    formatted = apply_answer_format(example, "canonical_numeric")
+
+    assert "OP DOUBLE" in formatted.answer
+    assert "STEP1 ADD" in formatted.answer
+    assert "MID 9 4" in formatted.answer
+    assert "STEP2 SUB" in formatted.answer
+    assert formatted.answer.endswith("OUT 5 2")
+
+
+def test_canonical_numeric_compare_sum_uses_both_additions() -> None:
+    example = TrainingExample(
+        id="arithmetic.compare_sum:00000000",
+        task_type="arithmetic.compare_sum",
+        prompt="Compare 33 + 50 and 33 + 46",
+        answer="83",
+        metadata={"a": 33, "b": 50, "c": 33, "d": 46, "left": 83, "right": 79},
+    )
+
+    formatted = apply_answer_format(example, "canonical_numeric")
+
+    assert "OP COMP_SUM" in formatted.answer
+    assert "LEFT_OUT 8 3" in formatted.answer
+    assert "RIGHT_OUT 7 9" in formatted.answer
+    assert "COMPARE 8 3 > 7 9" in formatted.answer
+    assert formatted.answer.endswith("OUT 8 3")
+
+
+def test_canonical_numeric_state_change_add() -> None:
+    example = TrainingExample(
+        id="state_change.add:00000000",
+        task_type="state_change.add",
+        prompt="Vasya had 52. Got 30.",
+        answer="82",
+        metadata={"start": 52, "delta": 30, "operation": "state_add"},
+    )
+
+    formatted = apply_answer_format(example, "canonical_numeric")
+
+    assert formatted.answer == (
+        "OP STATE_ADD\n"
+        "SUBJ SAME\n"
+        "OBJ SAME\n"
+        "START 5 2\n"
+        "CHANGE 3 0\n"
+        "P0 2 0 C0 -> S2 C0\n"
+        "P1 5 3 C0 -> S8 C0\n"
+        "OUT 8 2"
+    )
+
+
+def test_canonical_numeric_sorting_uses_compact_min_steps() -> None:
+    example = TrainingExample(
+        id="sorting.ascending:00000000",
+        task_type="sorting.ascending",
+        prompt="Sort ascending: 26, 34, 27, 78.",
+        answer="26, 27, 34, 78",
+        metadata={"numbers": [26, 34, 27, 78], "operation": "sort_ascending"},
+    )
+
+    formatted = apply_answer_format(example, "canonical_numeric")
+
+    assert formatted.answer == (
+        "OP SORT_ASC\n"
+        "N 2 6 | 3 4 | 2 7 | 7 8\n"
+        "S0 MIN 2 6\n"
+        "S1 MIN 2 7\n"
+        "S2 MIN 3 4\n"
+        "S3 MIN 7 8\n"
+        "OUT 26, 27, 34, 78"
+    )
+
+
+def test_canonical_numeric_quantity_direct_copy() -> None:
+    example = TrainingExample(
+        id="quantity.direct:00000000",
+        task_type="quantity.direct",
+        prompt="Masha has 73 apples.",
+        answer="73",
+        metadata={"count": 73, "operation": "known"},
+    )
+
+    formatted = apply_answer_format(example, "canonical_numeric")
+
+    assert formatted.answer == ("OP COPY_QTY\nSUBJ SAME\nOBJ SAME\nN 7 3\nOUT 7 3")
+
+
 def test_state_change_other_subject_does_not_change_target() -> None:
     example = generate_examples(
         count=1,
@@ -402,6 +552,11 @@ def test_compare_sum_does_not_ask_ambiguous_equal_sums() -> None:
 
     for example in examples:
         assert example.metadata["left"] != example.metadata["right"]
+        assert {"a", "b", "c", "d"}.issubset(example.metadata)
+        assert example.metadata["left"] == example.metadata["a"] + example.metadata["b"]
+        assert (
+            example.metadata["right"] == example.metadata["c"] + example.metadata["d"]
+        )
         assert example.answer == str(
             max(example.metadata["left"], example.metadata["right"])
         )

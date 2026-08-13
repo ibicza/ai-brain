@@ -459,7 +459,15 @@ def generate_compare_sum(
         task_type="arithmetic.compare_sum",
         prompt=_case_prefix(rng, profile) + prompt,
         answer=str(max(left, right)),
-        metadata={"left": left, "right": right, "operation": "compare_sum"},
+        metadata={
+            "a": a,
+            "b": b,
+            "c": c,
+            "d": d,
+            "left": left,
+            "right": right,
+            "operation": "compare_sum",
+        },
     )
 
 

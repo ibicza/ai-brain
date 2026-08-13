@@ -41,6 +41,7 @@ def _compact_task_rows(rows: list[dict]) -> list[dict]:
         "task_type",
         "count",
         "normalized_exact_match",
+        "final_normalized_exact_match",
         "false_answer_rate",
         "empty_prediction_rate",
         "delta_normalized_exact_match",
@@ -48,6 +49,9 @@ def _compact_task_rows(rows: list[dict]) -> list[dict]:
         "right_count",
         "left_normalized_exact_match",
         "right_normalized_exact_match",
+        "delta_final_normalized_exact_match",
+        "left_final_normalized_exact_match",
+        "right_final_normalized_exact_match",
     )
     return [{key: row[key] for key in keep_keys if key in row} for row in rows]
 

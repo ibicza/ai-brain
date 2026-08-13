@@ -143,6 +143,35 @@ def test_analyze_eval_computes_immediate_end_rate(tmp_path) -> None:
     assert diagnostics["overall"]["immediate_end_rate"] == 1 / 24
 
 
+def test_analyze_eval_backfills_final_answer_fields_for_old_predictions(
+    tmp_path,
+) -> None:
+    predictions_path = tmp_path / "old_predictions.jsonl"
+    output_dir = tmp_path / "diagnostics"
+    rows = [
+        _prediction(
+            index=0,
+            task_type="arithmetic.add",
+            expected="ones: wrong\nanswer: 134",
+            predicted="different trace\nOUT 1 3 4",
+            raw_generation="different trace\nOUT 1 3 4\n<|end|>",
+            normalized_exact_match=False,
+        )
+    ]
+    _write_predictions(predictions_path, rows)
+
+    diagnostics = analyze_eval(
+        predictions_path=predictions_path,
+        output_dir=output_dir,
+    )["diagnostics"]
+
+    assert diagnostics["overall"]["normalized_exact_match"] == 0.0
+    assert diagnostics["overall"]["final_normalized_exact_match"] == 1.0
+    sample = diagnostics["by_task_type"]["arithmetic.add"]["error_samples"][0]
+    assert sample["final_expected"] == "134"
+    assert sample["final_predicted"] == "1 3 4"
+
+
 def test_analyze_eval_computes_top_predictions(tmp_path) -> None:
     predictions_path = tmp_path / "predictions.jsonl"
     output_dir = tmp_path / "diagnostics"

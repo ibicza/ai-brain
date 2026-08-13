@@ -5,6 +5,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
+from ai_brain.eval.final_answer import extract_final_answer, normalize_final_answer
 from ai_brain.eval.metrics import task_group
 
 _REQUIRED_PREDICTION_FIELDS = (
@@ -121,6 +122,7 @@ def _iter_predictions(path: Path):
                     f"Prediction row {line_number} in {path} is missing required fields: "
                     f"{', '.join(missing)}"
                 )
+            _ensure_final_answer_fields(prediction)
             if "task_group" not in prediction:
                 prediction["task_group"] = task_group(str(prediction["task_type"]))
             if "tokens_generated" not in prediction:
@@ -130,6 +132,32 @@ def _iter_predictions(path: Path):
             yield prediction
 
 
+def _ensure_final_answer_fields(prediction: dict[str, Any]) -> None:
+    final_expected = str(
+        prediction.get(
+            "final_expected", extract_final_answer(str(prediction["expected"]))
+        )
+    )
+    final_predicted = str(
+        prediction.get(
+            "final_predicted",
+            extract_final_answer(str(prediction["predicted"])),
+        )
+    )
+    prediction["final_expected"] = final_expected
+    prediction["final_predicted"] = final_predicted
+    prediction["final_exact_match"] = bool(
+        prediction.get("final_exact_match", final_predicted == final_expected)
+    )
+    prediction["final_normalized_exact_match"] = bool(
+        prediction.get(
+            "final_normalized_exact_match",
+            normalize_final_answer(final_predicted)
+            == normalize_final_answer(final_expected),
+        )
+    )
+
+
 def _stats_for(predictions: list[dict[str, Any]]) -> dict[str, Any]:
     count = len(predictions)
     if count == 0:
@@ -137,6 +165,8 @@ def _stats_for(predictions: list[dict[str, Any]]) -> dict[str, Any]:
             "count": 0,
             "exact_match": 0.0,
             "normalized_exact_match": 0.0,
+            "final_exact_match": 0.0,
+            "final_normalized_exact_match": 0.0,
             "false_answer_count": 0,
             "false_answer_rate": 0.0,
             "empty_prediction_count": 0,
@@ -151,6 +181,12 @@ def _stats_for(predictions: list[dict[str, Any]]) -> dict[str, Any]:
     exact_count = sum(bool(prediction["exact_match"]) for prediction in predictions)
     normalized_count = sum(
         bool(prediction["normalized_exact_match"]) for prediction in predictions
+    )
+    final_exact_count = sum(
+        bool(prediction["final_exact_match"]) for prediction in predictions
+    )
+    final_normalized_count = sum(
+        bool(prediction["final_normalized_exact_match"]) for prediction in predictions
     )
     false_answer_count = sum(
         bool(prediction["false_answer"]) for prediction in predictions
@@ -169,6 +205,8 @@ def _stats_for(predictions: list[dict[str, Any]]) -> dict[str, Any]:
         "count": count,
         "exact_match": exact_count / count,
         "normalized_exact_match": normalized_count / count,
+        "final_exact_match": final_exact_count / count,
+        "final_normalized_exact_match": final_normalized_count / count,
         "false_answer_count": false_answer_count,
         "false_answer_rate": false_answer_count / count,
         "empty_prediction_count": empty_prediction_count,
@@ -261,6 +299,8 @@ def _samples(
             "prompt": str(prediction["prompt"]),
             "expected": str(prediction["expected"]),
             "predicted": str(prediction["predicted"]),
+            "final_expected": str(prediction["final_expected"]),
+            "final_predicted": str(prediction["final_predicted"]),
             "raw_generation": str(prediction["raw_generation"]),
         }
         for prediction in predictions[:max_samples]
@@ -277,6 +317,8 @@ def _render_diagnostics_markdown(diagnostics: dict[str, Any]) -> str:
             f"- Count: {overall['count']}",
             f"- Exact match: {_fmt_rate(overall['exact_match'])}",
             f"- Normalized exact match: {_fmt_rate(overall['normalized_exact_match'])}",
+            f"- Final exact match: {_fmt_rate(overall['final_exact_match'])}",
+            f"- Final normalized exact match: {_fmt_rate(overall['final_normalized_exact_match'])}",
             f"- False answer rate: {_fmt_rate(overall['false_answer_rate'])}",
             f"- Empty prediction rate: {_fmt_rate(overall['empty_prediction_rate'])}",
             f"- Immediate end rate: {_fmt_rate(overall['immediate_end_rate'])}",
@@ -284,13 +326,14 @@ def _render_diagnostics_markdown(diagnostics: dict[str, Any]) -> str:
             "",
             "## By Group",
             "",
-            "| Group | Count | Normalized EM | False Answer Rate | Empty Rate | Avg Tokens |",
-            "|---|---:|---:|---:|---:|---:|",
+            "| Group | Count | Norm EM | Final Norm EM | False Answer Rate | Empty Rate | Avg Tokens |",
+            "|---|---:|---:|---:|---:|---:|---:|",
         ]
     )
     for group, stats in diagnostics["by_group"].items():
         lines.append(
             f"| {group} | {stats['count']} | {_fmt_rate(stats['normalized_exact_match'])} | "
+            f"{_fmt_rate(stats['final_normalized_exact_match'])} | "
             f"{_fmt_rate(stats['false_answer_rate'])} | {_fmt_rate(stats['empty_prediction_rate'])} | "
             f"{stats['avg_tokens_generated']:.2f} |"
         )
@@ -326,6 +369,8 @@ def _render_diagnostics_markdown(diagnostics: dict[str, Any]) -> str:
                     f"  - Prompt: {_md_cell(sample['prompt'])}",
                     f"  - Expected: {_md_cell(sample['expected'])}",
                     f"  - Predicted: {_md_cell(sample['predicted'])}",
+                    f"  - Final expected: {_md_cell(sample['final_expected'])}",
+                    f"  - Final predicted: {_md_cell(sample['final_predicted'])}",
                     "",
                 ]
             )
@@ -340,13 +385,14 @@ def _append_task_table(
             "",
             f"## {title}",
             "",
-            "| Task Type | Count | Normalized EM | False Answer Rate | Empty Rate |",
-            "|---|---:|---:|---:|---:|",
+            "| Task Type | Count | Norm EM | Final Norm EM | False Answer Rate | Empty Rate |",
+            "|---|---:|---:|---:|---:|---:|",
         ]
     )
     for row in rows:
         lines.append(
             f"| {row['task_type']} | {row['count']} | {_fmt_rate(row['normalized_exact_match'])} | "
+            f"{_fmt_rate(row['final_normalized_exact_match'])} | "
             f"{_fmt_rate(row['false_answer_rate'])} | {_fmt_rate(row['empty_prediction_rate'])} |"
         )
 
