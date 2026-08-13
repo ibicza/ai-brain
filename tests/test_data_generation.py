@@ -7,6 +7,7 @@ from ai_brain.data.templates import (
     CountedNoun,
     choose_past_be_verb,
     format_counted_noun,
+    format_counted_noun_accusative,
 )
 from ai_brain.data.writer import generate_jsonl
 
@@ -29,16 +30,20 @@ def test_training_example_json_line_is_valid_json() -> None:
 
 
 def test_generation_is_deterministic_for_same_seed() -> None:
-    first = generate_examples(count=20, seed=1234)
-    second = generate_examples(count=20, seed=1234)
+    first = generate_examples(count=100, seed=1234)
+    second = generate_examples(count=100, seed=1234)
 
     assert [example.to_dict() for example in first] == [
         example.to_dict() for example in second
     ]
 
 
+def test_generator_set_has_enough_first_stage_task_types() -> None:
+    assert len(GENERATOR_NAMES) >= 30
+
+
 def test_generates_known_task_types() -> None:
-    examples = generate_examples(count=200, seed=1234)
+    examples = generate_examples(count=1000, seed=1234)
 
     generated_task_types = {example.task_type for example in examples}
 
@@ -46,9 +51,14 @@ def test_generates_known_task_types() -> None:
     assert "comparison.max" in generated_task_types
     assert "arithmetic.add" in generated_task_types
     assert "sequence.arithmetic_progression" in generated_task_types
+    assert "quantity.direct" in generated_task_types
+    assert "quantity.irrelevant_subject" in generated_task_types
+    assert "quantity.object_mismatch" in generated_task_types
+    assert "state_change.add" in generated_task_types
+    assert "state_change.subtract" in generated_task_types
     assert "epistemic.insufficient_info" in generated_task_types
     assert "epistemic.irrelevant_fact" in generated_task_types
-    assert "quantity.direct" in generated_task_types
+    assert "logic.transitive_height" in generated_task_types
 
 
 def test_each_generator_can_generate_one_example() -> None:
@@ -63,6 +73,7 @@ def test_each_generator_can_generate_one_example() -> None:
         assert examples[0].task_type == task_type
         assert examples[0].prompt
         assert examples[0].answer
+        assert examples[0].metadata
 
 
 def test_generate_jsonl_writes_file(tmp_path: Path) -> None:
@@ -100,6 +111,22 @@ def test_counted_noun_formatting() -> None:
     assert format_counted_noun(21, noun) == "21 яблоко"
 
 
+def test_accusative_counted_noun_formatting() -> None:
+    noun = CountedNoun(
+        one="монета",
+        few="монеты",
+        many="монет",
+        question="монет",
+        gender="feminine",
+        accusative_one="монету",
+    )
+
+    assert format_counted_noun_accusative(1, noun) == "1 монету"
+    assert format_counted_noun_accusative(2, noun) == "2 монеты"
+    assert format_counted_noun_accusative(5, noun) == "5 монет"
+    assert format_counted_noun_accusative(21, noun) == "21 монету"
+
+
 def test_irrelevant_fact_has_different_subjects() -> None:
     example = generate_examples(
         count=1,
@@ -108,7 +135,7 @@ def test_irrelevant_fact_has_different_subjects() -> None:
     )[0]
 
     assert example.task_type == "epistemic.irrelevant_fact"
-    assert example.metadata["epistemic_state"] == "irrelevant_fact"
+    assert example.metadata["epistemic_state"] == "irrelevant_subject"
     assert example.metadata["fact_subject"] != example.metadata["question_subject"]
     assert example.answer.startswith("Недостаточно информации:")
 
@@ -126,7 +153,114 @@ def test_direct_quantity_answer_matches_metadata_count() -> None:
     assert example.metadata["subject_genitive"] in example.prompt
     assert example.metadata["known_fact"] in example.prompt
     assert example.metadata["question"] in example.prompt
-    assert example.metadata["subject_genitive"] in example.prompt
+
+
+def test_quantity_object_mismatch_uses_different_nouns() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["quantity.object_mismatch"],
+    )[0]
+
+    assert example.task_type == "quantity.object_mismatch"
+    assert example.metadata["epistemic_state"] == "object_mismatch"
+    assert example.metadata["fact_noun"] != example.metadata["question_noun"]
+    assert example.answer.startswith("Недостаточно информации:")
+
+
+def test_location_mismatch_uses_different_locations() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["quantity.location_mismatch"],
+    )[0]
+
+    assert example.task_type == "quantity.location_mismatch"
+    assert example.metadata["epistemic_state"] == "location_mismatch"
+    assert example.metadata["fact_location"] != example.metadata["question_location"]
+    assert example.answer.startswith("Недостаточно информации:")
+
+
+def test_state_change_add_adds_delta() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["state_change.add"],
+    )[0]
+
+    assert example.task_type == "state_change.add"
+    assert example.answer == str(example.metadata["start"] + example.metadata["delta"])
+
+
+def test_state_change_subtract_subtracts_delta() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["state_change.subtract"],
+    )[0]
+
+    assert example.task_type == "state_change.subtract"
+    assert example.answer == str(example.metadata["start"] - example.metadata["delta"])
+
+
+def test_state_change_other_subject_does_not_change_target() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["state_change.other_subject_no_change"],
+    )[0]
+
+    assert example.metadata["target_subject"] != example.metadata["changed_subject"]
+    assert example.answer == str(example.metadata["start"])
+
+
+def test_logic_transitive_height_answers_highest_person() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["logic.transitive_height"],
+    )[0]
+
+    assert example.task_type == "logic.transitive_height"
+    assert example.answer == example.metadata["high"]
+
+
+def test_known_zero_quantity_answers_zero() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["quantity.known_zero"],
+    )[0]
+
+    assert example.task_type == "quantity.known_zero"
+    assert example.metadata["epistemic_state"] == "known_zero"
+    assert example.answer == "0"
+
+
+def test_false_presupposition_does_not_answer_zero() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["epistemic.false_presupposition"],
+    )[0]
+
+    assert example.task_type == "epistemic.false_presupposition"
+    assert example.metadata["epistemic_state"] == "false_presupposition"
+    assert example.answer.startswith("Ложная предпосылка:")
+
+
+def test_compare_sum_does_not_ask_ambiguous_equal_sums() -> None:
+    examples = generate_examples(
+        count=100,
+        seed=1234,
+        task_types=["arithmetic.compare_sum"],
+    )
+
+    for example in examples:
+        assert example.metadata["left"] != example.metadata["right"]
+        assert example.answer == str(
+            max(example.metadata["left"], example.metadata["right"])
+        )
 
 
 def test_past_be_verb_agrees_with_singular_noun_gender() -> None:
@@ -143,6 +277,7 @@ def test_past_be_verb_agrees_with_singular_noun_gender() -> None:
         many="монет",
         question="монет",
         gender="feminine",
+        accusative_one="монету",
     )
     neuter = CountedNoun(
         one="яблоко",
