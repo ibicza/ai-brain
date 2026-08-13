@@ -226,3 +226,97 @@ def test_encode_text_and_decode_ids_commands(tmp_path, capsys) -> None:
     assert decode_exit_code == 0
     assert decoded["text"] == text
     assert decoded["count"] == len(encoded["ids"])
+
+
+def test_prepare_lm_dataset_and_train_lm_commands(tmp_path, capsys) -> None:
+    train_path = tmp_path / "train.jsonl"
+    eval_path = tmp_path / "eval.jsonl"
+    tokenizer_path = tmp_path / "tokenizer.json"
+    cache_path = tmp_path / "cache.pt"
+    output_dir = tmp_path / "run"
+    cache_dir = tmp_path / "tokenized"
+    records = [
+        {"prompt": "Add 2 + 2.", "answer": "4", "task_type": "arithmetic.add"},
+        {"prompt": "Sort 2, 1.", "answer": "1, 2", "task_type": "sorting.numbers"},
+    ]
+    dataset_text = "\n".join(
+        json.dumps(record, ensure_ascii=False) for record in records
+    )
+    train_path.write_text(dataset_text, encoding="utf-8")
+    eval_path.write_text(dataset_text, encoding="utf-8")
+
+    main(
+        [
+            "train-tokenizer",
+            "--input",
+            str(train_path),
+            "--output",
+            str(tokenizer_path),
+            "--vocab-size",
+            "512",
+            "--min-frequency",
+            "1",
+        ]
+    )
+    capsys.readouterr()
+
+    prepare_exit_code = main(
+        [
+            "prepare-lm-dataset",
+            "--input",
+            str(train_path),
+            "--tokenizer",
+            str(tokenizer_path),
+            "--output",
+            str(cache_path),
+            "--sequence-length",
+            "32",
+            "--loss-mode",
+            "answer-only",
+        ]
+    )
+    prepared = json.loads(capsys.readouterr().out)
+
+    assert prepare_exit_code == 0
+    assert cache_path.exists()
+    assert prepared["count"] == 2
+    assert prepared["metadata"]["loss_mode"] == "answer-only"
+
+    train_exit_code = main(
+        [
+            "train-lm",
+            "--train",
+            str(train_path),
+            "--eval",
+            str(eval_path),
+            "--tokenizer",
+            str(tokenizer_path),
+            "--output-dir",
+            str(output_dir),
+            "--config",
+            "debug",
+            "--steps",
+            "2",
+            "--batch-size",
+            "2",
+            "--sequence-length",
+            "32",
+            "--loss-mode",
+            "answer-only",
+            "--eval-every",
+            "1",
+            "--eval-batches",
+            "1",
+            "--save-every",
+            "2",
+            "--cache-dir",
+            str(cache_dir),
+            "--cpu",
+        ]
+    )
+    trained = json.loads(capsys.readouterr().out)
+
+    assert train_exit_code == 0
+    assert trained["final_step"] == 2
+    assert (output_dir / "metrics.jsonl").exists()
+    assert (output_dir / "checkpoints" / "step_000002.pt").exists()

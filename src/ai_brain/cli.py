@@ -18,6 +18,9 @@ from ai_brain.runtime.device import (
     get_device_info,
     run_smoke_train_step,
 )
+from ai_brain.training.config import LOSS_MODES, TrainConfig
+from ai_brain.training.lm_dataset import prepare_lm_dataset
+from ai_brain.training.loop import train_lm
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -277,6 +280,146 @@ def build_parser() -> argparse.ArgumentParser:
         help="Comma-separated token ids.",
     )
 
+    prepare_lm_parser = subparsers.add_parser(
+        "prepare-lm-dataset",
+        help="Tokenize a supervised LM JSONL dataset into a torch cache.",
+    )
+    prepare_lm_parser.add_argument(
+        "--input",
+        type=Path,
+        required=True,
+        help="Input JSONL dataset path.",
+    )
+    prepare_lm_parser.add_argument(
+        "--tokenizer",
+        type=Path,
+        required=True,
+        help="Tokenizer JSON file path.",
+    )
+    prepare_lm_parser.add_argument(
+        "--output",
+        type=Path,
+        required=True,
+        help="Output .pt cache path.",
+    )
+    prepare_lm_parser.add_argument(
+        "--sequence-length",
+        type=int,
+        default=256,
+        help="Fixed token sequence length.",
+    )
+    prepare_lm_parser.add_argument(
+        "--loss-mode",
+        choices=LOSS_MODES,
+        default="answer-only",
+        help="Labeling mode for supervised LM loss.",
+    )
+    prepare_lm_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Rebuild cache even when metadata matches.",
+    )
+
+    train_lm_parser = subparsers.add_parser(
+        "train-lm",
+        help="Train the baseline supervised causal LM.",
+    )
+    train_lm_parser.add_argument(
+        "--train",
+        type=Path,
+        required=True,
+        help="Training JSONL dataset path.",
+    )
+    train_lm_parser.add_argument(
+        "--eval",
+        type=Path,
+        required=True,
+        help="Eval JSONL dataset path.",
+    )
+    train_lm_parser.add_argument(
+        "--tokenizer",
+        type=Path,
+        required=True,
+        help="Tokenizer JSON file path.",
+    )
+    train_lm_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Run output directory.",
+    )
+    train_lm_parser.add_argument(
+        "--config",
+        choices=["debug", "tiny"],
+        default="debug",
+        help="Model architecture preset.",
+    )
+    train_lm_parser.add_argument(
+        "--steps",
+        type=int,
+        default=200,
+        help="Number of optimizer steps.",
+    )
+    train_lm_parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=8,
+        help="Training batch size.",
+    )
+    train_lm_parser.add_argument(
+        "--sequence-length",
+        type=int,
+        default=256,
+        help="Fixed token sequence length.",
+    )
+    train_lm_parser.add_argument(
+        "--loss-mode",
+        choices=LOSS_MODES,
+        default="answer-only",
+        help="Supervised LM loss mode.",
+    )
+    train_lm_parser.add_argument(
+        "--learning-rate",
+        type=float,
+        default=3e-4,
+        help="AdamW learning rate.",
+    )
+    train_lm_parser.add_argument(
+        "--seed",
+        type=int,
+        default=1234,
+        help="Random seed.",
+    )
+    train_lm_parser.add_argument(
+        "--eval-every",
+        type=int,
+        default=50,
+        help="Evaluate every N steps.",
+    )
+    train_lm_parser.add_argument(
+        "--eval-batches",
+        type=int,
+        default=20,
+        help="Number of batches per eval pass.",
+    )
+    train_lm_parser.add_argument(
+        "--save-every",
+        type=int,
+        default=100,
+        help="Save checkpoint every N steps.",
+    )
+    train_lm_parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=Path("cache/tokenized"),
+        help="Directory for tokenized dataset caches.",
+    )
+    train_lm_parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="Force CPU instead of CUDA.",
+    )
+
     return parser
 
 
@@ -398,6 +541,42 @@ def main(argv: Sequence[str] | None = None) -> int:
         tokenizer = ByteLevelBpeTokenizer.load(args.tokenizer)
         text = tokenizer.decode(ids, skip_special_tokens=False)
         result = {"text": text, "count": len(ids)}
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "prepare-lm-dataset":
+        result = prepare_lm_dataset(
+            input_path=args.input,
+            tokenizer_path=args.tokenizer,
+            output_path=args.output,
+            sequence_length=args.sequence_length,
+            loss_mode=args.loss_mode,
+            force=args.force,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "train-lm":
+        result = train_lm(
+            TrainConfig(
+                train_path=args.train,
+                eval_path=args.eval,
+                tokenizer_path=args.tokenizer,
+                output_dir=args.output_dir,
+                model_config_name=args.config,
+                steps=args.steps,
+                batch_size=args.batch_size,
+                sequence_length=args.sequence_length,
+                loss_mode=args.loss_mode,
+                learning_rate=args.learning_rate,
+                seed=args.seed,
+                eval_every=args.eval_every,
+                eval_batches=args.eval_batches,
+                save_every=args.save_every,
+                cache_dir=args.cache_dir,
+                cpu=args.cpu,
+            )
+        )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
 
