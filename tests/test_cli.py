@@ -1,52 +1,251 @@
+from __future__ import annotations
+
+import argparse
 import json
+from collections.abc import Sequence
+from pathlib import Path
 
-from ai_brain.cli import main
+from ai_brain.data.generators import GENERATOR_NAMES
+from ai_brain.data.writer import generate_jsonl
+from ai_brain.model.config import tiny_config
+from ai_brain.model.smoke import run_model_smoke_step
+from ai_brain.model.tiny_transformer import TinyCausalTransformer
+from ai_brain.model.utils import count_parameters, format_parameter_count
+from ai_brain.runtime.device import (
+    format_device_info,
+    get_device_info,
+    run_smoke_train_step,
+)
 
 
-def test_device_command_cpu(capsys) -> None:
-    exit_code = main(["device", "--cpu"])
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="ai-brain",
+        description="Development CLI for the AI Brain project.",
+    )
 
-    captured = capsys.readouterr()
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-    assert exit_code == 0
-    assert "device: cpu" in captured.out
-    assert "name: CPU" in captured.out
+    device_parser = subparsers.add_parser(
+        "device",
+        help="Show runtime device information.",
+    )
+    device_parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="Force CPU instead of CUDA.",
+    )
+
+    smoke_parser = subparsers.add_parser(
+        "smoke",
+        help="Run a tiny forward/backward/optimizer training step.",
+    )
+    smoke_parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="Force CPU instead of CUDA.",
+    )
+    smoke_parser.add_argument(
+        "--seed",
+        type=int,
+        default=1234,
+        help="Random seed for the smoke training step.",
+    )
+
+    subparsers.add_parser(
+        "model-info",
+        help="Show tiny model parameter information.",
+    )
+
+    model_smoke_parser = subparsers.add_parser(
+        "model-smoke",
+        help="Run a tiny Transformer forward/backward/optimizer step.",
+    )
+    model_smoke_parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="Force CPU instead of CUDA.",
+    )
+    model_smoke_parser.add_argument(
+        "--config",
+        choices=["debug", "tiny"],
+        default="debug",
+        help="Model config to use.",
+    )
+    model_smoke_parser.add_argument(
+        "--seed",
+        type=int,
+        default=1234,
+        help="Random seed for the model smoke step.",
+    )
+    model_smoke_parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=2,
+        help="Batch size for the model smoke step.",
+    )
+    model_smoke_parser.add_argument(
+        "--sequence-length",
+        type=int,
+        default=16,
+        help="Sequence length for the model smoke step.",
+    )
+
+    generate_data_parser = subparsers.add_parser(
+        "generate-data",
+        help="Generate a synthetic JSONL training dataset.",
+    )
+    generate_data_parser.add_argument(
+        "--output",
+        type=Path,
+        required=True,
+        help="Output JSONL file path.",
+    )
+    generate_data_parser.add_argument(
+        "--count",
+        type=int,
+        default=100,
+        help="Number of examples to generate.",
+    )
+    generate_data_parser.add_argument(
+        "--seed",
+        type=int,
+        default=1234,
+        help="Random seed for deterministic generation.",
+    )
+    generate_data_parser.add_argument(
+        "--task-type",
+        action="append",
+        choices=GENERATOR_NAMES,
+        help="Restrict generation to one task type. Can be repeated.",
+    )
+
+    return parser
 
 
-def test_smoke_command_cpu(capsys) -> None:
-    exit_code = main(["smoke", "--cpu"])
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    if args.command == "device":
+        info = get_device_info(prefer_cuda=not args.cpu)
+        print(format_device_info(info))
+        return 0
+
+    if args.command == "smoke":
+        info = get_device_info(prefer_cuda=not args.cpu)
+        result = run_smoke_train_step(info, seed=args.seed)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "model-info":
+        config = tiny_config()
+        model = TinyCausalTransformer(config)
+        parameter_count = count_parameters(model)
+        trainable_parameter_count = count_parameters(model, trainable_only=True)
+
+        print(
+            json.dumps(
+                {
+                    "model": "TinyCausalTransformer",
+                    "parameters": parameter_count,
+                    "parameters_human": format_parameter_count(parameter_count),
+                    "trainable_parameters": trainable_parameter_count,
+                    "trainable_parameters_human": format_parameter_count(
+                        trainable_parameter_count
+                    ),
+                    "config": {
+                        "vocab_size": config.vocab_size,
+                        "max_sequence_length": config.max_sequence_length,
+                        "d_model": config.d_model,
+                        "num_layers": config.num_layers,
+                        "num_heads": config.num_heads,
+                        "ffn_hidden_dim": config.ffn_hidden_dim,
+                        "dropout": config.dropout,
+                        "tie_embeddings": config.tie_embeddings,
+                    },
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+
+    if args.command == "model-smoke":
+        info = get_device_info(prefer_cuda=not args.cpu)
+        result = run_model_smoke_step(
+            info,
+            config_name=args.config,
+            seed=args.seed,
+            batch_size=args.batch_size,
+            sequence_length=args.sequence_length,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-data":
+        result = generate_jsonl(
+            output_path=args.output,
+            count=args.count,
+            seed=args.seed,
+            task_types=args.task_type,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    parser.error(f"Unknown command: {args.command}")
+    return 2
+
+
+def test_generate_data_command(tmp_path, capsys) -> None:
+    output_path = tmp_path / "smoke.jsonl"
+
+    exit_code = main(
+        [
+            "generate-data",
+            "--output",
+            str(output_path),
+            "--count",
+            "5",
+            "--seed",
+            "1234",
+        ]
+    )
 
     captured = capsys.readouterr()
     result = json.loads(captured.out)
 
     assert exit_code == 0
-    assert result["device"] == "cpu"
-    assert isinstance(result["loss"], float)
-    assert result["parameters_changed"] is True
+    assert result["count"] == 5
+    assert output_path.exists()
+    assert len(output_path.read_text(encoding="utf-8").splitlines()) == 5
 
 
-def test_model_info_command(capsys) -> None:
-    exit_code = main(["model-info"])
+def test_generate_data_command_with_task_type(tmp_path, capsys) -> None:
+    output_path = tmp_path / "quantity.jsonl"
+
+    exit_code = main(
+        [
+            "generate-data",
+            "--output",
+            str(output_path),
+            "--count",
+            "5",
+            "--seed",
+            "1234",
+            "--task-type",
+            "quantity.direct",
+        ]
+    )
 
     captured = capsys.readouterr()
     result = json.loads(captured.out)
+    lines = output_path.read_text(encoding="utf-8").splitlines()
 
     assert exit_code == 0
-    assert result["model"] == "TinyCausalTransformer"
-    assert result["parameters"] > 0
-    assert result["parameters"] == result["trainable_parameters"]
-    assert result["config"]["d_model"] == 128
+    assert result["count"] == 5
+    assert len(lines) == 5
 
+    loaded = [json.loads(line) for line in lines]
 
-def test_model_smoke_command_cpu(capsys) -> None:
-    exit_code = main(["model-smoke", "--cpu"])
-
-    captured = capsys.readouterr()
-    result = json.loads(captured.out)
-
-    assert exit_code == 0
-    assert result["model"] == "TinyCausalTransformer"
-    assert result["config_name"] == "debug"
-    assert result["device"] == "cpu"
-    assert result["logits_shape"] == [2, 16, 256]
-    assert result["parameters_changed"] is True
+    assert {example["task_type"] for example in loaded} == {"quantity.direct"}

@@ -3,7 +3,11 @@ from pathlib import Path
 
 from ai_brain.data.generators import GENERATOR_NAMES, generate_examples
 from ai_brain.data.schema import TrainingExample
-from ai_brain.data.templates import CountedNoun, format_counted_noun
+from ai_brain.data.templates import (
+    CountedNoun,
+    choose_past_be_verb,
+    format_counted_noun,
+)
 from ai_brain.data.writer import generate_jsonl
 
 
@@ -44,6 +48,7 @@ def test_generates_known_task_types() -> None:
     assert "sequence.arithmetic_progression" in generated_task_types
     assert "epistemic.insufficient_info" in generated_task_types
     assert "epistemic.irrelevant_fact" in generated_task_types
+    assert "quantity.direct" in generated_task_types
 
 
 def test_each_generator_can_generate_one_example() -> None:
@@ -85,6 +90,7 @@ def test_counted_noun_formatting() -> None:
         few="яблока",
         many="яблок",
         question="яблок",
+        gender="neuter",
     )
 
     assert format_counted_noun(1, noun) == "1 яблоко"
@@ -105,3 +111,50 @@ def test_irrelevant_fact_has_different_subjects() -> None:
     assert example.metadata["epistemic_state"] == "irrelevant_fact"
     assert example.metadata["fact_subject"] != example.metadata["question_subject"]
     assert example.answer.startswith("Недостаточно информации:")
+
+
+def test_direct_quantity_answer_matches_metadata_count() -> None:
+    example = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["quantity.direct"],
+    )[0]
+
+    assert example.task_type == "quantity.direct"
+    assert example.metadata["epistemic_state"] == "known"
+    assert example.answer == str(example.metadata["count"])
+    assert example.metadata["subject_genitive"] in example.prompt
+    assert example.metadata["known_fact"] in example.prompt
+    assert example.metadata["question"] in example.prompt
+    assert example.metadata["subject_genitive"] in example.prompt
+
+
+def test_past_be_verb_agrees_with_singular_noun_gender() -> None:
+    masculine = CountedNoun(
+        one="карандаш",
+        few="карандаша",
+        many="карандашей",
+        question="карандашей",
+        gender="masculine",
+    )
+    feminine = CountedNoun(
+        one="монета",
+        few="монеты",
+        many="монет",
+        question="монет",
+        gender="feminine",
+    )
+    neuter = CountedNoun(
+        one="яблоко",
+        few="яблока",
+        many="яблок",
+        question="яблок",
+        gender="neuter",
+    )
+
+    assert choose_past_be_verb(1, masculine) == "был"
+    assert choose_past_be_verb(1, feminine) == "была"
+    assert choose_past_be_verb(1, neuter) == "было"
+    assert choose_past_be_verb(2, masculine) == "было"
+    assert choose_past_be_verb(11, feminine) == "было"
+    assert choose_past_be_verb(21, masculine) == "был"

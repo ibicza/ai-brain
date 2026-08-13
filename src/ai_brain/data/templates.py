@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
 
 
 @dataclass(frozen=True)
@@ -10,12 +11,16 @@ class Person:
     accusative: str
 
 
+NounGender = Literal["masculine", "feminine", "neuter"]
+
+
 @dataclass(frozen=True)
 class CountedNoun:
     one: str
     few: str
     many: str
     question: str
+    gender: NounGender
 
 
 PEOPLE: tuple[Person, ...] = (
@@ -40,18 +45,68 @@ PEOPLE: tuple[Person, ...] = (
 
 COUNTED_NOUNS: tuple[CountedNoun, ...] = (
     CountedNoun(
-        one="мороженое", few="мороженых", many="мороженых", question="мороженых"
+        one="мороженое",
+        few="мороженых",
+        many="мороженых",
+        question="мороженых",
+        gender="neuter",
     ),
     CountedNoun(
-        one="карандаш", few="карандаша", many="карандашей", question="карандашей"
+        one="карандаш",
+        few="карандаша",
+        many="карандашей",
+        question="карандашей",
+        gender="masculine",
     ),
-    CountedNoun(one="монета", few="монеты", many="монет", question="монет"),
-    CountedNoun(one="яблоко", few="яблока", many="яблок", question="яблок"),
-    CountedNoun(one="конфета", few="конфеты", many="конфет", question="конфет"),
-    CountedNoun(one="кубик", few="кубика", many="кубиков", question="кубиков"),
-    CountedNoun(one="книга", few="книги", many="книг", question="книг"),
-    CountedNoun(one="рубль", few="рубля", many="рублей", question="рублей"),
-    CountedNoun(one="печенье", few="печенья", many="печений", question="печений"),
+    CountedNoun(
+        one="монета",
+        few="монеты",
+        many="монет",
+        question="монет",
+        gender="feminine",
+    ),
+    CountedNoun(
+        one="яблоко",
+        few="яблока",
+        many="яблок",
+        question="яблок",
+        gender="neuter",
+    ),
+    CountedNoun(
+        one="конфета",
+        few="конфеты",
+        many="конфет",
+        question="конфет",
+        gender="feminine",
+    ),
+    CountedNoun(
+        one="кубик",
+        few="кубика",
+        many="кубиков",
+        question="кубиков",
+        gender="masculine",
+    ),
+    CountedNoun(
+        one="книга",
+        few="книги",
+        many="книг",
+        question="книг",
+        gender="feminine",
+    ),
+    CountedNoun(
+        one="рубль",
+        few="рубля",
+        many="рублей",
+        question="рублей",
+        gender="masculine",
+    ),
+    CountedNoun(
+        one="печенье",
+        few="печенья",
+        many="печений",
+        question="печений",
+        gender="neuter",
+    ),
 )
 
 
@@ -75,3 +130,26 @@ def choose_counted_noun_form(count: int, noun: CountedNoun) -> str:
 
 def format_counted_noun(count: int, noun: CountedNoun) -> str:
     return f"{count} {choose_counted_noun_form(count, noun)}"
+
+
+def is_singular_one(count: int) -> bool:
+    absolute_count = abs(count)
+    last_two_digits = absolute_count % 100
+
+    if 11 <= last_two_digits <= 14:
+        return False
+
+    return absolute_count % 10 == 1
+
+
+def choose_past_be_verb(count: int, noun: CountedNoun) -> str:
+    if not is_singular_one(count):
+        return "было"
+
+    if noun.gender == "masculine":
+        return "был"
+
+    if noun.gender == "feminine":
+        return "была"
+
+    return "было"

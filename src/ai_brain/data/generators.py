@@ -4,7 +4,12 @@ import random
 from collections.abc import Sequence
 
 from ai_brain.data.schema import TrainingExample
-from ai_brain.data.templates import COUNTED_NOUNS, PEOPLE, format_counted_noun
+from ai_brain.data.templates import (
+    COUNTED_NOUNS,
+    PEOPLE,
+    choose_past_be_verb,
+    format_counted_noun,
+)
 
 GeneratorName = str
 
@@ -12,6 +17,7 @@ GENERATOR_NAMES: tuple[GeneratorName, ...] = (
     "comparison.max",
     "arithmetic.add",
     "sequence.arithmetic_progression",
+    "quantity.direct",
     "epistemic.insufficient_info",
     "epistemic.irrelevant_fact",
 )
@@ -83,6 +89,36 @@ def generate_arithmetic_progression(
     )
 
 
+def generate_direct_quantity(rng: random.Random, index: int) -> TrainingExample:
+    subject = rng.choice(PEOPLE)
+    noun = rng.choice(COUNTED_NOUNS)
+    count = rng.randint(1, 20)
+
+    counted_noun = format_counted_noun(count, noun)
+
+    be_verb = choose_past_be_verb(count, noun)
+
+    fact = f"У {subject.genitive} {be_verb} {counted_noun}."
+    question = f"Сколько {noun.question} было у {subject.genitive}?"
+
+    return TrainingExample(
+        id=f"quantity.direct:{index:08d}",
+        task_type="quantity.direct",
+        prompt=f"{fact} {question}",
+        answer=str(count),
+        metadata={
+            "known_fact": fact,
+            "question": question,
+            "epistemic_state": "known",
+            "subject": subject.nominative,
+            "subject_genitive": subject.genitive,
+            "count": count,
+            "noun": noun.many,
+            "be_verb": be_verb,
+        },
+    )
+
+
 def generate_insufficient_info(rng: random.Random, index: int) -> TrainingExample:
     variants = [
         ("Вася купил машину.", "Какого цвета машина Васи?"),
@@ -144,7 +180,9 @@ def generate_irrelevant_fact(rng: random.Random, index: int) -> TrainingExample:
 
     counted_noun = format_counted_noun(count, noun)
 
-    fact = f"У {fact_subject.genitive} было {counted_noun}."
+    be_verb = choose_past_be_verb(count, noun)
+
+    fact = f"У {fact_subject.genitive} {be_verb} {counted_noun}."
     question = f"Сколько {noun.question} было у {question_subject.genitive}?"
 
     return TrainingExample(
@@ -164,6 +202,7 @@ def generate_irrelevant_fact(rng: random.Random, index: int) -> TrainingExample:
             "question_subject": question_subject.nominative,
             "count": count,
             "noun": noun.many,
+            "be_verb": be_verb,
         },
     )
 
@@ -189,6 +228,9 @@ def generate_example(
 
     if task_type == "sequence.arithmetic_progression":
         return generate_arithmetic_progression(rng, index)
+
+    if task_type == "quantity.direct":
+        return generate_direct_quantity(rng, index)
 
     if task_type == "epistemic.insufficient_info":
         return generate_insufficient_info(rng, index)
