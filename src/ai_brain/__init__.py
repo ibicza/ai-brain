@@ -1,2 +1,3 @@
-def main() -> None:
-    print("Hello from ai-brain!")
+from ai_brain.cli import main
+
+__all__ = ["main"]
