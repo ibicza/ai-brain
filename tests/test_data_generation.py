@@ -9,7 +9,12 @@ from ai_brain.data.templates import (
     format_counted_noun,
     format_counted_noun_accusative,
 )
-from ai_brain.data.writer import generate_jsonl
+from ai_brain.data.writer import (
+    dataset_stats,
+    generate_data_split,
+    generate_jsonl,
+    read_jsonl,
+)
 
 
 def test_training_example_json_line_is_valid_json() -> None:
@@ -293,3 +298,56 @@ def test_past_be_verb_agrees_with_singular_noun_gender() -> None:
     assert choose_past_be_verb(2, masculine) == "было"
     assert choose_past_be_verb(11, feminine) == "было"
     assert choose_past_be_verb(21, masculine) == "был"
+
+
+def test_generate_data_split_writes_manifest_and_disjoint_prompts(
+    tmp_path: Path,
+) -> None:
+    task_types = ["arithmetic.add", "arithmetic.subtract", "quantity.direct"]
+    output_dir = tmp_path / "stage1"
+
+    result = generate_data_split(
+        output_dir=output_dir,
+        train_count=12,
+        eval_count=9,
+        train_seed=1000,
+        eval_seed=2000,
+        task_types=task_types,
+    )
+
+    train_examples = read_jsonl(output_dir / "train.jsonl")
+    eval_examples = read_jsonl(output_dir / "eval.jsonl")
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+
+    assert result["manifest_path"] == str(output_dir / "manifest.json")
+    assert len(train_examples) == 12
+    assert len(eval_examples) == 9
+    assert {example["prompt"] for example in train_examples}.isdisjoint(
+        {example["prompt"] for example in eval_examples}
+    )
+    assert manifest["task_types"] == task_types
+    assert manifest["quality_checks"]["prompt_intersection_count"] == 0
+    assert manifest["quality_checks"]["all_task_types_present"] is True
+    assert manifest["splits"]["train"]["missing_task_types"] == []
+    assert manifest["splits"]["eval"]["missing_task_types"] == []
+
+
+def test_dataset_stats_counts_task_types_and_missing_types(tmp_path: Path) -> None:
+    output_path = tmp_path / "dataset.jsonl"
+    generate_jsonl(
+        output_path=output_path,
+        count=5,
+        seed=1234,
+        task_types=["arithmetic.add"],
+    )
+
+    stats = dataset_stats(
+        input_path=output_path,
+        expected_task_types=["arithmetic.add", "arithmetic.subtract"],
+    )
+
+    assert stats["count"] == 5
+    assert stats["task_type_counts"] == {"arithmetic.add": 5}
+    assert stats["missing_task_types"] == ["arithmetic.subtract"]
+    assert stats["all_task_types_present"] is False
+    assert stats["duplicate_prompt_count"] >= 0

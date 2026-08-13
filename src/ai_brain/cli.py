@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from ai_brain.data.generators import GENERATOR_NAMES
-from ai_brain.data.writer import generate_jsonl
+from ai_brain.data.writer import dataset_stats, generate_data_split, generate_jsonl
 from ai_brain.model.config import tiny_config
 from ai_brain.model.smoke import run_model_smoke_step
 from ai_brain.model.tiny_transformer import TinyCausalTransformer
@@ -120,6 +120,64 @@ def build_parser() -> argparse.ArgumentParser:
         help="Restrict generation to one task type. Can be repeated.",
     )
 
+    generate_split_parser = subparsers.add_parser(
+        "generate-data-split",
+        help="Generate train/eval JSONL files and a dataset manifest.",
+    )
+    generate_split_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory for train.jsonl, eval.jsonl, and manifest.json.",
+    )
+    generate_split_parser.add_argument(
+        "--train-count",
+        type=int,
+        default=50_000,
+        help="Number of training examples to generate.",
+    )
+    generate_split_parser.add_argument(
+        "--eval-count",
+        type=int,
+        default=5_000,
+        help="Number of eval examples to generate.",
+    )
+    generate_split_parser.add_argument(
+        "--train-seed",
+        type=int,
+        default=1000,
+        help="Random seed for the train split.",
+    )
+    generate_split_parser.add_argument(
+        "--eval-seed",
+        type=int,
+        default=2000,
+        help="Random seed for the eval split.",
+    )
+    generate_split_parser.add_argument(
+        "--task-type",
+        action="append",
+        choices=GENERATOR_NAMES,
+        help="Restrict generation to one task type. Can be repeated.",
+    )
+
+    dataset_stats_parser = subparsers.add_parser(
+        "dataset-stats",
+        help="Show counts and prompt statistics for a JSONL dataset.",
+    )
+    dataset_stats_parser.add_argument(
+        "--input",
+        type=Path,
+        required=True,
+        help="Input JSONL file path.",
+    )
+    dataset_stats_parser.add_argument(
+        "--task-type",
+        action="append",
+        choices=GENERATOR_NAMES,
+        help="Expected task type. Can be repeated. Defaults to all known types.",
+    )
+
     return parser
 
 
@@ -187,6 +245,26 @@ def main(argv: Sequence[str] | None = None) -> int:
             task_types=args.task_type,
         )
         print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-data-split":
+        result = generate_data_split(
+            output_dir=args.output_dir,
+            train_count=args.train_count,
+            eval_count=args.eval_count,
+            train_seed=args.train_seed,
+            eval_seed=args.eval_seed,
+            task_types=args.task_type,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "dataset-stats":
+        result = dataset_stats(
+            input_path=args.input,
+            expected_task_types=args.task_type,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
 
     parser.error(f"Unknown command: {args.command}")
