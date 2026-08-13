@@ -80,10 +80,7 @@ def _format_reversed_answer(
         id=example.id,
         task_type=example.task_type,
         prompt=example.prompt,
-        answer=(
-            f"answer_reversed: {_space_digits(example.answer[::-1])}\n"
-            f"answer: {example.answer}"
-        ),
+        answer=_space_digits(example.answer[::-1]),
         metadata=_format_metadata(example, answer_format),
     )
 

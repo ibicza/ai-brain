@@ -332,7 +332,7 @@ def test_scratchpad_format_state_change_reports_start_change_and_digits() -> Non
     )
 
 
-def test_reversed_answer_format_keeps_final_answer() -> None:
+def test_reversed_answer_format_outputs_reversed_digits_only() -> None:
     example = TrainingExample(
         id="arithmetic.add:00000000",
         task_type="arithmetic.add",
@@ -343,7 +343,7 @@ def test_reversed_answer_format_keeps_final_answer() -> None:
 
     formatted = apply_answer_format(example, "reversed_answer")
 
-    assert formatted.answer == "answer_reversed: 6 9\nanswer: 96"
+    assert formatted.answer == "6 9"
     assert formatted.metadata["answer_format"] == "reversed_answer"
 
 
