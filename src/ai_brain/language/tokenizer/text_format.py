@@ -13,6 +13,10 @@ def format_prompt_answer(prompt: str, answer: str) -> str:
     return f"{PROMPT_TOKEN}\n{prompt.strip()}\n{ANSWER_TOKEN}\n{answer.strip()}\n{END_TOKEN}"
 
 
+def format_inference_prompt(prompt: str) -> str:
+    return f"{PROMPT_TOKEN}\n{prompt.strip()}\n{ANSWER_TOKEN}\n"
+
+
 def format_training_example(example: dict[str, Any]) -> str:
     return format_prompt_answer(
         prompt=str(example["prompt"]),

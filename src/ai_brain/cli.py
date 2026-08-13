@@ -7,6 +7,7 @@ from pathlib import Path
 
 from ai_brain.data.generators import GENERATION_PROFILES, GENERATOR_NAMES
 from ai_brain.data.writer import dataset_stats, generate_data_split, generate_jsonl
+from ai_brain.eval.runner import eval_lm, generate_answer
 from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
 from ai_brain.language.tokenizer.trainer import train_tokenizer
 from ai_brain.model.config import tiny_config
@@ -426,6 +427,91 @@ def build_parser() -> argparse.ArgumentParser:
         help="Force CPU instead of CUDA.",
     )
 
+    generate_answer_parser = subparsers.add_parser(
+        "generate-answer",
+        help="Generate one deterministic answer from a trained LM checkpoint.",
+    )
+    generate_answer_parser.add_argument(
+        "--checkpoint",
+        type=Path,
+        required=True,
+        help="Model checkpoint path.",
+    )
+    generate_answer_parser.add_argument(
+        "--tokenizer",
+        type=Path,
+        required=True,
+        help="Tokenizer JSON file path.",
+    )
+    generate_answer_parser.add_argument(
+        "--prompt",
+        required=True,
+        help="Prompt text to answer.",
+    )
+    generate_answer_parser.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=32,
+        help="Maximum number of tokens to generate.",
+    )
+    generate_answer_parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="Force CPU instead of CUDA.",
+    )
+
+    eval_lm_parser = subparsers.add_parser(
+        "eval-lm",
+        help="Run exact-answer generation benchmark for a checkpoint.",
+    )
+    eval_lm_parser.add_argument(
+        "--checkpoint",
+        type=Path,
+        required=True,
+        help="Model checkpoint path.",
+    )
+    eval_lm_parser.add_argument(
+        "--eval",
+        type=Path,
+        required=True,
+        help="Eval JSONL dataset path.",
+    )
+    eval_lm_parser.add_argument(
+        "--tokenizer",
+        type=Path,
+        required=True,
+        help="Tokenizer JSON file path.",
+    )
+    eval_lm_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory for predictions.jsonl and summary.json.",
+    )
+    eval_lm_parser.add_argument(
+        "--max-examples",
+        type=int,
+        default=None,
+        help="Maximum number of eval examples to run.",
+    )
+    eval_lm_parser.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=32,
+        help="Maximum number of tokens to generate per example.",
+    )
+    eval_lm_parser.add_argument(
+        "--seed",
+        type=int,
+        default=1234,
+        help="Random seed for deterministic setup.",
+    )
+    eval_lm_parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="Force CPU instead of CUDA.",
+    )
+
     return parser
 
 
@@ -583,6 +669,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 cache_dir=args.cache_dir,
                 cpu=args.cpu,
             )
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-answer":
+        result = generate_answer(
+            checkpoint_path=args.checkpoint,
+            tokenizer_path=args.tokenizer,
+            prompt=args.prompt,
+            max_new_tokens=args.max_new_tokens,
+            cpu=args.cpu,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "eval-lm":
+        result = eval_lm(
+            checkpoint_path=args.checkpoint,
+            eval_path=args.eval,
+            tokenizer_path=args.tokenizer,
+            output_dir=args.output_dir,
+            max_examples=args.max_examples,
+            max_new_tokens=args.max_new_tokens,
+            seed=args.seed,
+            cpu=args.cpu,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
