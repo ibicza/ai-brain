@@ -532,6 +532,196 @@ def generate_range_primed(
     }
 
 
+def generate_arithmetic_primitive_split(
+    *,
+    output_dir: Path,
+    train_count: int,
+    eval_same_count: int,
+    eval_shifted_in_distribution_count: int,
+    eval_holdout_digit_combinations_count: int,
+    eval_far_range_count: int,
+    train_seed: int,
+    eval_same_seed: int,
+    eval_shifted_in_distribution_seed: int,
+    eval_holdout_digit_combinations_seed: int,
+    eval_far_range_seed: int,
+    task_types: Sequence[GeneratorName],
+    task_preset: str | None = None,
+    train_profile: GenerationProfileName = "train_same",
+    eval_same_profile: GenerationProfileName = "eval_same",
+    eval_shifted_in_distribution_profile: GenerationProfileName = (
+        "eval_shifted_in_distribution"
+    ),
+    eval_holdout_digit_combinations_profile: GenerationProfileName = (
+        "eval_holdout_digit_combinations"
+    ),
+    eval_far_range_profile: GenerationProfileName = "eval_far_range",
+    enforce_unique_prompts: bool = True,
+    answer_format: AnswerFormatName = "compact_digit_trace",
+) -> dict[str, Any]:
+    allowed_task_types = tuple(task_types)
+    if not allowed_task_types:
+        raise ValueError("task_types must not be empty")
+
+    split_specs = {
+        "train_same": {
+            "count": train_count,
+            "seed": train_seed,
+            "profile": train_profile,
+            "split_name": "train",
+        },
+        "eval_same": {
+            "count": eval_same_count,
+            "seed": eval_same_seed,
+            "profile": eval_same_profile,
+            "split_name": "eval",
+        },
+        "eval_shifted_in_distribution": {
+            "count": eval_shifted_in_distribution_count,
+            "seed": eval_shifted_in_distribution_seed,
+            "profile": eval_shifted_in_distribution_profile,
+            "split_name": "eval",
+        },
+        "eval_holdout_digit_combinations": {
+            "count": eval_holdout_digit_combinations_count,
+            "seed": eval_holdout_digit_combinations_seed,
+            "profile": eval_holdout_digit_combinations_profile,
+            "split_name": "eval",
+        },
+        "eval_far_range": {
+            "count": eval_far_range_count,
+            "seed": eval_far_range_seed,
+            "profile": eval_far_range_profile,
+            "split_name": "eval",
+        },
+    }
+
+    split_examples: dict[str, list[TrainingExample]] = {}
+    blocked_prompts: set[str] = set()
+    for split_name, spec in split_specs.items():
+        examples = _generate_examples_with_coverage(
+            count=spec["count"],
+            seed=spec["seed"],
+            task_types=allowed_task_types,
+            split_name=spec["split_name"],
+            profile=spec["profile"],
+            enforce_unique_prompts=enforce_unique_prompts,
+            answer_format=answer_format,
+            blocked_prompts=blocked_prompts,
+        )
+        split_examples[split_name] = examples
+        blocked_prompts |= {example.prompt for example in examples}
+
+    split_examples["train"] = list(split_examples["train_same"])
+    output_dir.mkdir(parents=True, exist_ok=True)
+    paths = {
+        split_name: output_dir / f"{split_name}.jsonl" for split_name in split_examples
+    }
+    paths["train"] = output_dir / "train.jsonl"
+    for split_name, examples in split_examples.items():
+        write_jsonl(paths[split_name], examples)
+
+    split_prompt_sets = {
+        split_name: {example.prompt for example in examples}
+        for split_name, examples in split_examples.items()
+    }
+    prompt_intersections = _build_prompt_intersection_summaries(split_prompt_sets)
+    numeric_summaries = {
+        split_name: _build_numeric_range_summary(examples)
+        for split_name, examples in split_examples.items()
+    }
+    digit_coverage = {
+        split_name: _build_digit_combo_summary(examples)
+        for split_name, examples in split_examples.items()
+    }
+    eval_split_names = (
+        "eval_same",
+        "eval_shifted_in_distribution",
+        "eval_holdout_digit_combinations",
+        "eval_far_range",
+    )
+    train_digit_combos = _digit_combo_set(split_examples["train_same"])
+    digit_combo_overlaps = {
+        split_name: _build_digit_combo_overlap_summary(
+            train_digit_combos,
+            _digit_combo_set(split_examples[split_name]),
+        )
+        for split_name in eval_split_names
+    }
+
+    manifest = {
+        "version": 1,
+        "kind": "arithmetic_primitive",
+        "task_preset": task_preset,
+        "answer_format": answer_format,
+        "task_types": list(allowed_task_types),
+        "profiles": {
+            split_name: spec["profile"] for split_name, spec in split_specs.items()
+        }
+        | {"train": "train_same"},
+        "seeds": {split_name: spec["seed"] for split_name, spec in split_specs.items()}
+        | {"train": train_seed},
+        "splits": {
+            split_name: {
+                "path": paths[split_name].name,
+                "count": len(examples),
+                "seed": train_seed
+                if split_name == "train"
+                else split_specs[split_name]["seed"],
+                "profile": "train_same"
+                if split_name == "train"
+                else split_specs[split_name]["profile"],
+                "numeric_range_summary": numeric_summaries[split_name],
+                "digit_combination_coverage": digit_coverage[split_name],
+                **build_dataset_stats(
+                    examples,
+                    expected_task_types=allowed_task_types,
+                ),
+            }
+            for split_name, examples in split_examples.items()
+        },
+        "quality_checks": {
+            "prompt_intersections": prompt_intersections,
+            "all_prompt_intersections_zero": all(
+                summary["count"] == 0
+                for pair_key, summary in prompt_intersections.items()
+                if pair_key != _intersection_key("train", "train_same")
+            ),
+            "all_task_types_present": all(
+                build_dataset_stats(
+                    examples,
+                    expected_task_types=allowed_task_types,
+                )["all_task_types_present"]
+                for split_name, examples in split_examples.items()
+                if split_name != "train"
+            ),
+            "digit_combo_overlaps_with_train": digit_combo_overlaps,
+        },
+    }
+
+    manifest_path = output_dir / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    return {
+        "output_dir": str(output_dir),
+        "train_path": str(paths["train"]),
+        "train_same_path": str(paths["train_same"]),
+        "eval_same_path": str(paths["eval_same"]),
+        "eval_shifted_in_distribution_path": str(paths["eval_shifted_in_distribution"]),
+        "eval_holdout_digit_combinations_path": str(
+            paths["eval_holdout_digit_combinations"]
+        ),
+        "eval_far_range_path": str(paths["eval_far_range"]),
+        "manifest_path": str(manifest_path),
+        "task_preset": task_preset,
+        "answer_format": answer_format,
+        "manifest": manifest,
+    }
+
+
 def generate_data_split(
     *,
     output_dir: Path,
@@ -723,6 +913,53 @@ def _generate_examples_with_coverage(
     return examples
 
 
+def _digit_combo_set(examples: Sequence[TrainingExample | dict[str, Any]]) -> set[str]:
+    combos: set[str] = set()
+    for example in examples:
+        metadata = _get_example_field(example, "metadata")
+        if not isinstance(metadata, dict):
+            continue
+        value = metadata.get("digit_combo_keys")
+        if isinstance(value, list):
+            combos.update(str(item) for item in value)
+        elif metadata.get("digit_combo_key"):
+            combos.add(str(metadata["digit_combo_key"]))
+    return combos
+
+
+def _build_digit_combo_summary(
+    examples: Sequence[TrainingExample | dict[str, Any]],
+) -> dict[str, Any]:
+    combos = sorted(_digit_combo_set(examples))
+    by_op = Counter(combo.split(":", 1)[0] for combo in combos)
+    return {
+        "unique_digit_combo_count": len(combos),
+        "unique_digit_combo_count_by_op": dict(sorted(by_op.items())),
+        "sample": combos[:30],
+    }
+
+
+def _build_digit_combo_overlap_summary(
+    train_combos: set[str],
+    eval_combos: set[str],
+) -> dict[str, Any]:
+    overlap = sorted(train_combos & eval_combos)
+    holdout_only = sorted(eval_combos - train_combos)
+    return {
+        "train_unique_digit_combo_count": len(train_combos),
+        "eval_unique_digit_combo_count": len(eval_combos),
+        "overlap_count": len(overlap),
+        "eval_overlap_fraction": len(overlap) / len(eval_combos)
+        if eval_combos
+        else 0.0,
+        "eval_unseen_digit_combo_count": len(holdout_only),
+        "eval_unseen_digit_combo_fraction": (
+            len(holdout_only) / len(eval_combos) if eval_combos else 0.0
+        ),
+        "unseen_sample": holdout_only[:30],
+    }
+
+
 def _build_prompt_intersection_summaries(
     split_prompt_sets: dict[str, set[str]],
 ) -> dict[str, dict[str, Any]]:
@@ -888,6 +1125,10 @@ _INPUT_NUMERIC_METADATA_KEYS = {
     "delta",
     "count",
     "numbers",
+    "known",
+    "target",
+    "missing",
+    "mid",
 }
 
 

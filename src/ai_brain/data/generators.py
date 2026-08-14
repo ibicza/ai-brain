@@ -34,6 +34,8 @@ GenerationProfileName = Literal[
     "eval_shifted_in_distribution",
     "eval_shifted_holdout",
     "eval_far_shifted",
+    "eval_holdout_digit_combinations",
+    "eval_far_range",
 ]
 
 
@@ -52,6 +54,8 @@ class GenerationProfile:
             "eval_shifted_in_distribution",
             "eval_shifted_holdout",
             "eval_far_shifted",
+            "eval_holdout_digit_combinations",
+            "eval_far_range",
         } and (low, high) == (3, 5):
             return rng.randint(3, 4)
 
@@ -107,9 +111,16 @@ class GenerationProfile:
             (3, 5): (3, 4),
             (0, 9999): (100_000, 999_999),
         }
-        if self.name == "eval_far_shifted":
+        if self.name in {"eval_far_shifted", "eval_far_range"}:
             far_low, far_high = far_shifted_ranges.get((low, high), (low, high))
             return rng.randint(far_low, far_high)
+
+        if self.name == "eval_holdout_digit_combinations":
+            holdout_low, holdout_high = shifted_prime_ranges.get(
+                (low, high),
+                (low, high),
+            )
+            return rng.randint(holdout_low, holdout_high)
 
         eval_ranges = {
             (0, 99): (20, 199),
@@ -140,11 +151,17 @@ class GenerationProfile:
             if stop == 50:
                 return rng.sample(range(70, 120), count)
 
-        if self.name == "eval_far_shifted":
+        if self.name in {"eval_far_shifted", "eval_far_range"}:
             if stop == 100:
                 return rng.sample(range(200, 400), count)
             if stop == 50:
                 return rng.sample(range(120, 240), count)
+
+        if self.name == "eval_holdout_digit_combinations":
+            if stop == 100:
+                return rng.sample(range(20, 110), count)
+            if stop == 50:
+                return rng.sample(range(20, 70), count)
 
         if stop == 100:
             return rng.sample(range(20, 200), count)
@@ -168,6 +185,10 @@ EVAL_SHIFTED_IN_DISTRIBUTION_PROFILE = GenerationProfile(
 )
 EVAL_SHIFTED_HOLDOUT_PROFILE = GenerationProfile(name="eval_shifted_holdout")
 EVAL_FAR_SHIFTED_PROFILE = GenerationProfile(name="eval_far_shifted")
+EVAL_HOLDOUT_DIGIT_COMBINATIONS_PROFILE = GenerationProfile(
+    name="eval_holdout_digit_combinations"
+)
+EVAL_FAR_RANGE_PROFILE = GenerationProfile(name="eval_far_range")
 GENERATION_PROFILES: dict[GenerationProfileName, GenerationProfile] = {
     "train": TRAIN_PROFILE,
     "eval": EVAL_PROFILE,
@@ -180,6 +201,8 @@ GENERATION_PROFILES: dict[GenerationProfileName, GenerationProfile] = {
     "eval_shifted_in_distribution": EVAL_SHIFTED_IN_DISTRIBUTION_PROFILE,
     "eval_shifted_holdout": EVAL_SHIFTED_HOLDOUT_PROFILE,
     "eval_far_shifted": EVAL_FAR_SHIFTED_PROFILE,
+    "eval_holdout_digit_combinations": EVAL_HOLDOUT_DIGIT_COMBINATIONS_PROFILE,
+    "eval_far_range": EVAL_FAR_RANGE_PROFILE,
 }
 
 
@@ -594,6 +617,487 @@ def generate_double_step(
         answer=str(a + b - c),
         metadata={"a": a, "b": b, "c": c, "operation": "add_then_subtract"},
     )
+
+
+def _primitive_combo_mode(profile: GenerationProfile) -> str:
+    if profile.name == "eval_holdout_digit_combinations":
+        return "holdout"
+    return "train"
+
+
+def _digit_add_combo_is_holdout(a: int, b: int, carry: int) -> bool:
+    return (a * 17 + b * 5 + carry * 11) % 5 == 0
+
+
+def _digit_sub_combo_is_holdout(a: int, b: int, borrow: int) -> bool:
+    return (a * 13 + b * 7 + borrow * 3) % 5 == 0
+
+
+def _combo_allowed(is_holdout: bool, profile: GenerationProfile) -> bool:
+    mode = _primitive_combo_mode(profile)
+    return is_holdout if mode == "holdout" else not is_holdout
+
+
+def _sample_until_allowed(
+    rng: random.Random,
+    sampler: Callable[[], tuple[int, ...]],
+    predicate: Callable[[tuple[int, ...]], bool],
+) -> tuple[int, ...]:
+    for _ in range(10_000):
+        values = sampler()
+        if predicate(values):
+            return values
+    raise RuntimeError("Could not sample arithmetic primitive satisfying constraints")
+
+
+def _two_digit_range(profile: GenerationProfile) -> tuple[int, int]:
+    if profile.name == "eval_far_range":
+        return 40, 99
+    if profile.name in {
+        "train_shifted_prime",
+        "eval_shifted_in_distribution",
+        "eval_holdout_digit_combinations",
+    }:
+        return 20, 79
+    return 10, 59
+
+
+def _sample_two_digit(rng: random.Random, profile: GenerationProfile) -> int:
+    low, high = _two_digit_range(profile)
+    return rng.randint(low, high)
+
+
+def _digits2(value: int) -> tuple[int, int]:
+    return value // 10, value % 10
+
+
+def _add_digit_combo_keys(a: int, b: int) -> list[str]:
+    at, au = _digits2(a)
+    bt, bu = _digits2(b)
+    ones_carry = 1 if au + bu >= 10 else 0
+    return [f"add:{au}:{bu}:0", f"add:{at}:{bt}:{ones_carry}"]
+
+
+def _sub_digit_combo_keys(a: int, b: int) -> list[str]:
+    at, au = _digits2(a)
+    bt, bu = _digits2(b)
+    ones_borrow = 1 if au < bu else 0
+    return [f"sub:{au}:{bu}:0", f"sub:{at}:{bt}:{ones_borrow}"]
+
+
+def _add_has_holdout_combo(a: int, b: int) -> bool:
+    at, au = _digits2(a)
+    bt, bu = _digits2(b)
+    ones_carry = 1 if au + bu >= 10 else 0
+    return _digit_add_combo_is_holdout(au, bu, 0) or _digit_add_combo_is_holdout(
+        at,
+        bt,
+        ones_carry,
+    )
+
+
+def _sub_has_holdout_combo(a: int, b: int) -> bool:
+    at, au = _digits2(a)
+    bt, bu = _digits2(b)
+    ones_borrow = 1 if au < bu else 0
+    return _digit_sub_combo_is_holdout(au, bu, 0) or _digit_sub_combo_is_holdout(
+        at,
+        bt,
+        ones_borrow,
+    )
+
+
+def generate_digit_add_carry(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a, b, carry = _sample_until_allowed(
+        rng,
+        lambda: (rng.randint(0, 9), rng.randint(0, 9), rng.randint(0, 1)),
+        lambda values: _combo_allowed(
+            _digit_add_combo_is_holdout(*values),
+            profile,
+        ),
+    )
+    total = a + b + carry
+    digit = total % 10
+    next_carry = total // 10
+    combo_key = f"add:{a}:{b}:{carry}"
+    return TrainingExample(
+        id=f"arithmetic.digit_add_carry:{index:08d}",
+        task_type="arithmetic.digit_add_carry",
+        prompt=_case_prefix(rng, profile) + f"DIGIT_ADD a={a} b={b} c={carry}",
+        answer=f"S {digit} C {next_carry}",
+        metadata={
+            "a": a,
+            "b": b,
+            "carry_in": carry,
+            "sum_digit": digit,
+            "carry_out": next_carry,
+            "operation": "digit_add_carry",
+            "digit_combo_key": combo_key,
+            "digit_combo_keys": [combo_key],
+            "holdout_digit_combo": _digit_add_combo_is_holdout(a, b, carry),
+        },
+    )
+
+
+def generate_digit_sub_borrow(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a, b, borrow = _sample_until_allowed(
+        rng,
+        lambda: (rng.randint(0, 9), rng.randint(0, 9), rng.randint(0, 1)),
+        lambda values: _combo_allowed(
+            _digit_sub_combo_is_holdout(*values),
+            profile,
+        ),
+    )
+    raw = a - b - borrow
+    next_borrow = 1 if raw < 0 else 0
+    digit = raw + 10 if raw < 0 else raw
+    combo_key = f"sub:{a}:{b}:{borrow}"
+    return TrainingExample(
+        id=f"arithmetic.digit_sub_borrow:{index:08d}",
+        task_type="arithmetic.digit_sub_borrow",
+        prompt=_case_prefix(rng, profile) + f"DIGIT_SUB a={a} b={b} borrow={borrow}",
+        answer=f"S {digit} B {next_borrow}",
+        metadata={
+            "a": a,
+            "b": b,
+            "borrow_in": borrow,
+            "diff_digit": digit,
+            "borrow_out": next_borrow,
+            "operation": "digit_sub_borrow",
+            "digit_combo_key": combo_key,
+            "digit_combo_keys": [combo_key],
+            "holdout_digit_combo": _digit_sub_combo_is_holdout(a, b, borrow),
+        },
+    )
+
+
+def generate_add_2digit_no_carry(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a, b = _sample_until_allowed(
+        rng,
+        lambda: (_sample_two_digit(rng, profile), _sample_two_digit(rng, profile)),
+        lambda values: (
+            _digits2(values[0])[1] + _digits2(values[1])[1] < 10
+            and _digits2(values[0])[0] + _digits2(values[1])[0] < 10
+            and _combo_allowed(_add_has_holdout_combo(*values), profile)
+        ),
+    )
+    return _make_2digit_add_example(
+        index=index,
+        task_type="arithmetic.add_2digit_no_carry",
+        rng=rng,
+        profile=profile,
+        a=a,
+        b=b,
+        operation="add_2digit_no_carry",
+    )
+
+
+def generate_add_2digit_with_carry(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a, b = _sample_until_allowed(
+        rng,
+        lambda: (_sample_two_digit(rng, profile), _sample_two_digit(rng, profile)),
+        lambda values: (
+            _digits2(values[0])[1] + _digits2(values[1])[1] >= 10
+            and _combo_allowed(_add_has_holdout_combo(*values), profile)
+        ),
+    )
+    return _make_2digit_add_example(
+        index=index,
+        task_type="arithmetic.add_2digit_with_carry",
+        rng=rng,
+        profile=profile,
+        a=a,
+        b=b,
+        operation="add_2digit_with_carry",
+    )
+
+
+def _make_2digit_add_example(
+    *,
+    index: int,
+    task_type: str,
+    rng: random.Random,
+    profile: GenerationProfile,
+    a: int,
+    b: int,
+    operation: str,
+) -> TrainingExample:
+    combo_keys = _add_digit_combo_keys(a, b)
+    return TrainingExample(
+        id=f"{task_type}:{index:08d}",
+        task_type=task_type,
+        prompt=_case_prefix(rng, profile) + f"ADD2 {a} + {b}",
+        answer=str(a + b),
+        metadata={
+            "a": a,
+            "b": b,
+            "operation": operation,
+            "digit_combo_keys": combo_keys,
+            "digit_combo_key": "|".join(combo_keys),
+            "holdout_digit_combo": _add_has_holdout_combo(a, b),
+        },
+    )
+
+
+def generate_sub_2digit_no_borrow(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a, b = _sample_until_allowed(
+        rng,
+        lambda: (_sample_two_digit(rng, profile), _sample_two_digit(rng, profile)),
+        lambda values: (
+            values[0] >= values[1]
+            and _digits2(values[0])[1] >= _digits2(values[1])[1]
+            and _digits2(values[0])[0] >= _digits2(values[1])[0]
+            and _combo_allowed(_sub_has_holdout_combo(*values), profile)
+        ),
+    )
+    return _make_2digit_sub_example(
+        index=index,
+        task_type="arithmetic.sub_2digit_no_borrow",
+        rng=rng,
+        profile=profile,
+        a=a,
+        b=b,
+        operation="sub_2digit_no_borrow",
+    )
+
+
+def generate_sub_2digit_with_borrow(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    a, b = _sample_until_allowed(
+        rng,
+        lambda: (_sample_two_digit(rng, profile), _sample_two_digit(rng, profile)),
+        lambda values: (
+            values[0] >= values[1]
+            and _digits2(values[0])[1] < _digits2(values[1])[1]
+            and _combo_allowed(_sub_has_holdout_combo(*values), profile)
+        ),
+    )
+    return _make_2digit_sub_example(
+        index=index,
+        task_type="arithmetic.sub_2digit_with_borrow",
+        rng=rng,
+        profile=profile,
+        a=a,
+        b=b,
+        operation="sub_2digit_with_borrow",
+    )
+
+
+def _make_2digit_sub_example(
+    *,
+    index: int,
+    task_type: str,
+    rng: random.Random,
+    profile: GenerationProfile,
+    a: int,
+    b: int,
+    operation: str,
+) -> TrainingExample:
+    combo_keys = _sub_digit_combo_keys(a, b)
+    return TrainingExample(
+        id=f"{task_type}:{index:08d}",
+        task_type=task_type,
+        prompt=_case_prefix(rng, profile) + f"SUB2 {a} - {b}",
+        answer=str(a - b),
+        metadata={
+            "a": a,
+            "b": b,
+            "operation": operation,
+            "digit_combo_keys": combo_keys,
+            "digit_combo_key": "|".join(combo_keys),
+            "holdout_digit_combo": _sub_has_holdout_combo(a, b),
+        },
+    )
+
+
+def generate_missing_addend_simple(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    known, missing = _sample_until_allowed(
+        rng,
+        lambda: (_sample_two_digit(rng, profile), rng.randint(0, 49)),
+        lambda values: _combo_allowed(
+            _sub_has_holdout_combo(values[0] + values[1], values[0])
+            if values[0] + values[1] <= 99
+            else False,
+            profile,
+        ),
+    )
+    total = known + missing
+    combo_keys = _sub_digit_combo_keys(total, known) if total <= 99 else []
+    return TrainingExample(
+        id=f"arithmetic.missing_addend_simple:{index:08d}",
+        task_type="arithmetic.missing_addend_simple",
+        prompt=_case_prefix(rng, profile)
+        + f"MISSING_ADDEND known={known} target={total}",
+        answer=str(missing),
+        metadata={
+            "known": known,
+            "target": total,
+            "missing": missing,
+            "operation": "missing_addend_as_subtraction",
+            "digit_combo_keys": combo_keys,
+            "digit_combo_key": "|".join(combo_keys),
+            "holdout_digit_combo": _sub_has_holdout_combo(total, known)
+            if total <= 99
+            else False,
+        },
+    )
+
+
+def _simple_addend_range(profile: GenerationProfile) -> tuple[int, int]:
+    if profile.name == "eval_far_range":
+        return 50, 99
+    if profile.name in {
+        "train_shifted_prime",
+        "eval_shifted_in_distribution",
+        "eval_holdout_digit_combinations",
+    }:
+        return 20, 79
+    return 0, 49
+
+
+def generate_compare_sum_simple(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    low, high = _simple_addend_range(profile)
+    a, b, c, d = _sample_until_allowed(
+        rng,
+        lambda: (
+            rng.randint(low, high),
+            rng.randint(low, high),
+            rng.randint(low, high),
+            rng.randint(low, high),
+        ),
+        lambda values: (
+            values[0] + values[1] != values[2] + values[3]
+            and _combo_allowed(
+                _digit_add_combo_is_holdout(values[0] % 10, values[1] % 10, 0)
+                or _digit_add_combo_is_holdout(values[2] % 10, values[3] % 10, 0),
+                profile,
+            )
+        ),
+    )
+    left = a + b
+    right = c + d
+    combo_keys = [
+        *_add_digit_combo_keys(a % 100, b % 100),
+        *_add_digit_combo_keys(c % 100, d % 100),
+    ]
+    return TrainingExample(
+        id=f"arithmetic.compare_sum_simple:{index:08d}",
+        task_type="arithmetic.compare_sum_simple",
+        prompt=_case_prefix(rng, profile) + f"COMPARE_SUM {a} + {b} vs {c} + {d}",
+        answer=str(max(left, right)),
+        metadata={
+            "a": a,
+            "b": b,
+            "c": c,
+            "d": d,
+            "left": left,
+            "right": right,
+            "operation": "compare_sum_simple",
+            "digit_combo_keys": combo_keys,
+            "digit_combo_key": "|".join(combo_keys),
+            "holdout_digit_combo": any(
+                _digit_add_combo_is_holdout(*tuple(map(int, key.split(":")[1:])))
+                for key in combo_keys
+            ),
+        },
+    )
+
+
+def generate_double_step_simple(
+    rng: random.Random,
+    index: int,
+    profile: GenerationProfile = TRAIN_PROFILE,
+) -> TrainingExample:
+    subset = rng.choice(["no_carry_no_borrow", "carry_or_borrow"])
+    a, b, c = _sample_until_allowed(
+        rng,
+        lambda: (
+            _sample_two_digit(rng, profile),
+            rng.randint(0, 49),
+            rng.randint(0, 49),
+        ),
+        lambda values: _double_step_allowed(values, subset, profile),
+    )
+    mid = a + b
+    answer = mid - c
+    add_keys = _add_digit_combo_keys(a % 100, b % 100)
+    sub_keys = _sub_digit_combo_keys(mid % 100, c % 100)
+    combo_keys = [*add_keys, *sub_keys]
+    return TrainingExample(
+        id=f"arithmetic.double_step_simple:{index:08d}",
+        task_type="arithmetic.double_step_simple",
+        prompt=_case_prefix(rng, profile) + f"DOUBLE_STEP {a} + {b} - {c}",
+        answer=str(answer),
+        metadata={
+            "a": a,
+            "b": b,
+            "c": c,
+            "mid": mid,
+            "subset": subset,
+            "operation": "double_step_simple",
+            "digit_combo_keys": combo_keys,
+            "digit_combo_key": "|".join(combo_keys),
+            "holdout_digit_combo": any(
+                _digit_add_combo_is_holdout(*tuple(map(int, key.split(":")[1:])))
+                if key.startswith("add:")
+                else _digit_sub_combo_is_holdout(*tuple(map(int, key.split(":")[1:])))
+                for key in combo_keys
+            ),
+        },
+    )
+
+
+def _double_step_allowed(
+    values: tuple[int, ...],
+    subset: str,
+    profile: GenerationProfile,
+) -> bool:
+    a, b, c = values
+    mid = a + b
+    if mid < c or mid > 99 or c > 99:
+        return False
+    add_carry = _digits2(a % 100)[1] + _digits2(b % 100)[1] >= 10
+    sub_borrow = _digits2(mid % 100)[1] < _digits2(c % 100)[1]
+    if subset == "no_carry_no_borrow" and (add_carry or sub_borrow):
+        return False
+    if subset == "carry_or_borrow" and not (add_carry or sub_borrow):
+        return False
+    has_holdout = _add_has_holdout_combo(a % 100, b % 100) or _sub_has_holdout_combo(
+        mid % 100,
+        c % 100,
+    )
+    return _combo_allowed(has_holdout, profile)
 
 
 def generate_arithmetic_progression(
@@ -1342,6 +1846,15 @@ GENERATOR_FUNCTIONS: dict[GeneratorName, GeneratorFunction] = {
     "arithmetic.missing_addend": generate_missing_addend,
     "arithmetic.compare_sum": generate_compare_sum,
     "arithmetic.double_step": generate_double_step,
+    "arithmetic.digit_add_carry": generate_digit_add_carry,
+    "arithmetic.digit_sub_borrow": generate_digit_sub_borrow,
+    "arithmetic.add_2digit_no_carry": generate_add_2digit_no_carry,
+    "arithmetic.add_2digit_with_carry": generate_add_2digit_with_carry,
+    "arithmetic.sub_2digit_no_borrow": generate_sub_2digit_no_borrow,
+    "arithmetic.sub_2digit_with_borrow": generate_sub_2digit_with_borrow,
+    "arithmetic.missing_addend_simple": generate_missing_addend_simple,
+    "arithmetic.compare_sum_simple": generate_compare_sum_simple,
+    "arithmetic.double_step_simple": generate_double_step_simple,
     "sequence.arithmetic_progression": generate_arithmetic_progression,
     "sequence.decreasing_progression": generate_decreasing_progression,
     "sequence.missing_middle": generate_missing_middle,

@@ -28,6 +28,51 @@ TASK_PRESETS: dict[str, TaskPreset] = {
         ),
         description="Arithmetic reasoning tasks.",
     ),
+    "digit_add_carry": TaskPreset(
+        name="digit_add_carry",
+        task_types=("arithmetic.digit_add_carry",),
+        description="Single digit addition with incoming carry.",
+    ),
+    "digit_sub_borrow": TaskPreset(
+        name="digit_sub_borrow",
+        task_types=("arithmetic.digit_sub_borrow",),
+        description="Single digit subtraction with incoming borrow.",
+    ),
+    "add_2digit_no_carry": TaskPreset(
+        name="add_2digit_no_carry",
+        task_types=("arithmetic.add_2digit_no_carry",),
+        description="Two-digit addition without carry.",
+    ),
+    "add_2digit_with_carry": TaskPreset(
+        name="add_2digit_with_carry",
+        task_types=("arithmetic.add_2digit_with_carry",),
+        description="Two-digit addition with carry.",
+    ),
+    "sub_2digit_no_borrow": TaskPreset(
+        name="sub_2digit_no_borrow",
+        task_types=("arithmetic.sub_2digit_no_borrow",),
+        description="Two-digit subtraction without borrow.",
+    ),
+    "sub_2digit_with_borrow": TaskPreset(
+        name="sub_2digit_with_borrow",
+        task_types=("arithmetic.sub_2digit_with_borrow",),
+        description="Two-digit subtraction with borrow.",
+    ),
+    "missing_addend_simple": TaskPreset(
+        name="missing_addend_simple",
+        task_types=("arithmetic.missing_addend_simple",),
+        description="Missing addend represented as target minus known.",
+    ),
+    "compare_sum_simple": TaskPreset(
+        name="compare_sum_simple",
+        task_types=("arithmetic.compare_sum_simple",),
+        description="Compute and compare two sums.",
+    ),
+    "double_step_simple": TaskPreset(
+        name="double_step_simple",
+        task_types=("arithmetic.double_step_simple",),
+        description="Add then subtract with simple subset labels.",
+    ),
     "quantity_direct": TaskPreset(
         name="quantity_direct",
         task_types=(

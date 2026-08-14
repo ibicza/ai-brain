@@ -8,9 +8,10 @@ from pathlib import Path
 
 from ai_brain.data.answer_format import ANSWER_FORMAT_NAMES
 from ai_brain.data.generators import GENERATION_PROFILES, GENERATOR_NAMES
-from ai_brain.data.presets import TASK_PRESETS, resolve_task_selection
+from ai_brain.data.presets import TASK_PRESETS, get_task_preset, resolve_task_selection
 from ai_brain.data.writer import (
     dataset_stats,
+    generate_arithmetic_primitive_split,
     generate_data_split,
     generate_jsonl,
     generate_range_ablation,
@@ -517,6 +518,84 @@ def build_parser() -> argparse.ArgumentParser:
         "--answer-format",
         choices=ANSWER_FORMAT_NAMES,
         help="Answer/prompt formatting. Defaults to the M-12 recipe for --task-preset.",
+    )
+
+    arithmetic_primitive_parser = subparsers.add_parser(
+        "generate-arithmetic-primitive",
+        help="Generate controlled arithmetic primitive train/eval splits.",
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory for train/eval JSONL files and manifest.json.",
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--primitive",
+        required=True,
+        choices=tuple(
+            name
+            for name in TASK_PRESETS
+            if name
+            in {
+                "digit_add_carry",
+                "digit_sub_borrow",
+                "add_2digit_no_carry",
+                "add_2digit_with_carry",
+                "sub_2digit_no_borrow",
+                "sub_2digit_with_borrow",
+                "missing_addend_simple",
+                "compare_sum_simple",
+                "double_step_simple",
+            }
+        ),
+        help="Arithmetic primitive preset to generate.",
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--train-count",
+        type=int,
+        required=True,
+        help="Number of train_same examples.",
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--eval-count",
+        type=int,
+        help="Number of examples for each eval split.",
+    )
+    arithmetic_primitive_parser.add_argument("--eval-same-count", type=int)
+    arithmetic_primitive_parser.add_argument(
+        "--eval-shifted-in-distribution-count",
+        type=int,
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--eval-holdout-digit-combinations-count",
+        type=int,
+    )
+    arithmetic_primitive_parser.add_argument("--eval-far-range-count", type=int)
+    arithmetic_primitive_parser.add_argument("--train-seed", type=int, required=True)
+    arithmetic_primitive_parser.add_argument(
+        "--eval-same-seed", type=int, required=True
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--eval-shifted-in-distribution-seed",
+        type=int,
+        required=True,
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--eval-holdout-digit-combinations-seed",
+        type=int,
+        required=True,
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--eval-far-range-seed",
+        type=int,
+        required=True,
+    )
+    arithmetic_primitive_parser.add_argument(
+        "--answer-format",
+        choices=ANSWER_FORMAT_NAMES,
+        default="compact_digit_trace",
+        help="Answer format for generated examples.",
     )
 
     dataset_stats_parser = subparsers.add_parser(
@@ -1154,6 +1233,61 @@ def main(argv: Sequence[str] | None = None) -> int:
             eval_far_shifted_profile=args.eval_far_shifted_profile,
             task_preset=task_preset,
             answer_format=answer_format,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-arithmetic-primitive":
+        preset = get_task_preset(args.primitive)
+        eval_same_count = (
+            args.eval_same_count
+            if args.eval_same_count is not None
+            else args.eval_count
+        )
+        eval_shifted_in_distribution_count = (
+            args.eval_shifted_in_distribution_count
+            if args.eval_shifted_in_distribution_count is not None
+            else args.eval_count
+        )
+        eval_holdout_digit_combinations_count = (
+            args.eval_holdout_digit_combinations_count
+            if args.eval_holdout_digit_combinations_count is not None
+            else args.eval_count
+        )
+        eval_far_range_count = (
+            args.eval_far_range_count
+            if args.eval_far_range_count is not None
+            else args.eval_count
+        )
+        if (
+            eval_same_count is None
+            or eval_shifted_in_distribution_count is None
+            or eval_holdout_digit_combinations_count is None
+            or eval_far_range_count is None
+        ):
+            parser.error(
+                "generate-arithmetic-primitive requires --eval-count or all four "
+                "specific eval count arguments."
+            )
+        result = generate_arithmetic_primitive_split(
+            output_dir=args.output_dir,
+            train_count=args.train_count,
+            eval_same_count=eval_same_count,
+            eval_shifted_in_distribution_count=eval_shifted_in_distribution_count,
+            eval_holdout_digit_combinations_count=(
+                eval_holdout_digit_combinations_count
+            ),
+            eval_far_range_count=eval_far_range_count,
+            train_seed=args.train_seed,
+            eval_same_seed=args.eval_same_seed,
+            eval_shifted_in_distribution_seed=(args.eval_shifted_in_distribution_seed),
+            eval_holdout_digit_combinations_seed=(
+                args.eval_holdout_digit_combinations_seed
+            ),
+            eval_far_range_seed=args.eval_far_range_seed,
+            task_types=preset.task_types,
+            task_preset=preset.name,
+            answer_format=args.answer_format,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0

@@ -19,6 +19,7 @@ AnswerFormatName = Literal[
     "canonical_numeric",
     "place_role_numeric",
     "r2l_numeric",
+    "compact_digit_trace",
 ]
 
 ANSWER_FORMAT_NAMES: tuple[AnswerFormatName, ...] = (
@@ -29,6 +30,7 @@ ANSWER_FORMAT_NAMES: tuple[AnswerFormatName, ...] = (
     "canonical_numeric",
     "place_role_numeric",
     "r2l_numeric",
+    "compact_digit_trace",
 )
 
 _CASE_PREFIX_RE = re.compile(r"case \d+\.")
@@ -59,6 +61,9 @@ def apply_answer_format(
 
     if answer_format == "r2l_numeric":
         return _format_r2l_numeric(example, answer_format)
+
+    if answer_format == "compact_digit_trace":
+        return _format_compact_digit_trace(example, answer_format)
 
     raise ValueError(f"Unknown answer format: {answer_format}")
 
@@ -157,6 +162,179 @@ def _format_place_role_numeric(
         answer=_place_role_numeric_answer(example),
         metadata=_format_metadata(example, answer_format),
     )
+
+
+def _format_compact_digit_trace(
+    example: TrainingExample,
+    answer_format: AnswerFormatName,
+) -> TrainingExample:
+    return TrainingExample(
+        id=example.id,
+        task_type=example.task_type,
+        prompt=example.prompt,
+        answer=_compact_digit_trace_answer(example),
+        metadata=_format_metadata(example, answer_format),
+    )
+
+
+def _compact_digit_trace_answer(example: TrainingExample) -> str:
+    metadata = example.metadata
+
+    if example.task_type == "arithmetic.digit_add_carry":
+        return f"S {metadata['sum_digit']} C {metadata['carry_out']}"
+
+    if example.task_type == "arithmetic.digit_sub_borrow":
+        return f"S {metadata['diff_digit']} B {metadata['borrow_out']}"
+
+    if example.task_type in {
+        "arithmetic.add_2digit_no_carry",
+        "arithmetic.add_2digit_with_carry",
+        "arithmetic.add",
+    }:
+        return _compact_add_trace(metadata["a"], metadata["b"])
+
+    if example.task_type in {
+        "arithmetic.sub_2digit_no_borrow",
+        "arithmetic.sub_2digit_with_borrow",
+        "arithmetic.subtract",
+    }:
+        return _compact_sub_trace(metadata["a"], metadata["b"])
+
+    if example.task_type in {
+        "arithmetic.missing_addend_simple",
+        "arithmetic.missing_addend",
+    }:
+        known = metadata.get("known", metadata.get("a"))
+        target = metadata.get("target", metadata.get("total"))
+        return "\n".join(
+            [
+                "OP MISS_ADD",
+                f"TARGET {_compact_digits(int(target))}",
+                f"KNOWN {_compact_digits(int(known))}",
+                *_compact_sub_rows(int(target), int(known)),
+                f"OUT {int(target) - int(known)}",
+            ]
+        )
+
+    if example.task_type in {
+        "arithmetic.compare_sum_simple",
+        "arithmetic.compare_sum",
+    }:
+        a = metadata["a"]
+        b = metadata["b"]
+        c = metadata["c"]
+        d = metadata["d"]
+        left = a + b
+        right = c + d
+        return "\n".join(
+            [
+                "OP COMPARE_SUM",
+                f"L_A {_compact_digits(a)}",
+                f"L_B {_compact_digits(b)}",
+                *_compact_add_rows(a, b, prefix="L"),
+                f"L_OUT {left}",
+                f"R_A {_compact_digits(c)}",
+                f"R_B {_compact_digits(d)}",
+                *_compact_add_rows(c, d, prefix="R"),
+                f"R_OUT {right}",
+                f"CMP {left} {'>' if left > right else '<'} {right}",
+                f"OUT {max(left, right)}",
+            ]
+        )
+
+    if example.task_type in {
+        "arithmetic.double_step_simple",
+        "arithmetic.double_step",
+    }:
+        a = metadata["a"]
+        b = metadata["b"]
+        c = metadata["c"]
+        mid = a + b
+        return "\n".join(
+            [
+                "OP DOUBLE",
+                f"A {_compact_digits(a)}",
+                f"B {_compact_digits(b)}",
+                *_compact_add_rows(a, b, prefix="M"),
+                f"MID {mid}",
+                f"C {_compact_digits(c)}",
+                *_compact_sub_rows(mid, c, prefix="O"),
+                f"OUT {mid - c}",
+            ]
+        )
+
+    if example.answer.isdecimal():
+        return f"OUT {example.answer}"
+
+    return example.answer
+
+
+def _compact_add_trace(a: int, b: int) -> str:
+    return "\n".join(
+        [
+            "OP ADD",
+            f"A {_compact_digits(a)}",
+            f"B {_compact_digits(b)}",
+            *_compact_add_rows(a, b),
+            f"OUT {a + b}",
+        ]
+    )
+
+
+def _compact_sub_trace(a: int, b: int) -> str:
+    return "\n".join(
+        [
+            "OP SUB",
+            f"A {_compact_digits(a)}",
+            f"B {_compact_digits(b)}",
+            *_compact_sub_rows(a, b),
+            f"OUT {a - b}",
+        ]
+    )
+
+
+def _compact_add_rows(a: int, b: int, *, prefix: str = "") -> list[str]:
+    carry = 0
+    rows: list[str] = []
+    for label, left, right in _compact_digit_pairs(a, b):
+        total = left + right + carry
+        digit = total % 10
+        next_carry = total // 10
+        row_label = f"{prefix}_{label}" if prefix else label
+        rows.append(f"{row_label} {left} {right} {carry} -> {digit} {next_carry}")
+        carry = next_carry
+    return rows
+
+
+def _compact_sub_rows(a: int, b: int, *, prefix: str = "") -> list[str]:
+    borrow = 0
+    rows: list[str] = []
+    for label, top, bottom in _compact_digit_pairs(a, b):
+        adjusted = top - borrow
+        next_borrow = 0
+        if adjusted < bottom:
+            adjusted += 10
+            next_borrow = 1
+        row_label = f"{prefix}_{label}" if prefix else label
+        rows.append(
+            f"{row_label} {top} {bottom} {borrow} -> {adjusted - bottom} {next_borrow}"
+        )
+        borrow = next_borrow
+    return rows
+
+
+def _compact_digit_pairs(a: int, b: int) -> list[tuple[str, int, int]]:
+    max_digits = max(len(digits_of_number(a)), len(digits_of_number(b)), 2)
+    pairs: list[tuple[str, int, int]] = []
+    labels = ["U", "T", "H", "K"]
+    for index in range(max_digits):
+        label = labels[index] if index < len(labels) else f"D{index}"
+        pairs.append((label, _digit_from_right(a, index), _digit_from_right(b, index)))
+    return pairs
+
+
+def _compact_digits(value: int) -> str:
+    return " ".join(str(digit) for digit in digits_of_number(value))
 
 
 def _place_role_prompt(example: TrainingExample) -> str:

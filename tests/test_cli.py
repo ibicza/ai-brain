@@ -167,10 +167,10 @@ def test_generate_data_rejects_unknown_task_preset(capsys, tmp_path) -> None:
 
     captured = capsys.readouterr()
 
-    assert (
-        "Unknown task preset: foo. Available presets: "
-        "arithmetic, quantity_direct, sorting_short, state_change"
-    ) in captured.err
+    assert "Unknown task preset: foo. Available presets:" in captured.err
+    assert "arithmetic" in captured.err
+    assert "digit_add_carry" in captured.err
+    assert "double_step_simple" in captured.err
 
 
 def test_generate_data_split_command(tmp_path, capsys) -> None:
@@ -400,6 +400,45 @@ def test_generate_range_primed_command_uses_preset_recipe(tmp_path, capsys) -> N
     assert manifest["profiles"]["eval_far_shifted"] == "eval_far_shifted"
     assert manifest["splits"]["train_shifted_prime"]["count"] == 1
     assert manifest["quality_checks"]["all_prompt_intersections_zero"] is True
+
+
+def test_generate_arithmetic_primitive_command(tmp_path, capsys) -> None:
+    output_dir = tmp_path / "m13_digit_add"
+
+    exit_code = main(
+        [
+            "generate-arithmetic-primitive",
+            "--output-dir",
+            str(output_dir),
+            "--primitive",
+            "digit_add_carry",
+            "--train-count",
+            "40",
+            "--eval-count",
+            "20",
+            "--train-seed",
+            "1000",
+            "--eval-same-seed",
+            "2000",
+            "--eval-shifted-in-distribution-seed",
+            "3000",
+            "--eval-holdout-digit-combinations-seed",
+            "4000",
+            "--eval-far-range-seed",
+            "5000",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    manifest = result["manifest"]
+
+    assert exit_code == 0
+    assert result["answer_format"] == "compact_digit_trace"
+    assert (output_dir / "eval_holdout_digit_combinations.jsonl").exists()
+    assert (output_dir / "eval_far_range.jsonl").exists()
+    assert manifest["task_preset"] == "digit_add_carry"
+    assert manifest["splits"]["eval_far_range"]["count"] == 20
 
 
 def test_dataset_stats_command(tmp_path, capsys) -> None:

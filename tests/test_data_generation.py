@@ -19,6 +19,7 @@ from ai_brain.data.templates import (
 )
 from ai_brain.data.writer import (
     dataset_stats,
+    generate_arithmetic_primitive_split,
     generate_data_split,
     generate_jsonl,
     generate_range_ablation,
@@ -781,12 +782,21 @@ def test_dataset_stats_reports_top_duplicate_prompts(tmp_path: Path) -> None:
 
 
 def test_task_preset_registry_contains_required_presets() -> None:
-    assert set(TASK_PRESETS) == {
+    assert {
         "arithmetic",
         "quantity_direct",
         "sorting_short",
         "state_change",
-    }
+        "digit_add_carry",
+        "digit_sub_borrow",
+        "add_2digit_no_carry",
+        "add_2digit_with_carry",
+        "sub_2digit_no_borrow",
+        "sub_2digit_with_borrow",
+        "missing_addend_simple",
+        "compare_sum_simple",
+        "double_step_simple",
+    }.issubset(TASK_PRESETS)
     assert TASK_PRESETS["quantity_direct"].task_types == (
         "quantity.direct",
         "quantity.location_direct",
@@ -822,10 +832,11 @@ def test_resolve_task_selection_rejects_unknown_preset() -> None:
     try:
         resolve_task_selection(task_preset="foo", task_types=None)
     except ValueError as error:
-        assert str(error) == (
-            "Unknown task preset: foo. Available presets: "
-            "arithmetic, quantity_direct, sorting_short, state_change"
-        )
+        message = str(error)
+        assert "Unknown task preset: foo. Available presets:" in message
+        assert "arithmetic" in message
+        assert "digit_add_carry" in message
+        assert "double_step_simple" in message
     else:
         raise AssertionError("Expected ValueError")
 
@@ -1155,3 +1166,104 @@ def test_r2l_numeric_keeps_non_decimal_answers_final_answer_scored() -> None:
 
     assert formatted.prompt == "Sort 9 2, 6 0, 8 5."
     assert formatted.answer == "answer: 60, 85, 92"
+
+
+def test_compact_digit_trace_formats_2digit_addition() -> None:
+    example = TrainingExample(
+        id="arithmetic.add_2digit_with_carry:00000000",
+        task_type="arithmetic.add_2digit_with_carry",
+        prompt="ADD2 71 + 63",
+        answer="134",
+        metadata={"a": 71, "b": 63, "operation": "add_2digit_with_carry"},
+    )
+
+    formatted = apply_answer_format(example, "compact_digit_trace")
+
+    assert (
+        formatted.answer
+        == "OP ADD\nA 7 1\nB 6 3\nU 1 3 0 -> 4 0\nT 7 6 0 -> 3 1\nOUT 134"
+    )
+    assert formatted.metadata["answer_format"] == "compact_digit_trace"
+
+
+def test_compact_digit_trace_formats_digit_sub_borrow() -> None:
+    example = TrainingExample(
+        id="arithmetic.digit_sub_borrow:00000000",
+        task_type="arithmetic.digit_sub_borrow",
+        prompt="DIGIT_SUB a=2 b=8 borrow=0",
+        answer="S 4 B 1",
+        metadata={
+            "a": 2,
+            "b": 8,
+            "borrow_in": 0,
+            "diff_digit": 4,
+            "borrow_out": 1,
+        },
+    )
+
+    formatted = apply_answer_format(example, "compact_digit_trace")
+
+    assert formatted.answer == "S 4 B 1"
+
+
+def test_arithmetic_primitive_profiles_split_digit_combinations() -> None:
+    train = generate_examples(
+        count=200,
+        seed=6100,
+        task_types=["arithmetic.digit_add_carry"],
+        profile="train_same",
+    )
+    holdout = generate_examples(
+        count=100,
+        seed=6200,
+        task_types=["arithmetic.digit_add_carry"],
+        profile="eval_holdout_digit_combinations",
+    )
+
+    assert {example.metadata["holdout_digit_combo"] for example in train} == {False}
+    assert {example.metadata["holdout_digit_combo"] for example in holdout} == {True}
+    assert len({example.metadata["digit_combo_key"] for example in train}) > 20
+    assert len({example.metadata["digit_combo_key"] for example in holdout}) > 10
+
+
+def test_generate_arithmetic_primitive_split_writes_digit_holdout_manifest(
+    tmp_path: Path,
+) -> None:
+    output_dir = tmp_path / "m13_digit_add"
+
+    result = generate_arithmetic_primitive_split(
+        output_dir=output_dir,
+        train_count=80,
+        eval_same_count=40,
+        eval_shifted_in_distribution_count=40,
+        eval_holdout_digit_combinations_count=30,
+        eval_far_range_count=30,
+        train_seed=1000,
+        eval_same_seed=2000,
+        eval_shifted_in_distribution_seed=3000,
+        eval_holdout_digit_combinations_seed=4000,
+        eval_far_range_seed=5000,
+        task_types=["arithmetic.digit_add_carry"],
+        task_preset="digit_add_carry",
+        answer_format="compact_digit_trace",
+    )
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+
+    assert result["answer_format"] == "compact_digit_trace"
+    assert len(read_jsonl(output_dir / "train.jsonl")) == 80
+    assert len(read_jsonl(output_dir / "eval_holdout_digit_combinations.jsonl")) == 30
+    assert (output_dir / "eval_far_range.jsonl").exists()
+    assert manifest["kind"] == "arithmetic_primitive"
+    assert manifest["quality_checks"]["all_prompt_intersections_zero"] is True
+    assert (
+        manifest["splits"]["train_same"]["digit_combination_coverage"][
+            "unique_digit_combo_count"
+        ]
+        > 0
+    )
+    assert (
+        manifest["quality_checks"]["digit_combo_overlaps_with_train"][
+            "eval_holdout_digit_combinations"
+        ]["eval_unseen_digit_combo_fraction"]
+        == 1.0
+    )
