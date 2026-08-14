@@ -6,13 +6,18 @@ from torch import nn
 
 from ai_brain.model.config import ModelConfig
 from ai_brain.model.recurrent_transformer import RecurrentCausalTransformer
-from ai_brain.model.tiny_transformer import TinyCausalTransformer
+from ai_brain.model.tiny_transformer import (
+    TinyCausalTransformer,
+    TinyNumericCausalTransformer,
+)
 
 
 def build_model(config: ModelConfig) -> nn.Module:
     config.validate()
     if config.model_type == "tiny":
         return TinyCausalTransformer(config)
+    if config.model_type == "numeric":
+        return TinyNumericCausalTransformer(config)
     if config.model_type == "recurrent":
         return RecurrentCausalTransformer(config)
     raise ValueError(f"Unknown model_type: {config.model_type}")
@@ -21,6 +26,8 @@ def build_model(config: ModelConfig) -> nn.Module:
 def model_class_name(config: ModelConfig) -> str:
     if config.model_type == "tiny":
         return "TinyCausalTransformer"
+    if config.model_type == "numeric":
+        return "TinyNumericCausalTransformer"
     if config.model_type == "recurrent":
         return "RecurrentCausalTransformer"
     raise ValueError(f"Unknown model_type: {config.model_type}")

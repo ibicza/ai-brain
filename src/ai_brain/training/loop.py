@@ -10,6 +10,7 @@ import torch.nn.functional as F
 from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
 from ai_brain.model.config import get_named_model_config
 from ai_brain.model.factory import build_model, model_class_name
+from ai_brain.numeric_features import NUMERIC_FEATURE_KEYS
 from ai_brain.runtime.device import get_device_info
 from ai_brain.training.batching import sample_batch
 from ai_brain.training.checkpoint import load_checkpoint, save_checkpoint
@@ -64,7 +65,7 @@ def evaluate_loss(
             device=device,
             generator=generator,
         )
-        logits = model(batch["input_ids"])
+        logits = _model_logits(model, batch)
         loss = compute_lm_loss(logits, batch["labels"])
         if not torch.isfinite(loss):
             raise ValueError(f"Non-finite eval loss: {loss.item()}")
@@ -78,6 +79,18 @@ def evaluate_loss(
     if not losses:
         raise ValueError("Evaluation produced no finite losses")
     return sum(losses) / len(losses)
+
+
+def _model_logits(
+    model: torch.nn.Module,
+    batch: dict[str, torch.Tensor],
+) -> torch.Tensor:
+    if getattr(model, "uses_numeric_features", False):
+        return model(
+            batch["input_ids"],
+            **{key: batch[key] for key in NUMERIC_FEATURE_KEYS},
+        )
+    return model(batch["input_ids"])
 
 
 def train_lm(config: TrainConfig) -> dict[str, Any]:
@@ -181,7 +194,7 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
             device=device,
             generator=generator,
         )
-        logits = model(batch["input_ids"])
+        logits = _model_logits(model, batch)
         loss = compute_lm_loss(logits, batch["labels"])
         if not torch.isfinite(loss):
             raise ValueError(f"Non-finite train loss at step {step}: {loss.item()}")

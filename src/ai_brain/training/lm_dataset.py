@@ -17,10 +17,15 @@ from ai_brain.language.tokenizer.special_tokens import (
     PAD_TOKEN,
     PROMPT_TOKEN,
 )
+from ai_brain.numeric_features import (
+    NUMERIC_FEATURE_KEYS,
+    NumericFeatureArrays,
+    encode_text_numeric_features,
+)
 from ai_brain.training.config import LossMode
 
 IGNORE_INDEX = -100
-CACHE_FORMAT_VERSION = 2
+CACHE_FORMAT_VERSION = 3
 
 
 @dataclass(frozen=True)
@@ -28,6 +33,10 @@ class EncodedLmExample:
     input_ids: list[int]
     labels: list[int]
     attention_mask: list[int]
+    digit_value_ids: list[int]
+    digit_place_ids: list[int]
+    number_role_ids: list[int]
+    operation_step_ids: list[int]
     truncated: bool
     supervised_token_count: int
 
@@ -40,6 +49,10 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
         labels: torch.Tensor,
         attention_mask: torch.Tensor,
         metadata: dict[str, Any],
+        digit_value_ids: torch.Tensor | None = None,
+        digit_place_ids: torch.Tensor | None = None,
+        number_role_ids: torch.Tensor | None = None,
+        operation_step_ids: torch.Tensor | None = None,
     ) -> None:
         if input_ids.shape != labels.shape or input_ids.shape != attention_mask.shape:
             raise ValueError(
@@ -51,6 +64,12 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
         self.input_ids = input_ids.long()
         self.labels = labels.long()
         self.attention_mask = attention_mask.long()
+        self.digit_value_ids = _feature_tensor_or_zeros(digit_value_ids, input_ids)
+        self.digit_place_ids = _feature_tensor_or_zeros(digit_place_ids, input_ids)
+        self.number_role_ids = _feature_tensor_or_zeros(number_role_ids, input_ids)
+        self.operation_step_ids = _feature_tensor_or_zeros(
+            operation_step_ids, input_ids
+        )
         self.metadata = metadata
 
     def __len__(self) -> int:
@@ -61,6 +80,10 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
             "input_ids": self.input_ids[index],
             "labels": self.labels[index],
             "attention_mask": self.attention_mask[index],
+            "digit_value_ids": self.digit_value_ids[index],
+            "digit_place_ids": self.digit_place_ids[index],
+            "number_role_ids": self.number_role_ids[index],
+            "operation_step_ids": self.operation_step_ids[index],
         }
 
 
@@ -82,9 +105,43 @@ def encode_lm_example(
     prefix_text = f"{PROMPT_TOKEN}\n{prompt.strip()}\n{ANSWER_TOKEN}\n"
     answer_text = f"{answer.strip()}\n{END_TOKEN}"
 
-    prefix_ids = [bos_id, *tokenizer.encode(prefix_text)]
-    answer_ids = [*tokenizer.encode(answer_text), eos_id]
+    prefix_token_ids, prefix_features = encode_text_numeric_features(
+        prefix_text,
+        tokenizer,
+    )
+    answer_token_ids, answer_features = encode_text_numeric_features(
+        answer_text,
+        tokenizer,
+    )
+    prefix_ids = [bos_id, *prefix_token_ids]
+    answer_ids = [*answer_token_ids, eos_id]
     ids = [*prefix_ids, *answer_ids]
+    feature_arrays = NumericFeatureArrays(
+        digit_value_ids=[
+            0,
+            *prefix_features.digit_value_ids,
+            *answer_features.digit_value_ids,
+            0,
+        ],
+        digit_place_ids=[
+            0,
+            *prefix_features.digit_place_ids,
+            *answer_features.digit_place_ids,
+            0,
+        ],
+        number_role_ids=[
+            0,
+            *prefix_features.number_role_ids,
+            *answer_features.number_role_ids,
+            0,
+        ],
+        operation_step_ids=[
+            0,
+            *prefix_features.operation_step_ids,
+            *answer_features.operation_step_ids,
+            0,
+        ],
+    )
 
     if loss_mode == "answer-only":
         labels = [IGNORE_INDEX] * len(prefix_ids) + answer_ids
@@ -97,6 +154,12 @@ def encode_lm_example(
     if truncated:
         ids = ids[:sequence_length]
         labels = labels[:sequence_length]
+        feature_arrays = NumericFeatureArrays(
+            digit_value_ids=feature_arrays.digit_value_ids[:sequence_length],
+            digit_place_ids=feature_arrays.digit_place_ids[:sequence_length],
+            number_role_ids=feature_arrays.number_role_ids[:sequence_length],
+            operation_step_ids=feature_arrays.operation_step_ids[:sequence_length],
+        )
 
     supervised_token_count = sum(label != IGNORE_INDEX for label in labels)
     if loss_mode == "answer-only" and supervised_token_count == 0:
@@ -112,11 +175,19 @@ def encode_lm_example(
         ids.extend([pad_id] * pad_count)
         labels.extend([IGNORE_INDEX] * pad_count)
         attention_mask.extend([0] * pad_count)
+        feature_arrays.digit_value_ids.extend([0] * pad_count)
+        feature_arrays.digit_place_ids.extend([0] * pad_count)
+        feature_arrays.number_role_ids.extend([0] * pad_count)
+        feature_arrays.operation_step_ids.extend([0] * pad_count)
 
     return EncodedLmExample(
         input_ids=ids,
         labels=labels,
         attention_mask=attention_mask,
+        digit_value_ids=feature_arrays.digit_value_ids,
+        digit_place_ids=feature_arrays.digit_place_ids,
+        number_role_ids=feature_arrays.number_role_ids,
+        operation_step_ids=feature_arrays.operation_step_ids,
         truncated=truncated,
         supervised_token_count=supervised_token_count,
     )
@@ -171,6 +242,13 @@ def prepare_lm_dataset(
         [example.attention_mask for example in examples],
         dtype=torch.long,
     )
+    feature_tensors = {
+        key: torch.tensor(
+            [getattr(example, key) for example in examples],
+            dtype=torch.long,
+        )
+        for key in NUMERIC_FEATURE_KEYS
+    }
 
     stats = _summarize_encoded_examples(examples)
     metadata = {
@@ -183,6 +261,7 @@ def prepare_lm_dataset(
         "input_ids": input_ids,
         "labels": labels,
         "attention_mask": attention_mask,
+        **feature_tensors,
         "metadata": metadata,
     }
 
@@ -204,6 +283,10 @@ def load_tokenized_lm_dataset(cache_path: Path) -> TokenizedLmDataset:
         labels=payload["labels"],
         attention_mask=payload["attention_mask"],
         metadata=dict(payload["metadata"]),
+        digit_value_ids=payload.get("digit_value_ids"),
+        digit_place_ids=payload.get("digit_place_ids"),
+        number_role_ids=payload.get("number_role_ids"),
+        operation_step_ids=payload.get("operation_step_ids"),
     )
 
 
@@ -220,6 +303,17 @@ def default_lm_cache_path(
         f"{input_path.stem}_{tokenizer_path.stem}_seq{sequence_length}_{loss_name}.pt"
     )
     return cache_dir / filename
+
+
+def _feature_tensor_or_zeros(
+    feature_tensor: torch.Tensor | None,
+    input_ids: torch.Tensor,
+) -> torch.Tensor:
+    if feature_tensor is None:
+        return torch.zeros_like(input_ids, dtype=torch.long)
+    if feature_tensor.shape != input_ids.shape:
+        raise ValueError("numeric feature tensors must match input_ids shape")
+    return feature_tensor.long()
 
 
 def _required_token_id(tokenizer: ByteLevelBpeTokenizer, token: str) -> int:

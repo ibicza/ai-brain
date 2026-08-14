@@ -9,6 +9,10 @@ from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
 from ai_brain.language.tokenizer.special_tokens import BOS_TOKEN, END_TOKEN, EOS_TOKEN
 from ai_brain.language.tokenizer.text_format import format_inference_prompt
 from ai_brain.model.factory import build_model, model_config_from_checkpoint
+from ai_brain.numeric_features import (
+    NUMERIC_FEATURE_KEYS,
+    build_numeric_feature_tensors,
+)
 from ai_brain.training.checkpoint import load_checkpoint
 
 
@@ -56,6 +60,7 @@ def generate_greedy(
     max_new_tokens: int,
     eos_token_id: int,
     end_token_id: int,
+    tokenizer: ByteLevelBpeTokenizer | None = None,
 ) -> list[int]:
     if max_new_tokens <= 0:
         raise ValueError("max_new_tokens must be positive")
@@ -69,7 +74,20 @@ def generate_greedy(
 
     for _ in range(max_new_tokens):
         context = generated[:, -model.config.max_sequence_length :]
-        logits = model(context)
+        if getattr(model, "uses_numeric_features", False):
+            if tokenizer is None:
+                raise ValueError("Numeric model generation requires a tokenizer")
+            feature_tensors = _build_context_feature_tensors(
+                tokenizer=tokenizer,
+                generated=generated,
+            )
+            feature_tensors = {
+                key: value[:, -model.config.max_sequence_length :]
+                for key, value in feature_tensors.items()
+            }
+            logits = model(context, **feature_tensors)
+        else:
+            logits = model(context)
         next_token_id = int(torch.argmax(logits[:, -1, :], dim=-1).item())
         next_token = torch.tensor(
             [[next_token_id]], device=generated.device, dtype=torch.long
@@ -101,7 +119,24 @@ def generate_answer_ids(
         max_new_tokens=max_new_tokens,
         eos_token_id=_required_token_id(tokenizer, EOS_TOKEN),
         end_token_id=_required_token_id(tokenizer, END_TOKEN),
+        tokenizer=tokenizer,
     )
+
+
+def _build_context_feature_tensors(
+    *,
+    tokenizer: ByteLevelBpeTokenizer,
+    generated: torch.Tensor,
+) -> dict[str, torch.Tensor]:
+    input_ids = generated[0].detach().cpu().tolist()
+    text_without_bos = tokenizer.decode(input_ids[1:], skip_special_tokens=False)
+    features = build_numeric_feature_tensors(
+        input_ids=input_ids,
+        text_without_bos=text_without_bos,
+        tokenizer=tokenizer,
+        device=generated.device,
+    )
+    return {key: features[key] for key in NUMERIC_FEATURE_KEYS}
 
 
 def _required_token_id(tokenizer: ByteLevelBpeTokenizer, token: str) -> int:

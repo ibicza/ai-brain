@@ -31,3 +31,18 @@ def test_model_smoke_step_recurrent_debug_cpu() -> None:
     assert isinstance(result["loss"], float)
     assert math.isfinite(result["loss"])
     assert result["parameters_changed"] is True
+
+
+def test_model_smoke_step_numeric_debug_cpu() -> None:
+    info = get_device_info(prefer_cuda=False)
+
+    result = run_model_smoke_step(info, config_name="numeric_debug")
+
+    assert result["model"] == "TinyNumericCausalTransformer"
+    assert result["model_type"] == "numeric"
+    assert result["config_name"] == "numeric_debug"
+    assert result["device"] == "cpu"
+    assert result["logits_shape"] == [2, 16, 256]
+    assert isinstance(result["loss"], float)
+    assert math.isfinite(result["loss"])
+    assert result["parameters_changed"] is True

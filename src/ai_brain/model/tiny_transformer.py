@@ -4,6 +4,13 @@ import torch
 from torch import nn
 
 from ai_brain.model.config import ModelConfig
+from ai_brain.numeric_features import (
+    DIGIT_PLACE_VOCAB_SIZE,
+    DIGIT_VALUE_VOCAB_SIZE,
+    FEATURE_NONE_ID,
+    NUMBER_ROLE_VOCAB_SIZE,
+    OPERATION_STEP_VOCAB_SIZE,
+)
 
 
 class FeedForward(nn.Module):
@@ -101,6 +108,8 @@ class TinyCausalTransformer(nn.Module):
         super().__init__()
 
         config.validate()
+        if config.model_type != "tiny":
+            raise ValueError("TinyCausalTransformer requires model_type='tiny'")
         self.config = config
 
         self.token_embedding = nn.Embedding(config.vocab_size, config.d_model)
@@ -120,6 +129,10 @@ class TinyCausalTransformer(nn.Module):
             self.lm_head.weight = self.token_embedding.weight
 
     def forward(self, input_ids: torch.Tensor) -> torch.Tensor:
+        x = self.embed_tokens_and_positions(input_ids)
+        return self.forward_embeddings(x)
+
+    def embed_tokens_and_positions(self, input_ids: torch.Tensor) -> torch.Tensor:
         if input_ids.ndim != 2:
             raise ValueError("input_ids must have shape [batch_size, sequence_length]")
 
@@ -138,10 +151,79 @@ class TinyCausalTransformer(nn.Module):
         )
 
         x = self.token_embedding(input_ids)
-        x = x + self.position_embedding(positions).unsqueeze(0)
+        return x + self.position_embedding(positions).unsqueeze(0)
 
+    def forward_embeddings(self, x: torch.Tensor) -> torch.Tensor:
         for block in self.blocks:
             x = block(x)
 
         x = self.final_norm(x)
         return self.lm_head(x)
+
+
+class TinyNumericCausalTransformer(TinyCausalTransformer):
+    uses_numeric_features = True
+
+    def __init__(self, config: ModelConfig) -> None:
+        numeric_config = ModelConfig(**{**config.__dict__, "model_type": "tiny"})
+        super().__init__(numeric_config)
+        if config.model_type != "numeric":
+            raise ValueError(
+                "TinyNumericCausalTransformer requires model_type='numeric'"
+            )
+        self.config = config
+        self.digit_value_embedding = nn.Embedding(
+            DIGIT_VALUE_VOCAB_SIZE,
+            config.d_model,
+            padding_idx=FEATURE_NONE_ID,
+        )
+        self.digit_place_embedding = nn.Embedding(
+            DIGIT_PLACE_VOCAB_SIZE,
+            config.d_model,
+            padding_idx=FEATURE_NONE_ID,
+        )
+        self.number_role_embedding = nn.Embedding(
+            NUMBER_ROLE_VOCAB_SIZE,
+            config.d_model,
+            padding_idx=FEATURE_NONE_ID,
+        )
+        self.operation_step_embedding = nn.Embedding(
+            OPERATION_STEP_VOCAB_SIZE,
+            config.d_model,
+            padding_idx=FEATURE_NONE_ID,
+        )
+
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        *,
+        digit_value_ids: torch.Tensor | None = None,
+        digit_place_ids: torch.Tensor | None = None,
+        number_role_ids: torch.Tensor | None = None,
+        operation_step_ids: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        x = self.embed_tokens_and_positions(input_ids)
+        x = x + self.digit_value_embedding(
+            _feature_ids_or_none(digit_value_ids, input_ids)
+        )
+        x = x + self.digit_place_embedding(
+            _feature_ids_or_none(digit_place_ids, input_ids)
+        )
+        x = x + self.number_role_embedding(
+            _feature_ids_or_none(number_role_ids, input_ids)
+        )
+        x = x + self.operation_step_embedding(
+            _feature_ids_or_none(operation_step_ids, input_ids)
+        )
+        return self.forward_embeddings(x)
+
+
+def _feature_ids_or_none(
+    feature_ids: torch.Tensor | None,
+    input_ids: torch.Tensor,
+) -> torch.Tensor:
+    if feature_ids is None:
+        return torch.zeros_like(input_ids, dtype=torch.long)
+    if feature_ids.shape != input_ids.shape:
+        raise ValueError("numeric feature ids must match input_ids shape")
+    return feature_ids.long()

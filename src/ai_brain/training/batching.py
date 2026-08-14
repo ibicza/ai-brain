@@ -34,6 +34,10 @@ def batch_by_indices(
         "input_ids": dataset.input_ids[indices].to(device),
         "labels": dataset.labels[indices].to(device),
         "attention_mask": dataset.attention_mask[indices].to(device),
+        "digit_value_ids": dataset.digit_value_ids[indices].to(device),
+        "digit_place_ids": dataset.digit_place_ids[indices].to(device),
+        "number_role_ids": dataset.number_role_ids[indices].to(device),
+        "operation_step_ids": dataset.operation_step_ids[indices].to(device),
     }
 
 

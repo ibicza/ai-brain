@@ -20,8 +20,8 @@ class ModelConfig:
     output_layers: int = 0
 
     def validate(self) -> None:
-        if self.model_type not in {"tiny", "recurrent"}:
-            raise ValueError("model_type must be 'tiny' or 'recurrent'")
+        if self.model_type not in {"tiny", "recurrent", "numeric"}:
+            raise ValueError("model_type must be 'tiny', 'recurrent', or 'numeric'")
 
         if self.vocab_size <= 0:
             raise ValueError("vocab_size must be positive")
@@ -44,7 +44,7 @@ class ModelConfig:
         if not 0.0 <= self.dropout < 1.0:
             raise ValueError("dropout must be in [0.0, 1.0)")
 
-        if self.model_type == "tiny":
+        if self.model_type in {"tiny", "numeric"}:
             if self.num_layers <= 0:
                 raise ValueError("num_layers must be positive")
             return
@@ -90,6 +90,34 @@ def debug_config() -> ModelConfig:
     )
 
 
+def numeric_debug_config() -> ModelConfig:
+    return ModelConfig(
+        vocab_size=256,
+        max_sequence_length=32,
+        d_model=64,
+        num_layers=1,
+        num_heads=4,
+        ffn_hidden_dim=128,
+        dropout=0.0,
+        tie_embeddings=True,
+        model_type="numeric",
+    )
+
+
+def numeric_tiny_config() -> ModelConfig:
+    return ModelConfig(
+        vocab_size=1024,
+        max_sequence_length=128,
+        d_model=128,
+        num_layers=2,
+        num_heads=4,
+        ffn_hidden_dim=512,
+        dropout=0.0,
+        tie_embeddings=True,
+        model_type="numeric",
+    )
+
+
 def recurrent_debug_config() -> ModelConfig:
     return ModelConfig(
         vocab_size=256,
@@ -129,6 +157,8 @@ def recurrent_tiny_config() -> ModelConfig:
 MODEL_CONFIG_NAMES: tuple[str, ...] = (
     "debug",
     "tiny",
+    "numeric_debug",
+    "numeric_tiny",
     "recurrent_debug",
     "recurrent_tiny",
 )
@@ -140,6 +170,12 @@ def get_named_model_config(name: str) -> ModelConfig:
 
     if name == "tiny":
         return tiny_config()
+
+    if name == "numeric_debug":
+        return numeric_debug_config()
+
+    if name == "numeric_tiny":
+        return numeric_tiny_config()
 
     if name == "recurrent_debug":
         return recurrent_debug_config()

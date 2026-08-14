@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -8,6 +9,12 @@ from tokenizers import Tokenizer, decoders, models, pre_tokenizers, trainers
 from tokenizers.pre_tokenizers import ByteLevel
 
 from ai_brain.language.tokenizer.special_tokens import SPECIAL_TOKENS, UNK_TOKEN
+
+
+@dataclass(frozen=True)
+class EncodedText:
+    ids: list[int]
+    offsets: list[tuple[int, int]]
 
 
 class ByteLevelBpeTokenizer:
@@ -51,6 +58,10 @@ class ByteLevelBpeTokenizer:
 
     def encode(self, text: str) -> list[int]:
         return self._tokenizer.encode(text).ids
+
+    def encode_with_offsets(self, text: str) -> EncodedText:
+        encoded = self._tokenizer.encode(text)
+        return EncodedText(ids=encoded.ids, offsets=list(encoded.offsets))
 
     def decode(self, ids: Iterable[int], *, skip_special_tokens: bool = False) -> str:
         return self._tokenizer.decode(

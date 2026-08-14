@@ -13,9 +13,16 @@ from ai_brain.language.tokenizer.special_tokens import (
     PAD_TOKEN,
 )
 from ai_brain.language.tokenizer.text_format import format_prompt_answer
+from ai_brain.numeric_features import (
+    DIGIT_PLACE_IDS,
+    NUMBER_ROLE_IDS,
+    OPERATION_STEP_IDS,
+    encode_text_numeric_features,
+)
 from ai_brain.training.batching import sample_batch
 from ai_brain.training.config import TrainConfig
 from ai_brain.training.lm_dataset import (
+    CACHE_FORMAT_VERSION,
     IGNORE_INDEX,
     TokenizedLmDataset,
     encode_lm_example,
@@ -192,7 +199,7 @@ def test_prepare_lm_dataset_reuses_matching_cache(tmp_path) -> None:
     assert first["reused"] is False
     assert second["reused"] is True
     assert second["metadata"]["loss_mode"] == "answer-only"
-    assert second["metadata"]["cache_format_version"] == 2
+    assert second["metadata"]["cache_format_version"] == CACHE_FORMAT_VERSION
 
 
 def test_prepare_lm_dataset_rebuilds_on_loss_mode_mismatch(tmp_path) -> None:
@@ -465,3 +472,168 @@ def test_train_lm_init_checkpoint_allows_sequence_length_growth(tmp_path) -> Non
     assert initialized["loaded_key_count"] > 0
     assert initialized["skipped_key_count"] > 0
     assert second["initialized_from_checkpoint"]["skipped_key_count"] > 0
+
+
+def _feature_rows(text: str, tokenizer: ByteLevelBpeTokenizer):
+    ids, features = encode_text_numeric_features(text, tokenizer)
+    tokens = [tokenizer.id_to_token(token_id) for token_id in ids]
+    return tokens, features
+
+
+def test_numeric_feature_extraction_on_add_trace(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "case 1. ADD2_COMPOSED 71 + 63",
+                "answer": "OP ADD\nA 7 1\nB 6 3\nU 1 3 0 -> 4 0\nT 7 6 0 -> 3 1\nOUT 134",
+                "task_type": "arithmetic.add_2digit_composed",
+            }
+        ],
+    )
+
+    _tokens, features = _feature_rows(
+        "OP ADD\nA 7 1\nB 6 3\nU 1 3 0 -> 4 0\nT 7 6 0 -> 3 1\nOUT 134",
+        tokenizer,
+    )
+
+    assert 8 in features.digit_value_ids
+    assert DIGIT_PLACE_IDS["tens"] in features.digit_place_ids
+    assert DIGIT_PLACE_IDS["ones"] in features.digit_place_ids
+    assert NUMBER_ROLE_IDS["a"] in features.number_role_ids
+    assert NUMBER_ROLE_IDS["b"] in features.number_role_ids
+    assert NUMBER_ROLE_IDS["result"] in features.number_role_ids
+    assert NUMBER_ROLE_IDS["carry_out"] in features.number_role_ids
+    assert OPERATION_STEP_IDS["unit_step"] in features.operation_step_ids
+    assert OPERATION_STEP_IDS["tens_step"] in features.operation_step_ids
+    assert OPERATION_STEP_IDS["out"] in features.operation_step_ids
+
+
+def test_numeric_feature_extraction_on_sub_trace(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "case 1. SUB2_COMPOSED 52 - 18",
+                "answer": "OP SUB\nA 5 2\nB 1 8\nU 2 8 0 -> 4 1\nT 5 1 1 -> 3 0\nOUT 34",
+                "task_type": "arithmetic.sub_2digit_composed",
+            }
+        ],
+    )
+
+    _tokens, features = _feature_rows(
+        "OP SUB\nA 5 2\nB 1 8\nU 2 8 0 -> 4 1\nT 5 1 1 -> 3 0\nOUT 34",
+        tokenizer,
+    )
+
+    assert NUMBER_ROLE_IDS["borrow_in"] in features.number_role_ids
+    assert NUMBER_ROLE_IDS["borrow_out"] in features.number_role_ids
+    assert OPERATION_STEP_IDS["unit_step"] in features.operation_step_ids
+    assert OPERATION_STEP_IDS["tens_step"] in features.operation_step_ids
+
+
+def test_encode_lm_example_numeric_feature_lengths_match_input_ids(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "case 1. ADD_DIGIT a=3 b=4 c=0",
+                "answer": "S 7 C 0",
+                "task_type": "arithmetic.digit_add_no_carry",
+            }
+        ],
+    )
+
+    encoded = encode_lm_example(
+        prompt="case 1. ADD_DIGIT a=3 b=4 c=0",
+        answer="S 7 C 0",
+        tokenizer=tokenizer,
+        sequence_length=64,
+        loss_mode="answer-only",
+    )
+
+    assert len(encoded.input_ids) == 64
+    assert len(encoded.digit_value_ids) == len(encoded.input_ids)
+    assert len(encoded.digit_place_ids) == len(encoded.input_ids)
+    assert len(encoded.number_role_ids) == len(encoded.input_ids)
+    assert len(encoded.operation_step_ids) == len(encoded.input_ids)
+    assert any(value != 0 for value in encoded.digit_value_ids)
+
+
+def test_old_text_dataset_gets_none_numeric_features(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(tmp_path, _records())
+    encoded = encode_lm_example(
+        prompt="No numeric structure here.",
+        answer="plain text",
+        tokenizer=tokenizer,
+        sequence_length=32,
+        loss_mode="answer-only",
+    )
+
+    assert set(encoded.digit_value_ids) == {0}
+    assert set(encoded.digit_place_ids) == {0}
+    assert set(encoded.number_role_ids) == {0}
+    assert set(encoded.operation_step_ids) == {0}
+
+
+def test_load_tokenized_lm_dataset_backfills_old_cache_features(tmp_path) -> None:
+    cache_path = tmp_path / "old_cache.pt"
+    input_ids = torch.ones((2, 8), dtype=torch.long)
+    torch.save(
+        {
+            "input_ids": input_ids,
+            "labels": input_ids.clone(),
+            "attention_mask": input_ids.clone(),
+            "metadata": {"cache_format_version": 2},
+        },
+        cache_path,
+    )
+
+    dataset = load_tokenized_lm_dataset(cache_path)
+
+    assert torch.equal(dataset.digit_value_ids, torch.zeros_like(input_ids))
+    assert torch.equal(dataset.operation_step_ids, torch.zeros_like(input_ids))
+
+
+def test_train_lm_can_train_numeric_debug(tmp_path) -> None:
+    records = [
+        {
+            "prompt": "case 1. ADD_DIGIT a=3 b=4 c=0",
+            "answer": "S 7 C 0",
+            "task_type": "arithmetic.digit_add_no_carry",
+        },
+        {
+            "prompt": "case 2. SUB_DIGIT a=8 b=3 borrow=0",
+            "answer": "S 5 B 0",
+            "task_type": "arithmetic.digit_sub_no_borrow",
+        },
+    ]
+    train_path = tmp_path / "train.jsonl"
+    eval_path = tmp_path / "eval.jsonl"
+    output_dir = tmp_path / "numeric_run"
+    cache_dir = tmp_path / "tokenized"
+    _write_jsonl(train_path, records)
+    _write_jsonl(eval_path, records)
+    _tokenizer, tokenizer_path = _train_tokenizer(tmp_path, records)
+
+    result = train_lm(
+        TrainConfig(
+            train_path=train_path,
+            eval_path=eval_path,
+            tokenizer_path=tokenizer_path,
+            output_dir=output_dir,
+            model_config_name="numeric_debug",
+            steps=1,
+            batch_size=2,
+            sequence_length=64,
+            loss_mode="answer-only",
+            eval_every=1,
+            eval_batches=1,
+            save_every=1,
+            cache_dir=cache_dir,
+            cpu=True,
+        )
+    )
+
+    assert result["model_config"]["model_type"] == "numeric"
+    assert result["checkpoint_paths"]
