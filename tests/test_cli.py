@@ -609,3 +609,34 @@ def test_generate_range_ablation_command_accepts_eval_count_alias(
     assert manifest["answer_format"] == "place_role_numeric"
     assert manifest["splits"]["eval_same"]["count"] == 5
     assert manifest["splits"]["eval_shifted"]["count"] == 5
+
+
+def test_generate_data_command_accepts_r2l_numeric(tmp_path, capsys) -> None:
+    output_path = tmp_path / "r2l.jsonl"
+
+    exit_code = main(
+        [
+            "generate-data",
+            "--output",
+            str(output_path),
+            "--count",
+            "3",
+            "--seed",
+            "1234",
+            "--task-type",
+            "arithmetic.add",
+            "--answer-format",
+            "r2l_numeric",
+        ]
+    )
+
+    result = json.loads(capsys.readouterr().out)
+    loaded = [
+        json.loads(line)
+        for line in output_path.read_text(encoding="utf-8").splitlines()
+    ]
+
+    assert exit_code == 0
+    assert result["answer_format"] == "r2l_numeric"
+    assert all(example["answer"].startswith("REV ") for example in loaded)
+    assert all("answer:" in example["answer"] for example in loaded)

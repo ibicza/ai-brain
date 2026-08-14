@@ -1021,3 +1021,35 @@ def test_place_role_numeric_sorting_keeps_normal_out_list() -> None:
     )
     assert "S0 MIN N0_T 2 N0_U 6" in formatted.answer
     assert formatted.answer.endswith("OUT 26, 27, 34, 78")
+
+
+def test_r2l_numeric_outputs_reversed_work_and_normal_final_answer() -> None:
+    example = TrainingExample(
+        id="arithmetic.add:00000000",
+        task_type="arithmetic.add",
+        prompt="case 12. Add 53 + 43?",
+        answer="96",
+        metadata={"a": 53, "b": 43, "operation": "addition"},
+    )
+
+    formatted = apply_answer_format(example, "r2l_numeric")
+
+    assert formatted.prompt == "case 12. Add 5 3 + 4 3?"
+    assert formatted.answer == "REV 6 9\nanswer: 96"
+    assert formatted.metadata["answer_format"] == "r2l_numeric"
+    assert formatted.metadata["original_answer"] == "96"
+
+
+def test_r2l_numeric_keeps_non_decimal_answers_final_answer_scored() -> None:
+    example = TrainingExample(
+        id="sorting.ascending:00000000",
+        task_type="sorting.ascending",
+        prompt="Sort 92, 60, 85.",
+        answer="60, 85, 92",
+        metadata={"numbers": [92, 60, 85]},
+    )
+
+    formatted = apply_answer_format(example, "r2l_numeric")
+
+    assert formatted.prompt == "Sort 9 2, 6 0, 8 5."
+    assert formatted.answer == "answer: 60, 85, 92"

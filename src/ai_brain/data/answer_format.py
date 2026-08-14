@@ -18,6 +18,7 @@ AnswerFormatName = Literal[
     "reversed_answer",
     "canonical_numeric",
     "place_role_numeric",
+    "r2l_numeric",
 ]
 
 ANSWER_FORMAT_NAMES: tuple[AnswerFormatName, ...] = (
@@ -27,6 +28,7 @@ ANSWER_FORMAT_NAMES: tuple[AnswerFormatName, ...] = (
     "reversed_answer",
     "canonical_numeric",
     "place_role_numeric",
+    "r2l_numeric",
 )
 
 _CASE_PREFIX_RE = re.compile(r"case \d+\.")
@@ -54,6 +56,9 @@ def apply_answer_format(
 
     if answer_format == "place_role_numeric":
         return _format_place_role_numeric(example, answer_format)
+
+    if answer_format == "r2l_numeric":
+        return _format_r2l_numeric(example, answer_format)
 
     raise ValueError(f"Unknown answer format: {answer_format}")
 
@@ -97,6 +102,33 @@ def _format_reversed_answer(
         task_type=example.task_type,
         prompt=example.prompt,
         answer=_space_digits(example.answer[::-1]),
+        metadata=_format_metadata(example, answer_format),
+    )
+
+
+def _format_r2l_numeric(
+    example: TrainingExample,
+    answer_format: AnswerFormatName,
+) -> TrainingExample:
+    if not example.answer.isdecimal():
+        return TrainingExample(
+            id=example.id,
+            task_type=example.task_type,
+            prompt=_space_digits_in_text(example.prompt),
+            answer=f"answer: {example.answer}",
+            metadata=_format_metadata(example, answer_format),
+        )
+
+    return TrainingExample(
+        id=example.id,
+        task_type=example.task_type,
+        prompt=_space_digits_in_text(example.prompt),
+        answer="\n".join(
+            [
+                f"REV {_space_digits(example.answer[::-1])}",
+                f"answer: {example.answer}",
+            ]
+        ),
         metadata=_format_metadata(example, answer_format),
     )
 
