@@ -532,6 +532,180 @@ def generate_range_primed(
     }
 
 
+def generate_digit_table_curriculum(
+    *,
+    output_dir: Path,
+    seed: int = 31000,
+    digit_table_repeats: int = 10,
+    eval_digit_table_repeats: int = 2,
+    composition_count: int = 8_000,
+    eval_composition_count: int = 2_000,
+    answer_format: AnswerFormatName = "compact_digit_trace",
+) -> dict[str, Any]:
+    if digit_table_repeats <= 0:
+        raise ValueError("digit_table_repeats must be positive")
+    if eval_digit_table_repeats <= 0:
+        raise ValueError("eval_digit_table_repeats must be positive")
+    if composition_count <= 0 or eval_composition_count <= 0:
+        raise ValueError("composition counts must be positive")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    split_seeds = {
+        "train_digit_table": seed + 1,
+        "eval_digit_table_seen": seed + 2,
+        "eval_digit_table_holdout": seed + 3,
+        "train_2digit_composition": seed + 4,
+        "eval_2digit_same": seed + 5,
+        "eval_2digit_holdout_combo": seed + 6,
+        "eval_2digit_far": seed + 7,
+        "train_mixed": seed + 8,
+    }
+
+    train_digit_table = _build_digit_table_examples(
+        repeats=digit_table_repeats,
+        seed=split_seeds["train_digit_table"],
+        split_label="train_digit_table",
+        answer_format=answer_format,
+    )
+    eval_digit_table_seen = _build_digit_table_examples(
+        repeats=eval_digit_table_repeats,
+        seed=split_seeds["eval_digit_table_seen"],
+        split_label="eval_digit_table_seen",
+        answer_format=answer_format,
+    )
+    eval_digit_table_holdout = _build_digit_table_examples(
+        repeats=eval_digit_table_repeats,
+        seed=split_seeds["eval_digit_table_holdout"],
+        split_label="eval_digit_table_holdout",
+        answer_format=answer_format,
+    )
+
+    train_2digit_composition = _build_2digit_composition_examples(
+        count=composition_count,
+        seed=split_seeds["train_2digit_composition"],
+        split_label="train_2digit_composition",
+        mode="train",
+        answer_format=answer_format,
+    )
+    eval_2digit_same = _build_2digit_composition_examples(
+        count=eval_composition_count,
+        seed=split_seeds["eval_2digit_same"],
+        split_label="eval_2digit_same",
+        mode="same",
+        blocked_prompts={example.prompt for example in train_2digit_composition},
+        answer_format=answer_format,
+    )
+    blocked_eval_prompts = {example.prompt for example in train_2digit_composition}
+    blocked_eval_prompts |= {example.prompt for example in eval_2digit_same}
+    eval_2digit_holdout_combo = _build_2digit_composition_examples(
+        count=eval_composition_count,
+        seed=split_seeds["eval_2digit_holdout_combo"],
+        split_label="eval_2digit_holdout_combo",
+        mode="holdout_combo",
+        blocked_prompts=blocked_eval_prompts,
+        answer_format=answer_format,
+    )
+    blocked_eval_prompts |= {example.prompt for example in eval_2digit_holdout_combo}
+    eval_2digit_far = _build_2digit_composition_examples(
+        count=eval_composition_count,
+        seed=split_seeds["eval_2digit_far"],
+        split_label="eval_2digit_far",
+        mode="far",
+        blocked_prompts=blocked_eval_prompts,
+        answer_format=answer_format,
+    )
+
+    train_mixed = [*train_digit_table, *train_2digit_composition]
+    random.Random(split_seeds["train_mixed"]).shuffle(train_mixed)
+
+    split_examples = {
+        "train_digit_table": train_digit_table,
+        "eval_digit_table_seen": eval_digit_table_seen,
+        "eval_digit_table_holdout": eval_digit_table_holdout,
+        "train_2digit_composition": train_2digit_composition,
+        "train_mixed": train_mixed,
+        "eval_2digit_same": eval_2digit_same,
+        "eval_2digit_holdout_combo": eval_2digit_holdout_combo,
+        "eval_2digit_far": eval_2digit_far,
+    }
+    paths = {
+        split_name: output_dir / f"{split_name}.jsonl" for split_name in split_examples
+    }
+    for split_name, examples in split_examples.items():
+        write_jsonl(paths[split_name], examples)
+
+    prompt_sets = {
+        split_name: {example.prompt for example in examples}
+        for split_name, examples in split_examples.items()
+    }
+    prompt_intersections = _build_prompt_intersection_summaries(prompt_sets)
+    digit_table_combos = _digit_combo_set(train_digit_table)
+    composition_train_combos = _digit_combo_set(train_2digit_composition)
+
+    manifest = {
+        "version": 1,
+        "kind": "digit_table_curriculum",
+        "answer_format": answer_format,
+        "seeds": split_seeds,
+        "digit_table_repeats": digit_table_repeats,
+        "eval_digit_table_repeats": eval_digit_table_repeats,
+        "composition_count": composition_count,
+        "eval_composition_count": eval_composition_count,
+        "splits": {
+            split_name: {
+                "path": paths[split_name].name,
+                "count": len(examples),
+                "task_type_counts": dict(
+                    sorted(Counter(example.task_type for example in examples).items())
+                ),
+                "digit_combination_coverage": _build_digit_combo_summary(examples),
+                "digit_operation_coverage": _build_digit_operation_coverage(examples),
+                "numeric_range_summary": _build_numeric_range_summary(examples),
+                "unique_prompt_count": len({example.prompt for example in examples}),
+                "duplicate_prompt_count": len(examples)
+                - len({example.prompt for example in examples}),
+            }
+            for split_name, examples in split_examples.items()
+        },
+        "quality_checks": {
+            "prompt_intersections": prompt_intersections,
+            "all_prompt_intersections_zero": all(
+                summary["count"] == 0
+                for pair_key, summary in prompt_intersections.items()
+                if pair_key
+                not in {
+                    _intersection_key("train_mixed", "train_digit_table"),
+                    _intersection_key("train_mixed", "train_2digit_composition"),
+                }
+            ),
+            "digit_table_combo_count": len(digit_table_combos),
+            "composition_train_combo_count": len(composition_train_combos),
+            "composition_holdout_combo_overlap": _build_digit_combo_overlap_summary(
+                composition_train_combos,
+                _digit_combo_set(eval_2digit_holdout_combo),
+            ),
+            "composition_holdout_combos_seen_in_digit_table": _build_digit_combo_overlap_summary(
+                digit_table_combos,
+                _digit_combo_set(eval_2digit_holdout_combo),
+            ),
+        },
+    }
+
+    manifest_path = output_dir / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    return {
+        "output_dir": str(output_dir),
+        "manifest_path": str(manifest_path),
+        "answer_format": answer_format,
+        "paths": {split_name: str(path) for split_name, path in paths.items()},
+        "manifest": manifest,
+    }
+
+
 def generate_arithmetic_primitive_split(
     *,
     output_dir: Path,
@@ -911,6 +1085,334 @@ def _generate_examples_with_coverage(
         examples.append(example)
 
     return examples
+
+
+_DIGIT_TABLE_TASK_TYPES = (
+    "arithmetic.digit_add_no_carry",
+    "arithmetic.digit_add_with_carry_input",
+    "arithmetic.digit_add_carry_out",
+    "arithmetic.digit_sub_no_borrow",
+    "arithmetic.digit_sub_with_borrow_input",
+    "arithmetic.digit_sub_borrow_out",
+)
+
+_COMPOSITION_TASK_TYPES = (
+    "arithmetic.add_2digit_composed",
+    "arithmetic.sub_2digit_composed",
+)
+
+
+def _build_digit_table_examples(
+    *,
+    repeats: int,
+    seed: int,
+    split_label: str,
+    answer_format: AnswerFormatName,
+) -> list[TrainingExample]:
+    base_examples: list[TrainingExample] = []
+    for a in range(10):
+        for b in range(10):
+            base_examples.extend(
+                _digit_table_examples_for_pair(a=a, b=b, split_label=split_label)
+            )
+
+    examples: list[TrainingExample] = []
+    rng = random.Random(seed)
+    for repeat in range(repeats):
+        repeated = list(base_examples)
+        rng.shuffle(repeated)
+        for example in repeated:
+            index = len(examples)
+            case_id = seed * 1_000_000 + repeat * 100_000 + index
+            prompt = f"case {case_id}. {example.prompt}"
+            examples.append(
+                apply_answer_format(
+                    TrainingExample(
+                        id=f"{example.task_type}:{split_label}:{index:08d}",
+                        task_type=example.task_type,
+                        prompt=prompt,
+                        answer=example.answer,
+                        metadata={**example.metadata, "split": split_label},
+                    ),
+                    answer_format,
+                )
+            )
+    return examples
+
+
+def _digit_table_examples_for_pair(
+    *,
+    a: int,
+    b: int,
+    split_label: str,
+) -> list[TrainingExample]:
+    examples: list[TrainingExample] = []
+    if a + b < 10:
+        examples.append(
+            _make_digit_add_table_example("arithmetic.digit_add_no_carry", a, b, 0)
+        )
+    if a + b >= 10:
+        examples.append(
+            _make_digit_add_table_example("arithmetic.digit_add_carry_out", a, b, 0)
+        )
+    examples.append(
+        _make_digit_add_table_example("arithmetic.digit_add_with_carry_input", a, b, 1)
+    )
+
+    if a >= b:
+        examples.append(
+            _make_digit_sub_table_example("arithmetic.digit_sub_no_borrow", a, b, 0)
+        )
+    if a < b:
+        examples.append(
+            _make_digit_sub_table_example("arithmetic.digit_sub_borrow_out", a, b, 0)
+        )
+    examples.append(
+        _make_digit_sub_table_example("arithmetic.digit_sub_with_borrow_input", a, b, 1)
+    )
+    return examples
+
+
+def _make_digit_add_table_example(
+    task_type: str,
+    a: int,
+    b: int,
+    carry: int,
+) -> TrainingExample:
+    total = a + b + carry
+    digit = total % 10
+    carry_out = total // 10
+    combo_key = f"add:{a}:{b}:{carry}"
+    return TrainingExample(
+        id=f"{task_type}:template",
+        task_type=task_type,
+        prompt=f"ADD_DIGIT a={a} b={b} c={carry}",
+        answer=f"S {digit} C {carry_out}",
+        metadata={
+            "a": a,
+            "b": b,
+            "carry_in": carry,
+            "sum_digit": digit,
+            "carry_out": carry_out,
+            "digit_combo_key": combo_key,
+            "digit_combo_keys": [combo_key],
+            "operation": task_type.rsplit(".", 1)[-1],
+        },
+    )
+
+
+def _make_digit_sub_table_example(
+    task_type: str,
+    a: int,
+    b: int,
+    borrow: int,
+) -> TrainingExample:
+    raw = a - b - borrow
+    borrow_out = 1 if raw < 0 else 0
+    digit = raw + 10 if raw < 0 else raw
+    combo_key = f"sub:{a}:{b}:{borrow}"
+    return TrainingExample(
+        id=f"{task_type}:template",
+        task_type=task_type,
+        prompt=f"SUB_DIGIT a={a} b={b} borrow={borrow}",
+        answer=f"S {digit} B {borrow_out}",
+        metadata={
+            "a": a,
+            "b": b,
+            "borrow_in": borrow,
+            "diff_digit": digit,
+            "borrow_out": borrow_out,
+            "digit_combo_key": combo_key,
+            "digit_combo_keys": [combo_key],
+            "operation": task_type.rsplit(".", 1)[-1],
+        },
+    )
+
+
+def _build_2digit_composition_examples(
+    *,
+    count: int,
+    seed: int,
+    split_label: str,
+    mode: str,
+    answer_format: AnswerFormatName,
+    blocked_prompts: set[str] | None = None,
+) -> list[TrainingExample]:
+    rng = random.Random(seed)
+    examples: list[TrainingExample] = []
+    seen_prompts: set[str] = set()
+    blocked = blocked_prompts or set()
+    attempts = 0
+    while len(examples) < count:
+        attempts += 1
+        if attempts > count * 500:
+            raise RuntimeError(
+                f"Could not generate enough composition examples for {mode}"
+            )
+        task_type = rng.choice(_COMPOSITION_TASK_TYPES)
+        if task_type == "arithmetic.add_2digit_composed":
+            example = _sample_add_2digit_composed(
+                rng, mode, split_label, len(examples), seed
+            )
+        else:
+            example = _sample_sub_2digit_composed(
+                rng, mode, split_label, len(examples), seed
+            )
+        if example.prompt in blocked or example.prompt in seen_prompts:
+            continue
+        seen_prompts.add(example.prompt)
+        examples.append(apply_answer_format(example, answer_format))
+    return examples
+
+
+def _sample_add_2digit_composed(
+    rng: random.Random,
+    mode: str,
+    split_label: str,
+    index: int,
+    seed: int,
+) -> TrainingExample:
+    for _ in range(10_000):
+        a, b = _sample_2digit_operands(rng, mode)
+        has_holdout = _composition_has_holdout_combo(_add_combo_keys_2digit(a, b))
+        if mode == "holdout_combo" and not has_holdout:
+            continue
+        if mode != "holdout_combo" and has_holdout:
+            continue
+        return _make_add_2digit_composed(split_label, index, seed, a, b)
+    raise RuntimeError("Could not sample add_2digit_composed")
+
+
+def _sample_sub_2digit_composed(
+    rng: random.Random,
+    mode: str,
+    split_label: str,
+    index: int,
+    seed: int,
+) -> TrainingExample:
+    for _ in range(10_000):
+        a, b = _sample_2digit_operands(rng, mode)
+        if a < b:
+            a, b = b, a
+        has_holdout = _composition_has_holdout_combo(_sub_combo_keys_2digit(a, b))
+        if mode == "holdout_combo" and not has_holdout:
+            continue
+        if mode != "holdout_combo" and has_holdout:
+            continue
+        return _make_sub_2digit_composed(split_label, index, seed, a, b)
+    raise RuntimeError("Could not sample sub_2digit_composed")
+
+
+def _sample_2digit_operands(rng: random.Random, mode: str) -> tuple[int, int]:
+    if mode == "far":
+        return rng.randint(60, 99), rng.randint(60, 99)
+    if mode in {"holdout_combo", "shifted"}:
+        return rng.randint(20, 79), rng.randint(20, 79)
+    return rng.randint(10, 59), rng.randint(10, 59)
+
+
+def _make_add_2digit_composed(
+    split_label: str,
+    index: int,
+    seed: int,
+    a: int,
+    b: int,
+) -> TrainingExample:
+    combo_keys = _add_combo_keys_2digit(a, b)
+    return TrainingExample(
+        id=f"arithmetic.add_2digit_composed:{split_label}:{index:08d}",
+        task_type="arithmetic.add_2digit_composed",
+        prompt=f"case {seed + index}. ADD2_COMPOSED {a} + {b}",
+        answer=str(a + b),
+        metadata={
+            "a": a,
+            "b": b,
+            "digit_combo_keys": combo_keys,
+            "digit_combo_key": "|".join(combo_keys),
+            "operation": "add_2digit_composed",
+        },
+    )
+
+
+def _make_sub_2digit_composed(
+    split_label: str,
+    index: int,
+    seed: int,
+    a: int,
+    b: int,
+) -> TrainingExample:
+    combo_keys = _sub_combo_keys_2digit(a, b)
+    return TrainingExample(
+        id=f"arithmetic.sub_2digit_composed:{split_label}:{index:08d}",
+        task_type="arithmetic.sub_2digit_composed",
+        prompt=f"case {seed + index}. SUB2_COMPOSED {a} - {b}",
+        answer=str(a - b),
+        metadata={
+            "a": a,
+            "b": b,
+            "digit_combo_keys": combo_keys,
+            "digit_combo_key": "|".join(combo_keys),
+            "operation": "sub_2digit_composed",
+        },
+    )
+
+
+def _add_combo_keys_2digit(a: int, b: int) -> list[str]:
+    at, au = divmod(a, 10)
+    bt, bu = divmod(b, 10)
+    ones_carry = 1 if au + bu >= 10 else 0
+    return [f"add:{au}:{bu}:0", f"add:{at}:{bt}:{ones_carry}"]
+
+
+def _sub_combo_keys_2digit(a: int, b: int) -> list[str]:
+    at, au = divmod(a, 10)
+    bt, bu = divmod(b, 10)
+    ones_borrow = 1 if au < bu else 0
+    return [f"sub:{au}:{bu}:0", f"sub:{at}:{bt}:{ones_borrow}"]
+
+
+def _composition_has_holdout_combo(combo_keys: Sequence[str]) -> bool:
+    return any(_combo_key_is_composition_holdout(key) for key in combo_keys)
+
+
+def _combo_key_is_composition_holdout(combo_key: str) -> bool:
+    op, left, right, carry_or_borrow = combo_key.split(":")
+    value = int(left) * 17 + int(right) * 7 + int(carry_or_borrow) * 11
+    return value % 5 == (0 if op == "add" else 1)
+
+
+def _build_digit_operation_coverage(
+    examples: Sequence[TrainingExample | dict[str, Any]],
+) -> dict[str, Any]:
+    coverage = {
+        "add_pairs": set(),
+        "sub_pairs": set(),
+        "carry_in_values": set(),
+        "carry_out_values": set(),
+        "borrow_in_values": set(),
+        "borrow_out_values": set(),
+    }
+    for example in examples:
+        metadata = _get_example_field(example, "metadata")
+        if not isinstance(metadata, dict):
+            continue
+        task_type = _get_example_field(example, "task_type")
+        if "digit_add" in task_type:
+            coverage["add_pairs"].add((metadata["a"], metadata["b"]))
+            coverage["carry_in_values"].add(metadata["carry_in"])
+            coverage["carry_out_values"].add(metadata["carry_out"])
+        if "digit_sub" in task_type:
+            coverage["sub_pairs"].add((metadata["a"], metadata["b"]))
+            coverage["borrow_in_values"].add(metadata["borrow_in"])
+            coverage["borrow_out_values"].add(metadata["borrow_out"])
+    return {
+        "add_pair_count": len(coverage["add_pairs"]),
+        "sub_pair_count": len(coverage["sub_pairs"]),
+        "carry_in_values": sorted(coverage["carry_in_values"]),
+        "carry_out_values": sorted(coverage["carry_out_values"]),
+        "borrow_in_values": sorted(coverage["borrow_in_values"]),
+        "borrow_out_values": sorted(coverage["borrow_out_values"]),
+    }
 
 
 def _digit_combo_set(examples: Sequence[TrainingExample | dict[str, Any]]) -> set[str]:

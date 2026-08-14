@@ -26,6 +26,7 @@ class TrainConfig:
     eval_batches: int = 20
     save_every: int = 100
     cache_dir: Path = Path("cache/tokenized")
+    init_checkpoint_path: Path | None = None
     cpu: bool = False
 
     def validate(self) -> None:
@@ -58,4 +59,6 @@ class TrainConfig:
             "cache_dir",
         ):
             result[key] = str(result[key])
+        if result["init_checkpoint_path"] is not None:
+            result["init_checkpoint_path"] = str(result["init_checkpoint_path"])
         return result

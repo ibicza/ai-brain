@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 import torch
@@ -404,3 +405,63 @@ def test_train_lm_uses_grad_clip(tmp_path, monkeypatch) -> None:
     assert calls == [0.5]
     assert "grad_norm" in metrics
     assert result["last_metrics"]["grad_norm"] == metrics["grad_norm"]
+
+
+def test_train_lm_init_checkpoint_allows_sequence_length_growth(tmp_path) -> None:
+    records = _records()
+    train_path = tmp_path / "train.jsonl"
+    eval_path = tmp_path / "eval.jsonl"
+    first_output_dir = tmp_path / "first_run"
+    second_output_dir = tmp_path / "second_run"
+    cache_dir = tmp_path / "tokenized"
+    _write_jsonl(train_path, records)
+    _write_jsonl(eval_path, records)
+    _tokenizer, tokenizer_path = _train_tokenizer(tmp_path, records)
+
+    first = train_lm(
+        TrainConfig(
+            train_path=train_path,
+            eval_path=eval_path,
+            tokenizer_path=tokenizer_path,
+            output_dir=first_output_dir,
+            model_config_name="debug",
+            steps=1,
+            batch_size=2,
+            sequence_length=32,
+            loss_mode="answer-only",
+            eval_every=1,
+            eval_batches=1,
+            save_every=1,
+            cache_dir=cache_dir,
+            cpu=True,
+        )
+    )
+
+    second = train_lm(
+        TrainConfig(
+            train_path=train_path,
+            eval_path=eval_path,
+            tokenizer_path=tokenizer_path,
+            output_dir=second_output_dir,
+            model_config_name="debug",
+            steps=1,
+            batch_size=2,
+            sequence_length=40,
+            loss_mode="answer-only",
+            eval_every=1,
+            eval_batches=1,
+            save_every=1,
+            cache_dir=cache_dir,
+            init_checkpoint_path=Path(first["checkpoint_paths"][-1]),
+            cpu=True,
+        )
+    )
+    train_config = json.loads(
+        (second_output_dir / "train_config.json").read_text(encoding="utf-8")
+    )
+    initialized = train_config["initialized_from_checkpoint"]
+
+    assert initialized["path"] == first["checkpoint_paths"][-1]
+    assert initialized["loaded_key_count"] > 0
+    assert initialized["skipped_key_count"] > 0
+    assert second["initialized_from_checkpoint"]["skipped_key_count"] > 0

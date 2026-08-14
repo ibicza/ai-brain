@@ -180,15 +180,26 @@ def _format_compact_digit_trace(
 def _compact_digit_trace_answer(example: TrainingExample) -> str:
     metadata = example.metadata
 
-    if example.task_type == "arithmetic.digit_add_carry":
+    if example.task_type in {
+        "arithmetic.digit_add_carry",
+        "arithmetic.digit_add_no_carry",
+        "arithmetic.digit_add_with_carry_input",
+        "arithmetic.digit_add_carry_out",
+    }:
         return f"S {metadata['sum_digit']} C {metadata['carry_out']}"
 
-    if example.task_type == "arithmetic.digit_sub_borrow":
+    if example.task_type in {
+        "arithmetic.digit_sub_borrow",
+        "arithmetic.digit_sub_no_borrow",
+        "arithmetic.digit_sub_with_borrow_input",
+        "arithmetic.digit_sub_borrow_out",
+    }:
         return f"S {metadata['diff_digit']} B {metadata['borrow_out']}"
 
     if example.task_type in {
         "arithmetic.add_2digit_no_carry",
         "arithmetic.add_2digit_with_carry",
+        "arithmetic.add_2digit_composed",
         "arithmetic.add",
     }:
         return _compact_add_trace(metadata["a"], metadata["b"])
@@ -196,6 +207,7 @@ def _compact_digit_trace_answer(example: TrainingExample) -> str:
     if example.task_type in {
         "arithmetic.sub_2digit_no_borrow",
         "arithmetic.sub_2digit_with_borrow",
+        "arithmetic.sub_2digit_composed",
         "arithmetic.subtract",
     }:
         return _compact_sub_trace(metadata["a"], metadata["b"])

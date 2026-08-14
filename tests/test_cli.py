@@ -441,6 +441,42 @@ def test_generate_arithmetic_primitive_command(tmp_path, capsys) -> None:
     assert manifest["splits"]["eval_far_range"]["count"] == 20
 
 
+def test_generate_digit_table_curriculum_command(tmp_path, capsys) -> None:
+    output_dir = tmp_path / "m14"
+
+    exit_code = main(
+        [
+            "generate-digit-table-curriculum",
+            "--output-dir",
+            str(output_dir),
+            "--seed",
+            "31000",
+            "--digit-table-repeats",
+            "1",
+            "--eval-digit-table-repeats",
+            "1",
+            "--composition-count",
+            "80",
+            "--eval-composition-count",
+            "40",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    manifest = result["manifest"]
+
+    assert exit_code == 0
+    assert result["answer_format"] == "compact_digit_trace"
+    assert (output_dir / "train_digit_table.jsonl").exists()
+    assert (output_dir / "train_2digit_composition.jsonl").exists()
+    assert (output_dir / "train_mixed.jsonl").exists()
+    assert (output_dir / "eval_2digit_holdout_combo.jsonl").exists()
+    assert manifest["kind"] == "digit_table_curriculum"
+    assert manifest["splits"]["train_digit_table"]["count"] == 400
+    assert manifest["quality_checks"]["all_prompt_intersections_zero"] is True
+
+
 def test_dataset_stats_command(tmp_path, capsys) -> None:
     output_path = tmp_path / "add.jsonl"
     main(

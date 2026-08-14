@@ -28,6 +28,26 @@ TASK_PRESETS: dict[str, TaskPreset] = {
         ),
         description="Arithmetic reasoning tasks.",
     ),
+    "digit_table": TaskPreset(
+        name="digit_table",
+        task_types=(
+            "arithmetic.digit_add_no_carry",
+            "arithmetic.digit_add_with_carry_input",
+            "arithmetic.digit_add_carry_out",
+            "arithmetic.digit_sub_no_borrow",
+            "arithmetic.digit_sub_with_borrow_input",
+            "arithmetic.digit_sub_borrow_out",
+        ),
+        description="Full digit addition/subtraction table with carry and borrow.",
+    ),
+    "digit_table_composition": TaskPreset(
+        name="digit_table_composition",
+        task_types=(
+            "arithmetic.add_2digit_composed",
+            "arithmetic.sub_2digit_composed",
+        ),
+        description="Two-digit add/sub composition using compact digit traces.",
+    ),
     "digit_add_carry": TaskPreset(
         name="digit_add_carry",
         task_types=("arithmetic.digit_add_carry",),

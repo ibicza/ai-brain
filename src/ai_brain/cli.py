@@ -13,6 +13,7 @@ from ai_brain.data.writer import (
     dataset_stats,
     generate_arithmetic_primitive_split,
     generate_data_split,
+    generate_digit_table_curriculum,
     generate_jsonl,
     generate_range_ablation,
     generate_range_primed,
@@ -520,6 +521,53 @@ def build_parser() -> argparse.ArgumentParser:
         help="Answer/prompt formatting. Defaults to the M-12 recipe for --task-preset.",
     )
 
+    digit_table_parser = subparsers.add_parser(
+        "generate-digit-table-curriculum",
+        help="Generate digit table and held-out 2-digit composition curriculum splits.",
+    )
+    digit_table_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory for digit table curriculum JSONL files and manifest.json.",
+    )
+    digit_table_parser.add_argument(
+        "--seed",
+        type=int,
+        default=31000,
+        help="Base seed for deterministic split generation.",
+    )
+    digit_table_parser.add_argument(
+        "--digit-table-repeats",
+        type=int,
+        default=10,
+        help="Balanced repeats of the full digit table for train.",
+    )
+    digit_table_parser.add_argument(
+        "--eval-digit-table-repeats",
+        type=int,
+        default=2,
+        help="Balanced repeats of the full digit table for each digit eval split.",
+    )
+    digit_table_parser.add_argument(
+        "--composition-count",
+        type=int,
+        default=8000,
+        help="Number of train_2digit_composition examples.",
+    )
+    digit_table_parser.add_argument(
+        "--eval-composition-count",
+        type=int,
+        default=2000,
+        help="Number of examples for each 2-digit eval split.",
+    )
+    digit_table_parser.add_argument(
+        "--answer-format",
+        choices=ANSWER_FORMAT_NAMES,
+        default="compact_digit_trace",
+        help="Answer format for generated examples.",
+    )
+
     arithmetic_primitive_parser = subparsers.add_parser(
         "generate-arithmetic-primitive",
         help="Generate controlled arithmetic primitive train/eval splits.",
@@ -833,6 +881,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("cache/tokenized"),
         help="Directory for tokenized dataset caches.",
+    )
+    train_lm_parser.add_argument(
+        "--init-checkpoint",
+        type=Path,
+        help="Optional checkpoint to initialize model weights before training.",
     )
     train_lm_parser.add_argument(
         "--cpu",
@@ -1237,6 +1290,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
 
+    if args.command == "generate-digit-table-curriculum":
+        result = generate_digit_table_curriculum(
+            output_dir=args.output_dir,
+            seed=args.seed,
+            digit_table_repeats=args.digit_table_repeats,
+            eval_digit_table_repeats=args.eval_digit_table_repeats,
+            composition_count=args.composition_count,
+            eval_composition_count=args.eval_composition_count,
+            answer_format=args.answer_format,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
     if args.command == "generate-arithmetic-primitive":
         preset = get_task_preset(args.primitive)
         eval_same_count = (
@@ -1363,6 +1429,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 eval_batches=args.eval_batches,
                 save_every=args.save_every,
                 cache_dir=args.cache_dir,
+                init_checkpoint_path=args.init_checkpoint,
                 cpu=args.cpu,
             )
         )

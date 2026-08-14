@@ -21,6 +21,7 @@ from ai_brain.data.writer import (
     dataset_stats,
     generate_arithmetic_primitive_split,
     generate_data_split,
+    generate_digit_table_curriculum,
     generate_jsonl,
     generate_range_ablation,
     generate_range_primed,
@@ -1267,3 +1268,93 @@ def test_generate_arithmetic_primitive_split_writes_digit_holdout_manifest(
         ]["eval_unseen_digit_combo_fraction"]
         == 1.0
     )
+
+
+def test_m14_digit_table_task_types_are_registered() -> None:
+    task_types = {
+        "arithmetic.digit_add_no_carry",
+        "arithmetic.digit_add_with_carry_input",
+        "arithmetic.digit_add_carry_out",
+        "arithmetic.digit_sub_no_borrow",
+        "arithmetic.digit_sub_with_borrow_input",
+        "arithmetic.digit_sub_borrow_out",
+        "arithmetic.add_2digit_composed",
+        "arithmetic.sub_2digit_composed",
+    }
+
+    for task_type in task_types:
+        examples = generate_examples(count=1, seed=7100, task_types=[task_type])
+
+        assert examples[0].task_type == task_type
+        assert examples[0].prompt
+        assert examples[0].answer
+
+
+def test_compact_digit_trace_formats_m14_composed_task_type() -> None:
+    example = TrainingExample(
+        id="arithmetic.add_2digit_composed:00000000",
+        task_type="arithmetic.add_2digit_composed",
+        prompt="ADD2_COMPOSED 71 + 63",
+        answer="134",
+        metadata={"a": 71, "b": 63, "operation": "add_2digit_composed"},
+    )
+
+    formatted = apply_answer_format(example, "compact_digit_trace")
+
+    assert formatted.answer == (
+        "OP ADD\nA 7 1\nB 6 3\nU 1 3 0 -> 4 0\nT 7 6 0 -> 3 1\nOUT 134"
+    )
+
+
+def test_generate_digit_table_curriculum_writes_coverage_manifest(
+    tmp_path: Path,
+) -> None:
+    output_dir = tmp_path / "m14"
+
+    result = generate_digit_table_curriculum(
+        output_dir=output_dir,
+        seed=31000,
+        digit_table_repeats=1,
+        eval_digit_table_repeats=1,
+        composition_count=120,
+        eval_composition_count=60,
+        answer_format="compact_digit_trace",
+    )
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+
+    expected_files = {
+        "train_digit_table.jsonl",
+        "eval_digit_table_seen.jsonl",
+        "eval_digit_table_holdout.jsonl",
+        "train_2digit_composition.jsonl",
+        "train_mixed.jsonl",
+        "eval_2digit_same.jsonl",
+        "eval_2digit_holdout_combo.jsonl",
+        "eval_2digit_far.jsonl",
+        "manifest.json",
+    }
+
+    assert result["answer_format"] == "compact_digit_trace"
+    assert manifest["kind"] == "digit_table_curriculum"
+    assert expected_files.issubset({path.name for path in output_dir.iterdir()})
+    assert manifest["splits"]["train_digit_table"]["count"] == 400
+    assert manifest["splits"]["train_2digit_composition"]["count"] == 120
+    assert manifest["splits"]["train_mixed"]["count"] == 520
+    assert manifest["quality_checks"]["all_prompt_intersections_zero"] is True
+
+    coverage = manifest["splits"]["train_digit_table"]["digit_operation_coverage"]
+    assert coverage["add_pair_count"] == 100
+    assert coverage["sub_pair_count"] == 100
+    assert coverage["carry_in_values"] == [0, 1]
+    assert coverage["carry_out_values"] == [0, 1]
+    assert coverage["borrow_in_values"] == [0, 1]
+    assert coverage["borrow_out_values"] == [0, 1]
+
+    holdout_overlap = manifest["quality_checks"]["composition_holdout_combo_overlap"]
+    assert holdout_overlap["eval_unseen_digit_combo_count"] > 0
+    assert holdout_overlap["eval_unseen_digit_combo_fraction"] > 0.0
+
+    digit_table_overlap = manifest["quality_checks"][
+        "composition_holdout_combos_seen_in_digit_table"
+    ]
+    assert digit_table_overlap["eval_overlap_fraction"] == 1.0

@@ -12,7 +12,7 @@ from ai_brain.model.config import get_named_model_config
 from ai_brain.model.factory import build_model, model_class_name
 from ai_brain.runtime.device import get_device_info
 from ai_brain.training.batching import sample_batch
-from ai_brain.training.checkpoint import save_checkpoint
+from ai_brain.training.checkpoint import load_checkpoint, save_checkpoint
 from ai_brain.training.config import TrainConfig
 from ai_brain.training.lm_dataset import (
     IGNORE_INDEX,
@@ -133,6 +133,26 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         torch.cuda.manual_seed_all(config.seed)
 
     model = build_model(model_config).to(device)
+    initialized_from_checkpoint = None
+    if config.init_checkpoint_path is not None:
+        checkpoint = load_checkpoint(config.init_checkpoint_path, map_location=device)
+        checkpoint_state = checkpoint["model_state_dict"]
+        model_state = model.state_dict()
+        compatible_state = {
+            key: value
+            for key, value in checkpoint_state.items()
+            if key in model_state and model_state[key].shape == value.shape
+        }
+        skipped_keys = sorted(set(checkpoint_state) - set(compatible_state))
+        model_state.update(compatible_state)
+        model.load_state_dict(model_state)
+        initialized_from_checkpoint = {
+            "path": str(config.init_checkpoint_path),
+            "step": checkpoint.get("step"),
+            "loaded_key_count": len(compatible_state),
+            "skipped_key_count": len(skipped_keys),
+            "skipped_keys_sample": skipped_keys[:10],
+        }
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
     generator = torch.Generator().manual_seed(config.seed)
 
@@ -146,6 +166,7 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         "tokenizer": tokenizer.info(),
         "train_cache": train_cache_info,
         "eval_cache": eval_cache_info,
+        "initialized_from_checkpoint": initialized_from_checkpoint,
     }
     write_train_config(config.output_dir / "train_config.json", train_config_payload)
 
@@ -221,4 +242,5 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         "device": str(device),
         "device_name": device_info.name,
         "model_config": asdict(model_config),
+        "initialized_from_checkpoint": initialized_from_checkpoint,
     }
