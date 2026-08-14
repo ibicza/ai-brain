@@ -22,6 +22,7 @@ from ai_brain.data.writer import (
     generate_data_split,
     generate_jsonl,
     generate_range_ablation,
+    generate_range_primed,
     read_jsonl,
     write_jsonl,
 )
@@ -99,6 +100,56 @@ def test_same_and_shifted_profiles_use_expected_numeric_ranges() -> None:
     assert 0 <= eval_same.metadata["b"] <= 30
     assert 20 <= eval_shifted.metadata["a"] <= 80
     assert 20 <= eval_shifted.metadata["b"] <= 80
+
+
+def test_m12_shifted_profiles_use_expected_numeric_bands() -> None:
+    train_prime = generate_examples(
+        count=1,
+        seed=1234,
+        task_types=["quantity.direct"],
+        profile="train_shifted_prime",
+    )[0]
+    in_distribution = generate_examples(
+        count=1,
+        seed=2234,
+        task_types=["quantity.direct"],
+        profile="eval_shifted_in_distribution",
+    )[0]
+    holdout = generate_examples(
+        count=1,
+        seed=3234,
+        task_types=["quantity.direct"],
+        profile="eval_shifted_holdout",
+    )[0]
+    far = generate_examples(
+        count=1,
+        seed=4234,
+        task_types=["quantity.direct"],
+        profile="eval_far_shifted",
+    )[0]
+
+    assert 21 <= train_prime.metadata["count"] <= 60
+    assert 21 <= in_distribution.metadata["count"] <= 60
+    assert 61 <= holdout.metadata["count"] <= 100
+    assert 101 <= far.metadata["count"] <= 300
+
+
+def test_m12_shifted_profiles_keep_sorting_short_lengths() -> None:
+    for profile in (
+        "train_shifted_prime",
+        "eval_shifted_in_distribution",
+        "eval_shifted_holdout",
+        "eval_far_shifted",
+    ):
+        examples = generate_examples(
+            count=100,
+            seed=4400,
+            task_types=TASK_PRESETS["sorting_short"].task_types,
+            profile=profile,
+        )
+
+        assert max(len(example.metadata["numbers"]) for example in examples) <= 4
+        assert min(len(example.metadata["numbers"]) for example in examples) >= 3
 
 
 def test_eval_shifted_keeps_sorting_short_lengths() -> None:
@@ -930,6 +981,57 @@ def test_generate_range_ablation_writes_three_disjoint_splits(tmp_path: Path) ->
     assert manifest["quality_checks"]["no_eval_same_shifted_intersection"] is True
     assert {example["metadata"]["answer_format"] for example in train} == {
         "canonical_numeric"
+    }
+
+
+def test_generate_range_primed_writes_manifest_and_disjoint_splits(
+    tmp_path: Path,
+) -> None:
+    output_dir = tmp_path / "m12"
+
+    result = generate_range_primed(
+        output_dir=output_dir,
+        train_count=20,
+        eval_same_count=8,
+        eval_shifted_in_distribution_count=7,
+        eval_shifted_holdout_count=6,
+        eval_far_shifted_count=5,
+        train_same_seed=1000,
+        train_shifted_prime_seed=1100,
+        eval_same_seed=2000,
+        eval_shifted_in_distribution_seed=2100,
+        eval_shifted_holdout_seed=2200,
+        eval_far_shifted_seed=2300,
+        shifted_prime_fraction=0.25,
+        task_types=["arithmetic.add", "arithmetic.subtract"],
+        task_preset="arithmetic",
+        answer_format="scratchpad",
+    )
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+
+    assert result["answer_format"] == "scratchpad"
+    assert result["shifted_prime_fraction"] == 0.25
+    assert len(read_jsonl(output_dir / "train.jsonl")) == 20
+    assert len(read_jsonl(output_dir / "train_same.jsonl")) == 15
+    assert len(read_jsonl(output_dir / "train_shifted_prime.jsonl")) == 5
+    assert (output_dir / "eval_shifted_in_distribution.jsonl").exists()
+    assert (output_dir / "eval_shifted_holdout.jsonl").exists()
+    assert (output_dir / "eval_far_shifted.jsonl").exists()
+    assert manifest["kind"] == "range_primed"
+    assert manifest["answer_format"] == "scratchpad"
+    assert manifest["profiles"]["train_shifted_prime"] == "train_shifted_prime"
+    assert manifest["seeds"]["eval_far_shifted"] == 2300
+    assert manifest["splits"]["train_shifted_prime"]["task_type_counts"]
+    assert manifest["splits"]["eval_far_shifted"]["numeric_range_summary"]["count"] > 0
+    assert manifest["quality_checks"]["all_prompt_intersections_zero"] is True
+    assert (
+        manifest["quality_checks"]["no_train_prime_eval_prompt_intersections"] is True
+    )
+    assert set(manifest["quality_checks"]["numeric_overlap_summaries"]) == {
+        "eval_same",
+        "eval_shifted_in_distribution",
+        "eval_shifted_holdout",
+        "eval_far_shifted",
     }
 
 

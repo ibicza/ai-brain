@@ -14,6 +14,7 @@ from ai_brain.data.writer import (
     generate_data_split,
     generate_jsonl,
     generate_range_ablation,
+    generate_range_primed,
 )
 from ai_brain.eval.compare import compare_evals
 from ai_brain.eval.diagnostics import analyze_eval
@@ -32,6 +33,25 @@ from ai_brain.runtime.device import (
 from ai_brain.training.config import LOSS_MODES, TrainConfig
 from ai_brain.training.lm_dataset import prepare_lm_dataset
 from ai_brain.training.loop import train_lm
+
+RANGE_PRIMED_RECIPES: dict[str, dict[str, float | str]] = {
+    "quantity_direct": {
+        "shifted_prime_fraction": 0.10,
+        "answer_format": "place_role_numeric",
+    },
+    "state_change": {
+        "shifted_prime_fraction": 0.10,
+        "answer_format": "place_role_numeric",
+    },
+    "sorting_short": {
+        "shifted_prime_fraction": 0.20,
+        "answer_format": "normal_answer",
+    },
+    "arithmetic": {
+        "shifted_prime_fraction": 0.50,
+        "answer_format": "scratchpad",
+    },
+}
 
 
 def _configure_stdout() -> None:
@@ -363,6 +383,140 @@ def build_parser() -> argparse.ArgumentParser:
         choices=ANSWER_FORMAT_NAMES,
         default="normal_answer",
         help="Answer/prompt formatting ablation for generated examples.",
+    )
+
+    range_primed_parser = subparsers.add_parser(
+        "generate-range-primed",
+        help="Generate train/train_same/train_shifted_prime and four eval splits.",
+    )
+    range_primed_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory for primed train/eval JSONL files and manifest.json.",
+    )
+    range_primed_parser.add_argument(
+        "--train-count",
+        type=int,
+        required=True,
+        help="Total train examples across train_same and train_shifted_prime.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-count",
+        type=int,
+        help="Number of examples for each eval split.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-same-count",
+        type=int,
+        help="Number of eval_same examples to generate.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-shifted-in-distribution-count",
+        type=int,
+        help="Number of eval_shifted_in_distribution examples to generate.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-shifted-holdout-count",
+        type=int,
+        help="Number of eval_shifted_holdout examples to generate.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-far-shifted-count",
+        type=int,
+        help="Number of eval_far_shifted examples to generate.",
+    )
+    range_primed_parser.add_argument(
+        "--train-same-seed",
+        type=int,
+        required=True,
+        help="Random seed for train_same.",
+    )
+    range_primed_parser.add_argument(
+        "--train-shifted-prime-seed",
+        type=int,
+        required=True,
+        help="Random seed for train_shifted_prime.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-same-seed",
+        type=int,
+        required=True,
+        help="Random seed for eval_same.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-shifted-in-distribution-seed",
+        type=int,
+        required=True,
+        help="Random seed for eval_shifted_in_distribution.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-shifted-holdout-seed",
+        type=int,
+        required=True,
+        help="Random seed for eval_shifted_holdout.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-far-shifted-seed",
+        type=int,
+        required=True,
+        help="Random seed for eval_far_shifted.",
+    )
+    range_primed_parser.add_argument(
+        "--shifted-prime-fraction",
+        type=float,
+        help="Fraction of train examples drawn from train_shifted_prime.",
+    )
+    range_primed_parser.add_argument(
+        "--task-type",
+        action="append",
+        choices=GENERATOR_NAMES,
+        help="Restrict generation to one task type. Can be repeated.",
+    )
+    range_primed_parser.add_argument(
+        "--task-preset",
+        help="Restrict generation to a focused task preset.",
+    )
+    range_primed_parser.add_argument(
+        "--train-same-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="train_same",
+        help="Difficulty profile for train_same.",
+    )
+    range_primed_parser.add_argument(
+        "--train-shifted-prime-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="train_shifted_prime",
+        help="Difficulty profile for train_shifted_prime.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-same-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="eval_same",
+        help="Difficulty profile for eval_same.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-shifted-in-distribution-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="eval_shifted_in_distribution",
+        help="Difficulty profile for eval_shifted_in_distribution.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-shifted-holdout-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="eval_shifted_holdout",
+        help="Difficulty profile for eval_shifted_holdout.",
+    )
+    range_primed_parser.add_argument(
+        "--eval-far-shifted-profile",
+        choices=tuple(GENERATION_PROFILES),
+        default="eval_far_shifted",
+        help="Difficulty profile for eval_far_shifted.",
+    )
+    range_primed_parser.add_argument(
+        "--answer-format",
+        choices=ANSWER_FORMAT_NAMES,
+        help="Answer/prompt formatting. Defaults to the M-12 recipe for --task-preset.",
     )
 
     dataset_stats_parser = subparsers.add_parser(
@@ -769,6 +923,16 @@ def _resolve_task_selection_or_exit(
         parser.error(str(error))
 
 
+def _range_primed_recipe_value(
+    task_preset: str | None,
+    key: str,
+    fallback: float | str,
+) -> float | str:
+    if task_preset is None:
+        return fallback
+    return RANGE_PRIMED_RECIPES.get(task_preset, {}).get(key, fallback)
+
+
 def _default_generate_profile(task_preset: str | None) -> str:
     if task_preset is None:
         return "train"
@@ -915,6 +1079,81 @@ def main(argv: Sequence[str] | None = None) -> int:
             eval_shifted_profile=args.eval_shifted_profile,
             task_preset=task_preset,
             answer_format=args.answer_format,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-range-primed":
+        task_types, task_preset = _resolve_task_selection_or_exit(parser, args)
+        eval_same_count = (
+            args.eval_same_count
+            if args.eval_same_count is not None
+            else args.eval_count
+        )
+        eval_shifted_in_distribution_count = (
+            args.eval_shifted_in_distribution_count
+            if args.eval_shifted_in_distribution_count is not None
+            else args.eval_count
+        )
+        eval_shifted_holdout_count = (
+            args.eval_shifted_holdout_count
+            if args.eval_shifted_holdout_count is not None
+            else args.eval_count
+        )
+        eval_far_shifted_count = (
+            args.eval_far_shifted_count
+            if args.eval_far_shifted_count is not None
+            else args.eval_count
+        )
+        if (
+            eval_same_count is None
+            or eval_shifted_in_distribution_count is None
+            or eval_shifted_holdout_count is None
+            or eval_far_shifted_count is None
+        ):
+            parser.error(
+                "generate-range-primed requires --eval-count or all four "
+                "specific eval count arguments."
+            )
+        shifted_prime_fraction = (
+            args.shifted_prime_fraction
+            if args.shifted_prime_fraction is not None
+            else float(
+                _range_primed_recipe_value(
+                    task_preset,
+                    "shifted_prime_fraction",
+                    0.10,
+                )
+            )
+        )
+        answer_format = args.answer_format or str(
+            _range_primed_recipe_value(task_preset, "answer_format", "normal_answer")
+        )
+        result = generate_range_primed(
+            output_dir=args.output_dir,
+            train_count=args.train_count,
+            eval_same_count=eval_same_count,
+            eval_shifted_in_distribution_count=eval_shifted_in_distribution_count,
+            eval_shifted_holdout_count=eval_shifted_holdout_count,
+            eval_far_shifted_count=eval_far_shifted_count,
+            train_same_seed=args.train_same_seed,
+            train_shifted_prime_seed=args.train_shifted_prime_seed,
+            eval_same_seed=args.eval_same_seed,
+            eval_shifted_in_distribution_seed=args.eval_shifted_in_distribution_seed,
+            eval_shifted_holdout_seed=args.eval_shifted_holdout_seed,
+            eval_far_shifted_seed=args.eval_far_shifted_seed,
+            shifted_prime_fraction=shifted_prime_fraction,
+            task_types=task_types,
+            train_same_profile=args.train_same_profile,
+            train_shifted_prime_profile=args.train_shifted_prime_profile,
+            eval_same_profile=args.eval_same_profile,
+            eval_shifted_in_distribution_profile=(
+                args.eval_shifted_in_distribution_profile
+            ),
+            eval_shifted_holdout_profile=args.eval_shifted_holdout_profile,
+            eval_far_shifted_profile=args.eval_far_shifted_profile,
+            task_preset=task_preset,
+            answer_format=answer_format,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0

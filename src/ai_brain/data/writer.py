@@ -269,6 +269,269 @@ def generate_range_ablation(
     }
 
 
+def generate_range_primed(
+    *,
+    output_dir: Path,
+    train_count: int,
+    eval_same_count: int,
+    eval_shifted_in_distribution_count: int,
+    eval_shifted_holdout_count: int,
+    eval_far_shifted_count: int,
+    train_same_seed: int,
+    train_shifted_prime_seed: int,
+    eval_same_seed: int,
+    eval_shifted_in_distribution_seed: int,
+    eval_shifted_holdout_seed: int,
+    eval_far_shifted_seed: int,
+    shifted_prime_fraction: float,
+    task_types: Sequence[GeneratorName] | None = None,
+    train_same_profile: GenerationProfileName = "train_same",
+    train_shifted_prime_profile: GenerationProfileName = "train_shifted_prime",
+    eval_same_profile: GenerationProfileName = "eval_same",
+    eval_shifted_in_distribution_profile: GenerationProfileName = (
+        "eval_shifted_in_distribution"
+    ),
+    eval_shifted_holdout_profile: GenerationProfileName = "eval_shifted_holdout",
+    eval_far_shifted_profile: GenerationProfileName = "eval_far_shifted",
+    task_preset: str | None = None,
+    enforce_unique_prompts: bool = True,
+    answer_format: AnswerFormatName = "normal_answer",
+) -> dict[str, Any]:
+    if train_count < 0:
+        raise ValueError("train_count must be non-negative")
+    if not 0.0 <= shifted_prime_fraction <= 1.0:
+        raise ValueError("shifted_prime_fraction must be between 0.0 and 1.0")
+
+    allowed_task_types = tuple(task_types or GENERATOR_NAMES)
+    train_shifted_prime_count = round(train_count * shifted_prime_fraction)
+    train_same_count = train_count - train_shifted_prime_count
+
+    train_same_examples = _generate_examples_with_coverage(
+        count=train_same_count,
+        seed=train_same_seed,
+        task_types=allowed_task_types,
+        split_name="train",
+        profile=train_same_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+    )
+    train_same_prompts = {example.prompt for example in train_same_examples}
+    train_shifted_prime_examples = _generate_examples_with_coverage(
+        count=train_shifted_prime_count,
+        seed=train_shifted_prime_seed,
+        task_types=allowed_task_types,
+        split_name="train",
+        profile=train_shifted_prime_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+        blocked_prompts=train_same_prompts,
+    )
+
+    train_examples = [*train_same_examples, *train_shifted_prime_examples]
+    random.Random((train_same_seed << 16) ^ train_shifted_prime_seed).shuffle(
+        train_examples
+    )
+    blocked_prompts = {example.prompt for example in train_examples}
+
+    eval_same_examples = _generate_examples_with_coverage(
+        count=eval_same_count,
+        seed=eval_same_seed,
+        task_types=allowed_task_types,
+        split_name="eval",
+        profile=eval_same_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+        blocked_prompts=blocked_prompts,
+    )
+    blocked_prompts |= {example.prompt for example in eval_same_examples}
+
+    eval_shifted_in_distribution_examples = _generate_examples_with_coverage(
+        count=eval_shifted_in_distribution_count,
+        seed=eval_shifted_in_distribution_seed,
+        task_types=allowed_task_types,
+        split_name="eval",
+        profile=eval_shifted_in_distribution_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+        blocked_prompts=blocked_prompts,
+    )
+    blocked_prompts |= {
+        example.prompt for example in eval_shifted_in_distribution_examples
+    }
+
+    eval_shifted_holdout_examples = _generate_examples_with_coverage(
+        count=eval_shifted_holdout_count,
+        seed=eval_shifted_holdout_seed,
+        task_types=allowed_task_types,
+        split_name="eval",
+        profile=eval_shifted_holdout_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+        blocked_prompts=blocked_prompts,
+    )
+    blocked_prompts |= {example.prompt for example in eval_shifted_holdout_examples}
+
+    eval_far_shifted_examples = _generate_examples_with_coverage(
+        count=eval_far_shifted_count,
+        seed=eval_far_shifted_seed,
+        task_types=allowed_task_types,
+        split_name="eval",
+        profile=eval_far_shifted_profile,
+        enforce_unique_prompts=enforce_unique_prompts,
+        answer_format=answer_format,
+        blocked_prompts=blocked_prompts,
+    )
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    paths = {
+        "train": output_dir / "train.jsonl",
+        "train_same": output_dir / "train_same.jsonl",
+        "train_shifted_prime": output_dir / "train_shifted_prime.jsonl",
+        "eval_same": output_dir / "eval_same.jsonl",
+        "eval_shifted_in_distribution": output_dir
+        / "eval_shifted_in_distribution.jsonl",
+        "eval_shifted_holdout": output_dir / "eval_shifted_holdout.jsonl",
+        "eval_far_shifted": output_dir / "eval_far_shifted.jsonl",
+    }
+    split_examples = {
+        "train": train_examples,
+        "train_same": train_same_examples,
+        "train_shifted_prime": train_shifted_prime_examples,
+        "eval_same": eval_same_examples,
+        "eval_shifted_in_distribution": eval_shifted_in_distribution_examples,
+        "eval_shifted_holdout": eval_shifted_holdout_examples,
+        "eval_far_shifted": eval_far_shifted_examples,
+    }
+    for split_name, examples in split_examples.items():
+        write_jsonl(paths[split_name], examples)
+
+    split_profiles = {
+        "train": "mixed",
+        "train_same": train_same_profile,
+        "train_shifted_prime": train_shifted_prime_profile,
+        "eval_same": eval_same_profile,
+        "eval_shifted_in_distribution": eval_shifted_in_distribution_profile,
+        "eval_shifted_holdout": eval_shifted_holdout_profile,
+        "eval_far_shifted": eval_far_shifted_profile,
+    }
+    split_seeds = {
+        "train": None,
+        "train_same": train_same_seed,
+        "train_shifted_prime": train_shifted_prime_seed,
+        "eval_same": eval_same_seed,
+        "eval_shifted_in_distribution": eval_shifted_in_distribution_seed,
+        "eval_shifted_holdout": eval_shifted_holdout_seed,
+        "eval_far_shifted": eval_far_shifted_seed,
+    }
+
+    split_prompt_sets = {
+        split_name: {example.prompt for example in examples}
+        for split_name, examples in split_examples.items()
+    }
+    prompt_intersections = _build_prompt_intersection_summaries(split_prompt_sets)
+    eval_split_names = (
+        "eval_same",
+        "eval_shifted_in_distribution",
+        "eval_shifted_holdout",
+        "eval_far_shifted",
+    )
+    train_prime_eval_intersections = {
+        split_name: prompt_intersections[
+            _intersection_key("train_shifted_prime", split_name)
+        ]
+        for split_name in eval_split_names
+    }
+
+    numeric_summaries = {
+        split_name: _build_numeric_range_summary(examples)
+        for split_name, examples in split_examples.items()
+    }
+    numeric_overlap_summaries = {
+        split_name: _build_numeric_overlap_summary(
+            train_shifted_prime_examples,
+            split_examples[split_name],
+        )
+        for split_name in eval_split_names
+    }
+
+    manifest = {
+        "version": 1,
+        "kind": "range_primed",
+        "task_preset": task_preset,
+        "answer_format": answer_format,
+        "shifted_prime_fraction": shifted_prime_fraction,
+        "task_types": list(allowed_task_types),
+        "profiles": split_profiles,
+        "seeds": split_seeds,
+        "splits": {
+            split_name: {
+                "path": paths[split_name].name,
+                "count": len(examples),
+                "seed": split_seeds[split_name],
+                "profile": split_profiles[split_name],
+                "numeric_range_summary": numeric_summaries[split_name],
+                **build_dataset_stats(
+                    examples,
+                    expected_task_types=allowed_task_types,
+                ),
+            }
+            for split_name, examples in split_examples.items()
+        },
+        "split_policy": {
+            "name": "stable_prompt_hash_mod_2",
+            "salt": _SPLIT_HASH_SALT,
+            "enforce_unique_prompts": enforce_unique_prompts,
+        },
+        "quality_checks": {
+            "prompt_intersections": prompt_intersections,
+            "train_prime_eval_prompt_intersections": train_prime_eval_intersections,
+            "no_train_prime_eval_prompt_intersections": all(
+                summary["count"] == 0
+                for summary in train_prime_eval_intersections.values()
+            ),
+            "all_prompt_intersections_zero": all(
+                summary["count"] == 0
+                for pair_key, summary in prompt_intersections.items()
+                if pair_key
+                not in {
+                    _intersection_key("train", "train_same"),
+                    _intersection_key("train", "train_shifted_prime"),
+                }
+            ),
+            "all_task_types_present": all(
+                build_dataset_stats(
+                    examples,
+                    expected_task_types=allowed_task_types,
+                )["all_task_types_present"]
+                for examples in split_examples.values()
+            ),
+            "numeric_overlap_summaries": numeric_overlap_summaries,
+        },
+    }
+
+    manifest_path = output_dir / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    return {
+        "output_dir": str(output_dir),
+        "train_path": str(paths["train"]),
+        "train_same_path": str(paths["train_same"]),
+        "train_shifted_prime_path": str(paths["train_shifted_prime"]),
+        "eval_same_path": str(paths["eval_same"]),
+        "eval_shifted_in_distribution_path": str(paths["eval_shifted_in_distribution"]),
+        "eval_shifted_holdout_path": str(paths["eval_shifted_holdout"]),
+        "eval_far_shifted_path": str(paths["eval_far_shifted"]),
+        "manifest_path": str(manifest_path),
+        "task_preset": task_preset,
+        "answer_format": answer_format,
+        "shifted_prime_fraction": shifted_prime_fraction,
+        "manifest": manifest,
+    }
+
+
 def generate_data_split(
     *,
     output_dir: Path,
@@ -458,6 +721,210 @@ def _generate_examples_with_coverage(
         examples.append(example)
 
     return examples
+
+
+def _build_prompt_intersection_summaries(
+    split_prompt_sets: dict[str, set[str]],
+) -> dict[str, dict[str, Any]]:
+    split_names = list(split_prompt_sets)
+    summaries: dict[str, dict[str, Any]] = {}
+    for left_index, left_name in enumerate(split_names):
+        for right_name in split_names[left_index + 1 :]:
+            intersection = sorted(
+                split_prompt_sets[left_name] & split_prompt_sets[right_name]
+            )
+            summaries[_intersection_key(left_name, right_name)] = {
+                "count": len(intersection),
+                "sample": intersection[:10],
+            }
+    return summaries
+
+
+def _intersection_key(left_name: str, right_name: str) -> str:
+    return "__".join(sorted((left_name, right_name)))
+
+
+def _build_numeric_range_summary(
+    examples: Sequence[TrainingExample | dict[str, Any]],
+) -> dict[str, Any]:
+    values = sorted(
+        value
+        for example in examples
+        for value in _extract_input_metadata_numbers(
+            _get_example_field(example, "metadata")
+        )
+    )
+    unique_values = sorted(set(values))
+    if not values:
+        return {
+            "count": 0,
+            "unique_count": 0,
+            "min": None,
+            "max": None,
+            "sample": [],
+        }
+
+    by_key_values = _extract_input_metadata_numbers_by_key(examples)
+
+    return {
+        "count": len(values),
+        "unique_count": len(unique_values),
+        "min": values[0],
+        "max": values[-1],
+        "sample": unique_values[:20],
+        "by_key": {
+            key: _summarize_numeric_values(key_values)
+            for key, key_values in sorted(by_key_values.items())
+        },
+    }
+
+
+def _build_numeric_overlap_summary(
+    train_prime_examples: Sequence[TrainingExample | dict[str, Any]],
+    eval_examples: Sequence[TrainingExample | dict[str, Any]],
+) -> dict[str, Any]:
+    train_values = {
+        value
+        for example in train_prime_examples
+        for value in _extract_input_metadata_numbers(
+            _get_example_field(example, "metadata")
+        )
+    }
+    eval_values = {
+        value
+        for example in eval_examples
+        for value in _extract_input_metadata_numbers(
+            _get_example_field(example, "metadata")
+        )
+    }
+    overlap = sorted(train_values & eval_values)
+    eval_unique_count = len(eval_values)
+    train_unique_count = len(train_values)
+    train_by_key = _extract_input_metadata_numbers_by_key(train_prime_examples)
+    eval_by_key = _extract_input_metadata_numbers_by_key(eval_examples)
+
+    return {
+        "train_prime_unique_numeric_count": train_unique_count,
+        "eval_unique_numeric_count": eval_unique_count,
+        "overlap_count": len(overlap),
+        "eval_overlap_fraction": (
+            len(overlap) / eval_unique_count if eval_unique_count else 0.0
+        ),
+        "train_prime_overlap_fraction": (
+            len(overlap) / train_unique_count if train_unique_count else 0.0
+        ),
+        "overlap_sample": overlap[:20],
+        "by_key": _build_numeric_overlap_by_key(train_by_key, eval_by_key),
+    }
+
+
+def _summarize_numeric_values(values: Sequence[int]) -> dict[str, Any]:
+    sorted_values = sorted(values)
+    unique_values = sorted(set(sorted_values))
+    if not sorted_values:
+        return {
+            "count": 0,
+            "unique_count": 0,
+            "min": None,
+            "max": None,
+            "sample": [],
+        }
+
+    return {
+        "count": len(sorted_values),
+        "unique_count": len(unique_values),
+        "min": sorted_values[0],
+        "max": sorted_values[-1],
+        "sample": unique_values[:20],
+    }
+
+
+def _extract_input_metadata_numbers_by_key(
+    examples: Sequence[TrainingExample | dict[str, Any]],
+) -> dict[str, list[int]]:
+    by_key: dict[str, list[int]] = {}
+    for example in examples:
+        metadata = _get_example_field(example, "metadata")
+        if not isinstance(metadata, dict):
+            continue
+        for key, value in metadata.items():
+            if key not in _INPUT_NUMERIC_METADATA_KEYS:
+                continue
+            by_key.setdefault(key, []).extend(_extract_metadata_numbers(value))
+    return by_key
+
+
+def _build_numeric_overlap_by_key(
+    train_by_key: dict[str, list[int]],
+    eval_by_key: dict[str, list[int]],
+) -> dict[str, dict[str, Any]]:
+    overlap_by_key = {}
+    for key in sorted(set(train_by_key) | set(eval_by_key)):
+        train_values = set(train_by_key.get(key, []))
+        eval_values = set(eval_by_key.get(key, []))
+        overlap = sorted(train_values & eval_values)
+        overlap_by_key[key] = {
+            "train_prime_unique_numeric_count": len(train_values),
+            "eval_unique_numeric_count": len(eval_values),
+            "overlap_count": len(overlap),
+            "eval_overlap_fraction": (
+                len(overlap) / len(eval_values) if eval_values else 0.0
+            ),
+            "train_prime_overlap_fraction": (
+                len(overlap) / len(train_values) if train_values else 0.0
+            ),
+            "overlap_sample": overlap[:20],
+        }
+    return overlap_by_key
+
+
+_INPUT_NUMERIC_METADATA_KEYS = {
+    "a",
+    "b",
+    "c",
+    "d",
+    "total",
+    "start",
+    "delta",
+    "count",
+    "numbers",
+}
+
+
+def _extract_input_metadata_numbers(metadata: Any) -> list[int]:
+    if not isinstance(metadata, dict):
+        return []
+
+    numbers: list[int] = []
+    for key, value in metadata.items():
+        if key in _INPUT_NUMERIC_METADATA_KEYS:
+            numbers.extend(_extract_metadata_numbers(value))
+    return numbers
+
+
+def _extract_metadata_numbers(value: Any) -> list[int]:
+    if isinstance(value, bool):
+        return []
+
+    if isinstance(value, int):
+        return [value]
+
+    if isinstance(value, float) and value.is_integer():
+        return [int(value)]
+
+    if isinstance(value, dict):
+        numbers: list[int] = []
+        for nested_value in value.values():
+            numbers.extend(_extract_metadata_numbers(nested_value))
+        return numbers
+
+    if isinstance(value, list | tuple):
+        numbers = []
+        for nested_value in value:
+            numbers.extend(_extract_metadata_numbers(nested_value))
+        return numbers
+
+    return []
 
 
 def _get_top_duplicate_prompts(

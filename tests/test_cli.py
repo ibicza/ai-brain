@@ -354,6 +354,54 @@ def test_generate_range_ablation_command(tmp_path, capsys) -> None:
     assert manifest["quality_checks"]["no_train_eval_same_intersection"] is True
 
 
+def test_generate_range_primed_command_uses_preset_recipe(tmp_path, capsys) -> None:
+    output_dir = tmp_path / "m12"
+
+    exit_code = main(
+        [
+            "generate-range-primed",
+            "--output-dir",
+            str(output_dir),
+            "--train-count",
+            "10",
+            "--eval-count",
+            "4",
+            "--train-same-seed",
+            "1000",
+            "--train-shifted-prime-seed",
+            "1100",
+            "--eval-same-seed",
+            "2000",
+            "--eval-shifted-in-distribution-seed",
+            "2100",
+            "--eval-shifted-holdout-seed",
+            "2200",
+            "--eval-far-shifted-seed",
+            "2300",
+            "--task-preset",
+            "quantity_direct",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    manifest = result["manifest"]
+
+    assert exit_code == 0
+    assert (output_dir / "train.jsonl").exists()
+    assert (output_dir / "train_same.jsonl").exists()
+    assert (output_dir / "train_shifted_prime.jsonl").exists()
+    assert (output_dir / "eval_same.jsonl").exists()
+    assert (output_dir / "eval_shifted_in_distribution.jsonl").exists()
+    assert (output_dir / "eval_shifted_holdout.jsonl").exists()
+    assert (output_dir / "eval_far_shifted.jsonl").exists()
+    assert result["answer_format"] == "place_role_numeric"
+    assert result["shifted_prime_fraction"] == 0.10
+    assert manifest["profiles"]["eval_far_shifted"] == "eval_far_shifted"
+    assert manifest["splits"]["train_shifted_prime"]["count"] == 1
+    assert manifest["quality_checks"]["all_prompt_intersections_zero"] is True
+
+
 def test_dataset_stats_command(tmp_path, capsys) -> None:
     output_path = tmp_path / "add.jsonl"
     main(

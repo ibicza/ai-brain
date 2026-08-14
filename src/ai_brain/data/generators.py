@@ -30,6 +30,10 @@ GenerationProfileName = Literal[
     "train_same",
     "eval_same",
     "eval_shifted",
+    "train_shifted_prime",
+    "eval_shifted_in_distribution",
+    "eval_shifted_holdout",
+    "eval_far_shifted",
 ]
 
 
@@ -44,6 +48,10 @@ class GenerationProfile:
             "train_same",
             "eval_same",
             "eval_shifted",
+            "train_shifted_prime",
+            "eval_shifted_in_distribution",
+            "eval_shifted_holdout",
+            "eval_far_shifted",
         } and (low, high) == (3, 5):
             return rng.randint(3, 4)
 
@@ -57,6 +65,51 @@ class GenerationProfile:
         if self.name in {"train", "train_short", "train_same", "eval_same"}:
             train_low, train_high = train_ranges.get((low, high), (low, high))
             return rng.randint(train_low, train_high)
+
+        shifted_prime_ranges = {
+            (0, 99): (20, 109),
+            (0, 30): (20, 60),
+            (0, 20): (20, 50),
+            (0, 10): (20, 40),
+            (1, 20): (21, 60),
+            (1, 10): (11, 25),
+            (3, 5): (3, 4),
+            (0, 9999): (10_000, 49_999),
+        }
+        if self.name in {"train_shifted_prime", "eval_shifted_in_distribution"}:
+            prime_low, prime_high = shifted_prime_ranges.get((low, high), (low, high))
+            return rng.randint(prime_low, prime_high)
+
+        shifted_holdout_ranges = {
+            (0, 99): (110, 199),
+            (0, 30): (61, 100),
+            (0, 20): (51, 80),
+            (0, 10): (41, 60),
+            (1, 20): (61, 100),
+            (1, 10): (26, 40),
+            (3, 5): (3, 4),
+            (0, 9999): (50_000, 99_999),
+        }
+        if self.name == "eval_shifted_holdout":
+            holdout_low, holdout_high = shifted_holdout_ranges.get(
+                (low, high),
+                (low, high),
+            )
+            return rng.randint(holdout_low, holdout_high)
+
+        far_shifted_ranges = {
+            (0, 99): (200, 999),
+            (0, 30): (101, 300),
+            (0, 20): (81, 240),
+            (0, 10): (61, 180),
+            (1, 20): (101, 300),
+            (1, 10): (41, 120),
+            (3, 5): (3, 4),
+            (0, 9999): (100_000, 999_999),
+        }
+        if self.name == "eval_far_shifted":
+            far_low, far_high = far_shifted_ranges.get((low, high), (low, high))
+            return rng.randint(far_low, far_high)
 
         eval_ranges = {
             (0, 99): (20, 199),
@@ -75,6 +128,24 @@ class GenerationProfile:
         if self.name in {"train", "train_short", "train_same", "eval_same"}:
             return rng.sample(range(stop), count)
 
+        if self.name in {"train_shifted_prime", "eval_shifted_in_distribution"}:
+            if stop == 100:
+                return rng.sample(range(20, 110), count)
+            if stop == 50:
+                return rng.sample(range(20, 70), count)
+
+        if self.name == "eval_shifted_holdout":
+            if stop == 100:
+                return rng.sample(range(110, 200), count)
+            if stop == 50:
+                return rng.sample(range(70, 120), count)
+
+        if self.name == "eval_far_shifted":
+            if stop == 100:
+                return rng.sample(range(200, 400), count)
+            if stop == 50:
+                return rng.sample(range(120, 240), count)
+
         if stop == 100:
             return rng.sample(range(20, 200), count)
 
@@ -91,6 +162,12 @@ EVAL_SHORT_PROFILE = GenerationProfile(name="eval_short")
 TRAIN_SAME_PROFILE = GenerationProfile(name="train_same")
 EVAL_SAME_PROFILE = GenerationProfile(name="eval_same")
 EVAL_SHIFTED_PROFILE = GenerationProfile(name="eval_shifted")
+TRAIN_SHIFTED_PRIME_PROFILE = GenerationProfile(name="train_shifted_prime")
+EVAL_SHIFTED_IN_DISTRIBUTION_PROFILE = GenerationProfile(
+    name="eval_shifted_in_distribution"
+)
+EVAL_SHIFTED_HOLDOUT_PROFILE = GenerationProfile(name="eval_shifted_holdout")
+EVAL_FAR_SHIFTED_PROFILE = GenerationProfile(name="eval_far_shifted")
 GENERATION_PROFILES: dict[GenerationProfileName, GenerationProfile] = {
     "train": TRAIN_PROFILE,
     "eval": EVAL_PROFILE,
@@ -99,6 +176,10 @@ GENERATION_PROFILES: dict[GenerationProfileName, GenerationProfile] = {
     "train_same": TRAIN_SAME_PROFILE,
     "eval_same": EVAL_SAME_PROFILE,
     "eval_shifted": EVAL_SHIFTED_PROFILE,
+    "train_shifted_prime": TRAIN_SHIFTED_PRIME_PROFILE,
+    "eval_shifted_in_distribution": EVAL_SHIFTED_IN_DISTRIBUTION_PROFILE,
+    "eval_shifted_holdout": EVAL_SHIFTED_HOLDOUT_PROFILE,
+    "eval_far_shifted": EVAL_FAR_SHIFTED_PROFILE,
 }
 
 
