@@ -572,3 +572,40 @@ def test_prepare_lm_dataset_and_train_lm_commands(tmp_path, capsys) -> None:
     assert trained["last_metrics"]["grad_norm"] > 0
     assert (output_dir / "metrics.jsonl").exists()
     assert (output_dir / "checkpoints" / "step_000002.pt").exists()
+
+
+def test_generate_range_ablation_command_accepts_eval_count_alias(
+    tmp_path, capsys
+) -> None:
+    output_dir = tmp_path / "m112"
+
+    exit_code = main(
+        [
+            "generate-range-ablation",
+            "--output-dir",
+            str(output_dir),
+            "--train-count",
+            "8",
+            "--eval-count",
+            "5",
+            "--train-seed",
+            "1000",
+            "--eval-same-seed",
+            "2000",
+            "--eval-shifted-seed",
+            "3000",
+            "--task-type",
+            "quantity.direct",
+            "--answer-format",
+            "place_role_numeric",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    manifest = result["manifest"]
+
+    assert exit_code == 0
+    assert manifest["answer_format"] == "place_role_numeric"
+    assert manifest["splits"]["eval_same"]["count"] == 5
+    assert manifest["splits"]["eval_shifted"]["count"] == 5

@@ -3,6 +3,12 @@ from pathlib import Path
 
 from ai_brain.data.answer_format import apply_answer_format
 from ai_brain.data.generators import GENERATOR_NAMES, generate_examples
+from ai_brain.data.number_format import (
+    digits_of_number,
+    format_plain_digit_number,
+    format_role_number,
+    place_names_for_digits,
+)
 from ai_brain.data.presets import TASK_PRESETS, resolve_task_selection
 from ai_brain.data.schema import TrainingExample
 from ai_brain.data.templates import (
@@ -925,3 +931,93 @@ def test_generate_range_ablation_writes_three_disjoint_splits(tmp_path: Path) ->
     assert {example["metadata"]["answer_format"] for example in train} == {
         "canonical_numeric"
     }
+
+
+def test_number_format_helpers_format_roles_and_places() -> None:
+    assert digits_of_number(134) == [1, 3, 4]
+    assert place_names_for_digits(1) == ["U"]
+    assert place_names_for_digits(2) == ["T", "U"]
+    assert place_names_for_digits(3) == ["H", "T", "U"]
+    assert format_role_number("A", 71) == "A_T 7 A_U 1"
+    assert format_role_number("OUT", 134) == "OUT_H 1 OUT_T 3 OUT_U 4"
+    assert format_plain_digit_number(134) == "1 3 4"
+
+
+def test_place_role_numeric_addition_transforms_prompt_and_answer() -> None:
+    example = TrainingExample(
+        id="arithmetic.add:00000000",
+        task_type="arithmetic.add",
+        prompt="case 12. ????? ????? ????? 71 ? 63.",
+        answer="134",
+        metadata={"a": 71, "b": 63, "operation": "addition"},
+    )
+
+    formatted = apply_answer_format(example, "place_role_numeric")
+
+    assert formatted.prompt == ("case 12. ????? ????? ????? A_T 7 A_U 1 ? B_T 6 B_U 3.")
+    assert formatted.answer == (
+        "OP ADD\n"
+        "A_T 7 A_U 1\n"
+        "B_T 6 B_U 3\n"
+        "P_U A_U 1 B_U 3 C_IN 0 -> S_U 4 C_OUT 0\n"
+        "P_T A_T 7 B_T 6 C_IN 0 -> S_T 3 C_OUT 1\n"
+        "OUT_H 1 OUT_T 3 OUT_U 4"
+    )
+    assert formatted.metadata["answer_format"] == "place_role_numeric"
+    assert formatted.metadata["original_prompt"] == example.prompt
+
+
+def test_place_role_numeric_quantity_direct_tags_prompt_number() -> None:
+    example = TrainingExample(
+        id="quantity.direct:00000000",
+        task_type="quantity.direct",
+        prompt="? ???? ???? 73 ???????. ??????? ???????? ???? ? ?????",
+        answer="73",
+        metadata={"count": 73, "operation": "known"},
+    )
+
+    formatted = apply_answer_format(example, "place_role_numeric")
+
+    assert "N_T 7 N_U 3 ???????" in formatted.prompt
+    assert formatted.answer == (
+        "OP COPY_QTY\nSUBJ SAME\nOBJ SAME\nN_T 7 N_U 3\nOUT_T 7 OUT_U 3"
+    )
+
+
+def test_place_role_numeric_state_change_add_tags_prompt_numbers() -> None:
+    example = TrainingExample(
+        id="state_change.add:00000000",
+        task_type="state_change.add",
+        prompt=(
+            "? ???? ???? 52 ?????. ???? ???? ??? 30 ??????. "
+            "??????? ?????? ????? ? ?????"
+        ),
+        answer="82",
+        metadata={"start": 52, "delta": 30, "operation": "state_add"},
+    )
+
+    formatted = apply_answer_format(example, "place_role_numeric")
+
+    assert "START_T 5 START_U 2" in formatted.prompt
+    assert "CHANGE_T 3 CHANGE_U 0" in formatted.prompt
+    assert formatted.answer.endswith("OUT_T 8 OUT_U 2")
+
+
+def test_place_role_numeric_sorting_keeps_normal_out_list() -> None:
+    example = TrainingExample(
+        id="sorting.ascending:00000000",
+        task_type="sorting.ascending",
+        prompt="?????? ????? ?? ???????? ? ????????: 26, 34, 27, 78.",
+        answer="26, 27, 34, 78",
+        metadata={"numbers": [26, 34, 27, 78], "operation": "sort_ascending"},
+    )
+
+    formatted = apply_answer_format(example, "place_role_numeric")
+
+    assert formatted.prompt == (
+        "?????? ????? ?? ???????? ? ????????: "
+        "N0_T 2 N0_U 6, N1_T 3 N1_U 4, "
+        "N2_T 2 N2_U 7, N3_T 7 N3_U 8."
+    )
+    assert "S0 MIN N0_T 2 N0_U 6" in formatted.answer
+    assert formatted.answer.endswith("OUT 26, 27, 34, 78")

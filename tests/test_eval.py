@@ -136,9 +136,19 @@ def test_final_normalization_matches_digit_spaced_single_number() -> None:
     assert final_answers_match("answer: 134", "OUT 1 3 4")
 
 
+def test_final_normalization_matches_role_tagged_single_number() -> None:
+    assert extract_final_answer("OUT_T 7 OUT_U 3") == "OUT_T 7 OUT_U 3"
+    assert normalize_final_answer("OUT_T 7 OUT_U 3") == "73"
+    assert normalize_final_answer("OUT_H 1 OUT_T 3 OUT_U 4") == "134"
+    assert final_answers_match("answer: 73", "OUT_T 7 OUT_U 3")
+    assert final_answers_match("answer: 73", "7 3")
+
+
 def test_final_normalization_does_not_collapse_sorting_list() -> None:
     assert normalize_final_answer("1, 3, 4") == "1, 3, 4"
+    assert normalize_final_answer("OUT 26, 27, 34, 78") == "out 26, 27, 34, 78"
     assert not final_answers_match("OUT 134", "OUT 1, 3, 4")
+    assert not final_answers_match("OUT 26273478", "OUT 26, 27, 34, 78")
 
 
 def test_scratchpad_final_answer_matches_with_different_trace() -> None:

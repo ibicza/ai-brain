@@ -298,15 +298,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Number of train_same examples to generate.",
     )
     range_ablation_parser.add_argument(
+        "--eval-count",
+        type=int,
+        help="Number of examples for both eval_same and eval_shifted.",
+    )
+    range_ablation_parser.add_argument(
         "--eval-same-count",
         type=int,
-        required=True,
         help="Number of eval_same examples to generate.",
     )
     range_ablation_parser.add_argument(
         "--eval-shifted-count",
         type=int,
-        required=True,
         help="Number of eval_shifted examples to generate.",
     )
     range_ablation_parser.add_argument(
@@ -883,11 +886,26 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "generate-range-ablation":
         task_types, task_preset = _resolve_task_selection_or_exit(parser, args)
+        eval_same_count = (
+            args.eval_same_count
+            if args.eval_same_count is not None
+            else args.eval_count
+        )
+        eval_shifted_count = (
+            args.eval_shifted_count
+            if args.eval_shifted_count is not None
+            else args.eval_count
+        )
+        if eval_same_count is None or eval_shifted_count is None:
+            parser.error(
+                "generate-range-ablation requires --eval-count or both "
+                "--eval-same-count and --eval-shifted-count."
+            )
         result = generate_range_ablation(
             output_dir=args.output_dir,
             train_count=args.train_count,
-            eval_same_count=args.eval_same_count,
-            eval_shifted_count=args.eval_shifted_count,
+            eval_same_count=eval_same_count,
+            eval_shifted_count=eval_shifted_count,
             train_seed=args.train_seed,
             eval_same_seed=args.eval_same_seed,
             eval_shifted_seed=args.eval_shifted_seed,
