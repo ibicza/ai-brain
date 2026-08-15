@@ -19,7 +19,9 @@ AnswerFormatName = Literal[
     "canonical_numeric",
     "place_role_numeric",
     "r2l_numeric",
+    "rtl_numeric",
     "compact_digit_trace",
+    "compact_lsd_trace",
 ]
 
 ANSWER_FORMAT_NAMES: tuple[AnswerFormatName, ...] = (
@@ -30,7 +32,9 @@ ANSWER_FORMAT_NAMES: tuple[AnswerFormatName, ...] = (
     "canonical_numeric",
     "place_role_numeric",
     "r2l_numeric",
+    "rtl_numeric",
     "compact_digit_trace",
+    "compact_lsd_trace",
 )
 
 _CASE_PREFIX_RE = re.compile(r"case \d+\.")
@@ -62,8 +66,14 @@ def apply_answer_format(
     if answer_format == "r2l_numeric":
         return _format_r2l_numeric(example, answer_format)
 
+    if answer_format == "rtl_numeric":
+        return _format_rtl_numeric(example, answer_format)
+
     if answer_format == "compact_digit_trace":
         return _format_compact_digit_trace(example, answer_format)
+
+    if answer_format == "compact_lsd_trace":
+        return _format_compact_lsd_trace(example, answer_format)
 
     raise ValueError(f"Unknown answer format: {answer_format}")
 
@@ -138,6 +148,20 @@ def _format_r2l_numeric(
     )
 
 
+def _format_rtl_numeric(
+    example: TrainingExample,
+    answer_format: AnswerFormatName,
+) -> TrainingExample:
+    answer = _rtl_numeric_answer(example)
+    return TrainingExample(
+        id=example.id,
+        task_type=example.task_type,
+        prompt=example.prompt,
+        answer=answer,
+        metadata=_format_metadata(example, answer_format),
+    )
+
+
 def _format_canonical_numeric(
     example: TrainingExample,
     answer_format: AnswerFormatName,
@@ -175,6 +199,50 @@ def _format_compact_digit_trace(
         answer=_compact_digit_trace_answer(example),
         metadata=_format_metadata(example, answer_format),
     )
+
+
+def _format_compact_lsd_trace(
+    example: TrainingExample,
+    answer_format: AnswerFormatName,
+) -> TrainingExample:
+    return TrainingExample(
+        id=example.id,
+        task_type=example.task_type,
+        prompt=example.prompt,
+        answer=_compact_lsd_trace_answer(example),
+        metadata=_format_metadata(example, answer_format),
+    )
+
+
+def _rtl_numeric_answer(example: TrainingExample) -> str:
+    metadata = example.metadata
+    if _is_addition_task(example.task_type) and "a" in metadata and "b" in metadata:
+        digits = _rtl_add_output_digits(int(metadata["a"]), int(metadata["b"]))
+        return "\n".join(
+            [
+                f"OUT_RTL {_space_digits(''.join(str(digit) for digit in digits))}",
+                f"FINAL {int(metadata['a']) + int(metadata['b'])}",
+            ]
+        )
+
+    if _is_subtraction_task(example.task_type) and "a" in metadata and "b" in metadata:
+        digits = _rtl_sub_output_digits(int(metadata["a"]), int(metadata["b"]))
+        return "\n".join(
+            [
+                f"OUT_RTL {_space_digits(''.join(str(digit) for digit in digits))}",
+                f"FINAL {int(metadata['a']) - int(metadata['b'])}",
+            ]
+        )
+
+    if example.answer.isdecimal():
+        return "\n".join(
+            [
+                f"OUT_RTL {_space_digits(example.answer[::-1])}",
+                f"FINAL {example.answer}",
+            ]
+        )
+
+    return f"FINAL {example.answer}"
 
 
 def _compact_digit_trace_answer(example: TrainingExample) -> str:
@@ -281,6 +349,44 @@ def _compact_digit_trace_answer(example: TrainingExample) -> str:
     return example.answer
 
 
+def _compact_lsd_trace_answer(example: TrainingExample) -> str:
+    metadata = example.metadata
+
+    if _is_addition_task(example.task_type) and "a" in metadata and "b" in metadata:
+        return _compact_lsd_add_trace(int(metadata["a"]), int(metadata["b"]))
+
+    if _is_subtraction_task(example.task_type) and "a" in metadata and "b" in metadata:
+        return _compact_lsd_sub_trace(int(metadata["a"]), int(metadata["b"]))
+
+    if example.answer.isdecimal():
+        return "\n".join(
+            [
+                f"OUT_RTL {_space_digits(example.answer[::-1])}",
+                f"FINAL {example.answer}",
+            ]
+        )
+
+    return f"FINAL {example.answer}"
+
+
+def _is_addition_task(task_type: str) -> bool:
+    return task_type in {
+        "arithmetic.add_2digit_no_carry",
+        "arithmetic.add_2digit_with_carry",
+        "arithmetic.add_2digit_composed",
+        "arithmetic.add",
+    }
+
+
+def _is_subtraction_task(task_type: str) -> bool:
+    return task_type in {
+        "arithmetic.sub_2digit_no_borrow",
+        "arithmetic.sub_2digit_with_borrow",
+        "arithmetic.sub_2digit_composed",
+        "arithmetic.subtract",
+    }
+
+
 def _compact_add_trace(a: int, b: int) -> str:
     return "\n".join(
         [
@@ -303,6 +409,78 @@ def _compact_sub_trace(a: int, b: int) -> str:
             f"OUT {a - b}",
         ]
     )
+
+
+def _compact_lsd_add_trace(a: int, b: int) -> str:
+    rows, output_digits = _rtl_add_rows_and_output_digits(a, b)
+    return "\n".join(
+        [
+            "OP ADD_RTL",
+            *rows,
+            f"OUT_RTL {_space_digits(''.join(str(digit) for digit in output_digits))}",
+            f"FINAL {a + b}",
+        ]
+    )
+
+
+def _compact_lsd_sub_trace(a: int, b: int) -> str:
+    rows, output_digits = _rtl_sub_rows_and_output_digits(a, b)
+    return "\n".join(
+        [
+            "OP SUB_RTL",
+            *rows,
+            f"OUT_RTL {_space_digits(''.join(str(digit) for digit in output_digits))}",
+            f"FINAL {a - b}",
+        ]
+    )
+
+
+def _rtl_add_output_digits(a: int, b: int) -> list[int]:
+    _rows, output_digits = _rtl_add_rows_and_output_digits(a, b)
+    return output_digits
+
+
+def _rtl_sub_output_digits(a: int, b: int) -> list[int]:
+    _rows, output_digits = _rtl_sub_rows_and_output_digits(a, b)
+    return output_digits
+
+
+def _rtl_add_rows_and_output_digits(a: int, b: int) -> tuple[list[str], list[int]]:
+    carry = 0
+    output_digits: list[int] = []
+    rows: list[str] = []
+    for label, left, right in _compact_digit_pairs(a, b):
+        total = left + right + carry
+        digit = total % 10
+        next_carry = total // 10
+        rows.append(f"{label} {left} {right} C{carry} -> {digit} C{next_carry}")
+        output_digits.append(digit)
+        carry = next_carry
+    if carry:
+        rows.append(f"H C{carry} -> {carry}")
+        output_digits.append(carry)
+    while len(output_digits) > 1 and output_digits[-1] == 0:
+        output_digits.pop()
+    return rows, output_digits
+
+
+def _rtl_sub_rows_and_output_digits(a: int, b: int) -> tuple[list[str], list[int]]:
+    borrow = 0
+    output_digits: list[int] = []
+    rows: list[str] = []
+    for label, top, bottom in _compact_digit_pairs(a, b):
+        adjusted = top - borrow
+        next_borrow = 0
+        if adjusted < bottom:
+            adjusted += 10
+            next_borrow = 1
+        digit = adjusted - bottom
+        rows.append(f"{label} {top} {bottom} B{borrow} -> {digit} B{next_borrow}")
+        output_digits.append(digit)
+        borrow = next_borrow
+    while len(output_digits) > 1 and output_digits[-1] == 0:
+        output_digits.pop()
+    return rows, output_digits
 
 
 def _compact_add_rows(a: int, b: int, *, prefix: str = "") -> list[str]:

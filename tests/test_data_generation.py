@@ -1169,6 +1169,59 @@ def test_r2l_numeric_keeps_non_decimal_answers_final_answer_scored() -> None:
     assert formatted.answer == "answer: 60, 85, 92"
 
 
+def test_rtl_numeric_outputs_lsd_first_work_and_normal_final_answer() -> None:
+    example = TrainingExample(
+        id="arithmetic.add_2digit_composed:00000000",
+        task_type="arithmetic.add_2digit_composed",
+        prompt="ADD2_COMPOSED 84 + 65",
+        answer="149",
+        metadata={"a": 84, "b": 65},
+    )
+
+    formatted = apply_answer_format(example, "rtl_numeric")
+
+    assert formatted.answer == "OUT_RTL 9 4 1\nFINAL 149"
+    assert formatted.metadata["answer_format"] == "rtl_numeric"
+
+
+def test_compact_lsd_trace_formats_addition_with_final_carry() -> None:
+    example = TrainingExample(
+        id="arithmetic.add_2digit_composed:00000000",
+        task_type="arithmetic.add_2digit_composed",
+        prompt="ADD2_COMPOSED 84 + 65",
+        answer="149",
+        metadata={"a": 84, "b": 65},
+    )
+
+    formatted = apply_answer_format(example, "compact_lsd_trace")
+
+    assert formatted.answer == (
+        "OP ADD_RTL\n"
+        "U 4 5 C0 -> 9 C0\n"
+        "T 8 6 C0 -> 4 C1\n"
+        "H C1 -> 1\n"
+        "OUT_RTL 9 4 1\n"
+        "FINAL 149"
+    )
+    assert formatted.metadata["answer_format"] == "compact_lsd_trace"
+
+
+def test_compact_lsd_trace_formats_subtraction_with_borrow() -> None:
+    example = TrainingExample(
+        id="arithmetic.sub_2digit_composed:00000000",
+        task_type="arithmetic.sub_2digit_composed",
+        prompt="SUB2_COMPOSED 52 - 18",
+        answer="34",
+        metadata={"a": 52, "b": 18},
+    )
+
+    formatted = apply_answer_format(example, "compact_lsd_trace")
+
+    assert formatted.answer == (
+        "OP SUB_RTL\nU 2 8 B0 -> 4 B1\nT 5 1 B1 -> 3 B0\nOUT_RTL 4 3\nFINAL 34"
+    )
+
+
 def test_compact_digit_trace_formats_2digit_addition() -> None:
     example = TrainingExample(
         id="arithmetic.add_2digit_with_carry:00000000",

@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import torch
 
 from ai_brain.cli import main
+from ai_brain.eval.arithmetic_forensics import analyze_arithmetic_forensics
 from ai_brain.eval.final_answer import (
     extract_final_answer,
     final_answers_match,
@@ -143,6 +144,13 @@ def test_extract_final_answer_stops_at_special_token() -> None:
 def test_final_normalization_matches_digit_spaced_single_number() -> None:
     assert normalize_final_answer("1 3 4") == "134"
     assert final_answers_match("answer: 134", "OUT 1 3 4")
+
+
+def test_extract_final_answer_uses_final_after_out_rtl() -> None:
+    text = "OUT_RTL 9 4 1\nFINAL 149"
+
+    assert extract_final_answer(text) == "149"
+    assert normalize_final_answer(extract_final_answer(text)) == "149"
 
 
 def test_final_normalization_matches_role_tagged_single_number() -> None:
@@ -481,6 +489,55 @@ def test_eval_metrics_by_task_type() -> None:
     assert summary["overall"]["final_normalized_exact_match"] == 0.5
     assert summary["by_group"]["arithmetic"]["count"] == 2
     assert summary["by_task_type"]["arithmetic.add"]["normalized_exact_match"] == 0.5
+
+
+def test_arithmetic_forensics_scores_addition_overflow_trace(tmp_path) -> None:
+    eval_path = tmp_path / "eval.jsonl"
+    train_path = tmp_path / "train.jsonl"
+    predictions_path = tmp_path / "predictions.jsonl"
+    expected = "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 4 1\nOUT 149"
+    predicted = "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 6 0\nOUT 69"
+    eval_record = {
+        "id": "add:1",
+        "task_type": "arithmetic.add_2digit_composed",
+        "prompt": "ADD2_COMPOSED 84 + 65",
+        "answer": expected,
+        "metadata": {
+            "a": 84,
+            "b": 65,
+            "digit_combo_keys": ["add:4:5:0", "add:8:6:0"],
+        },
+    }
+    prediction = {
+        "id": "add:1",
+        "task_type": "arithmetic.add_2digit_composed",
+        "prompt": "ADD2_COMPOSED 84 + 65",
+        "expected": expected,
+        "predicted": predicted,
+        "raw_generation": predicted,
+        "exact_match": False,
+        "normalized_exact_match": False,
+        "false_answer": False,
+    }
+    _write_jsonl(eval_path, [eval_record])
+    _write_jsonl(train_path, [eval_record])
+    _write_jsonl(predictions_path, [prediction])
+
+    result = analyze_arithmetic_forensics(
+        predictions_path=predictions_path,
+        eval_path=eval_path,
+        train_path=train_path,
+    )
+    overflow = result["addition"]["buckets"]["overflow_to_new_digit"]
+
+    assert overflow["count"] == 1
+    assert overflow["final_normalized_exact_match"] == 0.0
+    assert overflow["units_accuracy"] == 1.0
+    assert overflow["tens_accuracy"] == 0.0
+    assert overflow["hundreds_accuracy"] == 0.0
+    assert overflow["u_row_accuracy"] == 1.0
+    assert overflow["t_row_accuracy"] == 0.0
+    assert overflow["carry_or_borrow_prediction_accuracy"] == 0.5
 
 
 def test_false_answer_rate_for_epistemic_tasks() -> None:
