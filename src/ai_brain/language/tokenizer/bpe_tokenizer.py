@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from tokenizers import Tokenizer, decoders, models, pre_tokenizers, trainers
 from tokenizers.pre_tokenizers import ByteLevel
@@ -15,6 +16,13 @@ from ai_brain.language.tokenizer.special_tokens import SPECIAL_TOKENS, UNK_TOKEN
 class EncodedText:
     ids: list[int]
     offsets: list[tuple[int, int]]
+
+
+NumericTokenizationMode = Literal["default_bpe", "digit_safe"]
+NUMERIC_TOKENIZATION_MODES: tuple[NumericTokenizationMode, ...] = (
+    "default_bpe",
+    "digit_safe",
+)
 
 
 class ByteLevelBpeTokenizer:
@@ -56,10 +64,26 @@ class ByteLevelBpeTokenizer:
         path.parent.mkdir(parents=True, exist_ok=True)
         self._tokenizer.save(str(path))
 
-    def encode(self, text: str) -> list[int]:
-        return self._tokenizer.encode(text).ids
+    def encode(
+        self,
+        text: str,
+        *,
+        numeric_tokenization: NumericTokenizationMode = "default_bpe",
+    ) -> list[int]:
+        return self.encode_with_offsets(
+            text,
+            numeric_tokenization=numeric_tokenization,
+        ).ids
 
-    def encode_with_offsets(self, text: str) -> EncodedText:
+    def encode_with_offsets(
+        self,
+        text: str,
+        *,
+        numeric_tokenization: NumericTokenizationMode = "default_bpe",
+    ) -> EncodedText:
+        _validate_numeric_tokenization(numeric_tokenization)
+        if numeric_tokenization == "digit_safe":
+            return self._encode_digit_safe_with_offsets(text)
         encoded = self._tokenizer.encode(text)
         return EncodedText(ids=encoded.ids, offsets=list(encoded.offsets))
 
@@ -97,3 +121,40 @@ class ByteLevelBpeTokenizer:
             },
             "byte_fallback": True,
         }
+
+    def _encode_digit_safe_with_offsets(self, text: str) -> EncodedText:
+        ids: list[int] = []
+        offsets: list[tuple[int, int]] = []
+        cursor = 0
+        for match in re.finditer(r"\d+", text):
+            if match.start() > cursor:
+                span = text[cursor : match.start()]
+                encoded = self._tokenizer.encode(span)
+                ids.extend(encoded.ids)
+                offsets.extend(
+                    (cursor + start, cursor + end) for start, end in encoded.offsets
+                )
+            for index in range(match.start(), match.end()):
+                encoded_digit = self._tokenizer.encode(text[index])
+                ids.extend(encoded_digit.ids)
+                offsets.extend((index, index + 1) for _ in encoded_digit.ids)
+            cursor = match.end()
+        if cursor < len(text):
+            span = text[cursor:]
+            encoded = self._tokenizer.encode(span)
+            ids.extend(encoded.ids)
+            offsets.extend(
+                (cursor + start, cursor + end) for start, end in encoded.offsets
+            )
+        return EncodedText(ids=ids, offsets=offsets)
+
+
+def _validate_numeric_tokenization(
+    numeric_tokenization: NumericTokenizationMode,
+) -> None:
+    if numeric_tokenization not in NUMERIC_TOKENIZATION_MODES:
+        modes = ", ".join(NUMERIC_TOKENIZATION_MODES)
+        raise ValueError(
+            f"Unknown numeric_tokenization: {numeric_tokenization}. "
+            f"Available modes: {modes}"
+        )

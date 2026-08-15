@@ -6,7 +6,10 @@ from dataclasses import dataclass
 
 import torch
 
-from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
+from ai_brain.language.tokenizer.bpe_tokenizer import (
+    ByteLevelBpeTokenizer,
+    NumericTokenizationMode,
+)
 
 FEATURE_NONE_ID = 0
 
@@ -83,8 +86,13 @@ class NumericFeatureArrays:
 def encode_text_numeric_features(
     text: str,
     tokenizer: ByteLevelBpeTokenizer,
+    *,
+    numeric_tokenization: NumericTokenizationMode = "default_bpe",
 ) -> tuple[list[int], NumericFeatureArrays]:
-    encoded = tokenizer.encode_with_offsets(text)
+    encoded = tokenizer.encode_with_offsets(
+        text,
+        numeric_tokenization=numeric_tokenization,
+    )
     char_features = _classify_chars(text)
     token_features = NumericFeatureArrays.none(len(encoded.ids))
 
@@ -113,11 +121,13 @@ def build_numeric_feature_tensors(
     input_ids: list[int],
     text_without_bos: str,
     tokenizer: ByteLevelBpeTokenizer,
+    numeric_tokenization: NumericTokenizationMode = "default_bpe",
     device: torch.device,
 ) -> dict[str, torch.Tensor]:
     encoded_ids, encoded_features = encode_text_numeric_features(
         text_without_bos,
         tokenizer,
+        numeric_tokenization=numeric_tokenization,
     )
     features = NumericFeatureArrays.none(len(input_ids))
     if input_ids[1:] == encoded_ids:

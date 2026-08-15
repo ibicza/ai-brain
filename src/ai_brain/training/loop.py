@@ -90,6 +90,21 @@ def _model_logits(
             batch["input_ids"],
             **{key: batch[key] for key in NUMERIC_FEATURE_KEYS},
         )
+    if getattr(model, "uses_abacus_position_features", False):
+        return model(
+            batch["input_ids"],
+            abacus_position_ids=batch["abacus_position_ids"],
+        )
+    if getattr(model, "uses_coupled_position_features", False):
+        return model(
+            batch["input_ids"],
+            coupled_position_ids=batch["coupled_position_ids"],
+        )
+    if getattr(model, "uses_gated_place_features", False):
+        return model(
+            batch["input_ids"],
+            digit_place_ids=batch["digit_place_ids"],
+        )
     return model(batch["input_ids"])
 
 
@@ -111,6 +126,13 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         tokenizer_path=config.tokenizer_path,
         sequence_length=config.sequence_length,
         loss_mode=config.loss_mode,
+        numeric_tokenization=config.numeric_tokenization,
+        abacus_random_offset_max=(
+            config.abacus_random_offset_max
+            if config.model_config_name.startswith("abacus_")
+            else 0
+        ),
+        position_offset_seed=config.seed,
     )
     eval_cache_path = default_lm_cache_path(
         cache_dir=config.cache_dir,
@@ -118,6 +140,9 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         tokenizer_path=config.tokenizer_path,
         sequence_length=config.sequence_length,
         loss_mode=config.loss_mode,
+        numeric_tokenization=config.numeric_tokenization,
+        abacus_random_offset_max=0,
+        position_offset_seed=0,
     )
 
     train_cache_info = prepare_lm_dataset(
@@ -126,6 +151,13 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         output_path=train_cache_path,
         sequence_length=config.sequence_length,
         loss_mode=config.loss_mode,
+        numeric_tokenization=config.numeric_tokenization,
+        abacus_random_offset_max=(
+            config.abacus_random_offset_max
+            if config.model_config_name.startswith("abacus_")
+            else 0
+        ),
+        position_offset_seed=config.seed,
     )
     eval_cache_info = prepare_lm_dataset(
         input_path=config.eval_path,
@@ -133,6 +165,9 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         output_path=eval_cache_path,
         sequence_length=config.sequence_length,
         loss_mode=config.loss_mode,
+        numeric_tokenization=config.numeric_tokenization,
+        abacus_random_offset_max=0,
+        position_offset_seed=0,
     )
 
     train_dataset = load_tokenized_lm_dataset(train_cache_path)

@@ -8,7 +8,10 @@ from typing import Any
 import torch
 from torch.utils.data import Dataset
 
-from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
+from ai_brain.language.tokenizer.bpe_tokenizer import (
+    ByteLevelBpeTokenizer,
+    NumericTokenizationMode,
+)
 from ai_brain.language.tokenizer.special_tokens import (
     ANSWER_TOKEN,
     BOS_TOKEN,
@@ -22,10 +25,16 @@ from ai_brain.numeric_features import (
     NumericFeatureArrays,
     encode_text_numeric_features,
 )
+from ai_brain.numeric_position_features import (
+    POSITION_FEATURE_KEYS,
+    NumericPositionFeatureArrays,
+    encode_text_position_features,
+    random_abacus_offset,
+)
 from ai_brain.training.config import LossMode
 
 IGNORE_INDEX = -100
-CACHE_FORMAT_VERSION = 3
+CACHE_FORMAT_VERSION = 4
 
 
 @dataclass(frozen=True)
@@ -37,6 +46,8 @@ class EncodedLmExample:
     digit_place_ids: list[int]
     number_role_ids: list[int]
     operation_step_ids: list[int]
+    abacus_position_ids: list[int]
+    coupled_position_ids: list[int]
     truncated: bool
     supervised_token_count: int
 
@@ -53,6 +64,8 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
         digit_place_ids: torch.Tensor | None = None,
         number_role_ids: torch.Tensor | None = None,
         operation_step_ids: torch.Tensor | None = None,
+        abacus_position_ids: torch.Tensor | None = None,
+        coupled_position_ids: torch.Tensor | None = None,
     ) -> None:
         if input_ids.shape != labels.shape or input_ids.shape != attention_mask.shape:
             raise ValueError(
@@ -70,6 +83,12 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
         self.operation_step_ids = _feature_tensor_or_zeros(
             operation_step_ids, input_ids
         )
+        self.abacus_position_ids = _feature_tensor_or_zeros(
+            abacus_position_ids, input_ids
+        )
+        self.coupled_position_ids = _feature_tensor_or_zeros(
+            coupled_position_ids, input_ids
+        )
         self.metadata = metadata
 
     def __len__(self) -> int:
@@ -84,6 +103,8 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
             "digit_place_ids": self.digit_place_ids[index],
             "number_role_ids": self.number_role_ids[index],
             "operation_step_ids": self.operation_step_ids[index],
+            "abacus_position_ids": self.abacus_position_ids[index],
+            "coupled_position_ids": self.coupled_position_ids[index],
         }
 
 
@@ -94,6 +115,8 @@ def encode_lm_example(
     tokenizer: ByteLevelBpeTokenizer,
     sequence_length: int,
     loss_mode: LossMode,
+    numeric_tokenization: NumericTokenizationMode = "default_bpe",
+    abacus_position_offset: int = 0,
 ) -> EncodedLmExample:
     if sequence_length < 2:
         raise ValueError("sequence_length must be at least 2")
@@ -108,11 +131,30 @@ def encode_lm_example(
     prefix_token_ids, prefix_features = encode_text_numeric_features(
         prefix_text,
         tokenizer,
+        numeric_tokenization=numeric_tokenization,
     )
     answer_token_ids, answer_features = encode_text_numeric_features(
         answer_text,
         tokenizer,
+        numeric_tokenization=numeric_tokenization,
     )
+    prefix_position_ids, prefix_position_features = encode_text_position_features(
+        prefix_text,
+        tokenizer,
+        numeric_tokenization=numeric_tokenization,
+        abacus_offset=abacus_position_offset,
+    )
+    answer_position_ids, answer_position_features = encode_text_position_features(
+        answer_text,
+        tokenizer,
+        numeric_tokenization=numeric_tokenization,
+        abacus_offset=abacus_position_offset,
+    )
+    if (
+        prefix_position_ids != prefix_token_ids
+        or answer_position_ids != answer_token_ids
+    ):
+        raise ValueError("numeric feature and position feature tokenization mismatch")
     prefix_ids = [bos_id, *prefix_token_ids]
     answer_ids = [*answer_token_ids, eos_id]
     ids = [*prefix_ids, *answer_ids]
@@ -142,6 +184,20 @@ def encode_lm_example(
             0,
         ],
     )
+    position_feature_arrays = NumericPositionFeatureArrays(
+        abacus_position_ids=[
+            0,
+            *prefix_position_features.abacus_position_ids,
+            *answer_position_features.abacus_position_ids,
+            0,
+        ],
+        coupled_position_ids=[
+            0,
+            *prefix_position_features.coupled_position_ids,
+            *answer_position_features.coupled_position_ids,
+            0,
+        ],
+    )
 
     if loss_mode == "answer-only":
         labels = [IGNORE_INDEX] * len(prefix_ids) + answer_ids
@@ -159,6 +215,14 @@ def encode_lm_example(
             digit_place_ids=feature_arrays.digit_place_ids[:sequence_length],
             number_role_ids=feature_arrays.number_role_ids[:sequence_length],
             operation_step_ids=feature_arrays.operation_step_ids[:sequence_length],
+        )
+        position_feature_arrays = NumericPositionFeatureArrays(
+            abacus_position_ids=position_feature_arrays.abacus_position_ids[
+                :sequence_length
+            ],
+            coupled_position_ids=position_feature_arrays.coupled_position_ids[
+                :sequence_length
+            ],
         )
 
     supervised_token_count = sum(label != IGNORE_INDEX for label in labels)
@@ -179,6 +243,8 @@ def encode_lm_example(
         feature_arrays.digit_place_ids.extend([0] * pad_count)
         feature_arrays.number_role_ids.extend([0] * pad_count)
         feature_arrays.operation_step_ids.extend([0] * pad_count)
+        position_feature_arrays.abacus_position_ids.extend([0] * pad_count)
+        position_feature_arrays.coupled_position_ids.extend([0] * pad_count)
 
     return EncodedLmExample(
         input_ids=ids,
@@ -188,6 +254,8 @@ def encode_lm_example(
         digit_place_ids=feature_arrays.digit_place_ids,
         number_role_ids=feature_arrays.number_role_ids,
         operation_step_ids=feature_arrays.operation_step_ids,
+        abacus_position_ids=position_feature_arrays.abacus_position_ids,
+        coupled_position_ids=position_feature_arrays.coupled_position_ids,
         truncated=truncated,
         supervised_token_count=supervised_token_count,
     )
@@ -200,6 +268,9 @@ def prepare_lm_dataset(
     output_path: Path,
     sequence_length: int,
     loss_mode: LossMode = "answer-only",
+    numeric_tokenization: NumericTokenizationMode = "default_bpe",
+    abacus_random_offset_max: int = 0,
+    position_offset_seed: int = 0,
     force: bool = False,
 ) -> dict[str, Any]:
     expected_metadata = _build_metadata(
@@ -207,6 +278,9 @@ def prepare_lm_dataset(
         tokenizer_path=tokenizer_path,
         sequence_length=sequence_length,
         loss_mode=loss_mode,
+        numeric_tokenization=numeric_tokenization,
+        abacus_random_offset_max=abacus_random_offset_max,
+        position_offset_seed=position_offset_seed,
     )
 
     if output_path.exists() and not force:
@@ -228,8 +302,14 @@ def prepare_lm_dataset(
             tokenizer=tokenizer,
             sequence_length=sequence_length,
             loss_mode=loss_mode,
+            numeric_tokenization=numeric_tokenization,
+            abacus_position_offset=random_abacus_offset(
+                max_offset=abacus_random_offset_max,
+                seed=position_offset_seed,
+                index=index,
+            ),
         )
-        for record in _iter_jsonl_records(input_path)
+        for index, record in enumerate(_iter_jsonl_records(input_path))
     ]
     if not examples:
         raise ValueError(f"No examples found in {input_path}")
@@ -247,7 +327,7 @@ def prepare_lm_dataset(
             [getattr(example, key) for example in examples],
             dtype=torch.long,
         )
-        for key in NUMERIC_FEATURE_KEYS
+        for key in (*NUMERIC_FEATURE_KEYS, *POSITION_FEATURE_KEYS)
     }
 
     stats = _summarize_encoded_examples(examples)
@@ -287,6 +367,8 @@ def load_tokenized_lm_dataset(cache_path: Path) -> TokenizedLmDataset:
         digit_place_ids=payload.get("digit_place_ids"),
         number_role_ids=payload.get("number_role_ids"),
         operation_step_ids=payload.get("operation_step_ids"),
+        abacus_position_ids=payload.get("abacus_position_ids"),
+        coupled_position_ids=payload.get("coupled_position_ids"),
     )
 
 
@@ -297,10 +379,16 @@ def default_lm_cache_path(
     tokenizer_path: Path,
     sequence_length: int,
     loss_mode: LossMode,
+    numeric_tokenization: NumericTokenizationMode = "default_bpe",
+    abacus_random_offset_max: int = 0,
+    position_offset_seed: int = 0,
 ) -> Path:
     loss_name = loss_mode.replace("-", "_")
+    tokenization_name = numeric_tokenization.replace("-", "_")
+    offset_name = f"abacus{abacus_random_offset_max}_seed{position_offset_seed}"
     filename = (
-        f"{input_path.stem}_{tokenizer_path.stem}_seq{sequence_length}_{loss_name}.pt"
+        f"{input_path.stem}_{tokenizer_path.stem}_{tokenization_name}_"
+        f"seq{sequence_length}_{loss_name}_{offset_name}.pt"
     )
     return cache_dir / filename
 
@@ -357,6 +445,9 @@ def _build_metadata(
     tokenizer_path: Path,
     sequence_length: int,
     loss_mode: LossMode,
+    numeric_tokenization: NumericTokenizationMode,
+    abacus_random_offset_max: int,
+    position_offset_seed: int,
 ) -> dict[str, Any]:
     source_stat = input_path.stat()
     tokenizer_stat = tokenizer_path.stat()
@@ -370,6 +461,9 @@ def _build_metadata(
         "tokenizer_mtime_ns": tokenizer_stat.st_mtime_ns,
         "sequence_length": sequence_length,
         "loss_mode": loss_mode,
+        "numeric_tokenization": numeric_tokenization,
+        "abacus_random_offset_max": abacus_random_offset_max,
+        "position_offset_seed": position_offset_seed,
     }
 
 

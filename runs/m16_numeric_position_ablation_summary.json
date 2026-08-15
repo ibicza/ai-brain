@@ -1,0 +1,1383 @@
+{
+  "m14_reference": {
+    "2digit_far": 0.0175,
+    "2digit_holdout_combo": 0.0645,
+    "digit_holdout": 0.81
+  },
+  "strong_thresholds": {
+    "2digit_far": 0.15,
+    "2digit_holdout_combo": 0.35,
+    "digit_holdout": 0.97
+  },
+  "success_thresholds": {
+    "2digit_far": 0.05,
+    "2digit_holdout_combo": 0.15,
+    "digit_holdout": 0.9
+  },
+  "variants": {
+    "A_BASELINE": {
+      "config": "tiny",
+      "dir": "a_baseline",
+      "extra_params_vs_baseline": 0,
+      "gated_place_alpha": null,
+      "last_metrics": {
+        "eval_loss": 2.0797577142715453,
+        "grad_norm": 0.5609105825424194,
+        "lr": 0.0003,
+        "step": 8000,
+        "train_loss": 0.03412172198295593
+      },
+      "parameter_count": 1478144,
+      "position": "none",
+      "run": "m16_a_baseline_default_bpe_tiny_8k",
+      "splits": {
+        "2digit_far": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+            "final_expected": "133",
+            "final_predicted": "63",
+            "predicted": "OP ADD\nA 4 1\nB 1 6\nU 1 6 0 -> 3 1\nT 4 1 1 -> 6 0\nOUT 63",
+            "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 38.9535,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.03880597014925373,
+              "full_nem": 0.0
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+              "final_expected": "133",
+              "final_predicted": "63",
+              "predicted": "OP ADD\nA 4 1\nB 1 6\nU 1 6 0 -> 3 1\nT 4 1 1 -> 6 0\nOUT 63",
+              "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+              "task_type": "arithmetic.add_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 4 1\nOUT 149",
+              "final_expected": "149",
+              "final_predicted": "33",
+              "predicted": "OP ADD\nA 1 5\nB 2 2\nU 5 2 0 -> 3 0\nT 1 2 0 -> 3 0\nOUT 33",
+              "prompt": "case 31008. ADD2_COMPOSED 84 + 65",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.0195,
+          "full_nem": 0.0,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 9 4\nB 6 0\nU 4 0 0 -> 4 0\nT 9 6 0 -> 3 0\nOUT 34",
+            "final_expected": "34",
+            "final_predicted": "83",
+            "predicted": "OP SUB\nA 4 8\nB 3 0\nU 8 3 0 -> 3 0\nT 4 4 0 -> 8 0\nOUT 83",
+            "prompt": "case 31011. SUB2_COMPOSED 94 - 60",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_holdout_combo": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+            "final_expected": "75",
+            "final_predicted": "73",
+            "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 3 1\nT 2 5 1 -> 7 0\nOUT 73",
+            "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 38.9635,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.04329896907216495,
+              "full_nem": 0.031958762886597936
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+              "final_expected": "5",
+              "final_predicted": "10",
+              "predicted": "OP SUB\nA 3 0\nB 2 6\nU 0 6 0 -> 0 0\nT 2 2 0 -> 1 0\nOUT 10",
+              "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+              "task_type": "arithmetic.sub_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+              "final_expected": "75",
+              "final_predicted": "73",
+              "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 3 1\nT 2 5 1 -> 7 0\nOUT 73",
+              "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.021,
+          "full_nem": 0.0155,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+            "final_expected": "5",
+            "final_predicted": "10",
+            "predicted": "OP SUB\nA 3 0\nB 2 6\nU 0 6 0 -> 0 0\nT 2 2 0 -> 1 0\nOUT 10",
+            "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_same": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 3 2\nB 3 7\nU 2 7 0 -> 9 0\nT 3 3 0 -> 6 0\nOUT 69",
+            "final_expected": "69",
+            "final_predicted": "73",
+            "predicted": "OP ADD\nA 3 2\nB 3 7\nU 2 7 0 -> 3 1\nT 3 3 1 -> 7 0\nOUT 73",
+            "prompt": "case 31011. ADD2_COMPOSED 32 + 37",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 38.9295,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.4780835881753313,
+              "full_nem": 0.4750254841997961
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.6643768400392541,
+              "full_nem": 0.6594700686947988
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP SUB\nA 2 5\nB 1 7\nU 5 7 0 -> 8 1\nT 2 1 1 -> 0 0\nOUT 8",
+              "final_expected": "8",
+              "final_predicted": "2",
+              "predicted": "OP SUB\nA 2 5\nB 1 7\nU 5 7 0 -> 2 0\nT 2 1 0 -> 0 0\nOUT 2",
+              "prompt": "case 31005. SUB2_COMPOSED 25 - 17",
+              "task_type": "arithmetic.sub_2digit_composed"
+            },
+            {
+              "expected": "OP SUB\nA 5 0\nB 3 4\nU 0 4 0 -> 6 1\nT 5 3 1 -> 1 0\nOUT 16",
+              "final_expected": "16",
+              "final_predicted": "14",
+              "predicted": "OP SUB\nA 5 0\nB 3 4\nU 0 4 0 -> 4 0\nT 5 3 0 -> 1 0\nOUT 14",
+              "prompt": "case 31010. SUB2_COMPOSED 50 - 34",
+              "task_type": "arithmetic.sub_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.573,
+          "full_nem": 0.569,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 2 5\nB 1 7\nU 5 7 0 -> 8 1\nT 2 1 1 -> 0 0\nOUT 8",
+            "final_expected": "8",
+            "final_predicted": "2",
+            "predicted": "OP SUB\nA 2 5\nB 1 7\nU 5 7 0 -> 2 0\nT 2 1 0 -> 0 0\nOUT 2",
+            "prompt": "case 31005. SUB2_COMPOSED 25 - 17",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "digit_holdout": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 7.01,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.13333333333333333,
+              "full_nem": 0.13333333333333333
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.09090909090909091,
+              "full_nem": 0.09090909090909091
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.09,
+              "full_nem": 0.09
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.06666666666666667,
+              "full_nem": 0.06666666666666667
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.16363636363636364,
+              "full_nem": 0.16363636363636364
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.09,
+              "full_nem": 0.09
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 5 C 0",
+              "final_expected": "S 5 C 0",
+              "final_predicted": "S 3 C 0",
+              "predicted": "S 3 C 0",
+              "prompt": "case 31003000000. ADD_DIGIT a=3 b=1 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            },
+            {
+              "expected": "S 0 C 1",
+              "final_expected": "S 0 C 1",
+              "final_predicted": "S 2 C 1",
+              "predicted": "S 2 C 1",
+              "prompt": "case 31003000001. ADD_DIGIT a=1 b=8 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.1025,
+          "full_nem": 0.1025,
+          "sub_failure_sample": null
+        },
+        "digit_seen": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 7.01375,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.13333333333333333,
+              "full_nem": 0.13333333333333333
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.05454545454545454,
+              "full_nem": 0.05454545454545454
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.12,
+              "full_nem": 0.12
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.044444444444444446,
+              "full_nem": 0.044444444444444446
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.13636363636363635,
+              "full_nem": 0.13636363636363635
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.11,
+              "full_nem": 0.11
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 7 C 0",
+              "final_expected": "S 7 C 0",
+              "final_predicted": "S 3 C 0",
+              "predicted": "S 3 C 0",
+              "prompt": "case 31002000000. ADD_DIGIT a=0 b=7 c=0",
+              "task_type": "arithmetic.digit_add_no_carry"
+            },
+            {
+              "expected": "S 6 C 1",
+              "final_expected": "S 6 C 1",
+              "final_predicted": "S 3 C 1",
+              "predicted": "S 3 C 1",
+              "prompt": "case 31002000001. ADD_DIGIT a=9 b=6 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.10375,
+          "full_nem": 0.10375,
+          "sub_failure_sample": null
+        }
+      },
+      "tokenization": "default_bpe",
+      "variant": "A_BASELINE"
+    },
+    "B_DIGIT_SAFE": {
+      "config": "tiny",
+      "dir": "b_digit_safe",
+      "extra_params_vs_baseline": 0,
+      "gated_place_alpha": null,
+      "last_metrics": {
+        "eval_loss": 1.0023429065942764,
+        "grad_norm": 0.07393947243690491,
+        "lr": 0.0003,
+        "step": 8000,
+        "train_loss": 0.005429872777312994
+      },
+      "parameter_count": 1478144,
+      "position": "none",
+      "run": "m16_b_digit_safe_tiny_8k",
+      "splits": {
+        "2digit_far": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+            "final_expected": "133",
+            "final_predicted": "63",
+            "predicted": "OP ADD\nA 7 1\nB 2 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 6 0\nOUT 63",
+            "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 54.942,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.3611940298507463,
+              "full_nem": 0.010945273631840797
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+              "final_expected": "133",
+              "final_predicted": "63",
+              "predicted": "OP ADD\nA 7 1\nB 2 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 6 0\nOUT 63",
+              "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+              "task_type": "arithmetic.add_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 4 1\nOUT 149",
+              "final_expected": "149",
+              "final_predicted": "69",
+              "predicted": "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 6 0\nOUT 69",
+              "prompt": "case 31008. ADD2_COMPOSED 84 + 65",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.1815,
+          "full_nem": 0.0055,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 9 4\nB 6 0\nU 4 0 0 -> 4 0\nT 9 6 0 -> 3 0\nOUT 34",
+            "final_expected": "34",
+            "final_predicted": "14",
+            "predicted": "OP SUB\nA 9 4\nB 2 0\nU 4 0 0 -> 4 0\nT 9 6 0 -> 1 0\nOUT 14",
+            "prompt": "case 31011. SUB2_COMPOSED 94 - 60",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_holdout_combo": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+            "final_expected": "75",
+            "final_predicted": "74",
+            "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 4 0\nT 2 5 0 -> 7 0\nOUT 74",
+            "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 55.125,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.10824742268041238,
+              "full_nem": 0.05360824742268041
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+              "final_expected": "5",
+              "final_predicted": "13",
+              "predicted": "OP SUB\nA 6 9\nB 2 4\nU 9 4 0 -> 3 0\nT 6 6 0 -> 1 0\nOUT 13",
+              "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+              "task_type": "arithmetic.sub_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+              "final_expected": "75",
+              "final_predicted": "74",
+              "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 4 0\nT 2 5 0 -> 7 0\nOUT 74",
+              "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.0525,
+          "full_nem": 0.026,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+            "final_expected": "5",
+            "final_predicted": "13",
+            "predicted": "OP SUB\nA 6 9\nB 2 4\nU 9 4 0 -> 3 0\nT 6 6 0 -> 1 0\nOUT 13",
+            "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_same": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 54.8565,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 1.0,
+              "full_nem": 1.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 1.0,
+              "full_nem": 1.0
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [],
+          "false_answer_rate": 0.0,
+          "final_nem": 1.0,
+          "full_nem": 1.0,
+          "sub_failure_sample": null
+        },
+        "digit_holdout": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 9.0,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.03333333333333333,
+              "full_nem": 0.03333333333333333
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.13636363636363635,
+              "full_nem": 0.13636363636363635
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.145,
+              "full_nem": 0.145
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.15555555555555556,
+              "full_nem": 0.15555555555555556
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.05454545454545454,
+              "full_nem": 0.05454545454545454
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.14,
+              "full_nem": 0.14
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 5 C 0",
+              "final_expected": "S 5 C 0",
+              "final_predicted": "S 8 C 0",
+              "predicted": "S 8 C 0",
+              "prompt": "case 31003000000. ADD_DIGIT a=3 b=1 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            },
+            {
+              "expected": "S 0 C 1",
+              "final_expected": "S 0 C 1",
+              "final_predicted": "S 8 C 0",
+              "predicted": "S 8 C 0",
+              "prompt": "case 31003000001. ADD_DIGIT a=1 b=8 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.11875,
+          "full_nem": 0.11875,
+          "sub_failure_sample": null
+        },
+        "digit_seen": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 9.0,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.05555555555555555,
+              "full_nem": 0.05555555555555555
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.15454545454545454,
+              "full_nem": 0.15454545454545454
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.13,
+              "full_nem": 0.13
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.15555555555555556,
+              "full_nem": 0.15555555555555556
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.05454545454545454,
+              "full_nem": 0.05454545454545454
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.14,
+              "full_nem": 0.14
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 7 C 0",
+              "final_expected": "S 7 C 0",
+              "final_predicted": "S 8 C 0",
+              "predicted": "S 8 C 0",
+              "prompt": "case 31002000000. ADD_DIGIT a=0 b=7 c=0",
+              "task_type": "arithmetic.digit_add_no_carry"
+            },
+            {
+              "expected": "S 6 C 1",
+              "final_expected": "S 6 C 1",
+              "final_predicted": "S 8 C 1",
+              "predicted": "S 8 C 1",
+              "prompt": "case 31002000001. ADD_DIGIT a=9 b=6 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.12,
+          "full_nem": 0.12,
+          "sub_failure_sample": null
+        }
+      },
+      "tokenization": "digit_safe",
+      "variant": "B_DIGIT_SAFE"
+    },
+    "C_ABACUS": {
+      "config": "abacus_tiny",
+      "dir": "c_abacus",
+      "extra_params_vs_baseline": 65536,
+      "gated_place_alpha": null,
+      "last_metrics": {
+        "eval_loss": 0.7676254943013191,
+        "grad_norm": 0.1691759079694748,
+        "lr": 0.0003,
+        "step": 8000,
+        "train_loss": 0.01416692417114973
+      },
+      "parameter_count": 1543680,
+      "position": "abacus digit-position + train random offset 0..99",
+      "run": "m16_c_abacus_digit_position_tiny_8k",
+      "splits": {
+        "2digit_far": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+            "final_expected": "133",
+            "final_predicted": "23",
+            "predicted": "OP ADD\nA 2 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 2 0\nOUT 23",
+            "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 54.938,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.3711442786069652,
+              "full_nem": 0.10945273631840796
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+              "final_expected": "133",
+              "final_predicted": "23",
+              "predicted": "OP ADD\nA 2 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 2 0\nOUT 23",
+              "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+              "task_type": "arithmetic.add_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 4 1\nOUT 149",
+              "final_expected": "149",
+              "final_predicted": "29",
+              "predicted": "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 2 0\nOUT 29",
+              "prompt": "case 31008. ADD2_COMPOSED 84 + 65",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.1865,
+          "full_nem": 0.055,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 9 4\nB 6 0\nU 4 0 0 -> 4 0\nT 9 6 0 -> 3 0\nOUT 34",
+            "final_expected": "34",
+            "final_predicted": "24",
+            "predicted": "OP SUB\nA 4 4\nB 6 0\nU 4 0 0 -> 4 0\nT 9 6 0 -> 2 0\nOUT 24",
+            "prompt": "case 31011. SUB2_COMPOSED 94 - 60",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_holdout_combo": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+            "final_expected": "75",
+            "final_predicted": "76",
+            "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 6 0\nT 2 5 0 -> 7 0\nOUT 76",
+            "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 54.941,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.1134020618556701,
+              "full_nem": 0.01752577319587629
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+              "final_expected": "5",
+              "final_predicted": "14",
+              "predicted": "OP SUB\nA 5 9\nB 6 4\nU 9 4 0 -> 4 0\nT 6 6 0 -> 1 0\nOUT 14",
+              "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+              "task_type": "arithmetic.sub_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+              "final_expected": "75",
+              "final_predicted": "76",
+              "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 6 0\nT 2 5 0 -> 7 0\nOUT 76",
+              "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.055,
+          "full_nem": 0.0085,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+            "final_expected": "5",
+            "final_predicted": "14",
+            "predicted": "OP SUB\nA 5 9\nB 6 4\nU 9 4 0 -> 4 0\nT 6 6 0 -> 1 0\nOUT 14",
+            "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_same": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 3 3\nB 3 4\nU 3 4 0 -> 7 0\nT 3 3 0 -> 6 0\nOUT 67",
+            "final_expected": "67",
+            "final_predicted": "72",
+            "predicted": "OP ADD\nA 3 3\nB 3 4\nU 3 4 0 -> 2 1\nT 3 3 1 -> 7 0\nOUT 72",
+            "prompt": "case 31038. ADD2_COMPOSED 33 + 34",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 54.847,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.8950050968399592,
+              "full_nem": 0.8950050968399592
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.8115799803729146,
+              "full_nem": 0.8115799803729146
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP SUB\nA 5 1\nB 1 9\nU 1 9 0 -> 2 1\nT 5 1 1 -> 3 0\nOUT 32",
+              "final_expected": "32",
+              "final_predicted": "38",
+              "predicted": "OP SUB\nA 5 1\nB 1 9\nU 1 9 0 -> 8 1\nT 5 1 1 -> 3 0\nOUT 38",
+              "prompt": "case 31019. SUB2_COMPOSED 51 - 19",
+              "task_type": "arithmetic.sub_2digit_composed"
+            },
+            {
+              "expected": "OP SUB\nA 4 9\nB 2 2\nU 9 2 0 -> 7 0\nT 4 2 0 -> 2 0\nOUT 27",
+              "final_expected": "27",
+              "final_predicted": "22",
+              "predicted": "OP SUB\nA 4 9\nB 2 2\nU 9 2 0 -> 2 0\nT 4 2 0 -> 2 0\nOUT 22",
+              "prompt": "case 31026. SUB2_COMPOSED 49 - 22",
+              "task_type": "arithmetic.sub_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.8525,
+          "full_nem": 0.8525,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 5 1\nB 1 9\nU 1 9 0 -> 2 1\nT 5 1 1 -> 3 0\nOUT 32",
+            "final_expected": "32",
+            "final_predicted": "38",
+            "predicted": "OP SUB\nA 5 1\nB 1 9\nU 1 9 0 -> 8 1\nT 5 1 1 -> 3 0\nOUT 38",
+            "prompt": "case 31019. SUB2_COMPOSED 51 - 19",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "digit_holdout": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 9.0,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.13333333333333333,
+              "full_nem": 0.13333333333333333
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.07272727272727272,
+              "full_nem": 0.07272727272727272
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.1,
+              "full_nem": 0.1
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.1111111111111111,
+              "full_nem": 0.1111111111111111
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.1,
+              "full_nem": 0.1
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.1,
+              "full_nem": 0.1
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 5 C 0",
+              "final_expected": "S 5 C 0",
+              "final_predicted": "S 3 C 0",
+              "predicted": "S 3 C 0",
+              "prompt": "case 31003000000. ADD_DIGIT a=3 b=1 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            },
+            {
+              "expected": "S 0 C 1",
+              "final_expected": "S 0 C 1",
+              "final_predicted": "S 3 C 1",
+              "predicted": "S 3 C 1",
+              "prompt": "case 31003000001. ADD_DIGIT a=1 b=8 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.10125,
+          "full_nem": 0.10125,
+          "sub_failure_sample": null
+        },
+        "digit_seen": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 9.0,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.13333333333333333,
+              "full_nem": 0.13333333333333333
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.07272727272727272,
+              "full_nem": 0.07272727272727272
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.1,
+              "full_nem": 0.1
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.06666666666666667,
+              "full_nem": 0.06666666666666667
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.13636363636363635,
+              "full_nem": 0.13636363636363635
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.1,
+              "full_nem": 0.1
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 7 C 0",
+              "final_expected": "S 7 C 0",
+              "final_predicted": "S 3 C 1",
+              "predicted": "S 3 C 1",
+              "prompt": "case 31002000000. ADD_DIGIT a=0 b=7 c=0",
+              "task_type": "arithmetic.digit_add_no_carry"
+            },
+            {
+              "expected": "S 6 C 1",
+              "final_expected": "S 6 C 1",
+              "final_predicted": "S 3 C 1",
+              "predicted": "S 3 C 1",
+              "prompt": "case 31002000001. ADD_DIGIT a=9 b=6 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.10125,
+          "full_nem": 0.10125,
+          "sub_failure_sample": null
+        }
+      },
+      "tokenization": "digit_safe",
+      "variant": "C_ABACUS"
+    },
+    "D_POSITION_COUPLING": {
+      "config": "coupled_tiny",
+      "dir": "d_coupled",
+      "extra_params_vs_baseline": 65536,
+      "gated_place_alpha": null,
+      "last_metrics": {
+        "eval_loss": 0.597645477950573,
+        "grad_norm": 0.17811007797718048,
+        "lr": 0.0003,
+        "step": 8000,
+        "train_loss": 0.005135681945830584
+      },
+      "parameter_count": 1543680,
+      "position": "coupled arithmetic-significance position ids",
+      "run": "m16_d_position_coupling_tiny_8k",
+      "splits": {
+        "2digit_far": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+            "final_expected": "133",
+            "final_predicted": "4",
+            "predicted": "OP ADD\nA 7 1\nB 2 2\nU 1 2 0 -> 3 0\nT 7 2 0 -> 4 0\nOUT 4",
+            "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 53.978,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.2218905472636816,
+              "full_nem": 0.12736318407960198
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+              "final_expected": "133",
+              "final_predicted": "4",
+              "predicted": "OP ADD\nA 7 1\nB 2 2\nU 1 2 0 -> 3 0\nT 7 2 0 -> 4 0\nOUT 4",
+              "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+              "task_type": "arithmetic.add_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 4 1\nOUT 149",
+              "final_expected": "149",
+              "final_predicted": "6",
+              "predicted": "OP ADD\nA 8 4\nB 2 5\nU 4 5 0 -> 9 0\nT 8 2 0 -> 6 0\nOUT 6",
+              "prompt": "case 31008. ADD2_COMPOSED 84 + 65",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.1115,
+          "full_nem": 0.064,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 9 4\nB 6 0\nU 4 0 0 -> 4 0\nT 9 6 0 -> 3 0\nOUT 34",
+            "final_expected": "34",
+            "final_predicted": "2",
+            "predicted": "OP SUB\nA 4 4\nB 2 0\nU 4 0 0 -> 4 0\nT 4 2 0 -> 2 0\nOUT 2",
+            "prompt": "case 31011. SUB2_COMPOSED 94 - 60",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_holdout_combo": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+            "final_expected": "75",
+            "final_predicted": "7",
+            "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 6 0\nT 2 5 0 -> 7 0\nOUT 7",
+            "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 53.967,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.09175257731958762,
+              "full_nem": 0.08350515463917525
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+              "final_expected": "5",
+              "final_predicted": "2",
+              "predicted": "OP SUB\nA 6 9\nB 2 4\nU 9 4 0 -> 3 0\nT 6 2 0 -> 2 0\nOUT 2",
+              "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+              "task_type": "arithmetic.sub_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+              "final_expected": "75",
+              "final_predicted": "7",
+              "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 6 0\nT 2 5 0 -> 7 0\nOUT 7",
+              "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.0445,
+          "full_nem": 0.0405,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+            "final_expected": "5",
+            "final_predicted": "2",
+            "predicted": "OP SUB\nA 6 9\nB 2 4\nU 9 4 0 -> 3 0\nT 6 2 0 -> 2 0\nOUT 2",
+            "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_same": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 1 9\nB 2 4\nU 9 4 0 -> 3 1\nT 1 2 1 -> 4 0\nOUT 43",
+            "final_expected": "43",
+            "final_predicted": "4",
+            "predicted": "OP ADD\nA 1 9\nB 2 4\nU 9 4 0 -> 3 1\nT 1 2 1 -> 4 0\nOUT 4",
+            "prompt": "case 31008. ADD2_COMPOSED 19 + 24",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 54.0,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.3042198233562316,
+              "full_nem": 0.3042198233562316
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP SUB\nA 4 7\nB 1 4\nU 7 4 0 -> 3 0\nT 4 1 0 -> 3 0\nOUT 33",
+              "final_expected": "33",
+              "final_predicted": "3",
+              "predicted": "OP SUB\nA 4 7\nB 1 4\nU 7 4 0 -> 3 0\nT 4 1 0 -> 3 0\nOUT 3",
+              "prompt": "case 31006. SUB2_COMPOSED 47 - 14",
+              "task_type": "arithmetic.sub_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 1 9\nB 2 4\nU 9 4 0 -> 3 1\nT 1 2 1 -> 4 0\nOUT 43",
+              "final_expected": "43",
+              "final_predicted": "4",
+              "predicted": "OP ADD\nA 1 9\nB 2 4\nU 9 4 0 -> 3 1\nT 1 2 1 -> 4 0\nOUT 4",
+              "prompt": "case 31008. ADD2_COMPOSED 19 + 24",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.155,
+          "full_nem": 0.155,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 4 7\nB 1 4\nU 7 4 0 -> 3 0\nT 4 1 0 -> 3 0\nOUT 33",
+            "final_expected": "33",
+            "final_predicted": "3",
+            "predicted": "OP SUB\nA 4 7\nB 1 4\nU 7 4 0 -> 3 0\nT 4 1 0 -> 3 0\nOUT 3",
+            "prompt": "case 31006. SUB2_COMPOSED 47 - 14",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "digit_holdout": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 9.0,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.37777777777777777,
+              "full_nem": 0.37777777777777777
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.35454545454545455,
+              "full_nem": 0.35454545454545455
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.31,
+              "full_nem": 0.31
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.1,
+              "full_nem": 0.1
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.41818181818181815,
+              "full_nem": 0.41818181818181815
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.195,
+              "full_nem": 0.195
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 5 C 0",
+              "final_expected": "S 5 C 0",
+              "final_predicted": "S 7 C 0",
+              "predicted": "S 7 C 0",
+              "prompt": "case 31003000000. ADD_DIGIT a=3 b=1 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            },
+            {
+              "expected": "S 0 C 1",
+              "final_expected": "S 0 C 1",
+              "final_predicted": "S 9 C 0",
+              "predicted": "S 9 C 0",
+              "prompt": "case 31003000001. ADD_DIGIT a=1 b=8 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.28625,
+          "full_nem": 0.28625,
+          "sub_failure_sample": null
+        },
+        "digit_seen": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 9.0,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.35555555555555557,
+              "full_nem": 0.35555555555555557
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.32727272727272727,
+              "full_nem": 0.32727272727272727
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.32,
+              "full_nem": 0.32
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.1111111111111111,
+              "full_nem": 0.1111111111111111
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.44545454545454544,
+              "full_nem": 0.44545454545454544
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.2,
+              "full_nem": 0.2
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 7 C 0",
+              "final_expected": "S 7 C 0",
+              "final_predicted": "S 2 C 0",
+              "predicted": "S 2 C 0",
+              "prompt": "case 31002000000. ADD_DIGIT a=0 b=7 c=0",
+              "task_type": "arithmetic.digit_add_no_carry"
+            },
+            {
+              "expected": "S 6 C 1",
+              "final_expected": "S 6 C 1",
+              "final_predicted": "S 7 C 1",
+              "predicted": "S 7 C 1",
+              "prompt": "case 31002000001. ADD_DIGIT a=9 b=6 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.28875,
+          "full_nem": 0.28875,
+          "sub_failure_sample": null
+        }
+      },
+      "tokenization": "digit_safe",
+      "variant": "D_POSITION_COUPLING"
+    },
+    "E_GATED_PLACE": {
+      "config": "gated_place_tiny",
+      "dir": "e_gated_place",
+      "extra_params_vs_baseline": 641,
+      "gated_place_alpha": -0.20548176765441895,
+      "last_metrics": {
+        "eval_loss": 0.9332023352384567,
+        "grad_norm": 0.07778237760066986,
+        "lr": 0.0003,
+        "step": 8000,
+        "train_loss": 0.005870693363249302
+      },
+      "parameter_count": 1478785,
+      "position": "gated place-only alpha * place embedding",
+      "run": "m16_e_gated_place_tiny_8k",
+      "splits": {
+        "2digit_far": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+            "final_expected": "133",
+            "final_predicted": "63",
+            "predicted": "OP ADD\nA 7 1\nB  407 407 407 407 407 1 2 0 -> 3 0\nT 7 6 0 -> 6 0\nOUT 63",
+            "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 49.927,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.2955223880597015,
+              "full_nem": 0.007960199004975124
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP ADD\nA 7 1\nB 6 2\nU 1 2 0 -> 3 0\nT 7 6 0 -> 3 1\nOUT 133",
+              "final_expected": "133",
+              "final_predicted": "63",
+              "predicted": "OP ADD\nA 7 1\nB  407 407 407 407 407 1 2 0 -> 3 0\nT 7 6 0 -> 6 0\nOUT 63",
+              "prompt": "case 31007. ADD2_COMPOSED 71 + 62",
+              "task_type": "arithmetic.add_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 8 4\nB 6 5\nU 4 5 0 -> 9 0\nT 8 6 0 -> 4 1\nOUT 149",
+              "final_expected": "149",
+              "final_predicted": "OP ADD\nA 3 4\nB  407 407 407 407",
+              "predicted": "OP ADD\nA 3 4\nB  407 407 407 407",
+              "prompt": "case 31008. ADD2_COMPOSED 84 + 65",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.1485,
+          "full_nem": 0.004,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 9 4\nB 6 0\nU 4 0 0 -> 4 0\nT 9 6 0 -> 3 0\nOUT 34",
+            "final_expected": "34",
+            "final_predicted": "OP SUB\nA 9 4\nB  407 407 0",
+            "predicted": "OP SUB\nA 9 4\nB  407 407 0",
+            "prompt": "case 31011. SUB2_COMPOSED 94 - 60",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_holdout_combo": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+            "final_expected": "75",
+            "final_predicted": "79",
+            "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 9 0\nT 2 5 0 -> 7 0\nOUT 79",
+            "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 53.47,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.0,
+              "full_nem": 0.0
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.11958762886597939,
+              "full_nem": 0.1134020618556701
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+              "final_expected": "5",
+              "final_predicted": "13",
+              "predicted": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 3 0\nT 6 6 0 -> 1 0\nOUT 13",
+              "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+              "task_type": "arithmetic.sub_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 5 0\nT 2 5 0 -> 7 0\nOUT 75",
+              "final_expected": "75",
+              "final_predicted": "79",
+              "predicted": "OP ADD\nA 2 0\nB 5 5\nU 0 5 0 -> 9 0\nT 2 5 0 -> 7 0\nOUT 79",
+              "prompt": "case 31007. ADD2_COMPOSED 20 + 55",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.058,
+          "full_nem": 0.055,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 5 0\nT 6 6 0 -> 0 0\nOUT 5",
+            "final_expected": "5",
+            "final_predicted": "13",
+            "predicted": "OP SUB\nA 6 9\nB 6 4\nU 9 4 0 -> 3 0\nT 6 6 0 -> 1 0\nOUT 13",
+            "prompt": "case 31006. SUB2_COMPOSED 69 - 64",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "2digit_same": {
+          "add_failure_sample": {
+            "expected": "OP ADD\nA 1 9\nB 2 4\nU 9 4 0 -> 3 1\nT 1 2 1 -> 4 0\nOUT 43",
+            "final_expected": "43",
+            "final_predicted": "4",
+            "predicted": "OP ADD\nA 1 9\nB 2 4\nU 9 4 0 -> 3 1\nT 1 2 1 -> 4 0\nOUT 4",
+            "prompt": "case 31008. ADD2_COMPOSED 19 + 24",
+            "task_type": "arithmetic.add_2digit_composed"
+          },
+          "avg_tokens_generated": 54.797,
+          "by_task_type": {
+            "arithmetic.add_2digit_composed": {
+              "final_nem": 0.8562691131498471,
+              "full_nem": 0.8562691131498471
+            },
+            "arithmetic.sub_2digit_composed": {
+              "final_nem": 0.9735034347399412,
+              "full_nem": 0.9735034347399412
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "OP ADD\nA 1 9\nB 2 4\nU 9 4 0 -> 3 1\nT 1 2 1 -> 4 0\nOUT 43",
+              "final_expected": "43",
+              "final_predicted": "4",
+              "predicted": "OP ADD\nA 1 9\nB 2 4\nU 9 4 0 -> 3 1\nT 1 2 1 -> 4 0\nOUT 4",
+              "prompt": "case 31008. ADD2_COMPOSED 19 + 24",
+              "task_type": "arithmetic.add_2digit_composed"
+            },
+            {
+              "expected": "OP ADD\nA 3 2\nB 3 7\nU 2 7 0 -> 9 0\nT 3 3 0 -> 6 0\nOUT 69",
+              "final_expected": "69",
+              "final_predicted": "6",
+              "predicted": "OP ADD\nA 3 2\nB 3 7\nU 2 7 0 -> 9 0\nT 3 3 0 -> 6 0\nOUT 6",
+              "prompt": "case 31011. ADD2_COMPOSED 32 + 37",
+              "task_type": "arithmetic.add_2digit_composed"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.916,
+          "full_nem": 0.916,
+          "sub_failure_sample": {
+            "expected": "OP SUB\nA 5 9\nB 1 1\nU 9 1 0 -> 8 0\nT 5 1 0 -> 4 0\nOUT 48",
+            "final_expected": "48",
+            "final_predicted": "4",
+            "predicted": "OP SUB\nA 5 9\nB 1 1\nU 9 1 0 -> 8 0\nT 5 1 0 -> 4 0\nOUT 4",
+            "prompt": "case 31105. SUB2_COMPOSED 59 - 11",
+            "task_type": "arithmetic.sub_2digit_composed"
+          }
+        },
+        "digit_holdout": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 9.0,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.05555555555555555,
+              "full_nem": 0.05555555555555555
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.12727272727272726,
+              "full_nem": 0.12727272727272726
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.165,
+              "full_nem": 0.165
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.1,
+              "full_nem": 0.1
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.1,
+              "full_nem": 0.1
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.16,
+              "full_nem": 0.16
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 5 C 0",
+              "final_expected": "S 5 C 0",
+              "final_predicted": "S 8 C 0",
+              "predicted": "S 8 C 0",
+              "prompt": "case 31003000000. ADD_DIGIT a=3 b=1 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            },
+            {
+              "expected": "S 0 C 1",
+              "final_expected": "S 0 C 1",
+              "final_predicted": "S 1 C 1",
+              "predicted": "S 1 C 1",
+              "prompt": "case 31003000001. ADD_DIGIT a=1 b=8 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.13,
+          "full_nem": 0.13,
+          "sub_failure_sample": null
+        },
+        "digit_seen": {
+          "add_failure_sample": null,
+          "avg_tokens_generated": 9.0,
+          "by_task_type": {
+            "arithmetic.digit_add_carry_out": {
+              "final_nem": 0.03333333333333333,
+              "full_nem": 0.03333333333333333
+            },
+            "arithmetic.digit_add_no_carry": {
+              "final_nem": 0.19090909090909092,
+              "full_nem": 0.19090909090909092
+            },
+            "arithmetic.digit_add_with_carry_input": {
+              "final_nem": 0.15,
+              "full_nem": 0.15
+            },
+            "arithmetic.digit_sub_borrow_out": {
+              "final_nem": 0.08888888888888889,
+              "full_nem": 0.08888888888888889
+            },
+            "arithmetic.digit_sub_no_borrow": {
+              "final_nem": 0.10909090909090909,
+              "full_nem": 0.10909090909090909
+            },
+            "arithmetic.digit_sub_with_borrow_input": {
+              "final_nem": 0.18,
+              "full_nem": 0.18
+            }
+          },
+          "empty_prediction_rate": 0.0,
+          "failure_samples": [
+            {
+              "expected": "S 7 C 0",
+              "final_expected": "S 7 C 0",
+              "final_predicted": "S 8 C 0",
+              "predicted": "S 8 C 0",
+              "prompt": "case 31002000000. ADD_DIGIT a=0 b=7 c=0",
+              "task_type": "arithmetic.digit_add_no_carry"
+            },
+            {
+              "expected": "S 6 C 1",
+              "final_expected": "S 6 C 1",
+              "final_predicted": "S 8 C 1",
+              "predicted": "S 8 C 1",
+              "prompt": "case 31002000001. ADD_DIGIT a=9 b=6 c=1",
+              "task_type": "arithmetic.digit_add_with_carry_input"
+            }
+          ],
+          "false_answer_rate": 0.0,
+          "final_nem": 0.1375,
+          "full_nem": 0.1375,
+          "sub_failure_sample": null
+        }
+      },
+      "tokenization": "digit_safe",
+      "variant": "E_GATED_PLACE"
+    }
+  }
+}

@@ -11,6 +11,7 @@ from ai_brain.numeric_features import (
     NUMBER_ROLE_VOCAB_SIZE,
     OPERATION_STEP_VOCAB_SIZE,
 )
+from ai_brain.numeric_position_features import POSITION_FEATURE_VOCAB_SIZE
 
 
 class FeedForward(nn.Module):
@@ -214,6 +215,97 @@ class TinyNumericCausalTransformer(TinyCausalTransformer):
         )
         x = x + self.operation_step_embedding(
             _feature_ids_or_none(operation_step_ids, input_ids)
+        )
+        return self.forward_embeddings(x)
+
+
+class TinyAbacusPositionTransformer(TinyCausalTransformer):
+    uses_abacus_position_features = True
+
+    def __init__(self, config: ModelConfig) -> None:
+        tiny_config = ModelConfig(**{**config.__dict__, "model_type": "tiny"})
+        super().__init__(tiny_config)
+        if config.model_type != "abacus":
+            raise ValueError(
+                "TinyAbacusPositionTransformer requires model_type='abacus'"
+            )
+        self.config = config
+        self.abacus_position_embedding = nn.Embedding(
+            POSITION_FEATURE_VOCAB_SIZE,
+            config.d_model,
+            padding_idx=FEATURE_NONE_ID,
+        )
+
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        *,
+        abacus_position_ids: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        x = self.embed_tokens_and_positions(input_ids)
+        x = x + self.abacus_position_embedding(
+            _feature_ids_or_none(abacus_position_ids, input_ids)
+        )
+        return self.forward_embeddings(x)
+
+
+class TinyCoupledPositionTransformer(TinyCausalTransformer):
+    uses_coupled_position_features = True
+
+    def __init__(self, config: ModelConfig) -> None:
+        tiny_config = ModelConfig(**{**config.__dict__, "model_type": "tiny"})
+        super().__init__(tiny_config)
+        if config.model_type != "coupled":
+            raise ValueError(
+                "TinyCoupledPositionTransformer requires model_type='coupled'"
+            )
+        self.config = config
+        self.coupled_position_embedding = nn.Embedding(
+            POSITION_FEATURE_VOCAB_SIZE,
+            config.d_model,
+            padding_idx=FEATURE_NONE_ID,
+        )
+
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        *,
+        coupled_position_ids: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        x = self.embed_tokens_and_positions(input_ids)
+        x = x + self.coupled_position_embedding(
+            _feature_ids_or_none(coupled_position_ids, input_ids)
+        )
+        return self.forward_embeddings(x)
+
+
+class TinyGatedPlaceTransformer(TinyCausalTransformer):
+    uses_gated_place_features = True
+
+    def __init__(self, config: ModelConfig) -> None:
+        tiny_config = ModelConfig(**{**config.__dict__, "model_type": "tiny"})
+        super().__init__(tiny_config)
+        if config.model_type != "gated_place":
+            raise ValueError(
+                "TinyGatedPlaceTransformer requires model_type='gated_place'"
+            )
+        self.config = config
+        self.digit_place_embedding = nn.Embedding(
+            DIGIT_PLACE_VOCAB_SIZE,
+            config.d_model,
+            padding_idx=FEATURE_NONE_ID,
+        )
+        self.place_alpha = nn.Parameter(torch.tensor(0.0))
+
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        *,
+        digit_place_ids: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        x = self.embed_tokens_and_positions(input_ids)
+        x = x + self.place_alpha * self.digit_place_embedding(
+            _feature_ids_or_none(digit_place_ids, input_ids)
         )
         return self.forward_embeddings(x)
 

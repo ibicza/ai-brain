@@ -14,7 +14,10 @@ from ai_brain.eval.normalize import (
     is_false_answer,
     normalize_answer,
 )
-from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
+from ai_brain.language.tokenizer.bpe_tokenizer import (
+    ByteLevelBpeTokenizer,
+    NumericTokenizationMode,
+)
 from ai_brain.runtime.device import get_device_info
 
 
@@ -25,6 +28,7 @@ def generate_answer(
     prompt: str,
     max_new_tokens: int = 32,
     cpu: bool = False,
+    numeric_tokenization: NumericTokenizationMode | None = None,
 ) -> dict[str, Any]:
     if max_new_tokens <= 0:
         raise ValueError("max_new_tokens must be positive")
@@ -36,12 +40,17 @@ def generate_answer(
         tokenizer_path=tokenizer_path,
         device=device_info.device,
     )
+    numeric_tokenization = _resolve_numeric_tokenization(
+        checkpoint,
+        numeric_tokenization,
+    )
     generated_ids = generate_answer_ids(
         model=model,
         tokenizer=tokenizer,
         prompt=prompt,
         max_new_tokens=max_new_tokens,
         device=device_info.device,
+        numeric_tokenization=numeric_tokenization,
     )
     raw_generation = tokenizer.decode(generated_ids, skip_special_tokens=False)
     answer = extract_generated_answer(raw_generation)
@@ -52,6 +61,7 @@ def generate_answer(
         "raw_generation": raw_generation,
         "tokens_generated": len(generated_ids),
         "checkpoint_step": checkpoint.get("step"),
+        "numeric_tokenization": numeric_tokenization,
         "device": str(device_info.device),
         "device_name": device_info.name,
     }
@@ -67,6 +77,7 @@ def eval_lm(
     max_new_tokens: int = 32,
     seed: int = 1234,
     cpu: bool = False,
+    numeric_tokenization: NumericTokenizationMode | None = None,
 ) -> dict[str, Any]:
     if max_examples is not None and max_examples <= 0:
         raise ValueError("max_examples must be positive")
@@ -80,6 +91,10 @@ def eval_lm(
         checkpoint_path=checkpoint_path,
         tokenizer_path=tokenizer_path,
         device=device_info.device,
+    )
+    numeric_tokenization = _resolve_numeric_tokenization(
+        checkpoint,
+        numeric_tokenization,
     )
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -98,6 +113,7 @@ def eval_lm(
                 prompt=record["prompt"],
                 max_new_tokens=max_new_tokens,
                 device=device_info.device,
+                numeric_tokenization=numeric_tokenization,
             )
             raw_generation = tokenizer.decode(generated_ids, skip_special_tokens=False)
             predicted = extract_generated_answer(raw_generation)
@@ -147,6 +163,7 @@ def eval_lm(
         "checkpoint_step": checkpoint.get("step"),
         "eval_path": str(eval_path),
         "tokenizer_path": str(tokenizer_path),
+        "numeric_tokenization": numeric_tokenization,
         "predictions_path": str(predictions_path),
         "max_examples": max_examples,
         "max_new_tokens": max_new_tokens,
@@ -181,3 +198,16 @@ def _iter_eval_records(path: Path):
             ):
                 raise ValueError(f"Record is missing prompt/answer/task_type in {path}")
             yield record
+
+
+def _resolve_numeric_tokenization(
+    checkpoint: dict[str, Any],
+    override: NumericTokenizationMode | None,
+) -> NumericTokenizationMode:
+    if override is not None:
+        return override
+    train_config = checkpoint.get("train_config", {})
+    value = str(train_config.get("numeric_tokenization", "default_bpe"))
+    if value not in {"default_bpe", "digit_safe"}:
+        raise ValueError(f"Unknown checkpoint numeric_tokenization: {value}")
+    return value  # type: ignore[return-value]

@@ -21,7 +21,10 @@ from ai_brain.data.writer import (
 from ai_brain.eval.compare import compare_evals
 from ai_brain.eval.diagnostics import analyze_eval
 from ai_brain.eval.runner import eval_lm, generate_answer
-from ai_brain.language.tokenizer.bpe_tokenizer import ByteLevelBpeTokenizer
+from ai_brain.language.tokenizer.bpe_tokenizer import (
+    NUMERIC_TOKENIZATION_MODES,
+    ByteLevelBpeTokenizer,
+)
 from ai_brain.language.tokenizer.trainer import train_tokenizer
 from ai_brain.model.config import MODEL_CONFIG_NAMES, get_named_model_config
 from ai_brain.model.factory import build_model, model_class_name
@@ -725,6 +728,12 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Text to encode.",
     )
+    encode_text_parser.add_argument(
+        "--numeric-tokenization",
+        choices=NUMERIC_TOKENIZATION_MODES,
+        default="default_bpe",
+        help="Numeric tokenization mode for decimal spans.",
+    )
 
     decode_ids_parser = subparsers.add_parser(
         "decode-ids",
@@ -775,6 +784,18 @@ def build_parser() -> argparse.ArgumentParser:
         choices=LOSS_MODES,
         default="answer-only",
         help="Labeling mode for supervised LM loss.",
+    )
+    prepare_lm_parser.add_argument(
+        "--numeric-tokenization",
+        choices=NUMERIC_TOKENIZATION_MODES,
+        default="default_bpe",
+        help="Numeric tokenization mode for decimal spans.",
+    )
+    prepare_lm_parser.add_argument(
+        "--abacus-random-offset-max",
+        type=int,
+        default=0,
+        help="Maximum per-example Abacus position offset for this cache.",
     )
     prepare_lm_parser.add_argument(
         "--force",
@@ -859,6 +880,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Maximum gradient norm for clipping.",
     )
     train_lm_parser.add_argument(
+        "--numeric-tokenization",
+        choices=NUMERIC_TOKENIZATION_MODES,
+        default="default_bpe",
+        help="Numeric tokenization mode for decimal spans.",
+    )
+    train_lm_parser.add_argument(
+        "--abacus-random-offset-max",
+        type=int,
+        default=99,
+        help="Maximum random Abacus position offset for abacus_* training.",
+    )
+    train_lm_parser.add_argument(
         "--eval-every",
         type=int,
         default=50,
@@ -925,6 +958,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Force CPU instead of CUDA.",
     )
+    generate_answer_parser.add_argument(
+        "--numeric-tokenization",
+        choices=NUMERIC_TOKENIZATION_MODES,
+        help="Override checkpoint numeric tokenization mode.",
+    )
 
     eval_lm_parser = subparsers.add_parser(
         "eval-lm",
@@ -976,6 +1014,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--cpu",
         action="store_true",
         help="Force CPU instead of CUDA.",
+    )
+    eval_lm_parser.add_argument(
+        "--numeric-tokenization",
+        choices=NUMERIC_TOKENIZATION_MODES,
+        help="Override checkpoint numeric tokenization mode.",
     )
 
     analyze_eval_parser = subparsers.add_parser(
@@ -1385,7 +1428,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "encode-text":
         tokenizer = ByteLevelBpeTokenizer.load(args.tokenizer)
-        ids = tokenizer.encode(args.text)
+        ids = tokenizer.encode(
+            args.text,
+            numeric_tokenization=args.numeric_tokenization,
+        )
         result = {"ids": ids, "count": len(ids)}
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
@@ -1405,6 +1451,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             output_path=args.output,
             sequence_length=args.sequence_length,
             loss_mode=args.loss_mode,
+            numeric_tokenization=args.numeric_tokenization,
+            abacus_random_offset_max=args.abacus_random_offset_max,
+            position_offset_seed=0,
             force=args.force,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
@@ -1424,6 +1473,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 loss_mode=args.loss_mode,
                 learning_rate=args.learning_rate,
                 grad_clip_norm=args.grad_clip_norm,
+                numeric_tokenization=args.numeric_tokenization,
+                abacus_random_offset_max=args.abacus_random_offset_max,
                 seed=args.seed,
                 eval_every=args.eval_every,
                 eval_batches=args.eval_batches,
@@ -1443,6 +1494,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             prompt=args.prompt,
             max_new_tokens=args.max_new_tokens,
             cpu=args.cpu,
+            numeric_tokenization=args.numeric_tokenization,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
@@ -1457,6 +1509,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             max_new_tokens=args.max_new_tokens,
             seed=args.seed,
             cpu=args.cpu,
+            numeric_tokenization=args.numeric_tokenization,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0

@@ -4,6 +4,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Literal
 
+from ai_brain.language.tokenizer.bpe_tokenizer import NumericTokenizationMode
+
 LossMode = Literal["answer-only", "full"]
 LOSS_MODES: tuple[LossMode, ...] = ("answer-only", "full")
 
@@ -21,6 +23,8 @@ class TrainConfig:
     loss_mode: LossMode = "answer-only"
     learning_rate: float = 3e-4
     grad_clip_norm: float = 1.0
+    numeric_tokenization: NumericTokenizationMode = "default_bpe"
+    abacus_random_offset_max: int = 0
     seed: int = 1234
     eval_every: int = 50
     eval_batches: int = 20
@@ -42,6 +46,12 @@ class TrainConfig:
             raise ValueError("learning_rate must be positive")
         if self.grad_clip_norm <= 0:
             raise ValueError("grad_clip_norm must be positive")
+        if self.numeric_tokenization not in {"default_bpe", "digit_safe"}:
+            raise ValueError(
+                f"Unknown numeric_tokenization: {self.numeric_tokenization}"
+            )
+        if self.abacus_random_offset_max < 0:
+            raise ValueError("abacus_random_offset_max must be non-negative")
         if self.eval_every <= 0:
             raise ValueError("eval_every must be positive")
         if self.eval_batches <= 0:

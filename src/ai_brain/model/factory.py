@@ -7,7 +7,10 @@ from torch import nn
 from ai_brain.model.config import ModelConfig
 from ai_brain.model.recurrent_transformer import RecurrentCausalTransformer
 from ai_brain.model.tiny_transformer import (
+    TinyAbacusPositionTransformer,
     TinyCausalTransformer,
+    TinyCoupledPositionTransformer,
+    TinyGatedPlaceTransformer,
     TinyNumericCausalTransformer,
 )
 
@@ -18,6 +21,12 @@ def build_model(config: ModelConfig) -> nn.Module:
         return TinyCausalTransformer(config)
     if config.model_type == "numeric":
         return TinyNumericCausalTransformer(config)
+    if config.model_type == "abacus":
+        return TinyAbacusPositionTransformer(config)
+    if config.model_type == "coupled":
+        return TinyCoupledPositionTransformer(config)
+    if config.model_type == "gated_place":
+        return TinyGatedPlaceTransformer(config)
     if config.model_type == "recurrent":
         return RecurrentCausalTransformer(config)
     raise ValueError(f"Unknown model_type: {config.model_type}")
@@ -28,6 +37,12 @@ def model_class_name(config: ModelConfig) -> str:
         return "TinyCausalTransformer"
     if config.model_type == "numeric":
         return "TinyNumericCausalTransformer"
+    if config.model_type == "abacus":
+        return "TinyAbacusPositionTransformer"
+    if config.model_type == "coupled":
+        return "TinyCoupledPositionTransformer"
+    if config.model_type == "gated_place":
+        return "TinyGatedPlaceTransformer"
     if config.model_type == "recurrent":
         return "RecurrentCausalTransformer"
     raise ValueError(f"Unknown model_type: {config.model_type}")

@@ -19,6 +19,7 @@ from ai_brain.numeric_features import (
     OPERATION_STEP_IDS,
     encode_text_numeric_features,
 )
+from ai_brain.numeric_position_features import encode_text_position_features
 from ai_brain.training.batching import sample_batch
 from ai_brain.training.config import TrainConfig
 from ai_brain.training.lm_dataset import (
@@ -557,6 +558,8 @@ def test_encode_lm_example_numeric_feature_lengths_match_input_ids(tmp_path) -> 
     assert len(encoded.digit_place_ids) == len(encoded.input_ids)
     assert len(encoded.number_role_ids) == len(encoded.input_ids)
     assert len(encoded.operation_step_ids) == len(encoded.input_ids)
+    assert len(encoded.abacus_position_ids) == len(encoded.input_ids)
+    assert len(encoded.coupled_position_ids) == len(encoded.input_ids)
     assert any(value != 0 for value in encoded.digit_value_ids)
 
 
@@ -593,6 +596,141 @@ def test_load_tokenized_lm_dataset_backfills_old_cache_features(tmp_path) -> Non
 
     assert torch.equal(dataset.digit_value_ids, torch.zeros_like(input_ids))
     assert torch.equal(dataset.operation_step_ids, torch.zeros_like(input_ids))
+    assert torch.equal(dataset.abacus_position_ids, torch.zeros_like(input_ids))
+    assert torch.equal(dataset.coupled_position_ids, torch.zeros_like(input_ids))
+
+
+def test_digit_safe_tokenization_splits_decimal_spans(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "case 1. ADD2_COMPOSED 73 + 149",
+                "answer": "OUT 222",
+                "task_type": "arithmetic.add_2digit_composed",
+            }
+        ],
+    )
+
+    default_ids = tokenizer.encode("73 149")
+    digit_safe = tokenizer.encode_with_offsets(
+        "73 149",
+        numeric_tokenization="digit_safe",
+    )
+    digit_ids = [tokenizer.encode(str(digit))[0] for digit in range(10)]
+
+    assert tokenizer.decode(digit_safe.ids, skip_special_tokens=False) == "73 149"
+    assert len(digit_safe.ids) == 6
+    assert digit_safe.ids[:2] == [digit_ids[7], digit_ids[3]]
+    assert digit_safe.ids[3:] == [digit_ids[1], digit_ids[4], digit_ids[9]]
+    assert len(default_ids) <= len(digit_safe.ids)
+
+
+def test_position_features_align_with_digit_safe_tokens(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "case 1. ADD2_COMPOSED 71 + 63",
+                "answer": "OP ADD\nA 7 1\nB 6 3\nU 1 3 0 -> 4 0\nT 7 6 0 -> 3 1\nOUT 134",
+                "task_type": "arithmetic.add_2digit_composed",
+            }
+        ],
+    )
+    text = "ADD_COMPOSED 71 + 63\nOUT 134"
+
+    ids, features = encode_text_position_features(
+        text,
+        tokenizer,
+        numeric_tokenization="digit_safe",
+    )
+    pieces = [
+        tokenizer.decode([token_id], skip_special_tokens=False) for token_id in ids
+    ]
+    digit_rows = [
+        (piece, abacus, coupled)
+        for piece, abacus, coupled in zip(
+            pieces,
+            features.abacus_position_ids,
+            features.coupled_position_ids,
+            strict=True,
+        )
+        if piece.isdigit()
+    ]
+
+    assert digit_rows[:4] == [("7", 2, 2), ("1", 1, 1), ("6", 2, 2), ("3", 1, 1)]
+    assert digit_rows[-3:] == [("1", 3, 3), ("3", 2, 2), ("4", 1, 1)]
+
+
+def test_coupled_position_features_handle_partial_generation(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "case 1. ADD2_COMPOSED 71 + 63",
+                "answer": "OP ADD\nA 7 1\nB 6 3\nU 1 3 0 -> 4 0\nT 7",
+                "task_type": "arithmetic.add_2digit_composed",
+            }
+        ],
+    )
+    text = "OP ADD\nA 7 1\nB 6 3\nU 1 3 0 -> 4\nT 7"
+
+    _ids, features = encode_text_position_features(
+        text,
+        tokenizer,
+        numeric_tokenization="digit_safe",
+    )
+
+    nonzero = [value for value in features.coupled_position_ids if value != 0]
+    assert nonzero
+    assert max(nonzero) <= 2
+
+
+def test_train_lm_can_train_abacus_debug_digit_safe(tmp_path) -> None:
+    records = [
+        {
+            "prompt": "case 1. ADD_DIGIT a=3 b=4 c=0",
+            "answer": "S 7 C 0",
+            "task_type": "arithmetic.digit_add_no_carry",
+        },
+        {
+            "prompt": "case 2. SUB_DIGIT a=8 b=3 borrow=0",
+            "answer": "S 5 B 0",
+            "task_type": "arithmetic.digit_sub_no_borrow",
+        },
+    ]
+    train_path = tmp_path / "train.jsonl"
+    eval_path = tmp_path / "eval.jsonl"
+    output_dir = tmp_path / "abacus_run"
+    cache_dir = tmp_path / "tokenized"
+    _write_jsonl(train_path, records)
+    _write_jsonl(eval_path, records)
+    _tokenizer, tokenizer_path = _train_tokenizer(tmp_path, records)
+
+    result = train_lm(
+        TrainConfig(
+            train_path=train_path,
+            eval_path=eval_path,
+            tokenizer_path=tokenizer_path,
+            output_dir=output_dir,
+            model_config_name="abacus_debug",
+            steps=1,
+            batch_size=2,
+            sequence_length=64,
+            loss_mode="answer-only",
+            numeric_tokenization="digit_safe",
+            abacus_random_offset_max=3,
+            eval_every=1,
+            eval_batches=1,
+            save_every=1,
+            cache_dir=cache_dir,
+            cpu=True,
+        )
+    )
+
+    assert result["model_config"]["model_type"] == "abacus"
+    assert result["train_cache"]["metadata"]["numeric_tokenization"] == "digit_safe"
+    assert result["train_cache"]["metadata"]["abacus_random_offset_max"] == 3
 
 
 def test_train_lm_can_train_numeric_debug(tmp_path) -> None:

@@ -25,12 +25,14 @@ from ai_brain.language.tokenizer.special_tokens import END_TOKEN, EOS_TOKEN
 from ai_brain.language.tokenizer.text_format import format_prompt_answer
 from ai_brain.model.config import (
     ModelConfig,
+    abacus_debug_config,
     numeric_debug_config,
     recurrent_debug_config,
 )
 from ai_brain.model.factory import build_model
 from ai_brain.model.recurrent_transformer import RecurrentCausalTransformer
 from ai_brain.model.tiny_transformer import (
+    TinyAbacusPositionTransformer,
     TinyCausalTransformer,
     TinyNumericCausalTransformer,
 )
@@ -302,6 +304,76 @@ def test_load_numeric_checkpoint_for_inference_and_eval(tmp_path) -> None:
     assert checkpoint["model_config"]["model_type"] == "numeric"
     assert result["summary"]["count"] == 1
     assert (output_dir / "predictions.jsonl").exists()
+
+
+def test_load_abacus_checkpoint_uses_checkpoint_numeric_tokenization(tmp_path) -> None:
+    records = [
+        {
+            "id": "digit:add",
+            "task_type": "arithmetic.digit_add_no_carry",
+            "prompt": "case 1. ADD_DIGIT a=3 b=4 c=0",
+            "answer": "S 7 C 0",
+        }
+    ]
+    tokenizer_path = tmp_path / "tokenizer.json"
+    checkpoint_path = tmp_path / "abacus_checkpoint.pt"
+    eval_path = tmp_path / "eval.jsonl"
+    output_dir = tmp_path / "eval_abacus"
+    tokenizer = ByteLevelBpeTokenizer.train(
+        [
+            format_prompt_answer(record["prompt"], record["answer"])
+            for record in records
+        ],
+        vocab_size=512,
+        min_frequency=1,
+    )
+    tokenizer.save(tokenizer_path)
+    _write_jsonl(eval_path, records)
+
+    base_config = abacus_debug_config()
+    model_config = ModelConfig(
+        **{
+            **asdict(base_config),
+            "vocab_size": tokenizer.vocab_size,
+            "max_sequence_length": 64,
+        }
+    )
+    model = build_model(model_config)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    torch.save(
+        {
+            "step": 1,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "model_config": asdict(model_config),
+            "train_config": {
+                "loss_mode": "answer-only",
+                "numeric_tokenization": "digit_safe",
+            },
+            "tokenizer_path": str(tokenizer_path),
+            "last_metrics": {"train_loss": 1.0},
+        },
+        checkpoint_path,
+    )
+
+    loaded_model, _checkpoint = load_model_for_inference(
+        checkpoint_path=checkpoint_path,
+        tokenizer_path=tokenizer_path,
+        device=torch.device("cpu"),
+    )
+    result = eval_lm(
+        checkpoint_path=checkpoint_path,
+        eval_path=eval_path,
+        tokenizer_path=tokenizer_path,
+        output_dir=output_dir,
+        max_examples=1,
+        max_new_tokens=2,
+        cpu=True,
+    )
+
+    assert isinstance(loaded_model, TinyAbacusPositionTransformer)
+    assert result["summary"]["numeric_tokenization"] == "digit_safe"
+    assert result["summary"]["count"] == 1
 
 
 def test_load_recurrent_checkpoint_for_inference(tmp_path) -> None:

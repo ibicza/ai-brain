@@ -38,6 +38,8 @@ def batch_by_indices(
         "digit_place_ids": dataset.digit_place_ids[indices].to(device),
         "number_role_ids": dataset.number_role_ids[indices].to(device),
         "operation_step_ids": dataset.operation_step_ids[indices].to(device),
+        "abacus_position_ids": dataset.abacus_position_ids[indices].to(device),
+        "coupled_position_ids": dataset.coupled_position_ids[indices].to(device),
     }
 
 

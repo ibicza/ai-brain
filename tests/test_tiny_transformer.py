@@ -1,8 +1,18 @@
 import torch
 
-from ai_brain.model.config import debug_config, numeric_debug_config, tiny_config
+from ai_brain.model.config import (
+    abacus_debug_config,
+    coupled_debug_config,
+    debug_config,
+    gated_place_debug_config,
+    numeric_debug_config,
+    tiny_config,
+)
 from ai_brain.model.tiny_transformer import (
+    TinyAbacusPositionTransformer,
     TinyCausalTransformer,
+    TinyCoupledPositionTransformer,
+    TinyGatedPlaceTransformer,
     TinyNumericCausalTransformer,
 )
 from ai_brain.model.utils import count_parameters, format_parameter_count
@@ -99,3 +109,37 @@ def test_numeric_tiny_transformer_defaults_missing_features_to_none() -> None:
     logits = model(input_ids)
 
     assert logits.shape == (2, 8, config.vocab_size)
+
+
+def test_abacus_position_transformer_forward_shape() -> None:
+    config = abacus_debug_config()
+    model = TinyAbacusPositionTransformer(config)
+    input_ids = torch.randint(0, config.vocab_size, size=(2, 8), dtype=torch.long)
+    abacus_position_ids = torch.randint(0, 16, size=(2, 8), dtype=torch.long)
+
+    logits = model(input_ids, abacus_position_ids=abacus_position_ids)
+
+    assert logits.shape == (2, 8, config.vocab_size)
+
+
+def test_coupled_position_transformer_forward_shape() -> None:
+    config = coupled_debug_config()
+    model = TinyCoupledPositionTransformer(config)
+    input_ids = torch.randint(0, config.vocab_size, size=(2, 8), dtype=torch.long)
+    coupled_position_ids = torch.randint(0, 16, size=(2, 8), dtype=torch.long)
+
+    logits = model(input_ids, coupled_position_ids=coupled_position_ids)
+
+    assert logits.shape == (2, 8, config.vocab_size)
+
+
+def test_gated_place_transformer_starts_with_zero_gate() -> None:
+    config = gated_place_debug_config()
+    model = TinyGatedPlaceTransformer(config)
+    input_ids = torch.randint(0, config.vocab_size, size=(2, 8), dtype=torch.long)
+    digit_place_ids = torch.randint(0, 5, size=(2, 8), dtype=torch.long)
+
+    logits = model(input_ids, digit_place_ids=digit_place_ids)
+
+    assert logits.shape == (2, 8, config.vocab_size)
+    assert float(model.place_alpha.detach().item()) == 0.0

@@ -1,0 +1,3895 @@
+{
+  "alignment_tables": {
+    "add_prompt": {
+      "default_bpe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "case",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "case",
+          "token_id": 305
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 1",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ".",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ".",
+          "token_id": 20
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "2",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "2",
+          "token_id": 24
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "_",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "_",
+          "token_id": 69
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "C",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "C",
+          "token_id": 41
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "M",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "M",
+          "token_id": 51
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "S",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "S",
+          "token_id": 57
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "E",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "E",
+          "token_id": 43
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": " 71",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "prompt",
+          "piece": " 71",
+          "token_id": 1374
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " +",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " +",
+          "token_id": 491
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": " 63",
+          "digit_place": "tens",
+          "digit_value_id": 7,
+          "number_role": "b",
+          "operation_step": "prompt",
+          "piece": " 63",
+          "token_id": 1317
+        }
+      ],
+      "digit_safe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "case",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "case",
+          "token_id": 305
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "1",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ".",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ".",
+          "token_id": 20
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "2",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "2",
+          "token_id": 24
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "_",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "_",
+          "token_id": 69
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "C",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "C",
+          "token_id": 41
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "M",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "M",
+          "token_id": 51
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "S",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "S",
+          "token_id": 57
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "E",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "E",
+          "token_id": 43
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": "7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "prompt",
+          "piece": "7",
+          "token_id": 29
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "prompt",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " +",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " +",
+          "token_id": 491
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": "6",
+          "digit_place": "tens",
+          "digit_value_id": 7,
+          "number_role": "b",
+          "operation_step": "prompt",
+          "piece": "6",
+          "token_id": 28
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "prompt",
+          "piece": "3",
+          "token_id": 25
+        }
+      ]
+    },
+    "add_trace": {
+      "default_bpe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": " 7",
+          "token_id": 399
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 6",
+          "digit_place": "tens",
+          "digit_value_id": 7,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": " 6",
+          "token_id": 393
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": " 3",
+          "token_id": 338
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "unit_step",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "unit_step",
+          "piece": " 3",
+          "token_id": 338
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_in",
+          "operation_step": "unit_step",
+          "piece": " 0",
+          "token_id": 707
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "unit_step",
+          "piece": " 4",
+          "token_id": 349
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_out",
+          "operation_step": "unit_step",
+          "piece": " 0",
+          "token_id": 707
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "tens_step",
+          "piece": " 7",
+          "token_id": 399
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 6",
+          "digit_place": "tens",
+          "digit_value_id": 7,
+          "number_role": "b",
+          "operation_step": "tens_step",
+          "piece": " 6",
+          "token_id": 393
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_in",
+          "operation_step": "tens_step",
+          "piece": " 0",
+          "token_id": 707
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 3",
+          "digit_place": "tens",
+          "digit_value_id": 4,
+          "number_role": "result",
+          "operation_step": "tens_step",
+          "piece": " 3",
+          "token_id": 338
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 3,
+          "decoded_piece": " 1",
+          "digit_place": "carry",
+          "digit_value_id": 2,
+          "number_role": "carry_out",
+          "operation_step": "tens_step",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 3,
+          "coupled_position_id": 3,
+          "decoded_piece": " 13",
+          "digit_place": "hundreds",
+          "digit_value_id": 2,
+          "number_role": "result",
+          "operation_step": "out",
+          "piece": " 13",
+          "token_id": 565
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "out",
+          "piece": "4",
+          "token_id": 26
+        }
+      ],
+      "digit_safe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": "7",
+          "token_id": 29
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "6",
+          "digit_place": "tens",
+          "digit_value_id": 7,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "6",
+          "token_id": 28
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "3",
+          "token_id": 25
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "unit_step",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "unit_step",
+          "piece": "3",
+          "token_id": 25
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_in",
+          "operation_step": "unit_step",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "unit_step",
+          "piece": "4",
+          "token_id": 26
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_out",
+          "operation_step": "unit_step",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "tens_step",
+          "piece": "7",
+          "token_id": 29
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "6",
+          "digit_place": "tens",
+          "digit_value_id": 7,
+          "number_role": "b",
+          "operation_step": "tens_step",
+          "piece": "6",
+          "token_id": 28
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_in",
+          "operation_step": "tens_step",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "3",
+          "digit_place": "tens",
+          "digit_value_id": 4,
+          "number_role": "result",
+          "operation_step": "tens_step",
+          "piece": "3",
+          "token_id": 25
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 3,
+          "decoded_piece": "1",
+          "digit_place": "carry",
+          "digit_value_id": 2,
+          "number_role": "carry_out",
+          "operation_step": "tens_step",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 3,
+          "coupled_position_id": 3,
+          "decoded_piece": "1",
+          "digit_place": "hundreds",
+          "digit_value_id": 2,
+          "number_role": "result",
+          "operation_step": "out",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": "3",
+          "digit_place": "tens",
+          "digit_value_id": 4,
+          "number_role": "result",
+          "operation_step": "out",
+          "piece": "3",
+          "token_id": 25
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "out",
+          "piece": "4",
+          "token_id": 26
+        }
+      ]
+    },
+    "partial_bad_trace": {
+      "default_bpe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": " 7",
+          "token_id": 399
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 6",
+          "digit_place": "tens",
+          "digit_value_id": 7,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": " 6",
+          "token_id": 393
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": " 3",
+          "token_id": 338
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "unit_step",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "unit_step",
+          "piece": " 3",
+          "token_id": 338
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_in",
+          "operation_step": "unit_step",
+          "piece": " 0",
+          "token_id": 707
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "unit_step",
+          "piece": " 4",
+          "token_id": 349
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "tens_step",
+          "piece": " 7",
+          "token_id": 399
+        }
+      ],
+      "digit_safe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": "7",
+          "token_id": 29
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "6",
+          "digit_place": "tens",
+          "digit_value_id": 7,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "6",
+          "token_id": 28
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "3",
+          "token_id": 25
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "a",
+          "operation_step": "unit_step",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "3",
+          "digit_place": "ones",
+          "digit_value_id": 4,
+          "number_role": "b",
+          "operation_step": "unit_step",
+          "piece": "3",
+          "token_id": 25
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_in",
+          "operation_step": "unit_step",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "unit_step",
+          "piece": "4",
+          "token_id": 26
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "7",
+          "digit_place": "tens",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "tens_step",
+          "piece": "7",
+          "token_id": 29
+        }
+      ]
+    },
+    "partial_garbled_trace": {
+      "default_bpe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 7",
+          "digit_place": "ones",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": " 7",
+          "token_id": 399
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 4,
+          "coupled_position_id": 4,
+          "decoded_piece": " 4052",
+          "digit_place": "hundreds",
+          "digit_value_id": 5,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": " 4052",
+          "token_id": 3603
+        },
+        {
+          "abacus_position_id": 4,
+          "coupled_position_id": 4,
+          "decoded_piece": " 4052",
+          "digit_place": "hundreds",
+          "digit_value_id": 5,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": " 4052",
+          "token_id": 3603
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 7",
+          "digit_place": "ones",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "unit_step",
+          "piece": " 7",
+          "token_id": 399
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "b",
+          "operation_step": "unit_step",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_in",
+          "operation_step": "unit_step",
+          "piece": " 0",
+          "token_id": 707
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 2",
+          "digit_place": "ones",
+          "digit_value_id": 3,
+          "number_role": "result",
+          "operation_step": "unit_step",
+          "piece": " 2",
+          "token_id": 321
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_out",
+          "operation_step": "unit_step",
+          "piece": " 0",
+          "token_id": 707
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 4",
+          "digit_place": "tens",
+          "digit_value_id": 5,
+          "number_role": "a",
+          "operation_step": "tens_step",
+          "piece": " 4",
+          "token_id": 349
+        }
+      ],
+      "digit_safe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "D",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "D",
+          "token_id": 42
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "7",
+          "digit_place": "ones",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": "7",
+          "token_id": 29
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 4,
+          "coupled_position_id": 4,
+          "decoded_piece": "4",
+          "digit_place": "hundreds",
+          "digit_value_id": 5,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "4",
+          "token_id": 26
+        },
+        {
+          "abacus_position_id": 3,
+          "coupled_position_id": 3,
+          "decoded_piece": "0",
+          "digit_place": "hundreds",
+          "digit_value_id": 1,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": "5",
+          "digit_place": "hundreds",
+          "digit_value_id": 6,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "5",
+          "token_id": 27
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "2",
+          "digit_place": "hundreds",
+          "digit_value_id": 3,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "2",
+          "token_id": 24
+        },
+        {
+          "abacus_position_id": 4,
+          "coupled_position_id": 4,
+          "decoded_piece": "4",
+          "digit_place": "hundreds",
+          "digit_value_id": 5,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "4",
+          "token_id": 26
+        },
+        {
+          "abacus_position_id": 3,
+          "coupled_position_id": 3,
+          "decoded_piece": "0",
+          "digit_place": "hundreds",
+          "digit_value_id": 1,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": "5",
+          "digit_place": "tens",
+          "digit_value_id": 6,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "5",
+          "token_id": 27
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "2",
+          "digit_place": "ones",
+          "digit_value_id": 3,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "2",
+          "token_id": 24
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "7",
+          "digit_place": "ones",
+          "digit_value_id": 8,
+          "number_role": "a",
+          "operation_step": "unit_step",
+          "piece": "7",
+          "token_id": 29
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "1",
+          "digit_place": "ones",
+          "digit_value_id": 2,
+          "number_role": "b",
+          "operation_step": "unit_step",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_in",
+          "operation_step": "unit_step",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "2",
+          "digit_place": "ones",
+          "digit_value_id": 3,
+          "number_role": "result",
+          "operation_step": "unit_step",
+          "piece": "2",
+          "token_id": 24
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "carry_out",
+          "operation_step": "unit_step",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "4",
+          "digit_place": "tens",
+          "digit_value_id": 5,
+          "number_role": "a",
+          "operation_step": "tens_step",
+          "piece": "4",
+          "token_id": 26
+        }
+      ]
+    },
+    "sub_trace": {
+      "default_bpe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "S",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "S",
+          "token_id": 57
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 5",
+          "digit_place": "tens",
+          "digit_value_id": 6,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": " 5",
+          "token_id": 388
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 2",
+          "digit_place": "ones",
+          "digit_value_id": 3,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": " 2",
+          "token_id": 321
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 1",
+          "digit_place": "tens",
+          "digit_value_id": 2,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 8",
+          "digit_place": "ones",
+          "digit_value_id": 9,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": " 8",
+          "token_id": 401
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 2",
+          "digit_place": "ones",
+          "digit_value_id": 3,
+          "number_role": "a",
+          "operation_step": "unit_step",
+          "piece": " 2",
+          "token_id": 321
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 8",
+          "digit_place": "ones",
+          "digit_value_id": 9,
+          "number_role": "b",
+          "operation_step": "unit_step",
+          "piece": " 8",
+          "token_id": 401
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "borrow_in",
+          "operation_step": "unit_step",
+          "piece": " 0",
+          "token_id": 707
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": " 4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "unit_step",
+          "piece": " 4",
+          "token_id": 349
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 1",
+          "digit_place": "carry",
+          "digit_value_id": 2,
+          "number_role": "borrow_out",
+          "operation_step": "unit_step",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 5",
+          "digit_place": "tens",
+          "digit_value_id": 6,
+          "number_role": "a",
+          "operation_step": "tens_step",
+          "piece": " 5",
+          "token_id": 388
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 1",
+          "digit_place": "tens",
+          "digit_value_id": 2,
+          "number_role": "b",
+          "operation_step": "tens_step",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 1",
+          "digit_place": "carry",
+          "digit_value_id": 2,
+          "number_role": "borrow_in",
+          "operation_step": "tens_step",
+          "piece": " 1",
+          "token_id": 314
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": " 3",
+          "digit_place": "tens",
+          "digit_value_id": 4,
+          "number_role": "result",
+          "operation_step": "tens_step",
+          "piece": " 3",
+          "token_id": 338
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 3,
+          "decoded_piece": " 0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "borrow_out",
+          "operation_step": "tens_step",
+          "piece": " 0",
+          "token_id": 707
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": " 34",
+          "digit_place": "tens",
+          "digit_value_id": 4,
+          "number_role": "result",
+          "operation_step": "out",
+          "piece": " 34",
+          "token_id": 734
+        }
+      ],
+      "digit_safe": [
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "P",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "P",
+          "token_id": 54
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "S",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "S",
+          "token_id": 57
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "A",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "A",
+          "token_id": 39
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "5",
+          "digit_place": "tens",
+          "digit_value_id": 6,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": "5",
+          "token_id": 27
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "2",
+          "digit_place": "ones",
+          "digit_value_id": 3,
+          "number_role": "a",
+          "operation_step": "a_row",
+          "piece": "2",
+          "token_id": 24
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "B",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "B",
+          "token_id": 40
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "1",
+          "digit_place": "tens",
+          "digit_value_id": 2,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "8",
+          "digit_place": "ones",
+          "digit_value_id": 9,
+          "number_role": "b",
+          "operation_step": "b_row",
+          "piece": "8",
+          "token_id": 30
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "2",
+          "digit_place": "ones",
+          "digit_value_id": 3,
+          "number_role": "a",
+          "operation_step": "unit_step",
+          "piece": "2",
+          "token_id": 24
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "8",
+          "digit_place": "ones",
+          "digit_value_id": 9,
+          "number_role": "b",
+          "operation_step": "unit_step",
+          "piece": "8",
+          "token_id": 30
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "borrow_in",
+          "operation_step": "unit_step",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "unit_step",
+          "piece": "4",
+          "token_id": 26
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "1",
+          "digit_place": "carry",
+          "digit_value_id": 2,
+          "number_role": "borrow_out",
+          "operation_step": "unit_step",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "5",
+          "digit_place": "tens",
+          "digit_value_id": 6,
+          "number_role": "a",
+          "operation_step": "tens_step",
+          "piece": "5",
+          "token_id": 27
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "1",
+          "digit_place": "tens",
+          "digit_value_id": 2,
+          "number_role": "b",
+          "operation_step": "tens_step",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "1",
+          "digit_place": "carry",
+          "digit_value_id": 2,
+          "number_role": "borrow_in",
+          "operation_step": "tens_step",
+          "piece": "1",
+          "token_id": 23
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": " -",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": " -",
+          "token_id": 927
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": ">",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": ">",
+          "token_id": 36
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 2,
+          "decoded_piece": "3",
+          "digit_place": "tens",
+          "digit_value_id": 4,
+          "number_role": "result",
+          "operation_step": "tens_step",
+          "piece": "3",
+          "token_id": 25
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 3,
+          "decoded_piece": "0",
+          "digit_place": "carry",
+          "digit_value_id": 1,
+          "number_role": "borrow_out",
+          "operation_step": "tens_step",
+          "piece": "0",
+          "token_id": 22
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "O",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "O",
+          "token_id": 53
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "U",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "U",
+          "token_id": 59
+        },
+        {
+          "abacus_position_id": 0,
+          "coupled_position_id": 0,
+          "decoded_piece": "T",
+          "digit_place": "none",
+          "digit_value_id": 0,
+          "number_role": "none",
+          "operation_step": "none",
+          "piece": "T",
+          "token_id": 58
+        },
+        {
+          "abacus_position_id": 2,
+          "coupled_position_id": 2,
+          "decoded_piece": "3",
+          "digit_place": "tens",
+          "digit_value_id": 4,
+          "number_role": "result",
+          "operation_step": "out",
+          "piece": "3",
+          "token_id": 25
+        },
+        {
+          "abacus_position_id": 1,
+          "coupled_position_id": 1,
+          "decoded_piece": "4",
+          "digit_place": "ones",
+          "digit_value_id": 5,
+          "number_role": "result",
+          "operation_step": "out",
+          "piece": "4",
+          "token_id": 26
+        }
+      ]
+    }
+  },
+  "digit_stability": {
+    "0": {
+      "decoded": "0",
+      "ids": [
+        22
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "1": {
+      "decoded": "1",
+      "ids": [
+        23
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "2": {
+      "decoded": "2",
+      "ids": [
+        24
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "3": {
+      "decoded": "3",
+      "ids": [
+        25
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "4": {
+      "decoded": "4",
+      "ids": [
+        26
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "5": {
+      "decoded": "5",
+      "ids": [
+        27
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "6": {
+      "decoded": "6",
+      "ids": [
+        28
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "7": {
+      "decoded": "7",
+      "ids": [
+        29
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "8": {
+      "decoded": "8",
+      "ids": [
+        30
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    },
+    "9": {
+      "decoded": "9",
+      "ids": [
+        31
+      ],
+      "stable_single_token": true,
+      "token_count": 1
+    }
+  },
+  "embedding_norms": {
+    "m15_digit_table_20k_checkpoint_seq128": {
+      "digit_place_embedding": {
+        "fro_norm": 22.027563095092773,
+        "max_row_norm": 11.60351848602295,
+        "mean_row_norm": 8.800956726074219
+      },
+      "digit_value_embedding": {
+        "fro_norm": 34.490325927734375,
+        "max_row_norm": 11.751976013183594,
+        "mean_row_norm": 9.905272483825684
+      },
+      "number_role_embedding": {
+        "fro_norm": 27.392942428588867,
+        "max_row_norm": 10.775996208190918,
+        "mean_row_norm": 9.056446075439453
+      },
+      "operation_step_embedding": {
+        "fro_norm": 30.36313247680664,
+        "max_row_norm": 11.726024627685547,
+        "mean_row_norm": 9.520143508911133
+      },
+      "position_embedding": {
+        "fro_norm": 119.5084457397461,
+        "max_row_norm": 12.490798950195312,
+        "mean_row_norm": 10.539416313171387
+      },
+      "token_embedding": {
+        "fro_norm": 963.368896484375,
+        "max_row_norm": 13.307587623596191,
+        "mean_row_norm": 10.623128890991211
+      }
+    },
+    "numeric_tiny_init_seq256": {
+      "digit_place_embedding": {
+        "fro_norm": 21.968700408935547,
+        "max_row_norm": 11.543606758117676,
+        "mean_row_norm": 8.781643867492676
+      },
+      "digit_value_embedding": {
+        "fro_norm": 35.946205139160156,
+        "max_row_norm": 12.580023765563965,
+        "mean_row_norm": 10.307628631591797
+      },
+      "number_role_embedding": {
+        "fro_norm": 30.472326278686523,
+        "max_row_norm": 13.012674331665039,
+        "mean_row_norm": 10.058328628540039
+      },
+      "operation_step_embedding": {
+        "fro_norm": 31.77756690979004,
+        "max_row_norm": 12.492892265319824,
+        "mean_row_norm": 9.965632438659668
+      },
+      "position_embedding": {
+        "fro_norm": 180.38668823242188,
+        "max_row_norm": 13.071500778198242,
+        "mean_row_norm": 11.252176284790039
+      },
+      "token_embedding": {
+        "fro_norm": 1022.4873657226562,
+        "max_row_norm": 13.816359519958496,
+        "mean_row_norm": 11.275115966796875
+      }
+    }
+  },
+  "findings": {
+    "m15_bpe_conflict": "default BPE can merge multi-digit numbers, so one token may receive majority digit/place features from multiple characters.",
+    "partial_generation": "partial trace rows receive features only for digits that match known row patterns; malformed multi-digit chunks can be interpreted as decimal spans by generic position features.",
+    "seq128_to_seq256_confound": "M-15 staged continuation skipped position_embedding.weight when sequence length changed from 128 to 256.",
+    "service_digits_in_task_names": "decimal spans inside labels like ADD2_COMPOSED are numeric spans under digit_safe unless the data format avoids digits in command names."
+  },
+  "number_samples_default": [
+    {
+      "decoded": "0",
+      "decoded_pieces": [
+        "0"
+      ],
+      "ids": [
+        22
+      ],
+      "mode": "default_bpe",
+      "number": "0",
+      "token_count": 1,
+      "tokens": [
+        "0"
+      ]
+    },
+    {
+      "decoded": "1",
+      "decoded_pieces": [
+        "1"
+      ],
+      "ids": [
+        23
+      ],
+      "mode": "default_bpe",
+      "number": "1",
+      "token_count": 1,
+      "tokens": [
+        "1"
+      ]
+    },
+    {
+      "decoded": "2",
+      "decoded_pieces": [
+        "2"
+      ],
+      "ids": [
+        24
+      ],
+      "mode": "default_bpe",
+      "number": "2",
+      "token_count": 1,
+      "tokens": [
+        "2"
+      ]
+    },
+    {
+      "decoded": "3",
+      "decoded_pieces": [
+        "3"
+      ],
+      "ids": [
+        25
+      ],
+      "mode": "default_bpe",
+      "number": "3",
+      "token_count": 1,
+      "tokens": [
+        "3"
+      ]
+    },
+    {
+      "decoded": "4",
+      "decoded_pieces": [
+        "4"
+      ],
+      "ids": [
+        26
+      ],
+      "mode": "default_bpe",
+      "number": "4",
+      "token_count": 1,
+      "tokens": [
+        "4"
+      ]
+    },
+    {
+      "decoded": "5",
+      "decoded_pieces": [
+        "5"
+      ],
+      "ids": [
+        27
+      ],
+      "mode": "default_bpe",
+      "number": "5",
+      "token_count": 1,
+      "tokens": [
+        "5"
+      ]
+    },
+    {
+      "decoded": "6",
+      "decoded_pieces": [
+        "6"
+      ],
+      "ids": [
+        28
+      ],
+      "mode": "default_bpe",
+      "number": "6",
+      "token_count": 1,
+      "tokens": [
+        "6"
+      ]
+    },
+    {
+      "decoded": "7",
+      "decoded_pieces": [
+        "7"
+      ],
+      "ids": [
+        29
+      ],
+      "mode": "default_bpe",
+      "number": "7",
+      "token_count": 1,
+      "tokens": [
+        "7"
+      ]
+    },
+    {
+      "decoded": "8",
+      "decoded_pieces": [
+        "8"
+      ],
+      "ids": [
+        30
+      ],
+      "mode": "default_bpe",
+      "number": "8",
+      "token_count": 1,
+      "tokens": [
+        "8"
+      ]
+    },
+    {
+      "decoded": "9",
+      "decoded_pieces": [
+        "9"
+      ],
+      "ids": [
+        31
+      ],
+      "mode": "default_bpe",
+      "number": "9",
+      "token_count": 1,
+      "tokens": [
+        "9"
+      ]
+    },
+    {
+      "decoded": "10",
+      "decoded_pieces": [
+        "10"
+      ],
+      "ids": [
+        846
+      ],
+      "mode": "default_bpe",
+      "number": "10",
+      "token_count": 1,
+      "tokens": [
+        "10"
+      ]
+    },
+    {
+      "decoded": "11",
+      "decoded_pieces": [
+        "11"
+      ],
+      "ids": [
+        882
+      ],
+      "mode": "default_bpe",
+      "number": "11",
+      "token_count": 1,
+      "tokens": [
+        "11"
+      ]
+    },
+    {
+      "decoded": "12",
+      "decoded_pieces": [
+        "12"
+      ],
+      "ids": [
+        873
+      ],
+      "mode": "default_bpe",
+      "number": "12",
+      "token_count": 1,
+      "tokens": [
+        "12"
+      ]
+    },
+    {
+      "decoded": "19",
+      "decoded_pieces": [
+        "19"
+      ],
+      "ids": [
+        855
+      ],
+      "mode": "default_bpe",
+      "number": "19",
+      "token_count": 1,
+      "tokens": [
+        "19"
+      ]
+    },
+    {
+      "decoded": "20",
+      "decoded_pieces": [
+        "20"
+      ],
+      "ids": [
+        833
+      ],
+      "mode": "default_bpe",
+      "number": "20",
+      "token_count": 1,
+      "tokens": [
+        "20"
+      ]
+    },
+    {
+      "decoded": "42",
+      "decoded_pieces": [
+        "42"
+      ],
+      "ids": [
+        1078
+      ],
+      "mode": "default_bpe",
+      "number": "42",
+      "token_count": 1,
+      "tokens": [
+        "42"
+      ]
+    },
+    {
+      "decoded": "73",
+      "decoded_pieces": [
+        "73"
+      ],
+      "ids": [
+        1251
+      ],
+      "mode": "default_bpe",
+      "number": "73",
+      "token_count": 1,
+      "tokens": [
+        "73"
+      ]
+    },
+    {
+      "decoded": "99",
+      "decoded_pieces": [
+        "99"
+      ],
+      "ids": [
+        1299
+      ],
+      "mode": "default_bpe",
+      "number": "99",
+      "token_count": 1,
+      "tokens": [
+        "99"
+      ]
+    },
+    {
+      "decoded": "100",
+      "decoded_pieces": [
+        "10",
+        "0"
+      ],
+      "ids": [
+        846,
+        22
+      ],
+      "mode": "default_bpe",
+      "number": "100",
+      "token_count": 2,
+      "tokens": [
+        "10",
+        "0"
+      ]
+    },
+    {
+      "decoded": "101",
+      "decoded_pieces": [
+        "10",
+        "1"
+      ],
+      "ids": [
+        846,
+        23
+      ],
+      "mode": "default_bpe",
+      "number": "101",
+      "token_count": 2,
+      "tokens": [
+        "10",
+        "1"
+      ]
+    },
+    {
+      "decoded": "149",
+      "decoded_pieces": [
+        "14",
+        "9"
+      ],
+      "ids": [
+        861,
+        31
+      ],
+      "mode": "default_bpe",
+      "number": "149",
+      "token_count": 2,
+      "tokens": [
+        "14",
+        "9"
+      ]
+    },
+    {
+      "decoded": "222",
+      "decoded_pieces": [
+        "222"
+      ],
+      "ids": [
+        1716
+      ],
+      "mode": "default_bpe",
+      "number": "222",
+      "token_count": 1,
+      "tokens": [
+        "222"
+      ]
+    },
+    {
+      "decoded": "999",
+      "decoded_pieces": [
+        "99",
+        "9"
+      ],
+      "ids": [
+        1299,
+        31
+      ],
+      "mode": "default_bpe",
+      "number": "999",
+      "token_count": 2,
+      "tokens": [
+        "99",
+        "9"
+      ]
+    },
+    {
+      "decoded": "1000",
+      "decoded_pieces": [
+        "10",
+        "00"
+      ],
+      "ids": [
+        846,
+        1358
+      ],
+      "mode": "default_bpe",
+      "number": "1000",
+      "token_count": 2,
+      "tokens": [
+        "10",
+        "00"
+      ]
+    },
+    {
+      "decoded": "1234",
+      "decoded_pieces": [
+        "1",
+        "23",
+        "4"
+      ],
+      "ids": [
+        23,
+        850,
+        26
+      ],
+      "mode": "default_bpe",
+      "number": "1234",
+      "token_count": 3,
+      "tokens": [
+        "1",
+        "23",
+        "4"
+      ]
+    },
+    {
+      "decoded": "9001",
+      "decoded_pieces": [
+        "90",
+        "01"
+      ],
+      "ids": [
+        1311,
+        1337
+      ],
+      "mode": "default_bpe",
+      "number": "9001",
+      "token_count": 2,
+      "tokens": [
+        "90",
+        "01"
+      ]
+    }
+  ],
+  "number_samples_digit_safe": [
+    {
+      "decoded": "0",
+      "decoded_pieces": [
+        "0"
+      ],
+      "ids": [
+        22
+      ],
+      "mode": "digit_safe",
+      "number": "0",
+      "token_count": 1,
+      "tokens": [
+        "0"
+      ]
+    },
+    {
+      "decoded": "1",
+      "decoded_pieces": [
+        "1"
+      ],
+      "ids": [
+        23
+      ],
+      "mode": "digit_safe",
+      "number": "1",
+      "token_count": 1,
+      "tokens": [
+        "1"
+      ]
+    },
+    {
+      "decoded": "2",
+      "decoded_pieces": [
+        "2"
+      ],
+      "ids": [
+        24
+      ],
+      "mode": "digit_safe",
+      "number": "2",
+      "token_count": 1,
+      "tokens": [
+        "2"
+      ]
+    },
+    {
+      "decoded": "3",
+      "decoded_pieces": [
+        "3"
+      ],
+      "ids": [
+        25
+      ],
+      "mode": "digit_safe",
+      "number": "3",
+      "token_count": 1,
+      "tokens": [
+        "3"
+      ]
+    },
+    {
+      "decoded": "4",
+      "decoded_pieces": [
+        "4"
+      ],
+      "ids": [
+        26
+      ],
+      "mode": "digit_safe",
+      "number": "4",
+      "token_count": 1,
+      "tokens": [
+        "4"
+      ]
+    },
+    {
+      "decoded": "5",
+      "decoded_pieces": [
+        "5"
+      ],
+      "ids": [
+        27
+      ],
+      "mode": "digit_safe",
+      "number": "5",
+      "token_count": 1,
+      "tokens": [
+        "5"
+      ]
+    },
+    {
+      "decoded": "6",
+      "decoded_pieces": [
+        "6"
+      ],
+      "ids": [
+        28
+      ],
+      "mode": "digit_safe",
+      "number": "6",
+      "token_count": 1,
+      "tokens": [
+        "6"
+      ]
+    },
+    {
+      "decoded": "7",
+      "decoded_pieces": [
+        "7"
+      ],
+      "ids": [
+        29
+      ],
+      "mode": "digit_safe",
+      "number": "7",
+      "token_count": 1,
+      "tokens": [
+        "7"
+      ]
+    },
+    {
+      "decoded": "8",
+      "decoded_pieces": [
+        "8"
+      ],
+      "ids": [
+        30
+      ],
+      "mode": "digit_safe",
+      "number": "8",
+      "token_count": 1,
+      "tokens": [
+        "8"
+      ]
+    },
+    {
+      "decoded": "9",
+      "decoded_pieces": [
+        "9"
+      ],
+      "ids": [
+        31
+      ],
+      "mode": "digit_safe",
+      "number": "9",
+      "token_count": 1,
+      "tokens": [
+        "9"
+      ]
+    },
+    {
+      "decoded": "10",
+      "decoded_pieces": [
+        "1",
+        "0"
+      ],
+      "ids": [
+        23,
+        22
+      ],
+      "mode": "digit_safe",
+      "number": "10",
+      "token_count": 2,
+      "tokens": [
+        "1",
+        "0"
+      ]
+    },
+    {
+      "decoded": "11",
+      "decoded_pieces": [
+        "1",
+        "1"
+      ],
+      "ids": [
+        23,
+        23
+      ],
+      "mode": "digit_safe",
+      "number": "11",
+      "token_count": 2,
+      "tokens": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "decoded": "12",
+      "decoded_pieces": [
+        "1",
+        "2"
+      ],
+      "ids": [
+        23,
+        24
+      ],
+      "mode": "digit_safe",
+      "number": "12",
+      "token_count": 2,
+      "tokens": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "decoded": "19",
+      "decoded_pieces": [
+        "1",
+        "9"
+      ],
+      "ids": [
+        23,
+        31
+      ],
+      "mode": "digit_safe",
+      "number": "19",
+      "token_count": 2,
+      "tokens": [
+        "1",
+        "9"
+      ]
+    },
+    {
+      "decoded": "20",
+      "decoded_pieces": [
+        "2",
+        "0"
+      ],
+      "ids": [
+        24,
+        22
+      ],
+      "mode": "digit_safe",
+      "number": "20",
+      "token_count": 2,
+      "tokens": [
+        "2",
+        "0"
+      ]
+    },
+    {
+      "decoded": "42",
+      "decoded_pieces": [
+        "4",
+        "2"
+      ],
+      "ids": [
+        26,
+        24
+      ],
+      "mode": "digit_safe",
+      "number": "42",
+      "token_count": 2,
+      "tokens": [
+        "4",
+        "2"
+      ]
+    },
+    {
+      "decoded": "73",
+      "decoded_pieces": [
+        "7",
+        "3"
+      ],
+      "ids": [
+        29,
+        25
+      ],
+      "mode": "digit_safe",
+      "number": "73",
+      "token_count": 2,
+      "tokens": [
+        "7",
+        "3"
+      ]
+    },
+    {
+      "decoded": "99",
+      "decoded_pieces": [
+        "9",
+        "9"
+      ],
+      "ids": [
+        31,
+        31
+      ],
+      "mode": "digit_safe",
+      "number": "99",
+      "token_count": 2,
+      "tokens": [
+        "9",
+        "9"
+      ]
+    },
+    {
+      "decoded": "100",
+      "decoded_pieces": [
+        "1",
+        "0",
+        "0"
+      ],
+      "ids": [
+        23,
+        22,
+        22
+      ],
+      "mode": "digit_safe",
+      "number": "100",
+      "token_count": 3,
+      "tokens": [
+        "1",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "decoded": "101",
+      "decoded_pieces": [
+        "1",
+        "0",
+        "1"
+      ],
+      "ids": [
+        23,
+        22,
+        23
+      ],
+      "mode": "digit_safe",
+      "number": "101",
+      "token_count": 3,
+      "tokens": [
+        "1",
+        "0",
+        "1"
+      ]
+    },
+    {
+      "decoded": "149",
+      "decoded_pieces": [
+        "1",
+        "4",
+        "9"
+      ],
+      "ids": [
+        23,
+        26,
+        31
+      ],
+      "mode": "digit_safe",
+      "number": "149",
+      "token_count": 3,
+      "tokens": [
+        "1",
+        "4",
+        "9"
+      ]
+    },
+    {
+      "decoded": "222",
+      "decoded_pieces": [
+        "2",
+        "2",
+        "2"
+      ],
+      "ids": [
+        24,
+        24,
+        24
+      ],
+      "mode": "digit_safe",
+      "number": "222",
+      "token_count": 3,
+      "tokens": [
+        "2",
+        "2",
+        "2"
+      ]
+    },
+    {
+      "decoded": "999",
+      "decoded_pieces": [
+        "9",
+        "9",
+        "9"
+      ],
+      "ids": [
+        31,
+        31,
+        31
+      ],
+      "mode": "digit_safe",
+      "number": "999",
+      "token_count": 3,
+      "tokens": [
+        "9",
+        "9",
+        "9"
+      ]
+    },
+    {
+      "decoded": "1000",
+      "decoded_pieces": [
+        "1",
+        "0",
+        "0",
+        "0"
+      ],
+      "ids": [
+        23,
+        22,
+        22,
+        22
+      ],
+      "mode": "digit_safe",
+      "number": "1000",
+      "token_count": 4,
+      "tokens": [
+        "1",
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "decoded": "1234",
+      "decoded_pieces": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "ids": [
+        23,
+        24,
+        25,
+        26
+      ],
+      "mode": "digit_safe",
+      "number": "1234",
+      "token_count": 4,
+      "tokens": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "decoded": "9001",
+      "decoded_pieces": [
+        "9",
+        "0",
+        "0",
+        "1"
+      ],
+      "ids": [
+        31,
+        22,
+        22,
+        23
+      ],
+      "mode": "digit_safe",
+      "number": "9001",
+      "token_count": 4,
+      "tokens": [
+        "9",
+        "0",
+        "0",
+        "1"
+      ]
+    }
+  ],
+  "token_count_distribution_0_999_default": {
+    "1": 105,
+    "2": 895
+  },
+  "token_count_distribution_0_999_digit_safe": {
+    "1": 10,
+    "2": 90,
+    "3": 900
+  },
+  "tokenizer_info": {
+    "byte_fallback": true,
+    "special_token_ids": {
+      "<|answer|>": 5,
+      "<|bos|>": 1,
+      "<|end|>": 6,
+      "<|eos|>": 2,
+      "<|pad|>": 0,
+      "<|prompt|>": 4,
+      "<|unk|>": 3
+    },
+    "type": "byte_level_bpe",
+    "vocab_size": 8192
+  },
+  "tokenizer_path": "artifacts\\tokenizers\\stage1_bpe_8k.json"
+}
