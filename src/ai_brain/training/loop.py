@@ -132,6 +132,11 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
             if config.model_config_name.startswith("abacus_")
             else 0
         ),
+        coupled_random_offset_max=(
+            config.coupled_random_offset_max
+            if config.model_config_name.startswith("coupled_")
+            else 0
+        ),
         position_offset_seed=config.seed,
     )
     eval_cache_path = default_lm_cache_path(
@@ -142,6 +147,7 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         loss_mode=config.loss_mode,
         numeric_tokenization=config.numeric_tokenization,
         abacus_random_offset_max=0,
+        coupled_random_offset_max=0,
         position_offset_seed=0,
     )
 
@@ -157,6 +163,11 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
             if config.model_config_name.startswith("abacus_")
             else 0
         ),
+        coupled_random_offset_max=(
+            config.coupled_random_offset_max
+            if config.model_config_name.startswith("coupled_")
+            else 0
+        ),
         position_offset_seed=config.seed,
     )
     eval_cache_info = prepare_lm_dataset(
@@ -167,6 +178,7 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         loss_mode=config.loss_mode,
         numeric_tokenization=config.numeric_tokenization,
         abacus_random_offset_max=0,
+        coupled_random_offset_max=0,
         position_offset_seed=0,
     )
 

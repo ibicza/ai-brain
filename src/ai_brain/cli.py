@@ -798,6 +798,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Maximum per-example Abacus position offset for this cache.",
     )
     prepare_lm_parser.add_argument(
+        "--coupled-random-offset-max",
+        type=int,
+        default=0,
+        help="Maximum per-example Position Coupling offset for this cache.",
+    )
+    prepare_lm_parser.add_argument(
         "--force",
         action="store_true",
         help="Rebuild cache even when metadata matches.",
@@ -890,6 +896,12 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=99,
         help="Maximum random Abacus position offset for abacus_* training.",
+    )
+    train_lm_parser.add_argument(
+        "--coupled-random-offset-max",
+        type=int,
+        default=99,
+        help="Maximum random Position Coupling offset for coupled_* training.",
     )
     train_lm_parser.add_argument(
         "--eval-every",
@@ -1453,6 +1465,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             loss_mode=args.loss_mode,
             numeric_tokenization=args.numeric_tokenization,
             abacus_random_offset_max=args.abacus_random_offset_max,
+            coupled_random_offset_max=args.coupled_random_offset_max,
             position_offset_seed=0,
             force=args.force,
         )
@@ -1475,6 +1488,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 grad_clip_norm=args.grad_clip_norm,
                 numeric_tokenization=args.numeric_tokenization,
                 abacus_random_offset_max=args.abacus_random_offset_max,
+                coupled_random_offset_max=args.coupled_random_offset_max,
                 seed=args.seed,
                 eval_every=args.eval_every,
                 eval_batches=args.eval_batches,

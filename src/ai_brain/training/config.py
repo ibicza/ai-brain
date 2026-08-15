@@ -25,6 +25,7 @@ class TrainConfig:
     grad_clip_norm: float = 1.0
     numeric_tokenization: NumericTokenizationMode = "default_bpe"
     abacus_random_offset_max: int = 0
+    coupled_random_offset_max: int = 0
     seed: int = 1234
     eval_every: int = 50
     eval_batches: int = 20
@@ -52,6 +53,8 @@ class TrainConfig:
             )
         if self.abacus_random_offset_max < 0:
             raise ValueError("abacus_random_offset_max must be non-negative")
+        if self.coupled_random_offset_max < 0:
+            raise ValueError("coupled_random_offset_max must be non-negative")
         if self.eval_every <= 0:
             raise ValueError("eval_every must be positive")
         if self.eval_batches <= 0:

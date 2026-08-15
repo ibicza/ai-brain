@@ -30,11 +30,12 @@ from ai_brain.numeric_position_features import (
     NumericPositionFeatureArrays,
     encode_text_position_features,
     random_abacus_offset,
+    random_position_offset,
 )
 from ai_brain.training.config import LossMode
 
 IGNORE_INDEX = -100
-CACHE_FORMAT_VERSION = 4
+CACHE_FORMAT_VERSION = 5
 
 
 @dataclass(frozen=True)
@@ -117,6 +118,7 @@ def encode_lm_example(
     loss_mode: LossMode,
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
     abacus_position_offset: int = 0,
+    coupled_position_offset: int = 0,
 ) -> EncodedLmExample:
     if sequence_length < 2:
         raise ValueError("sequence_length must be at least 2")
@@ -143,12 +145,14 @@ def encode_lm_example(
         tokenizer,
         numeric_tokenization=numeric_tokenization,
         abacus_offset=abacus_position_offset,
+        coupled_offset=coupled_position_offset,
     )
     answer_position_ids, answer_position_features = encode_text_position_features(
         answer_text,
         tokenizer,
         numeric_tokenization=numeric_tokenization,
         abacus_offset=abacus_position_offset,
+        coupled_offset=coupled_position_offset,
     )
     if (
         prefix_position_ids != prefix_token_ids
@@ -270,6 +274,7 @@ def prepare_lm_dataset(
     loss_mode: LossMode = "answer-only",
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
     abacus_random_offset_max: int = 0,
+    coupled_random_offset_max: int = 0,
     position_offset_seed: int = 0,
     force: bool = False,
 ) -> dict[str, Any]:
@@ -280,6 +285,7 @@ def prepare_lm_dataset(
         loss_mode=loss_mode,
         numeric_tokenization=numeric_tokenization,
         abacus_random_offset_max=abacus_random_offset_max,
+        coupled_random_offset_max=coupled_random_offset_max,
         position_offset_seed=position_offset_seed,
     )
 
@@ -305,6 +311,11 @@ def prepare_lm_dataset(
             numeric_tokenization=numeric_tokenization,
             abacus_position_offset=random_abacus_offset(
                 max_offset=abacus_random_offset_max,
+                seed=position_offset_seed,
+                index=index,
+            ),
+            coupled_position_offset=random_position_offset(
+                max_offset=coupled_random_offset_max,
                 seed=position_offset_seed,
                 index=index,
             ),
@@ -381,11 +392,15 @@ def default_lm_cache_path(
     loss_mode: LossMode,
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
     abacus_random_offset_max: int = 0,
+    coupled_random_offset_max: int = 0,
     position_offset_seed: int = 0,
 ) -> Path:
     loss_name = loss_mode.replace("-", "_")
     tokenization_name = numeric_tokenization.replace("-", "_")
-    offset_name = f"abacus{abacus_random_offset_max}_seed{position_offset_seed}"
+    offset_name = (
+        f"abacus{abacus_random_offset_max}_coupled{coupled_random_offset_max}"
+        f"_seed{position_offset_seed}"
+    )
     filename = (
         f"{input_path.stem}_{tokenizer_path.stem}_{tokenization_name}_"
         f"seq{sequence_length}_{loss_name}_{offset_name}.pt"
@@ -447,6 +462,7 @@ def _build_metadata(
     loss_mode: LossMode,
     numeric_tokenization: NumericTokenizationMode,
     abacus_random_offset_max: int,
+    coupled_random_offset_max: int,
     position_offset_seed: int,
 ) -> dict[str, Any]:
     source_stat = input_path.stat()
@@ -463,6 +479,7 @@ def _build_metadata(
         "loss_mode": loss_mode,
         "numeric_tokenization": numeric_tokenization,
         "abacus_random_offset_max": abacus_random_offset_max,
+        "coupled_random_offset_max": coupled_random_offset_max,
         "position_offset_seed": position_offset_seed,
     }
 

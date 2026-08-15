@@ -686,6 +686,92 @@ def test_coupled_position_features_handle_partial_generation(tmp_path) -> None:
     assert max(nonzero) <= 2
 
 
+def test_official_position_coupling_addition_features(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "ADD_PC 84 + 65",
+                "answer": "= 9 4 1\nFINAL 149",
+                "task_type": "arithmetic.add_balanced",
+            }
+        ],
+    )
+    text = "ADD_PC 84 + 65\n= 9 4 1"
+
+    ids, features = encode_text_position_features(
+        text,
+        tokenizer,
+        numeric_tokenization="digit_safe",
+    )
+    pieces = [
+        tokenizer.decode([token_id], skip_special_tokens=False) for token_id in ids
+    ]
+    marked = [
+        (piece.strip(), position)
+        for piece, position in zip(
+            pieces,
+            features.coupled_position_ids,
+            strict=True,
+        )
+        if position != 0
+    ]
+
+    assert marked == [
+        ("8", 3),
+        ("4", 2),
+        ("+", 1),
+        ("6", 3),
+        ("5", 2),
+        ("=", 1),
+        ("9", 2),
+        ("4", 3),
+        ("1", 4),
+    ]
+
+
+def test_official_abacus_addition_features_use_reversed_spans(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "ADD_ABACUS 48 + 56",
+                "answer": "= 941\nFINAL 149",
+                "task_type": "arithmetic.add_balanced",
+            }
+        ],
+    )
+    text = "ADD_ABACUS 48 + 56\n= 941"
+
+    ids, features = encode_text_position_features(
+        text,
+        tokenizer,
+        numeric_tokenization="digit_safe",
+    )
+    pieces = [
+        tokenizer.decode([token_id], skip_special_tokens=False) for token_id in ids
+    ]
+    marked_digits = [
+        (piece, position)
+        for piece, position in zip(
+            pieces,
+            features.abacus_position_ids,
+            strict=True,
+        )
+        if piece.isdigit()
+    ]
+
+    assert marked_digits == [
+        ("4", 1),
+        ("8", 2),
+        ("5", 1),
+        ("6", 2),
+        ("9", 1),
+        ("4", 2),
+        ("1", 3),
+    ]
+
+
 def test_train_lm_can_train_abacus_debug_digit_safe(tmp_path) -> None:
     records = [
         {
