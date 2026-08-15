@@ -86,6 +86,34 @@ def tiny_config() -> ModelConfig:
     )
 
 
+def arithmetic_3m_config() -> ModelConfig:
+    return ModelConfig(
+        vocab_size=1024,
+        max_sequence_length=128,
+        d_model=256,
+        num_layers=4,
+        num_heads=8,
+        ffn_hidden_dim=1024,
+        dropout=0.0,
+        tie_embeddings=True,
+        model_type="tiny",
+    )
+
+
+def arithmetic_10m_config() -> ModelConfig:
+    return ModelConfig(
+        vocab_size=1024,
+        max_sequence_length=128,
+        d_model=384,
+        num_layers=5,
+        num_heads=8,
+        ffn_hidden_dim=1536,
+        dropout=0.0,
+        tie_embeddings=True,
+        model_type="tiny",
+    )
+
+
 def debug_config() -> ModelConfig:
     return ModelConfig(
         vocab_size=256,
@@ -251,6 +279,8 @@ def recurrent_tiny_config() -> ModelConfig:
 MODEL_CONFIG_NAMES: tuple[str, ...] = (
     "debug",
     "tiny",
+    "arithmetic_3m",
+    "arithmetic_10m",
     "numeric_debug",
     "numeric_tiny",
     "abacus_debug",
@@ -270,6 +300,12 @@ def get_named_model_config(name: str) -> ModelConfig:
 
     if name == "tiny":
         return tiny_config()
+
+    if name == "arithmetic_3m":
+        return arithmetic_3m_config()
+
+    if name == "arithmetic_10m":
+        return arithmetic_10m_config()
 
     if name == "numeric_debug":
         return numeric_debug_config()
