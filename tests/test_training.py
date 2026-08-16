@@ -20,6 +20,7 @@ from ai_brain.numeric_features import (
     encode_text_numeric_features,
 )
 from ai_brain.numeric_position_features import encode_text_position_features
+from ai_brain.segments import SEG_CONTEXT, SEG_PAD, SEG_QUERY
 from ai_brain.training.batching import sample_batch
 from ai_brain.training.config import TrainConfig
 from ai_brain.training.lm_dataset import (
@@ -106,6 +107,36 @@ def test_answer_only_first_supervised_token_is_answer_text(tmp_path) -> None:
     assert tokenizer.decode([first_supervised], skip_special_tokens=False).startswith(
         "4"
     )
+
+
+def test_encode_lm_example_builds_segment_ids_from_metadata(tmp_path) -> None:
+    tokenizer, _tokenizer_path = _train_tokenizer(
+        tmp_path,
+        [
+            {
+                "prompt": "NOISE\nADD 12 + 34",
+                "answer": "FINAL 46",
+                "task_type": "m18.add",
+            }
+        ],
+    )
+
+    encoded = encode_lm_example(
+        prompt="NOISE\nADD 12 + 34",
+        answer="FINAL 46",
+        tokenizer=tokenizer,
+        sequence_length=64,
+        loss_mode="answer-only",
+        segment_spans=[
+            {"segment": "context", "start": 0, "end": 6, "access": False},
+            {"segment": "query", "start": 6, "end": 17, "access": False},
+        ],
+    )
+
+    real_segments = encoded.segment_ids[: sum(encoded.attention_mask)]
+    assert SEG_CONTEXT in real_segments
+    assert SEG_QUERY in real_segments
+    assert encoded.segment_ids[-1] == SEG_PAD
 
 
 def test_truncated_example_does_not_fake_eos(tmp_path) -> None:

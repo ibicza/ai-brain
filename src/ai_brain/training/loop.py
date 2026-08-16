@@ -12,6 +12,10 @@ from ai_brain.model.config import get_named_model_config
 from ai_brain.model.factory import build_model, model_class_name
 from ai_brain.numeric_features import NUMERIC_FEATURE_KEYS
 from ai_brain.runtime.device import get_device_info
+from ai_brain.segments import (
+    SegmentAttentionMode,
+    build_segment_attention_allow_mask,
+)
 from ai_brain.training.batching import sample_batch
 from ai_brain.training.checkpoint import load_checkpoint, save_checkpoint
 from ai_brain.training.config import TrainConfig
@@ -67,6 +71,7 @@ def evaluate_loss(
     device: torch.device,
     seed: int,
     position_offset: int | torch.Tensor = 0,
+    segment_attention_mode: SegmentAttentionMode = "flat_causal",
 ) -> float:
     was_training = model.training
     model.eval()
@@ -80,7 +85,12 @@ def evaluate_loss(
             device=device,
             generator=generator,
         )
-        model_output = _model_logits(model, batch, position_offset=position_offset)
+        model_output = _model_logits(
+            model,
+            batch,
+            position_offset=position_offset,
+            segment_attention_mode=segment_attention_mode,
+        )
         logits = (
             model_output["logits"] if isinstance(model_output, dict) else model_output
         )
@@ -104,12 +114,21 @@ def _model_logits(
     batch: dict[str, torch.Tensor],
     *,
     position_offset: int | torch.Tensor = 0,
+    segment_attention_mode: SegmentAttentionMode = "flat_causal",
 ) -> torch.Tensor:
     model_kwargs: dict[str, Any] = {}
     if getattr(model, "relevance_head", None) is not None:
         model_kwargs["return_relevance"] = True
     if getattr(model, "supports_position_offset", False):
         model_kwargs["position_offset"] = position_offset
+    if segment_attention_mode != "flat_causal" and getattr(
+        model, "supports_attention_allow_mask", False
+    ):
+        model_kwargs["attention_allow_mask"] = build_segment_attention_allow_mask(
+            batch["segment_ids"],
+            mode=segment_attention_mode,
+            context_access_mask=batch["context_access_mask"],
+        )
     if getattr(model, "uses_numeric_features", False):
         return model(
             batch["input_ids"],
@@ -289,7 +308,12 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
             device=device,
             generator=generator,
         )
-        model_output = _model_logits(model, batch, position_offset=position_offset)
+        model_output = _model_logits(
+            model,
+            batch,
+            position_offset=position_offset,
+            segment_attention_mode=config.segment_attention_mode,
+        )
         if isinstance(model_output, dict):
             logits = model_output["logits"]
         else:
@@ -338,6 +362,7 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
                 device=device,
                 seed=config.seed + step,
                 position_offset=0,
+                segment_attention_mode=config.segment_attention_mode,
             )
             last_metrics = {**last_metrics, "eval_loss": eval_loss}
             append_metrics_jsonl(metrics_path, last_metrics)

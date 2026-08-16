@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Literal
 
 from ai_brain.language.tokenizer.bpe_tokenizer import NumericTokenizationMode
+from ai_brain.segments import SEGMENT_ATTENTION_MODES, SegmentAttentionMode
 
 LossMode = Literal["answer-only", "full"]
 LOSS_MODES: tuple[LossMode, ...] = ("answer-only", "full")
@@ -29,6 +30,7 @@ class TrainConfig:
     attention_variant: str = "standard"
     relevance_mode: str = "none"
     relevance_loss_weight: float = 0.0
+    segment_attention_mode: SegmentAttentionMode = "flat_causal"
     abacus_random_offset_max: int = 0
     coupled_random_offset_max: int = 0
     seed: int = 1234
@@ -75,6 +77,11 @@ class TrainConfig:
             raise ValueError("relevance_mode must be 'none', 'aux', or 'gate'")
         if self.relevance_loss_weight < 0:
             raise ValueError("relevance_loss_weight must be non-negative")
+        if self.segment_attention_mode not in SEGMENT_ATTENTION_MODES:
+            raise ValueError(
+                "segment_attention_mode must be 'flat_causal', "
+                "'query_isolated', or 'workspace'"
+            )
         if self.abacus_random_offset_max < 0:
             raise ValueError("abacus_random_offset_max must be non-negative")
         if self.coupled_random_offset_max < 0:

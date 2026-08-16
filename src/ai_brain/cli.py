@@ -35,6 +35,7 @@ from ai_brain.runtime.device import (
     get_device_info,
     run_smoke_train_step,
 )
+from ai_brain.segments import SEGMENT_ATTENTION_MODES
 from ai_brain.training.config import LOSS_MODES, TrainConfig
 from ai_brain.training.lm_dataset import prepare_lm_dataset
 from ai_brain.training.loop import train_lm
@@ -931,6 +932,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Auxiliary binary relevance loss weight.",
     )
     train_lm_parser.add_argument(
+        "--segment-attention-mode",
+        choices=SEGMENT_ATTENTION_MODES,
+        default="flat_causal",
+        help="Optional segment-aware attention routing mode.",
+    )
+    train_lm_parser.add_argument(
         "--abacus-random-offset-max",
         type=int,
         default=99,
@@ -1543,6 +1550,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 attention_variant=args.attention_variant,
                 relevance_mode=args.relevance_mode,
                 relevance_loss_weight=args.relevance_loss_weight,
+                segment_attention_mode=args.segment_attention_mode,
                 abacus_random_offset_max=args.abacus_random_offset_max,
                 coupled_random_offset_max=args.coupled_random_offset_max,
                 seed=args.seed,

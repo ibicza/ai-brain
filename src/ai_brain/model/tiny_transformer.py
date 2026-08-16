@@ -106,6 +106,7 @@ class CausalSelfAttention(nn.Module):
         x: torch.Tensor,
         *,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
         batch_size, sequence_length, d_model = x.shape
 
@@ -150,12 +151,14 @@ class CausalSelfAttention(nn.Module):
             attention_scores,
             sequence_length=sequence_length,
             attention_key_mask=attention_key_mask,
+            attention_allow_mask=attention_allow_mask,
         )
         if noise_scores is not None:
             noise_scores = self._apply_masks(
                 noise_scores,
                 sequence_length=sequence_length,
                 attention_key_mask=attention_key_mask,
+                attention_allow_mask=attention_allow_mask,
             )
 
         attention_weights = torch.softmax(attention_scores, dim=-1)
@@ -211,6 +214,7 @@ class CausalSelfAttention(nn.Module):
         *,
         sequence_length: int,
         attention_key_mask: torch.Tensor | None,
+        attention_allow_mask: torch.Tensor | None,
     ) -> torch.Tensor:
         mask = self.causal_mask[:, :, :sequence_length, :sequence_length]
         attention_scores = attention_scores.masked_fill(mask == 0, float("-inf"))
@@ -227,6 +231,18 @@ class CausalSelfAttention(nn.Module):
                 sequence_length,
             )
             attention_scores = attention_scores.masked_fill(~key_mask, float("-inf"))
+        if attention_allow_mask is not None:
+            expected_shape = (
+                attention_scores.shape[0],
+                sequence_length,
+                sequence_length,
+            )
+            if attention_allow_mask.shape != expected_shape:
+                raise ValueError(
+                    "attention_allow_mask must have shape [batch, seq, seq]"
+                )
+            allow_mask = attention_allow_mask.bool().unsqueeze(1)
+            attention_scores = attention_scores.masked_fill(~allow_mask, float("-inf"))
         return attention_scores
 
 
@@ -244,10 +260,12 @@ class TransformerBlock(nn.Module):
         x: torch.Tensor,
         *,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
         x = x + self.attention(
             self.attention_norm(x),
             attention_key_mask=attention_key_mask,
+            attention_allow_mask=attention_allow_mask,
         )
         x = x + self.ffn(self.ffn_norm(x))
         return x
@@ -256,6 +274,7 @@ class TransformerBlock(nn.Module):
 class TinyCausalTransformer(nn.Module):
     supports_position_offset = True
     supports_attention_key_mask = True
+    supports_attention_allow_mask = True
 
     def __init__(self, config: ModelConfig) -> None:
         super().__init__()
@@ -297,6 +316,7 @@ class TinyCausalTransformer(nn.Module):
         *,
         position_offset: int | torch.Tensor = 0,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
         return_relevance: bool = False,
     ) -> torch.Tensor | dict[str, torch.Tensor]:
         x = self.embed_tokens_and_positions(
@@ -306,6 +326,7 @@ class TinyCausalTransformer(nn.Module):
         return self.forward_embeddings_with_optional_relevance(
             x,
             attention_key_mask=attention_key_mask,
+            attention_allow_mask=attention_allow_mask,
             return_relevance=return_relevance,
         )
 
@@ -383,13 +404,28 @@ class TinyCausalTransformer(nn.Module):
         x: torch.Tensor,
         *,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
         return_hidden: bool = False,
-    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
+        return_layer_hiddens: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor] | dict[str, torch.Tensor]:
+        layer_hiddens = []
         for block in self.blocks:
-            x = block(x, attention_key_mask=attention_key_mask)
+            x = block(
+                x,
+                attention_key_mask=attention_key_mask,
+                attention_allow_mask=attention_allow_mask,
+            )
+            if return_layer_hiddens:
+                layer_hiddens.append(x)
 
         x = self.final_norm(x)
         logits = self.lm_head(x)
+        if return_layer_hiddens:
+            return {
+                "logits": logits,
+                "hidden": x,
+                "layer_hiddens": torch.stack(layer_hiddens, dim=0),
+            }
         if return_hidden:
             return logits, x
         return logits
@@ -399,11 +435,13 @@ class TinyCausalTransformer(nn.Module):
         x: torch.Tensor,
         *,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
         return_relevance: bool = False,
     ) -> torch.Tensor | dict[str, torch.Tensor]:
         logits, hidden = self.forward_embeddings(
             x,
             attention_key_mask=attention_key_mask,
+            attention_allow_mask=attention_allow_mask,
             return_hidden=True,
         )
         if return_relevance:
@@ -458,6 +496,7 @@ class TinyNumericCausalTransformer(TinyCausalTransformer):
         operation_step_ids: torch.Tensor | None = None,
         position_offset: int | torch.Tensor = 0,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
         return_relevance: bool = False,
     ) -> torch.Tensor:
         x = self.embed_tokens_and_positions(
@@ -479,6 +518,7 @@ class TinyNumericCausalTransformer(TinyCausalTransformer):
         return self.forward_embeddings_with_optional_relevance(
             x,
             attention_key_mask=attention_key_mask,
+            attention_allow_mask=attention_allow_mask,
             return_relevance=return_relevance,
         )
 
@@ -507,6 +547,7 @@ class TinyAbacusPositionTransformer(TinyCausalTransformer):
         abacus_position_ids: torch.Tensor | None = None,
         position_offset: int | torch.Tensor = 0,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
         return_relevance: bool = False,
     ) -> torch.Tensor:
         x = self.embed_tokens_and_positions(
@@ -519,6 +560,7 @@ class TinyAbacusPositionTransformer(TinyCausalTransformer):
         return self.forward_embeddings_with_optional_relevance(
             x,
             attention_key_mask=attention_key_mask,
+            attention_allow_mask=attention_allow_mask,
             return_relevance=return_relevance,
         )
 
@@ -547,6 +589,7 @@ class TinyCoupledPositionTransformer(TinyCausalTransformer):
         coupled_position_ids: torch.Tensor | None = None,
         position_offset: int | torch.Tensor = 0,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
         return_relevance: bool = False,
     ) -> torch.Tensor:
         x = self.embed_tokens_and_positions(
@@ -559,6 +602,7 @@ class TinyCoupledPositionTransformer(TinyCausalTransformer):
         return self.forward_embeddings_with_optional_relevance(
             x,
             attention_key_mask=attention_key_mask,
+            attention_allow_mask=attention_allow_mask,
             return_relevance=return_relevance,
         )
 
@@ -588,6 +632,7 @@ class TinyGatedPlaceTransformer(TinyCausalTransformer):
         digit_place_ids: torch.Tensor | None = None,
         position_offset: int | torch.Tensor = 0,
         attention_key_mask: torch.Tensor | None = None,
+        attention_allow_mask: torch.Tensor | None = None,
         return_relevance: bool = False,
     ) -> torch.Tensor:
         x = self.embed_tokens_and_positions(
@@ -600,6 +645,7 @@ class TinyGatedPlaceTransformer(TinyCausalTransformer):
         return self.forward_embeddings_with_optional_relevance(
             x,
             attention_key_mask=attention_key_mask,
+            attention_allow_mask=attention_allow_mask,
             return_relevance=return_relevance,
         )
 

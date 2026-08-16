@@ -53,6 +53,23 @@ def test_relative_position_transformer_forward_shape() -> None:
     assert logits.shape == (2, 8, config.vocab_size)
 
 
+def test_tiny_transformer_accepts_attention_allow_mask() -> None:
+    config = debug_config()
+    model = TinyCausalTransformer(config)
+    input_ids = torch.randint(
+        low=0,
+        high=config.vocab_size,
+        size=(2, 8),
+        dtype=torch.long,
+    )
+    attention_allow_mask = torch.ones((2, 8, 8), dtype=torch.bool)
+    attention_allow_mask[:, 4:, :2] = False
+
+    logits = model(input_ids, attention_allow_mask=attention_allow_mask)
+
+    assert logits.shape == (2, 8, config.vocab_size)
+
+
 def test_tiny_transformer_backward_step() -> None:
     config = debug_config()
     model = TinyCausalTransformer(config)

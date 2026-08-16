@@ -19,6 +19,11 @@ from ai_brain.numeric_features import (
 from ai_brain.numeric_position_features import (
     build_position_feature_tensors,
 )
+from ai_brain.segments import (
+    SEG_ANSWER,
+    SegmentAttentionMode,
+    build_segment_attention_allow_mask,
+)
 from ai_brain.training.checkpoint import load_checkpoint
 
 
@@ -77,6 +82,9 @@ def generate_greedy(
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
     position_offset: int = 0,
     attention_key_mask: torch.Tensor | None = None,
+    segment_ids: torch.Tensor | None = None,
+    context_access_mask: torch.Tensor | None = None,
+    segment_attention_mode: SegmentAttentionMode = "flat_causal",
 ) -> list[int]:
     if max_new_tokens <= 0:
         raise ValueError("max_new_tokens must be positive")
@@ -107,11 +115,49 @@ def generate_greedy(
             context_attention_key_mask = full_attention_key_mask[
                 :, -model.config.max_sequence_length :
             ]
+        context_attention_allow_mask = None
+        if segment_attention_mode != "flat_causal" and segment_ids is not None:
+            generated_count = generated.shape[1] - input_ids.shape[1]
+            full_segment_ids = segment_ids
+            full_context_access_mask = context_access_mask
+            if generated_count > 0:
+                generated_segments = torch.full(
+                    (1, generated_count),
+                    SEG_ANSWER,
+                    device=segment_ids.device,
+                    dtype=segment_ids.dtype,
+                )
+                full_segment_ids = torch.cat([segment_ids, generated_segments], dim=1)
+                if context_access_mask is not None:
+                    generated_access = torch.zeros(
+                        (1, generated_count),
+                        device=context_access_mask.device,
+                        dtype=context_access_mask.dtype,
+                    )
+                    full_context_access_mask = torch.cat(
+                        [context_access_mask, generated_access],
+                        dim=1,
+                    )
+            context_segment_ids = full_segment_ids[
+                :, -model.config.max_sequence_length :
+            ]
+            context_access = (
+                None
+                if full_context_access_mask is None
+                else full_context_access_mask[:, -model.config.max_sequence_length :]
+            )
+            context_attention_allow_mask = build_segment_attention_allow_mask(
+                context_segment_ids,
+                mode=segment_attention_mode,
+                context_access_mask=context_access,
+            )
         model_kwargs: dict[str, Any] = {}
         if getattr(model, "supports_position_offset", False):
             model_kwargs["position_offset"] = position_offset
         if getattr(model, "supports_attention_key_mask", False):
             model_kwargs["attention_key_mask"] = context_attention_key_mask
+        if getattr(model, "supports_attention_allow_mask", False):
+            model_kwargs["attention_allow_mask"] = context_attention_allow_mask
         if getattr(model, "uses_numeric_features", False):
             if tokenizer is None:
                 raise ValueError("Numeric model generation requires a tokenizer")
@@ -196,6 +242,9 @@ def generate_answer_ids(
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
     position_offset: int = 0,
     attention_key_mask: torch.Tensor | None = None,
+    segment_ids: torch.Tensor | None = None,
+    context_access_mask: torch.Tensor | None = None,
+    segment_attention_mode: SegmentAttentionMode = "flat_causal",
 ) -> list[int]:
     input_ids = build_inference_input_ids(
         prompt=prompt,
@@ -213,6 +262,9 @@ def generate_answer_ids(
         numeric_tokenization=numeric_tokenization,
         position_offset=position_offset,
         attention_key_mask=attention_key_mask,
+        segment_ids=segment_ids,
+        context_access_mask=context_access_mask,
+        segment_attention_mode=segment_attention_mode,
     )
 
 

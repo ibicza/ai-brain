@@ -32,10 +32,18 @@ from ai_brain.numeric_position_features import (
     random_abacus_offset,
     random_position_offset,
 )
+from ai_brain.segments import (
+    SEG_ANSWER,
+    SEG_CONTEXT,
+    SEG_CONTROL,
+    SEG_PAD,
+    SEG_QUERY,
+    SEGMENT_IDS,
+)
 from ai_brain.training.config import LossMode
 
 IGNORE_INDEX = -100
-CACHE_FORMAT_VERSION = 6
+CACHE_FORMAT_VERSION = 8
 RELEVANCE_IGNORE_INDEX = -100
 
 
@@ -51,6 +59,8 @@ class EncodedLmExample:
     abacus_position_ids: list[int]
     coupled_position_ids: list[int]
     relevance_labels: list[int]
+    segment_ids: list[int]
+    context_access_mask: list[int]
     truncated: bool
     supervised_token_count: int
 
@@ -70,6 +80,8 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
         abacus_position_ids: torch.Tensor | None = None,
         coupled_position_ids: torch.Tensor | None = None,
         relevance_labels: torch.Tensor | None = None,
+        segment_ids: torch.Tensor | None = None,
+        context_access_mask: torch.Tensor | None = None,
     ) -> None:
         if input_ids.shape != labels.shape or input_ids.shape != attention_mask.shape:
             raise ValueError(
@@ -97,6 +109,11 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
             relevance_labels,
             input_ids,
         )
+        self.segment_ids = _segment_tensor_or_default(segment_ids, input_ids)
+        self.context_access_mask = _context_access_tensor_or_zeros(
+            context_access_mask,
+            input_ids,
+        )
         self.metadata = metadata
 
     def __len__(self) -> int:
@@ -114,6 +131,8 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
             "abacus_position_ids": self.abacus_position_ids[index],
             "coupled_position_ids": self.coupled_position_ids[index],
             "relevance_labels": self.relevance_labels[index],
+            "segment_ids": self.segment_ids[index],
+            "context_access_mask": self.context_access_mask[index],
         }
 
 
@@ -128,6 +147,7 @@ def encode_lm_example(
     abacus_position_offset: int = 0,
     coupled_position_offset: int = 0,
     active_prompt_start_char: int | None = None,
+    segment_spans: list[dict[str, Any]] | None = None,
 ) -> EncodedLmExample:
     if sequence_length < 2:
         raise ValueError("sequence_length must be at least 2")
@@ -184,6 +204,15 @@ def encode_lm_example(
         prefix_ids=prefix_ids,
         answer_ids=answer_ids,
         active_prompt_start_char=active_prompt_start_char,
+    )
+    segment_ids, context_access_mask = _build_segment_arrays(
+        prompt=prompt.strip(),
+        prefix_text=prefix_text,
+        prefix_offsets=prefix_encoded.offsets,
+        prefix_ids=prefix_ids,
+        answer_ids=answer_ids,
+        active_prompt_start_char=active_prompt_start_char,
+        segment_spans=segment_spans,
     )
     feature_arrays = NumericFeatureArrays(
         digit_value_ids=[
@@ -252,6 +281,8 @@ def encode_lm_example(
             ],
         )
         relevance_labels = relevance_labels[:sequence_length]
+        segment_ids = segment_ids[:sequence_length]
+        context_access_mask = context_access_mask[:sequence_length]
 
     supervised_token_count = sum(label != IGNORE_INDEX for label in labels)
     if loss_mode == "answer-only" and supervised_token_count == 0:
@@ -274,6 +305,8 @@ def encode_lm_example(
         position_feature_arrays.abacus_position_ids.extend([0] * pad_count)
         position_feature_arrays.coupled_position_ids.extend([0] * pad_count)
         relevance_labels.extend([RELEVANCE_IGNORE_INDEX] * pad_count)
+        segment_ids.extend([SEG_PAD] * pad_count)
+        context_access_mask.extend([0] * pad_count)
 
     return EncodedLmExample(
         input_ids=ids,
@@ -286,6 +319,8 @@ def encode_lm_example(
         abacus_position_ids=position_feature_arrays.abacus_position_ids,
         coupled_position_ids=position_feature_arrays.coupled_position_ids,
         relevance_labels=relevance_labels,
+        segment_ids=segment_ids,
+        context_access_mask=context_access_mask,
         truncated=truncated,
         supervised_token_count=supervised_token_count,
     )
@@ -346,6 +381,7 @@ def prepare_lm_dataset(
                 index=index,
             ),
             active_prompt_start_char=_active_prompt_start_char(record),
+            segment_spans=_segment_spans(record),
         )
         for index, record in enumerate(_iter_jsonl_records(input_path))
     ]
@@ -371,6 +407,14 @@ def prepare_lm_dataset(
         [example.relevance_labels for example in examples],
         dtype=torch.long,
     )
+    segment_ids = torch.tensor(
+        [example.segment_ids for example in examples],
+        dtype=torch.long,
+    )
+    context_access_mask = torch.tensor(
+        [example.context_access_mask for example in examples],
+        dtype=torch.long,
+    )
 
     stats = _summarize_encoded_examples(examples)
     metadata = {
@@ -385,6 +429,8 @@ def prepare_lm_dataset(
         "attention_mask": attention_mask,
         **feature_tensors,
         "relevance_labels": relevance_labels,
+        "segment_ids": segment_ids,
+        "context_access_mask": context_access_mask,
         "metadata": metadata,
     }
 
@@ -413,6 +459,8 @@ def load_tokenized_lm_dataset(cache_path: Path) -> TokenizedLmDataset:
         abacus_position_ids=payload.get("abacus_position_ids"),
         coupled_position_ids=payload.get("coupled_position_ids"),
         relevance_labels=payload.get("relevance_labels"),
+        segment_ids=payload.get("segment_ids"),
+        context_access_mask=payload.get("context_access_mask"),
     )
 
 
@@ -463,6 +511,30 @@ def _relevance_tensor_or_ignore(
     return relevance_labels.long()
 
 
+def _segment_tensor_or_default(
+    segment_ids: torch.Tensor | None,
+    input_ids: torch.Tensor,
+) -> torch.Tensor:
+    if segment_ids is None:
+        result = torch.full_like(input_ids, SEG_QUERY, dtype=torch.long)
+        result[input_ids == 0] = SEG_PAD
+        return result
+    if segment_ids.shape != input_ids.shape:
+        raise ValueError("segment_ids tensor must match input_ids shape")
+    return segment_ids.long()
+
+
+def _context_access_tensor_or_zeros(
+    context_access_mask: torch.Tensor | None,
+    input_ids: torch.Tensor,
+) -> torch.Tensor:
+    if context_access_mask is None:
+        return torch.zeros_like(input_ids, dtype=torch.long)
+    if context_access_mask.shape != input_ids.shape:
+        raise ValueError("context_access_mask tensor must match input_ids shape")
+    return context_access_mask.long()
+
+
 def _build_relevance_labels(
     *,
     prompt: str,
@@ -490,6 +562,92 @@ def _build_relevance_labels(
     return labels
 
 
+def _build_segment_arrays(
+    *,
+    prompt: str,
+    prefix_text: str,
+    prefix_offsets: list[tuple[int, int]],
+    prefix_ids: list[int],
+    answer_ids: list[int],
+    active_prompt_start_char: int | None,
+    segment_spans: list[dict[str, Any]] | None,
+) -> tuple[list[int], list[int]]:
+    segment_ids = [SEG_CONTROL]
+    access_mask = [0]
+    prompt_start = len(f"{PROMPT_TOKEN}\n")
+    prompt_end = prompt_start + len(prompt)
+    normalized_spans = _normalize_segment_spans(segment_spans)
+    active_start = (
+        prompt_start + active_prompt_start_char
+        if active_prompt_start_char is not None
+        else None
+    )
+
+    for start, end in prefix_offsets:
+        if start >= prompt_end or end <= prompt_start:
+            segment_ids.append(SEG_ANSWER if start >= prompt_end else SEG_CONTROL)
+            access_mask.append(0)
+            continue
+        prompt_relative_start = max(0, start - prompt_start)
+        prompt_relative_end = min(len(prompt), end - prompt_start)
+        span = _matching_segment_span(
+            normalized_spans,
+            prompt_relative_start,
+            prompt_relative_end,
+        )
+        if span is not None:
+            segment_ids.append(span["segment_id"])
+            access_mask.append(int(span["access"]))
+        elif active_start is not None and end <= active_start:
+            segment_ids.append(SEG_CONTEXT)
+            access_mask.append(0)
+        else:
+            segment_ids.append(SEG_QUERY)
+            access_mask.append(0)
+
+    segment_ids.extend([SEG_ANSWER] * len(answer_ids))
+    access_mask.extend([0] * len(answer_ids))
+    if len(segment_ids) != len(prefix_ids) + len(answer_ids):
+        raise ValueError("segment id tokenization mismatch")
+    return segment_ids, access_mask
+
+
+def _normalize_segment_spans(
+    segment_spans: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    if not segment_spans:
+        return []
+    normalized = []
+    for span in segment_spans:
+        name = str(span["segment"])
+        if name not in SEGMENT_IDS:
+            raise ValueError(f"Unknown segment name in metadata: {name}")
+        normalized.append(
+            {
+                "start": int(span["start"]),
+                "end": int(span["end"]),
+                "segment_id": SEGMENT_IDS[name],
+                "access": bool(span.get("access", False)),
+            }
+        )
+    return normalized
+
+
+def _matching_segment_span(
+    spans: list[dict[str, Any]],
+    start: int,
+    end: int,
+) -> dict[str, Any] | None:
+    best = None
+    best_overlap = 0
+    for span in spans:
+        overlap = min(end, span["end"]) - max(start, span["start"])
+        if overlap > best_overlap:
+            best = span
+            best_overlap = overlap
+    return best
+
+
 def _active_prompt_start_char(record: dict[str, Any]) -> int | None:
     metadata = record.get("metadata", {})
     if not isinstance(metadata, dict):
@@ -498,6 +656,18 @@ def _active_prompt_start_char(record: dict[str, Any]) -> int | None:
     if value is None:
         return None
     return int(value)
+
+
+def _segment_spans(record: dict[str, Any]) -> list[dict[str, Any]] | None:
+    metadata = record.get("metadata", {})
+    if not isinstance(metadata, dict):
+        return None
+    value = metadata.get("segment_spans")
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise TypeError("metadata.segment_spans must be a list")
+    return value
 
 
 def _required_token_id(tokenizer: ByteLevelBpeTokenizer, token: str) -> int:
