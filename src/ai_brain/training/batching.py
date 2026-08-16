@@ -40,6 +40,9 @@ def batch_by_indices(
         "operation_step_ids": dataset.operation_step_ids[indices].to(device),
         "abacus_position_ids": dataset.abacus_position_ids[indices].to(device),
         "coupled_position_ids": dataset.coupled_position_ids[indices].to(device),
+        "relevance_labels": dataset.relevance_labels[indices].to(device),
+        "segment_ids": dataset.segment_ids[indices].to(device),
+        "context_access_mask": dataset.context_access_mask[indices].to(device),
     }
 
 
