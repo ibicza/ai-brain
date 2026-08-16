@@ -29,6 +29,7 @@ def generate_answer(
     max_new_tokens: int = 32,
     cpu: bool = False,
     numeric_tokenization: NumericTokenizationMode | None = None,
+    position_offset: int = 0,
 ) -> dict[str, Any]:
     if max_new_tokens <= 0:
         raise ValueError("max_new_tokens must be positive")
@@ -51,6 +52,7 @@ def generate_answer(
         max_new_tokens=max_new_tokens,
         device=device_info.device,
         numeric_tokenization=numeric_tokenization,
+        position_offset=position_offset,
     )
     raw_generation = tokenizer.decode(generated_ids, skip_special_tokens=False)
     answer = extract_generated_answer(raw_generation)
@@ -62,6 +64,7 @@ def generate_answer(
         "tokens_generated": len(generated_ids),
         "checkpoint_step": checkpoint.get("step"),
         "numeric_tokenization": numeric_tokenization,
+        "position_offset": position_offset,
         "device": str(device_info.device),
         "device_name": device_info.name,
     }
@@ -78,6 +81,7 @@ def eval_lm(
     seed: int = 1234,
     cpu: bool = False,
     numeric_tokenization: NumericTokenizationMode | None = None,
+    position_offset: int = 0,
 ) -> dict[str, Any]:
     if max_examples is not None and max_examples <= 0:
         raise ValueError("max_examples must be positive")
@@ -114,6 +118,7 @@ def eval_lm(
                 max_new_tokens=max_new_tokens,
                 device=device_info.device,
                 numeric_tokenization=numeric_tokenization,
+                position_offset=position_offset,
             )
             raw_generation = tokenizer.decode(generated_ids, skip_special_tokens=False)
             predicted = extract_generated_answer(raw_generation)
@@ -164,6 +169,7 @@ def eval_lm(
         "eval_path": str(eval_path),
         "tokenizer_path": str(tokenizer_path),
         "numeric_tokenization": numeric_tokenization,
+        "position_offset": position_offset,
         "predictions_path": str(predictions_path),
         "max_examples": max_examples,
         "max_new_tokens": max_new_tokens,

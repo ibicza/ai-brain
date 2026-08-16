@@ -892,6 +892,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Numeric tokenization mode for decimal spans.",
     )
     train_lm_parser.add_argument(
+        "--position-encoding",
+        choices=("absolute", "shifted_absolute", "nope"),
+        default="absolute",
+        help="Absolute, SHAPE-style shifted absolute, or no positional embeddings.",
+    )
+    train_lm_parser.add_argument(
+        "--position-shift-max",
+        type=int,
+        default=0,
+        help="Maximum random absolute position offset for shifted_absolute training.",
+    )
+    train_lm_parser.add_argument(
         "--abacus-random-offset-max",
         type=int,
         default=99,
@@ -975,6 +987,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=NUMERIC_TOKENIZATION_MODES,
         help="Override checkpoint numeric tokenization mode.",
     )
+    generate_answer_parser.add_argument(
+        "--position-offset",
+        type=int,
+        default=0,
+        help="Pure absolute position-id offset for generation.",
+    )
 
     eval_lm_parser = subparsers.add_parser(
         "eval-lm",
@@ -1031,6 +1049,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--numeric-tokenization",
         choices=NUMERIC_TOKENIZATION_MODES,
         help="Override checkpoint numeric tokenization mode.",
+    )
+    eval_lm_parser.add_argument(
+        "--position-offset",
+        type=int,
+        default=0,
+        help="Pure absolute position-id offset for generation eval.",
     )
 
     analyze_eval_parser = subparsers.add_parser(
@@ -1487,6 +1511,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 learning_rate=args.learning_rate,
                 grad_clip_norm=args.grad_clip_norm,
                 numeric_tokenization=args.numeric_tokenization,
+                position_encoding=args.position_encoding,
+                position_shift_max=args.position_shift_max,
                 abacus_random_offset_max=args.abacus_random_offset_max,
                 coupled_random_offset_max=args.coupled_random_offset_max,
                 seed=args.seed,
@@ -1509,6 +1535,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             max_new_tokens=args.max_new_tokens,
             cpu=args.cpu,
             numeric_tokenization=args.numeric_tokenization,
+            position_offset=args.position_offset,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
@@ -1524,6 +1551,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             seed=args.seed,
             cpu=args.cpu,
             numeric_tokenization=args.numeric_tokenization,
+            position_offset=args.position_offset,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0

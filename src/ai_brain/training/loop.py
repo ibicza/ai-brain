@@ -52,6 +52,7 @@ def evaluate_loss(
     batches: int,
     device: torch.device,
     seed: int,
+    position_offset: int | torch.Tensor = 0,
 ) -> float:
     was_training = model.training
     model.eval()
@@ -65,7 +66,7 @@ def evaluate_loss(
             device=device,
             generator=generator,
         )
-        logits = _model_logits(model, batch)
+        logits = _model_logits(model, batch, position_offset=position_offset)
         loss = compute_lm_loss(logits, batch["labels"])
         if not torch.isfinite(loss):
             raise ValueError(f"Non-finite eval loss: {loss.item()}")
@@ -84,28 +85,37 @@ def evaluate_loss(
 def _model_logits(
     model: torch.nn.Module,
     batch: dict[str, torch.Tensor],
+    *,
+    position_offset: int | torch.Tensor = 0,
 ) -> torch.Tensor:
+    model_kwargs: dict[str, Any] = {}
+    if getattr(model, "supports_position_offset", False):
+        model_kwargs["position_offset"] = position_offset
     if getattr(model, "uses_numeric_features", False):
         return model(
             batch["input_ids"],
+            **model_kwargs,
             **{key: batch[key] for key in NUMERIC_FEATURE_KEYS},
         )
     if getattr(model, "uses_abacus_position_features", False):
         return model(
             batch["input_ids"],
             abacus_position_ids=batch["abacus_position_ids"],
+            **model_kwargs,
         )
     if getattr(model, "uses_coupled_position_features", False):
         return model(
             batch["input_ids"],
             coupled_position_ids=batch["coupled_position_ids"],
+            **model_kwargs,
         )
     if getattr(model, "uses_gated_place_features", False):
         return model(
             batch["input_ids"],
             digit_place_ids=batch["digit_place_ids"],
+            **model_kwargs,
         )
-    return model(batch["input_ids"])
+    return model(batch["input_ids"], **model_kwargs)
 
 
 def train_lm(config: TrainConfig) -> dict[str, Any]:
@@ -116,7 +126,10 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
     model_config = replace(
         get_named_model_config(config.model_config_name),
         vocab_size=tokenizer.vocab_size,
-        max_sequence_length=config.sequence_length,
+        max_sequence_length=config.sequence_length + config.position_shift_max,
+        position_encoding=(
+            "nope" if config.position_encoding == "nope" else "absolute"
+        ),
     )
     model_config.validate()
 
@@ -241,7 +254,13 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
             device=device,
             generator=generator,
         )
-        logits = _model_logits(model, batch)
+        position_offset = _sample_position_offset(
+            config=config,
+            batch_size=config.batch_size,
+            device=device,
+            generator=generator,
+        )
+        logits = _model_logits(model, batch, position_offset=position_offset)
         loss = compute_lm_loss(logits, batch["labels"])
         if not torch.isfinite(loss):
             raise ValueError(f"Non-finite train loss at step {step}: {loss.item()}")
@@ -271,6 +290,7 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
                 batches=config.eval_batches,
                 device=device,
                 seed=config.seed + step,
+                position_offset=0,
             )
             last_metrics = {**last_metrics, "eval_loss": eval_loss}
             append_metrics_jsonl(metrics_path, last_metrics)
@@ -304,3 +324,21 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         "model_config": asdict(model_config),
         "initialized_from_checkpoint": initialized_from_checkpoint,
     }
+
+
+def _sample_position_offset(
+    *,
+    config: TrainConfig,
+    batch_size: int,
+    device: torch.device,
+    generator: torch.Generator,
+) -> int | torch.Tensor:
+    if config.position_encoding != "shifted_absolute" or config.position_shift_max == 0:
+        return 0
+    return torch.randint(
+        low=0,
+        high=config.position_shift_max + 1,
+        size=(batch_size,),
+        generator=generator,
+        dtype=torch.long,
+    ).to(device)

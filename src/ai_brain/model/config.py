@@ -18,6 +18,7 @@ class ModelConfig:
     recurrent_layers: int = 1
     recurrent_cycles: int = 1
     output_layers: int = 0
+    position_encoding: str = "absolute"
 
     def validate(self) -> None:
         if self.model_type not in {
@@ -32,6 +33,9 @@ class ModelConfig:
                 "model_type must be 'tiny', 'recurrent', 'numeric', "
                 "'abacus', 'coupled', or 'gated_place'"
             )
+
+        if self.position_encoding not in {"absolute", "nope"}:
+            raise ValueError("position_encoding must be 'absolute' or 'nope'")
 
         if self.vocab_size <= 0:
             raise ValueError("vocab_size must be positive")

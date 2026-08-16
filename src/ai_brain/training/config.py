@@ -24,6 +24,8 @@ class TrainConfig:
     learning_rate: float = 3e-4
     grad_clip_norm: float = 1.0
     numeric_tokenization: NumericTokenizationMode = "default_bpe"
+    position_encoding: str = "absolute"
+    position_shift_max: int = 0
     abacus_random_offset_max: int = 0
     coupled_random_offset_max: int = 0
     seed: int = 1234
@@ -51,6 +53,12 @@ class TrainConfig:
             raise ValueError(
                 f"Unknown numeric_tokenization: {self.numeric_tokenization}"
             )
+        if self.position_encoding not in {"absolute", "shifted_absolute", "nope"}:
+            raise ValueError(
+                "position_encoding must be 'absolute', 'shifted_absolute', or 'nope'"
+            )
+        if self.position_shift_max < 0:
+            raise ValueError("position_shift_max must be non-negative")
         if self.abacus_random_offset_max < 0:
             raise ValueError("abacus_random_offset_max must be non-negative")
         if self.coupled_random_offset_max < 0:

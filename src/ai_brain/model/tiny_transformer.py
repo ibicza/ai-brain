@@ -105,6 +105,8 @@ class TransformerBlock(nn.Module):
 
 
 class TinyCausalTransformer(nn.Module):
+    supports_position_offset = True
+
     def __init__(self, config: ModelConfig) -> None:
         super().__init__()
 
@@ -114,9 +116,13 @@ class TinyCausalTransformer(nn.Module):
         self.config = config
 
         self.token_embedding = nn.Embedding(config.vocab_size, config.d_model)
-        self.position_embedding = nn.Embedding(
-            config.max_sequence_length,
-            config.d_model,
+        self.position_embedding = (
+            nn.Embedding(
+                config.max_sequence_length,
+                config.d_model,
+            )
+            if config.position_encoding == "absolute"
+            else None
         )
 
         self.blocks = nn.ModuleList(
@@ -129,15 +135,28 @@ class TinyCausalTransformer(nn.Module):
         if config.tie_embeddings:
             self.lm_head.weight = self.token_embedding.weight
 
-    def forward(self, input_ids: torch.Tensor) -> torch.Tensor:
-        x = self.embed_tokens_and_positions(input_ids)
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        *,
+        position_offset: int | torch.Tensor = 0,
+    ) -> torch.Tensor:
+        x = self.embed_tokens_and_positions(
+            input_ids,
+            position_offset=position_offset,
+        )
         return self.forward_embeddings(x)
 
-    def embed_tokens_and_positions(self, input_ids: torch.Tensor) -> torch.Tensor:
+    def embed_tokens_and_positions(
+        self,
+        input_ids: torch.Tensor,
+        *,
+        position_offset: int | torch.Tensor = 0,
+    ) -> torch.Tensor:
         if input_ids.ndim != 2:
             raise ValueError("input_ids must have shape [batch_size, sequence_length]")
 
-        _batch_size, sequence_length = input_ids.shape
+        batch_size, sequence_length = input_ids.shape
 
         if sequence_length > self.config.max_sequence_length:
             raise ValueError(
@@ -145,14 +164,47 @@ class TinyCausalTransformer(nn.Module):
                 f"{sequence_length} > {self.config.max_sequence_length}"
             )
 
+        x = self.token_embedding(input_ids)
+        if self.position_embedding is None:
+            return x
+
         positions = torch.arange(
             sequence_length,
             device=input_ids.device,
             dtype=torch.long,
         )
+        if isinstance(position_offset, torch.Tensor):
+            if position_offset.ndim == 0:
+                positions = positions + position_offset.to(
+                    device=input_ids.device,
+                    dtype=torch.long,
+                )
+            else:
+                if position_offset.shape != (batch_size,):
+                    raise ValueError(
+                        "position_offset tensor must be scalar or shape [batch_size]"
+                    )
+                offsets = position_offset.to(device=input_ids.device, dtype=torch.long)
+                positions = positions.unsqueeze(0) + offsets.unsqueeze(1)
+        else:
+            positions = positions + int(position_offset)
 
-        x = self.token_embedding(input_ids)
-        return x + self.position_embedding(positions).unsqueeze(0)
+        max_position = int(positions.max().detach().cpu().item())
+        min_position = int(positions.min().detach().cpu().item())
+        if min_position < 0:
+            raise ValueError(
+                f"position offset produces negative position: {min_position}"
+            )
+        if max_position >= self.config.max_sequence_length:
+            raise ValueError(
+                "position offset exceeds config.max_sequence_length: "
+                f"{max_position} >= {self.config.max_sequence_length}"
+            )
+        position_embeddings = self.position_embedding(positions)
+        if position_embeddings.ndim == 2:
+            position_embeddings = position_embeddings.unsqueeze(0)
+
+        return x + position_embeddings
 
     def forward_embeddings(self, x: torch.Tensor) -> torch.Tensor:
         for block in self.blocks:
@@ -202,8 +254,12 @@ class TinyNumericCausalTransformer(TinyCausalTransformer):
         digit_place_ids: torch.Tensor | None = None,
         number_role_ids: torch.Tensor | None = None,
         operation_step_ids: torch.Tensor | None = None,
+        position_offset: int | torch.Tensor = 0,
     ) -> torch.Tensor:
-        x = self.embed_tokens_and_positions(input_ids)
+        x = self.embed_tokens_and_positions(
+            input_ids,
+            position_offset=position_offset,
+        )
         x = x + self.digit_value_embedding(
             _feature_ids_or_none(digit_value_ids, input_ids)
         )
@@ -241,8 +297,12 @@ class TinyAbacusPositionTransformer(TinyCausalTransformer):
         input_ids: torch.Tensor,
         *,
         abacus_position_ids: torch.Tensor | None = None,
+        position_offset: int | torch.Tensor = 0,
     ) -> torch.Tensor:
-        x = self.embed_tokens_and_positions(input_ids)
+        x = self.embed_tokens_and_positions(
+            input_ids,
+            position_offset=position_offset,
+        )
         x = x + self.abacus_position_embedding(
             _feature_ids_or_none(abacus_position_ids, input_ids)
         )
@@ -271,8 +331,12 @@ class TinyCoupledPositionTransformer(TinyCausalTransformer):
         input_ids: torch.Tensor,
         *,
         coupled_position_ids: torch.Tensor | None = None,
+        position_offset: int | torch.Tensor = 0,
     ) -> torch.Tensor:
-        x = self.embed_tokens_and_positions(input_ids)
+        x = self.embed_tokens_and_positions(
+            input_ids,
+            position_offset=position_offset,
+        )
         x = x + self.coupled_position_embedding(
             _feature_ids_or_none(coupled_position_ids, input_ids)
         )
@@ -302,8 +366,12 @@ class TinyGatedPlaceTransformer(TinyCausalTransformer):
         input_ids: torch.Tensor,
         *,
         digit_place_ids: torch.Tensor | None = None,
+        position_offset: int | torch.Tensor = 0,
     ) -> torch.Tensor:
-        x = self.embed_tokens_and_positions(input_ids)
+        x = self.embed_tokens_and_positions(
+            input_ids,
+            position_offset=position_offset,
+        )
         x = x + self.place_alpha * self.digit_place_embedding(
             _feature_ids_or_none(digit_place_ids, input_ids)
         )

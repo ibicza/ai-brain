@@ -75,6 +75,7 @@ def generate_greedy(
     end_token_id: int,
     tokenizer: ByteLevelBpeTokenizer | None = None,
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
+    position_offset: int = 0,
 ) -> list[int]:
     if max_new_tokens <= 0:
         raise ValueError("max_new_tokens must be positive")
@@ -88,6 +89,9 @@ def generate_greedy(
 
     for _ in range(max_new_tokens):
         context = generated[:, -model.config.max_sequence_length :]
+        model_kwargs: dict[str, Any] = {}
+        if getattr(model, "supports_position_offset", False):
+            model_kwargs["position_offset"] = position_offset
         if getattr(model, "uses_numeric_features", False):
             if tokenizer is None:
                 raise ValueError("Numeric model generation requires a tokenizer")
@@ -100,7 +104,7 @@ def generate_greedy(
                 key: value[:, -model.config.max_sequence_length :]
                 for key, value in feature_tensors.items()
             }
-            logits = model(context, **feature_tensors)
+            logits = model(context, **model_kwargs, **feature_tensors)
         elif getattr(model, "uses_abacus_position_features", False):
             if tokenizer is None:
                 raise ValueError("Abacus model generation requires a tokenizer")
@@ -114,6 +118,7 @@ def generate_greedy(
                 abacus_position_ids=feature_tensors["abacus_position_ids"][
                     :, -model.config.max_sequence_length :
                 ],
+                **model_kwargs,
             )
         elif getattr(model, "uses_coupled_position_features", False):
             if tokenizer is None:
@@ -128,6 +133,7 @@ def generate_greedy(
                 coupled_position_ids=feature_tensors["coupled_position_ids"][
                     :, -model.config.max_sequence_length :
                 ],
+                **model_kwargs,
             )
         elif getattr(model, "uses_gated_place_features", False):
             if tokenizer is None:
@@ -142,9 +148,10 @@ def generate_greedy(
                 digit_place_ids=feature_tensors["digit_place_ids"][
                     :, -model.config.max_sequence_length :
                 ],
+                **model_kwargs,
             )
         else:
-            logits = model(context)
+            logits = model(context, **model_kwargs)
         next_token_id = int(torch.argmax(logits[:, -1, :], dim=-1).item())
         next_token = torch.tensor(
             [[next_token_id]], device=generated.device, dtype=torch.long
@@ -167,6 +174,7 @@ def generate_answer_ids(
     max_new_tokens: int,
     device: torch.device,
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
+    position_offset: int = 0,
 ) -> list[int]:
     input_ids = build_inference_input_ids(
         prompt=prompt,
@@ -182,6 +190,7 @@ def generate_answer_ids(
         end_token_id=_required_token_id(tokenizer, END_TOKEN),
         tokenizer=tokenizer,
         numeric_tokenization=numeric_tokenization,
+        position_offset=position_offset,
     )
 
 
