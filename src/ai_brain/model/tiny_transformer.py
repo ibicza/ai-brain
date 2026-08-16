@@ -30,7 +30,7 @@ class FeedForward(nn.Module):
 
 
 class CausalSelfAttention(nn.Module):
-    def __init__(self, config: ModelConfig) -> None:
+    def __init__(self, config: ModelConfig, *, layer_index: int = 0) -> None:
         super().__init__()
 
         if config.d_model % config.num_heads != 0:
@@ -39,11 +39,32 @@ class CausalSelfAttention(nn.Module):
         self.num_heads = config.num_heads
         self.head_dim = config.d_model // config.num_heads
         self.position_encoding = config.position_encoding
+        self.attention_variant = config.attention_variant
+        self.relevance_mode = config.relevance_mode
         self.max_relative_position = config.max_sequence_length - 1
 
         self.qkv = nn.Linear(config.d_model, 3 * config.d_model)
+        self.qkv_noise = (
+            nn.Linear(config.d_model, 3 * config.d_model)
+            if config.attention_variant == "differential"
+            else None
+        )
+        self.differential_lambda = (
+            nn.Parameter(
+                torch.full(
+                    (config.num_heads, 1, 1),
+                    0.8 - 0.6 * torch.exp(torch.tensor(-0.3 * layer_index)),
+                )
+            )
+            if config.attention_variant == "differential"
+            else None
+        )
         self.output = nn.Linear(config.d_model, config.d_model)
         self.dropout = nn.Dropout(config.dropout)
+        self.key_gate = (
+            nn.Linear(config.d_model, 1) if config.relevance_mode == "gate" else None
+        )
+        self.last_attention_weights: torch.Tensor | None = None
         if config.position_encoding == "relative":
             relative_vocab_size = 2 * self.max_relative_position + 1
             self.relative_key_embedding = nn.Embedding(
@@ -80,7 +101,12 @@ class CausalSelfAttention(nn.Module):
             persistent=False,
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        x: torch.Tensor,
+        *,
+        attention_key_mask: torch.Tensor | None = None,
+    ) -> torch.Tensor:
         batch_size, sequence_length, d_model = x.shape
 
         qkv = self.qkv(x)
@@ -95,22 +121,50 @@ class CausalSelfAttention(nn.Module):
         value = value.view(
             batch_size, sequence_length, self.num_heads, self.head_dim
         ).transpose(1, 2)
+        if self.key_gate is not None:
+            gate = torch.sigmoid(self.key_gate(x)).unsqueeze(1)
+            key = key * gate
+            value = value * gate
 
-        attention_scores = query @ key.transpose(-2, -1)
-        attention_scores = attention_scores / self.head_dim**0.5
-        if self.relative_key_embedding is not None:
-            relative_ids = self.relative_position_ids[
-                :sequence_length,
-                :sequence_length,
-            ]
-            relative_keys = self.relative_key_embedding(relative_ids)
-            relative_scores = torch.einsum("bhid,ijd->bhij", query, relative_keys)
-            attention_scores = attention_scores + relative_scores / self.head_dim**0.5
+        attention_scores = self._attention_scores(query, key, sequence_length)
+        if self.qkv_noise is not None and self.differential_lambda is not None:
+            qkv_noise = self.qkv_noise(x)
+            noise_query, noise_key, _noise_value = qkv_noise.chunk(3, dim=-1)
+            noise_query = noise_query.view(
+                batch_size, sequence_length, self.num_heads, self.head_dim
+            ).transpose(1, 2)
+            noise_key = noise_key.view(
+                batch_size, sequence_length, self.num_heads, self.head_dim
+            ).transpose(1, 2)
+            if self.key_gate is not None:
+                noise_key = noise_key * gate
+            noise_scores = self._attention_scores(
+                noise_query,
+                noise_key,
+                sequence_length,
+            )
+        else:
+            noise_scores = None
 
-        mask = self.causal_mask[:, :, :sequence_length, :sequence_length]
-        attention_scores = attention_scores.masked_fill(mask == 0, float("-inf"))
+        attention_scores = self._apply_masks(
+            attention_scores,
+            sequence_length=sequence_length,
+            attention_key_mask=attention_key_mask,
+        )
+        if noise_scores is not None:
+            noise_scores = self._apply_masks(
+                noise_scores,
+                sequence_length=sequence_length,
+                attention_key_mask=attention_key_mask,
+            )
 
         attention_weights = torch.softmax(attention_scores, dim=-1)
+        if noise_scores is not None and self.differential_lambda is not None:
+            noise_weights = torch.softmax(noise_scores, dim=-1)
+            attention_weights = (
+                attention_weights - self.differential_lambda * noise_weights
+            )
+        self.last_attention_weights = attention_weights.detach()
         attention_weights = self.dropout(attention_weights)
 
         output = attention_weights @ value
@@ -133,24 +187,75 @@ class CausalSelfAttention(nn.Module):
 
         return self.output(output)
 
+    def _attention_scores(
+        self,
+        query: torch.Tensor,
+        key: torch.Tensor,
+        sequence_length: int,
+    ) -> torch.Tensor:
+        attention_scores = query @ key.transpose(-2, -1)
+        attention_scores = attention_scores / self.head_dim**0.5
+        if self.relative_key_embedding is not None:
+            relative_ids = self.relative_position_ids[
+                :sequence_length,
+                :sequence_length,
+            ]
+            relative_keys = self.relative_key_embedding(relative_ids)
+            relative_scores = torch.einsum("bhid,ijd->bhij", query, relative_keys)
+            attention_scores = attention_scores + relative_scores / self.head_dim**0.5
+        return attention_scores
+
+    def _apply_masks(
+        self,
+        attention_scores: torch.Tensor,
+        *,
+        sequence_length: int,
+        attention_key_mask: torch.Tensor | None,
+    ) -> torch.Tensor:
+        mask = self.causal_mask[:, :, :sequence_length, :sequence_length]
+        attention_scores = attention_scores.masked_fill(mask == 0, float("-inf"))
+        if attention_key_mask is not None:
+            if attention_key_mask.shape != (
+                attention_scores.shape[0],
+                sequence_length,
+            ):
+                raise ValueError("attention_key_mask must have shape [batch, seq]")
+            key_mask = attention_key_mask.bool().view(
+                attention_scores.shape[0],
+                1,
+                1,
+                sequence_length,
+            )
+            attention_scores = attention_scores.masked_fill(~key_mask, float("-inf"))
+        return attention_scores
+
 
 class TransformerBlock(nn.Module):
-    def __init__(self, config: ModelConfig) -> None:
+    def __init__(self, config: ModelConfig, *, layer_index: int = 0) -> None:
         super().__init__()
 
         self.attention_norm = nn.LayerNorm(config.d_model)
-        self.attention = CausalSelfAttention(config)
+        self.attention = CausalSelfAttention(config, layer_index=layer_index)
         self.ffn_norm = nn.LayerNorm(config.d_model)
         self.ffn = FeedForward(config)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.attention(self.attention_norm(x))
+    def forward(
+        self,
+        x: torch.Tensor,
+        *,
+        attention_key_mask: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        x = x + self.attention(
+            self.attention_norm(x),
+            attention_key_mask=attention_key_mask,
+        )
         x = x + self.ffn(self.ffn_norm(x))
         return x
 
 
 class TinyCausalTransformer(nn.Module):
     supports_position_offset = True
+    supports_attention_key_mask = True
 
     def __init__(self, config: ModelConfig) -> None:
         super().__init__()
@@ -171,11 +276,17 @@ class TinyCausalTransformer(nn.Module):
         )
 
         self.blocks = nn.ModuleList(
-            TransformerBlock(config) for _ in range(config.num_layers)
+            TransformerBlock(config, layer_index=layer_index)
+            for layer_index in range(config.num_layers)
         )
 
         self.final_norm = nn.LayerNorm(config.d_model)
         self.lm_head = nn.Linear(config.d_model, config.vocab_size, bias=False)
+        self.relevance_head = (
+            nn.Linear(config.d_model, 1)
+            if config.relevance_mode in {"aux", "gate"}
+            else None
+        )
 
         if config.tie_embeddings:
             self.lm_head.weight = self.token_embedding.weight
@@ -185,12 +296,18 @@ class TinyCausalTransformer(nn.Module):
         input_ids: torch.Tensor,
         *,
         position_offset: int | torch.Tensor = 0,
-    ) -> torch.Tensor:
+        attention_key_mask: torch.Tensor | None = None,
+        return_relevance: bool = False,
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
         x = self.embed_tokens_and_positions(
             input_ids,
             position_offset=position_offset,
         )
-        return self.forward_embeddings(x)
+        return self.forward_embeddings_with_optional_relevance(
+            x,
+            attention_key_mask=attention_key_mask,
+            return_relevance=return_relevance,
+        )
 
     def embed_tokens_and_positions(
         self,
@@ -261,12 +378,42 @@ class TinyCausalTransformer(nn.Module):
 
         return x + position_embeddings
 
-    def forward_embeddings(self, x: torch.Tensor) -> torch.Tensor:
+    def forward_embeddings(
+        self,
+        x: torch.Tensor,
+        *,
+        attention_key_mask: torch.Tensor | None = None,
+        return_hidden: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         for block in self.blocks:
-            x = block(x)
+            x = block(x, attention_key_mask=attention_key_mask)
 
         x = self.final_norm(x)
-        return self.lm_head(x)
+        logits = self.lm_head(x)
+        if return_hidden:
+            return logits, x
+        return logits
+
+    def forward_embeddings_with_optional_relevance(
+        self,
+        x: torch.Tensor,
+        *,
+        attention_key_mask: torch.Tensor | None = None,
+        return_relevance: bool = False,
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
+        logits, hidden = self.forward_embeddings(
+            x,
+            attention_key_mask=attention_key_mask,
+            return_hidden=True,
+        )
+        if return_relevance:
+            if self.relevance_head is None:
+                raise ValueError("Model has no relevance head")
+            return {
+                "logits": logits,
+                "relevance_logits": self.relevance_head(hidden).squeeze(-1),
+            }
+        return logits
 
 
 class TinyNumericCausalTransformer(TinyCausalTransformer):
@@ -310,6 +457,8 @@ class TinyNumericCausalTransformer(TinyCausalTransformer):
         number_role_ids: torch.Tensor | None = None,
         operation_step_ids: torch.Tensor | None = None,
         position_offset: int | torch.Tensor = 0,
+        attention_key_mask: torch.Tensor | None = None,
+        return_relevance: bool = False,
     ) -> torch.Tensor:
         x = self.embed_tokens_and_positions(
             input_ids,
@@ -327,7 +476,11 @@ class TinyNumericCausalTransformer(TinyCausalTransformer):
         x = x + self.operation_step_embedding(
             _feature_ids_or_none(operation_step_ids, input_ids)
         )
-        return self.forward_embeddings(x)
+        return self.forward_embeddings_with_optional_relevance(
+            x,
+            attention_key_mask=attention_key_mask,
+            return_relevance=return_relevance,
+        )
 
 
 class TinyAbacusPositionTransformer(TinyCausalTransformer):
@@ -353,6 +506,8 @@ class TinyAbacusPositionTransformer(TinyCausalTransformer):
         *,
         abacus_position_ids: torch.Tensor | None = None,
         position_offset: int | torch.Tensor = 0,
+        attention_key_mask: torch.Tensor | None = None,
+        return_relevance: bool = False,
     ) -> torch.Tensor:
         x = self.embed_tokens_and_positions(
             input_ids,
@@ -361,7 +516,11 @@ class TinyAbacusPositionTransformer(TinyCausalTransformer):
         x = x + self.abacus_position_embedding(
             _feature_ids_or_none(abacus_position_ids, input_ids)
         )
-        return self.forward_embeddings(x)
+        return self.forward_embeddings_with_optional_relevance(
+            x,
+            attention_key_mask=attention_key_mask,
+            return_relevance=return_relevance,
+        )
 
 
 class TinyCoupledPositionTransformer(TinyCausalTransformer):
@@ -387,6 +546,8 @@ class TinyCoupledPositionTransformer(TinyCausalTransformer):
         *,
         coupled_position_ids: torch.Tensor | None = None,
         position_offset: int | torch.Tensor = 0,
+        attention_key_mask: torch.Tensor | None = None,
+        return_relevance: bool = False,
     ) -> torch.Tensor:
         x = self.embed_tokens_and_positions(
             input_ids,
@@ -395,7 +556,11 @@ class TinyCoupledPositionTransformer(TinyCausalTransformer):
         x = x + self.coupled_position_embedding(
             _feature_ids_or_none(coupled_position_ids, input_ids)
         )
-        return self.forward_embeddings(x)
+        return self.forward_embeddings_with_optional_relevance(
+            x,
+            attention_key_mask=attention_key_mask,
+            return_relevance=return_relevance,
+        )
 
 
 class TinyGatedPlaceTransformer(TinyCausalTransformer):
@@ -422,6 +587,8 @@ class TinyGatedPlaceTransformer(TinyCausalTransformer):
         *,
         digit_place_ids: torch.Tensor | None = None,
         position_offset: int | torch.Tensor = 0,
+        attention_key_mask: torch.Tensor | None = None,
+        return_relevance: bool = False,
     ) -> torch.Tensor:
         x = self.embed_tokens_and_positions(
             input_ids,
@@ -430,7 +597,11 @@ class TinyGatedPlaceTransformer(TinyCausalTransformer):
         x = x + self.place_alpha * self.digit_place_embedding(
             _feature_ids_or_none(digit_place_ids, input_ids)
         )
-        return self.forward_embeddings(x)
+        return self.forward_embeddings_with_optional_relevance(
+            x,
+            attention_key_mask=attention_key_mask,
+            return_relevance=return_relevance,
+        )
 
 
 def _feature_ids_or_none(

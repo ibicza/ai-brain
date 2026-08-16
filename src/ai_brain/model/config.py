@@ -19,6 +19,8 @@ class ModelConfig:
     recurrent_cycles: int = 1
     output_layers: int = 0
     position_encoding: str = "absolute"
+    attention_variant: str = "standard"
+    relevance_mode: str = "none"
 
     def validate(self) -> None:
         if self.model_type not in {
@@ -38,6 +40,10 @@ class ModelConfig:
             raise ValueError(
                 "position_encoding must be 'absolute', 'relative', or 'nope'"
             )
+        if self.attention_variant not in {"standard", "differential"}:
+            raise ValueError("attention_variant must be 'standard' or 'differential'")
+        if self.relevance_mode not in {"none", "aux", "gate"}:
+            raise ValueError("relevance_mode must be 'none', 'aux', or 'gate'")
 
         if self.vocab_size <= 0:
             raise ValueError("vocab_size must be positive")

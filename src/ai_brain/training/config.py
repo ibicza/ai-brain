@@ -26,6 +26,9 @@ class TrainConfig:
     numeric_tokenization: NumericTokenizationMode = "default_bpe"
     position_encoding: str = "absolute"
     position_shift_max: int = 0
+    attention_variant: str = "standard"
+    relevance_mode: str = "none"
+    relevance_loss_weight: float = 0.0
     abacus_random_offset_max: int = 0
     coupled_random_offset_max: int = 0
     seed: int = 1234
@@ -66,6 +69,12 @@ class TrainConfig:
             )
         if self.position_shift_max < 0:
             raise ValueError("position_shift_max must be non-negative")
+        if self.attention_variant not in {"standard", "differential"}:
+            raise ValueError("attention_variant must be 'standard' or 'differential'")
+        if self.relevance_mode not in {"none", "aux", "gate"}:
+            raise ValueError("relevance_mode must be 'none', 'aux', or 'gate'")
+        if self.relevance_loss_weight < 0:
+            raise ValueError("relevance_loss_weight must be non-negative")
         if self.abacus_random_offset_max < 0:
             raise ValueError("abacus_random_offset_max must be non-negative")
         if self.coupled_random_offset_max < 0:

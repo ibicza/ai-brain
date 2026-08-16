@@ -76,6 +76,7 @@ def generate_greedy(
     tokenizer: ByteLevelBpeTokenizer | None = None,
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
     position_offset: int = 0,
+    attention_key_mask: torch.Tensor | None = None,
 ) -> list[int]:
     if max_new_tokens <= 0:
         raise ValueError("max_new_tokens must be positive")
@@ -89,9 +90,28 @@ def generate_greedy(
 
     for _ in range(max_new_tokens):
         context = generated[:, -model.config.max_sequence_length :]
+        context_attention_key_mask = None
+        if attention_key_mask is not None:
+            generated_count = generated.shape[1] - input_ids.shape[1]
+            full_attention_key_mask = attention_key_mask
+            if generated_count > 0:
+                generated_mask = torch.ones(
+                    (1, generated_count),
+                    device=attention_key_mask.device,
+                    dtype=attention_key_mask.dtype,
+                )
+                full_attention_key_mask = torch.cat(
+                    [attention_key_mask, generated_mask],
+                    dim=1,
+                )
+            context_attention_key_mask = full_attention_key_mask[
+                :, -model.config.max_sequence_length :
+            ]
         model_kwargs: dict[str, Any] = {}
         if getattr(model, "supports_position_offset", False):
             model_kwargs["position_offset"] = position_offset
+        if getattr(model, "supports_attention_key_mask", False):
+            model_kwargs["attention_key_mask"] = context_attention_key_mask
         if getattr(model, "uses_numeric_features", False):
             if tokenizer is None:
                 raise ValueError("Numeric model generation requires a tokenizer")
@@ -175,6 +195,7 @@ def generate_answer_ids(
     device: torch.device,
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
     position_offset: int = 0,
+    attention_key_mask: torch.Tensor | None = None,
 ) -> list[int]:
     input_ids = build_inference_input_ids(
         prompt=prompt,
@@ -191,6 +212,7 @@ def generate_answer_ids(
         tokenizer=tokenizer,
         numeric_tokenization=numeric_tokenization,
         position_offset=position_offset,
+        attention_key_mask=attention_key_mask,
     )
 
 

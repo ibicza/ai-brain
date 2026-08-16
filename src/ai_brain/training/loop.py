@@ -17,6 +17,7 @@ from ai_brain.training.checkpoint import load_checkpoint, save_checkpoint
 from ai_brain.training.config import TrainConfig
 from ai_brain.training.lm_dataset import (
     IGNORE_INDEX,
+    RELEVANCE_IGNORE_INDEX,
     default_lm_cache_path,
     load_tokenized_lm_dataset,
     prepare_lm_dataset,
@@ -43,6 +44,19 @@ def compute_lm_loss(logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
     )
 
 
+def compute_relevance_loss(
+    relevance_logits: torch.Tensor,
+    relevance_labels: torch.Tensor,
+) -> torch.Tensor:
+    mask = relevance_labels != RELEVANCE_IGNORE_INDEX
+    if not bool(mask.any()):
+        return relevance_logits.sum() * 0.0
+    return F.binary_cross_entropy_with_logits(
+        relevance_logits[mask],
+        relevance_labels[mask].float(),
+    )
+
+
 @torch.no_grad()
 def evaluate_loss(
     *,
@@ -66,7 +80,10 @@ def evaluate_loss(
             device=device,
             generator=generator,
         )
-        logits = _model_logits(model, batch, position_offset=position_offset)
+        model_output = _model_logits(model, batch, position_offset=position_offset)
+        logits = (
+            model_output["logits"] if isinstance(model_output, dict) else model_output
+        )
         loss = compute_lm_loss(logits, batch["labels"])
         if not torch.isfinite(loss):
             raise ValueError(f"Non-finite eval loss: {loss.item()}")
@@ -89,6 +106,8 @@ def _model_logits(
     position_offset: int | torch.Tensor = 0,
 ) -> torch.Tensor:
     model_kwargs: dict[str, Any] = {}
+    if getattr(model, "relevance_head", None) is not None:
+        model_kwargs["return_relevance"] = True
     if getattr(model, "supports_position_offset", False):
         model_kwargs["position_offset"] = position_offset
     if getattr(model, "uses_numeric_features", False):
@@ -138,6 +157,8 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
         vocab_size=tokenizer.vocab_size,
         max_sequence_length=config.sequence_length + position_extra,
         position_encoding=model_position_encoding,
+        attention_variant=config.attention_variant,
+        relevance_mode=config.relevance_mode,
     )
     model_config.validate()
 
@@ -268,8 +289,24 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
             device=device,
             generator=generator,
         )
-        logits = _model_logits(model, batch, position_offset=position_offset)
+        model_output = _model_logits(model, batch, position_offset=position_offset)
+        if isinstance(model_output, dict):
+            logits = model_output["logits"]
+        else:
+            logits = model_output
         loss = compute_lm_loss(logits, batch["labels"])
+        if (
+            config.relevance_loss_weight > 0
+            and isinstance(model_output, dict)
+            and "relevance_logits" in model_output
+        ):
+            relevance_loss = compute_relevance_loss(
+                model_output["relevance_logits"],
+                batch["relevance_labels"],
+            )
+            loss = loss + config.relevance_loss_weight * relevance_loss
+        else:
+            relevance_loss = None
         if not torch.isfinite(loss):
             raise ValueError(f"Non-finite train loss at step {step}: {loss.item()}")
 
@@ -289,6 +326,8 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
             "lr": config.learning_rate,
             "grad_norm": grad_norm_value,
         }
+        if relevance_loss is not None:
+            last_metrics["relevance_loss"] = float(relevance_loss.detach().cpu().item())
 
         if step % config.eval_every == 0 or step == config.steps:
             eval_loss = evaluate_loss(

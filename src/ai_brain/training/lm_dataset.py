@@ -35,7 +35,8 @@ from ai_brain.numeric_position_features import (
 from ai_brain.training.config import LossMode
 
 IGNORE_INDEX = -100
-CACHE_FORMAT_VERSION = 5
+CACHE_FORMAT_VERSION = 6
+RELEVANCE_IGNORE_INDEX = -100
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,7 @@ class EncodedLmExample:
     operation_step_ids: list[int]
     abacus_position_ids: list[int]
     coupled_position_ids: list[int]
+    relevance_labels: list[int]
     truncated: bool
     supervised_token_count: int
 
@@ -67,6 +69,7 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
         operation_step_ids: torch.Tensor | None = None,
         abacus_position_ids: torch.Tensor | None = None,
         coupled_position_ids: torch.Tensor | None = None,
+        relevance_labels: torch.Tensor | None = None,
     ) -> None:
         if input_ids.shape != labels.shape or input_ids.shape != attention_mask.shape:
             raise ValueError(
@@ -90,6 +93,10 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
         self.coupled_position_ids = _feature_tensor_or_zeros(
             coupled_position_ids, input_ids
         )
+        self.relevance_labels = _relevance_tensor_or_ignore(
+            relevance_labels,
+            input_ids,
+        )
         self.metadata = metadata
 
     def __len__(self) -> int:
@@ -106,6 +113,7 @@ class TokenizedLmDataset(Dataset[dict[str, torch.Tensor]]):
             "operation_step_ids": self.operation_step_ids[index],
             "abacus_position_ids": self.abacus_position_ids[index],
             "coupled_position_ids": self.coupled_position_ids[index],
+            "relevance_labels": self.relevance_labels[index],
         }
 
 
@@ -119,6 +127,7 @@ def encode_lm_example(
     numeric_tokenization: NumericTokenizationMode = "default_bpe",
     abacus_position_offset: int = 0,
     coupled_position_offset: int = 0,
+    active_prompt_start_char: int | None = None,
 ) -> EncodedLmExample:
     if sequence_length < 2:
         raise ValueError("sequence_length must be at least 2")
@@ -135,6 +144,12 @@ def encode_lm_example(
         tokenizer,
         numeric_tokenization=numeric_tokenization,
     )
+    prefix_encoded = tokenizer.encode_with_offsets(
+        prefix_text,
+        numeric_tokenization=numeric_tokenization,
+    )
+    if prefix_encoded.ids != prefix_token_ids:
+        raise ValueError("numeric feature and relevance tokenization mismatch")
     answer_token_ids, answer_features = encode_text_numeric_features(
         answer_text,
         tokenizer,
@@ -162,6 +177,14 @@ def encode_lm_example(
     prefix_ids = [bos_id, *prefix_token_ids]
     answer_ids = [*answer_token_ids, eos_id]
     ids = [*prefix_ids, *answer_ids]
+    relevance_labels = _build_relevance_labels(
+        prompt=prompt.strip(),
+        prefix_text=prefix_text,
+        prefix_offsets=prefix_encoded.offsets,
+        prefix_ids=prefix_ids,
+        answer_ids=answer_ids,
+        active_prompt_start_char=active_prompt_start_char,
+    )
     feature_arrays = NumericFeatureArrays(
         digit_value_ids=[
             0,
@@ -228,6 +251,7 @@ def encode_lm_example(
                 :sequence_length
             ],
         )
+        relevance_labels = relevance_labels[:sequence_length]
 
     supervised_token_count = sum(label != IGNORE_INDEX for label in labels)
     if loss_mode == "answer-only" and supervised_token_count == 0:
@@ -249,6 +273,7 @@ def encode_lm_example(
         feature_arrays.operation_step_ids.extend([0] * pad_count)
         position_feature_arrays.abacus_position_ids.extend([0] * pad_count)
         position_feature_arrays.coupled_position_ids.extend([0] * pad_count)
+        relevance_labels.extend([RELEVANCE_IGNORE_INDEX] * pad_count)
 
     return EncodedLmExample(
         input_ids=ids,
@@ -260,6 +285,7 @@ def encode_lm_example(
         operation_step_ids=feature_arrays.operation_step_ids,
         abacus_position_ids=position_feature_arrays.abacus_position_ids,
         coupled_position_ids=position_feature_arrays.coupled_position_ids,
+        relevance_labels=relevance_labels,
         truncated=truncated,
         supervised_token_count=supervised_token_count,
     )
@@ -319,6 +345,7 @@ def prepare_lm_dataset(
                 seed=position_offset_seed,
                 index=index,
             ),
+            active_prompt_start_char=_active_prompt_start_char(record),
         )
         for index, record in enumerate(_iter_jsonl_records(input_path))
     ]
@@ -340,6 +367,10 @@ def prepare_lm_dataset(
         )
         for key in (*NUMERIC_FEATURE_KEYS, *POSITION_FEATURE_KEYS)
     }
+    relevance_labels = torch.tensor(
+        [example.relevance_labels for example in examples],
+        dtype=torch.long,
+    )
 
     stats = _summarize_encoded_examples(examples)
     metadata = {
@@ -353,6 +384,7 @@ def prepare_lm_dataset(
         "labels": labels,
         "attention_mask": attention_mask,
         **feature_tensors,
+        "relevance_labels": relevance_labels,
         "metadata": metadata,
     }
 
@@ -380,6 +412,7 @@ def load_tokenized_lm_dataset(cache_path: Path) -> TokenizedLmDataset:
         operation_step_ids=payload.get("operation_step_ids"),
         abacus_position_ids=payload.get("abacus_position_ids"),
         coupled_position_ids=payload.get("coupled_position_ids"),
+        relevance_labels=payload.get("relevance_labels"),
     )
 
 
@@ -417,6 +450,54 @@ def _feature_tensor_or_zeros(
     if feature_tensor.shape != input_ids.shape:
         raise ValueError("numeric feature tensors must match input_ids shape")
     return feature_tensor.long()
+
+
+def _relevance_tensor_or_ignore(
+    relevance_labels: torch.Tensor | None,
+    input_ids: torch.Tensor,
+) -> torch.Tensor:
+    if relevance_labels is None:
+        return torch.full_like(input_ids, RELEVANCE_IGNORE_INDEX, dtype=torch.long)
+    if relevance_labels.shape != input_ids.shape:
+        raise ValueError("relevance_labels tensor must match input_ids shape")
+    return relevance_labels.long()
+
+
+def _build_relevance_labels(
+    *,
+    prompt: str,
+    prefix_text: str,
+    prefix_offsets: list[tuple[int, int]],
+    prefix_ids: list[int],
+    answer_ids: list[int],
+    active_prompt_start_char: int | None,
+) -> list[int]:
+    labels = [RELEVANCE_IGNORE_INDEX]
+    if active_prompt_start_char is None:
+        labels.extend([RELEVANCE_IGNORE_INDEX] * (len(prefix_ids) - 1))
+    else:
+        prompt_start = len(f"{PROMPT_TOKEN}\n")
+        prompt_end = prompt_start + len(prompt)
+        active_start = prompt_start + active_prompt_start_char
+        for start, end in prefix_offsets:
+            if start >= prompt_end or end <= prompt_start:
+                labels.append(RELEVANCE_IGNORE_INDEX)
+            elif end <= active_start:
+                labels.append(0)
+            else:
+                labels.append(1)
+    labels.extend([RELEVANCE_IGNORE_INDEX] * len(answer_ids))
+    return labels
+
+
+def _active_prompt_start_char(record: dict[str, Any]) -> int | None:
+    metadata = record.get("metadata", {})
+    if not isinstance(metadata, dict):
+        return None
+    value = metadata.get("active_prompt_start_char")
+    if value is None:
+        return None
+    return int(value)
 
 
 def _required_token_id(tokenizer: ByteLevelBpeTokenizer, token: str) -> int:

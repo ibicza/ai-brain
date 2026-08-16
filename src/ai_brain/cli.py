@@ -913,6 +913,24 @@ def build_parser() -> argparse.ArgumentParser:
         help="Maximum random absolute position offset for shifted_absolute training.",
     )
     train_lm_parser.add_argument(
+        "--attention-variant",
+        choices=("standard", "differential"),
+        default="standard",
+        help="Self-attention variant.",
+    )
+    train_lm_parser.add_argument(
+        "--relevance-mode",
+        choices=("none", "aux", "gate"),
+        default="none",
+        help="Optional token relevance auxiliary head or learned attention gate.",
+    )
+    train_lm_parser.add_argument(
+        "--relevance-loss-weight",
+        type=float,
+        default=0.0,
+        help="Auxiliary binary relevance loss weight.",
+    )
+    train_lm_parser.add_argument(
         "--abacus-random-offset-max",
         type=int,
         default=99,
@@ -1522,6 +1540,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 numeric_tokenization=args.numeric_tokenization,
                 position_encoding=args.position_encoding,
                 position_shift_max=args.position_shift_max,
+                attention_variant=args.attention_variant,
+                relevance_mode=args.relevance_mode,
+                relevance_loss_weight=args.relevance_loss_weight,
                 abacus_random_offset_max=args.abacus_random_offset_max,
                 coupled_random_offset_max=args.coupled_random_offset_max,
                 seed=args.seed,
