@@ -30,7 +30,7 @@ from ai_brain.training.lm_dataset import (
     load_tokenized_lm_dataset,
     prepare_lm_dataset,
 )
-from ai_brain.training.loop import train_lm
+from ai_brain.training.loop import _sample_position_offset, train_lm
 
 
 def _records() -> list[dict[str, str]]:
@@ -413,6 +413,36 @@ def test_train_lm_uses_grad_clip(tmp_path, monkeypatch) -> None:
     assert calls == [0.5]
     assert "grad_norm" in metrics
     assert result["last_metrics"]["grad_norm"] == metrics["grad_norm"]
+
+
+def test_randomized_absolute_sampler_preserves_order_with_gaps(tmp_path) -> None:
+    config = TrainConfig(
+        train_path=tmp_path / "train.jsonl",
+        eval_path=tmp_path / "eval.jsonl",
+        tokenizer_path=tmp_path / "tokenizer.json",
+        output_dir=tmp_path / "run",
+        position_encoding="randomized_absolute",
+        position_shift_max=16,
+        batch_size=4,
+        sequence_length=8,
+    )
+    positions = _sample_position_offset(
+        config=config,
+        batch_size=4,
+        device=torch.device("cpu"),
+        generator=torch.Generator().manual_seed(1234),
+    )
+
+    assert isinstance(positions, torch.Tensor)
+    assert positions.shape == (4, 8)
+    assert torch.all(positions[:, 1:] > positions[:, :-1])
+    assert (
+        int(positions.max().item()) < config.sequence_length + config.position_shift_max
+    )
+    assert any(
+        not torch.equal(row, torch.arange(row[0], row[0] + config.sequence_length))
+        for row in positions
+    )
 
 
 def test_train_lm_init_checkpoint_allows_sequence_length_growth(tmp_path) -> None:

@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import torch
 
 from ai_brain.model.config import (
@@ -31,6 +33,23 @@ def test_tiny_transformer_forward_shape() -> None:
 
     logits = model(input_ids)
 
+    assert logits.shape == (2, 8, config.vocab_size)
+
+
+def test_relative_position_transformer_forward_shape() -> None:
+    config = replace(debug_config(), position_encoding="relative")
+    model = TinyCausalTransformer(config)
+
+    input_ids = torch.randint(
+        low=0,
+        high=config.vocab_size,
+        size=(2, 8),
+        dtype=torch.long,
+    )
+
+    logits = model(input_ids, position_offset=4)
+
+    assert model.position_embedding is None
     assert logits.shape == (2, 8, config.vocab_size)
 
 

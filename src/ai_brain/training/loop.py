@@ -123,13 +123,21 @@ def train_lm(config: TrainConfig) -> dict[str, Any]:
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
     tokenizer = ByteLevelBpeTokenizer.load(config.tokenizer_path)
+    model_position_encoding = (
+        config.position_encoding
+        if config.position_encoding in {"relative", "nope"}
+        else "absolute"
+    )
+    position_extra = (
+        config.position_shift_max
+        if config.position_encoding in {"shifted_absolute", "randomized_absolute"}
+        else 0
+    )
     model_config = replace(
         get_named_model_config(config.model_config_name),
         vocab_size=tokenizer.vocab_size,
-        max_sequence_length=config.sequence_length + config.position_shift_max,
-        position_encoding=(
-            "nope" if config.position_encoding == "nope" else "absolute"
-        ),
+        max_sequence_length=config.sequence_length + position_extra,
+        position_encoding=model_position_encoding,
     )
     model_config.validate()
 
@@ -333,12 +341,28 @@ def _sample_position_offset(
     device: torch.device,
     generator: torch.Generator,
 ) -> int | torch.Tensor:
-    if config.position_encoding != "shifted_absolute" or config.position_shift_max == 0:
+    if config.position_shift_max == 0:
         return 0
-    return torch.randint(
-        low=0,
-        high=config.position_shift_max + 1,
-        size=(batch_size,),
-        generator=generator,
-        dtype=torch.long,
-    ).to(device)
+    if config.position_encoding == "shifted_absolute":
+        return torch.randint(
+            low=0,
+            high=config.position_shift_max + 1,
+            size=(batch_size,),
+            generator=generator,
+            dtype=torch.long,
+        ).to(device)
+    if config.position_encoding == "randomized_absolute":
+        sequence_length = config.sequence_length
+        virtual_length = sequence_length + config.position_shift_max
+        rows = [
+            torch.randperm(
+                virtual_length,
+                generator=generator,
+                dtype=torch.long,
+            )[:sequence_length]
+            .sort()
+            .values
+            for _ in range(batch_size)
+        ]
+        return torch.stack(rows, dim=0).to(device)
+    return 0

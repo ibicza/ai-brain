@@ -38,19 +38,45 @@ class CausalSelfAttention(nn.Module):
 
         self.num_heads = config.num_heads
         self.head_dim = config.d_model // config.num_heads
+        self.position_encoding = config.position_encoding
+        self.max_relative_position = config.max_sequence_length - 1
 
         self.qkv = nn.Linear(config.d_model, 3 * config.d_model)
         self.output = nn.Linear(config.d_model, config.d_model)
         self.dropout = nn.Dropout(config.dropout)
+        if config.position_encoding == "relative":
+            relative_vocab_size = 2 * self.max_relative_position + 1
+            self.relative_key_embedding = nn.Embedding(
+                relative_vocab_size,
+                self.head_dim,
+            )
+            self.relative_value_embedding = nn.Embedding(
+                relative_vocab_size,
+                self.head_dim,
+            )
+        else:
+            self.relative_key_embedding = None
+            self.relative_value_embedding = None
 
         causal_mask = torch.tril(
             torch.ones(config.max_sequence_length, config.max_sequence_length)
         )
+        indices = torch.arange(config.max_sequence_length)
+        relative_position_ids = (indices.view(1, -1) - indices.view(-1, 1)).clamp(
+            min=-self.max_relative_position,
+            max=self.max_relative_position,
+        )
+        relative_position_ids = relative_position_ids + self.max_relative_position
         self.register_buffer(
             "causal_mask",
             causal_mask.view(
                 1, 1, config.max_sequence_length, config.max_sequence_length
             ),
+            persistent=False,
+        )
+        self.register_buffer(
+            "relative_position_ids",
+            relative_position_ids,
             persistent=False,
         )
 
@@ -72,6 +98,14 @@ class CausalSelfAttention(nn.Module):
 
         attention_scores = query @ key.transpose(-2, -1)
         attention_scores = attention_scores / self.head_dim**0.5
+        if self.relative_key_embedding is not None:
+            relative_ids = self.relative_position_ids[
+                :sequence_length,
+                :sequence_length,
+            ]
+            relative_keys = self.relative_key_embedding(relative_ids)
+            relative_scores = torch.einsum("bhid,ijd->bhij", query, relative_keys)
+            attention_scores = attention_scores + relative_scores / self.head_dim**0.5
 
         mask = self.causal_mask[:, :, :sequence_length, :sequence_length]
         attention_scores = attention_scores.masked_fill(mask == 0, float("-inf"))
@@ -80,6 +114,17 @@ class CausalSelfAttention(nn.Module):
         attention_weights = self.dropout(attention_weights)
 
         output = attention_weights @ value
+        if self.relative_value_embedding is not None:
+            relative_ids = self.relative_position_ids[
+                :sequence_length,
+                :sequence_length,
+            ]
+            relative_values = self.relative_value_embedding(relative_ids)
+            output = output + torch.einsum(
+                "bhij,ijd->bhid",
+                attention_weights,
+                relative_values,
+            )
         output = (
             output.transpose(1, 2)
             .contiguous()
@@ -179,13 +224,23 @@ class TinyCausalTransformer(nn.Module):
                     device=input_ids.device,
                     dtype=torch.long,
                 )
-            else:
+            elif position_offset.ndim == 1:
                 if position_offset.shape != (batch_size,):
                     raise ValueError(
-                        "position_offset tensor must be scalar or shape [batch_size]"
+                        "position_offset tensor must be scalar, shape [batch_size], "
+                        "or exact shape [batch_size, sequence_length]"
                     )
                 offsets = position_offset.to(device=input_ids.device, dtype=torch.long)
                 positions = positions.unsqueeze(0) + offsets.unsqueeze(1)
+            else:
+                if position_offset.shape != (batch_size, sequence_length):
+                    raise ValueError(
+                        "position_offset tensor must be scalar, shape [batch_size], "
+                        "or exact shape [batch_size, sequence_length]"
+                    )
+                positions = position_offset.to(
+                    device=input_ids.device, dtype=torch.long
+                )
         else:
             positions = positions + int(position_offset)
 

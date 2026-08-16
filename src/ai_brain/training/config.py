@@ -53,9 +53,16 @@ class TrainConfig:
             raise ValueError(
                 f"Unknown numeric_tokenization: {self.numeric_tokenization}"
             )
-        if self.position_encoding not in {"absolute", "shifted_absolute", "nope"}:
+        if self.position_encoding not in {
+            "absolute",
+            "shifted_absolute",
+            "randomized_absolute",
+            "relative",
+            "nope",
+        }:
             raise ValueError(
-                "position_encoding must be 'absolute', 'shifted_absolute', or 'nope'"
+                "position_encoding must be 'absolute', 'shifted_absolute', "
+                "'randomized_absolute', 'relative', or 'nope'"
             )
         if self.position_shift_max < 0:
             raise ValueError("position_shift_max must be non-negative")

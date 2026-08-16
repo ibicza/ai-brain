@@ -34,8 +34,10 @@ class ModelConfig:
                 "'abacus', 'coupled', or 'gated_place'"
             )
 
-        if self.position_encoding not in {"absolute", "nope"}:
-            raise ValueError("position_encoding must be 'absolute' or 'nope'")
+        if self.position_encoding not in {"absolute", "relative", "nope"}:
+            raise ValueError(
+                "position_encoding must be 'absolute', 'relative', or 'nope'"
+            )
 
         if self.vocab_size <= 0:
             raise ValueError("vocab_size must be positive")

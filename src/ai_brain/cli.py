@@ -893,9 +893,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     train_lm_parser.add_argument(
         "--position-encoding",
-        choices=("absolute", "shifted_absolute", "nope"),
+        choices=(
+            "absolute",
+            "shifted_absolute",
+            "randomized_absolute",
+            "relative",
+            "nope",
+        ),
         default="absolute",
-        help="Absolute, SHAPE-style shifted absolute, or no positional embeddings.",
+        help=(
+            "Absolute, SHAPE-style shifted absolute, randomized absolute, "
+            "relative attention, or no positional embeddings."
+        ),
     )
     train_lm_parser.add_argument(
         "--position-shift-max",
