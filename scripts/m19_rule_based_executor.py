@@ -672,7 +672,7 @@ def _add_trace_metrics(
             {
                 "full_trace_exact": 0.0,
                 "digit_exact": 0.0,
-                "carry_borrow_exact": 0.0,
+                "carry_borrow_exact": None,
                 "empty_prediction_rate": 0.0,
                 "avg_tokens_generated": 0.0,
             }
@@ -684,8 +684,14 @@ def _add_trace_metrics(
     payload["digit_exact"] = (
         sum(bool(p.get("digit_exact")) for p in predictions) / count
     )
+    carry_predictions = [
+        p for p in predictions if p.get("carry_borrow_exact") is not None
+    ]
     payload["carry_borrow_exact"] = (
-        sum(bool(p.get("carry_borrow_exact")) for p in predictions) / count
+        None
+        if not carry_predictions
+        else sum(bool(p.get("carry_borrow_exact")) for p in carry_predictions)
+        / len(carry_predictions)
     )
     payload["empty_prediction_rate"] = (
         sum(not p["predicted"].strip() for p in predictions) / count
@@ -705,13 +711,17 @@ def _summary_payload(summary: dict[str, Any]) -> dict[str, Any]:
         "full_nem": float(overall.get("normalized_exact_match", 0.0)),
         "trace_exact": float(overall.get("full_trace_exact", 0.0)),
         "digit_exact": float(overall.get("digit_exact", 0.0)),
-        "carry_borrow_exact": float(overall.get("carry_borrow_exact", 0.0)),
+        "carry_borrow_exact": _optional_float(overall.get("carry_borrow_exact")),
         "by_task_type": {
             key: float(value.get("final_normalized_exact_match", 0.0))
             for key, value in summary.get("by_task_type", {}).items()
         },
         "summary": summary,
     }
+
+
+def _optional_float(value: Any) -> float | None:
+    return None if value is None else float(value)
 
 
 def _variant_gate(payload: dict[str, Any]) -> bool:
@@ -789,9 +799,13 @@ def _variant_table(analysis: dict[str, Any], variant: str) -> str:
             f"| {axis} | {summary.get('final_nem', 0.0):.4f} | "
             f"{summary.get('trace_exact', 0.0):.4f} | "
             f"{summary.get('digit_exact', 0.0):.4f} | "
-            f"{summary.get('carry_borrow_exact', 0.0):.4f} |"
+            f"{_fmt_optional(summary.get('carry_borrow_exact'))} |"
         )
     return "\n".join(rows)
+
+
+def _fmt_optional(value: Any) -> str:
+    return "N/A" if value is None else f"{float(value):.4f}"
 
 
 def _length_table(analysis: dict[str, Any]) -> str:

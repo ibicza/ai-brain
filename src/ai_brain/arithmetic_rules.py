@@ -68,7 +68,7 @@ def trace_component_scores(
     case: ArithmeticCase,
     text: str,
     trace_format: TraceFormat,
-) -> dict[str, bool]:
+) -> dict[str, bool | None]:
     expected = format_trace(case, trace_format)
     expected_lines = _normalize_lines(expected)
     predicted_lines = _normalize_lines(text)
@@ -76,12 +76,18 @@ def trace_component_scores(
     final_predicted = final_answer_from_trace(text)
     digit_expected = _final_digits(final_expected)
     digit_predicted = _final_digits(final_predicted)
+    expected_state_lines = _state_lines(expected_lines)
+    predicted_state_lines = _state_lines(predicted_lines)
+    carry_borrow_exact = (
+        None
+        if not expected_state_lines
+        else predicted_state_lines == expected_state_lines
+    )
     return {
         "final_exact": final_expected is not None and final_predicted == final_expected,
         "full_trace_exact": predicted_lines == expected_lines,
         "digit_exact": digit_predicted == digit_expected,
-        "carry_borrow_exact": _state_lines(predicted_lines)
-        == _state_lines(expected_lines),
+        "carry_borrow_exact": carry_borrow_exact,
     }
 
 

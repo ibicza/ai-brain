@@ -25,6 +25,20 @@ def test_scratchpad_addition_tracks_carry() -> None:
     assert verify_trace(case, trace, "scratchpad")
 
 
+def test_answer_only_carry_borrow_metric_is_not_applicable() -> None:
+    case = ArithmeticCase(op="add", a=27, b=35)
+
+    answer_scores = trace_component_scores(case, "FINAL 62", "answer")
+    scratchpad_scores = trace_component_scores(
+        case,
+        format_trace(case, "scratchpad"),
+        "scratchpad",
+    )
+
+    assert answer_scores["carry_borrow_exact"] is None
+    assert scratchpad_scores["carry_borrow_exact"] is True
+
+
 def test_scratchpad_subtraction_tracks_borrow() -> None:
     case = ArithmeticCase(op="sub", a=83, b=27)
     trace = format_trace(case, "scratchpad")
