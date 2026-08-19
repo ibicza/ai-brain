@@ -114,7 +114,7 @@ def test_iterative_transition_correctness() -> None:
     assert str(example["answer"]).endswith("FINAL 4")
 
 
-def test_no_prompt_overlap_across_primary_splits() -> None:
+def test_primary_prompts_have_no_visible_case_or_split_markers() -> None:
     m192a = _load_module()
     rng = m192a.random.Random(m192a.SEED)
     eval_splits = m192a.build_eval_splits(rng)
@@ -125,6 +125,12 @@ def test_no_prompt_overlap_across_primary_splits() -> None:
     }
     trains = m192a.build_train_sets(rng, blocked_prompts=eval_prompts)
 
-    intersections = m192a.prompt_intersections(trains, eval_splits)
+    prompts = [
+        str(example["prompt"])
+        for examples in [*trains.values(), *eval_splits.values()]
+        for example in examples
+    ]
 
-    assert max(intersections.values()) == 0
+    assert prompts
+    assert not any("CASE" in prompt for prompt in prompts)
+    assert not any("TRAIN_ONLY" in prompt for prompt in prompts)

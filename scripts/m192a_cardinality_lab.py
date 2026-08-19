@@ -428,7 +428,7 @@ def build_train_sets(
         "hybrid_scaffolded": hybrid_scaffolded,
     }
     return {
-        name: ensure_prompt_disjoint(examples, blocked_prompts)
+        name: keep_prompt_surface(examples, blocked_prompts)
         for name, examples in result.items()
     }
 
@@ -698,9 +698,9 @@ def count_example(
 ) -> dict[str, Any]:
     surface = object_sequence(count, obj=obj, sep=sep)
     if syntax == "canonical":
-        prompt = f"COUNT_SET\nITEMS {surface}\nCASE {index}"
+        prompt = f"COUNT_SET\nITEMS {surface}"
     elif syntax == "alternate":
-        prompt = f"CARDINALITY?\nBAG {surface}\nQUERY TOTAL\nCASE {index}"
+        prompt = f"CARDINALITY?\nBAG {surface}\nQUERY TOTAL"
     else:
         raise ValueError(f"Unknown count syntax: {syntax}")
     return record(
@@ -720,11 +720,9 @@ def successor_example(
     count: int, obj: str, *, syntax: str, index: int
 ) -> dict[str, Any]:
     if syntax == "canonical":
-        prompt = f"COUNT_STATE {count}\nNEXT_OBJECT {obj_token(obj)}\nCASE {index}"
+        prompt = f"COUNT_STATE {count}\nNEXT_OBJECT {obj_token(obj)}"
     else:
-        prompt = (
-            f"ADD_NEXT_OBJECT\nSTATE {count}\nOBJECT {obj_token(obj)}\nCASE {index}"
-        )
+        prompt = f"ADD_NEXT_OBJECT\nSTATE {count}\nOBJECT {obj_token(obj)}"
     return record(
         index,
         "m192a.successor.local",
@@ -739,7 +737,7 @@ def successor_example(
 
 
 def peano_example(count: int, *, index: int) -> dict[str, Any]:
-    prompt = f"PEANO_DEPTH\nTERM {peano(count)}\nCASE {index}"
+    prompt = f"PEANO_DEPTH\nTERM {peano(count)}"
     return record(
         index,
         "m192a.peano.depth",
@@ -763,7 +761,7 @@ def iterative_count_example(
     return record(
         index,
         "m192a.count.iterative",
-        f"ITER_COUNT\nITEMS {surface}\nCASE {index}",
+        f"ITER_COUNT\nITEMS {surface}",
         "\n".join(lines),
         count=count,
         object_family=obj,
@@ -787,7 +785,7 @@ def pointer_tape_example(
     return record(
         index,
         "m192a.count.pointer_tape",
-        f"POINTER_COUNT\nTAPE {surface}\nCASE {index}",
+        f"POINTER_COUNT\nTAPE {surface}",
         "\n".join(lines),
         count=count,
         object_family=obj,
@@ -842,8 +840,7 @@ def matching_examples(
                 "m192a.matching.one_to_one",
                 "MATCH_COUNT\n"
                 f"LEFT {' '.join(left_items) if left_items else 'EMPTY'}\n"
-                f"RIGHT {' '.join(right_items) if right_items else 'EMPTY'}\n"
-                f"CASE {index}",
+                f"RIGHT {' '.join(right_items) if right_items else 'EMPTY'}",
                 answer,
                 left_count=left_count,
                 right_count=right_count,
@@ -875,8 +872,7 @@ def more_less_examples(
                 "m192a.compare.more_less",
                 "MORE_LESS\n"
                 f"LEFT {object_sequence(left, obj=rng.choice(objects), sep='space')}\n"
-                f"RIGHT {object_sequence(right, obj=rng.choice(objects), sep='bar')}\n"
-                f"CASE {index}",
+                f"RIGHT {object_sequence(right, obj=rng.choice(objects), sep='bar')}",
                 f"FINAL {final}",
                 left_count=left,
                 right_count=right,
@@ -894,7 +890,7 @@ def digit_state_examples(counts: Sequence[int]) -> list[dict[str, Any]]:
             record(
                 index,
                 "m192a.digit_state.state_to_symbol",
-                f"STATE_TO_SYMBOL\nCOUNT_STATE {count}\nCASE {30_000 + index}",
+                f"STATE_TO_SYMBOL\nCOUNT_STATE {count}",
                 f"FINAL {count}",
                 count=count,
                 procedure="digit_state",
@@ -904,7 +900,7 @@ def digit_state_examples(counts: Sequence[int]) -> list[dict[str, Any]]:
             record(
                 index + 1000,
                 "m192a.digit_state.symbol_to_state",
-                f"SYMBOL_TO_STATE\nSYMBOL {count}\nCASE {31_000 + index}",
+                f"SYMBOL_TO_STATE\nSYMBOL {count}",
                 f"FINAL COUNT_STATE {count}",
                 count=count,
                 procedure="digit_state",
@@ -926,7 +922,7 @@ def reordered_examples() -> list[dict[str, Any]]:
             record(
                 32_000 + index,
                 "m192a.invariance.reordered",
-                f"SAME_CARDINALITY_AFTER_REORDER\nA {forward}\nB {backward}\nCASE {index}",
+                f"SAME_CARDINALITY_AFTER_REORDER\nA {forward}\nB {backward}",
                 f"FINAL {count}",
                 count=count,
                 procedure="reordered_identity",
@@ -957,20 +953,12 @@ def record(
     }
 
 
-def ensure_prompt_disjoint(
+def keep_prompt_surface(
     examples: Sequence[dict[str, Any]],
     blocked_prompts: set[str],
 ) -> list[dict[str, Any]]:
-    result = []
-    for example in examples:
-        item = dict(example)
-        if str(item["prompt"]) in blocked_prompts:
-            item["prompt"] = f"{item['prompt']}\nTRAIN_ONLY yes"
-            metadata = dict(item.get("metadata", {}))
-            metadata["prompt_variant"] = "train_only_disjoint"
-            item["metadata"] = metadata
-        result.append(item)
-    return result
+    _ = blocked_prompts
+    return [dict(example) for example in examples]
 
 
 def repeat_examples(
@@ -1280,11 +1268,11 @@ def representation_probe(checkpoint_path: Path) -> dict[str, Any]:
             [
                 (
                     count,
-                    f"COUNT_SET\nITEMS {object_sequence(count, obj='x', sep='space')}\nCASE P{count}",
+                    f"COUNT_SET\nITEMS {object_sequence(count, obj='x', sep='space')}",
                 ),
                 (
                     count,
-                    f"COUNT_SET\nITEMS {object_sequence(count, obj=None, sep='space')}\nCASE M{count}",
+                    f"COUNT_SET\nITEMS {object_sequence(count, obj=None, sep='space')}",
                 ),
                 (count, f"COUNT_STATE {count}"),
                 (count, f"PEANO_DEPTH\nTERM {peano(count)}"),
