@@ -1,0 +1,975 @@
+{
+  "ambiguity": {
+    "extra_examples_required": 2,
+    "one_demo_ambiguous": true,
+    "one_demo_candidate_set_size": 112,
+    "three_demo_candidate_set_size": 54
+  },
+  "architecture_bakeoff": [
+    {
+      "architecture": "M-21 full neural AST generation",
+      "merge_three": 0.0,
+      "merge_two": 0.0,
+      "semantic_exact": 0.6,
+      "validity": 1.0,
+      "verified_success": 0.6
+    },
+    {
+      "architecture": "deterministic canonical parser",
+      "merge_three": 1.0,
+      "merge_two": 1.0,
+      "semantic_exact": 1.0,
+      "validity": 1.0,
+      "verified_success": 1.0
+    },
+    {
+      "architecture": "neural retrieval of complete rule",
+      "merge_three": 1.0,
+      "merge_two": 1.0,
+      "semantic_exact": 1.0,
+      "validity": 1.0,
+      "verified_success": 1.0
+    },
+    {
+      "architecture": "sketch retrieval + typed slot filling",
+      "merge_three": 1.0,
+      "merge_two": 1.0,
+      "semantic_exact": 1.0,
+      "validity": 1.0,
+      "verified_success": 1.0
+    },
+    {
+      "architecture": "grammar-constrained AST generation",
+      "merge_three": 1.0,
+      "merge_two": 1.0,
+      "semantic_exact": 1.0,
+      "validity": 1.0,
+      "verified_success": 1.0
+    },
+    {
+      "architecture": "neural-guided symbolic search",
+      "merge_three": 1.0,
+      "merge_two": 1.0,
+      "semantic_exact": 1.0,
+      "validity": 1.0,
+      "verified_success": 1.0
+    },
+    {
+      "architecture": "subprogram-call planner",
+      "merge_three": 1.0,
+      "merge_two": 1.0,
+      "semantic_exact": 1.0,
+      "validity": 1.0,
+      "verified_success": 1.0
+    }
+  ],
+  "compiler_failure_audit": {
+    "available": true,
+    "failure_samples": [
+      {
+        "family": "move_then_drop",
+        "first_incorrect_slot": "action_kind",
+        "split": "seen_template"
+      },
+      {
+        "family": "move_then_drop",
+        "first_incorrect_slot": "action_kind",
+        "split": "seen_template"
+      },
+      {
+        "family": "move_then_drop",
+        "first_incorrect_slot": "action_kind",
+        "split": "seen_template"
+      },
+      {
+        "family": "move_then_drop",
+        "first_incorrect_slot": "action_kind",
+        "split": "seen_template"
+      },
+      {
+        "family": "move_then_drop",
+        "first_incorrect_slot": "action_kind",
+        "split": "seen_template"
+      },
+      {
+        "family": "move_then_drop",
+        "first_incorrect_slot": "action_kind",
+        "split": "seen_template"
+      },
+      {
+        "family": "move_then_drop",
+        "first_incorrect_slot": "action_kind",
+        "split": "seen_template"
+      },
+      {
+        "family": "move_then_drop",
+        "first_incorrect_slot": "action_kind",
+        "split": "seen_template"
+      },
+      {
+        "family": "move_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "move_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "move_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "move_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "move_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "move_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "move_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "move_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "drop_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "drop_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "drop_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      },
+      {
+        "family": "drop_move_then_drop",
+        "first_incorrect_slot": "clause_count",
+        "split": "heldout_template"
+      }
+    ],
+    "m21_by_split": {
+      "heldout_template": {
+        "count": 40,
+        "deterministic_parser_exact": 1.0,
+        "semantic_exact": 0.0
+      },
+      "seen_template": {
+        "count": 80,
+        "deterministic_parser_exact": 1.0,
+        "semantic_exact": 0.9
+      }
+    },
+    "slot_summary": {
+      "action_kind": {
+        "accuracy": 0.0,
+        "correct": 0,
+        "incorrect": 20
+      },
+      "ast_validity": {
+        "accuracy": 1.0,
+        "correct": 20,
+        "incorrect": 0
+      },
+      "binding": {
+        "accuracy": 1.0,
+        "correct": 20,
+        "incorrect": 0
+      },
+      "clause_count": {
+        "accuracy": 0.4,
+        "correct": 8,
+        "incorrect": 12
+      },
+      "destination_variable": {
+        "accuracy": 0.0,
+        "correct": 0,
+        "incorrect": 20
+      },
+      "predicate_count": {
+        "accuracy": 0.4,
+        "correct": 8,
+        "incorrect": 12
+      },
+      "predicate_kind": {
+        "accuracy": 0.4,
+        "correct": 8,
+        "incorrect": 12
+      },
+      "predicate_variable": {
+        "accuracy": 0.4,
+        "correct": 8,
+        "incorrect": 12
+      },
+      "semantic_equivalence": {
+        "accuracy": 0.0,
+        "correct": 0,
+        "incorrect": 20
+      },
+      "source_variable": {
+        "accuracy": 0.4,
+        "correct": 8,
+        "incorrect": 12
+      }
+    }
+  },
+  "complete_rule_retrieval": {
+    "embedding": {
+      "distractor_rules": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "new_bindings": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "paraphrased_structured_spec": {
+        "execution_success_top1": 1.0,
+        "top1": 0.3333333333333333,
+        "top3": 0.3333333333333333,
+        "top5": 0.6666666666666666
+      },
+      "seen_rule": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      }
+    },
+    "lexical": {
+      "distractor_rules": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "new_bindings": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "paraphrased_structured_spec": {
+        "execution_success_top1": 0.6666666666666666,
+        "top1": 0.3333333333333333,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "seen_rule": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      }
+    },
+    "oracle": {
+      "distractor_rules": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "new_bindings": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "paraphrased_structured_spec": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "seen_rule": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      }
+    },
+    "structured": {
+      "distractor_rules": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "new_bindings": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "paraphrased_structured_spec": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      "seen_rule": {
+        "execution_success_top1": 1.0,
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      }
+    }
+  },
+  "confidence_abstention": {
+    "abstention_rate": 0.0,
+    "accepted_programs": 5,
+    "coverage": 1.0,
+    "false_verified_program_rate": 0.0,
+    "rejected_bad_programs": 5
+  },
+  "demonstration_induction": {
+    "rows": [
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 112,
+        "contains_correct": 1.0,
+        "demos": 1,
+        "execution_100_states": 0.2,
+        "spec": "drain_A_to_C"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 2,
+        "execution_100_states": 0.2,
+        "spec": "drain_A_to_C"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 3,
+        "execution_100_states": 0.2,
+        "spec": "drain_A_to_C"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 5,
+        "execution_100_states": 0.2,
+        "spec": "drain_A_to_C"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 17,
+        "contains_correct": 1.0,
+        "demos": 10,
+        "execution_100_states": 1.0,
+        "spec": "drain_A_to_C"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 112,
+        "contains_correct": 1.0,
+        "demos": 1,
+        "execution_100_states": 1.0,
+        "spec": "clear_A"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 7,
+        "contains_correct": 1.0,
+        "demos": 2,
+        "execution_100_states": 1.0,
+        "spec": "clear_A"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 7,
+        "contains_correct": 1.0,
+        "demos": 3,
+        "execution_100_states": 1.0,
+        "spec": "clear_A"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 7,
+        "contains_correct": 1.0,
+        "demos": 5,
+        "execution_100_states": 1.0,
+        "spec": "clear_A"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 7,
+        "contains_correct": 1.0,
+        "demos": 10,
+        "execution_100_states": 1.0,
+        "spec": "clear_A"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 112,
+        "contains_correct": 1.0,
+        "demos": 1,
+        "execution_100_states": 1.0,
+        "spec": "conditional_drop_move"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 2,
+        "execution_100_states": 1.0,
+        "spec": "conditional_drop_move"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 3,
+        "execution_100_states": 1.0,
+        "spec": "conditional_drop_move"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 5,
+        "execution_100_states": 1.0,
+        "spec": "conditional_drop_move"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 17,
+        "contains_correct": 1.0,
+        "demos": 10,
+        "execution_100_states": 1.0,
+        "spec": "conditional_drop_move"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 112,
+        "contains_correct": 1.0,
+        "demos": 1,
+        "execution_100_states": 1.0,
+        "spec": "merge_two"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 2,
+        "execution_100_states": 1.0,
+        "spec": "merge_two"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 3,
+        "execution_100_states": 1.0,
+        "spec": "merge_two"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 54,
+        "contains_correct": 1.0,
+        "demos": 5,
+        "execution_100_states": 1.0,
+        "spec": "merge_two"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 17,
+        "contains_correct": 1.0,
+        "demos": 10,
+        "execution_100_states": 1.0,
+        "spec": "merge_two"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 112,
+        "contains_correct": 1.0,
+        "demos": 1,
+        "execution_100_states": 1.0,
+        "spec": "merge_three"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 17,
+        "contains_correct": 1.0,
+        "demos": 2,
+        "execution_100_states": 1.0,
+        "spec": "merge_three"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 17,
+        "contains_correct": 1.0,
+        "demos": 3,
+        "execution_100_states": 1.0,
+        "spec": "merge_three"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 17,
+        "contains_correct": 1.0,
+        "demos": 5,
+        "execution_100_states": 1.0,
+        "spec": "merge_three"
+      },
+      {
+        "ambiguous": 1.0,
+        "candidate_set_size": 10,
+        "contains_correct": 1.0,
+        "demos": 10,
+        "execution_100_states": 1.0,
+        "spec": "merge_three"
+      }
+    ],
+    "summary": {
+      "ambiguous": 1.0,
+      "candidate_set_size": 47.44,
+      "contains_correct": 1.0,
+      "demos": 4.2,
+      "execution_100_states": 0.872
+    }
+  },
+  "execution_guided_search": {
+    "rows": [
+      {
+        "execution_guided_evaluated": 7,
+        "grammar_candidates": 112,
+        "plain_candidates": 112,
+        "spec": "drain_A_to_C",
+        "success": 1.0
+      },
+      {
+        "execution_guided_evaluated": 13,
+        "grammar_candidates": 112,
+        "plain_candidates": 112,
+        "spec": "clear_A",
+        "success": 1.0
+      },
+      {
+        "execution_guided_evaluated": 89,
+        "grammar_candidates": 112,
+        "plain_candidates": 112,
+        "spec": "conditional_drop_move",
+        "success": 1.0
+      },
+      {
+        "execution_guided_evaluated": 17,
+        "grammar_candidates": 112,
+        "plain_candidates": 112,
+        "spec": "merge_two",
+        "success": 1.0
+      },
+      {
+        "execution_guided_evaluated": 43,
+        "grammar_candidates": 112,
+        "plain_candidates": 112,
+        "spec": "merge_three",
+        "success": 1.0
+      }
+    ],
+    "summary": {
+      "execution_guided_evaluated": 33.8,
+      "grammar_candidates": 112.0,
+      "plain_candidates": 112.0,
+      "success": 1.0
+    }
+  },
+  "grammar_constrained_generation": {
+    "rows": [
+      {
+        "candidates_evaluated": 7,
+        "execution_exact": 1.0,
+        "semantic_exact": 1.0,
+        "spec": "drain_A_to_C",
+        "type_validity": 1.0,
+        "validity": 1.0
+      },
+      {
+        "candidates_evaluated": 13,
+        "execution_exact": 1.0,
+        "semantic_exact": 1.0,
+        "spec": "clear_A",
+        "type_validity": 1.0,
+        "validity": 1.0
+      },
+      {
+        "candidates_evaluated": 89,
+        "execution_exact": 1.0,
+        "semantic_exact": 1.0,
+        "spec": "conditional_drop_move",
+        "type_validity": 1.0,
+        "validity": 1.0
+      },
+      {
+        "candidates_evaluated": 17,
+        "execution_exact": 1.0,
+        "semantic_exact": 1.0,
+        "spec": "merge_two",
+        "type_validity": 1.0,
+        "validity": 1.0
+      },
+      {
+        "candidates_evaluated": 43,
+        "execution_exact": 1.0,
+        "semantic_exact": 1.0,
+        "spec": "merge_three",
+        "type_validity": 1.0,
+        "validity": 1.0
+      }
+    ],
+    "summary": {
+      "candidates_evaluated": 33.8,
+      "execution_exact": 1.0,
+      "semantic_exact": 1.0,
+      "type_validity": 1.0,
+      "validity": 1.0
+    }
+  },
+  "learn_once_reuse": {
+    "rows": [
+      {
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "spec": "merge_two",
+        "stored": 1.0
+      },
+      {
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "spec": "merge_three",
+        "stored": 1.0
+      }
+    ],
+    "summary": {
+      "execution_0_10": 1.0,
+      "execution_11_20": 1.0,
+      "execution_21_50": 1.0,
+      "execution_51_100": 1.0,
+      "stored": 1.0
+    }
+  },
+  "manifest": {
+    "branch": "exp/verified-rule-acquisition",
+    "full_memory_rules": 25,
+    "heldout_sketches": [
+      "TWO_SOURCE_TRANSFER",
+      "THREE_SOURCE_TRANSFER"
+    ],
+    "kind": "m22_verified_rule_acquisition",
+    "memory_rules": 23,
+    "rule_ids_model_visible": false,
+    "sketch_count": 7
+  },
+  "memory_growth": {
+    "rows": [
+      {
+        "latency_ms": 0.03616799949668348,
+        "memory_size": 15,
+        "top1": 1.0,
+        "top5": 1.0,
+        "unique_semantic_hashes": 15
+      },
+      {
+        "latency_ms": 0.11773099686251953,
+        "memory_size": 55,
+        "top1": 1.0,
+        "top5": 1.0,
+        "unique_semantic_hashes": 48
+      },
+      {
+        "latency_ms": 0.2046250010607764,
+        "memory_size": 105,
+        "top1": 1.0,
+        "top5": 1.0,
+        "unique_semantic_hashes": 67
+      },
+      {
+        "latency_ms": 0.9978750022128224,
+        "memory_size": 505,
+        "top1": 1.0,
+        "top5": 1.0,
+        "unique_semantic_hashes": 202
+      }
+    ],
+    "summary": {
+      "latency_ms": 0.33909974990820047,
+      "memory_size": 170.0,
+      "top1": 1.0,
+      "top5": 1.0,
+      "unique_semantic_hashes": 83.0
+    }
+  },
+  "merge_conditions": {
+    "merge_three": [
+      {
+        "ast_found": 1.0,
+        "condition": "canonical_dsl",
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "semantic_exact": 1.0,
+        "verified": 1.0
+      },
+      {
+        "ast_found": 1.0,
+        "condition": "structured_spec",
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "semantic_exact": 1.0,
+        "verified": 1.0
+      },
+      {
+        "ast_found": 1.0,
+        "condition": "demonstrations",
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "semantic_exact": 1.0,
+        "verified": 1.0
+      },
+      {
+        "ast_found": 1.0,
+        "condition": "heldout_sketch_template",
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "semantic_exact": 1.0,
+        "verified": 1.0
+      }
+    ],
+    "merge_two": [
+      {
+        "ast_found": 1.0,
+        "condition": "canonical_dsl",
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "semantic_exact": 1.0,
+        "verified": 1.0
+      },
+      {
+        "ast_found": 1.0,
+        "condition": "structured_spec",
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "semantic_exact": 1.0,
+        "verified": 1.0
+      },
+      {
+        "ast_found": 1.0,
+        "condition": "demonstrations",
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "semantic_exact": 1.0,
+        "verified": 1.0
+      },
+      {
+        "ast_found": 1.0,
+        "condition": "heldout_sketch_template",
+        "execution_0_10": 1.0,
+        "execution_11_20": 1.0,
+        "execution_21_50": 1.0,
+        "execution_51_100": 1.0,
+        "semantic_exact": 1.0,
+        "verified": 1.0
+      }
+    ]
+  },
+  "neural_guided_search": {
+    "rows": [
+      {
+        "candidates_evaluated": 2,
+        "rank_first_correct": 2,
+        "spec": "drain_A_to_C",
+        "top10": 1.0,
+        "top100": 1.0,
+        "top1000": 1.0
+      },
+      {
+        "candidates_evaluated": 1,
+        "rank_first_correct": 1,
+        "spec": "clear_A",
+        "top10": 1.0,
+        "top100": 1.0,
+        "top1000": 1.0
+      },
+      {
+        "candidates_evaluated": 7,
+        "rank_first_correct": 7,
+        "spec": "conditional_drop_move",
+        "top10": 1.0,
+        "top100": 1.0,
+        "top1000": 1.0
+      },
+      {
+        "candidates_evaluated": 1,
+        "rank_first_correct": 1,
+        "spec": "merge_two",
+        "top10": 1.0,
+        "top100": 1.0,
+        "top1000": 1.0
+      },
+      {
+        "candidates_evaluated": 1,
+        "rank_first_correct": 1,
+        "spec": "merge_three",
+        "top10": 1.0,
+        "top100": 1.0,
+        "top1000": 1.0
+      }
+    ],
+    "summary": {
+      "candidates_evaluated": 2.4,
+      "rank_first_correct": 2.4,
+      "top10": 1.0,
+      "top100": 1.0,
+      "top1000": 1.0
+    }
+  },
+  "rule_memory": {
+    "load_roundtrip": true,
+    "records": 23,
+    "semantic_lookup": true
+  },
+  "sketch_overlap": {
+    "exact_sketch_overlap": 0,
+    "heldout_templates": [
+      "TWO_SOURCE_TRANSFER",
+      "THREE_SOURCE_TRANSFER"
+    ],
+    "primitive_clause_overlap": 4
+  },
+  "slot_filling": {
+    "by_group": {
+      "False": {
+        "complete_ast_semantic_exact": 1.0,
+        "execution_success": 1.0,
+        "slot_accuracy": 1.0,
+        "verification_success": 1.0
+      },
+      "True": {
+        "complete_ast_semantic_exact": 1.0,
+        "execution_success": 1.0,
+        "slot_accuracy": 1.0,
+        "verification_success": 1.0
+      }
+    },
+    "rows": [
+      {
+        "complete_ast_semantic_exact": 1.0,
+        "execution_success": 1.0,
+        "heldout_template": false,
+        "sketch": "DRAIN",
+        "slot_accuracy": 1.0,
+        "spec": "drain_A_to_C",
+        "verification_success": 1.0
+      },
+      {
+        "complete_ast_semantic_exact": 1.0,
+        "execution_success": 1.0,
+        "heldout_template": false,
+        "sketch": "CLEAR",
+        "slot_accuracy": 1.0,
+        "spec": "clear_A",
+        "verification_success": 1.0
+      },
+      {
+        "complete_ast_semantic_exact": 1.0,
+        "execution_success": 1.0,
+        "heldout_template": false,
+        "sketch": "CONDITIONAL_DROP_MOVE",
+        "slot_accuracy": 1.0,
+        "spec": "conditional_drop_move",
+        "verification_success": 1.0
+      },
+      {
+        "complete_ast_semantic_exact": 1.0,
+        "execution_success": 1.0,
+        "heldout_template": true,
+        "sketch": "TWO_SOURCE_TRANSFER",
+        "slot_accuracy": 1.0,
+        "spec": "merge_two",
+        "verification_success": 1.0
+      },
+      {
+        "complete_ast_semantic_exact": 1.0,
+        "execution_success": 1.0,
+        "heldout_template": true,
+        "sketch": "THREE_SOURCE_TRANSFER",
+        "slot_accuracy": 1.0,
+        "spec": "merge_three",
+        "verification_success": 1.0
+      }
+    ],
+    "summary": {
+      "complete_ast_semantic_exact": 1.0,
+      "execution_success": 1.0,
+      "slot_accuracy": 1.0,
+      "verification_success": 1.0
+    }
+  },
+  "subprogram_composition": {
+    "rows": [
+      {
+        "calls": 2,
+        "execution_success": 1.0,
+        "plan": "merge_two_from_drains"
+      },
+      {
+        "calls": 3,
+        "execution_success": 1.0,
+        "plan": "merge_three_from_drains"
+      }
+    ],
+    "summary": {
+      "calls": 2.5,
+      "execution_success": 1.0
+    }
+  },
+  "versioning_conflict": {
+    "new_version": 2,
+    "old_deprecated": true,
+    "uses_semantic_hash": false
+  }
+}
