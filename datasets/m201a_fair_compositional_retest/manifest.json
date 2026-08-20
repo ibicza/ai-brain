@@ -1,0 +1,70 @@
+{
+  "binding_split": {
+    "heldout": 16,
+    "overlap": 0,
+    "train": 80
+  },
+  "coverage": {
+    "eval_binding_hashes": 56,
+    "train_binding_hashes": 131,
+    "train_variable_tokens": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "W",
+      "X",
+      "Y",
+      "Z"
+    ]
+  },
+  "eval_counts": {
+    "action_heldout": 272,
+    "action_seen": 136,
+    "alpha_known": 96,
+    "binding_eval_mixed": 1024,
+    "binding_full_table_heldout": 16,
+    "binding_full_table_seen": 8,
+    "binding_l2p_heldout": 64,
+    "binding_l2p_seen": 32,
+    "binding_p2l_heldout": 64,
+    "binding_p2l_seen": 32,
+    "clause_selection_seen": 1824,
+    "heldout_binding": 912,
+    "heldout_predicate_composition": 384,
+    "heldout_program": 1440,
+    "merge_two_11_20": 7200,
+    "merge_two_21_50": 7680,
+    "merge_two_seen": 2688,
+    "predicate_heldout": 256,
+    "predicate_seen": 128,
+    "program_eval_mixed": 2048,
+    "program_seen": 1824,
+    "single_clause_eval_mixed": 2048,
+    "single_clause_new_heldout_binding": 192,
+    "single_clause_new_seen_binding": 96,
+    "single_clause_seen_heldout_binding": 192,
+    "single_clause_seen_seen_binding": 96,
+    "teacher_forced_clause_heldout_binding": 912,
+    "teacher_forced_clause_merge_two": 2688,
+    "teacher_forced_clause_seen": 1824
+  },
+  "kind": "m201a_fair_compositional_retest",
+  "model_config": "arithmetic_3m",
+  "seed": 2031,
+  "structural_overlap": {
+    "exact_prompt_overlap": 748,
+    "forbidden_prompt_count": 0,
+    "normalized_ast_overlap_heldout_program": 0,
+    "template_overlap_heldout_program": 0,
+    "template_overlap_merge_two": 0
+  },
+  "train_counts": {
+    "binding_point": 5000,
+    "flat_balanced": 20000,
+    "program_only": 16000,
+    "program_replay25": 18000,
+    "program_replay50": 18000,
+    "single_clause_replay": 16000
+  }
+}
