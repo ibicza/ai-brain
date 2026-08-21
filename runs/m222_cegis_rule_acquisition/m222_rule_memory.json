@@ -1,0 +1,119 @@
+{
+  "allow_hypothesis_identified": false,
+  "records": [
+    {
+      "deprecated": false,
+      "program_json": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3",
+      "provenance": "m222_cegis",
+      "rule_id": "rule-00001-7feb3789",
+      "semantic_hash": "7feb3789ed1110b94733ded4062879fb5ae1b74074af5988b431653d7f637723",
+      "specification": {
+        "drops": [],
+        "inputs": [
+          "A",
+          "B"
+        ],
+        "outputs": [
+          "C"
+        ],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B"
+        ],
+        "transfers": [
+          [
+            "A",
+            "C"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "version": 1
+    },
+    {
+      "deprecated": false,
+      "program_json": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3",
+      "provenance": "m222_cegis",
+      "rule_id": "rule-00002-8c180adb",
+      "semantic_hash": "8c180adbc6561f137d1b35516c9ea9dcbf4f42bb3db4c337651be9706f54a6e7",
+      "specification": {
+        "drops": [],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "A",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ],
+          [
+            "C",
+            "D"
+          ]
+        ],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "version": 1
+    },
+    {
+      "deprecated": false,
+      "program_json": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3",
+      "provenance": "m222_cegis",
+      "rule_id": "rule-00003-c8dab2bc",
+      "semantic_hash": "c8dab2bcd820e737733a14574f17da4a884e98a3efea09712487a246ddda317e",
+      "specification": {
+        "drops": [
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B"
+        ],
+        "outputs": [
+          "C"
+        ],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B"
+        ],
+        "transfers": [
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "version": 1
+    }
+  ],
+  "schema_version": 1
+}

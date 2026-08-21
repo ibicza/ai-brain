@@ -1,0 +1,43 @@
+{
+  "allow_hypothesis_identified": false,
+  "records": [
+    {
+      "deprecated": false,
+      "program_json": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3",
+      "provenance": "",
+      "rule_id": "rule-00001-7feb3789",
+      "semantic_hash": "7feb3789ed1110b94733ded4062879fb5ae1b74074af5988b431653d7f637723",
+      "specification": {
+        "drops": [],
+        "inputs": [
+          "A",
+          "B"
+        ],
+        "outputs": [
+          "C"
+        ],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B"
+        ],
+        "transfers": [
+          [
+            "A",
+            "C"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "version": 1
+    }
+  ],
+  "schema_version": 1
+}
