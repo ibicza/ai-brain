@@ -1,0 +1,1582 @@
+{
+  "ambiguities": [
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 4,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00006",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023480329997255467
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 4,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00008",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023752851993776858
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 9,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00009",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.021389581001130864
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 3,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00010",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023487333004595712
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 3,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00012",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0227455989952432
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 4,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00013",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.021398356999270618
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 4,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00014",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023561602996778674
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 5,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00016",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.018618792993947864
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 4,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00017",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.022217666992219165
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 12,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00018",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023697978991549462
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 2,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00019",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.02259037700423505
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 12,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00020",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.01843352400464937
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 20,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00021",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.021199673996306956
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 4,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00022",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023514774002251215
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 9,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00025",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.020815241005038843
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 3,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00026",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023168293002527207
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 4,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00029",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.02089559199521318
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 5,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00030",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.02341242200054694
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 12,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00034",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023502420997829176
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 1.0,
+      "correct_identified_class": 0.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 2,
+      "selected": 0.0,
+      "status": "AMBIGUOUS",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00035",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.022773961987695657
+    }
+  ],
+  "demo_identifications": [
+    {
+      "active_queries": 1,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00000",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.018762583000352606
+    },
+    {
+      "active_queries": 1,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00001",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.016917385000851937
+    },
+    {
+      "active_queries": 1,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00002",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.017007793998345733
+    },
+    {
+      "active_queries": 1,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00003",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.017152207001345232
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00004",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.018376506995991804
+    },
+    {
+      "active_queries": 1,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00005",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.01761622900085058
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00007",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0234774439886678
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00011",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.02376501499384176
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00015",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023662371997488663
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00023",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.023651662006159313
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00024",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.01965327700600028
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00027",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.024965010001324117
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00028",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.019800933994702064
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00031",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.024215682002250105
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00032",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.020141564004006796
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00033",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.021825800999067724
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00036",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.020415198989212513
+    },
+    {
+      "active_queries": 5,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00039",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.019416420997004025
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00043",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.019899899998563342
+    },
+    {
+      "active_queries": 4,
+      "ambiguous": 0.0,
+      "correct_identified_class": 1.0,
+      "false_selected_program": 0.0,
+      "remaining_semantic_classes": 1,
+      "selected": 1.0,
+      "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+      "strategy": "max_partition",
+      "task_id": "heldout_templates-00047",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.020322494994616136
+    }
+  ],
+  "rule_memory_reload_executions": [
+    {
+      "candidate_rank": 1,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00001-397734e1",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00000"
+    },
+    {
+      "candidate_rank": 2,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00002-9ac56261",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00001"
+    },
+    {
+      "candidate_rank": 3,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00003-aa2ef578",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00002"
+    },
+    {
+      "candidate_rank": 4,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00004-7feb3789",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00003"
+    },
+    {
+      "candidate_rank": 5,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00005-c8dab2bc",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00004"
+    },
+    {
+      "candidate_rank": 6,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00006-8c180adb",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00005"
+    },
+    {
+      "candidate_rank": 7,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00007-8d1f8637",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00006"
+    },
+    {
+      "candidate_rank": 8,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00008-1c171ae0",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00007"
+    },
+    {
+      "candidate_rank": 9,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00009-d71e46c3",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00008"
+    },
+    {
+      "candidate_rank": 10,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00010-0c751dba",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00009"
+    },
+    {
+      "candidate_rank": 11,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00011-d11927d8",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00010"
+    },
+    {
+      "candidate_rank": 12,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00012-3ea09e41",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00011"
+    },
+    {
+      "candidate_rank": 13,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00013-f1a1a79d",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00012"
+    },
+    {
+      "candidate_rank": 14,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00014-3802f08f",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00013"
+    },
+    {
+      "candidate_rank": 15,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00015-21d39928",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00014"
+    },
+    {
+      "candidate_rank": 16,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00016-1f774586",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00015"
+    },
+    {
+      "candidate_rank": 17,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00017-5da32fd3",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00016"
+    },
+    {
+      "candidate_rank": 18,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00018-23b9c7bf",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00017"
+    },
+    {
+      "candidate_rank": 19,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00019-3f8ec498",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00018"
+    },
+    {
+      "candidate_rank": 20,
+      "execution_retention": 1.0,
+      "reload_retention": 1.0,
+      "rule_id": "rule-00020-9e603e2e",
+      "stored": 1.0,
+      "task_id": "heldout_templates-00019"
+    }
+  ],
+  "successful_full_spec": [
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 1,
+      "family": "one_clause_noop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00000",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 2,
+      "family": "2_clause_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00001",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 3,
+      "family": "2_clause_transfer",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00002",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 4,
+      "family": "3_clause_transfer",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00003",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 5,
+      "family": "3_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00004",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 6,
+      "family": "4_clause_transfer",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00005",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 7,
+      "family": "8_clause_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00006",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 8,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00007",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 9,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00008",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 10,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00009",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 11,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00010",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 12,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00011",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 13,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00012",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 14,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00013",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 7,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00014",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 8,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00015",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 17,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00016",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 18,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00017",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 19,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00018",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    },
+    {
+      "budget_exhausted": 0.0,
+      "candidates_to_first_accepted": 20,
+      "family": "8_clause_transfer_drop",
+      "property_synthesis_success": 1.0,
+      "semantic_correct": 1.0,
+      "task_id": "heldout_templates-00019",
+      "unsupported": 0.0,
+      "wall_time_sec": 0.0035757560250203823
+    }
+  ],
+  "unsupported_tasks": [
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "contradictory",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-000"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "outside_grammar",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-001"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "under_specified",
+      "status": "AMBIGUOUS",
+      "task_id": "negative-002"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "impossible_preserve",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-003"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "insufficient_demonstrations",
+      "status": "AMBIGUOUS",
+      "task_id": "negative-004"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "query_budget_exhausted",
+      "status": "SEARCH_BUDGET_EXHAUSTED",
+      "task_id": "negative-005"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "contradictory",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-006"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "outside_grammar",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-007"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "under_specified",
+      "status": "AMBIGUOUS",
+      "task_id": "negative-008"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "impossible_preserve",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-009"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "insufficient_demonstrations",
+      "status": "AMBIGUOUS",
+      "task_id": "negative-010"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "query_budget_exhausted",
+      "status": "SEARCH_BUDGET_EXHAUSTED",
+      "task_id": "negative-011"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "contradictory",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-012"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "outside_grammar",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-013"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "under_specified",
+      "status": "AMBIGUOUS",
+      "task_id": "negative-014"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "impossible_preserve",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-015"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "insufficient_demonstrations",
+      "status": "AMBIGUOUS",
+      "task_id": "negative-016"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "query_budget_exhausted",
+      "status": "SEARCH_BUDGET_EXHAUSTED",
+      "task_id": "negative-017"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "contradictory",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-018"
+    },
+    {
+      "accepted": 0.0,
+      "checked_candidates": 40,
+      "kind": "outside_grammar",
+      "status": "UNSUPPORTED",
+      "task_id": "negative-019"
+    }
+  ],
+  "verifier_rejections": [
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "wrong_source",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "wrong_destination",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "move_to_drop",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "drop_to_move",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "missing_clause",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 0,
+          "R1": 0,
+          "R2": 0,
+          "R3": 0
+        },
+        "candidate_after": {
+          "error": "ValueError",
+          "message": "Program not deterministic for state RegisterState(counts={'R0': 0, 'R1': 0, 'R2': 0, 'R3': 0}): [0, 1]"
+        },
+        "target_after": {
+          "R0": 0,
+          "R1": 0,
+          "R2": 0,
+          "R3": 0
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "duplicate_clause",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "error": "ValueError",
+          "message": "Program not deterministic for state RegisterState(counts={'R0': 1, 'R1': 1, 'R2': 1, 'R3': 1}): [0, 1]"
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "extra_clause",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "wrong_predicate_kind",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "wrong_predicate_variable",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "error": "ValueError",
+          "message": "Program not deterministic for state RegisterState(counts={'R0': 1, 'R1': 1, 'R2': 1, 'R3': 1}): []"
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "wrong_halt_condition",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 0,
+          "R1": 0,
+          "R2": 0,
+          "R3": 0
+        },
+        "candidate_after": {
+          "error": "ValueError",
+          "message": "Program not deterministic for state RegisterState(counts={'R0': 0, 'R1': 0, 'R2': 0, 'R3': 0}): []"
+        },
+        "target_after": {
+          "R0": 0,
+          "R1": 0,
+          "R2": 0,
+          "R3": 0
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "nonterminating_cycle",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "modified_preserved_register",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 0,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "zero_only",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 2,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "one_only",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 0,
+          "R2": 2,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "phase_switch_bug",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "error": "ValueError",
+          "message": "Program not deterministic for state RegisterState(counts={'R0': 1, 'R1': 1, 'R2': 1, 'R3': 1}): [0, 1]"
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "both_sources_bug",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "error": "ValueError",
+          "message": "Program not deterministic for state RegisterState(counts={'R0': 1, 'R1': 1, 'R2': 1, 'R3': 1}): [0, 1]"
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "clause_order_bug",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 2,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "large_value_only_bug",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "wrong_source",
+      "target_id": "heldout_templates-00000"
+    },
+    {
+      "accepted": 0.0,
+      "counterexample": {
+        "before": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "candidate_after": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        },
+        "target_after": {
+          "R0": 1,
+          "R1": 1,
+          "R2": 1,
+          "R3": 1
+        }
+      },
+      "false_accept": 0.0,
+      "family": "one_clause_noop",
+      "known_incorrect": 1.0,
+      "operator": "wrong_destination",
+      "target_id": "heldout_templates-00000"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import statistics
 import time
 from dataclasses import asdict
 from datetime import UTC, datetime
@@ -637,6 +638,11 @@ def retrieval_novelty(candidates: list[ProgramAst]) -> dict[str, Any]:
             target_hash = target["program"].semantic_hash(
                 alpha=True, order_insensitive=True
             )
+            known_hashes = {
+                program.semantic_hash(alpha=True, order_insensitive=True)
+                for program in active_memory
+            }
+            is_known = target_hash in known_hashes
             scored = sorted(
                 [(ranker.score(spec, program), program) for program in active_memory],
                 key=lambda item: -item[0],
@@ -657,9 +663,9 @@ def retrieval_novelty(candidates: list[ProgramAst]) -> dict[str, Any]:
                     "top1": float(rank == 1),
                     "top5": float(rank is not None and rank <= 5),
                     "mrr": 1 / rank if rank else 0.0,
-                    "known_recall": float(rank is not None),
-                    "novel_abstention": float(rank is None),
-                    "false_known_rate": 0.0 if rank is None else 1.0,
+                    "known_recall": float(is_known and rank is not None),
+                    "novel_abstention": float((not is_known) and rank is None),
+                    "false_known_rate": float((not is_known) and rank is not None),
                 }
             )
     return {"rows": rows, "summary": mean_numeric(rows)}
@@ -710,17 +716,34 @@ def learn_once_reuse(candidates: list[ProgramAst]) -> dict[str, Any]:
             rows.append({"task": target["name"], "stored": 0.0, "rule_id": ""})
     memory.save(memory_path)
     loaded = RuleMemory.load(memory_path)
-    retention = (
-        1.0 if len(loaded.records) == sum(row["stored"] for row in rows) else 0.0
-    )
+    stored_count = int(sum(row["stored"] for row in rows))
+    retention = float(len(loaded.records) == stored_count)
+    loaded_by_id = {
+        record.rule_id: program
+        for record, program in zip(
+            loaded.records.values(), loaded.programs(), strict=True
+        )
+    }
     for row in rows:
         row["reload_retention"] = retention
-        row["execution_0_1000"] = 1.0
+        target = next(item for item in hidden_targets() if item["name"] == row["task"])
+        program = loaded_by_id.get(row["rule_id"])
+        row["execution_0_1000"] = (
+            measure_execution_retention(program, target["spec"]) if program else 0.0
+        )
     return {
         "rows": rows,
         "summary": mean_numeric(rows),
         "memory_path": str(memory_path.relative_to(ROOT)),
     }
+
+
+def measure_execution_retention(
+    program: ProgramAst | None, spec: ProgramSpecification
+) -> float:
+    if program is None:
+        return 0.0
+    return float(property_verify(program, spec, large=True).accepted)
 
 
 def rule_memory_integrity() -> dict[str, Any]:
@@ -766,6 +789,7 @@ def sequential_acquisition(candidates: list[ProgramAst]) -> dict[str, Any]:
     rows = []
     specs = [spec_two(), spec_three(), spec_drop_transfer()]
     for index in range(100):
+        start = time.perf_counter()
         spec = specs[index % len(specs)]
         program = candidates[index % len(candidates)]
         status = (
@@ -777,13 +801,20 @@ def sequential_acquisition(candidates: list[ProgramAst]) -> dict[str, Any]:
             memory.add(program, spec, status, provenance="sequential")
         except ValueError:
             pass
+        retained = [
+            measure_execution_retention(stored_program, record.specification)
+            for record, stored_program in zip(
+                memory.records.values(), memory.programs(), strict=True
+            )
+        ]
+        latency_ms = (time.perf_counter() - start) * 1000
         rows.append(
             {
                 "step": index + 1,
                 "memory_size": len(memory.records),
-                "execution_retention": 1.0,
+                "execution_retention": statistics.mean(retained) if retained else 0.0,
                 "semantic_duplicate_count": (index + 1) - len(memory.records),
-                "latency_ms": 0.1,
+                "latency_ms": latency_ms,
             }
         )
     return {"rows": rows, "summary": mean_numeric(rows)}
