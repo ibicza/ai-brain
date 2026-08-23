@@ -14,6 +14,7 @@ from ai_brain.rules.ast import (
     ProgramAst,
     RegisterState,
     exact_closed_loop,
+    program_variables,
     verify_m21_program,
 )
 from ai_brain.rules.specifications import ProgramSpecification
@@ -193,6 +194,38 @@ def property_verify(
     abstract = abstract_verify(program)
     if not abstract.accepted:
         return abstract
+    if spec.allowed_variables:
+        unexpected = program_variables(program) - set(spec.allowed_variables)
+        if unexpected:
+            return VerificationResult(
+                False,
+                VerificationStatus.REJECTED,
+                f"disallowed_variables_{','.join(sorted(unexpected))}",
+            )
+    if spec.allowed_primitives:
+        unexpected = {clause.action.kind for clause in program.clauses} - set(
+            spec.allowed_primitives
+        )
+        if unexpected:
+            return VerificationResult(
+                False,
+                VerificationStatus.REJECTED,
+                f"disallowed_primitives_{','.join(sorted(unexpected))}",
+            )
+    if spec.phase_constraints:
+        actual_phases = tuple(
+            (
+                clause.action.kind,
+                clause.action.source or "",
+                clause.action.destination,
+            )
+            for clause in program.clauses
+            if clause.action.kind != "HALT"
+        )
+        if actual_phases != spec.phase_constraints:
+            return VerificationResult(
+                False, VerificationStatus.REJECTED, "phase_constraint_violation"
+            )
     for state in property_states(spec, large=large):
         before = dict(state.counts)
         try:

@@ -13,7 +13,32 @@ class ProgramSpecification:
     drops: tuple[str, ...] = ()
     preserve: tuple[str, ...] = ()
     terminate_when_empty: tuple[str, ...] = ()
+    allowed_variables: tuple[str, ...] = ()
+    allowed_primitives: tuple[str, ...] = ()
+    phase_constraints: tuple[tuple[str, str, str | None], ...] = ()
     unsupported: bool = False
+
+    def __post_init__(self) -> None:
+        for field_name in (
+            "inputs",
+            "outputs",
+            "drops",
+            "preserve",
+            "terminate_when_empty",
+            "allowed_variables",
+            "allowed_primitives",
+        ):
+            object.__setattr__(self, field_name, tuple(getattr(self, field_name)))
+        object.__setattr__(
+            self, "transfers", tuple(tuple(item) for item in self.transfers)
+        )
+        object.__setattr__(
+            self,
+            "phase_constraints",
+            tuple(
+                (str(item[0]), str(item[1]), item[2]) for item in self.phase_constraints
+            ),
+        )
 
     def roles(self) -> tuple[str, ...]:
         roles = set(self.inputs) | set(self.outputs) | set(self.drops)
@@ -30,6 +55,9 @@ class ProgramSpecification:
             or self.drops
             or self.preserve
             or self.terminate_when_empty
+            or self.allowed_variables
+            or self.allowed_primitives
+            or self.phase_constraints
             or self.unsupported
         )
 
@@ -42,6 +70,9 @@ class ProgramSpecification:
                 f"drops={self.drops}",
                 f"preserve={self.preserve}",
                 f"terminate={self.terminate_when_empty}",
+                f"variables={self.allowed_variables}",
+                f"primitives={self.allowed_primitives}",
+                f"phases={self.phase_constraints}",
                 f"unsupported={self.unsupported}",
             ]
         )

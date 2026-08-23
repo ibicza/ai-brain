@@ -708,6 +708,9 @@ def learn_once_reuse(candidates: list[ProgramAst]) -> dict[str, Any]:
                 target["spec"],
                 result.status,
                 provenance="m222_cegis",
+                verification_evidence=property_verify(
+                    result.program, target["spec"], large=True
+                ),
             )
             rows.append(
                 {"task": target["name"], "stored": 1.0, "rule_id": record.rule_id}
@@ -749,13 +752,20 @@ def measure_execution_retention(
 def rule_memory_integrity() -> dict[str, Any]:
     memory = RuleMemory()
     target = hidden_targets()[0]
+    evidence = property_verify(target["program"], target["spec"], large=True)
     record = memory.add(
-        target["program"], target["spec"], VerificationStatus.PROPERTY_VERIFIED
+        target["program"],
+        target["spec"],
+        VerificationStatus.PROPERTY_VERIFIED,
+        verification_evidence=evidence,
     )
     duplicate_rejected = False
     try:
         memory.add(
-            target["program"], target["spec"], VerificationStatus.PROPERTY_VERIFIED
+            target["program"],
+            target["spec"],
+            VerificationStatus.PROPERTY_VERIFIED,
+            verification_evidence=evidence,
         )
     except ValueError:
         duplicate_rejected = True
@@ -798,7 +808,17 @@ def sequential_acquisition(candidates: list[ProgramAst]) -> dict[str, Any]:
             else VerificationStatus.IDENTIFIED_IN_HYPOTHESIS_SPACE
         )
         try:
-            memory.add(program, spec, status, provenance="sequential")
+            memory.add(
+                program,
+                spec,
+                status,
+                provenance="sequential",
+                verification_evidence=(
+                    property_verify(program, spec)
+                    if status == VerificationStatus.PROPERTY_VERIFIED
+                    else None
+                ),
+            )
         except ValueError:
             pass
         retained = [

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 from ai_brain.rules.ast import (
     ProgramAst,
@@ -14,6 +15,7 @@ from ai_brain.rules.ast import (
 )
 from ai_brain.rules.specifications import ProgramSpecification
 from ai_brain.rules.statuses import VerificationStatus
+from ai_brain.rules.verifier import VerificationResult
 
 
 @dataclass(frozen=True)
@@ -23,6 +25,7 @@ class RuleRecord:
     semantic_hash: str
     status: VerificationStatus
     specification: ProgramSpecification
+    verification_evidence: dict[str, Any] | None = None
     version: int = 1
     deprecated: bool = False
     provenance: str = ""
@@ -51,9 +54,20 @@ class RuleMemory:
         status: VerificationStatus,
         *,
         provenance: str = "",
+        verification_evidence: VerificationResult | dict[str, Any] | None = None,
     ) -> RuleRecord:
         if not self.can_store(status):
             raise ValueError(f"RuleMemory rejects status {status}")
+        evidence = _evidence_dict(verification_evidence)
+        if status == VerificationStatus.PROPERTY_VERIFIED:
+            if not specification.is_full():
+                raise ValueError(
+                    "PROPERTY_VERIFIED requires a non-empty ProgramSpecification"
+                )
+            if not evidence or not evidence.get("accepted"):
+                raise ValueError("PROPERTY_VERIFIED requires verifier evidence")
+            if evidence.get("status") != VerificationStatus.PROPERTY_VERIFIED:
+                raise ValueError("PROPERTY_VERIFIED evidence has incompatible status")
         semantic_hash = program.semantic_hash(alpha=True, order_insensitive=True)
         for record in self.records.values():
             if not record.deprecated and record.semantic_hash == semantic_hash:
@@ -64,6 +78,7 @@ class RuleMemory:
             semantic_hash=semantic_hash,
             status=status,
             specification=specification,
+            verification_evidence=evidence,
             provenance=provenance,
         )
         self.records[record.rule_id] = record
@@ -107,3 +122,21 @@ class RuleMemory:
             parse_canonical_dsl(record.program_json)[0]
             for record in self.records.values()
         ]
+
+
+def _evidence_dict(
+    evidence: VerificationResult | dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if evidence is None:
+        return None
+    if isinstance(evidence, VerificationResult):
+        return {
+            "accepted": evidence.accepted,
+            "status": str(evidence.status),
+            "reason": evidence.reason,
+            "counterexample": evidence.counterexample,
+        }
+    result = dict(evidence)
+    if "status" in result:
+        result["status"] = str(result["status"])
+    return result

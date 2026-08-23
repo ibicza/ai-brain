@@ -1,0 +1,51 @@
+{
+  "candidate_pool_size": 10000,
+  "clause_count_distribution": {
+    "1": 50,
+    "2": 50,
+    "3": 50,
+    "4": 50
+  },
+  "family_distribution": {
+    "drop": 25,
+    "halt_only": 50,
+    "phase_switch": 25,
+    "three_phase_transfer": 50,
+    "transfer": 25,
+    "transfer_drop": 25
+  },
+  "heldout_templates": 200,
+  "kind": "m223a_balanced_blackbox_benchmark",
+  "logical_variable_count_distribution": {
+    "0": 50,
+    "1": 25,
+    "2": 25,
+    "3": 50,
+    "4": 50
+  },
+  "max_family_fraction": 0.25,
+  "one_clause_semantic_limitation": "The total one-clause DSL admits only unconditional HALT; this bucket contains distinct opaque tasks over that single semantic template.",
+  "opaque_task_ids": true,
+  "predicate_width_distribution": {
+    "0": 50,
+    "1": 50,
+    "2": 50,
+    "3": 50
+  },
+  "public_forbidden_key_hits": {
+    "action_count": 0,
+    "clause_count": 0,
+    "family": 0,
+    "fingerprint": 0,
+    "formal_examples": 0,
+    "program": 0,
+    "semantic_hash": 0,
+    "target": 0
+  },
+  "repeated_task_count": 194,
+  "seed": 22331,
+  "structurally_unique_200_templates": false,
+  "unique_alpha_templates": 6,
+  "unique_program_templates": 6,
+  "unique_public_specifications": 6
+}

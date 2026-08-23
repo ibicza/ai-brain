@@ -56,6 +56,10 @@ def generic_drop_all(source: str, *, name: str) -> ProgramAst:
     )
 
 
+def generic_no_op(*, name: str = "generic_noop") -> ProgramAst:
+    return make_program([clause((), ActionAst("HALT"))], name)
+
+
 def generic_two_phase(a: str, b: str, destination: str, *, name: str) -> ProgramAst:
     return make_program(
         [
@@ -218,6 +222,24 @@ def unique_programs(limit: int, *, dedupe_alpha: bool = True) -> list[ProgramAst
         if len(programs) >= limit:
             break
     return programs
+
+
+def blackbox_candidate_pool(limit: int) -> list[ProgramAst]:
+    """Build the target-independent, alpha-unique Stage-1 search space."""
+    if limit < 1:
+        return []
+    noop = generic_no_op()
+    programs = [noop]
+    seen = {noop.semantic_hash(alpha=True, order_insensitive=True)}
+    for program in enumerate_generic_programs(limit * 2 + 32):
+        key = program.semantic_hash(alpha=True, order_insensitive=True)
+        if key in seen:
+            continue
+        seen.add(key)
+        programs.append(program)
+        if len(programs) >= limit:
+            return programs
+    raise RuntimeError(f"Could not build {limit} alpha-unique candidates")
 
 
 def summarize_candidate_space(requested_budget: int) -> CandidateSpaceSummary:

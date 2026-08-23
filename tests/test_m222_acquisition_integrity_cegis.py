@@ -194,9 +194,20 @@ def test_rule_memory_status_policy_duplicate_and_reload(tmp_path: Path) -> None:
     memory = RuleMemory()
     program = generic_three_phase("A", "B", "C", "D", name="three")
     spec = m222.spec_three("A", "B", "C", "D")
-    memory.add(program, spec, VerificationStatus.PROPERTY_VERIFIED)
+    evidence = property_verify(program, spec, large=True)
+    memory.add(
+        program,
+        spec,
+        VerificationStatus.PROPERTY_VERIFIED,
+        verification_evidence=evidence,
+    )
     with pytest.raises(ValueError, match="Duplicate semantic rule"):
-        memory.add(program, spec, VerificationStatus.PROPERTY_VERIFIED)
+        memory.add(
+            program,
+            spec,
+            VerificationStatus.PROPERTY_VERIFIED,
+            verification_evidence=evidence,
+        )
     with pytest.raises(ValueError, match="rejects status"):
         RuleMemory().add(
             generic_transfer_one("A", "C", name="provisional"),
