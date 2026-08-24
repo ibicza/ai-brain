@@ -1,0 +1,1228 @@
+{
+  "active_disambiguation": {
+    "rows": [
+      {
+        "active_examples": 2,
+        "active_remaining": 1,
+        "active_success": 1.0,
+        "random_examples": 5,
+        "random_remaining": 2,
+        "random_success": 0.0,
+        "task": "merge_two"
+      },
+      {
+        "active_examples": 2,
+        "active_remaining": 1,
+        "active_success": 1.0,
+        "random_examples": 2,
+        "random_remaining": 1,
+        "random_success": 1.0,
+        "task": "merge_three"
+      }
+    ],
+    "summary": {
+      "active_examples": 2.0,
+      "active_remaining": 1.0,
+      "active_success": 1.0,
+      "random_examples": 3.5,
+      "random_remaining": 1.5,
+      "random_success": 0.5
+    }
+  },
+  "adversarial_verifier_test": {
+    "false_verified_program_rate": 0.0,
+    "rows": [
+      {
+        "accepted": 0.0,
+        "case": "drops_second_source",
+        "reason": "wrong_value_R2"
+      },
+      {
+        "accepted": 0.0,
+        "case": "wrong_destination",
+        "reason": "preserve_violation_D"
+      },
+      {
+        "accepted": 0.0,
+        "case": "preserves_one_source",
+        "reason": "not_empty_B"
+      },
+      {
+        "accepted": 0.0,
+        "case": "wrong_halt_condition",
+        "reason": "not_empty_B"
+      }
+    ]
+  },
+  "demonstration_induction_without_target": {
+    "rows": [
+      {
+        "abstention": 1.0,
+        "demos": 1,
+        "remaining": 11,
+        "selected_correct": 0.0,
+        "status": "AMBIGUOUS",
+        "task": "merge_two"
+      },
+      {
+        "abstention": 1.0,
+        "demos": 2,
+        "remaining": 4,
+        "selected_correct": 0.0,
+        "status": "AMBIGUOUS",
+        "task": "merge_two"
+      },
+      {
+        "abstention": 1.0,
+        "demos": 3,
+        "remaining": 4,
+        "selected_correct": 0.0,
+        "status": "AMBIGUOUS",
+        "task": "merge_two"
+      },
+      {
+        "abstention": 1.0,
+        "demos": 5,
+        "remaining": 4,
+        "selected_correct": 0.0,
+        "status": "AMBIGUOUS",
+        "task": "merge_two"
+      },
+      {
+        "abstention": 1.0,
+        "demos": 1,
+        "remaining": 11,
+        "selected_correct": 0.0,
+        "status": "AMBIGUOUS",
+        "task": "merge_three"
+      },
+      {
+        "abstention": 1.0,
+        "demos": 2,
+        "remaining": 3,
+        "selected_correct": 0.0,
+        "status": "AMBIGUOUS",
+        "task": "merge_three"
+      },
+      {
+        "abstention": 1.0,
+        "demos": 3,
+        "remaining": 3,
+        "selected_correct": 0.0,
+        "status": "AMBIGUOUS",
+        "task": "merge_three"
+      },
+      {
+        "abstention": 1.0,
+        "demos": 5,
+        "remaining": 3,
+        "selected_correct": 0.0,
+        "status": "AMBIGUOUS",
+        "task": "merge_three"
+      }
+    ],
+    "summary": {
+      "abstention": 1.0,
+      "demos": 2.75,
+      "remaining": 5.375,
+      "selected_correct": 0.0
+    }
+  },
+  "hard_rule_memory_distractors": {
+    "memory_program_count": 100,
+    "near_neighbor_examples": [
+      "wrong variable",
+      "wrong action",
+      "missing clause",
+      "wrong destination",
+      "wrong halt"
+    ],
+    "sizes": [
+      10,
+      100,
+      500,
+      1000,
+      5000
+    ]
+  },
+  "learned_candidate_scorer": {
+    "differs_from_handwritten_candidate_score": true,
+    "parameter_count": 37
+  },
+  "learned_complete_rule_retrieval": {
+    "rows": [
+      {
+        "execution_top1": 0.0,
+        "mrr": 1.0,
+        "rank": 1,
+        "task": "heldout_instance_0_drain_A_D",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 1.0,
+        "rank": 1,
+        "task": "heldout_instance_1_drain_C_B",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.02631578947368421,
+        "rank": 38,
+        "task": "heldout_instance_2_merge_two_A_B_C",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.041666666666666664,
+        "rank": 24,
+        "task": "heldout_instance_3_cond_A_D_B",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.02631578947368421,
+        "rank": 38,
+        "task": "heldout_instance_4_merge_two_B_A_D",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.041666666666666664,
+        "rank": 24,
+        "task": "heldout_instance_5_cond_B_D_C",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.02631578947368421,
+        "rank": 38,
+        "task": "heldout_instance_6_merge_two_C_B_A",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.041666666666666664,
+        "rank": 24,
+        "task": "heldout_instance_7_cond_D_A_B",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.02631578947368421,
+        "rank": 38,
+        "task": "heldout_instance_8_merge_two_D_B_C",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.07142857142857142,
+        "rank": 14,
+        "task": "heldout_instance_9_merge_three_A_C_B_D",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.07142857142857142,
+        "rank": 14,
+        "task": "heldout_instance_10_merge_three_B_C_D_A",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.07142857142857142,
+        "rank": 14,
+        "task": "heldout_instance_11_merge_three_C_D_A_B",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.07142857142857142,
+        "rank": 14,
+        "task": "heldout_instance_12_merge_three_D_C_B_A",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 1.0,
+        "rank": 1,
+        "task": "heldout_instance_13_drain_B_C",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 1.0,
+        "rank": 1,
+        "task": "heldout_instance_14_drain_D_A",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.041666666666666664,
+        "rank": 24,
+        "task": "heldout_instance_15_cond_A_C_B",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.02631578947368421,
+        "rank": 38,
+        "task": "heldout_instance_16_merge_two_A_D_C",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.041666666666666664,
+        "rank": 24,
+        "task": "heldout_instance_17_cond_B_C_D",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.02631578947368421,
+        "rank": 38,
+        "task": "heldout_instance_18_merge_two_C_A_B",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      },
+      {
+        "execution_top1": 0.0,
+        "mrr": 0.041666666666666664,
+        "rank": 24,
+        "task": "heldout_instance_19_cond_C_D_A",
+        "top1": 0.0,
+        "top3": 0.0,
+        "top5": 0.0
+      }
+    ],
+    "summary": {
+      "execution_top1": 0.0,
+      "mrr": 0.23468045112781954,
+      "rank": 21.6,
+      "top1": 0.2,
+      "top3": 0.2,
+      "top5": 0.2
+    }
+  },
+  "learned_sketch_ranking": {
+    "rows": [
+      {
+        "correct": "DRAIN",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_0_drain_A_D",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "DRAIN",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_1_drain_C_B",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_2_merge_two_A_B_C",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "CONDITIONAL_DROP_MOVE",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_3_cond_A_D_B",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_4_merge_two_B_A_D",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "CONDITIONAL_DROP_MOVE",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_5_cond_B_D_C",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_6_merge_two_C_B_A",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "CONDITIONAL_DROP_MOVE",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_7_cond_D_A_B",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_8_merge_two_D_B_C",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_9_merge_three_A_C_B_D",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_10_merge_three_B_C_D_A",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_11_merge_three_C_D_A_B",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_12_merge_three_D_C_B_A",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "DRAIN",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_13_drain_B_C",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "DRAIN",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_14_drain_D_A",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "CONDITIONAL_DROP_MOVE",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_15_cond_A_C_B",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_16_merge_two_A_D_C",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "CONDITIONAL_DROP_MOVE",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_17_cond_B_C_D",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "heldout_instance_18_merge_two_C_A_B",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "CONDITIONAL_DROP_MOVE",
+        "heldout_detection": 1.0,
+        "task": "heldout_instance_19_cond_C_D_A",
+        "top1": 1.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "merge_two",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      },
+      {
+        "correct": "NOVEL",
+        "heldout_detection": 0.0,
+        "task": "merge_three",
+        "top1": 0.0,
+        "top3": 1.0,
+        "top5": 1.0
+      }
+    ],
+    "summary": {
+      "heldout_detection": 0.45454545454545453,
+      "top1": 0.2727272727272727,
+      "top3": 1.0,
+      "top5": 1.0
+    }
+  },
+  "learned_subprogram_planner": {
+    "rows": [
+      {
+        "manual_sequence_supplied": false,
+        "status": "ACQUIRED",
+        "task": "merge_two",
+        "verified_execution": 1.0
+      },
+      {
+        "manual_sequence_supplied": false,
+        "status": "ACQUIRED",
+        "task": "merge_three",
+        "verified_execution": 1.0
+      }
+    ],
+    "summary": {
+      "verified_execution": 1.0
+    }
+  },
+  "manifest": {
+    "branch": "exp/oracle-free-rule-acquisition",
+    "candidate_space_1e2": 120,
+    "candidate_space_1e3": 1000,
+    "candidate_space_1e4": 10000,
+    "candidate_space_1e5_practical": "virtual budget over compact verified candidate pool",
+    "heldout_ast_templates": 100,
+    "heldout_program_instances": 200,
+    "heldout_sketches_absent": true,
+    "kind": "m221_oracle_free_rule_acquisition",
+    "materialized_verified_candidate_pool": 11,
+    "train_task_specs": 1000
+  },
+  "model_parameters": {
+    "candidate_scorer": 37,
+    "retriever": 37,
+    "sketch_ranker": 32,
+    "slot_heads": {
+      "A": 16,
+      "B": 16,
+      "DEST": 17,
+      "SOURCE": 17
+    }
+  },
+  "neural_guided_search": {
+    "rows": [
+      {
+        "budget": 10,
+        "candidates_evaluated": 4,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_two"
+      },
+      {
+        "budget": 10,
+        "candidates_evaluated": 1,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_three"
+      },
+      {
+        "budget": 100,
+        "candidates_evaluated": 4,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_two"
+      },
+      {
+        "budget": 100,
+        "candidates_evaluated": 1,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_three"
+      },
+      {
+        "budget": 1000,
+        "candidates_evaluated": 4,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_two"
+      },
+      {
+        "budget": 1000,
+        "candidates_evaluated": 1,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_three"
+      },
+      {
+        "budget": 10000,
+        "candidates_evaluated": 4,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_two"
+      },
+      {
+        "budget": 10000,
+        "candidates_evaluated": 1,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_three"
+      },
+      {
+        "budget": 100000,
+        "candidates_evaluated": 4,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_two"
+      },
+      {
+        "budget": 100000,
+        "candidates_evaluated": 1,
+        "status": "ACQUIRED",
+        "success": 1.0,
+        "task": "merge_three"
+      }
+    ],
+    "summary": {
+      "budget": 22222.0,
+      "candidates_evaluated": 2.5,
+      "success": 1.0
+    }
+  },
+  "neurality_oracle_audit": [
+    {
+      "classification": "heuristic",
+      "hand_written_score": true,
+      "method": "lexical retrieval",
+      "trained_parameters": false,
+      "training_dataset": "none",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "heuristic char_ngram_retrieval",
+      "hand_written_score": true,
+      "method": "embedding retrieval",
+      "trained_parameters": false,
+      "training_dataset": "none",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "heuristic signature_retrieval",
+      "hand_written_score": true,
+      "method": "structured retrieval",
+      "trained_parameters": false,
+      "training_dataset": "none",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "oracle/heuristic",
+      "hand_written_score": true,
+      "method": "sketch completion",
+      "trained_parameters": false,
+      "training_dataset": "none",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": true,
+      "uses_target_ast": true,
+      "uses_target_semantic_hash": true,
+      "uses_target_sketch": true
+    },
+    {
+      "classification": "exact symbolic",
+      "hand_written_score": false,
+      "method": "grammar-constrained generation",
+      "trained_parameters": false,
+      "training_dataset": "grammar",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "heuristic_guided_search",
+      "hand_written_score": true,
+      "method": "neural-guided search",
+      "trained_parameters": false,
+      "training_dataset": "none",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "exact symbolic",
+      "hand_written_score": false,
+      "method": "execution-guided search",
+      "trained_parameters": false,
+      "training_dataset": "grammar",
+      "uses_demonstrations_only": true,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "oracle_target_present_metric",
+      "hand_written_score": false,
+      "method": "demonstration induction",
+      "trained_parameters": false,
+      "training_dataset": "demos",
+      "uses_demonstrations_only": true,
+      "uses_program_from_signature": false,
+      "uses_target_ast": true,
+      "uses_target_semantic_hash": true,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "manual symbolic plan",
+      "hand_written_score": true,
+      "method": "subprogram planner",
+      "trained_parameters": false,
+      "training_dataset": "none",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": true
+    },
+    {
+      "classification": "oracle-selected reuse",
+      "hand_written_score": false,
+      "method": "learn-once/reuse",
+      "trained_parameters": false,
+      "training_dataset": "demos",
+      "uses_demonstrations_only": true,
+      "uses_program_from_signature": false,
+      "uses_target_ast": true,
+      "uses_target_semantic_hash": true,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "neural",
+      "hand_written_score": false,
+      "method": "learned complete-rule retriever",
+      "trained_parameters": true,
+      "training_dataset": "contrastive pair data",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": false
+    },
+    {
+      "classification": "neural",
+      "hand_written_score": false,
+      "method": "learned candidate scorer",
+      "trained_parameters": true,
+      "training_dataset": "positive/hard-negative AST pairs",
+      "uses_demonstrations_only": false,
+      "uses_program_from_signature": false,
+      "uses_target_ast": false,
+      "uses_target_semantic_hash": false,
+      "uses_target_sketch": false
+    }
+  ],
+  "novel_rule_abstention": {
+    "chosen": {
+      "false_known_rate": 0.0,
+      "known_rule_recall": 0.15,
+      "novel_rule_abstention": 1.0,
+      "threshold": 8.600000000000003
+    },
+    "rows": [
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 1.0,
+        "novel_rule_abstention": 0.0,
+        "threshold": -1.9999999999999902
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.95,
+        "novel_rule_abstention": 0.0,
+        "threshold": -1.3999999999999955
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.9,
+        "novel_rule_abstention": 0.0,
+        "threshold": -1.1999999999999886
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.85,
+        "novel_rule_abstention": 0.0,
+        "threshold": -0.3999999999999951
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.8,
+        "novel_rule_abstention": 0.0,
+        "threshold": 0.20000000000000578
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.75,
+        "novel_rule_abstention": 0.0,
+        "threshold": 1.2000000000000055
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.7,
+        "novel_rule_abstention": 0.0,
+        "threshold": 2.6000000000000063
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.65,
+        "novel_rule_abstention": 0.0,
+        "threshold": 3.0000000000000013
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.6,
+        "novel_rule_abstention": 0.0,
+        "threshold": 3.200000000000002
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.55,
+        "novel_rule_abstention": 0.0,
+        "threshold": 3.40000000000001
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.45,
+        "novel_rule_abstention": 0.0,
+        "threshold": 3.600000000000004
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_rule_recall": 0.4,
+        "novel_rule_abstention": 0.0,
+        "threshold": 4.600000000000005
+      },
+      {
+        "false_known_rate": 0.5,
+        "known_rule_recall": 0.25,
+        "novel_rule_abstention": 0.5,
+        "threshold": 5.400000000000008
+      },
+      {
+        "false_known_rate": 0.5,
+        "known_rule_recall": 0.2,
+        "novel_rule_abstention": 0.5,
+        "threshold": 7.8000000000000025
+      },
+      {
+        "false_known_rate": 0.0,
+        "known_rule_recall": 0.15,
+        "novel_rule_abstention": 1.0,
+        "threshold": 8.600000000000003
+      },
+      {
+        "false_known_rate": 0.0,
+        "known_rule_recall": 0.05,
+        "novel_rule_abstention": 1.0,
+        "threshold": 10.000000000000004
+      }
+    ]
+  },
+  "oracle_firewall": {
+    "acquisition_view_fields": [
+      "spec_fields",
+      "demonstrations",
+      "rule_memory",
+      "allowed_sketches",
+      "primitive_vocabulary",
+      "search_budget"
+    ],
+    "target_fields_raise": true
+  },
+  "sequential_rule_memory_growth": {
+    "rows": [
+      {
+        "execution_retention": 1.0,
+        "memory_size": 1,
+        "semantic_duplicates": 0,
+        "step": 1
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 2,
+        "semantic_duplicates": 1,
+        "step": 2
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 3,
+        "semantic_duplicates": 1,
+        "step": 3
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 4,
+        "semantic_duplicates": 1,
+        "step": 4
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 5,
+        "semantic_duplicates": 2,
+        "step": 5
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 6,
+        "semantic_duplicates": 3,
+        "step": 6
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 7,
+        "semantic_duplicates": 4,
+        "step": 7
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 8,
+        "semantic_duplicates": 5,
+        "step": 8
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 9,
+        "semantic_duplicates": 6,
+        "step": 9
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 10,
+        "semantic_duplicates": 6,
+        "step": 10
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 11,
+        "semantic_duplicates": 7,
+        "step": 11
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 12,
+        "semantic_duplicates": 8,
+        "step": 12
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 13,
+        "semantic_duplicates": 9,
+        "step": 13
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 14,
+        "semantic_duplicates": 10,
+        "step": 14
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 15,
+        "semantic_duplicates": 11,
+        "step": 15
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 16,
+        "semantic_duplicates": 12,
+        "step": 16
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 17,
+        "semantic_duplicates": 13,
+        "step": 17
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 18,
+        "semantic_duplicates": 14,
+        "step": 18
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 19,
+        "semantic_duplicates": 15,
+        "step": 19
+      },
+      {
+        "execution_retention": 1.0,
+        "memory_size": 20,
+        "semantic_duplicates": 16,
+        "step": 20
+      }
+    ],
+    "summary": {
+      "execution_retention": 1.0,
+      "memory_size": 10.5,
+      "semantic_duplicates": 7.2,
+      "step": 10.5
+    }
+  },
+  "specification_free_verifier": {
+    "property_conditions": [
+      "type validity",
+      "determinism",
+      "postconditions",
+      "preserve",
+      "empty",
+      "transfer",
+      "termination"
+    ],
+    "uses_target_ast": false
+  },
+  "specification_information_audit": [
+    {
+      "class": "FULLY_CONSTRUCTIVE",
+      "condition": "canonical structured specification",
+      "neural_induction_claim": false
+    },
+    {
+      "class": "FULLY_CONSTRUCTIVE",
+      "condition": "field-order permutation",
+      "neural_induction_claim": false
+    },
+    {
+      "class": "CONSTRAINING",
+      "condition": "controlled paraphrased structured specification",
+      "neural_induction_claim": true
+    },
+    {
+      "class": "BEHAVIORAL",
+      "condition": "demonstrations only",
+      "neural_induction_claim": true
+    },
+    {
+      "class": "CONSTRAINING",
+      "condition": "partial specification + demonstrations",
+      "neural_induction_claim": true
+    }
+  ],
+  "split_audit": {
+    "exact_ast_overlap_with_no_heldout_library": 0,
+    "exact_sketch_overlap": 0,
+    "heldout_sketches_removed": true,
+    "normalized_ast_overlap_with_no_heldout_library": 0,
+    "normalized_sketch_overlap": 0,
+    "primitive_operation_overlap": 5
+  },
+  "subprogram_search": {
+    "rows": [
+      {
+        "depth": 2,
+        "evaluated": 17,
+        "success": 1.0,
+        "task": "merge_two"
+      },
+      {
+        "depth": 3,
+        "evaluated": 213,
+        "success": 1.0,
+        "task": "merge_three"
+      }
+    ],
+    "summary": {
+      "depth": 2.5,
+      "evaluated": 115.0,
+      "success": 1.0
+    }
+  },
+  "true_learn_once_reuse": {
+    "rows": [
+      {
+        "acquisition_success": 1.0,
+        "reuse_execution_min": 1.0,
+        "storage_success": 1.0,
+        "task": "merge_two",
+        "verification_success": 1.0
+      },
+      {
+        "acquisition_success": 1.0,
+        "reuse_execution_min": 1.0,
+        "storage_success": 1.0,
+        "task": "merge_three",
+        "verification_success": 1.0
+      }
+    ],
+    "summary": {
+      "acquisition_success": 1.0,
+      "reuse_execution_min": 1.0,
+      "storage_success": 1.0,
+      "verification_success": 1.0
+    }
+  },
+  "typed_slot_filling": {
+    "rows": [
+      {
+        "ast_semantic_exact": 1.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.0,
+        "task": "heldout_instance_0_drain_A_D",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 1.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.5,
+        "task": "heldout_instance_1_drain_C_B",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 0.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.3333333333333333,
+        "task": "heldout_instance_3_cond_A_D_B",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 0.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.0,
+        "task": "heldout_instance_5_cond_B_D_C",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 0.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.3333333333333333,
+        "task": "heldout_instance_7_cond_D_A_B",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 1.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.0,
+        "task": "heldout_instance_13_drain_B_C",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 1.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.5,
+        "task": "heldout_instance_14_drain_D_A",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 0.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.3333333333333333,
+        "task": "heldout_instance_15_cond_A_C_B",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 0.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.0,
+        "task": "heldout_instance_17_cond_B_C_D",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      },
+      {
+        "ast_semantic_exact": 0.0,
+        "execution_exact": 0.0,
+        "slot_accuracy": 0.3333333333333333,
+        "task": "heldout_instance_19_cond_C_D_A",
+        "verifier_acceptance": 0.0,
+        "whole_assignment_exact": 0.0
+      }
+    ],
+    "summary": {
+      "ast_semantic_exact": 0.4,
+      "execution_exact": 0.0,
+      "slot_accuracy": 0.2333333333333333,
+      "verifier_acceptance": 0.0,
+      "whole_assignment_exact": 0.0
+    }
+  }
+}

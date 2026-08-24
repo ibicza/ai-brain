@@ -1,0 +1,13 @@
+{
+  "branch": "exp/oracle-free-rule-acquisition",
+  "candidate_space_1e2": 120,
+  "candidate_space_1e3": 1000,
+  "candidate_space_1e4": 10000,
+  "candidate_space_1e5_practical": "virtual budget over compact verified candidate pool",
+  "heldout_ast_templates": 100,
+  "heldout_program_instances": 200,
+  "heldout_sketches_absent": true,
+  "kind": "m221_oracle_free_rule_acquisition",
+  "materialized_verified_candidate_pool": 11,
+  "train_task_specs": 1000
+}

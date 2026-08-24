@@ -1,0 +1,43 @@
+{
+  "controlled_language_version": "1",
+  "families": [
+    "NOOP",
+    "CLEAR",
+    "DRAIN",
+    "MERGE_TWO",
+    "MERGE_THREE",
+    "DROP_THEN_TRANSFER"
+  ],
+  "frozen_backend_sha": "11b573ee46",
+  "frozen_backend_tag": "stage1-acquisition-v1",
+  "integration_base_sha": "11b573ee46c6df552d6a44b91d4f1712a62b5273",
+  "languages": [
+    "ru",
+    "en"
+  ],
+  "m231_source_sha": "54aafbc0fd",
+  "policies": {
+    "append_only_audit": true,
+    "atomic_rule_memory": true,
+    "cpu_only_trusted_path": true,
+    "explicit_approval": true,
+    "hash_bound_approval": true
+  },
+  "primitives": [
+    "MOVE_ONE",
+    "DROP_ONE",
+    "HALT"
+  ],
+  "final_integration_sha": "git:stage1-v1.0.0^{commit}",
+  "research_only_frontends": [
+    "NEURAL_LANGUAGE_TO_SPEC"
+  ],
+  "rule_memory_schema_version": 1,
+  "specification_schema_version": 1,
+  "stage1_version": "1.0.0",
+  "trusted_frontends": [
+    "FORM",
+    "CANONICAL_DSL",
+    "CONTROLLED_LANGUAGE"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "acceptance_checks": 1267,
+  "active_rules_executed": 89,
+  "device": "CPU-only deterministic acceptance",
+  "elapsed_seconds": 17.052,
+  "family_counts": {
+    "CLEAR": 4,
+    "DRAIN": 12,
+    "DROP_THEN_TRANSFER": 24,
+    "MERGE_THREE": 24,
+    "MERGE_TWO": 24,
+    "NOOP": 1
+  },
+  "language_semantic_cases": 356,
+  "outcome": "A",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13",
+  "rule_memory_records": 100,
+  "source_sha": "11b573ee46c6df552d6a44b91d4f1712a62b5273",
+  "structural_specifications": 89
+}

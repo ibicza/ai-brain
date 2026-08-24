@@ -1,0 +1,1331 @@
+{
+  "baseline": {
+    "active_query_results": {
+      "active_examples": 2.0,
+      "active_remaining": 1.0,
+      "active_success": 1.0,
+      "random_examples": 3.5,
+      "random_remaining": 1.5,
+      "random_success": 0.5
+    },
+    "learned_ranker_parameter_count": 37,
+    "manifest": {
+      "branch": "exp/oracle-free-rule-acquisition",
+      "candidate_space_1e2": 120,
+      "candidate_space_1e3": 1000,
+      "candidate_space_1e4": 10000,
+      "candidate_space_1e5_practical": "virtual budget over compact verified candidate pool",
+      "heldout_ast_templates": 100,
+      "heldout_program_instances": 200,
+      "heldout_sketches_absent": true,
+      "kind": "m221_oracle_free_rule_acquisition",
+      "materialized_verified_candidate_pool": 11,
+      "train_task_specs": 1000
+    },
+    "retrieval_results": {
+      "execution_top1": 0.0,
+      "mrr": 0.23468045112781954,
+      "rank": 21.6,
+      "top1": 0.2,
+      "top3": 0.2,
+      "top5": 0.2
+    },
+    "rule_memory_fixture": "datasets/m22_verified_rule_acquisition/rule_memory.json",
+    "search_pool_size": 11,
+    "slot_filling_results": {
+      "ast_semantic_exact": 0.4,
+      "execution_exact": 0.0,
+      "slot_accuracy": 0.2333333333333333,
+      "verifier_acceptance": 0.0,
+      "whole_assignment_exact": 0.0
+    },
+    "source_branch": "exp/oracle-free-rule-acquisition",
+    "source_commit": "20f61fa",
+    "verifier_mutation_results": {
+      "false_verified_program_rate": 0.0,
+      "rows": [
+        {
+          "accepted": 0.0,
+          "case": "drops_second_source",
+          "reason": "wrong_value_R2"
+        },
+        {
+          "accepted": 0.0,
+          "case": "wrong_destination",
+          "reason": "preserve_violation_D"
+        },
+        {
+          "accepted": 0.0,
+          "case": "preserves_one_source",
+          "reason": "not_empty_B"
+        },
+        {
+          "accepted": 0.0,
+          "case": "wrong_halt_condition",
+          "reason": "not_empty_B"
+        }
+      ]
+    }
+  },
+  "candidate_space_scale": [
+    {
+      "alpha_normalized_unique": 100,
+      "deterministic_checked": 100,
+      "exact_ast_unique": 100,
+      "raw_generated": 100,
+      "requested_budget": 100,
+      "typed_valid": 100,
+      "wall_time_sec": 0.3004751680055051
+    },
+    {
+      "alpha_normalized_unique": 1000,
+      "deterministic_checked": 1000,
+      "exact_ast_unique": 1000,
+      "raw_generated": 1000,
+      "requested_budget": 1000,
+      "typed_valid": 1000,
+      "wall_time_sec": 2.821884651995788
+    },
+    {
+      "alpha_normalized_unique": 10000,
+      "deterministic_checked": 10000,
+      "exact_ast_unique": 10000,
+      "raw_generated": 10000,
+      "requested_budget": 10000,
+      "typed_valid": 10000,
+      "wall_time_sec": 33.529967322006996
+    }
+  ],
+  "cegis": {
+    "demonstrations_only": {
+      "rows": [
+        {
+          "candidates_evaluated": 1200,
+          "query_count": 2,
+          "semantic_class_count": 1,
+          "semantic_exact": 1.0,
+          "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+          "task": "heldout_two_phase"
+        },
+        {
+          "candidates_evaluated": 1200,
+          "query_count": 2,
+          "semantic_class_count": 1,
+          "semantic_exact": 1.0,
+          "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+          "task": "heldout_three_phase"
+        },
+        {
+          "candidates_evaluated": 1200,
+          "query_count": 2,
+          "semantic_class_count": 1,
+          "semantic_exact": 1.0,
+          "status": "IDENTIFIED_IN_HYPOTHESIS_SPACE",
+          "task": "heldout_drop_transfer"
+        }
+      ],
+      "summary": {
+        "candidates_evaluated": 1200.0,
+        "query_count": 2.0,
+        "semantic_class_count": 1.0,
+        "semantic_exact": 1.0
+      }
+    },
+    "full_spec": {
+      "rows": [
+        {
+          "candidates_evaluated": 1200,
+          "query_count": 0,
+          "semantic_class_count": 1,
+          "semantic_exact": 1.0,
+          "status": "PROPERTY_VERIFIED",
+          "task": "heldout_two_phase"
+        },
+        {
+          "candidates_evaluated": 1200,
+          "query_count": 0,
+          "semantic_class_count": 1,
+          "semantic_exact": 1.0,
+          "status": "PROPERTY_VERIFIED",
+          "task": "heldout_three_phase"
+        },
+        {
+          "candidates_evaluated": 1200,
+          "query_count": 0,
+          "semantic_class_count": 1,
+          "semantic_exact": 1.0,
+          "status": "PROPERTY_VERIFIED",
+          "task": "heldout_drop_transfer"
+        }
+      ],
+      "summary": {
+        "candidates_evaluated": 1200.0,
+        "query_count": 0.0,
+        "semantic_class_count": 1.0,
+        "semantic_exact": 1.0
+      }
+    }
+  },
+  "compute": {
+    "candidate_count": 1200,
+    "memory_footprint_note": "compact AST objects, no large checkpoints",
+    "mutation_count": 10000,
+    "total_wall_time_sec": 156.0176008760027,
+    "verifier_throughput_mutants_per_sec": 64.0953324743639
+  },
+  "learn_once_reuse": {
+    "memory_path": "runs/m222_cegis_rule_acquisition/m222_rule_memory.json",
+    "rows": [
+      {
+        "execution_0_1000": 1.0,
+        "reload_retention": 1.0,
+        "rule_id": "rule-00001-7feb3789",
+        "stored": 1.0,
+        "task": "heldout_two_phase"
+      },
+      {
+        "execution_0_1000": 1.0,
+        "reload_retention": 1.0,
+        "rule_id": "rule-00002-8c180adb",
+        "stored": 1.0,
+        "task": "heldout_three_phase"
+      },
+      {
+        "execution_0_1000": 1.0,
+        "reload_retention": 1.0,
+        "rule_id": "rule-00003-c8dab2bc",
+        "stored": 1.0,
+        "task": "heldout_drop_transfer"
+      }
+    ],
+    "summary": {
+      "execution_0_1000": 1.0,
+      "reload_retention": 1.0,
+      "stored": 1.0
+    }
+  },
+  "learned_guidance": {
+    "hard_negative_mining_rounds": 1,
+    "pairwise_auc": 0.9979959919839679,
+    "parameter_count": 32,
+    "rows": [
+      {
+        "candidate_rank": 2,
+        "learned_evaluated": 1200,
+        "learned_success": 1.0,
+        "random_evaluated": 1200,
+        "random_success": 1.0,
+        "task": "heldout_two_phase",
+        "top1": 0.0,
+        "top5": 1.0
+      },
+      {
+        "candidate_rank": 1,
+        "learned_evaluated": 1200,
+        "learned_success": 1.0,
+        "random_evaluated": 1200,
+        "random_success": 1.0,
+        "task": "heldout_three_phase",
+        "top1": 1.0,
+        "top5": 1.0
+      },
+      {
+        "candidate_rank": 3,
+        "learned_evaluated": 1200,
+        "learned_success": 1.0,
+        "random_evaluated": 1200,
+        "random_success": 1.0,
+        "task": "heldout_drop_transfer",
+        "top1": 0.0,
+        "top5": 1.0
+      }
+    ],
+    "summary": {
+      "candidate_rank": 2.0,
+      "learned_evaluated": 1200.0,
+      "learned_success": 1.0,
+      "random_evaluated": 1200.0,
+      "random_success": 1.0,
+      "top1": 0.3333333333333333,
+      "top5": 1.0
+    }
+  },
+  "manifest": {
+    "heldout_instance_exact_ast_overlap": 0,
+    "heldout_normalized_ast_templates": 200,
+    "heldout_program_instances": 500,
+    "heldout_template_alpha_overlap": 0,
+    "kind": "m222_cegis_rule_acquisition",
+    "model_visible_ids": false,
+    "predicate_action_primitive_overlap": 5,
+    "primitive_vocabulary_overlap": 5,
+    "seed": 2227,
+    "train_specifications": 5000,
+    "validation_specifications": 1000
+  },
+  "mutation_testing": {
+    "by_operator": {
+      "both_sources_bug": {
+        "count": 555,
+        "counterexample": null,
+        "rejected": 555,
+        "survivors": 0
+      },
+      "clause_order_bug": {
+        "count": 555,
+        "counterexample": null,
+        "rejected": 555,
+        "survivors": 0
+      },
+      "drop_to_move": {
+        "count": 556,
+        "counterexample": {
+          "R0": 1,
+          "R1": 0,
+          "R2": 0,
+          "R3": 0
+        },
+        "rejected": 556,
+        "survivors": 0
+      },
+      "duplicate_clause": {
+        "count": 556,
+        "counterexample": null,
+        "rejected": 556,
+        "survivors": 0
+      },
+      "extra_clause": {
+        "count": 556,
+        "counterexample": null,
+        "rejected": 556,
+        "survivors": 0
+      },
+      "missing_clause": {
+        "count": 556,
+        "counterexample": null,
+        "rejected": 556,
+        "survivors": 0
+      },
+      "modified_preserved_register": {
+        "count": 555,
+        "counterexample": {
+          "R0": 1,
+          "R1": 0,
+          "R2": 0,
+          "R3": 0
+        },
+        "rejected": 555,
+        "survivors": 0
+      },
+      "move_to_drop": {
+        "count": 556,
+        "counterexample": null,
+        "rejected": 556,
+        "survivors": 0
+      },
+      "nonterminating_cycle": {
+        "count": 555,
+        "counterexample": null,
+        "rejected": 555,
+        "survivors": 0
+      },
+      "one_only": {
+        "count": 555,
+        "counterexample": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 0,
+          "R3": 0
+        },
+        "rejected": 555,
+        "survivors": 0
+      },
+      "phase_switch_bug": {
+        "count": 555,
+        "counterexample": {
+          "R0": 1,
+          "R1": 0,
+          "R2": 0,
+          "R3": 0
+        },
+        "rejected": 555,
+        "survivors": 0
+      },
+      "premature_halt": {
+        "count": 555,
+        "counterexample": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 0,
+          "R3": 0
+        },
+        "rejected": 555,
+        "survivors": 0
+      },
+      "wrong_destination": {
+        "count": 556,
+        "counterexample": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 0,
+          "R3": 0
+        },
+        "rejected": 556,
+        "survivors": 0
+      },
+      "wrong_halt_condition": {
+        "count": 556,
+        "counterexample": null,
+        "rejected": 556,
+        "survivors": 0
+      },
+      "wrong_predicate_kind": {
+        "count": 556,
+        "counterexample": null,
+        "rejected": 556,
+        "survivors": 0
+      },
+      "wrong_predicate_variable": {
+        "count": 556,
+        "counterexample": null,
+        "rejected": 556,
+        "survivors": 0
+      },
+      "wrong_source": {
+        "count": 556,
+        "counterexample": null,
+        "rejected": 556,
+        "survivors": 0
+      },
+      "zero_only": {
+        "count": 555,
+        "counterexample": {
+          "R0": 0,
+          "R1": 1,
+          "R2": 0,
+          "R3": 0
+        },
+        "rejected": 555,
+        "survivors": 0
+      }
+    },
+    "false_accept_rate": 0.0,
+    "mutation_count": 10000,
+    "sample_survivors": [],
+    "surviving_mutants": 0
+  },
+  "negative_controls": {
+    "rows": [
+      {
+        "accepted": 0.0,
+        "control": "no_specification",
+        "status": "AMBIGUOUS"
+      },
+      {
+        "accepted": 0.0,
+        "control": "unsupported",
+        "status": "UNSUPPORTED"
+      },
+      {
+        "accepted": 0.0,
+        "control": "budget_too_small",
+        "status": "SEARCH_BUDGET_EXHAUSTED"
+      }
+    ],
+    "summary": {
+      "accepted": 0.0
+    }
+  },
+  "oracle_boundary": {
+    "forbidden_constructor_refs": 0,
+    "hidden_oracle_public_methods": [
+      "query",
+      "score_after_termination"
+    ],
+    "target_access_guards": {
+      "target_ast": true,
+      "target_hash": true,
+      "target_name": true,
+      "target_template": true
+    }
+  },
+  "retrieval_novelty": {
+    "rows": [
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 100,
+        "mrr": 0.5,
+        "novel_abstention": 0.0,
+        "task": "heldout_two_phase",
+        "top1": 0.0,
+        "top5": 1.0
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 100,
+        "mrr": 1.0,
+        "novel_abstention": 0.0,
+        "task": "heldout_three_phase",
+        "top1": 1.0,
+        "top5": 1.0
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 100,
+        "mrr": 0.3333333333333333,
+        "novel_abstention": 0.0,
+        "task": "heldout_drop_transfer",
+        "top1": 0.0,
+        "top5": 1.0
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 1000,
+        "mrr": 0.5,
+        "novel_abstention": 0.0,
+        "task": "heldout_two_phase",
+        "top1": 0.0,
+        "top5": 1.0
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 1000,
+        "mrr": 1.0,
+        "novel_abstention": 0.0,
+        "task": "heldout_three_phase",
+        "top1": 1.0,
+        "top5": 1.0
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 1000,
+        "mrr": 0.3333333333333333,
+        "novel_abstention": 0.0,
+        "task": "heldout_drop_transfer",
+        "top1": 0.0,
+        "top5": 1.0
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 5000,
+        "mrr": 0.16666666666666666,
+        "novel_abstention": 0.0,
+        "task": "heldout_two_phase",
+        "top1": 0.0,
+        "top5": 0.0
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 5000,
+        "mrr": 1.0,
+        "novel_abstention": 0.0,
+        "task": "heldout_three_phase",
+        "top1": 1.0,
+        "top5": 1.0
+      },
+      {
+        "false_known_rate": 1.0,
+        "known_recall": 1.0,
+        "memory_size": 5000,
+        "mrr": 0.09090909090909091,
+        "novel_abstention": 0.0,
+        "task": "heldout_drop_transfer",
+        "top1": 0.0,
+        "top5": 0.0
+      }
+    ],
+    "summary": {
+      "false_known_rate": 1.0,
+      "known_recall": 1.0,
+      "memory_size": 2033.3333333333333,
+      "mrr": 0.5471380471380471,
+      "novel_abstention": 0.0,
+      "top1": 0.3333333333333333,
+      "top5": 0.7777777777777778
+    }
+  },
+  "rule_memory_integrity": {
+    "alpha_order_duplicate_rejected": true,
+    "partial_corruption_rejected": true,
+    "save_load": true,
+    "schema_version": 1,
+    "semantic_duplicate_rejected": true,
+    "status_policy_rejects_ambiguous": true
+  },
+  "semantic_classes": {
+    "candidate_ast_count": 300,
+    "selected_class_size_max": 39,
+    "semantic_class_count": 154
+  },
+  "sequential_acquisition": {
+    "rows": [
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 1,
+        "semantic_duplicate_count": 0,
+        "step": 1
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 2,
+        "semantic_duplicate_count": 0,
+        "step": 2
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 3,
+        "semantic_duplicate_count": 0,
+        "step": 3
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 4,
+        "semantic_duplicate_count": 0,
+        "step": 4
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 5,
+        "semantic_duplicate_count": 0,
+        "step": 5
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 6,
+        "semantic_duplicate_count": 0,
+        "step": 6
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 7,
+        "semantic_duplicate_count": 0,
+        "step": 7
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 8,
+        "semantic_duplicate_count": 0,
+        "step": 8
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 9,
+        "semantic_duplicate_count": 0,
+        "step": 9
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 10,
+        "semantic_duplicate_count": 0,
+        "step": 10
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 11,
+        "semantic_duplicate_count": 0,
+        "step": 11
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 12,
+        "semantic_duplicate_count": 0,
+        "step": 12
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 13,
+        "semantic_duplicate_count": 0,
+        "step": 13
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 14,
+        "semantic_duplicate_count": 0,
+        "step": 14
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 15,
+        "semantic_duplicate_count": 0,
+        "step": 15
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 16,
+        "semantic_duplicate_count": 0,
+        "step": 16
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 17,
+        "semantic_duplicate_count": 0,
+        "step": 17
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 18,
+        "semantic_duplicate_count": 0,
+        "step": 18
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 19,
+        "semantic_duplicate_count": 0,
+        "step": 19
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 20,
+        "semantic_duplicate_count": 0,
+        "step": 20
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 21,
+        "semantic_duplicate_count": 0,
+        "step": 21
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 22,
+        "semantic_duplicate_count": 0,
+        "step": 22
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 23,
+        "semantic_duplicate_count": 0,
+        "step": 23
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 24,
+        "semantic_duplicate_count": 0,
+        "step": 24
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 25,
+        "semantic_duplicate_count": 0,
+        "step": 25
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 26,
+        "semantic_duplicate_count": 0,
+        "step": 26
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 27,
+        "semantic_duplicate_count": 0,
+        "step": 27
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 28,
+        "semantic_duplicate_count": 0,
+        "step": 28
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 29,
+        "semantic_duplicate_count": 0,
+        "step": 29
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 30,
+        "semantic_duplicate_count": 0,
+        "step": 30
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 31,
+        "semantic_duplicate_count": 0,
+        "step": 31
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 32,
+        "semantic_duplicate_count": 0,
+        "step": 32
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 33,
+        "semantic_duplicate_count": 0,
+        "step": 33
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 34,
+        "semantic_duplicate_count": 0,
+        "step": 34
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 35,
+        "semantic_duplicate_count": 0,
+        "step": 35
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 36,
+        "semantic_duplicate_count": 0,
+        "step": 36
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 37,
+        "semantic_duplicate_count": 0,
+        "step": 37
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 38,
+        "semantic_duplicate_count": 0,
+        "step": 38
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 39,
+        "semantic_duplicate_count": 0,
+        "step": 39
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 40,
+        "semantic_duplicate_count": 0,
+        "step": 40
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 41,
+        "semantic_duplicate_count": 0,
+        "step": 41
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 42,
+        "semantic_duplicate_count": 0,
+        "step": 42
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 43,
+        "semantic_duplicate_count": 0,
+        "step": 43
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 44,
+        "semantic_duplicate_count": 0,
+        "step": 44
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 45,
+        "semantic_duplicate_count": 0,
+        "step": 45
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 46,
+        "semantic_duplicate_count": 0,
+        "step": 46
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 47,
+        "semantic_duplicate_count": 0,
+        "step": 47
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 48,
+        "semantic_duplicate_count": 0,
+        "step": 48
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 49,
+        "semantic_duplicate_count": 0,
+        "step": 49
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 50,
+        "semantic_duplicate_count": 0,
+        "step": 50
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 51,
+        "semantic_duplicate_count": 0,
+        "step": 51
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 52,
+        "semantic_duplicate_count": 0,
+        "step": 52
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 53,
+        "semantic_duplicate_count": 0,
+        "step": 53
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 54,
+        "semantic_duplicate_count": 0,
+        "step": 54
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 55,
+        "semantic_duplicate_count": 0,
+        "step": 55
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 56,
+        "semantic_duplicate_count": 0,
+        "step": 56
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 57,
+        "semantic_duplicate_count": 0,
+        "step": 57
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 58,
+        "semantic_duplicate_count": 0,
+        "step": 58
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 59,
+        "semantic_duplicate_count": 0,
+        "step": 59
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 60,
+        "semantic_duplicate_count": 0,
+        "step": 60
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 61,
+        "semantic_duplicate_count": 0,
+        "step": 61
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 62,
+        "semantic_duplicate_count": 0,
+        "step": 62
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 63,
+        "semantic_duplicate_count": 0,
+        "step": 63
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 64,
+        "semantic_duplicate_count": 0,
+        "step": 64
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 65,
+        "semantic_duplicate_count": 0,
+        "step": 65
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 66,
+        "semantic_duplicate_count": 0,
+        "step": 66
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 67,
+        "semantic_duplicate_count": 0,
+        "step": 67
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 68,
+        "semantic_duplicate_count": 0,
+        "step": 68
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 69,
+        "semantic_duplicate_count": 0,
+        "step": 69
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 70,
+        "semantic_duplicate_count": 0,
+        "step": 70
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 71,
+        "semantic_duplicate_count": 0,
+        "step": 71
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 72,
+        "semantic_duplicate_count": 0,
+        "step": 72
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 73,
+        "semantic_duplicate_count": 0,
+        "step": 73
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 74,
+        "semantic_duplicate_count": 0,
+        "step": 74
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 75,
+        "semantic_duplicate_count": 0,
+        "step": 75
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 76,
+        "semantic_duplicate_count": 0,
+        "step": 76
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 77,
+        "semantic_duplicate_count": 0,
+        "step": 77
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 78,
+        "semantic_duplicate_count": 0,
+        "step": 78
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 79,
+        "semantic_duplicate_count": 0,
+        "step": 79
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 80,
+        "semantic_duplicate_count": 0,
+        "step": 80
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 81,
+        "semantic_duplicate_count": 0,
+        "step": 81
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 82,
+        "semantic_duplicate_count": 0,
+        "step": 82
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 83,
+        "semantic_duplicate_count": 0,
+        "step": 83
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 84,
+        "semantic_duplicate_count": 0,
+        "step": 84
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 85,
+        "semantic_duplicate_count": 0,
+        "step": 85
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 86,
+        "semantic_duplicate_count": 0,
+        "step": 86
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 87,
+        "semantic_duplicate_count": 0,
+        "step": 87
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 88,
+        "semantic_duplicate_count": 0,
+        "step": 88
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 89,
+        "semantic_duplicate_count": 0,
+        "step": 89
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 90,
+        "semantic_duplicate_count": 0,
+        "step": 90
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 91,
+        "semantic_duplicate_count": 0,
+        "step": 91
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 92,
+        "semantic_duplicate_count": 0,
+        "step": 92
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 93,
+        "semantic_duplicate_count": 0,
+        "step": 93
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 94,
+        "semantic_duplicate_count": 0,
+        "step": 94
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 95,
+        "semantic_duplicate_count": 0,
+        "step": 95
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 96,
+        "semantic_duplicate_count": 0,
+        "step": 96
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 97,
+        "semantic_duplicate_count": 0,
+        "step": 97
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 98,
+        "semantic_duplicate_count": 0,
+        "step": 98
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 99,
+        "semantic_duplicate_count": 0,
+        "step": 99
+      },
+      {
+        "execution_retention": 1.0,
+        "latency_ms": 0.1,
+        "memory_size": 100,
+        "semantic_duplicate_count": 0,
+        "step": 100
+      }
+    ],
+    "summary": {
+      "execution_retention": 1.0,
+      "latency_ms": 0.1,
+      "memory_size": 50.5,
+      "semantic_duplicate_count": 0.0,
+      "step": 50.5
+    }
+  },
+  "stage1_decision": "OUTCOME B \u2014 generic CEGIS works, learned guidance does not yet help enough.",
+  "subprogram_search": {
+    "rows": [
+      {
+        "depth": 2,
+        "evaluated": 89,
+        "found": 1.0,
+        "target_sequence_supplied": false,
+        "task": "heldout_two_phase"
+      },
+      {
+        "depth": 3,
+        "evaluated": 1437,
+        "found": 1.0,
+        "target_sequence_supplied": false,
+        "task": "heldout_three_phase"
+      }
+    ],
+    "summary": {
+      "depth": 2.5,
+      "evaluated": 763.0,
+      "found": 1.0
+    }
+  },
+  "verifier": {
+    "rows": [
+      {
+        "abstract": true,
+        "abstract_nodes": 16,
+        "property": true,
+        "static": true,
+        "task": "heldout_two_phase"
+      },
+      {
+        "abstract": true,
+        "abstract_nodes": 16,
+        "property": true,
+        "static": true,
+        "task": "heldout_three_phase"
+      },
+      {
+        "abstract": true,
+        "abstract_nodes": 16,
+        "property": true,
+        "static": true,
+        "task": "heldout_drop_transfer"
+      }
+    ],
+    "summary": {
+      "abstract_nodes": 16.0
+    }
+  }
+}

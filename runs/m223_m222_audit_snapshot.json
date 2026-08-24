@@ -1,0 +1,23 @@
+{
+  "actual_cegis_pool_size": 1200,
+  "actual_evaluated_target_count": 3,
+  "hardcoded_metric_locations_after_patch": [],
+  "learned_ranker_train_eval_overlap": "hidden_targets reused in M-22.2 train/eval ranker analysis",
+  "m222_commit": "4b0c17c",
+  "mutation_target_count": 1,
+  "novelty_detection_result": {
+    "false_known_rate": 1.0,
+    "known_recall": 1.0,
+    "memory_size": 2033.3333333333333,
+    "mrr": 0.5471380471380471,
+    "novel_abstention": 0.0,
+    "top1": 0.3333333333333333,
+    "top5": 0.7777777777777778
+  },
+  "report_hashes": {
+    "docs/m222_acquisition_integrity_cegis_report.md": "87e4f2691809bd77f6c35a3add930db8aed9dc36edfc5624966c691c43b4545c",
+    "docs/m222_generic_grammar_cegis_report.md": "54321e315c99d011cb4787918bbc9a08a750c9bf41e97e383739aa7365365673",
+    "docs/m222_learned_guidance_report.md": "d9742f1d602652b55e73b82ada922113ce761db083731081c1b871a642e97b97",
+    "docs/m222_verifier_mutation_report.md": "46eded44f7042fbe00c52f36d98869d0b5e922fcda181f32eb369086c579328e"
+  }
+}

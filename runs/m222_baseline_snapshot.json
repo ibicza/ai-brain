@@ -1,0 +1,68 @@
+{
+  "active_query_results": {
+    "active_examples": 2.0,
+    "active_remaining": 1.0,
+    "active_success": 1.0,
+    "random_examples": 3.5,
+    "random_remaining": 1.5,
+    "random_success": 0.5
+  },
+  "learned_ranker_parameter_count": 37,
+  "manifest": {
+    "branch": "exp/oracle-free-rule-acquisition",
+    "candidate_space_1e2": 120,
+    "candidate_space_1e3": 1000,
+    "candidate_space_1e4": 10000,
+    "candidate_space_1e5_practical": "virtual budget over compact verified candidate pool",
+    "heldout_ast_templates": 100,
+    "heldout_program_instances": 200,
+    "heldout_sketches_absent": true,
+    "kind": "m221_oracle_free_rule_acquisition",
+    "materialized_verified_candidate_pool": 11,
+    "train_task_specs": 1000
+  },
+  "retrieval_results": {
+    "execution_top1": 0.0,
+    "mrr": 0.23468045112781954,
+    "rank": 21.6,
+    "top1": 0.2,
+    "top3": 0.2,
+    "top5": 0.2
+  },
+  "rule_memory_fixture": "datasets/m22_verified_rule_acquisition/rule_memory.json",
+  "search_pool_size": 11,
+  "slot_filling_results": {
+    "ast_semantic_exact": 0.4,
+    "execution_exact": 0.0,
+    "slot_accuracy": 0.2333333333333333,
+    "verifier_acceptance": 0.0,
+    "whole_assignment_exact": 0.0
+  },
+  "source_branch": "exp/oracle-free-rule-acquisition",
+  "source_commit": "20f61fa",
+  "verifier_mutation_results": {
+    "false_verified_program_rate": 0.0,
+    "rows": [
+      {
+        "accepted": 0.0,
+        "case": "drops_second_source",
+        "reason": "wrong_value_R2"
+      },
+      {
+        "accepted": 0.0,
+        "case": "wrong_destination",
+        "reason": "preserve_violation_D"
+      },
+      {
+        "accepted": 0.0,
+        "case": "preserves_one_source",
+        "reason": "not_empty_B"
+      },
+      {
+        "accepted": 0.0,
+        "case": "wrong_halt_condition",
+        "reason": "not_empty_B"
+      }
+    ]
+  }
+}

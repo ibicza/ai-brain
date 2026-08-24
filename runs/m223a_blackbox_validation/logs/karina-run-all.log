@@ -1,0 +1,6 @@
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building ai-brain @ file:///home/ibicza/ai-brain-m223a-run
+      Built ai-brain @ file:///home/ibicza/ai-brain-m223a-run
+Installed 46 packages in 200ms
+{"analysis_path": "runs/m223a_blackbox_validation/analysis.json", "decision": "OUTCOME B", "gates": {"balanced_templates_200": true, "balanced_unique_templates_200": false, "candidate_pool_10k": true, "demo_false_selection_zero": true, "full_spec_property_acquisition": true, "hidden_semantic_correctness": true, "known_incorrect_count_10k": true, "known_incorrect_false_accept_zero": true, "mutation_count_10k": true, "mutation_diverse_targets_100": true, "rule_memory_reload": true, "sequential_100_retention": true, "target_access_violations_zero": true}}

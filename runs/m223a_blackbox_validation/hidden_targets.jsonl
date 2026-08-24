@@ -1,0 +1,200 @@
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-db5303a9dfa16018", "variable_count": 2}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-6a61649b98774318", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-49ee33d0971c7593", "variable_count": 4}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-82ce01eb3656a318", "variable_count": 3}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-4aeaf1584e0a5ce5", "variable_count": 2}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-c6b01fddc21219c5", "variable_count": 3}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-be65762e1c7b126c", "variable_count": 1}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-736c3e870cc1d872", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-37a846008896c735", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-665403ba63379f4c", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-1de84faee232b67a", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-3ce96d784fa554ac", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-e8f77d63beda2281", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-6adc7a88e422fb22", "variable_count": 4}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-69aae7562ef2ecce", "variable_count": 3}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-85f82ce652cceb5b", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-3b3f3731cfb9a3c7", "variable_count": 0}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-9c5d270ca6ae9ebe", "variable_count": 1}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-e69816207bea2c33", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-411437d13706a80b", "variable_count": 4}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-9127893a135dfbe6", "variable_count": 3}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-22d294c5eb5fcac7", "variable_count": 2}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-bbb257228bf62a53", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-6d2a6b902c306c1a", "variable_count": 4}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-45c67f8168877cb9", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-3fdab2e7010b8c65", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-b4aeaf55922f0fb9", "variable_count": 0}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-fa1217ee18227980", "variable_count": 3}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-c22df58cc217a1e5", "variable_count": 3}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-6ee2c7d8323a12ff", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-064d0907ef65e360", "variable_count": 0}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-f0c75fab72495b7f", "variable_count": 2}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-c5ef89d131f75c09", "variable_count": 2}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-e02404c4e8a2797c", "variable_count": 4}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-3fd92526fc17ab9b", "variable_count": 1}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-170b453a805bcdb4", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-a0d6e12c1d32e5e2", "variable_count": 0}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-76d8e98f18d52e95", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-e38b051db88c61ab", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-9cb44407a853b25f", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-3b756a61417e08e5", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-90ac56c1e040749a", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-fbf320ba37958982", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-026b2afaf482a5cf", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-e5c855e2ac0d3862", "variable_count": 0}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-a94bd36be7c3f2bc", "variable_count": 1}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-708d05bf563fc866", "variable_count": 3}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-30ec1e5cf73b774e", "variable_count": 2}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-8b42ffb15832d3ba", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-b600003f853cb0a0", "variable_count": 4}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-5ea148e633a99f14", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-0c9dc1337cb129a7", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-a0893c86ca9ce462", "variable_count": 0}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-d7332c6a2681b52b", "variable_count": 3}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-16f9632f922efd5d", "variable_count": 2}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-17df38aa021c7e7c", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-e525c9432fa4e222", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-570319d057c01eb7", "variable_count": 0}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-5635c89a3e8b0dda", "variable_count": 3}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-864d0173002694cd", "variable_count": 1}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-7bf6f3098f2e2eb9", "variable_count": 4}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-c76bf4bab8f584a2", "variable_count": 1}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-2c6fdd1005a16bc6", "variable_count": 1}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-8d38a413827b4a94", "variable_count": 4}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-38e71fc3bee7f3e1", "variable_count": 1}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-50f6cb5535507779", "variable_count": 1}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-e434ce30aee21cca", "variable_count": 3}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-941ca6015b7c4b3f", "variable_count": 2}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-a457ad8abf037cd5", "variable_count": 3}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-d60b8a3b78468b52", "variable_count": 3}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-9a09861c59d8ed05", "variable_count": 3}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-c475d5a933381223", "variable_count": 2}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-be29ba4fbcc52274", "variable_count": 3}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-19ef3d4f0ccd98c7", "variable_count": 3}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-3ab92b3efa774c1c", "variable_count": 1}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-3ce3a7df95aedb93", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-4808e052705318eb", "variable_count": 0}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-eb5588cd115de17d", "variable_count": 1}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-4b747ab3a7bf2e4a", "variable_count": 2}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-d3a48e80ee042dd4", "variable_count": 3}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-2de411621660ce20", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-6370bec98233e836", "variable_count": 0}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-6c7f7ee4d64469d2", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-00cf3a1a65c7d11a", "variable_count": 0}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-fe55f8644d19e685", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-f557056636f18cbc", "variable_count": 4}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-2cc66682c6134d83", "variable_count": 2}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-381130a0db1c49b1", "variable_count": 1}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-c10b11d19c3367ce", "variable_count": 1}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-f7bb7a813ee1dcd5", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-6177075dd53f3225", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-4389bcd74fdda711", "variable_count": 0}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-f61c7919a76c1e73", "variable_count": 2}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-0fa92981b2534392", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-0659fd570e80309a", "variable_count": 4}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-697e09127f6ff208", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-f66480ab352c6efa", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-83ccabcdc22a79dd", "variable_count": 4}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-064883efba4f5566", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-9581aaec1dea3b4c", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-917cd88826516ae2", "variable_count": 0}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-ba2444bc00b01054", "variable_count": 2}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-49ba969d83ababa1", "variable_count": 3}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-07f88858e1c271bb", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-3fc5e047f69940fa", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-6d469181327478a4", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-c82032005b001256", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-5faf7d15992b47f9", "variable_count": 0}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-5391a6f11f761a19", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-764af374770677e0", "variable_count": 4}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-226e2db63dc60b27", "variable_count": 2}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-31fd2c24623e3b9d", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-b9773c06d596a165", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-e2a55841a627c49f", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-f15bb29b9158b33a", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-0d98b0e5fde2b025", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-7bdcd2f1105512b3", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-7abc07f9b66fc252", "variable_count": 4}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-fa6f50c0de928c04", "variable_count": 3}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-20f396057499f550", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-32e6ac4d5ed6d0a5", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-0a8a9ccdfbbf0935", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-56520b2a7d6563b3", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-a39af2d803fd54b5", "variable_count": 4}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-59ef25e031b4c076", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-c0ee8740047663fc", "variable_count": 0}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-ca84faacd1e3a3bd", "variable_count": 2}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-b3c548ad88e36e4e", "variable_count": 2}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-c3726708a45e2f0a", "variable_count": 0}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-937a4a496540f977", "variable_count": 1}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-ed92ae636e2a0d35", "variable_count": 4}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-4e205497ced73aa1", "variable_count": 2}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-781fb10a545391f9", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-7c45dac00bea6263", "variable_count": 0}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-73b8586dda87ad9b", "variable_count": 3}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-78cd307d8e949431", "variable_count": 3}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-3bcb0542c6c699cc", "variable_count": 2}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-54a8f19e0338736d", "variable_count": 3}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-f896a6825d865a64", "variable_count": 1}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-03485a424d2d3f15", "variable_count": 1}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-e4950470370bc703", "variable_count": 0}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-9de1ad5e2f3154f2", "variable_count": 1}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-ac5df5baab52dcdf", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-09cf4219a56c0a50", "variable_count": 0}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-0166c6f9108a743a", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-ae419343b162a566", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-4b07861daa6aa636", "variable_count": 4}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-27ac724baced9d8c", "variable_count": 1}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-7f7411b0c22e2271", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-367ca43f28179950", "variable_count": 0}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-688a897e146299aa", "variable_count": 1}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-d01fac6ace2784a5", "variable_count": 4}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-b06839bae08b20f2", "variable_count": 2}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-61e270c0941f647e", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-f77b5957f35cd253", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-0da2594c1aee1777", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-2e0b04972e4f4dd1", "variable_count": 4}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-230297b00c66fa36", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-17388064bc690144", "variable_count": 4}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-0d74f59027ee5289", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-015f8f5612b8a69c", "variable_count": 0}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-c77dd1c27316982d", "variable_count": 3}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-99d16bf3d078d678", "variable_count": 3}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-a8b31ddb8282183b", "variable_count": 1}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-45cb1f5df669ec97", "variable_count": 0}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-a7b8d38448bd3df0", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-9cd5269056dd5b1b", "variable_count": 0}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-2c20d48e5a0a77b4", "variable_count": 0}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-bdf4cc628351cb6b", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-c16bc104ab5a1e29", "variable_count": 0}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-611fa0070d2f2229", "variable_count": 3}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-005c7a4ddd1d779f", "variable_count": 0}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-24e4b2d3ecc073f5", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-e1829e94edaf05a3", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-7e2adec46f989285", "variable_count": 4}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-ee595f0291ae5adc", "variable_count": 4}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-3f69c550afbba8df", "variable_count": 2}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-297661ba0a3c2d82", "variable_count": 4}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-6514010db2ed3a54", "variable_count": 2}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-b9dd91be4b4fd76f", "variable_count": 2}
+{"clause_count": 3, "family": "transfer_drop", "predicate_width": 2, "program": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-c67c0f9e26076c88", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-bd49cbe4e2993887", "variable_count": 4}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-4735f460d75bc8ad", "variable_count": 2}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-ca7ced5cb6001a84", "variable_count": 1}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-f2438930236ddf1b", "variable_count": 0}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-96873b3084933d39", "variable_count": 1}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-8523694f6b6bada8", "variable_count": 0}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-eb0f22d8b61120e4", "variable_count": 2}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-4a49ac28c14f0a47", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-250c8ade3f9b01fd", "variable_count": 4}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-77e1220d6d36a6a3", "variable_count": 3}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-ce84afcf01b798a9", "variable_count": 4}
+{"clause_count": 3, "family": "phase_switch", "predicate_width": 2, "program": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3", "task_id": "task-5231fc38a9fd82a4", "variable_count": 3}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-a23bf4b8c96d37cf", "variable_count": 1}
+{"clause_count": 2, "family": "transfer", "predicate_width": 1, "program": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-ae2300b5bcc7fa13", "variable_count": 2}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-ef54961047fd061c", "variable_count": 1}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-2a7754ae7c595954", "variable_count": 0}
+{"clause_count": 2, "family": "drop", "predicate_width": 1, "program": "NE A D A\nE A H\nA R0 B R1 C R2 D R3", "task_id": "task-8923393e0f0aaf38", "variable_count": 1}
+{"clause_count": 1, "family": "halt_only", "predicate_width": 0, "program": "H\nA R0 B R1 C R2 D R3", "task_id": "task-557b0fcb06e79376", "variable_count": 0}
+{"clause_count": 4, "family": "three_phase_transfer", "predicate_width": 3, "program": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3", "task_id": "task-af0f8e7b02d852c7", "variable_count": 4}

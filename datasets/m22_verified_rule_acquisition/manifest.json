@@ -1,0 +1,12 @@
+{
+  "branch": "exp/verified-rule-acquisition",
+  "full_memory_rules": 25,
+  "heldout_sketches": [
+    "TWO_SOURCE_TRANSFER",
+    "THREE_SOURCE_TRANSFER"
+  ],
+  "kind": "m22_verified_rule_acquisition",
+  "memory_rules": 23,
+  "rule_ids_model_visible": false,
+  "sketch_count": 7
+}

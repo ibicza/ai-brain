@@ -1,0 +1,348 @@
+{
+  "allow_hypothesis_identified": false,
+  "records": [
+    {
+      "deprecated": false,
+      "program_json": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3",
+      "provenance": "m223a_blackbox_acquisition",
+      "rule_id": "rule-00001-aa2ef578",
+      "semantic_hash": "aa2ef578409a5a305a5d66c998c75046d159c31856127a01f43d28a91168d38a",
+      "specification": {
+        "allowed_primitives": [
+          "HALT",
+          "MOVE_ONE"
+        ],
+        "allowed_variables": [
+          "A",
+          "B"
+        ],
+        "drops": [],
+        "inputs": [
+          "A"
+        ],
+        "outputs": [
+          "B"
+        ],
+        "phase_constraints": [
+          [
+            "MOVE_ONE",
+            "A",
+            "B"
+          ]
+        ],
+        "preserve": [
+          "C",
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A"
+        ],
+        "transfers": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "verification_evidence": {
+        "accepted": true,
+        "counterexample": null,
+        "reason": "ok",
+        "status": "PROPERTY_VERIFIED",
+        "verifier": "property_verify"
+      },
+      "version": 1
+    },
+    {
+      "deprecated": false,
+      "program_json": "H\nA R0 B R1 C R2 D R3",
+      "provenance": "m223a_blackbox_acquisition",
+      "rule_id": "rule-00002-397734e1",
+      "semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "specification": {
+        "allowed_primitives": [
+          "HALT"
+        ],
+        "allowed_variables": [],
+        "drops": [],
+        "inputs": [],
+        "outputs": [],
+        "phase_constraints": [],
+        "preserve": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "terminate_when_empty": [],
+        "transfers": [],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "verification_evidence": {
+        "accepted": true,
+        "counterexample": null,
+        "reason": "ok",
+        "status": "PROPERTY_VERIFIED",
+        "verifier": "property_verify"
+      },
+      "version": 1
+    },
+    {
+      "deprecated": false,
+      "program_json": "NE A M A D\nE A NE B M B D\nE A E B NE C M C D\nE A E B E C H\nA R0 B R1 C R2 D R3",
+      "provenance": "m223a_blackbox_acquisition",
+      "rule_id": "rule-00003-8c180adb",
+      "semantic_hash": "8c180adbc6561f137d1b35516c9ea9dcbf4f42bb3db4c337651be9706f54a6e7",
+      "specification": {
+        "allowed_primitives": [
+          "HALT",
+          "MOVE_ONE"
+        ],
+        "allowed_variables": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "drops": [],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "phase_constraints": [
+          [
+            "MOVE_ONE",
+            "A",
+            "D"
+          ],
+          [
+            "MOVE_ONE",
+            "B",
+            "D"
+          ],
+          [
+            "MOVE_ONE",
+            "C",
+            "D"
+          ]
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "A",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ],
+          [
+            "C",
+            "D"
+          ]
+        ],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "verification_evidence": {
+        "accepted": true,
+        "counterexample": null,
+        "reason": "ok",
+        "status": "PROPERTY_VERIFIED",
+        "verifier": "property_verify"
+      },
+      "version": 1
+    },
+    {
+      "deprecated": false,
+      "program_json": "NE A M A C\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3",
+      "provenance": "m223a_blackbox_acquisition",
+      "rule_id": "rule-00004-7feb3789",
+      "semantic_hash": "7feb3789ed1110b94733ded4062879fb5ae1b74074af5988b431653d7f637723",
+      "specification": {
+        "allowed_primitives": [
+          "HALT",
+          "MOVE_ONE"
+        ],
+        "allowed_variables": [
+          "A",
+          "B",
+          "C"
+        ],
+        "drops": [],
+        "inputs": [
+          "A",
+          "B"
+        ],
+        "outputs": [
+          "C"
+        ],
+        "phase_constraints": [
+          [
+            "MOVE_ONE",
+            "A",
+            "C"
+          ],
+          [
+            "MOVE_ONE",
+            "B",
+            "C"
+          ]
+        ],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B"
+        ],
+        "transfers": [
+          [
+            "A",
+            "C"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "verification_evidence": {
+        "accepted": true,
+        "counterexample": null,
+        "reason": "ok",
+        "status": "PROPERTY_VERIFIED",
+        "verifier": "property_verify"
+      },
+      "version": 1
+    },
+    {
+      "deprecated": false,
+      "program_json": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3",
+      "provenance": "m223a_blackbox_acquisition",
+      "rule_id": "rule-00005-c8dab2bc",
+      "semantic_hash": "c8dab2bcd820e737733a14574f17da4a884e98a3efea09712487a246ddda317e",
+      "specification": {
+        "allowed_primitives": [
+          "DROP_ONE",
+          "HALT",
+          "MOVE_ONE"
+        ],
+        "allowed_variables": [
+          "A",
+          "B",
+          "C"
+        ],
+        "drops": [
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B"
+        ],
+        "outputs": [
+          "C"
+        ],
+        "phase_constraints": [
+          [
+            "DROP_ONE",
+            "A",
+            null
+          ],
+          [
+            "MOVE_ONE",
+            "B",
+            "C"
+          ]
+        ],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B"
+        ],
+        "transfers": [
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "verification_evidence": {
+        "accepted": true,
+        "counterexample": null,
+        "reason": "ok",
+        "status": "PROPERTY_VERIFIED",
+        "verifier": "property_verify"
+      },
+      "version": 1
+    },
+    {
+      "deprecated": false,
+      "program_json": "NE A D A\nE A H\nA R0 B R1 C R2 D R3",
+      "provenance": "m223a_blackbox_acquisition",
+      "rule_id": "rule-00006-9ac56261",
+      "semantic_hash": "9ac5626136441c0066966beba8512bd4ee69517818697c5f1826cf414f801fca",
+      "specification": {
+        "allowed_primitives": [
+          "DROP_ONE",
+          "HALT"
+        ],
+        "allowed_variables": [
+          "A"
+        ],
+        "drops": [
+          "A"
+        ],
+        "inputs": [
+          "A"
+        ],
+        "outputs": [],
+        "phase_constraints": [
+          [
+            "DROP_ONE",
+            "A",
+            null
+          ]
+        ],
+        "preserve": [
+          "B",
+          "C",
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A"
+        ],
+        "transfers": [],
+        "unsupported": false
+      },
+      "status": "PROPERTY_VERIFIED",
+      "verification_evidence": {
+        "accepted": true,
+        "counterexample": null,
+        "reason": "ok",
+        "status": "PROPERTY_VERIFIED",
+        "verifier": "property_verify"
+      },
+      "version": 1
+    }
+  ],
+  "schema_version": 1
+}

@@ -1,0 +1,520 @@
+{
+  "coverage": {
+    "bindings": 20,
+    "predicate_action_tuples": 9,
+    "program_families": 7,
+    "templates": 5
+  },
+  "eval_counts": {
+    "action_heldout_register_pairs": 28,
+    "action_seen": 102,
+    "alpha_renaming": 288,
+    "binding_heldout": 36,
+    "binding_seen": 54,
+    "binding_swapped": 248,
+    "distractor_0": 1056,
+    "distractor_16": 1056,
+    "distractor_2": 1056,
+    "distractor_8": 1056,
+    "heldout_binding": 2412,
+    "heldout_merge_two_11_20": 7200,
+    "heldout_merge_two_21_50": 43200,
+    "heldout_merge_two_51_100": 19800,
+    "heldout_merge_two_seen": 4488,
+    "heldout_predicate_composition": 728,
+    "heldout_program_instance": 2784,
+    "merge_three": 1040,
+    "order_invariance": 2412,
+    "predicate_heldout": 64,
+    "predicate_seen": 96,
+    "program_length_21_50": 28380,
+    "program_length_51_100": 6780,
+    "program_removed": 248,
+    "program_seen": 3618,
+    "single_clause_heldout": 192,
+    "surface_alternate": 1684,
+    "teacher_forced_merge_two": 4488,
+    "wrong_program": 248
+  },
+  "kind": "m201_compositional_dsl_variable_binding",
+  "model_config": "arithmetic_3m",
+  "prompt_audit": {
+    "eval/action_heldout_register_pairs": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 28,
+      "forbidden_prompt_count": 0
+    },
+    "eval/action_seen": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 102,
+      "forbidden_prompt_count": 0
+    },
+    "eval/alpha_renaming": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 288,
+      "forbidden_prompt_count": 0
+    },
+    "eval/binding_heldout": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 36,
+      "forbidden_prompt_count": 0
+    },
+    "eval/binding_seen": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 54,
+      "forbidden_prompt_count": 0
+    },
+    "eval/binding_swapped": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 248,
+      "forbidden_prompt_count": 0
+    },
+    "eval/distractor_0": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 1056,
+      "forbidden_prompt_count": 0
+    },
+    "eval/distractor_16": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 1056,
+      "forbidden_prompt_count": 0
+    },
+    "eval/distractor_2": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 1056,
+      "forbidden_prompt_count": 0
+    },
+    "eval/distractor_8": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 1056,
+      "forbidden_prompt_count": 0
+    },
+    "eval/heldout_binding": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 2412,
+      "forbidden_prompt_count": 0
+    },
+    "eval/heldout_merge_two_11_20": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 7200,
+      "forbidden_prompt_count": 0
+    },
+    "eval/heldout_merge_two_21_50": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 43200,
+      "forbidden_prompt_count": 0
+    },
+    "eval/heldout_merge_two_51_100": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 19800,
+      "forbidden_prompt_count": 0
+    },
+    "eval/heldout_merge_two_seen": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 4488,
+      "forbidden_prompt_count": 0
+    },
+    "eval/heldout_predicate_composition": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 728,
+      "forbidden_prompt_count": 0
+    },
+    "eval/heldout_program_instance": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 2784,
+      "forbidden_prompt_count": 0
+    },
+    "eval/merge_three": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 1040,
+      "forbidden_prompt_count": 0
+    },
+    "eval/order_invariance": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 2412,
+      "forbidden_prompt_count": 0
+    },
+    "eval/predicate_heldout": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 64,
+      "forbidden_prompt_count": 0
+    },
+    "eval/predicate_seen": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 96,
+      "forbidden_prompt_count": 0
+    },
+    "eval/program_length_21_50": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 28380,
+      "forbidden_prompt_count": 0
+    },
+    "eval/program_length_51_100": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 6780,
+      "forbidden_prompt_count": 0
+    },
+    "eval/program_removed": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 248,
+      "forbidden_prompt_count": 0
+    },
+    "eval/program_seen": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 3618,
+      "forbidden_prompt_count": 0
+    },
+    "eval/single_clause_heldout": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 192,
+      "forbidden_prompt_count": 0
+    },
+    "eval/surface_alternate": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 1684,
+      "forbidden_prompt_count": 0
+    },
+    "eval/teacher_forced_merge_two": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 4488,
+      "forbidden_prompt_count": 0
+    },
+    "eval/wrong_program": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 248,
+      "forbidden_prompt_count": 0
+    },
+    "train/action_semantics": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 5000,
+      "forbidden_prompt_count": 0
+    },
+    "train/binding": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 4000,
+      "forbidden_prompt_count": 0
+    },
+    "train/curriculum_stage1": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 12000,
+      "forbidden_prompt_count": 0
+    },
+    "train/curriculum_stage2": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 16000,
+      "forbidden_prompt_count": 0
+    },
+    "train/flat_program": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 14000,
+      "forbidden_prompt_count": 0
+    },
+    "train/predicate": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 4000,
+      "forbidden_prompt_count": 0
+    },
+    "train/primitives": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 12000,
+      "forbidden_prompt_count": 0
+    },
+    "train/single_clause": {
+      "contains_case": false,
+      "contains_program_id": false,
+      "count": 6000,
+      "forbidden_prompt_count": 0
+    }
+  },
+  "seed": 20100,
+  "split_structural_audit": {
+    "action_heldout_register_pairs": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "action_seen": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "alpha_renaming": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "binding_heldout": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "binding_seen": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "binding_swapped": {
+      "clause_overlap": 5,
+      "exact_program_text_overlap": 6,
+      "normalized_ast_overlap": 3,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 8,
+      "template_overlap": 3
+    },
+    "distractor_0": {
+      "clause_overlap": 3,
+      "exact_program_text_overlap": 4,
+      "normalized_ast_overlap": 2,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 5,
+      "template_overlap": 2
+    },
+    "distractor_16": {
+      "clause_overlap": 3,
+      "exact_program_text_overlap": 4,
+      "normalized_ast_overlap": 2,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 5,
+      "template_overlap": 2
+    },
+    "distractor_2": {
+      "clause_overlap": 3,
+      "exact_program_text_overlap": 4,
+      "normalized_ast_overlap": 2,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 5,
+      "template_overlap": 2
+    },
+    "distractor_8": {
+      "clause_overlap": 3,
+      "exact_program_text_overlap": 4,
+      "normalized_ast_overlap": 2,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 5,
+      "template_overlap": 2
+    },
+    "heldout_binding": {
+      "clause_overlap": 8,
+      "exact_program_text_overlap": 8,
+      "normalized_ast_overlap": 5,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 9,
+      "template_overlap": 5
+    },
+    "heldout_merge_two_11_20": {
+      "clause_overlap": 2,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 3,
+      "template_overlap": 0
+    },
+    "heldout_merge_two_21_50": {
+      "clause_overlap": 2,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 3,
+      "template_overlap": 0
+    },
+    "heldout_merge_two_51_100": {
+      "clause_overlap": 2,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 3,
+      "predicate_action_tuple_overlap": 3,
+      "template_overlap": 0
+    },
+    "heldout_merge_two_seen": {
+      "clause_overlap": 2,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 8,
+      "predicate_action_tuple_overlap": 3,
+      "template_overlap": 0
+    },
+    "heldout_predicate_composition": {
+      "clause_overlap": 2,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 8,
+      "predicate_action_tuple_overlap": 3,
+      "template_overlap": 0
+    },
+    "heldout_program_instance": {
+      "clause_overlap": 4,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 8,
+      "predicate_action_tuple_overlap": 3,
+      "template_overlap": 0
+    },
+    "merge_three": {
+      "clause_overlap": 1,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 2,
+      "template_overlap": 0
+    },
+    "order_invariance": {
+      "clause_overlap": 8,
+      "exact_program_text_overlap": 8,
+      "normalized_ast_overlap": 5,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 9,
+      "template_overlap": 5
+    },
+    "predicate_heldout": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "predicate_seen": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "program_length_21_50": {
+      "clause_overlap": 5,
+      "exact_program_text_overlap": 6,
+      "normalized_ast_overlap": 3,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 8,
+      "template_overlap": 3
+    },
+    "program_length_51_100": {
+      "clause_overlap": 3,
+      "exact_program_text_overlap": 4,
+      "normalized_ast_overlap": 2,
+      "physical_binding_overlap": 3,
+      "predicate_action_tuple_overlap": 5,
+      "template_overlap": 2
+    },
+    "program_removed": {
+      "clause_overlap": 5,
+      "exact_program_text_overlap": 6,
+      "normalized_ast_overlap": 3,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 8,
+      "template_overlap": 3
+    },
+    "program_seen": {
+      "clause_overlap": 8,
+      "exact_program_text_overlap": 8,
+      "normalized_ast_overlap": 5,
+      "physical_binding_overlap": 6,
+      "predicate_action_tuple_overlap": 9,
+      "template_overlap": 5
+    },
+    "single_clause_heldout": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "surface_alternate": {
+      "clause_overlap": 5,
+      "exact_program_text_overlap": 6,
+      "normalized_ast_overlap": 3,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 8,
+      "template_overlap": 3
+    },
+    "teacher_forced_merge_two": {
+      "clause_overlap": 0,
+      "exact_program_text_overlap": 0,
+      "normalized_ast_overlap": 0,
+      "physical_binding_overlap": 0,
+      "predicate_action_tuple_overlap": 0,
+      "template_overlap": 0
+    },
+    "wrong_program": {
+      "clause_overlap": 5,
+      "exact_program_text_overlap": 6,
+      "normalized_ast_overlap": 3,
+      "physical_binding_overlap": 4,
+      "predicate_action_tuple_overlap": 8,
+      "template_overlap": 3
+    }
+  },
+  "structural_audit": {
+    "clause_overlap": 8,
+    "exact_program_text_overlap": 8,
+    "exact_prompt_overlap": 566,
+    "heldout_template_overlap": 0,
+    "logical_variable_pattern_overlap": 1,
+    "normalized_ast_overlap": 5,
+    "physical_binding_overlap": 8,
+    "predicate_action_tuple_overlap": 9
+  },
+  "train_counts": {
+    "action_semantics": 5000,
+    "binding": 4000,
+    "curriculum_stage1": 12000,
+    "curriculum_stage2": 16000,
+    "flat_program": 14000,
+    "predicate": 4000,
+    "primitives": 12000,
+    "single_clause": 6000
+  }
+}

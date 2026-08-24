@@ -1,0 +1,12 @@
+{
+  "binding_overlap": 0,
+  "canonical_parser_roundtrip": true,
+  "heldout_ast_overlap": 0,
+  "heldout_binding_count": 4,
+  "heldout_program_count": 3,
+  "kind": "m21_neural_symbolic_interpreter",
+  "m201a_baseline_report": "runs/m201a_fair_compositional_retest_report.md",
+  "seed": 2117,
+  "train_binding_count": 20,
+  "train_program_count": 10
+}

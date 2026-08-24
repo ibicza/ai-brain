@@ -1,0 +1,1376 @@
+{
+  "records": [
+    {
+      "alpha_hash": "aa2ef578409a5a305a5d66c998c75046d159c31856127a01f43d28a91168d38a",
+      "confidence": 1.0,
+      "creation_method": "canonical_ast",
+      "deprecated": false,
+      "orderless_hash": "4ad0c87c279a22a1ee49484d1032b3fd49ab6d1d4adefe53dc1aae89c4c594ab",
+      "postconditions": [
+        "A"
+      ],
+      "preconditions": [],
+      "program_json": "NE A M A C\nE A H\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_seed_library",
+      "required_variables": [
+        "A",
+        "C"
+      ],
+      "rule_id": "rule-0001-aa2ef578",
+      "semantic_hash": "4ad0c87c279a22a1ee49484d1032b3fd49ab6d1d4adefe53dc1aae89c4c594ab",
+      "signature": {
+        "drops": [],
+        "inputs": [
+          "A"
+        ],
+        "outputs": [
+          "C"
+        ],
+        "preserve": [
+          "B",
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A"
+        ],
+        "transfers": [
+          [
+            "A",
+            "C"
+          ]
+        ]
+      },
+      "surface_name": "move everything from A into C",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "9ac5626136441c0066966beba8512bd4ee69517818697c5f1826cf414f801fca",
+      "confidence": 1.0,
+      "creation_method": "canonical_ast",
+      "deprecated": false,
+      "orderless_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "postconditions": [
+        "A"
+      ],
+      "preconditions": [],
+      "program_json": "NE A D A\nE A H\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_seed_library",
+      "required_variables": [
+        "A"
+      ],
+      "rule_id": "rule-0002-9ac56261",
+      "semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "signature": {
+        "drops": [
+          "A"
+        ],
+        "inputs": [
+          "A"
+        ],
+        "outputs": [],
+        "preserve": [
+          "B",
+          "C",
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A"
+        ],
+        "transfers": []
+      },
+      "surface_name": "remove all tokens from A",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "c8dab2bcd820e737733a14574f17da4a884e98a3efea09712487a246ddda317e",
+      "confidence": 1.0,
+      "creation_method": "canonical_ast",
+      "deprecated": false,
+      "orderless_hash": "9dfbd85eb6e988f006c614547fbe1faa24a5fea4fd3cc677d12d3ddc96c36382",
+      "postconditions": [
+        "A",
+        "B"
+      ],
+      "preconditions": [],
+      "program_json": "NE A D A\nE A NE B M B C\nE A E B H\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_seed_library",
+      "required_variables": [
+        "A",
+        "B",
+        "C"
+      ],
+      "rule_id": "rule-0003-c8dab2bc",
+      "semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "signature": {
+        "drops": [
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B"
+        ],
+        "outputs": [
+          "C"
+        ],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B"
+        ],
+        "transfers": [
+          [
+            "B",
+            "C"
+          ]
+        ]
+      },
+      "surface_name": "drop A then transfer B into C",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "8d1f86374da0c010f06553fbaddb0424871620672ea24bd32f9e227aa664bf6a",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "6b4a81255c3fb8a8c75d8501a50a711253e1bc4dcdee7cff3f0989925a215db9",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C D B\nE A NE B NE C D B\nNE A E B E C D A\nNE A E B NE C D A\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C"
+      ],
+      "rule_id": "rule-0004-8d1f8637",
+      "semantic_hash": "e4ee89ddabe61533b1e49eb382d029153eb47530189b58402c6b3c6cb85de3b7",
+      "signature": {
+        "drops": [
+          "C",
+          "B",
+          "B",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": []
+      },
+      "surface_name": "distractor 0 RuleSignature(inputs=('A', 'B', 'C'), outputs=(), transfers=(), drops=('C', 'B', 'B', 'A', 'A', 'A', 'A'), preserve=('D',), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "0c751dba936691c058ae1344099eef44f1fb270551c25735d8e9dcee23661ad1",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "fe0d6bf0dc7bf26d760eb1e9998c7d023705150b1f28c40fa1516cf4217a5d96",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C D B\nE A NE B NE C D B\nNE A E B E C D A\nNE A E B NE C D A\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0005-0c751dba",
+      "semantic_hash": "4cc5181917256d5a3efe211f0e285179923df4ee1d723df85acaca3f510fdade",
+      "signature": {
+        "drops": [
+          "B",
+          "B",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 1 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'),), drops=('B', 'B', 'A', 'A', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "6072390a323d737235fff023ce7876a49b11daa0f303cdccd556c36091e3c171",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "cdb48171a40d0350dc634bad43ed3d8f7ec3900b4c9a7c41e528e29edc5fb6fa",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C M B D\nE A NE B NE C D B\nNE A E B E C D A\nNE A E B NE C D A\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0006-6072390a",
+      "semantic_hash": "321a8d046e0fda012858bb7c3806f585b5f983e11842e223035b1801d91052e4",
+      "signature": {
+        "drops": [
+          "B",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 2 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'), ('B', 'D')), drops=('B', 'A', 'A', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "3f8ec498bbfe06a88a3d37c7ba1fb40be6d894a4b55a9c2d180f51664fff8f68",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "d8af99373066dbe80c4da3e519055914d796ad3c55ecd85ebb175b519b80881d",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C M B D\nE A NE B NE C D B\nNE A E B E C D A\nNE A E B NE C D A\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0007-3f8ec498",
+      "semantic_hash": "2b7936fb47f56c5cf6b39b158443e8f14f05602cb048106683acadeff8ca402c",
+      "signature": {
+        "drops": [
+          "C",
+          "B",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 3 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('B', 'D'),), drops=('C', 'B', 'A', 'A', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "b6972fecbd9f7b23edddcc032ca0606f6c944e78af26c37ecf86dc860af62bba",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "46e17b35f5690980cb84f0613e7911a26f2d86a906cb22ce03263b46ee7b496d",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C M B D\nE A NE B NE C M B D\nNE A E B E C D A\nNE A E B NE C D A\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0008-b6972fec",
+      "semantic_hash": "7c0ccfc241cfbf62839d609104d73ea728a4cefefd3441ca614d07080abc86ac",
+      "signature": {
+        "drops": [
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 4 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'), ('B', 'D'), ('B', 'D')), drops=('A', 'A', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "3a5e4f34015080508285908b098275ec731c8a319c2d9f5bfde0cb818eaf2a9d",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "9ee2609d1263e4b898604482ee5d061217422885b8d0626d7725586750099110",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C M B D\nE A NE B NE C M B D\nNE A E B E C D A\nNE A E B NE C D A\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0009-3a5e4f34",
+      "semantic_hash": "a8cdbb0a7cd3ea980493b9976c48ea2fd1e8e72934830d100566c0d1861caa33",
+      "signature": {
+        "drops": [
+          "C",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "B",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 5 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('B', 'D'), ('B', 'D')), drops=('C', 'A', 'A', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "2c7dcdb6f9c356543677d4a4c61fd2f80e88d27f1cde0d01933b635a1d5b4e5a",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "59536db0f2570696bd783f34ce21495ed4dfb9847d213253b3b1d8680c1e7892",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C M B D\nE A NE B NE C M C D\nNE A E B E C D A\nNE A E B NE C D A\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0010-2c7dcdb6",
+      "semantic_hash": "ad752d6d3aa38c4a2c03efc1baf0b78d6b711d0a9e036f70c98847837b8f4f71",
+      "signature": {
+        "drops": [
+          "C",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "B",
+            "D"
+          ],
+          [
+            "C",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 6 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('B', 'D'), ('C', 'D')), drops=('C', 'A', 'A', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "b4842f3308a434cedf9633a9b583e873454324a7a14af38be08f4e1370d4dd4d",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "14829501017d879540d8e6083ded2ff606dc25be755f5fd2eb7f3f1fec9af490",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C D B\nE A NE B NE C M C D\nNE A E B E C D A\nNE A E B NE C D A\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0011-b4842f33",
+      "semantic_hash": "890b53ca643412c70c8ca0a24d1d3e8a7253dbb3d12cd53f008a0444315c4ea4",
+      "signature": {
+        "drops": [
+          "C",
+          "B",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 7 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'),), drops=('C', 'B', 'A', 'A', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "78fa1ede273b4a77904196da9abacd89c3afc40129977dc589457c1d9d04fabf",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "0fc1216a202bdb0887def9de89efdcf67bdeaca833fdd797f2d1343306ad9d60",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C M B D\nE A NE B NE C M C D\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0012-78fa1ede",
+      "semantic_hash": "4add4fb983a735727324ffa0b8a16675e374ffcae031174de1ff5b1e04f353e0",
+      "signature": {
+        "drops": [
+          "C",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "B",
+            "D"
+          ],
+          [
+            "C",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 8 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('B', 'D'), ('C', 'D')), drops=('C', 'A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "2f2b29452844ae2e8877a2caffb668b20717391dba419bb9e71a26845f448c60",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "3477d6e84be2a5e0b8918274126c05009a16082475e0729031fd69c74cc0bc31",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C M B D\nE A NE B NE C M C D\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0013-2f2b2945",
+      "semantic_hash": "73d9eab77ca9ca0709554a3251df33857e1643f22c302a2b5a13cec2dbf2cf41",
+      "signature": {
+        "drops": [
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ],
+          [
+            "C",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 9 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'), ('B', 'D'), ('C', 'D')), drops=('A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "c633f7d532320ef52e927c39eeec123b8db30f25172e76acdbea6d8d702db4c4",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "488941cacb8d06bb23a15cac424a4ce4dff9936f67dc493affd5edf9d52b7508",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C D B\nE A NE B NE C D C\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C"
+      ],
+      "rule_id": "rule-0014-c633f7d5",
+      "semantic_hash": "6ace3645977a2ff6945dde3c9ee3762265239825e3f423bf5c3e67dd8efacf5e",
+      "signature": {
+        "drops": [
+          "C",
+          "B",
+          "C",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": []
+      },
+      "surface_name": "distractor 10 RuleSignature(inputs=('A', 'B', 'C'), outputs=(), transfers=(), drops=('C', 'B', 'C', 'A', 'C', 'A', 'A'), preserve=('D',), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "1c3cd60cd4e49ee620f33dfc7ef828f48c4f30a8916dc6dc5f2ac0c14909f607",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "a7cdbfc89e620e653931ecce4d44de44cbc25cc97115f8e42acc28973e2766ec",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C D B\nE A NE B NE C D C\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0015-1c3cd60c",
+      "semantic_hash": "a28e8757a4aab12493414949d5b2437c8c04f922621d12ce33374b2141b066a9",
+      "signature": {
+        "drops": [
+          "B",
+          "C",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 11 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'),), drops=('B', 'C', 'A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "78c2e6ebc705a46080558a6f1e67f3b45401799ef5cda686b9e7fd5adabcd27d",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "2331a696ca4932e3f4164682182e591d254cc7336e3bbdb0defc5cd3263f1ace",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C D B\nE A NE B NE C D B\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C"
+      ],
+      "rule_id": "rule-0016-78c2e6eb",
+      "semantic_hash": "51c7c89a5a286bdae1f82a0a38eeb0ff17c74ad6ab5fafe45c71442242c281cf",
+      "signature": {
+        "drops": [
+          "C",
+          "B",
+          "B",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [],
+        "preserve": [
+          "D"
+        ],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": []
+      },
+      "surface_name": "distractor 12 RuleSignature(inputs=('A', 'B', 'C'), outputs=(), transfers=(), drops=('C', 'B', 'B', 'A', 'C', 'A', 'A'), preserve=('D',), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "8c4f6ed27e95989bce15f3beceb74b6a2adcfc753cce557e7cc59167c7169282",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "cc4c96861a6f2f4177810772bce06cd2ffed048a5f7091265def8d2dab223865",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C M B D\nE A NE B NE C D B\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0017-8c4f6ed2",
+      "semantic_hash": "9bd9c7f5fc31b501eb417febc9fa9d0a31bff0da24333f2aa7ac93ef12dfa4da",
+      "signature": {
+        "drops": [
+          "B",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 13 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'), ('B', 'D')), drops=('B', 'A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "c9d5255abac417ac04dd4b59bcb00efc4b42fc5b4af35a2e15a558629351229c",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "938d7772a4c39d5061147fbf900af3e5288ba7af697dff1ced21ca596dce4da4",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C M B D\nE A NE B NE C D B\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0018-c9d5255a",
+      "semantic_hash": "cd4b92bd75b0f06739b430a4d6ab67d44a9b67c85dece16acb3f3d6882b0a210",
+      "signature": {
+        "drops": [
+          "C",
+          "B",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 14 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('B', 'D'),), drops=('C', 'B', 'A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "fe6a2195f86df7015194da5b8e251edf6afc9fb190b4743539b92cf715a3f872",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "2c6ca39219e22c07c5f1b77ed7f5387fecd1e9282261c96ccd0f3c5fcf854d18",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C M B D\nE A NE B NE C D C\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0019-fe6a2195",
+      "semantic_hash": "c0ab5fd8e3915bc7f48a402c3119b175b147f95d2ec999cfc1ef53b98272fbfe",
+      "signature": {
+        "drops": [
+          "C",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 15 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'), ('B', 'D')), drops=('C', 'A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "a0fbf494b6120f8c890e1599e500a3814a4244b52f10a8ea029f84a70a1f02d3",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "bf01b41a6fc2401840b9450f7f6fe1bd6f050e5cf3fb47ae604dbbcab5a90c90",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C M B D\nE A NE B NE C M B D\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0020-a0fbf494",
+      "semantic_hash": "3127addcf698789a35040aac1ebfc36274a6e42ab140f759082e231f7a96eab5",
+      "signature": {
+        "drops": [
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 16 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'), ('B', 'D'), ('B', 'D')), drops=('A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "5193cdcfff655670b824eae8e5d315aa585f27357eca459d4acee507fa69e102",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "39ffb6e3e2b0ebf5d926530efdfa019b253cbf681bccb28f84c9e60dc71aad1c",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C M B D\nE A NE B NE C M B D\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0021-5193cdcf",
+      "semantic_hash": "a6b8d473fb6d19dec6f4c301c81d8d6b456399317dac1a7564fd58cfd587ef02",
+      "signature": {
+        "drops": [
+          "C",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "B",
+            "D"
+          ],
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 17 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('B', 'D'), ('B', 'D')), drops=('C', 'A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "e20363b42eaef29e75f11eff7e6db01bc733302c5c4ac8ecc7e459f20fac0b54",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "d1a86ab2d68be729a1c78a064296f6836de3b904559b1fd9c8b4ac7159bfab14",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C D C\nE A NE B E C D B\nE A NE B NE C M B D\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0022-e20363b4",
+      "semantic_hash": "e08229d969cbf33b026bab30a17302c398cbfdbeb73716bca7413eb5cd5a4df0",
+      "signature": {
+        "drops": [
+          "C",
+          "B",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "B",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 18 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('B', 'D'),), drops=('C', 'B', 'A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    },
+    {
+      "alpha_hash": "82eeb1c6d44cbb93dd64129a99c65f66f46cb6b91fa5d36956a67e124eb4208f",
+      "confidence": 0.8,
+      "creation_method": "grammar_candidate",
+      "deprecated": false,
+      "orderless_hash": "c8254d1383a252a2cc5d49e47060172441323f209d83a126a3da1317e596f7e0",
+      "postconditions": [
+        "A",
+        "B",
+        "C"
+      ],
+      "preconditions": [],
+      "program_json": "E A E B E C H\nE A E B NE C M C D\nE A NE B E C D B\nE A NE B NE C M C D\nNE A E B E C D A\nNE A E B NE C D C\nNE A NE B E C D A\nNE A NE B NE C D A\nA R0 B R1 C R2 D R3",
+      "provenance": "m22_distractor",
+      "required_variables": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "rule_id": "rule-0023-82eeb1c6",
+      "semantic_hash": "19a8b83ea4f97ad58d527feca81d54e861c7be763a1f605a44563cb819c2c823",
+      "signature": {
+        "drops": [
+          "B",
+          "A",
+          "C",
+          "A",
+          "A"
+        ],
+        "inputs": [
+          "A",
+          "B",
+          "C"
+        ],
+        "outputs": [
+          "D"
+        ],
+        "preserve": [],
+        "terminate_when_empty": [
+          "A",
+          "B",
+          "C"
+        ],
+        "transfers": [
+          [
+            "C",
+            "D"
+          ],
+          [
+            "C",
+            "D"
+          ]
+        ]
+      },
+      "surface_name": "distractor 19 RuleSignature(inputs=('A', 'B', 'C'), outputs=('D',), transfers=(('C', 'D'), ('C', 'D')), drops=('B', 'A', 'C', 'A', 'A'), preserve=(), terminate_when_empty=('A', 'B', 'C'))",
+      "verification_status": "verified",
+      "verification_tests": [
+        "determinism",
+        "semantic_examples"
+      ],
+      "version": 1
+    }
+  ],
+  "rejected": []
+}

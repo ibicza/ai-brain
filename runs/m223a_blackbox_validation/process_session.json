@@ -1,0 +1,10 @@
+{
+  "acquisition_process_pid": 4660,
+  "demo_count": 20,
+  "duration_sec_before_finalize": 94.73239409999996,
+  "full_count": 200,
+  "manifest_templates": 200,
+  "orchestrator_process_pid": 22496,
+  "process_ids_distinct": true,
+  "scorer_process_pid": 2988
+}

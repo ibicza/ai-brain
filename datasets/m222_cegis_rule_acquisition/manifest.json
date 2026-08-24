@@ -1,0 +1,13 @@
+{
+  "heldout_instance_exact_ast_overlap": 0,
+  "heldout_normalized_ast_templates": 200,
+  "heldout_program_instances": 500,
+  "heldout_template_alpha_overlap": 0,
+  "kind": "m222_cegis_rule_acquisition",
+  "model_visible_ids": false,
+  "predicate_action_primitive_overlap": 5,
+  "primitive_vocabulary_overlap": 5,
+  "seed": 2227,
+  "train_specifications": 5000,
+  "validation_specifications": 1000
+}
