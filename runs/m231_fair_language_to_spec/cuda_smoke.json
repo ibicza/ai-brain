@@ -1,0 +1,6 @@
+{
+  "device": "cuda:0",
+  "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "loss": 2.6650390625,
+  "parameters_changed": true
+}

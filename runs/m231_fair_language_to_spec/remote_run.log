@@ -1,0 +1,47 @@
+Resolved 48 packages in 0.65ms
+Checked 46 packages in 0.42ms
+139 files already formatted
+All checks passed!
+........................................................................ [ 19%]
+........................................................................ [ 39%]
+........................................................................ [ 59%]
+........................................................................ [ 79%]
+........................................................................ [ 98%]
+....                                                                     [100%]
+=============================== warnings summary ===============================
+tests/test_m231_fair_bilingual_retest.py::test_calibration_fails_closed
+tests/test_m23_language_to_spec.py::test_typed_parser_forward_and_tiny_training_smoke
+  /home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+364 passed, 2 warnings in 20.73s
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+{"device": "cuda:0", "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU", "loss": 2.6650390625, "parameters_changed": true}
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/ibicza/ai-brain-m231-run/.venv/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+{"best_candidate": "factorized_bpe", "best_seed": 23101, "checks": "Karina: ruff format --check; ruff check; pytest; CUDA smoke; official training/evaluation", "decision": "OUTCOME C — DETERMINISTIC CONTROLLED LANGUAGE WORKS BEST", "multiseed": {"candidate": "factorized_bpe", "metrics": {"test_id": {"max": 1.0, "mean": 1.0, "min": 1.0, "std": 0.0}, "test_lexical_holdout": {"max": 0.226, "mean": 0.20666666666666667, "min": 0.194, "std": 0.013888444437333107}, "test_template_holdout": {"max": 0.364, "mean": 0.35266666666666663, "min": 0.346, "std": 0.008055363982396388}, "test_variable_permutation": {"max": 0.678, "mean": 0.6186666666666667, "min": 0.56, "std": 0.04817560470703911}}, "seeds": ["23101", "23102", "23103"]}, "qualifies_for_multiseed": true}
+M231_EXIT:0

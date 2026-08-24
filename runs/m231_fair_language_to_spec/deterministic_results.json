@@ -1,0 +1,1076 @@
+{
+  "extended": {
+    "test_ambiguous": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_composed_ood": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_contradictory": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_cross_language": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_id": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_lexical_holdout": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_negation_preserve": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_order_holdout": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_template_holdout": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_unsupported": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_variable_permutation": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "validation_train_surface": {
+      "count": 2000,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    }
+  },
+  "train": {
+    "test_ambiguous": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_composed_ood": {
+      "count": 500,
+      "failures": [
+        {
+          "family": "MERGE_TWO",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BDA",
+          "target_status": "SUPPORTED",
+          "text": "Channel the complete contents held by B and D to A. Conclude when B and D are empty. Maintain intact C. Keep the stated phase order. The operation is deterministic."
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CADB",
+          "target_status": "SUPPORTED",
+          "text": "Channel everything from C, A and D so that B receives it! Conclude when C, A and D are empty! No register is required to remain unchanged! Apply the instruction exactly! The operation is deterministic!"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DBC",
+          "target_status": "SUPPORTED",
+          "text": "Convey the complete contents held by D and B to C! Retain untouched A! Conclude when D and B are empty! Do not invent an additional action! No extra operation is requested! No sample identifier is part of this command!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "B",
+          "target_status": "SUPPORTED",
+          "text": "Purge everything in B so nothing remains; Cease execution when B are empty; Maintain intact A, C and D; Use only the named registers; The result remains in the named destination; Do not invent an additional action;"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ACDB",
+          "target_status": "SUPPORTED",
+          "text": "Convey the complete contents held by A, C and D to B; No register is required to remain unchanged; Cease execution when A, C and D are empty; The operation is deterministic;"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DACB",
+          "target_status": "SUPPORTED",
+          "text": "Перебрось полное содержимое D, A и C в B. Прерви выполнение, когда D, A и C опустеют. Нет регистра, который требуется сохранить без изменений. Имена регистров указаны буквально. В команде нет видимого идентификатора примера. Это полная команда."
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CA",
+          "target_status": "SUPPORTED",
+          "text": "Channel everything from C so that A receives it; Maintain intact B and D; Conclude when C are empty;"
+        },
+        {
+          "family": "DRAIN",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DB",
+          "target_status": "SUPPORTED",
+          "text": "Переправь всё из D, чтобы B получил содержимое. Поддерживай без изменений A и C. Закончи операцию, когда D опустеют. Имена регистров указаны буквально. Выполни инструкцию точно. Все имена регистров заданы явно."
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "D",
+          "target_status": "SUPPORTED",
+          "text": "Purge the contents of D until it is empty. Conclude when D are empty. Retain untouched A, B and C. Use only the named registers. Apply the instruction exactly."
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ACBD",
+          "target_status": "SUPPORTED",
+          "text": "Перебрось всё из A, C и B, чтобы D получил содержимое. Нет регистра, который требуется сохранить без изменений. Закончи операцию, когда A, C и B опустеют. Не добавляй новое действие. Операция детерминирована."
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "D",
+          "target_status": "SUPPORTED",
+          "text": "Purge the contents of D until it is empty; Cease execution when D are empty; Retain untouched A, B and C; No sample identifier is part of this command; Use only the named registers;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCB",
+          "target_status": "SUPPORTED",
+          "text": "Ликвидируй всё из D до того, как перебрось C в B! Закончи операцию, когда D и C опустеют! Поддерживай без изменений A!"
+        },
+        {
+          "family": "DRAIN",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DC",
+          "target_status": "SUPPORTED",
+          "text": "Переправь всё из D, чтобы C получил содержимое! Прерви выполнение, когда D опустеют! Сбереги как есть A и B! Соблюдай заданный порядок фаз!"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ACB",
+          "target_status": "SUPPORTED",
+          "text": "Перебрось полное содержимое A и C в B. Прерви выполнение, когда A и C опустеют. Сбереги как есть D."
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ABDC",
+          "target_status": "SUPPORTED",
+          "text": "Convey the complete contents held by A, B and D to C; No register is required to remain unchanged; Conclude when A, B and D are empty; No extra operation is requested; Keep the stated phase order;"
+        },
+        {
+          "family": "DRAIN",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DC",
+          "target_status": "SUPPORTED",
+          "text": "Перебрось полное содержимое D в C; Сбереги как есть A и B; Прерви выполнение, когда D опустеют;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DAC",
+          "target_status": "SUPPORTED",
+          "text": "Expunge everything in D before you channel A to C! Retain untouched B! Cease execution when D and A are empty!"
+        },
+        {
+          "family": "DRAIN",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CB",
+          "target_status": "SUPPORTED",
+          "text": "Перебрось всё из C, чтобы B получил содержимое! Закончи операцию, когда C опустеют! Поддерживай без изменений A и D! Имена регистров указаны буквально! Используй только названные регистры! Все имена регистров заданы явно!"
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BA",
+          "target_status": "SUPPORTED",
+          "text": "Convey everything from B so that A receives it; Conclude when B are empty; Maintain intact C and D; Keep the stated phase order;"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ABDC",
+          "target_status": "SUPPORTED",
+          "text": "Convey everything from A, B and D so that C receives it; No register is required to remain unchanged; Conclude when A, B and D are empty; No sample identifier is part of this command; The operation is deterministic;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BDC",
+          "target_status": "SUPPORTED",
+          "text": "Purge everything in B before you convey D to C! Maintain intact A! Conclude when B and D are empty! The result remains in the named destination!"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DBC",
+          "target_status": "SUPPORTED",
+          "text": "На первой фазе ликвидируй D; только после этого переправь B в C. Поддерживай без изменений A. Закончи операцию, когда D и B опустеют. Соблюдай заданный порядок фаз. Используй только названные регистры. Не добавляй новое действие. Выполни инструкцию точно."
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "AC",
+          "target_status": "SUPPORTED",
+          "text": "Channel the complete contents held by A to C. Cease execution when A are empty. Retain untouched B and D. No sample identifier is part of this command. Do not invent an additional action. The operation is deterministic. This is the complete command."
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ADC",
+          "target_status": "SUPPORTED",
+          "text": "Phase one must purge A; only afterward channel D toward C; Retain untouched B; Cease execution when A and D are empty; No sample identifier is part of this command; Only the stated contents matter; Do not invent an additional action; Keep the stated phase order;"
+        },
+        {
+          "family": "DRAIN",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "AD",
+          "target_status": "SUPPORTED",
+          "text": "Переправь всё из A, чтобы D получил содержимое; Прерви выполнение, когда A опустеют; Поддерживай без изменений B и C; Операция детерминирована; Учитывай только указанное содержимое;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BAD",
+          "target_status": "SUPPORTED",
+          "text": "Expunge everything in B before you channel A to D; Retain untouched C; Cease execution when B and A are empty; Do not invent an additional action; The operation is deterministic; Use only the named registers;"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ACD",
+          "target_status": "SUPPORTED",
+          "text": "Convey everything from A and C so that D receives it! Retain untouched B! Cease execution when A and C are empty! No extra operation is requested! Do not invent an additional action!"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DBCA",
+          "target_status": "SUPPORTED",
+          "text": "Переправь полное содержимое D, B и C в A; Прерви выполнение, когда D, B и C опустеют; Нет регистра, который требуется сохранить без изменений; Это полная команда; В команде нет видимого идентификатора примера; Все имена регистров заданы явно;"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CDBA",
+          "target_status": "SUPPORTED",
+          "text": "Channel the complete contents held by C, D and B to A! Conclude when C, D and B are empty! No register is required to remain unchanged! No sample identifier is part of this command! All register names are explicit! Do not invent an additional action! Use only the named registers!"
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DA",
+          "target_status": "SUPPORTED",
+          "text": "Channel the complete contents held by D to A. Maintain intact B and C. Conclude when D are empty. The operation is deterministic. Use only the named registers. Only the stated contents matter. The result remains in the named destination."
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CDB",
+          "target_status": "SUPPORTED",
+          "text": "Избавься от содержимого всё из C до того, как перебрось D в B! Закончи операцию, когда C и D опустеют! Поддерживай без изменений A! Результат остаётся в названном приёмнике! Имена регистров указаны буквально!"
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BD",
+          "target_status": "SUPPORTED",
+          "text": "Channel everything from B so that D receives it; Conclude when B are empty; Retain untouched A and C; All register names are explicit;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ABD",
+          "target_status": "SUPPORTED",
+          "text": "Purge everything in A before you convey B to D! Retain untouched C! Cease execution when A and B are empty! Only the stated contents matter! Keep the stated phase order!"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BDCA",
+          "target_status": "SUPPORTED",
+          "text": "Перебрось полное содержимое B, D и C в A. Закончи операцию, когда B, D и C опустеют. Нет регистра, который требуется сохранить без изменений. Результат остаётся в названном приёмнике. Дополнительных действий не требуется."
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCA",
+          "target_status": "SUPPORTED",
+          "text": "Phase one must purge D; only afterward convey C toward A. Maintain intact B. Conclude when D and C are empty. Keep the stated phase order. Use only the named registers. No extra operation is requested."
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Purge the contents of C until it is empty; Cease execution when C are empty; Maintain intact A, B and D; This is the complete command; The register names are literal;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CAD",
+          "target_status": "SUPPORTED",
+          "text": "Ликвидируй всё из C до того, как перебрось A в D. Сбереги как есть B. Прерви выполнение, когда C и A опустеют. Выполни инструкцию точно. Операция детерминирована. Учитывай только указанное содержимое. Не добавляй новое действие."
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCAB",
+          "target_status": "SUPPORTED",
+          "text": "Переправь полное содержимое D, C и A в B! Нет регистра, который требуется сохранить без изменений! Закончи операцию, когда D, C и A опустеют!"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BCD",
+          "target_status": "SUPPORTED",
+          "text": "Phase one must expunge B; only afterward convey C toward D. Conclude when B and C are empty. Retain untouched A. No extra operation is requested."
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CBA",
+          "target_status": "SUPPORTED",
+          "text": "Переправь всё из C и B, чтобы A получил содержимое! Закончи операцию, когда C и B опустеют! Поддерживай без изменений D! Дополнительных действий не требуется!"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CBA",
+          "target_status": "SUPPORTED",
+          "text": "Purge everything in C before you channel B to A; Retain untouched D; Conclude when C and B are empty; The operation is deterministic; Keep the stated phase order; The result remains in the named destination; Only the stated contents matter;"
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "B",
+          "target_status": "SUPPORTED",
+          "text": "Избавься от содержимого содержимое B до полного опустошения. Поддерживай без изменений A, C и D. Закончи операцию, когда B опустеют. Все имена регистров заданы явно. Соблюдай заданный порядок фаз. Это полная команда."
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CAD",
+          "target_status": "SUPPORTED",
+          "text": "На первой фазе избавься от содержимого C; только после этого переправь A в D; Поддерживай без изменений B; Закончи операцию, когда C и A опустеют; Используй только названные регистры; Операция детерминирована;"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCAB",
+          "target_status": "SUPPORTED",
+          "text": "Convey everything from D, C and A so that B receives it. No register is required to remain unchanged. Conclude when D, C and A are empty. Only the stated contents matter. No extra operation is requested. The register names are literal."
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCAB",
+          "target_status": "SUPPORTED",
+          "text": "Channel the complete contents held by D, C and A to B; Cease execution when D, C and A are empty; No register is required to remain unchanged; Apply the instruction exactly;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DBC",
+          "target_status": "SUPPORTED",
+          "text": "Purge everything in D before you channel B to C; Cease execution when D and B are empty; Maintain intact A; Keep the stated phase order; Do not invent an additional action;"
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BA",
+          "target_status": "SUPPORTED",
+          "text": "Convey the complete contents held by B to A! Conclude when B are empty! Retain untouched C and D! No sample identifier is part of this command! No extra operation is requested! Use only the named registers!"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BAD",
+          "target_status": "SUPPORTED",
+          "text": "Convey the complete contents held by B and A to D! Cease execution when B and A are empty! Retain untouched C! No sample identifier is part of this command! No extra operation is requested! The register names are literal!"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DACB",
+          "target_status": "SUPPORTED",
+          "text": "Convey everything from D, A and C so that B receives it; No register is required to remain unchanged; Cease execution when D, A and C are empty; The operation is deterministic; The result remains in the named destination; No extra operation is requested; Keep the stated phase order;"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BADC",
+          "target_status": "SUPPORTED",
+          "text": "Convey everything from B, A and D so that C receives it! Cease execution when B, A and D are empty! No register is required to remain unchanged! The register names are literal! Keep the stated phase order!"
+        }
+      ],
+      "semantic_specification_exact": 0.168,
+      "status_accuracy": 0.168,
+      "structural_specification_exact": 0.168
+    },
+    "test_contradictory": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_cross_language": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_id": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_lexical_holdout": {
+      "count": 500,
+      "failures": [
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ADCB",
+          "target_status": "SUPPORTED",
+          "text": "Channel every item from A, D and C into B! No register is required to remain unchanged! Cease execution when A, D and C are empty! The register names are literal! All register names are explicit!"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CADB",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, переправь всё содержимое C, A и D в B. Нет регистра, который требуется сохранить без изменений. Прерви выполнение, когда C, A и D опустеют."
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "AC",
+          "target_status": "SUPPORTED",
+          "text": "Please convey all contents of A to C! Cease execution when A are empty! Maintain intact B and D! No sample identifier is part of this command!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "D",
+          "target_status": "SUPPORTED",
+          "text": "Ликвидируй все элементы из D. Поддерживай без изменений A, B и C. Закончи операцию, когда D опустеют."
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DBCA",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, перебрось всё содержимое D, B и C в A! Нет регистра, который требуется сохранить без изменений! Прерви выполнение, когда D, B и C опустеют! Соблюдай заданный порядок фаз! В команде нет видимого идентификатора примера!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "D",
+          "target_status": "SUPPORTED",
+          "text": "Избавься от содержимого все элементы из D! Поддерживай без изменений A, B и C! Прерви выполнение, когда D опустеют! Дополнительных действий не требуется! Это полная команда!"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DABC",
+          "target_status": "SUPPORTED",
+          "text": "Channel every item from D, A and B into C! Cease execution when D, A and B are empty! No register is required to remain unchanged! The result remains in the named destination! No sample identifier is part of this command! No extra operation is requested!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Expunge every item from C! Cease execution when C are empty! Retain untouched A, B and D! The operation is deterministic!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Expunge every item from C. Retain untouched A, B and D. Cease execution when C are empty. Only the stated contents matter. The register names are literal."
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DAB",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, перебрось всё содержимое D и A в B; Поддерживай без изменений C; Закончи операцию, когда D и A опустеют; Результат остаётся в названном приёмнике; Дополнительных действий не требуется; Не добавляй новое действие;"
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Please expunge the complete contents of C; Maintain intact A, B and D; Cease execution when C are empty; Use only the named registers;"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CAD",
+          "target_status": "SUPPORTED",
+          "text": "Перебрось все элементы из C и A в D! Прерви выполнение, когда C и A опустеют! Сбереги как есть B! Учитывай только указанное содержимое! Дополнительных действий не требуется!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Expunge every item from C! Conclude when C are empty! Retain untouched A, B and D! Use only the named registers! Only the stated contents matter! No extra operation is requested! This is the complete command!"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BDC",
+          "target_status": "SUPPORTED",
+          "text": "Please channel all contents of B and D to C! Cease execution when B and D are empty! Maintain intact A!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "B",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, ликвидируй полное содержимое B; Прерви выполнение, когда B опустеют; Поддерживай без изменений A, C и D; Учитывай только указанное содержимое; Операция детерминирована; Используй только названные регистры; Соблюдай заданный порядок фаз;"
+        },
+        {
+          "family": "DRAIN",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DB",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, перебрось всё содержимое D в B! Прерви выполнение, когда D опустеют! Сбереги как есть A и C! Соблюдай заданный порядок фаз!"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCBA",
+          "target_status": "SUPPORTED",
+          "text": "Convey every item from D, C and B into A; No register is required to remain unchanged; Cease execution when D, C and B are empty; Use only the named registers; All register names are explicit; The register names are literal;"
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DC",
+          "target_status": "SUPPORTED",
+          "text": "Channel every item from D into C! Retain untouched A and B! Conclude when D are empty! The operation is deterministic!"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CBAD",
+          "target_status": "SUPPORTED",
+          "text": "Please channel all contents of C, B and A to D; Conclude when C, B and A are empty; No register is required to remain unchanged; Use only the named registers;"
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Ликвидируй все элементы из C; Прерви выполнение, когда C опустеют; Сбереги как есть A, B и D;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DAB",
+          "target_status": "SUPPORTED",
+          "text": "Сначала ликвидируй D, затем перебрось все элементы из A в B! Поддерживай без изменений C! Прерви выполнение, когда D и A опустеют! Это полная команда! Используй только названные регистры!"
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BA",
+          "target_status": "SUPPORTED",
+          "text": "Please convey all contents of B to A! Cease execution when B are empty! Retain untouched C and D! Keep the stated phase order!"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ADC",
+          "target_status": "SUPPORTED",
+          "text": "Channel every item from A and D into C! Cease execution when A and D are empty! Retain untouched B! No sample identifier is part of this command!"
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DC",
+          "target_status": "SUPPORTED",
+          "text": "Please channel all contents of D to C; Retain untouched A and B; Cease execution when D are empty; Apply the instruction exactly; No sample identifier is part of this command; This is the complete command;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BDC",
+          "target_status": "SUPPORTED",
+          "text": "First expunge B, then channel every item from D into C! Conclude when B and D are empty! Maintain intact A! This is the complete command! The operation is deterministic!"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DAC",
+          "target_status": "SUPPORTED",
+          "text": "Please convey all contents of D and A to C; Retain untouched B; Cease execution when D and A are empty; The result remains in the named destination;"
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Purge every item from C! Maintain intact A, B and D! Cease execution when C are empty! Apply the instruction exactly! No sample identifier is part of this command!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, избавься от содержимого полное содержимое C! Закончи операцию, когда C опустеют! Сбереги как есть A, B и D! Учитывай только указанное содержимое! Дополнительных действий не требуется! Соблюдай заданный порядок фаз! Результат остаётся в названном приёмнике!"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BADC",
+          "target_status": "SUPPORTED",
+          "text": "Convey every item from B, A and D into C; Cease execution when B, A and D are empty; No register is required to remain unchanged; Only the stated contents matter; Do not invent an additional action;"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCB",
+          "target_status": "SUPPORTED",
+          "text": "Convey every item from D and C into B; Retain untouched A; Conclude when D and C are empty; Apply the instruction exactly; This is the complete command; The register names are literal;"
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, ликвидируй полное содержимое C; Поддерживай без изменений A, B и D; Закончи операцию, когда C опустеют; Используй только названные регистры; Соблюдай заданный порядок фаз; В команде нет видимого идентификатора примера;"
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "B",
+          "target_status": "SUPPORTED",
+          "text": "Избавься от содержимого все элементы из B. Поддерживай без изменений A, C и D. Закончи операцию, когда B опустеют. Соблюдай заданный порядок фаз. Учитывай только указанное содержимое."
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CB",
+          "target_status": "SUPPORTED",
+          "text": "Convey every item from C into B. Retain untouched A and D. Conclude when C are empty. Use only the named registers. The register names are literal. The operation is deterministic."
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BDA",
+          "target_status": "SUPPORTED",
+          "text": "Сначала ликвидируй B, затем перебрось все элементы из D в A; Прерви выполнение, когда B и D опустеют; Поддерживай без изменений C; Учитывай только указанное содержимое;"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCBA",
+          "target_status": "SUPPORTED",
+          "text": "Convey every item from D, C and B into A. Cease execution when D, C and B are empty. No register is required to remain unchanged. This is the complete command. Apply the instruction exactly. No sample identifier is part of this command."
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BACD",
+          "target_status": "SUPPORTED",
+          "text": "Please convey all contents of B, A and C to D! No register is required to remain unchanged! Cease execution when B, A and C are empty! The register names are literal!"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "CBD",
+          "target_status": "SUPPORTED",
+          "text": "First purge C, then channel every item from B into D. Maintain intact A. Conclude when C and B are empty."
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "D",
+          "target_status": "SUPPORTED",
+          "text": "Избавься от содержимого все элементы из D; Закончи операцию, когда D опустеют; Поддерживай без изменений A, B и C; Выполни инструкцию точно; Имена регистров указаны буквально;"
+        },
+        {
+          "family": "MERGE_THREE",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "DCBA",
+          "target_status": "SUPPORTED",
+          "text": "Перебрось все элементы из D, C и B в A. Прерви выполнение, когда D, C и B опустеют. Нет регистра, который требуется сохранить без изменений. Все имена регистров заданы явно. Учитывай только указанное содержимое. Это полная команда."
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, ликвидируй полное содержимое C; Сбереги как есть A, B и D; Прерви выполнение, когда C опустеют; Используй только названные регистры; Выполни инструкцию точно; Дополнительных действий не требуется; Операция детерминирована;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BDA",
+          "target_status": "SUPPORTED",
+          "text": "Purge B before you convey the contents of D to A; Conclude when B and D are empty; Retain untouched C; No sample identifier is part of this command;"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BAC",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, переправь всё содержимое B и A в C; Сбереги как есть D; Закончи операцию, когда B и A опустеют; В команде нет видимого идентификатора примера;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ACD",
+          "target_status": "SUPPORTED",
+          "text": "Purge A before you channel the contents of C to D! Maintain intact B! Conclude when A and C are empty! No extra operation is requested!"
+        },
+        {
+          "family": "CLEAR",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "D",
+          "target_status": "SUPPORTED",
+          "text": "Expunge every item from D; Retain untouched A, B and C; Cease execution when D are empty; Do not invent an additional action; Use only the named registers;"
+        },
+        {
+          "family": "DRAIN",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "AC",
+          "target_status": "SUPPORTED",
+          "text": "Please channel all contents of A to C. Maintain intact B and D. Cease execution when A are empty. All register names are explicit. The register names are literal. The operation is deterministic. Only the stated contents matter."
+        },
+        {
+          "family": "CLEAR",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "C",
+          "target_status": "SUPPORTED",
+          "text": "Ликвидируй все элементы из C. Поддерживай без изменений A, B и D. Закончи операцию, когда C опустеют."
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ABD",
+          "target_status": "SUPPORTED",
+          "text": "First expunge A, then channel every item from B into D. Retain untouched C. Conclude when A and B are empty. Do not invent an additional action."
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BCD",
+          "target_status": "SUPPORTED",
+          "text": "Сначала ликвидируй B, затем перебрось все элементы из C в D; Прерви выполнение, когда B и C опустеют; Сбереги как есть A; Дополнительных действий не требуется; Не добавляй новое действие; Используй только названные регистры;"
+        },
+        {
+          "family": "DROP_THEN_TRANSFER",
+          "language": "en",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "BDC",
+          "target_status": "SUPPORTED",
+          "text": "Expunge B before you convey the contents of D to C! Retain untouched A! Conclude when B and D are empty! The result remains in the named destination!"
+        },
+        {
+          "family": "MERGE_TWO",
+          "language": "ru",
+          "predicted_issue": "UNSUPPORTED_OPERATION",
+          "predicted_status": "UNSUPPORTED",
+          "role": "ACD",
+          "target_status": "SUPPORTED",
+          "text": "Пожалуйста, перебрось всё содержимое A и C в D! Прерви выполнение, когда A и C опустеют! Поддерживай без изменений B! Учитывай только указанное содержимое!"
+        }
+      ],
+      "semantic_specification_exact": 0.168,
+      "status_accuracy": 0.168,
+      "structural_specification_exact": 0.168
+    },
+    "test_negation_preserve": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_order_holdout": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_template_holdout": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_unsupported": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "test_variable_permutation": {
+      "count": 500,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    },
+    "validation_train_surface": {
+      "count": 2000,
+      "failures": [],
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "structural_specification_exact": 1.0
+    }
+  }
+}

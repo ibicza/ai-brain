@@ -1,0 +1,520 @@
+{
+  "confound_source_locations_at_m23_commit": {
+    "alpha_unique_binding_gap": [
+      "src/ai_brain/rules/grammar.py:235"
+    ],
+    "calibration_not_fail_closed": [
+      "src/ai_brain/language_to_spec/model.py:527"
+    ],
+    "confidence_ignores_fields": [
+      "src/ai_brain/language_to_spec/model.py:331"
+    ],
+    "deterministic_holdout_preprogrammed": [
+      "src/ai_brain/language_to_spec/deterministic.py:20"
+    ],
+    "exact_order_sensitive_ast_eval": [
+      "scripts/m23_language_to_spec.py:374"
+    ],
+    "finite_answer_json_control": [
+      "src/ai_brain/language_to_spec/json_control.py:52",
+      "src/ai_brain/language_to_spec/json_control.py:123"
+    ],
+    "incomplete_text_complete_target": [
+      "src/ai_brain/language_to_spec/generator.py:310",
+      "src/ai_brain/language_to_spec/generator.py:311"
+    ],
+    "language_family_coupling": [
+      "src/ai_brain/language_to_spec/generator.py:547",
+      "src/ai_brain/language_to_spec/generator.py:553"
+    ],
+    "oracle_clarification": [
+      "scripts/m23_language_to_spec.py:285"
+    ],
+    "silent_byte_truncation": [
+      "src/ai_brain/language_to_spec/model.py:136"
+    ],
+    "trained_heads_ignored": [
+      "src/ai_brain/language_to_spec/model.py:81",
+      "src/ai_brain/language_to_spec/model.py:278"
+    ],
+    "typed_parser_byte_not_bpe": [
+      "src/ai_brain/language_to_spec/model.py:66",
+      "src/ai_brain/language_to_spec/model.py:136"
+    ]
+  },
+  "dataset_hashes": {
+    "test_ambiguous": "82b40eed81163e5e90c07ffbaf5db7531bfd3402e1057b1efbff1b735d874ad8",
+    "test_contradictory": "c53c1bc69c1e9606a48f210ce289181a6e9b2594b9af2b0fb0351e5af9dbe175",
+    "test_cross_language": "9c18ed2a2b1420ba80f3217e91da073fc8d1b33dcf974a64b14c8fa5e4b5380b",
+    "test_id": "8791072da5a6fccc25e4435a47bcdcff5bcc95d7c97f01e6d1ad95e5e460be50",
+    "test_lexical_holdout": "af11456c2c295b561e586952d16aa7347bf367922766efb5ef855813fcaa76bc",
+    "test_negation_preserve": "a93cf351a7582f865d3191926a4b6558826e9f01e1beec5a3e1b5fec78434371",
+    "test_order_holdout": "9f75acb98137617ef12be948bcc0b12f7b91f2f64e67a0166f532fa2d4721c60",
+    "test_template_holdout": "3006cbb2ea9813ee264f5850352473f1a66337cf1cafdab5f107c0a18b89320d",
+    "test_unsupported": "92cd79c110e917c92d1dd20df2d59532ce14cd141a5da12df2fac89c4592bfea",
+    "test_variable_permutation": "834cb613a6b6ee93263ffb79a9d5dad7c0e1f6bd98617c4a29b3186134d5e69a",
+    "train": "2f7a520bfb886c8926a8fc2b7996f4068369a72adf4e17b38fe92ee497aa1501",
+    "validation": "5affefe9f917a10d71bd04ac91796885d71d75e86be08592701ea48cab4dda85"
+  },
+  "finite_answer_checkpoint_sha256": "0253b81f6927556620079b608ca74c3c4b4d757bdcd78f9f8b74935032a62115",
+  "finite_answer_split_metrics": {
+    "test_ambiguous": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.942,
+      "status_correct": 0.962,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.942
+    },
+    "test_contradictory": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 1.0,
+      "status_correct": 1.0,
+      "valid_json": 1.0,
+      "whole_specification_exact": 1.0
+    },
+    "test_cross_language": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.062,
+      "status_correct": 0.992,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.062
+    },
+    "test_id": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.322,
+      "status_correct": 0.998,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.322
+    },
+    "test_lexical_holdout": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.028,
+      "status_correct": 0.744,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.028
+    },
+    "test_negation_preserve": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.012,
+      "status_correct": 0.972,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.012
+    },
+    "test_order_holdout": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.03,
+      "status_correct": 0.898,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.03
+    },
+    "test_template_holdout": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.044,
+      "status_correct": 0.88,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.044
+    },
+    "test_unsupported": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.998,
+      "status_correct": 0.998,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.998
+    },
+    "test_variable_permutation": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 500,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.04,
+      "status_correct": 0.814,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.04
+    },
+    "validation": {
+      "checkpoint_step": 3000,
+      "constrained_decoding": "finite schema-enumerated prefix grammar",
+      "count": 2000,
+      "schema_valid": 1.0,
+      "semantic_specification_exact": 0.3205,
+      "status_correct": 0.8525,
+      "valid_json": 1.0,
+      "whole_specification_exact": 0.3205
+    }
+  },
+  "frozen_backend_commit": "11b573e",
+  "frozen_backend_tag": "stage1-acquisition-v1",
+  "m23_commit": "8e1c3cd",
+  "tokenizer_sha256": "c5e122c3dcd598a92f3cd50bea0a61e85acdcff1b1a2a2811fdfea6d6754e41a",
+  "typed_checkpoint_sha256": "7995701bcdf0b10c7eb29078940f85b57c32de1d7bbae3bdeff81dd4b7fc5465",
+  "typed_split_metrics": {
+    "test_ambiguous": {
+      "accepted_precision": 0.0,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 1.0
+        },
+        "ru": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 1.0
+        }
+      },
+      "count": 500,
+      "coverage": 0.0,
+      "field_exact": {
+        "allowed_primitives": 0.0,
+        "drops": 0.0,
+        "inputs": 0.0,
+        "outputs": 0.0,
+        "phase_constraints": 0.0,
+        "preserve": 0.0,
+        "terminate_when_empty": 0.0,
+        "transfers": 0.0
+      },
+      "incorrect_confidently_accepted_rate": 0.0,
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "supported_recall": 0.0
+    },
+    "test_contradictory": {
+      "accepted_precision": 0.0,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 1.0
+        },
+        "ru": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 1.0
+        }
+      },
+      "count": 500,
+      "coverage": 0.0,
+      "field_exact": {
+        "allowed_primitives": 0.0,
+        "drops": 0.0,
+        "inputs": 0.0,
+        "outputs": 0.0,
+        "phase_constraints": 0.0,
+        "preserve": 0.0,
+        "terminate_when_empty": 0.0,
+        "transfers": 0.0
+      },
+      "incorrect_confidently_accepted_rate": 0.0,
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "supported_recall": 0.0
+    },
+    "test_cross_language": {
+      "accepted_precision": 0.678343949044586,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.5612244897959183,
+          "count": 250,
+          "semantic_exact": 0.44
+        },
+        "ru": {
+          "accepted_precision": 0.8728813559322034,
+          "count": 250,
+          "semantic_exact": 0.412
+        }
+      },
+      "count": 500,
+      "coverage": 0.628,
+      "field_exact": {
+        "allowed_primitives": 0.9808917197452229,
+        "drops": 0.9777070063694268,
+        "inputs": 0.732484076433121,
+        "outputs": 0.8152866242038217,
+        "phase_constraints": 0.678343949044586,
+        "preserve": 0.678343949044586,
+        "terminate_when_empty": 0.732484076433121,
+        "transfers": 0.6815286624203821
+      },
+      "incorrect_confidently_accepted_rate": 0.202,
+      "semantic_specification_exact": 0.426,
+      "status_accuracy": 0.628,
+      "supported_recall": 0.426
+    },
+    "test_id": {
+      "accepted_precision": 0.9184100418410042,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.8724279835390947,
+          "count": 250,
+          "semantic_exact": 0.848
+        },
+        "ru": {
+          "accepted_precision": 0.9659574468085106,
+          "count": 250,
+          "semantic_exact": 0.908
+        }
+      },
+      "count": 500,
+      "coverage": 0.956,
+      "field_exact": {
+        "allowed_primitives": 1.0,
+        "drops": 1.0,
+        "inputs": 0.9790794979079498,
+        "outputs": 0.9309623430962343,
+        "phase_constraints": 0.9184100418410042,
+        "preserve": 0.9184100418410042,
+        "terminate_when_empty": 0.9790794979079498,
+        "transfers": 0.9184100418410042
+      },
+      "incorrect_confidently_accepted_rate": 0.078,
+      "semantic_specification_exact": 0.878,
+      "status_accuracy": 0.956,
+      "supported_recall": 0.878
+    },
+    "test_lexical_holdout": {
+      "accepted_precision": 0.0,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 0.0
+        },
+        "ru": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 0.0
+        }
+      },
+      "count": 500,
+      "coverage": 0.184,
+      "field_exact": {
+        "allowed_primitives": 0.7391304347826086,
+        "drops": 0.7391304347826086,
+        "inputs": 0.03260869565217391,
+        "outputs": 0.5,
+        "phase_constraints": 0.0,
+        "preserve": 0.0,
+        "terminate_when_empty": 0.03260869565217391,
+        "transfers": 0.010869565217391304
+      },
+      "incorrect_confidently_accepted_rate": 0.184,
+      "semantic_specification_exact": 0.0,
+      "status_accuracy": 0.184,
+      "supported_recall": 0.0
+    },
+    "test_negation_preserve": {
+      "accepted_precision": 0.0,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 0.0
+        },
+        "ru": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 0.0
+        }
+      },
+      "count": 500,
+      "coverage": 0.218,
+      "field_exact": {
+        "allowed_primitives": 0.3853211009174312,
+        "drops": 0.5688073394495413,
+        "inputs": 0.0,
+        "outputs": 0.5045871559633027,
+        "phase_constraints": 0.0,
+        "preserve": 0.0,
+        "terminate_when_empty": 0.0,
+        "transfers": 0.26605504587155965
+      },
+      "incorrect_confidently_accepted_rate": 0.218,
+      "semantic_specification_exact": 0.0,
+      "status_accuracy": 0.218,
+      "supported_recall": 0.0
+    },
+    "test_order_holdout": {
+      "accepted_precision": 0.7605633802816901,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.6578947368421053,
+          "count": 250,
+          "semantic_exact": 0.1
+        },
+        "ru": {
+          "accepted_precision": 0.7980769230769231,
+          "count": 250,
+          "semantic_exact": 0.332
+        }
+      },
+      "count": 500,
+      "coverage": 0.284,
+      "field_exact": {
+        "allowed_primitives": 0.8943661971830986,
+        "drops": 0.9859154929577465,
+        "inputs": 0.852112676056338,
+        "outputs": 0.7746478873239436,
+        "phase_constraints": 0.7605633802816901,
+        "preserve": 0.7605633802816901,
+        "terminate_when_empty": 0.852112676056338,
+        "transfers": 0.7605633802816901
+      },
+      "incorrect_confidently_accepted_rate": 0.068,
+      "semantic_specification_exact": 0.216,
+      "status_accuracy": 0.284,
+      "supported_recall": 0.216
+    },
+    "test_template_holdout": {
+      "accepted_precision": 0.08620689655172414,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.09090909090909091,
+          "count": 250,
+          "semantic_exact": 0.02
+        },
+        "ru": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 0.0
+        }
+      },
+      "count": 500,
+      "coverage": 0.116,
+      "field_exact": {
+        "allowed_primitives": 0.3620689655172414,
+        "drops": 0.46551724137931033,
+        "inputs": 0.1724137931034483,
+        "outputs": 0.22413793103448276,
+        "phase_constraints": 0.08620689655172414,
+        "preserve": 0.15517241379310345,
+        "terminate_when_empty": 0.1724137931034483,
+        "transfers": 0.08620689655172414
+      },
+      "incorrect_confidently_accepted_rate": 0.106,
+      "semantic_specification_exact": 0.01,
+      "status_accuracy": 0.116,
+      "supported_recall": 0.01
+    },
+    "test_unsupported": {
+      "accepted_precision": 0.0,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 1.0
+        },
+        "ru": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 1.0
+        }
+      },
+      "count": 500,
+      "coverage": 0.0,
+      "field_exact": {
+        "allowed_primitives": 0.0,
+        "drops": 0.0,
+        "inputs": 0.0,
+        "outputs": 0.0,
+        "phase_constraints": 0.0,
+        "preserve": 0.0,
+        "terminate_when_empty": 0.0,
+        "transfers": 0.0
+      },
+      "incorrect_confidently_accepted_rate": 0.0,
+      "semantic_specification_exact": 1.0,
+      "status_accuracy": 1.0,
+      "supported_recall": 0.0
+    },
+    "test_variable_permutation": {
+      "accepted_precision": 0.0,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 0.0
+        },
+        "ru": {
+          "accepted_precision": 0.0,
+          "count": 250,
+          "semantic_exact": 0.0
+        }
+      },
+      "count": 500,
+      "coverage": 0.248,
+      "field_exact": {
+        "allowed_primitives": 0.8951612903225806,
+        "drops": 0.8951612903225806,
+        "inputs": 0.0,
+        "outputs": 0.3951612903225806,
+        "phase_constraints": 0.0,
+        "preserve": 0.0,
+        "terminate_when_empty": 0.0,
+        "transfers": 0.0
+      },
+      "incorrect_confidently_accepted_rate": 0.248,
+      "semantic_specification_exact": 0.0,
+      "status_accuracy": 0.248,
+      "supported_recall": 0.0
+    },
+    "validation": {
+      "accepted_precision": 0.0,
+      "by_language": {
+        "en": {
+          "accepted_precision": 0.0,
+          "count": 1000,
+          "semantic_exact": 0.2
+        },
+        "ru": {
+          "accepted_precision": 0.0,
+          "count": 1000,
+          "semantic_exact": 0.4
+        }
+      },
+      "count": 2000,
+      "coverage": 0.2005,
+      "field_exact": {
+        "allowed_primitives": 0.8802992518703242,
+        "drops": 0.8802992518703242,
+        "inputs": 0.0,
+        "outputs": 0.4339152119700748,
+        "phase_constraints": 0.0,
+        "preserve": 0.0,
+        "terminate_when_empty": 0.0,
+        "transfers": 0.0
+      },
+      "incorrect_confidently_accepted_rate": 0.2005,
+      "semantic_specification_exact": 0.3,
+      "status_accuracy": 0.5005,
+      "supported_recall": 0.0
+    }
+  }
+}

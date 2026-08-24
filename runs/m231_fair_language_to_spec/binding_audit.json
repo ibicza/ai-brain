@@ -1,0 +1,811 @@
+{
+  "audits": [
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "B",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"B\"],\"inputs\":[\"B\",\"A\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"DROP_ONE\",\"B\",null],[\"MOVE_ONE\",\"A\",\"D\"]],\"preserve\":[\"C\"],\"terminate_when_empty\":[\"B\",\"A\"],\"transfers\":[[\"A\",\"D\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "SOURCE_1": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"C\"],\"inputs\":[\"C\"],\"outputs\":[],\"phase_constraints\":[[\"DROP_ONE\",\"C\",null]],\"preserve\":[\"A\",\"B\",\"D\"],\"terminate_when_empty\":[\"C\"],\"transfers\":[],\"unsupported\":false}",
+      "template_family": "CLEAR",
+      "template_found": true
+    },
+    {
+      "binding": {},
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[],\"outputs\":[],\"phase_constraints\":[],\"preserve\":[\"A\",\"B\",\"C\",\"D\"],\"terminate_when_empty\":[],\"transfers\":[],\"unsupported\":false}",
+      "template_family": "NOOP",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "A",
+        "SOURCE_2": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"A\"],\"inputs\":[\"A\",\"B\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"DROP_ONE\",\"A\",null],[\"MOVE_ONE\",\"B\",\"D\"]],\"preserve\":[\"C\"],\"terminate_when_empty\":[\"A\",\"B\"],\"transfers\":[[\"B\",\"D\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "A",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"A\"],\"inputs\":[\"A\",\"C\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"DROP_ONE\",\"A\",null],[\"MOVE_ONE\",\"C\",\"B\"]],\"preserve\":[\"D\"],\"terminate_when_empty\":[\"A\",\"C\"],\"transfers\":[[\"C\",\"B\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "B",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"A\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"C\"],[\"MOVE_ONE\",\"A\",\"C\"]],\"preserve\":[\"D\"],\"terminate_when_empty\":[\"B\",\"A\"],\"transfers\":[[\"B\",\"C\"],[\"A\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"B\"]],\"preserve\":[\"A\",\"D\"],\"terminate_when_empty\":[\"C\"],\"transfers\":[[\"C\",\"B\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "A",
+        "SOURCE_2": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"A\"],\"inputs\":[\"A\",\"D\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"DROP_ONE\",\"A\",null],[\"MOVE_ONE\",\"D\",\"C\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"A\",\"D\"],\"transfers\":[[\"D\",\"C\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "C",
+        "SOURCE_2": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"C\"],\"inputs\":[\"C\",\"B\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"DROP_ONE\",\"C\",null],[\"MOVE_ONE\",\"B\",\"A\"]],\"preserve\":[\"D\"],\"terminate_when_empty\":[\"C\",\"B\"],\"transfers\":[[\"B\",\"A\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "B",
+        "SOURCE_2": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"B\"],\"inputs\":[\"B\",\"D\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"DROP_ONE\",\"B\",null],[\"MOVE_ONE\",\"D\",\"C\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"B\",\"D\"],\"transfers\":[[\"D\",\"C\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "C",
+        "SOURCE_2": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\",\"D\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"B\"],[\"MOVE_ONE\",\"D\",\"B\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"C\",\"D\"],\"transfers\":[[\"C\",\"B\"],[\"D\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "B",
+        "SOURCE_2": "C",
+        "SOURCE_3": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"C\",\"D\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"A\"],[\"MOVE_ONE\",\"C\",\"A\"],[\"MOVE_ONE\",\"D\",\"A\"]],\"preserve\":[],\"terminate_when_empty\":[\"B\",\"C\",\"D\"],\"transfers\":[[\"B\",\"A\"],[\"C\",\"A\"],[\"D\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "A",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"A\"],\"inputs\":[\"A\",\"C\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"DROP_ONE\",\"A\",null],[\"MOVE_ONE\",\"C\",\"D\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"A\",\"C\"],\"transfers\":[[\"C\",\"D\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "C",
+        "SOURCE_2": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\",\"B\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"A\"],[\"MOVE_ONE\",\"B\",\"A\"]],\"preserve\":[\"D\"],\"terminate_when_empty\":[\"C\",\"B\"],\"transfers\":[[\"C\",\"A\"],[\"B\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"A\"]],\"preserve\":[\"B\",\"C\"],\"terminate_when_empty\":[\"D\"],\"transfers\":[[\"D\",\"A\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"A\"]],\"preserve\":[\"B\",\"D\"],\"terminate_when_empty\":[\"C\"],\"transfers\":[[\"C\",\"A\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "SOURCE_1": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"B\"],\"inputs\":[\"B\"],\"outputs\":[],\"phase_constraints\":[[\"DROP_ONE\",\"B\",null]],\"preserve\":[\"A\",\"C\",\"D\"],\"terminate_when_empty\":[\"B\"],\"transfers\":[],\"unsupported\":false}",
+      "template_family": "CLEAR",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "SOURCE_1": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"D\"],\"inputs\":[\"D\"],\"outputs\":[],\"phase_constraints\":[[\"DROP_ONE\",\"D\",null]],\"preserve\":[\"A\",\"B\",\"C\"],\"terminate_when_empty\":[\"D\"],\"transfers\":[],\"unsupported\":false}",
+      "template_family": "CLEAR",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "D",
+        "SOURCE_2": "C",
+        "SOURCE_3": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"C\",\"B\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"A\"],[\"MOVE_ONE\",\"C\",\"A\"],[\"MOVE_ONE\",\"B\",\"A\"]],\"preserve\":[],\"terminate_when_empty\":[\"D\",\"C\",\"B\"],\"transfers\":[[\"D\",\"A\"],[\"C\",\"A\"],[\"B\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "B",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"C\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"D\"],[\"MOVE_ONE\",\"C\",\"D\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"B\",\"C\"],\"transfers\":[[\"B\",\"D\"],[\"C\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "D",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"C\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"A\"],[\"MOVE_ONE\",\"C\",\"A\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"D\",\"C\"],\"transfers\":[[\"D\",\"A\"],[\"C\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "D",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"A\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"B\"],[\"MOVE_ONE\",\"A\",\"B\"]],\"preserve\":[\"C\"],\"terminate_when_empty\":[\"D\",\"A\"],\"transfers\":[[\"D\",\"B\"],[\"A\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "C",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"C\"],\"inputs\":[\"C\",\"A\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"DROP_ONE\",\"C\",null],[\"MOVE_ONE\",\"A\",\"D\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"C\",\"A\"],\"transfers\":[[\"A\",\"D\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"D\"]],\"preserve\":[\"B\",\"C\"],\"terminate_when_empty\":[\"A\"],\"transfers\":[[\"A\",\"D\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "A",
+        "SOURCE_2": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\",\"B\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"D\"],[\"MOVE_ONE\",\"B\",\"D\"]],\"preserve\":[\"C\"],\"terminate_when_empty\":[\"A\",\"B\"],\"transfers\":[[\"A\",\"D\"],[\"B\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "D",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"D\"],\"inputs\":[\"D\",\"C\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"DROP_ONE\",\"D\",null],[\"MOVE_ONE\",\"C\",\"B\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"D\",\"C\"],\"transfers\":[[\"C\",\"B\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "C",
+        "SOURCE_2": "B",
+        "SOURCE_3": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\",\"B\",\"A\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"D\"],[\"MOVE_ONE\",\"B\",\"D\"],[\"MOVE_ONE\",\"A\",\"D\"]],\"preserve\":[],\"terminate_when_empty\":[\"C\",\"B\",\"A\"],\"transfers\":[[\"C\",\"D\"],[\"B\",\"D\"],[\"A\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "B",
+        "SOURCE_2": "A",
+        "SOURCE_3": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"A\",\"D\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"C\"],[\"MOVE_ONE\",\"A\",\"C\"],[\"MOVE_ONE\",\"D\",\"C\"]],\"preserve\":[],\"terminate_when_empty\":[\"B\",\"A\",\"D\"],\"transfers\":[[\"B\",\"C\"],[\"A\",\"C\"],[\"D\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "B",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"B\"],\"inputs\":[\"B\",\"C\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"DROP_ONE\",\"B\",null],[\"MOVE_ONE\",\"C\",\"D\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"B\",\"C\"],\"transfers\":[[\"C\",\"D\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "A",
+        "SOURCE_2": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\",\"D\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"C\"],[\"MOVE_ONE\",\"D\",\"C\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"A\",\"D\"],\"transfers\":[[\"A\",\"C\"],[\"D\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "D",
+        "SOURCE_2": "C",
+        "SOURCE_3": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"C\",\"A\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"B\"],[\"MOVE_ONE\",\"C\",\"B\"],[\"MOVE_ONE\",\"A\",\"B\"]],\"preserve\":[],\"terminate_when_empty\":[\"D\",\"C\",\"A\"],\"transfers\":[[\"D\",\"B\"],[\"C\",\"B\"],[\"A\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "D",
+        "SOURCE_2": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"D\"],\"inputs\":[\"D\",\"B\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"DROP_ONE\",\"D\",null],[\"MOVE_ONE\",\"B\",\"C\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"D\",\"B\"],\"transfers\":[[\"B\",\"C\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "B",
+        "SOURCE_2": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"B\"],\"inputs\":[\"B\",\"D\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"DROP_ONE\",\"B\",null],[\"MOVE_ONE\",\"D\",\"A\"]],\"preserve\":[\"C\"],\"terminate_when_empty\":[\"B\",\"D\"],\"transfers\":[[\"D\",\"A\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"A\"]],\"preserve\":[\"C\",\"D\"],\"terminate_when_empty\":[\"B\"],\"transfers\":[[\"B\",\"A\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "B",
+        "SOURCE_2": "D",
+        "SOURCE_3": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"D\",\"A\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"C\"],[\"MOVE_ONE\",\"D\",\"C\"],[\"MOVE_ONE\",\"A\",\"C\"]],\"preserve\":[],\"terminate_when_empty\":[\"B\",\"D\",\"A\"],\"transfers\":[[\"B\",\"C\"],[\"D\",\"C\"],[\"A\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "C",
+        "SOURCE_2": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"C\"],\"inputs\":[\"C\",\"B\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"DROP_ONE\",\"C\",null],[\"MOVE_ONE\",\"B\",\"D\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"C\",\"B\"],\"transfers\":[[\"B\",\"D\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "D",
+        "SOURCE_2": "B",
+        "SOURCE_3": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"B\",\"C\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"A\"],[\"MOVE_ONE\",\"B\",\"A\"],[\"MOVE_ONE\",\"C\",\"A\"]],\"preserve\":[],\"terminate_when_empty\":[\"D\",\"B\",\"C\"],\"transfers\":[[\"D\",\"A\"],[\"B\",\"A\"],[\"C\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "A",
+        "SOURCE_2": "B",
+        "SOURCE_3": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\",\"B\",\"D\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"C\"],[\"MOVE_ONE\",\"B\",\"C\"],[\"MOVE_ONE\",\"D\",\"C\"]],\"preserve\":[],\"terminate_when_empty\":[\"A\",\"B\",\"D\"],\"transfers\":[[\"A\",\"C\"],[\"B\",\"C\"],[\"D\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"B\"]],\"preserve\":[\"A\",\"C\"],\"terminate_when_empty\":[\"D\"],\"transfers\":[[\"D\",\"B\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"C\"]],\"preserve\":[\"A\",\"B\"],\"terminate_when_empty\":[\"D\"],\"transfers\":[[\"D\",\"C\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "D",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"C\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"B\"],[\"MOVE_ONE\",\"C\",\"B\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"D\",\"C\"],\"transfers\":[[\"D\",\"B\"],[\"C\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"C\"]],\"preserve\":[\"B\",\"D\"],\"terminate_when_empty\":[\"A\"],\"transfers\":[[\"A\",\"C\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "D",
+        "SOURCE_2": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"B\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"C\"],[\"MOVE_ONE\",\"B\",\"C\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"D\",\"B\"],\"transfers\":[[\"D\",\"C\"],[\"B\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "B",
+        "SOURCE_2": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"D\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"A\"],[\"MOVE_ONE\",\"D\",\"A\"]],\"preserve\":[\"C\"],\"terminate_when_empty\":[\"B\",\"D\"],\"transfers\":[[\"B\",\"A\"],[\"D\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "A",
+        "SOURCE_2": "D",
+        "SOURCE_3": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\",\"D\",\"C\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"B\"],[\"MOVE_ONE\",\"D\",\"B\"],[\"MOVE_ONE\",\"C\",\"B\"]],\"preserve\":[],\"terminate_when_empty\":[\"A\",\"D\",\"C\"],\"transfers\":[[\"A\",\"B\"],[\"D\",\"B\"],[\"C\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "A",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\",\"C\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"D\"],[\"MOVE_ONE\",\"C\",\"D\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"A\",\"C\"],\"transfers\":[[\"A\",\"D\"],[\"C\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "C",
+        "SOURCE_2": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\",\"B\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"D\"],[\"MOVE_ONE\",\"B\",\"D\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"C\",\"B\"],\"transfers\":[[\"C\",\"D\"],[\"B\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "D",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"D\"],\"inputs\":[\"D\",\"C\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"DROP_ONE\",\"D\",null],[\"MOVE_ONE\",\"C\",\"A\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"D\",\"C\"],\"transfers\":[[\"C\",\"A\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "A",
+        "SOURCE_2": "C",
+        "SOURCE_3": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\",\"C\",\"D\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"B\"],[\"MOVE_ONE\",\"C\",\"B\"],[\"MOVE_ONE\",\"D\",\"B\"]],\"preserve\":[],\"terminate_when_empty\":[\"A\",\"C\",\"D\"],\"transfers\":[[\"A\",\"B\"],[\"C\",\"B\"],[\"D\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "D",
+        "SOURCE_2": "A",
+        "SOURCE_3": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"A\",\"C\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"B\"],[\"MOVE_ONE\",\"A\",\"B\"],[\"MOVE_ONE\",\"C\",\"B\"]],\"preserve\":[],\"terminate_when_empty\":[\"D\",\"A\",\"C\"],\"transfers\":[[\"D\",\"B\"],[\"A\",\"B\"],[\"C\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"D\"]],\"preserve\":[\"A\",\"C\"],\"terminate_when_empty\":[\"B\"],\"transfers\":[[\"B\",\"D\"]],\"unsupported\":false}",
+      "template_family": "DRAIN",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "B",
+        "SOURCE_2": "D",
+        "SOURCE_3": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"D\",\"C\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"A\"],[\"MOVE_ONE\",\"D\",\"A\"],[\"MOVE_ONE\",\"C\",\"A\"]],\"preserve\":[],\"terminate_when_empty\":[\"B\",\"D\",\"C\"],\"transfers\":[[\"B\",\"A\"],[\"D\",\"A\"],[\"C\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "B",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"A\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"D\"],[\"MOVE_ONE\",\"A\",\"D\"]],\"preserve\":[\"C\"],\"terminate_when_empty\":[\"B\",\"A\"],\"transfers\":[[\"B\",\"D\"],[\"A\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "C",
+        "SOURCE_2": "B",
+        "SOURCE_3": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\",\"B\",\"D\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"A\"],[\"MOVE_ONE\",\"B\",\"A\"],[\"MOVE_ONE\",\"D\",\"A\"]],\"preserve\":[],\"terminate_when_empty\":[\"C\",\"B\",\"D\"],\"transfers\":[[\"C\",\"A\"],[\"B\",\"A\"],[\"D\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "A",
+        "SOURCE_2": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\",\"C\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"B\"],[\"MOVE_ONE\",\"C\",\"B\"]],\"preserve\":[\"D\"],\"terminate_when_empty\":[\"A\",\"C\"],\"transfers\":[[\"A\",\"B\"],[\"C\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "C",
+        "SOURCE_2": "A",
+        "SOURCE_3": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\",\"A\",\"D\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"B\"],[\"MOVE_ONE\",\"A\",\"B\"],[\"MOVE_ONE\",\"D\",\"B\"]],\"preserve\":[],\"terminate_when_empty\":[\"C\",\"A\",\"D\"],\"transfers\":[[\"C\",\"B\"],[\"A\",\"B\"],[\"D\",\"B\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "B",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"B\"],\"inputs\":[\"B\",\"A\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"DROP_ONE\",\"B\",null],[\"MOVE_ONE\",\"A\",\"C\"]],\"preserve\":[\"D\"],\"terminate_when_empty\":[\"B\",\"A\"],\"transfers\":[[\"A\",\"C\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "D",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"A\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"C\"],[\"MOVE_ONE\",\"A\",\"C\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"D\",\"A\"],\"transfers\":[[\"D\",\"C\"],[\"A\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "C",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\",\"A\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"D\"],[\"MOVE_ONE\",\"A\",\"D\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"C\",\"A\"],\"transfers\":[[\"C\",\"D\"],[\"A\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "D",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"D\"],\"inputs\":[\"D\",\"A\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"DROP_ONE\",\"D\",null],[\"MOVE_ONE\",\"A\",\"C\"]],\"preserve\":[\"B\"],\"terminate_when_empty\":[\"D\",\"A\"],\"transfers\":[[\"A\",\"C\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "A",
+        "SOURCE_1": "C",
+        "SOURCE_2": "D",
+        "SOURCE_3": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"C\",\"D\",\"B\"],\"outputs\":[\"A\"],\"phase_constraints\":[[\"MOVE_ONE\",\"C\",\"A\"],[\"MOVE_ONE\",\"D\",\"A\"],[\"MOVE_ONE\",\"B\",\"A\"]],\"preserve\":[],\"terminate_when_empty\":[\"C\",\"D\",\"B\"],\"transfers\":[[\"C\",\"A\"],[\"D\",\"A\"],[\"B\",\"A\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "D",
+        "SOURCE_2": "A",
+        "SOURCE_3": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"D\",\"A\",\"B\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"D\",\"C\"],[\"MOVE_ONE\",\"A\",\"C\"],[\"MOVE_ONE\",\"B\",\"C\"]],\"preserve\":[],\"terminate_when_empty\":[\"D\",\"A\",\"B\"],\"transfers\":[[\"D\",\"C\"],[\"A\",\"C\"],[\"B\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "B",
+        "SOURCE_2": "A",
+        "SOURCE_3": "C"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"A\",\"C\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"D\"],[\"MOVE_ONE\",\"A\",\"D\"],[\"MOVE_ONE\",\"C\",\"D\"]],\"preserve\":[],\"terminate_when_empty\":[\"B\",\"A\",\"C\"],\"transfers\":[[\"B\",\"D\"],[\"A\",\"D\"],[\"C\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "C",
+        "SOURCE_2": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"C\"],\"inputs\":[\"C\",\"D\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"DROP_ONE\",\"C\",null],[\"MOVE_ONE\",\"D\",\"B\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"C\",\"D\"],\"transfers\":[[\"D\",\"B\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "C",
+        "SOURCE_1": "B",
+        "SOURCE_2": "D"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"B\",\"D\"],\"outputs\":[\"C\"],\"phase_constraints\":[[\"MOVE_ONE\",\"B\",\"C\"],[\"MOVE_ONE\",\"D\",\"C\"]],\"preserve\":[\"A\"],\"terminate_when_empty\":[\"B\",\"D\"],\"transfers\":[[\"B\",\"C\"],[\"D\",\"C\"]],\"unsupported\":false}",
+      "template_family": "MERGE_TWO",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "D",
+        "SOURCE_1": "A",
+        "SOURCE_2": "C",
+        "SOURCE_3": "B"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[],\"inputs\":[\"A\",\"C\",\"B\"],\"outputs\":[\"D\"],\"phase_constraints\":[[\"MOVE_ONE\",\"A\",\"D\"],[\"MOVE_ONE\",\"C\",\"D\"],[\"MOVE_ONE\",\"B\",\"D\"]],\"preserve\":[],\"terminate_when_empty\":[\"A\",\"C\",\"B\"],\"transfers\":[[\"A\",\"D\"],[\"C\",\"D\"],[\"B\",\"D\"]],\"unsupported\":false}",
+      "template_family": "MERGE_THREE",
+      "template_found": true
+    },
+    {
+      "binding": {
+        "DESTINATION": "B",
+        "SOURCE_1": "D",
+        "SOURCE_2": "A"
+      },
+      "binding_found": true,
+      "property_verified": true,
+      "specification": "{\"allowed_primitives\":[\"DROP_ONE\",\"HALT\",\"MOVE_ONE\"],\"allowed_variables\":[\"A\",\"B\",\"C\",\"D\"],\"drops\":[\"D\"],\"inputs\":[\"D\",\"A\"],\"outputs\":[\"B\"],\"phase_constraints\":[[\"DROP_ONE\",\"D\",null],[\"MOVE_ONE\",\"A\",\"B\"]],\"preserve\":[\"C\"],\"terminate_when_empty\":[\"D\",\"A\"],\"transfers\":[[\"A\",\"B\"]],\"unsupported\":false}",
+      "template_family": "DROP_THEN_TRANSFER",
+      "template_found": true
+    }
+  ],
+  "binding_found": 1.0,
+  "count": 67,
+  "property_verified": 1.0,
+  "template_found": 1.0
+}

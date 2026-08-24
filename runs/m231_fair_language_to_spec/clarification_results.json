@@ -1,0 +1,29 @@
+{
+  "deterministic_end_to_end": {
+    "ambiguity_detection": 1.0,
+    "answer_interpretation": 1.0,
+    "count": 500,
+    "issue_code_accuracy": 1.0,
+    "question_field_accuracy": 1.0,
+    "resolved_semantic_exact": 1.0,
+    "unresolved_abstention": 0.0
+  },
+  "neural_end_to_end": {
+    "ambiguity_detection": 1.0,
+    "answer_interpretation": 1.0,
+    "count": 500,
+    "issue_code_accuracy": 1.0,
+    "question_field_accuracy": 1.0,
+    "resolved_semantic_exact": 1.0,
+    "unresolved_abstention": 0.0
+  },
+  "oracle_issue_upper_bound": {
+    "ambiguity_detection": 1.0,
+    "answer_interpretation": 1.0,
+    "count": 500,
+    "issue_code_accuracy": 1.0,
+    "question_field_accuracy": 1.0,
+    "resolved_semantic_exact": 1.0,
+    "unresolved_abstention": 0.0
+  }
+}

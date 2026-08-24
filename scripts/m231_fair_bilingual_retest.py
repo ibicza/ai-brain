@@ -1173,6 +1173,8 @@ The finite-answer model is labeled a catalog classifier: JSON/schema validity is
 
 {_training_budget_table(results)}
 
+All neural candidates used the same maximum update budget, batch size, optimizer, and 500-step validation cadence. Early stopping produced different processed-example and wall-time totals, so the table supports diagnostic comparison only; it does not establish architecture superiority.
+
 ## Diagnostic Ladder
 
 {_metric_table(results)}
