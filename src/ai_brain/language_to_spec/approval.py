@@ -13,10 +13,11 @@ from ai_brain.language_to_spec.schema import (
     validate_proposal,
 )
 from ai_brain.rules.ast import parse_canonical_dsl
-from ai_brain.rules.blackbox import PublicAcquisitionResult
+from ai_brain.rules.blackbox import PublicAcquisitionResult, specification_signature
 from ai_brain.rules.memory import RuleMemory, RuleRecord
 from ai_brain.rules.specifications import ProgramSpecification
 from ai_brain.rules.statuses import VerificationStatus
+from ai_brain.rules.verifier import property_verify
 
 
 class ApprovalDecision(StrEnum):
@@ -113,6 +114,13 @@ def store_approved_language_rule(
     ):
         raise ValueError("Acquisition evidence is not property verified")
     program, _ = parse_canonical_dsl(acquisition.candidate_ast)
+    evidence_signature = evidence.get("specification_signature")
+    if evidence_signature is not None and evidence_signature != specification_signature(
+        proposal.specification
+    ):
+        raise ValueError("Verification evidence belongs to a stale specification")
+    if not property_verify(program, proposal.specification, large=True).accepted:
+        raise ValueError("Candidate is not verified against the final specification")
     provenance = json.dumps(
         {
             "source": "M-23 language frontend",
