@@ -1,0 +1,4 @@
+{"event":"integration_started","branch":"exp/stage1-v1-integration","frozen_backend_sha":"11b573ee46c6df552d6a44b91d4f1712a62b5273","m231_source_sha":"54aafbc0fdeb4de525e61818d32357fe96971bc4"}
+{"event":"m231_source_verified","remote":"karina","sha":"54aafbc0fdeb4de525e61818d32357fe96971bc4","ruff":"passed","pytest_passed":365,"exit_code":0}
+{"event":"local_regression_verified","ruff":"passed","pytest_passed":360}
+{"acceptance_checks":1267,"active_rules_executed":89,"device":"CPU-only deterministic acceptance","event":"acceptance_complete","language_semantic_cases":356,"outcome":"A","rule_memory_records":100,"structural_specifications":89}

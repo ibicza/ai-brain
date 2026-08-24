@@ -131,6 +131,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    from ai_brain.stage1.cli import add_stage1_parser
+
+    add_stage1_parser(subparsers)
+
     device_parser = subparsers.add_parser(
         "device",
         help="Show runtime device information.",
@@ -1200,6 +1204,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     _configure_stdout()
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "stage1":
+        from ai_brain.stage1.cli import run_stage1
+
+        return run_stage1(args)
 
     if args.command == "device":
         info = get_device_info(prefer_cuda=not args.cpu)

@@ -21,6 +21,7 @@ htmlcov/
 
 # Code review graph cache
 .code-review-graph/
+tmp/
 
 # Model training
 checkpoints/
