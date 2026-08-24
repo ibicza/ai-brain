@@ -3,6 +3,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$root"
+export PATH="$HOME/.local/bin:$PATH"
 
 mkdir -p runs/m231_fair_language_to_spec
 log="runs/m231_fair_language_to_spec/remote_run.log"
