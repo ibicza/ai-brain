@@ -1,0 +1,363 @@
+{
+  "counts": {
+    "test_ambiguous": 500,
+    "test_contradictory": 500,
+    "test_cross_language": 500,
+    "test_id": 500,
+    "test_lexical_holdout": 500,
+    "test_negation_preserve": 500,
+    "test_order_holdout": 500,
+    "test_template_holdout": 500,
+    "test_unsupported": 500,
+    "test_variable_permutation": 500,
+    "train": 20000,
+    "validation": 2000
+  },
+  "cross_language_pair_count": 250,
+  "cross_language_pairs_semantically_equal": true,
+  "model_visible_sample_id_hits": 0,
+  "normalized_text_globally_unique": true,
+  "schema_version": 1,
+  "seed": 23000,
+  "sha256": {
+    "test_ambiguous": "82b40eed81163e5e90c07ffbaf5db7531bfd3402e1057b1efbff1b735d874ad8",
+    "test_contradictory": "c53c1bc69c1e9606a48f210ce289181a6e9b2594b9af2b0fb0351e5af9dbe175",
+    "test_cross_language": "7f38a33a24a7610729f90ab40db9dff49e1a954535094cd7b93344df8b5741f0",
+    "test_id": "6841bea195e0eb51d8a4856fb7e85048d6d107883f0ea7068fe1d8a744858a9c",
+    "test_lexical_holdout": "ef0fc83d98b297535ada9e463d8617f0cb48852d063db463630f4005ed02bccc",
+    "test_negation_preserve": "7b443d16dbc499d010748eeea85ba1529e060ecffab1426187274b4bc45fba98",
+    "test_order_holdout": "0cedd5a1f06d306d152af537c86692b9661242c0418fdb0ae5eb539b7ddc6b66",
+    "test_template_holdout": "f69a80160fa0d9b3dbf8ab490dec3c051459527ad15fd190df85694b52a07e1c",
+    "test_unsupported": "92cd79c110e917c92d1dd20df2d59532ce14cd141a5da12df2fac89c4592bfea",
+    "test_variable_permutation": "45e24d5719bc6f4876ddd28c2ca5569307b04cb9d4005e7ed1c23a54de456833",
+    "train": "5d6786f7f64d13cb918f09d208a86f7d5e507bee0f2593e1a9626620e79fa896",
+    "validation": "868ba6485c164b3220f5a8322623fa96fd90577ace9291c2644a146610475963"
+  },
+  "splits": {
+    "test_ambiguous": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "None": 500
+      },
+      "specification_count": 0,
+      "status": {
+        "AMBIGUOUS": 500
+      },
+      "surface_template_family_count": 4
+    },
+    "test_contradictory": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "None": 500
+      },
+      "specification_count": 0,
+      "status": {
+        "CONTRADICTORY": 500
+      },
+      "surface_template_family_count": 3
+    },
+    "test_cross_language": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 24,
+        "DRAIN": 72,
+        "DROP_THEN_TRANSFER": 108,
+        "MERGE_THREE": 144,
+        "MERGE_TWO": 144,
+        "NOOP": 8
+      },
+      "specification_count": 67,
+      "status": {
+        "SUPPORTED": 500
+      },
+      "surface_template_family_count": 4
+    },
+    "test_id": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 84,
+        "DRAIN": 83,
+        "DROP_THEN_TRANSFER": 83,
+        "MERGE_THREE": 83,
+        "MERGE_TWO": 83,
+        "NOOP": 84
+      },
+      "specification_count": 67,
+      "status": {
+        "SUPPORTED": 500
+      },
+      "surface_template_family_count": 4
+    },
+    "test_lexical_holdout": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 84,
+        "DRAIN": 83,
+        "DROP_THEN_TRANSFER": 83,
+        "MERGE_THREE": 83,
+        "MERGE_TWO": 83,
+        "NOOP": 84
+      },
+      "specification_count": 67,
+      "status": {
+        "SUPPORTED": 500
+      },
+      "surface_template_family_count": 4
+    },
+    "test_negation_preserve": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 84,
+        "DRAIN": 83,
+        "DROP_THEN_TRANSFER": 83,
+        "MERGE_THREE": 83,
+        "MERGE_TWO": 83,
+        "NOOP": 84
+      },
+      "specification_count": 67,
+      "status": {
+        "SUPPORTED": 500
+      },
+      "surface_template_family_count": 4
+    },
+    "test_order_holdout": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 84,
+        "DRAIN": 83,
+        "DROP_THEN_TRANSFER": 83,
+        "MERGE_THREE": 83,
+        "MERGE_TWO": 83,
+        "NOOP": 84
+      },
+      "specification_count": 67,
+      "status": {
+        "SUPPORTED": 500
+      },
+      "surface_template_family_count": 4
+    },
+    "test_template_holdout": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 84,
+        "DRAIN": 83,
+        "DROP_THEN_TRANSFER": 83,
+        "MERGE_THREE": 83,
+        "MERGE_TWO": 83,
+        "NOOP": 84
+      },
+      "specification_count": 67,
+      "status": {
+        "SUPPORTED": 500
+      },
+      "surface_template_family_count": 4
+    },
+    "test_unsupported": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "None": 500
+      },
+      "specification_count": 0,
+      "status": {
+        "UNSUPPORTED": 500
+      },
+      "surface_template_family_count": 1
+    },
+    "test_variable_permutation": {
+      "count": 500,
+      "language": {
+        "en": 250,
+        "ru": 250
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 84,
+        "DRAIN": 83,
+        "DROP_THEN_TRANSFER": 83,
+        "MERGE_THREE": 83,
+        "MERGE_TWO": 83,
+        "NOOP": 84
+      },
+      "specification_count": 23,
+      "status": {
+        "SUPPORTED": 500
+      },
+      "surface_template_family_count": 4
+    },
+    "train": {
+      "count": 20000,
+      "language": {
+        "en": 10000,
+        "ru": 10000
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 2334,
+        "DRAIN": 2333,
+        "DROP_THEN_TRANSFER": 2333,
+        "MERGE_THREE": 2333,
+        "MERGE_TWO": 2333,
+        "NOOP": 2334,
+        "None": 6000
+      },
+      "specification_count": 67,
+      "status": {
+        "AMBIGUOUS": 2000,
+        "CONTRADICTORY": 2000,
+        "SUPPORTED": 14000,
+        "UNSUPPORTED": 2000
+      },
+      "surface_template_family_count": 12
+    },
+    "validation": {
+      "count": 2000,
+      "language": {
+        "en": 1000,
+        "ru": 1000
+      },
+      "lexical_family_count": 1,
+      "semantic_family": {
+        "CLEAR": 200,
+        "DRAIN": 266,
+        "DROP_THEN_TRANSFER": 200,
+        "MERGE_THREE": 267,
+        "MERGE_TWO": 200,
+        "NOOP": 267,
+        "None": 600
+      },
+      "specification_count": 67,
+      "status": {
+        "AMBIGUOUS": 200,
+        "CONTRADICTORY": 200,
+        "SUPPORTED": 1400,
+        "UNSUPPORTED": 200
+      },
+      "surface_template_family_count": 12
+    }
+  },
+  "total_count": 27000,
+  "train_overlap_audit": {
+    "test_ambiguous": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 0,
+      "surface_template": 4
+    },
+    "test_contradictory": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 0,
+      "surface_template": 3
+    },
+    "test_cross_language": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 67,
+      "surface_template": 4
+    },
+    "test_id": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 67,
+      "surface_template": 4
+    },
+    "test_lexical_holdout": {
+      "exact_text": 0,
+      "lexical_family": 0,
+      "normalized_text": 0,
+      "specification": 67,
+      "surface_template": 4
+    },
+    "test_negation_preserve": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 67,
+      "surface_template": 4
+    },
+    "test_order_holdout": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 67,
+      "surface_template": 4
+    },
+    "test_template_holdout": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 67,
+      "surface_template": 0
+    },
+    "test_unsupported": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 0,
+      "surface_template": 1
+    },
+    "test_variable_permutation": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 1,
+      "surface_template": 4
+    },
+    "validation": {
+      "exact_text": 0,
+      "lexical_family": 1,
+      "normalized_text": 0,
+      "specification": 67,
+      "surface_template": 12
+    }
+  }
+}
