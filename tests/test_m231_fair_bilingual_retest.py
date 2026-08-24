@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import random
 from dataclasses import asdict, replace
 from pathlib import Path
 
@@ -40,6 +41,7 @@ from ai_brain.language_to_spec.fair_model import (
     apply_calibration,
     build_candidate,
     calibrate_fail_closed,
+    clause_order_augment,
     encode_texts_v2,
     make_config,
 )
@@ -87,6 +89,23 @@ def test_language_family_parity_and_balance_regression(
     validation = manifest["splits"]["validation_train_surface"]["language_family"]
     for family in SemanticFamily:
         assert validation[f"ru|{family}"] == validation[f"en|{family}"]
+
+
+def test_clause_order_augmentation_preserves_visible_clause_multiset() -> None:
+    row = {
+        "text": "Move A into B. Preserve C and D. Stop when A is empty.",
+        "prompt": "Move A into B. Preserve C and D. Stop when A is empty.",
+    }
+    augmented = clause_order_augment(row, random.Random(7), probability=1.0)
+    expected = {"Move A into B.", "Preserve C and D.", "Stop when A is empty."}
+    actual = {
+        clause.strip() + "."
+        for clause in augmented["text"].split(".")
+        if clause.strip()
+    }
+    assert actual == expected
+    assert augmented["text"] != row["text"]
+    assert augmented["prompt"] == augmented["text"]
 
 
 def test_every_supported_train_spec_is_bilingual(

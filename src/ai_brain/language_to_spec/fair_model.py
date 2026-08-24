@@ -973,7 +973,13 @@ def calibrate_fail_closed(
 
 
 class BalancedBatchSampler:
-    def __init__(self, rows: Sequence[dict[str, Any]], seed: int) -> None:
+    def __init__(
+        self,
+        rows: Sequence[dict[str, Any]],
+        seed: int,
+        *,
+        clause_shuffle_probability: float = 0.0,
+    ) -> None:
         groups: dict[tuple[str, str, str, str], list[int]] = defaultdict(list)
         for index, row in enumerate(rows):
             groups[
@@ -989,6 +995,7 @@ class BalancedBatchSampler:
         self.keys = tuple(groups)
         self.rng = random.Random(seed)
         self.sampled = Counter()
+        self.clause_shuffle_probability = clause_shuffle_probability
 
     def batch(self, size: int) -> list[dict[str, Any]]:
         batch = []
@@ -996,7 +1003,14 @@ class BalancedBatchSampler:
             key = self.rng.choice(self.keys)
             row = self.rows[self.rng.choice(self.groups[key])]
             self.sampled[key] += 1
-            batch.append(role_permutation_augment(row, self.rng))
+            augmented = role_permutation_augment(row, self.rng)
+            batch.append(
+                clause_order_augment(
+                    augmented,
+                    self.rng,
+                    probability=self.clause_shuffle_probability,
+                )
+            )
         return batch
 
     def distribution(self) -> dict[str, int]:
@@ -1099,6 +1113,29 @@ def role_permutation_augment(
     return row
 
 
+def clause_order_augment(
+    row: dict[str, Any], rng: random.Random, *, probability: float = 0.5
+) -> dict[str, Any]:
+    """Shuffle complete surface clauses while preserving each clause verbatim."""
+    if probability <= 0 or rng.random() >= probability:
+        return row
+    clauses = [
+        match.group(0).strip()
+        for match in re.finditer(r"[^.!?;]+[.!?;]?", row["text"])
+        if match.group(0).strip()
+    ]
+    if len(clauses) < 3:
+        return row
+    shuffled = list(clauses)
+    rng.shuffle(shuffled)
+    if shuffled == clauses:
+        shuffled = [*clauses[1:], clauses[0]]
+    updated = copy.deepcopy(row)
+    updated["text"] = " ".join(shuffled)
+    updated["prompt"] = updated["text"]
+    return updated
+
+
 def build_candidate(
     config: FairParserConfig,
 ) -> CatalogSpecificationClassifier | FactorizedLanguageToSpecParserV2:
@@ -1147,6 +1184,7 @@ def train_fair_candidate(
     eval_every: int = 500,
     patience: int = 4,
     consistency_weight: float = 0.0,
+    clause_shuffle_probability: float = 0.0,
     cpu: bool = False,
 ) -> dict[str, Any]:
     device_info = get_device_info(prefer_cuda=not cpu)
@@ -1173,7 +1211,11 @@ def train_fair_candidate(
         model.parameters(), lr=learning_rate, weight_decay=0.01
     )
     tokenizer = _tokenizer(config)
-    sampler = BalancedBatchSampler(train_rows, seed)
+    sampler = BalancedBatchSampler(
+        train_rows,
+        seed,
+        clause_shuffle_probability=clause_shuffle_probability,
+    )
     pair_rng = random.Random(seed + 91_003)
     catalog = catalog_answers()
     history = []
@@ -1290,6 +1332,7 @@ def train_fair_candidate(
         "history": history,
         "balanced_sampler_distribution": sampler.distribution(),
         "pair_consistency_weight": consistency_weight,
+        "clause_shuffle_probability": clause_shuffle_probability,
         "calibration": asdict(calibration),
         "train_subset": {
             key: value for key, value in train_subset.items() if key != "failures"

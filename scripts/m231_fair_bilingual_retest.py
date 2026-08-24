@@ -70,10 +70,11 @@ BASELINE_SNAPSHOT = ROOT / "runs" / "m231_m23_baseline_snapshot.json"
 
 TEST_SPLITS = tuple(split for split in FAIR_SPLIT_COUNTS if split.startswith("test_"))
 CANDIDATES = {
-    "catalog_bpe": ("catalog", "bpe", 0.0),
-    "factorized_byte": ("factorized", "byte", 0.0),
-    "factorized_bpe": ("factorized", "bpe", 0.0),
-    "factorized_bpe_consistency": ("factorized", "bpe", 0.05),
+    "catalog_bpe": ("catalog", "bpe", 0.0, 0.0),
+    "factorized_byte": ("factorized", "byte", 0.0, 0.0),
+    "factorized_bpe": ("factorized", "bpe", 0.0, 0.0),
+    "factorized_bpe_consistency": ("factorized", "bpe", 0.05, 0.0),
+    "factorized_bpe_clause_shuffle": ("factorized", "bpe", 0.0, 0.75),
 }
 PRIMARY_CANDIDATES = ("catalog_bpe", "factorized_byte", "factorized_bpe")
 
@@ -316,7 +317,7 @@ def train_named_candidate(
     max_steps: int,
     cpu: bool,
 ) -> dict[str, Any]:
-    kind, encoding, consistency_weight = CANDIDATES[name]
+    kind, encoding, consistency_weight, clause_shuffle_probability = CANDIDATES[name]
     config = make_config(
         candidate_kind=kind,
         encoding=encoding,
@@ -335,6 +336,7 @@ def train_named_candidate(
         eval_every=500,
         patience=4,
         consistency_weight=consistency_weight,
+        clause_shuffle_probability=clause_shuffle_probability,
         cpu=cpu,
     )
     progress(
@@ -927,7 +929,9 @@ def _best_candidate(results: dict[str, Any]) -> tuple[str, int, dict[str, Any]]:
             + raw["test_lexical_holdout"]["semantic_specification_exact"]
             + raw["test_template_holdout"]["semantic_specification_exact"]
             + raw["test_variable_permutation"]["semantic_specification_exact"]
+            + raw["test_order_holdout"]["semantic_specification_exact"]
             + raw["test_negation_preserve"]["semantic_specification_exact"]
+            + raw["test_composed_ood"]["semantic_specification_exact"]
             + safe["test_id"]["coverage"]
             - 5.0 * safe["test_id"]["incorrect_accepted_rate"]
         )
@@ -1011,7 +1015,7 @@ def _metric_table(results: dict[str, Any]) -> str:
 
 def _training_budget_table(results: dict[str, Any]) -> str:
     lines = [
-        "| candidate | seed | parameters | updates | examples | best step | wall seconds | consistency weight |",
+        "| candidate | seed | parameters | updates | examples | best step | wall seconds | consistency / clause-shuffle |",
         "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for name, seeds in results.items():
@@ -1024,7 +1028,8 @@ def _training_budget_table(results: dict[str, Any]) -> str:
                 f"| {name} | {seed} | {row['parameter_count']} | "
                 f"{row['updates_run']} | {row['processed_examples']} | "
                 f"{row['best_step']} | {row['wall_time_seconds']:.2f} | "
-                f"{row['pair_consistency_weight']:.3f} |"
+                f"{row['pair_consistency_weight']:.3f} / "
+                f"{row.get('clause_shuffle_probability', 0.0):.2f} |"
             )
     return "\n".join(lines)
 
@@ -1396,6 +1401,34 @@ def run_all(*, max_steps: int, cpu: bool, checks: str) -> dict[str, Any]:
     return build_reports(checks)
 
 
+def run_targeted_order_fix(*, max_steps: int, cpu: bool) -> dict[str, Any]:
+    name = "factorized_bpe_clause_shuffle"
+    train = train_named_candidate(name, seed=23_101, max_steps=max_steps, cpu=cpu)
+    evaluation = evaluate_named_candidate(name, seed=23_101, cpu=cpu)
+    progress(
+        "phase_27_failure_fix_loop",
+        "targeted-order-fix",
+        metrics={
+            "best_step": train["best_step"],
+            "id": evaluation["raw"]["test_id"]["semantic_specification_exact"],
+            "order": evaluation["raw"]["test_order_holdout"][
+                "semantic_specification_exact"
+            ],
+            "template": evaluation["raw"]["test_template_holdout"][
+                "semantic_specification_exact"
+            ],
+            "composed": evaluation["raw"]["test_composed_ood"][
+                "semantic_specification_exact"
+            ],
+            "safe_incorrect": evaluation["safe"]["test_id"]["incorrect_accepted_rate"],
+        },
+        diagnosis="Order holdout failures track unseen permutations of otherwise familiar semantic clauses.",
+        fix="Shuffle only complete train clauses; preserve every clause verbatim and keep holdout lexemes/templates absent.",
+        next_action="Compare against the untouched exploratory checkpoints and rebuild reports",
+    )
+    return {"train": train, "evaluation": evaluation}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -1427,6 +1460,9 @@ def main() -> None:
     all_parser.add_argument("--max-steps", type=int, default=20_000)
     all_parser.add_argument("--cpu", action="store_true")
     all_parser.add_argument("--checks", default="pending")
+    fix_parser = subparsers.add_parser("targeted-order-fix")
+    fix_parser.add_argument("--max-steps", type=int, default=20_000)
+    fix_parser.add_argument("--cpu", action="store_true")
     args = parser.parse_args()
     if args.command == "snapshot":
         result = snapshot_m23()
@@ -1453,6 +1489,8 @@ def main() -> None:
         result = cuda_smoke()
     elif args.command == "report":
         result = build_reports(args.checks)
+    elif args.command == "targeted-order-fix":
+        result = run_targeted_order_fix(max_steps=args.max_steps, cpu=args.cpu)
     else:
         result = run_all(max_steps=args.max_steps, cpu=args.cpu, checks=args.checks)
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
