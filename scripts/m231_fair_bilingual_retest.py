@@ -1089,6 +1089,31 @@ def _group_risk_table(best: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _targeted_fix_report(results: dict[str, Any]) -> str:
+    baseline = results.get("factorized_bpe", {}).get("23101")
+    fixed = results.get("factorized_bpe_clause_shuffle", {}).get("23101")
+    if baseline is None or fixed is None:
+        return "Targeted order-invariance iteration was not run."
+    splits = (
+        ("order", "test_order_holdout"),
+        ("template", "test_template_holdout"),
+        ("lexical", "test_lexical_holdout"),
+        ("composed", "test_composed_ood"),
+        ("negation", "test_negation_preserve"),
+    )
+    lines = [
+        "| metric | baseline BPE | clause-shuffle BPE | delta |",
+        "|---|---:|---:|---:|",
+    ]
+    for label, split in splits:
+        before = baseline["raw"][split]["semantic_specification_exact"]
+        after = fixed["raw"][split]["semantic_specification_exact"]
+        lines.append(
+            f"| {label} | {before:.4f} | {after:.4f} | {after - before:+.4f} |"
+        )
+    return "\n".join(lines)
+
+
 def build_reports(checks: str) -> dict[str, Any]:
     baseline = _read_json(BASELINE_SNAPSHOT)
     manifest = _read_json(DATA_DIR / "manifest.json")
@@ -1156,6 +1181,12 @@ Best ranked candidate: `{best_name}` seed `{best_seed}`.
 
 Deterministic train-lexicon lexical holdout: `{deterministic["train"]["test_lexical_holdout"]["semantic_specification_exact"]:.4f}`.
 Extended production parser lexical holdout: `{deterministic["extended"]["test_lexical_holdout"]["semantic_specification_exact"]:.4f}` (programmed support, not OOD learning).
+
+## Targeted Failure/Fix Iteration
+
+The retained fix permutes only complete clauses already present in train. It adds no heldout lexeme or template ID and leaves calibration risk at `.01`.
+
+{_targeted_fix_report(results)}
 """
     calibration = best["calibration"]
     calibration_report = f"""# M-23.1 Calibration and Safety Report
@@ -1249,6 +1280,10 @@ Language/family MI is `{train_summary["language_family_mutual_information_bits"]
 ## Model Comparison
 
 {_metric_table(results)}
+
+## Targeted Failure/Fix Iteration
+
+{_targeted_fix_report(results)}
 
 ## Bilingual and Safety Diagnostics
 
@@ -1403,8 +1438,19 @@ def run_all(*, max_steps: int, cpu: bool, checks: str) -> dict[str, Any]:
 
 def run_targeted_order_fix(*, max_steps: int, cpu: bool) -> dict[str, Any]:
     name = "factorized_bpe_clause_shuffle"
-    train = train_named_candidate(name, seed=23_101, max_steps=max_steps, cpu=cpu)
-    evaluation = evaluate_named_candidate(name, seed=23_101, cpu=cpu)
+    candidate_dir = _candidate_dir(name, 23_101)
+    train_path = candidate_dir / "train_result.json"
+    evaluation_path = candidate_dir / "eval_results.json"
+    train = (
+        _read_json(train_path)
+        if train_path.exists()
+        else train_named_candidate(name, seed=23_101, max_steps=max_steps, cpu=cpu)
+    )
+    evaluation = (
+        _read_json(evaluation_path)
+        if evaluation_path.exists()
+        else evaluate_named_candidate(name, seed=23_101, cpu=cpu)
+    )
     progress(
         "phase_27_failure_fix_loop",
         "targeted-order-fix",
