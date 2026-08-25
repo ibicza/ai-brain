@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 import random
+import re
 import statistics
 import time
 from collections import Counter
@@ -41,6 +42,7 @@ class BiEncoderConfig:
     corpus_condition: str = "rich"
     hard_negative_weight: float = 0.0
     hard_negative_margin: float = 0.15
+    explicit_semantic_features: bool = False
 
 
 class SkillBiEncoder(nn.Module):
@@ -89,9 +91,13 @@ class LearnedRetriever:
             [f"{language or 'unknown'}\n{text}"],
             self.config.feature_count,
             self.device,
+            self.config.explicit_semantic_features,
         )
         skills = _feature_tensor(
-            list(self.skill_texts), self.config.feature_count, self.device
+            list(self.skill_texts),
+            self.config.feature_count,
+            self.device,
+            self.config.explicit_semantic_features,
         )
         scores = (
             self.model.encode_queries(query)
@@ -137,11 +143,17 @@ def train_bi_encoder(
         raise ValueError("No known-skill training rows")
     model = SkillBiEncoder(config).to(actual_device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
-    skill_features = _feature_tensor(skill_texts, config.feature_count, actual_device)
+    skill_features = _feature_tensor(
+        skill_texts,
+        config.feature_count,
+        actual_device,
+        config.explicit_semantic_features,
+    )
     train_features = _feature_tensor(
         [model_visible_text(row) for row in known_rows],
         config.feature_count,
         actual_device,
+        config.explicit_semantic_features,
     )
     train_targets = torch.tensor(
         [skill_to_index[row["target_skill_id"]] for row in known_rows],
@@ -292,7 +304,10 @@ def evaluate_cross_language_consistency(
     skills = sorted(registry.active_records(), key=lambda item: item.skill_id)
     retriever.model.eval()
     skill_features = _feature_tensor(
-        list(retriever.skill_texts), retriever.config.feature_count, retriever.device
+        list(retriever.skill_texts),
+        retriever.config.feature_count,
+        retriever.device,
+        retriever.config.explicit_semantic_features,
     )
     with torch.inference_mode():
         skill_embeddings = retriever.model.encode_skills(skill_features)
@@ -305,7 +320,10 @@ def evaluate_cross_language_consistency(
         ]
         started = time.perf_counter()
         features = _feature_tensor(
-            texts, retriever.config.feature_count, retriever.device
+            texts,
+            retriever.config.feature_count,
+            retriever.device,
+            retriever.config.explicit_semantic_features,
         )
         with torch.inference_mode():
             scores = retriever.model.encode_queries(features) @ skill_embeddings.T
@@ -403,7 +421,10 @@ def _score_rows(
 ) -> list[dict[str, Any]]:
     retriever.model.eval()
     skill_features = _feature_tensor(
-        list(retriever.skill_texts), retriever.config.feature_count, retriever.device
+        list(retriever.skill_texts),
+        retriever.config.feature_count,
+        retriever.device,
+        retriever.config.explicit_semantic_features,
     )
     with torch.inference_mode():
         skill_embeddings = retriever.model.encode_skills(skill_features)
@@ -417,6 +438,7 @@ def _score_rows(
             [model_visible_text(row) for row in batch],
             retriever.config.feature_count,
             retriever.device,
+            retriever.config.explicit_semantic_features,
         )
         with torch.inference_mode():
             scores = retriever.model.encode_queries(features) @ skill_embeddings.T
@@ -567,16 +589,21 @@ def _skill_text(skill: SkillRecord) -> str:
     return text
 
 
-def _feature_tensor(texts: list[str] | tuple[str, ...], size: int, device: str):
+def _feature_tensor(
+    texts: list[str] | tuple[str, ...],
+    size: int,
+    device: str,
+    explicit_semantic_features: bool = False,
+):
     matrix = torch.zeros((len(texts), size), dtype=torch.float32)
     for row, text in enumerate(texts):
-        counts = Counter(_hashed_features(text, size))
+        counts = Counter(_hashed_features(text, size, explicit_semantic_features))
         for column, count in counts.items():
             matrix[row, column] = 1.0 + math.log(count)
     return nn.functional.normalize(matrix, dim=1).to(device)
 
 
-def _hashed_features(text: str, size: int):
+def _hashed_features(text: str, size: int, explicit_semantic_features: bool = False):
     folded = " ".join(text.casefold().split())
     padded = f"^{folded}$"
     for width in (2, 3, 4, 5):
@@ -594,6 +621,88 @@ def _hashed_features(text: str, size: int):
             )
             % size
         )
+    if explicit_semantic_features:
+        for semantic in _explicit_semantic_features(folded):
+            column = (
+                int.from_bytes(
+                    hashlib.blake2b(
+                        f"semantic:{semantic}".encode(), digest_size=8
+                    ).digest(),
+                    "big",
+                )
+                % size
+            )
+            for _ in range(8):
+                yield column
+
+
+def _explicit_semantic_features(folded: str) -> tuple[str, ...]:
+    features: list[str] = []
+    lexemes = {
+        "MOVE": (
+            "relocate",
+            "route",
+            "send",
+            "направь",
+            "передай",
+            "отправь",
+            "move",
+            "convey",
+            "перенеси",
+            "переправь",
+            "move_one",
+        ),
+        "DROP": (
+            "discard",
+            "remove",
+            "empty",
+            "удали",
+            "опустоши",
+            "убери",
+            "clear",
+            "purge",
+            "очисти",
+            "ликвидируй",
+            "drop_one",
+        ),
+        "HALT": (
+            "finish",
+            "end",
+            "halt",
+            "заверши",
+            "прекрати",
+            "закончи",
+        ),
+    }
+    for operation, values in lexemes.items():
+        if any(value in folded for value in values):
+            features.append(f"OP:{operation}")
+
+    actions = re.findall(r"(move_one|drop_one)\(([a-d]),([a-d]|none)\)", folded)
+    for index, (action, source, destination) in enumerate(actions):
+        features.extend((f"PHASE:{index}:{action}", f"SRC:{index}:{source}"))
+        if destination != "none":
+            features.append(f"DEST:{destination}")
+
+    move_match = re.search(r"\bfrom\s+(.+?)\s+(?:to|into)\s+([a-d])\b", folded)
+    if move_match is None:
+        move_match = re.search(r"\bиз\s+(.+?)\s+в\s+([a-d])\b", folded)
+    if move_match is not None:
+        sources = re.findall(r"\b([a-d])\b", move_match.group(1))
+        for index, source in enumerate(sources):
+            features.append(f"SRC:{index}:{source}")
+        features.append(f"DEST:{move_match.group(2)}")
+
+    drop_match = re.search(
+        r"(?:discard|remove|empty|clear|purge|удали|опустоши|убери|очисти|ликвидируй)"
+        r"\s+(?:every\s+unit\s+from\s+|все\s+единицы\s+из\s+)?([a-d])\b",
+        folded,
+    )
+    if drop_match is not None:
+        features.append(f"DROP_SRC:{drop_match.group(1)}")
+    for role in re.findall(r"\b([a-d])\b", folded):
+        features.append(f"ROLE:{role}")
+    return tuple(features)
 
 
 def _seed_everything(seed: int) -> None:

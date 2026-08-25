@@ -432,6 +432,20 @@ def test_fair_v2_blind_freeze_and_leakage_diagnostics(
         verify_fair_blind_freeze(copied)
 
 
+def test_targeted_explicit_semantic_features_use_train_catalog_vocabulary() -> None:
+    from ai_brain.stage2.learned import _explicit_semantic_features
+
+    query = _explicit_semantic_features(
+        "relocate every unit from a then b to c; maintain d"
+    )
+    corpus = _explicit_semantic_features("effect_actions move_one(a,c) move_one(b,c)")
+    assert "OP:MOVE" in query
+    assert {"SRC:0:a", "SRC:1:b", "DEST:c"} <= set(query)
+    assert {"SRC:0:a", "SRC:1:b", "DEST:c"} <= set(corpus)
+    # Blind-only true-OOD lexemes are deliberately not normalized by the fix.
+    assert "OP:MOVE" not in _explicit_semantic_features("funnel a to b")
+
+
 @pytest.mark.parametrize(
     ("text", "language", "status"),
     [

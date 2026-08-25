@@ -184,6 +184,7 @@ def _config(args, condition):
         corpus_condition=condition,
         hard_negative_weight=args.hard_negative_weight,
         hard_negative_margin=args.hard_negative_margin,
+        explicit_semantic_features=args.explicit_semantic_features,
     )
 
 
@@ -218,6 +219,7 @@ def main():
     parser.add_argument("--false-known-bound", type=float, default=0.05)
     parser.add_argument("--hard-negative-weight", type=float, default=1.0)
     parser.add_argument("--hard-negative-margin", type=float, default=0.15)
+    parser.add_argument("--explicit-semantic-features", action="store_true")
     args = parser.parse_args()
     config = _config(args, args.condition)
     if args.command == "train":
