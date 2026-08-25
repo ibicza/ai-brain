@@ -1,4 +1,4 @@
-"""Deterministic Stage-2 semantic-effect equivalence classes."""
+"""Deterministic final-register-state equivalence classes for Stage 2."""
 
 from __future__ import annotations
 
@@ -9,11 +9,13 @@ from typing import Any
 from ai_brain.rules.specifications import ProgramSpecification
 from ai_brain.stage1.models import SemanticFamily, content_hash
 from ai_brain.stage1.specifications import infer_family, specification_from_dict
-from ai_brain.stage2.models import SemanticEquivalenceGroup, SkillRecord
+from ai_brain.stage2.models import FinalStateEquivalenceGroup, SkillRecord
 
 
-def semantic_effect_signature(specification: ProgramSpecification) -> dict[str, Any]:
-    """Return the exact normalized observable effect of a valid Stage-1 skill."""
+def final_state_effect_signature(
+    specification: ProgramSpecification,
+) -> dict[str, Any]:
+    """Return a normal form for final register state, not execution trace."""
     family = infer_family(specification)
     if family is None:
         raise ValueError("unsupported semantic family")
@@ -62,8 +64,8 @@ def semantic_effect_signature(specification: ProgramSpecification) -> dict[str, 
     }
 
 
-def semantic_effect_hash(specification: ProgramSpecification) -> str:
-    return content_hash(semantic_effect_signature(specification))
+def final_state_effect_hash(specification: ProgramSpecification) -> str:
+    return content_hash(final_state_effect_signature(specification))
 
 
 def equivalence_proof_kind(specification: ProgramSpecification) -> str:
@@ -75,21 +77,21 @@ def equivalence_proof_kind(specification: ProgramSpecification) -> str:
     return "EXACT_STAGE1_EFFECT_NORMAL_FORM"
 
 
-def build_equivalence_groups(
+def build_final_state_equivalence_groups(
     records: Iterable[SkillRecord],
-) -> tuple[SemanticEquivalenceGroup, ...]:
+) -> tuple[FinalStateEquivalenceGroup, ...]:
     grouped: dict[str, list[SkillRecord]] = defaultdict(list)
     for record in records:
         if record.active and not record.deprecated:
-            grouped[record.semantic_effect_hash].append(record)
-    groups: list[SemanticEquivalenceGroup] = []
+            grouped[record.final_state_effect_hash].append(record)
+    groups: list[FinalStateEquivalenceGroup] = []
     for effect_hash, members in sorted(grouped.items()):
         ordered = sorted(members, key=lambda item: item.skill_id)
         specification = specification_from_dict(ordered[0].effect_schema)
         family = infer_family(specification)
         groups.append(
-            SemanticEquivalenceGroup(
-                semantic_effect_hash=effect_hash,
+            FinalStateEquivalenceGroup(
+                final_state_effect_hash=effect_hash,
                 member_skill_ids=tuple(item.skill_id for item in ordered),
                 canonical_skill_id=ordered[0].skill_id,
                 equivalence_proof_kind=equivalence_proof_kind(specification),
@@ -98,3 +100,10 @@ def build_equivalence_groups(
             )
         )
     return tuple(groups)
+
+
+# Source aliases keep old reports and imports readable. New v3 artifacts and APIs use
+# explicit final-state terminology and never treat these hashes as trace identity.
+semantic_effect_signature = final_state_effect_signature
+semantic_effect_hash = final_state_effect_hash
+build_equivalence_groups = build_final_state_equivalence_groups

@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from ai_brain.rules.memory import RuleMemory
-from ai_brain.stage1.models import ExecutionLimits, SemanticFamily, content_hash
+from ai_brain.stage1.models import SemanticFamily, content_hash
 from ai_brain.stage1.specifications import build_family_specification
 from ai_brain.stage2.catalog import (
     controlled_command,
@@ -34,6 +34,7 @@ from ai_brain.stage2.fair_diagnostics import (
 )
 from ai_brain.stage2.models import (
     ConfirmationDecision,
+    EquivalenceScope,
     RetrievalMode,
     SearchStatus,
 )
@@ -48,9 +49,9 @@ from ai_brain.stage2.registry import (
 )
 from ai_brain.stage2.retrieval import candidate_list_hash
 from ai_brain.stage2.semantics import (
-    build_equivalence_groups,
-    semantic_effect_hash,
-    semantic_effect_signature,
+    build_final_state_equivalence_groups,
+    final_state_effect_hash,
+    final_state_effect_signature,
 )
 from ai_brain.stage2.service import (
     ConfirmationRequiredError,
@@ -187,13 +188,15 @@ def test_exact_semantic_signature_retrieval_is_trusted(catalog) -> None:
     )
     _, result = router.search_semantic_signature(specification)
     assert result.status == SearchStatus.EXACT_MATCH
-    assert result.retrieval_mode == RetrievalMode.EXACT_SEMANTIC
+    assert result.retrieval_mode == RetrievalMode.FINAL_STATE_EFFECT
 
 
 def test_true_semantic_signatures_normalize_only_commuting_merge_phases() -> None:
     noop_full = build_family_specification(SemanticFamily.NOOP)
     noop_sparse_metadata = replace(noop_full, preserve=("A",))
-    assert semantic_effect_hash(noop_full) == semantic_effect_hash(noop_sparse_metadata)
+    assert final_state_effect_hash(noop_full) == final_state_effect_hash(
+        noop_sparse_metadata
+    )
 
     merge_ab = build_family_specification(
         SemanticFamily.MERGE_TWO, sources=("A", "B"), destination="C"
@@ -202,8 +205,10 @@ def test_true_semantic_signatures_normalize_only_commuting_merge_phases() -> Non
         SemanticFamily.MERGE_TWO, sources=("B", "A"), destination="C"
     )
     assert merge_ab != merge_ba
-    assert semantic_effect_signature(merge_ab) == semantic_effect_signature(merge_ba)
-    assert semantic_effect_hash(merge_ab) == semantic_effect_hash(merge_ba)
+    assert final_state_effect_signature(merge_ab) == final_state_effect_signature(
+        merge_ba
+    )
+    assert final_state_effect_hash(merge_ab) == final_state_effect_hash(merge_ba)
 
     merge_three_abc = build_family_specification(
         SemanticFamily.MERGE_THREE, sources=("A", "B", "C"), destination="D"
@@ -211,7 +216,7 @@ def test_true_semantic_signatures_normalize_only_commuting_merge_phases() -> Non
     merge_three_cab = build_family_specification(
         SemanticFamily.MERGE_THREE, sources=("C", "A", "B"), destination="D"
     )
-    assert semantic_effect_hash(merge_three_abc) == semantic_effect_hash(
+    assert final_state_effect_hash(merge_three_abc) == final_state_effect_hash(
         merge_three_cab
     )
 
@@ -225,14 +230,16 @@ def test_true_semantic_signatures_normalize_only_commuting_merge_phases() -> Non
         sources=("B", "A"),
         destination="C",
     )
-    assert semantic_effect_hash(drop_ab) != semantic_effect_hash(drop_ba)
+    assert final_state_effect_hash(drop_ab) != final_state_effect_hash(drop_ba)
 
 
 def test_semantic_equivalence_groups_and_canonical_evidence(catalog) -> None:
     _, _, _, registry, _ = catalog
-    groups = build_equivalence_groups(registry.active_records())
+    groups = build_final_state_equivalence_groups(registry.active_records())
     assert len(groups) == 57
-    assert registry.manifest.semantic_effect_class_count == 57
+    assert registry.manifest.final_state_effect_class_count == 57
+    assert registry.manifest.full_execution_equivalence_class_count == 89
+    assert registry.manifest.trace_distinct_class_count == 16
     assert registry.manifest.order_sensitive_class_count == 24
     assert registry.manifest.order_insensitive_class_count == 33
     assert sorted(group.member_count for group in groups).count(2) == 12
@@ -251,16 +258,21 @@ def test_semantic_equivalence_groups_and_canonical_evidence(catalog) -> None:
     _, second_result = router.search_semantic_signature(
         second, query_id_factory=lambda: "semantic-merge-second"
     )
-    assert first_result.candidates[0].skill_id == second_result.candidates[0].skill_id
+    assert first_result.candidates[0].skill_id != second_result.candidates[0].skill_id
+    assert (
+        first_result.candidates[0].specification_hash
+        != second_result.candidates[0].specification_hash
+    )
     assert (
         first_result.candidates[0].evidence["member_skill_ids"]
         == second_result.candidates[0].evidence["member_skill_ids"]
     )
     evidence = first_result.candidates[0].evidence
     assert evidence["member_count"] == 2
-    assert evidence["equivalence_proof_kind"] == ("COMMUTING_DRAINS_SAME_DESTINATION")
+    assert evidence["equivalence_proof_kind"] == "COMMUTING_DRAINS_SAME_DESTINATION"
     assert not evidence["order_sensitive"]
-    assert len(evidence["structural_match_skill_ids"]) == 1
+    assert evidence["type"] == "STRUCTURAL_IDENTITY"
+    assert not evidence["structural_identity_differs"]
 
 
 @pytest.mark.parametrize(
@@ -271,7 +283,9 @@ def test_semantic_equivalence_groups_and_canonical_evidence(catalog) -> None:
         ("family_counts", {"NOOP": 89}),
         ("alias_count", 0),
         ("description_count", 0),
-        ("semantic_effect_class_count", 56),
+        ("final_state_effect_class_count", 56),
+        ("full_execution_equivalence_class_count", 88),
+        ("trace_distinct_class_count", 15),
         ("order_sensitive_class_count", 23),
         ("order_insensitive_class_count", 32),
     ],
@@ -616,45 +630,24 @@ def test_selection_confirmation_dispatch_and_receipt_bindings(catalog) -> None:
     assert registry.records[candidate.skill_id].rule_id == execution.rule_id
 
 
-def test_semantic_canonical_member_dispatch_and_limit_tamper(catalog) -> None:
-    _, installed, _, _, _ = catalog
-    router = _router(catalog, "semantic-canonical-dispatch")
-    results = []
+def test_final_state_search_preserves_installed_structural_identity(catalog) -> None:
+    router = _router(catalog, "final-state-exact")
     for index, sources in enumerate((("A", "B"), ("B", "A"))):
-        query, result = router.search_semantic_signature(
-            build_family_specification(
-                SemanticFamily.MERGE_TWO, sources=sources, destination="C"
-            ),
-            query_id_factory=lambda i=index: f"semantic-canonical-{i}",
+        specification = build_family_specification(
+            SemanticFamily.MERGE_TWO, sources=sources, destination="C"
         )
-        results.append((query, result))
-    query, result = next(
-        item
-        for item in results
-        if item[1].candidates[0].evidence["structural_identity_differs"]
-    )
-    candidate = result.candidates[0]
-    selection = router.confirm_selection(
-        router.prepare_selection(query, result, candidate.skill_id),
-        identity="semantic-operator",
-    )
-    initial_state = {"R0": 2, "R1": 3, "R2": 5, "R3": 7}
-    _, execution, dispatch = router.dispatch(
-        query=query,
-        result=result,
-        selection=selection,
-        proposal=installed.proposals[candidate.rule_id],
-        installed_receipt=installed.receipts[candidate.rule_id],
-        initial_state=initial_state,
-    )
-    assert execution.final_state == {"R0": 0, "R1": 0, "R2": 10, "R3": 7}
-    with pytest.raises(SkillDispatchError, match="hash mismatch"):
-        validate_dispatch_receipt(
-            replace(
-                dispatch,
-                execution_limits=ExecutionLimits(max_execution_steps=99),
-            )
+        _, result = router.search_final_state_effect(
+            specification,
+            equivalence_scope=EquivalenceScope.FINAL_STATE_ONLY,
+            query_id_factory=lambda i=index: f"final-state-exact-{i}",
         )
+        assert result.status == SearchStatus.EXACT_MATCH
+        assert result.exact_match
+        assert (
+            result.candidates[0].specification_hash
+            == result.requested_specification_hash
+        )
+        assert not result.candidates[0].evidence["structural_identity_differs"]
 
 
 def test_dispatch_rejects_tampering_replay_and_unrelated_rule(catalog) -> None:

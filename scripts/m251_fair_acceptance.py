@@ -20,7 +20,7 @@ from ai_brain.stage2.fair_benchmark import evaluate_fair_deterministic_baselines
 from ai_brain.stage2.fair_dataset import generate_fair_query_dataset
 from ai_brain.stage2.fair_diagnostics import diagnose_label_leakage
 from ai_brain.stage2.registry import rebuild_from_rule_memory
-from ai_brain.stage2.semantics import build_equivalence_groups
+from ai_brain.stage2.semantics import build_final_state_equivalence_groups
 from ai_brain.stage2.skill_corpora import skill_corpus_hash
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,7 +44,7 @@ def run(output_dir: Path, result_path: Path, *, small: bool = False) -> dict:
         catalog = install_structural_catalog(work / "catalog")
         memory = RuleMemory.load(catalog.service.memory_path)
         registry = rebuild_from_rule_memory(memory, receipts=catalog.receipts)
-        registry_path = output_dir / "skill_registry_v2.json"
+        registry_path = output_dir / "skill_registry_v3.json"
         registry.save(registry_path)
         query_dir = output_dir / "queries_v2"
         manifest = generate_fair_query_dataset(registry, query_dir, split_counts=counts)
@@ -55,7 +55,7 @@ def run(output_dir: Path, result_path: Path, *, small: bool = False) -> dict:
         )
         leakage = diagnose_label_leakage(train, development, registry.active_records())
         dispatch = validate_all_skill_dispatches(catalog, registry, work)
-        groups = build_equivalence_groups(registry.active_records())
+        groups = build_final_state_equivalence_groups(registry.active_records())
         no_torch = subprocess.run(
             [
                 sys.executable,
@@ -75,7 +75,13 @@ def run(output_dir: Path, result_path: Path, *, small: bool = False) -> dict:
         "trusted_import_no_torch": no_torch.returncode == 0,
         "registry": {
             "structural_skill_count": registry.manifest.skill_count,
-            "semantic_effect_class_count": registry.manifest.semantic_effect_class_count,
+            "final_state_effect_class_count": (
+                registry.manifest.final_state_effect_class_count
+            ),
+            "full_execution_equivalence_class_count": (
+                registry.manifest.full_execution_equivalence_class_count
+            ),
+            "trace_distinct_class_count": registry.manifest.trace_distinct_class_count,
             "order_sensitive_class_count": registry.manifest.order_sensitive_class_count,
             "order_insensitive_class_count": registry.manifest.order_insensitive_class_count,
             "registry_hash": registry.manifest.registry_hash,
@@ -113,8 +119,8 @@ def run(output_dir: Path, result_path: Path, *, small: bool = False) -> dict:
         "dispatch_evidence_hash": content_hash(dispatch),
         "duration_seconds": time.perf_counter() - started,
     }
-    if result["registry"]["semantic_effect_class_count"] != 57:
-        raise AssertionError("unexpected semantic class count")
+    if result["registry"]["final_state_effect_class_count"] != 57:
+        raise AssertionError("unexpected final-state class count")
     if result["dispatch"]["structural_dispatch_success"] != 89:
         raise AssertionError("all-skill dispatch failed")
     if leakage["wrapper_only"]["alert"]:

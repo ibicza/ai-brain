@@ -2,6 +2,8 @@
 
 from ai_brain.stage2.models import (
     ConfirmationDecision,
+    EquivalenceScope,
+    FinalStateEquivalenceGroup,
     NextAction,
     QuerySourceKind,
     RetrievalMode,
@@ -23,6 +25,9 @@ from ai_brain.stage2.registry import (
 )
 from ai_brain.stage2.semantics import (
     build_equivalence_groups,
+    build_final_state_equivalence_groups,
+    final_state_effect_hash,
+    final_state_effect_signature,
     semantic_effect_hash,
     semantic_effect_signature,
 )
@@ -39,6 +44,8 @@ __all__ = [
     "STAGE2_SCHEMA_VERSION",
     "ConfirmationDecision",
     "ConfirmationRequiredError",
+    "EquivalenceScope",
+    "FinalStateEquivalenceGroup",
     "NextAction",
     "QuerySourceKind",
     "RetrievalMode",
@@ -57,7 +64,10 @@ __all__ = [
     "SkillSelectionReceipt",
     "Stage2Router",
     "build_equivalence_groups",
+    "build_final_state_equivalence_groups",
     "ensure_stage1_compatible",
+    "final_state_effect_hash",
+    "final_state_effect_signature",
     "rebuild_from_rule_memory",
     "semantic_effect_hash",
     "semantic_effect_signature",

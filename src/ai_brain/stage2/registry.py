@@ -28,7 +28,10 @@ from ai_brain.stage1.specifications import infer_family
 from ai_brain.stage1.version import STAGE1_VERSION
 from ai_brain.stage2.catalog import controlled_command
 from ai_brain.stage2.models import SkillRecord, SkillRegistryManifest
-from ai_brain.stage2.semantics import build_equivalence_groups, semantic_effect_hash
+from ai_brain.stage2.semantics import (
+    build_final_state_equivalence_groups,
+    final_state_effect_hash,
+)
 from ai_brain.stage2.version import (
     SKILL_REGISTRY_SCHEMA_VERSION,
     STAGE2_SCHEMA_VERSION,
@@ -107,8 +110,11 @@ class SkillRegistry:
                 errors.append(f"rule semantic hash mismatch: {skill.skill_id}")
             if specification_hash(rule.specification) != skill.specification_hash:
                 errors.append(f"specification hash mismatch: {skill.skill_id}")
-            if semantic_effect_hash(rule.specification) != skill.semantic_effect_hash:
-                errors.append(f"semantic effect hash mismatch: {skill.skill_id}")
+            if (
+                final_state_effect_hash(rule.specification)
+                != skill.final_state_effect_hash
+            ):
+                errors.append(f"final-state effect hash mismatch: {skill.skill_id}")
             if rule.version != skill.rule_version:
                 errors.append(f"rule version mismatch: {skill.skill_id}")
             if _binding_hash(skill.provenance, rule) != skill.installed_receipt_hash:
@@ -206,6 +212,10 @@ class SkillRegistry:
             if not isinstance(row, dict) or set(row) != _ROOT_FIELDS:
                 raise TypeError("root schema mismatch")
             if row["schema_version"] != SKILL_REGISTRY_SCHEMA_VERSION:
+                if row["schema_version"] == 2:
+                    raise ValueError(
+                        "registry schema v2 must be rebuilt from verified RuleMemory"
+                    )
                 raise ValueError("unsupported registry schema")
             checksum = row["content_sha256"]
             if not isinstance(checksum, str) or _SHA256.fullmatch(checksum) is None:
@@ -296,7 +306,7 @@ def _build_manifest(
 
 def _manifest_counts(records: Mapping[str, SkillRecord]) -> dict[str, Any]:
     active = [item for item in records.values() if item.active and not item.deprecated]
-    groups = build_equivalence_groups(active)
+    groups = build_final_state_equivalence_groups(active)
     return {
         "skill_count": len(records),
         "active_skill_count": len(active),
@@ -308,7 +318,11 @@ def _manifest_counts(records: Mapping[str, SkillRecord]) -> dict[str, Any]:
             2 + len(item.controlled_examples_ru) + len(item.controlled_examples_en)
             for item in records.values()
         ),
-        "semantic_effect_class_count": len(groups),
+        "final_state_effect_class_count": len(groups),
+        "full_execution_equivalence_class_count": len(
+            {item.specification_hash for item in active}
+        ),
+        "trace_distinct_class_count": sum(item.member_count > 1 for item in groups),
         "order_sensitive_class_count": sum(item.order_sensitive for item in groups),
         "order_insensitive_class_count": sum(
             not item.order_sensitive for item in groups
@@ -398,7 +412,7 @@ def _skill_from_rule(
         rule_id=rule.rule_id,
         rule_semantic_hash=rule.semantic_hash,
         specification_hash=specification_hash(rule.specification),
-        semantic_effect_hash=semantic_effect_hash(rule.specification),
+        final_state_effect_hash=final_state_effect_hash(rule.specification),
         installed_receipt_hash=binding_hash,
         rule_version=rule.version,
         active=not rule.deprecated,
@@ -529,7 +543,9 @@ def _manifest_from_json(value: Any) -> SkillRegistryManifest:
         "active_skill_count",
         "alias_count",
         "description_count",
-        "semantic_effect_class_count",
+        "final_state_effect_class_count",
+        "full_execution_equivalence_class_count",
+        "trace_distinct_class_count",
         "order_sensitive_class_count",
         "order_insensitive_class_count",
     ):
@@ -583,7 +599,7 @@ def _record_from_json(value: Any) -> SkillRecord:
         "rule_id",
         "rule_semantic_hash",
         "specification_hash",
-        "semantic_effect_hash",
+        "final_state_effect_hash",
         "installed_receipt_hash",
         "canonical_name_ru",
         "canonical_name_en",
@@ -597,7 +613,7 @@ def _record_from_json(value: Any) -> SkillRecord:
     for name in (
         "rule_semantic_hash",
         "specification_hash",
-        "semantic_effect_hash",
+        "final_state_effect_hash",
         "installed_receipt_hash",
     ):
         if _SHA256.fullmatch(row[name]) is None:

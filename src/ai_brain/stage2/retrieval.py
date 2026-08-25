@@ -20,6 +20,7 @@ from ai_brain.stage1.models import (
 )
 from ai_brain.stage1.specifications import validate_specification
 from ai_brain.stage2.models import (
+    EquivalenceScope,
     NextAction,
     QuerySourceKind,
     RetrievalMode,
@@ -29,7 +30,11 @@ from ai_brain.stage2.models import (
     SkillSearchResult,
 )
 from ai_brain.stage2.registry import SkillRegistry, SkillRegistryStaleError
-from ai_brain.stage2.semantics import build_equivalence_groups, semantic_effect_hash
+from ai_brain.stage2.semantics import (
+    build_final_state_equivalence_groups,
+    final_state_effect_hash,
+)
+from ai_brain.stage2.version import STAGE2_SCHEMA_VERSION
 
 _TOKENS = re.compile(r"[A-Za-zА-Яа-яЁё0-9]+")
 
@@ -43,6 +48,7 @@ def create_query(
     required_capabilities: Iterable[str] = (),
     forbidden_effects: Iterable[str] = (),
     state_schema: Iterable[str] = (),
+    equivalence_scope: EquivalenceScope = EquivalenceScope.FULL_EXECUTION_TRACE,
     query_id_factory=None,
 ) -> SkillQuery:
     if not isinstance(original_input, str) or not original_input.strip():
@@ -62,16 +68,21 @@ def create_query(
         forbidden_effects=tuple(forbidden_effects),
         state_schema=tuple(state_schema),
         created_at=utc_now(),
+        equivalence_scope=EquivalenceScope(equivalence_scope),
     )
 
 
 def structured_query(
-    specification: ProgramSpecification, *, query_id_factory=None
+    specification: ProgramSpecification,
+    *,
+    equivalence_scope: EquivalenceScope = EquivalenceScope.FULL_EXECUTION_TRACE,
+    query_id_factory=None,
 ) -> SkillQuery:
     return create_query(
         QuerySourceKind.STRUCTURED_SPEC,
         specification.to_model_text(),
         specification=specification,
+        equivalence_scope=equivalence_scope,
         query_id_factory=query_id_factory,
     )
 
@@ -179,10 +190,10 @@ def retrieve_structured(
     )
 
 
-def retrieve_semantic_signature(
+def retrieve_final_state_effect(
     query: SkillQuery, registry: SkillRegistry, memory: RuleMemory
 ) -> SkillSearchResult:
-    """Retrieve one proven effect class and its deterministic representative."""
+    """Prefer structural identity, then apply the explicitly requested scope."""
     if query.source_kind != QuerySourceKind.STRUCTURED_SPEC:
         raise ValueError("Semantic retrieval requires a structured query")
     if query.specification is None:
@@ -192,7 +203,7 @@ def retrieve_semantic_signature(
             query,
             registry,
             memory,
-            RetrievalMode.EXACT_SEMANTIC,
+            RetrievalMode.FINAL_STATE_EFFECT,
             SearchStatus.UNSUPPORTED,
             (),
             next_action=NextAction.UNSUPPORTED,
@@ -205,23 +216,71 @@ def retrieve_semantic_signature(
             query,
             registry,
             memory,
-            RetrievalMode.EXACT_SEMANTIC,
+            RetrievalMode.FINAL_STATE_EFFECT,
             SearchStatus.STALE_REGISTRY,
             (),
             next_action=NextAction.UNSUPPORTED,
         )
-    effect_hash = semantic_effect_hash(query.specification)
+    requested_hash = specification_hash(query.specification)
+    structural_matches = [
+        item
+        for item in registry.active_records()
+        if item.specification_hash == requested_hash
+    ]
+    effect_hash = final_state_effect_hash(query.specification)
     groups = [
         item
-        for item in build_equivalence_groups(registry.active_records())
-        if item.semantic_effect_hash == effect_hash
+        for item in build_final_state_equivalence_groups(registry.active_records())
+        if item.final_state_effect_hash == effect_hash
     ]
+    if len(structural_matches) == 1:
+        exact = structural_matches[0]
+        group = groups[0] if len(groups) == 1 else None
+        evidence = {
+            "type": "STRUCTURAL_IDENTITY",
+            "requested_specification_hash": requested_hash,
+            "selected_specification_hash": exact.specification_hash,
+            "structural_identity_differs": False,
+            "full_trace_equivalent": True,
+            "equivalence_scope": str(query.equivalence_scope),
+            "final_state_effect_hash": effect_hash,
+        }
+        if group is not None:
+            evidence.update(_group_evidence(group))
+        candidate = replace(
+            _candidate(exact, 1.0, 1, "STRUCTURAL_IDENTITY"), evidence=evidence
+        )
+        return _result(
+            query,
+            registry,
+            memory,
+            RetrievalMode.FINAL_STATE_EFFECT,
+            SearchStatus.EXACT_MATCH,
+            (candidate,),
+            next_action=NextAction.SELECT_EXACT,
+            exact=True,
+        )
+    if len(structural_matches) > 1:
+        return _result(
+            query,
+            registry,
+            memory,
+            RetrievalMode.FINAL_STATE_EFFECT,
+            SearchStatus.AMBIGUOUS_VERSION,
+            tuple(
+                _candidate(item, 1.0, rank, "STRUCTURAL_IDENTITY")
+                for rank, item in enumerate(structural_matches, 1)
+            ),
+            next_action=NextAction.ASK_CLARIFICATION,
+            ambiguous=True,
+            clarification_target="rule_version",
+        )
     if not groups:
         return _result(
             query,
             registry,
             memory,
-            RetrievalMode.EXACT_SEMANTIC,
+            RetrievalMode.FINAL_STATE_EFFECT,
             SearchStatus.NO_MATCH,
             (),
             next_action=NextAction.RUN_SYNTHESIS,
@@ -232,7 +291,7 @@ def retrieve_semantic_signature(
             query,
             registry,
             memory,
-            RetrievalMode.EXACT_SEMANTIC,
+            RetrievalMode.FINAL_STATE_EFFECT,
             SearchStatus.AMBIGUOUS_VERSION,
             (),
             next_action=NextAction.ASK_CLARIFICATION,
@@ -240,37 +299,61 @@ def retrieve_semantic_signature(
             clarification_target="rule_version",
         )
     group = groups[0]
-    canonical = registry.records[group.canonical_skill_id]
-    structural_hash = specification_hash(query.specification)
-    structural_members = tuple(
-        item.skill_id
-        for item in registry.active_records()
-        if item.specification_hash == structural_hash
+    if (
+        query.equivalence_scope == EquivalenceScope.FULL_EXECUTION_TRACE
+        or group.order_sensitive
+    ):
+        return _result(
+            query,
+            registry,
+            memory,
+            RetrievalMode.FINAL_STATE_EFFECT,
+            SearchStatus.NO_MATCH,
+            (),
+            next_action=NextAction.RUN_SYNTHESIS,
+            novel=True,
+        )
+    ordered_ids = (group.canonical_skill_id,) + tuple(
+        item for item in group.member_skill_ids if item != group.canonical_skill_id
     )
-    candidate = replace(
-        _candidate(canonical, 1.0, 1, "semantic_effect_class"),
-        evidence={
-            "type": "semantic_effect_class",
-            "semantic_effect_hash": group.semantic_effect_hash,
-            "canonical_skill_id": group.canonical_skill_id,
-            "member_skill_ids": list(group.member_skill_ids),
-            "member_count": group.member_count,
-            "equivalence_proof_kind": group.equivalence_proof_kind,
-            "order_sensitive": group.order_sensitive,
-            "structural_match_skill_ids": list(structural_members),
-            "structural_identity_differs": canonical.skill_id not in structural_members,
-        },
+    candidates = tuple(
+        replace(
+            _candidate(
+                registry.records[skill_id],
+                1.0,
+                rank,
+                "FINAL_STATE_EQUIVALENCE",
+            ),
+            evidence={
+                "type": "FINAL_STATE_EQUIVALENCE",
+                "requested_specification_hash": requested_hash,
+                "selected_specification_hash": registry.records[
+                    skill_id
+                ].specification_hash,
+                "structural_identity_differs": True,
+                "full_trace_equivalent": False,
+                "equivalence_scope": str(query.equivalence_scope),
+                "warning": (
+                    "Final register state is equivalent, but action order, "
+                    "intermediate states, and action_stream_hash may differ."
+                ),
+                **_group_evidence(group),
+            },
+        )
+        for rank, skill_id in enumerate(ordered_ids, 1)
     )
     return _result(
         query,
         registry,
         memory,
-        RetrievalMode.EXACT_SEMANTIC,
-        SearchStatus.EXACT_MATCH,
-        (candidate,),
-        next_action=NextAction.SELECT_EXACT,
-        exact=True,
+        RetrievalMode.FINAL_STATE_EFFECT,
+        SearchStatus.FINAL_STATE_EQUIVALENT,
+        candidates,
+        next_action=NextAction.REVIEW_EQUIVALENT_CANDIDATES,
     )
+
+
+retrieve_semantic_signature = retrieve_final_state_effect
 
 
 def retrieve_controlled(
@@ -440,15 +523,26 @@ def retrieve_assistive(
 
 
 def validate_search_result(result: SkillSearchResult) -> None:
+    if result.schema_version != STAGE2_SCHEMA_VERSION:
+        raise ValueError("SkillSearchResult schema mismatch")
     expected = _result_content_hash(result)
     if result.result_hash != expected:
         raise ValueError("SkillSearchResult hash mismatch")
     if result.exact_match and result.retrieval_mode not in {
         RetrievalMode.EXACT_SPECIFICATION,
-        RetrievalMode.EXACT_SEMANTIC,
+        RetrievalMode.FINAL_STATE_EFFECT,
         RetrievalMode.CONTROLLED_EXACT,
     }:
         raise ValueError("Assistive retrieval cannot mark a result exact")
+    if result.exact_match != (result.status == SearchStatus.EXACT_MATCH):
+        raise ValueError("Search status and exact_match disagree")
+    if result.status == SearchStatus.FINAL_STATE_EQUIVALENT:
+        if result.retrieval_mode != RetrievalMode.FINAL_STATE_EFFECT:
+            raise ValueError("Only trusted final-state retrieval can claim equivalence")
+        if result.equivalence_scope != EquivalenceScope.FINAL_STATE_ONLY:
+            raise ValueError("Final-state candidate requires FINAL_STATE_ONLY scope")
+        if not result.candidates:
+            raise ValueError("Final-state equivalence requires reviewed candidates")
 
 
 def candidate_list_hash(result: SkillSearchResult) -> str:
@@ -477,6 +571,12 @@ def _result(
         registry_hash=registry.manifest.registry_hash,
         rule_memory_hash=registry.manifest.rule_memory_hash,
         retrieval_mode=mode,
+        equivalence_scope=query.equivalence_scope,
+        requested_specification_hash=(
+            specification_hash(query.specification)
+            if query.specification is not None
+            else None
+        ),
         status=status,
         candidates=tuple(candidates),
         exact_match=exact,
@@ -513,6 +613,18 @@ def _candidate(skill, score: float, rank: int, evidence_type: str) -> SkillCandi
             "effect_summary": skill.effect_summary,
         },
     )
+
+
+def _group_evidence(group) -> dict[str, object]:
+    return {
+        "final_state_effect_hash": group.final_state_effect_hash,
+        "equivalence_class_hash": group.equivalence_class_hash,
+        "canonical_skill_id": group.canonical_skill_id,
+        "member_skill_ids": list(group.member_skill_ids),
+        "member_count": group.member_count,
+        "equivalence_proof_kind": group.equivalence_proof_kind,
+        "order_sensitive": group.order_sensitive,
+    }
 
 
 def _clarification_question(target: str | None, language: str | None) -> str | None:

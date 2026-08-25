@@ -20,7 +20,9 @@ class QuerySourceKind(StrEnum):
 
 class RetrievalMode(StrEnum):
     EXACT_SPECIFICATION = "EXACT_SPECIFICATION"
-    EXACT_SEMANTIC = "EXACT_SEMANTIC"
+    FINAL_STATE_EFFECT = "FINAL_STATE_EFFECT"
+    # Source compatibility only. Persisted v3 artifacts use the honest value above.
+    EXACT_SEMANTIC = "FINAL_STATE_EFFECT"
     CONTROLLED_EXACT = "CONTROLLED_EXACT"
     LEXICAL = "LEXICAL"
     CHARACTER_NGRAM = "CHARACTER_NGRAM"
@@ -30,6 +32,7 @@ class RetrievalMode(StrEnum):
 
 class SearchStatus(StrEnum):
     EXACT_MATCH = "EXACT_MATCH"
+    FINAL_STATE_EQUIVALENT = "FINAL_STATE_EQUIVALENT"
     NO_MATCH = "NO_MATCH"
     AMBIGUOUS = "AMBIGUOUS"
     AMBIGUOUS_VERSION = "AMBIGUOUS_VERSION"
@@ -44,6 +47,7 @@ class NextAction(StrEnum):
     SELECT_EXACT = "SELECT_EXACT"
     ASK_CLARIFICATION = "ASK_CLARIFICATION"
     REVIEW_CANDIDATES = "REVIEW_CANDIDATES"
+    REVIEW_EQUIVALENT_CANDIDATES = "REVIEW_EQUIVALENT_CANDIDATES"
     RUN_SYNTHESIS = "RUN_SYNTHESIS"
     UNSUPPORTED = "UNSUPPORTED"
 
@@ -51,7 +55,15 @@ class NextAction(StrEnum):
 class ConfirmationDecision(StrEnum):
     PENDING = "PENDING"
     CONFIRM_SELECTION = "CONFIRM_SELECTION"
+    CONFIRM_FINAL_STATE_EQUIVALENT_SELECTION = (
+        "CONFIRM_FINAL_STATE_EQUIVALENT_SELECTION"
+    )
     REJECT_SELECTION = "REJECT_SELECTION"
+
+
+class EquivalenceScope(StrEnum):
+    FULL_EXECUTION_TRACE = "FULL_EXECUTION_TRACE"
+    FINAL_STATE_ONLY = "FINAL_STATE_ONLY"
 
 
 @dataclass(frozen=True)
@@ -60,7 +72,7 @@ class SkillRecord:
     rule_id: str
     rule_semantic_hash: str
     specification_hash: str
-    semantic_effect_hash: str
+    final_state_effect_hash: str
     installed_receipt_hash: str
     rule_version: int
     active: bool
@@ -108,6 +120,11 @@ class SkillRecord:
             json.loads(json.dumps(self.provenance, ensure_ascii=False)),
         )
 
+    @property
+    def semantic_effect_hash(self) -> str:
+        """Deprecated source alias; v3 persistence uses final_state_effect_hash."""
+        return self.final_state_effect_hash
+
 
 @dataclass(frozen=True)
 class SkillRegistryManifest:
@@ -121,16 +138,23 @@ class SkillRegistryManifest:
     family_counts: dict[str, int]
     alias_count: int
     description_count: int
-    semantic_effect_class_count: int
+    final_state_effect_class_count: int
+    full_execution_equivalence_class_count: int
+    trace_distinct_class_count: int
     order_sensitive_class_count: int
     order_insensitive_class_count: int
     created_at: str
     updated_at: str
 
+    @property
+    def semantic_effect_class_count(self) -> int:
+        """Deprecated source alias; v3 persistence names the observable scope."""
+        return self.final_state_effect_class_count
+
 
 @dataclass(frozen=True)
-class SemanticEquivalenceGroup:
-    semantic_effect_hash: str
+class FinalStateEquivalenceGroup:
+    final_state_effect_hash: str
     member_skill_ids: tuple[str, ...]
     canonical_skill_id: str
     equivalence_proof_kind: str
@@ -145,6 +169,27 @@ class SemanticEquivalenceGroup:
         if self.canonical_skill_id not in members:
             raise ValueError("canonical skill must be an equivalence member")
 
+    @property
+    def equivalence_class_hash(self) -> str:
+        from ai_brain.stage1.models import content_hash
+
+        return content_hash(
+            {
+                "final_state_effect_hash": self.final_state_effect_hash,
+                "member_skill_ids": self.member_skill_ids,
+                "equivalence_proof_kind": self.equivalence_proof_kind,
+                "order_sensitive": self.order_sensitive,
+            }
+        )
+
+    @property
+    def semantic_effect_hash(self) -> str:
+        """Deprecated source alias for pre-v3 callers."""
+        return self.final_state_effect_hash
+
+
+SemanticEquivalenceGroup = FinalStateEquivalenceGroup
+
 
 @dataclass(frozen=True)
 class SkillQuery:
@@ -158,6 +203,7 @@ class SkillQuery:
     forbidden_effects: tuple[str, ...]
     state_schema: tuple[str, ...]
     created_at: str
+    equivalence_scope: EquivalenceScope = EquivalenceScope.FULL_EXECUTION_TRACE
     schema_version: int = STAGE2_SCHEMA_VERSION
 
 
@@ -180,6 +226,8 @@ class SkillSearchResult:
     registry_hash: str
     rule_memory_hash: str
     retrieval_mode: RetrievalMode
+    equivalence_scope: EquivalenceScope
+    requested_specification_hash: str | None
     status: SearchStatus
     candidates: tuple[SkillCandidate, ...]
     exact_match: bool
@@ -203,9 +251,16 @@ class SkillSelectionReceipt:
     selected_skill_id: str
     rule_id: str
     rule_semantic_hash: str
-    specification_hash: str
+    requested_specification_hash: str | None
+    selected_specification_hash: str
+    final_state_effect_hash: str
+    equivalence_class_hash: str | None
+    equivalence_scope: EquivalenceScope
+    search_status: SearchStatus
+    structural_identity_differs: bool
+    full_trace_equivalent: bool
     retrieval_mode: RetrievalMode
-    exact_match_evidence: dict[str, Any]
+    retrieval_evidence: dict[str, Any]
     candidate_list_hash: str
     confirmation_decision: ConfirmationDecision
     confirmer_identity: str
@@ -223,7 +278,15 @@ class SkillDispatchReceipt:
     rule_id: str
     installed_receipt_hash: str
     rule_semantic_hash: str
-    specification_hash: str
+    requested_specification_hash: str | None
+    selected_specification_hash: str
+    final_state_effect_hash: str
+    equivalence_class_hash: str | None
+    equivalence_scope: EquivalenceScope
+    search_status: SearchStatus
+    confirmation_decision: ConfirmationDecision
+    structural_identity_differs: bool
+    full_trace_equivalent: bool
     initial_state_hash: str
     execution_limits: ExecutionLimits
     dispatch_policy: str
