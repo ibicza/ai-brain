@@ -78,9 +78,16 @@ def freeze_recipe(registry_path, dataset_dir, output_dir, conditions, seed, conf
         "conditions": conditions,
         "primary_condition": config.corpus_condition,
         "config": asdict(config),
+        "condition_configs": {
+            condition: result["config"] for condition, result in development.items()
+        },
         "seed": seed,
         "multi_seed_eligible": eligible,
         "calibration_method": "calibration_only_false_known_bound",
+        "targeted_ablation_count": 1,
+        "targeted_ablation": "explicit_register_operation_token_features",
+        "hard_negative_mining_rounds": 0,
+        "blind_open_policy": "single_atomic_open_all_predeclared_conditions",
         "blind_public_sha256": manifest["blind_public_sha256"],
         "blind_targets_sha256": manifest["blind_targets_sha256"],
         "query_surface_inventory_hash": manifest["query_surface_inventory_hash"],
@@ -99,7 +106,7 @@ def freeze_recipe(registry_path, dataset_dir, output_dir, conditions, seed, conf
     return recipe
 
 
-def open_blind_once(registry_path, dataset_dir, output_dir):
+def open_blind_once(registry_path, dataset_dir, output_dir, *, device="cpu"):
     verify_fair_blind_freeze(dataset_dir)
     final_path = output_dir / "blind_final.json"
     if final_path.exists():
@@ -119,7 +126,7 @@ def open_blind_once(registry_path, dataset_dir, output_dir):
     results = {}
     for condition in recipe["conditions"]:
         checkpoint = output_dir / f"{condition}_seed_{recipe['seed']}.pt"
-        retriever = load_retriever(checkpoint)
+        retriever = load_retriever(checkpoint, device=device)
         if retriever.registry_hash != registry.manifest.registry_hash:
             raise ValueError("checkpoint registry hash mismatch")
         results[condition] = evaluate_fair_retriever(retriever, blind)
@@ -141,7 +148,7 @@ def open_blind_once(registry_path, dataset_dir, output_dir):
     return final
 
 
-def verify_evidence(registry_path, dataset_dir, output_dir):
+def verify_evidence(registry_path, dataset_dir, output_dir, *, device="cpu"):
     verify_fair_blind_freeze(dataset_dir)
     recipe = _verified_recipe(output_dir)
     final = json.loads((output_dir / "blind_final.json").read_text(encoding="utf-8"))
@@ -149,7 +156,9 @@ def verify_evidence(registry_path, dataset_dir, output_dir):
         raise ValueError("blind result recipe hash mismatch")
     registry = SkillRegistry.load(registry_path)
     for condition in recipe["conditions"]:
-        retriever = load_retriever(output_dir / f"{condition}_seed_{recipe['seed']}.pt")
+        retriever = load_retriever(
+            output_dir / f"{condition}_seed_{recipe['seed']}.pt", device=device
+        )
         if retriever.registry_hash != registry.manifest.registry_hash:
             raise ValueError("checkpoint registry hash mismatch")
     result = {
@@ -236,9 +245,19 @@ def main():
             config,
         )
     elif args.command == "blind":
-        result = open_blind_once(args.registry, args.dataset_dir, args.output_dir)
+        result = open_blind_once(
+            args.registry,
+            args.dataset_dir,
+            args.output_dir,
+            device=args.device or "cpu",
+        )
     else:
-        result = verify_evidence(args.registry, args.dataset_dir, args.output_dir)
+        result = verify_evidence(
+            args.registry,
+            args.dataset_dir,
+            args.output_dir,
+            device=args.device or "cpu",
+        )
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
 
 
