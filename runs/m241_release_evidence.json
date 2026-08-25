@@ -1,0 +1,75 @@
+{
+  "acceptance": {
+    "local_m24_checks": 1267,
+    "local_m241_checks": 81,
+    "remote_m24_checks": 1267,
+    "remote_m241_checks": 81
+  },
+  "audit_revision_reconstruction": "passed",
+  "base_release_commit": "937f1133d17fdae9012308d329534b881cdf6e09",
+  "base_release_tag": "stage1-v1.0.0",
+  "branch": "exp/stage1-v1.0.1-hardening",
+  "evidence_commit": null,
+  "evidence_commit_note": "The evidence commit contains this file and is therefore recorded in Git and PR #2 without a self-referential hash.",
+  "execution_limit_defaults": {
+    "capture_trace": false,
+    "fail_on_trace_overflow": false,
+    "max_execution_steps": 1000008,
+    "max_register_value": 1000000,
+    "max_total_units": 1000000,
+    "max_trace_actions": 10000
+  },
+  "local": {
+    "full_pytest_count": 452,
+    "log": "runs/m241_release_evidence/local_exact_h2.log",
+    "log_sha256": "7e0d64740890fdd588138fa38ae35c487b067f2dee05ed309cf3c9cc399e9a08",
+    "no_torch": "passed",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13",
+    "standalone_cli": "passed",
+    "uv": "0.12.3"
+  },
+  "old_tag_targets": {
+    "stage1-acquisition-v1": "11b573ee46c6df552d6a44b91d4f1712a62b5273",
+    "stage1-v1.0.0": "937f1133d17fdae9012308d329534b881cdf6e09"
+  },
+  "pr_number": 2,
+  "proposal_id_collision_isolation": "passed",
+  "release_commit": "4e9520a16bd3aeb7579ea92ce44060fd7f1a705a",
+  "release_tag": "stage1-v1.0.1",
+  "release_tree_sha": "0a45089cd8549d70596b55a6501591ef1504211f",
+  "release_version": "1.0.1",
+  "remote": {
+    "full_pytest_count": 452,
+    "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU, 8151 MiB",
+    "hostname": "karina",
+    "log": "runs/m241_release_evidence/karina_exact_h2.log",
+    "log_sha256": "07a45a857504a49143dbebea4134397529e3f2a8044ee5a6a28814f8e81dd63a",
+    "no_torch": "passed",
+    "platform": "Linux karina 7.0.0-30-generic x86_64",
+    "python": "3.14.4",
+    "repository_path": "/home/ibicza/ai-brain-m241-release",
+    "standalone_cli": "passed",
+    "tmux_session": "m241-v101-release",
+    "uv": "0.12.5"
+  },
+  "rule_memory_migration": "passed",
+  "rule_memory_recovery": "passed",
+  "standalone_cli_includes": [
+    "help",
+    "language-help-ru",
+    "propose",
+    "review",
+    "verify",
+    "review-verification",
+    "approve",
+    "install",
+    "execute",
+    "audit-replay",
+    "audit-reconstruct",
+    "recover-rule-memory"
+  ],
+  "tag_object": "236276a1a72e1143c7d76c17d7e33ae2e6e1ed37",
+  "tag_target": "4e9520a16bd3aeb7579ea92ce44060fd7f1a705a",
+  "timestamp": "2026-08-25T15:11:34.9028367+03:00"
+}

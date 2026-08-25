@@ -1,0 +1,721 @@
+TIMESTAMP: 2026-08-25T12:09:31+00:00
+HOSTNAME: karina
+PWD: /home/ibicza/ai-brain-m241-release
+GIT_HEAD: 4e9520a16bd3aeb7579ea92ce44060fd7f1a705a
+GIT_STATUS_PORCELAIN_BEGIN
+GIT_STATUS_PORCELAIN_END
+PYTHON: Python 3.14.4
+UV: uv 0.12.5 (x86_64-unknown-linux-gnu)
+NVIDIA_SMI_BEGIN
+NVIDIA GeForce RTX 5060 Laptop GPU, 8151 MiB, 595.84
+NVIDIA_SMI_END
+=== UV SYNC ===
+Resolved 48 packages in 0.62ms
+Checked 46 packages in 0.38ms
+=== RUFF FORMAT CHECK ===
+141 files already formatted
+=== RUFF CHECK ===
+All checks passed!
+=== PYTEST ===
+........................................................................ [ 15%]
+........................................................................ [ 31%]
+........................................................................ [ 47%]
+........................................................................ [ 63%]
+........................................................................ [ 79%]
+........................................................................ [ 95%]
+....................                                                     [100%]
+452 passed in 20.48s
+=== M24 ACCEPTANCE ===
+{
+  "acceptance_checks": 1267,
+  "active_rules_executed": 89,
+  "device": "CPU-only deterministic acceptance",
+  "elapsed_seconds": 8.36,
+  "family_counts": {
+    "CLEAR": 4,
+    "DRAIN": 12,
+    "DROP_THEN_TRANSFER": 24,
+    "MERGE_THREE": 24,
+    "MERGE_TWO": 24,
+    "NOOP": 1
+  },
+  "language_semantic_cases": 356,
+  "outcome": "A",
+  "platform": "Linux-7.0.0-30-generic-x86_64-with-glibc2.43",
+  "python": "3.12.14",
+  "rule_memory_records": 100,
+  "source_sha": "4e9520a16bd3aeb7579ea92ce44060fd7f1a705a",
+  "structural_specifications": 89
+}
+=== M241 ACCEPTANCE ===
+{
+  "acceptance_checks": 81,
+  "audit_revision_reconstruction": "passed",
+  "elapsed_seconds": 0.625,
+  "no_torch": true,
+  "outcome": "A",
+  "platform": "Linux-7.0.0-30-generic-x86_64-with-glibc2.43",
+  "proposal_id_collision_isolation": "passed",
+  "python": "3.12.14",
+  "release_version": "1.0.1",
+  "rule_memory_migration": "passed",
+  "rule_memory_recovery": "passed",
+  "source_sha": "4e9520a16bd3aeb7579ea92ce44060fd7f1a705a",
+  "standalone_cli": "passed",
+  "standalone_cli_steps": 20,
+  "synonym_contradiction_cases": 40
+}
+=== STANDALONE CLI ===
+usage: ai-brain-stage1 [-h] [--memory MEMORY] [--audit AUDIT]
+                       {language-help,propose-language,propose-form,propose-dsl,clarify,review,verify,review-verification,approve,install,list,inspect,execute,audit-replay,audit-reconstruct,migrate-rule-memory,recover-rule-memory}
+                       ...
+
+Trusted deterministic Stage-1 v1 production workflow.
+
+positional arguments:
+  {language-help,propose-language,propose-form,propose-dsl,clarify,review,verify,review-verification,approve,install,list,inspect,execute,audit-replay,audit-reconstruct,migrate-rule-memory,recover-rule-memory}
+
+options:
+  -h, --help            show this help message and exit
+  --memory MEMORY
+  --audit AUDIT
+Укажите действие, источники A-D, приёмник, неизменяемые регистры, условие остановки и порядок фаз. Пример: Перенеси все элементы из A и B в C; D не изменяй; остановись, когда A и B опустеют.
+{
+  "created_at": "2026-08-25T12:10:05.047865+00:00",
+  "issues": [],
+  "language": "ru",
+  "original_input": "Перенеси все элементы из A в B; C и D не изменяй; остановись, когда A опустеет.",
+  "parser_name": "stage1_deterministic_controlled_language",
+  "parser_version": "1",
+  "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+  "provenance": [
+    {
+      "event": "parsed",
+      "partial_actions": [
+        [
+          "MOVE_ONE",
+          "A",
+          "B"
+        ]
+      ]
+    }
+  ],
+  "revision": 1,
+  "schema_version": 1,
+  "semantic_family": "DRAIN",
+  "source_kind": "CONTROLLED_LANGUAGE",
+  "specification": {
+    "allowed_primitives": [
+      "HALT",
+      "MOVE_ONE"
+    ],
+    "allowed_variables": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "drops": [],
+    "inputs": [
+      "A"
+    ],
+    "outputs": [
+      "B"
+    ],
+    "phase_constraints": [
+      [
+        "MOVE_ONE",
+        "A",
+        "B"
+      ]
+    ],
+    "preserve": [
+      "C",
+      "D"
+    ],
+    "terminate_when_empty": [
+      "A"
+    ],
+    "transfers": [
+      [
+        "A",
+        "B"
+      ]
+    ],
+    "unsupported": false
+  },
+  "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+  "status": "SUPPORTED_FOR_REVIEW"
+}
+{
+  "family": "DRAIN",
+  "generated_rule": "",
+  "issues": [],
+  "language": "ru",
+  "original_input": "Перенеси все элементы из A в B; C и D не изменяй; остановись, когда A опустеет.",
+  "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+  "specification": {
+    "allowed_primitives": [
+      "HALT",
+      "MOVE_ONE"
+    ],
+    "allowed_variables": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "drops": [],
+    "inputs": [
+      "A"
+    ],
+    "outputs": [
+      "B"
+    ],
+    "phase_constraints": [
+      [
+        "MOVE_ONE",
+        "A",
+        "B"
+      ]
+    ],
+    "preserve": [
+      "C",
+      "D"
+    ],
+    "terminate_when_empty": [
+      "A"
+    ],
+    "transfers": [
+      [
+        "A",
+        "B"
+      ]
+    ],
+    "unsupported": false
+  },
+  "status": "REVIEWED",
+  "verification_status": "NOT_VERIFIED",
+  "warnings_en": [],
+  "warnings_ru": []
+}
+{
+  "candidate_dsl": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3",
+  "candidate_hash": "d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3",
+  "compiler_name": "stage1_known_family_compiler_v1",
+  "created_at": "2026-08-25T12:10:05.179597+00:00",
+  "evidence_hash": "10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1",
+  "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+  "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+  "schema_version": 1,
+  "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+  "verification_evidence": {
+    "abstract_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "accepted": true,
+    "counterexample": null,
+    "property_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "reason": "ok",
+    "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+    "static_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "status": "PROPERTY_VERIFIED",
+    "verifier": "property_verify_large_v1"
+  },
+  "verification_status": "PROPERTY_VERIFIED"
+}
+{
+  "abstract_verification_result": {
+    "accepted": true,
+    "counterexample": null,
+    "reason": "ok",
+    "status": "PROPERTY_VERIFIED"
+  },
+  "candidate_dsl": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3",
+  "candidate_hash": "d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3",
+  "changed_registers": [
+    "A",
+    "B"
+  ],
+  "compiler_name": "stage1_known_family_compiler_v1",
+  "created_at": "2026-08-25T12:10:05.239190+00:00",
+  "evidence_hash": "10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1",
+  "ordered_phases": [
+    [
+      "MOVE_ONE",
+      "A",
+      "B"
+    ]
+  ],
+  "original_input": "Перенеси все элементы из A в B; C и D не изменяй; остановись, когда A опустеет.",
+  "preserved_registers": [
+    "C",
+    "D"
+  ],
+  "property_verification_result": {
+    "accepted": true,
+    "counterexample": null,
+    "reason": "ok",
+    "status": "PROPERTY_VERIFIED"
+  },
+  "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+  "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+  "review_hash": "f5e4fce727a38660010d673ca940816b01f745d9a24712c1741c79c647202b9e",
+  "schema_version": 1,
+  "semantic_effect_summary": "MOVE_ONE A -> B",
+  "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+  "stage1_version": "1.0.1",
+  "static_verification_result": {
+    "accepted": true,
+    "counterexample": null,
+    "reason": "ok",
+    "status": "PROPERTY_VERIFIED"
+  },
+  "termination_condition": [
+    "A"
+  ],
+  "verification_evidence": {
+    "abstract_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "accepted": true,
+    "counterexample": null,
+    "property_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "reason": "ok",
+    "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+    "static_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "status": "PROPERTY_VERIFIED",
+    "verifier": "property_verify_large_v1"
+  },
+  "warnings": [
+    "Controlled six-family DSL only",
+    "Property verification is scoped to Stage-1 specification semantics"
+  ]
+}
+{
+  "candidate_hash": "d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3",
+  "decision": "APPROVE",
+  "evidence_hash": "10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1",
+  "identity": "karina-release-gate",
+  "identity_type": "USER",
+  "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+  "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+  "schema_version": 1,
+  "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+  "stage1_version": "1.0.1",
+  "timestamp": "2026-08-25T12:10:05.299073+00:00",
+  "verified_review_hash": "f5e4fce727a38660010d673ca940816b01f745d9a24712c1741c79c647202b9e"
+}
+{
+  "deprecated": false,
+  "program_json": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3",
+  "provenance": "{\"approval_hash\": \"7b720f2026c6c140f4d00313295707a9ffb29c30f529d7392330102149c155cb\", \"approval_identity\": \"karina-release-gate\", \"approval_identity_type\": \"USER\", \"approval_timestamp\": \"2026-08-25T12:10:05.299073+00:00\", \"candidate_hash\": \"d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3\", \"evidence_hash\": \"10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1\", \"original_input_hash\": \"788de0cd7dca071fd634ab03d70498764b3ee2d37f28d2c562b511562d4dba46\", \"proposal_hash\": \"bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d\", \"proposal_id\": \"proposal-6b03ed338e0f429a832d0262d7074546\", \"proposal_revision\": 1, \"source_kind\": \"CONTROLLED_LANGUAGE\", \"specification_hash\": \"f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2\", \"verified_review_hash\": \"f5e4fce727a38660010d673ca940816b01f745d9a24712c1741c79c647202b9e\"}",
+  "rule_id": "rule-00001-b41f14d4",
+  "semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+  "specification": {
+    "allowed_primitives": [
+      "HALT",
+      "MOVE_ONE"
+    ],
+    "allowed_variables": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "drops": [],
+    "inputs": [
+      "A"
+    ],
+    "outputs": [
+      "B"
+    ],
+    "phase_constraints": [
+      [
+        "MOVE_ONE",
+        "A",
+        "B"
+      ]
+    ],
+    "preserve": [
+      "C",
+      "D"
+    ],
+    "terminate_when_empty": [
+      "A"
+    ],
+    "transfers": [
+      [
+        "A",
+        "B"
+      ]
+    ],
+    "unsupported": false
+  },
+  "status": "PROPERTY_VERIFIED",
+  "verification_evidence": {
+    "abstract_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "accepted": true,
+    "counterexample": null,
+    "property_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "reason": "ok",
+    "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+    "static_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "status": "PROPERTY_VERIFIED",
+    "verifier": "property_verify_large_v1"
+  },
+  "version": 1
+}
+{
+  "action_stream_hash": "fb4640177769b9deb8f654a5d98e538851dd74d4e6b0601602cc7aeb78176c70",
+  "captured_actions": [],
+  "executed_steps": 3,
+  "execution_hash": "bc342e071de6e25604ef15cc91592a039ceda047cb6fcbaadf0cc87ff006915c",
+  "failure_reason": null,
+  "final_state": {
+    "R0": 0,
+    "R1": 5,
+    "R2": 4,
+    "R3": 5
+  },
+  "halted": true,
+  "initial_state": {
+    "R0": 2,
+    "R1": 3,
+    "R2": 4,
+    "R3": 5
+  },
+  "limits": {
+    "capture_trace": false,
+    "fail_on_trace_overflow": false,
+    "max_execution_steps": 1000008,
+    "max_register_value": 1000000,
+    "max_total_units": 1000000,
+    "max_trace_actions": 10000,
+    "version": "1"
+  },
+  "limits_version": "1",
+  "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+  "rule_id": "rule-00001-b41f14d4",
+  "schema_version": 1,
+  "trace_requested": false,
+  "trace_truncated": false
+}
+[
+  {
+    "event_hash": "2fb60d1a758f2a5c04442d6ad48700955e96ee0f91aae0b18aeeed59aa9ecb57",
+    "event_type": "PROPOSAL_RECEIVED",
+    "payload": {
+      "original_input_hash": "788de0cd7dca071fd634ab03d70498764b3ee2d37f28d2c562b511562d4dba46",
+      "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+      "revision": 1,
+      "source_kind": "CONTROLLED_LANGUAGE",
+      "stage1_version": "1.0.1"
+    },
+    "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+    "sequence": 1,
+    "timestamp": "2026-08-25T12:10:05.047892+00:00"
+  },
+  {
+    "event_hash": "58763f1a38a5beb44b30e3b27e144f4ca00f54b3a5ceeb94a20e296ff90ef8c2",
+    "event_type": "PROPOSAL_PARSED",
+    "payload": {
+      "parser_name": "stage1_deterministic_controlled_language",
+      "parser_version": "1",
+      "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+      "revision": 1,
+      "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+      "stage1_version": "1.0.1",
+      "status": "SUPPORTED_FOR_REVIEW"
+    },
+    "previous_hash": "2fb60d1a758f2a5c04442d6ad48700955e96ee0f91aae0b18aeeed59aa9ecb57",
+    "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+    "sequence": 2,
+    "timestamp": "2026-08-25T12:10:05.051500+00:00"
+  },
+  {
+    "event_hash": "957b27618634766054958a8bf84a85e00af4c72b87833b90aef3674c12ac967b",
+    "event_type": "PROPOSAL_REVIEWED",
+    "payload": {
+      "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+      "review_hash": "c1bdab48d2ffe6b4f43714d9eca3e21d3eabf01358f34397832ad222182ff61b",
+      "revision": 1,
+      "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+      "stage1_version": "1.0.1"
+    },
+    "previous_hash": "58763f1a38a5beb44b30e3b27e144f4ca00f54b3a5ceeb94a20e296ff90ef8c2",
+    "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+    "sequence": 3,
+    "timestamp": "2026-08-25T12:10:05.112717+00:00"
+  },
+  {
+    "event_hash": "b3fcb3b475f6722c4389b68d1679cf48664b1d58aa80bb27e60d6a89c5704418",
+    "event_type": "CANDIDATE_VERIFIED",
+    "payload": {
+      "candidate_hash": "d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3",
+      "compiler_name": "stage1_known_family_compiler_v1",
+      "evidence_hash": "10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1",
+      "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+      "revision": 1,
+      "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+      "stage1_version": "1.0.1"
+    },
+    "previous_hash": "957b27618634766054958a8bf84a85e00af4c72b87833b90aef3674c12ac967b",
+    "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+    "sequence": 4,
+    "timestamp": "2026-08-25T12:10:05.179704+00:00"
+  },
+  {
+    "event_hash": "aa0c68c15348e246220fde66479ac202d54be028d0109fa4a8db3160162407f2",
+    "event_type": "VERIFIED_REVIEWED",
+    "payload": {
+      "candidate_hash": "d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3",
+      "evidence_hash": "10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1",
+      "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+      "revision": 1,
+      "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+      "stage1_version": "1.0.1",
+      "verified_review_hash": "f5e4fce727a38660010d673ca940816b01f745d9a24712c1741c79c647202b9e"
+    },
+    "previous_hash": "b3fcb3b475f6722c4389b68d1679cf48664b1d58aa80bb27e60d6a89c5704418",
+    "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+    "sequence": 5,
+    "timestamp": "2026-08-25T12:10:05.239347+00:00"
+  },
+  {
+    "event_hash": "d3040971f7f17c16876b4a7aecad755c46cda9d1a53a0b85cfe168e20bb8eb29",
+    "event_type": "PROPOSAL_APPROVED",
+    "payload": {
+      "approval_hash": "7b720f2026c6c140f4d00313295707a9ffb29c30f529d7392330102149c155cb",
+      "candidate_hash": "d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3",
+      "evidence_hash": "10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1",
+      "identity_type": "USER",
+      "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+      "revision": 1,
+      "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+      "stage1_version": "1.0.1",
+      "verified_review_hash": "f5e4fce727a38660010d673ca940816b01f745d9a24712c1741c79c647202b9e"
+    },
+    "previous_hash": "aa0c68c15348e246220fde66479ac202d54be028d0109fa4a8db3160162407f2",
+    "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+    "sequence": 6,
+    "timestamp": "2026-08-25T12:10:05.299262+00:00"
+  },
+  {
+    "event_hash": "d9bddadea567c348d568a8248c272d6eed1442ccd454c395cc3f80f316da19c2",
+    "event_type": "RULE_INSTALLED",
+    "payload": {
+      "approval_hash": "7b720f2026c6c140f4d00313295707a9ffb29c30f529d7392330102149c155cb",
+      "candidate_hash": "d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3",
+      "evidence_hash": "10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1",
+      "memory_schema_version": 1,
+      "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+      "revision": 1,
+      "rule_id": "rule-00001-b41f14d4",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+      "stage1_version": "1.0.1",
+      "verified_review_hash": "f5e4fce727a38660010d673ca940816b01f745d9a24712c1741c79c647202b9e"
+    },
+    "previous_hash": "d3040971f7f17c16876b4a7aecad755c46cda9d1a53a0b85cfe168e20bb8eb29",
+    "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+    "sequence": 7,
+    "timestamp": "2026-08-25T12:10:05.368595+00:00"
+  },
+  {
+    "event_hash": "49d2275febea5750c73c74028d0ddaa2bfb1e3dfaa549f7ce7d2f96c17993168",
+    "event_type": "RULE_EXECUTED",
+    "payload": {
+      "executed_steps": 3,
+      "execution_hash": "bc342e071de6e25604ef15cc91592a039ceda047cb6fcbaadf0cc87ff006915c",
+      "final_state_hash": "2cf694a0d5e4a0b996dc2b2894b223268a9e67e7933b24061b7651f9eea1bef1",
+      "initial_state_hash": "13835902abe398f4158eb77ef33cb648f21db27a52195f1d52465be9276ed328",
+      "revision": 1,
+      "rule_id": "rule-00001-b41f14d4",
+      "stage1_version": "1.0.1",
+      "trace_requested": false,
+      "trace_truncated": false
+    },
+    "previous_hash": "d9bddadea567c348d568a8248c272d6eed1442ccd454c395cc3f80f316da19c2",
+    "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+    "sequence": 8,
+    "timestamp": "2026-08-25T12:10:05.450822+00:00"
+  }
+]
+{
+  "active_revision": 1,
+  "approval_hash": "7b720f2026c6c140f4d00313295707a9ffb29c30f529d7392330102149c155cb",
+  "candidate_hash": "d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3",
+  "errors": [],
+  "event_types": [
+    "PROPOSAL_RECEIVED",
+    "PROPOSAL_PARSED",
+    "PROPOSAL_REVIEWED",
+    "CANDIDATE_VERIFIED",
+    "VERIFIED_REVIEWED",
+    "PROPOSAL_APPROVED",
+    "RULE_INSTALLED",
+    "RULE_EXECUTED"
+  ],
+  "evidence_hash": "10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1",
+  "execution_hashes": [
+    "bc342e071de6e25604ef15cc91592a039ceda047cb6fcbaadf0cc87ff006915c"
+  ],
+  "installed_rule_id": "rule-00001-b41f14d4",
+  "original_input_hash": "788de0cd7dca071fd634ab03d70498764b3ee2d37f28d2c562b511562d4dba46",
+  "proposal_hash": "bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d",
+  "proposal_id": "proposal-6b03ed338e0f429a832d0262d7074546",
+  "revisions": [
+    {
+      "errors": [],
+      "event_types": [
+        "PROPOSAL_RECEIVED",
+        "PROPOSAL_PARSED",
+        "PROPOSAL_REVIEWED",
+        "CANDIDATE_VERIFIED",
+        "VERIFIED_REVIEWED",
+        "PROPOSAL_APPROVED",
+        "RULE_INSTALLED",
+        "RULE_EXECUTED"
+      ],
+      "revision": 1,
+      "status": "ACTIVE",
+      "valid": true
+    }
+  ],
+  "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+  "valid": true,
+  "verified_review_hash": "f5e4fce727a38660010d673ca940816b01f745d9a24712c1741c79c647202b9e"
+}
+{
+  "active_rule_count": 1,
+  "backup": "/home/ibicza/ai-brain-m241-release/runs/m241_release_evidence/karina_cli_exact_h3/memory.json.bak",
+  "backup_sha256": "807dbf40f9783028d5cd2e9780311629f7ac0bc26c19aeefbd1f5c6ca7f9808f",
+  "corrupt_primary_sha256": "dafd65f7067e82e1c60e61626580f02f78d7a9c380fc15c390d8277d891726a9",
+  "preserved_corrupt_primary": "/home/ibicza/ai-brain-m241-release/runs/m241_release_evidence/karina_cli_exact_h3/memory.json.20260825T121005682299Z.corrupt",
+  "primary": "/home/ibicza/ai-brain-m241-release/runs/m241_release_evidence/karina_cli_exact_h3/memory.json",
+  "record_count": 1,
+  "recovered_at": "2026-08-25T12:10:05.682299+00:00",
+  "restored_primary_sha256": "807dbf40f9783028d5cd2e9780311629f7ac0bc26c19aeefbd1f5c6ca7f9808f",
+  "schema_version": 1
+}
+{
+  "deprecated": false,
+  "program_json": "NE A M A B\nE A H\nA R0 B R1 C R2 D R3",
+  "provenance": "{\"approval_hash\": \"7b720f2026c6c140f4d00313295707a9ffb29c30f529d7392330102149c155cb\", \"approval_identity\": \"karina-release-gate\", \"approval_identity_type\": \"USER\", \"approval_timestamp\": \"2026-08-25T12:10:05.299073+00:00\", \"candidate_hash\": \"d71da0e66f7e03a3c582bbd2ae48095ab5474125c420aba5753db5b37524c4c3\", \"evidence_hash\": \"10661696bef2cd1b3d071c66c294e99097ea3e2e4aaa7887aee40490573430f1\", \"original_input_hash\": \"788de0cd7dca071fd634ab03d70498764b3ee2d37f28d2c562b511562d4dba46\", \"proposal_hash\": \"bfaf27158ed3dcdf494292a68155ee51febab8a5d7f925be64cba5446492610d\", \"proposal_id\": \"proposal-6b03ed338e0f429a832d0262d7074546\", \"proposal_revision\": 1, \"source_kind\": \"CONTROLLED_LANGUAGE\", \"specification_hash\": \"f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2\", \"verified_review_hash\": \"f5e4fce727a38660010d673ca940816b01f745d9a24712c1741c79c647202b9e\"}",
+  "rule_id": "rule-00001-b41f14d4",
+  "semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+  "specification": {
+    "allowed_primitives": [
+      "HALT",
+      "MOVE_ONE"
+    ],
+    "allowed_variables": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "drops": [],
+    "inputs": [
+      "A"
+    ],
+    "outputs": [
+      "B"
+    ],
+    "phase_constraints": [
+      [
+        "MOVE_ONE",
+        "A",
+        "B"
+      ]
+    ],
+    "preserve": [
+      "C",
+      "D"
+    ],
+    "terminate_when_empty": [
+      "A"
+    ],
+    "transfers": [
+      [
+        "A",
+        "B"
+      ]
+    ],
+    "unsupported": false
+  },
+  "status": "PROPERTY_VERIFIED",
+  "verification_evidence": {
+    "abstract_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "accepted": true,
+    "counterexample": null,
+    "property_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "reason": "ok",
+    "specification_hash": "f6ef0f6dad446750010a0eb4b7e0bc859316ebedf60867a05d11ccc1fb2c0df2",
+    "static_verification": {
+      "accepted": true,
+      "counterexample": null,
+      "reason": "ok",
+      "status": "PROPERTY_VERIFIED"
+    },
+    "status": "PROPERTY_VERIFIED",
+    "verifier": "property_verify_large_v1"
+  },
+  "version": 1
+}
+=== NO TORCH ===
+NO_TORCH_OK
+=== KARINA EXACT H_FINAL PASS ===
