@@ -1,15 +1,11 @@
 # Stage-1 v1 Approval And Security
 
-Installation requires an explicit `APPROVE` decision with non-empty identity and identity type `USER` or `TRUSTED_SUPERVISOR`.
+Installation requires the workflow `VERIFIED -> VERIFIED_REVIEWED -> APPROVED`. Direct approval from `VERIFIED` is rejected.
 
-The `ApprovalEnvelope` binds:
+The verified review displays the original input, final specification, semantic effect, changed and preserved registers, termination, ordered phases, compiler mode, canonical candidate, static/abstract/property results, full evidence, hashes, version, and limitations. Its deterministic hash binds its complete content.
 
-- proposal ID and content hash;
-- final specification hash;
-- candidate hash;
-- verification-evidence hash;
-- approver identity, type, timestamp, and Stage-1 version.
+`ApprovalEnvelope` binds proposal, specification, candidate, evidence, verified-review, approver identity/type/timestamp, and Stage-1 version. A v1.0.0 approval cannot authorize a v1.0.1 installation. Installation revalidates every binding and reruns property verification.
 
-An edit increments the proposal revision and invalidates existing verification and approval. Installation checks every binding, parses the candidate again, reruns large property verification, and only then persists. Rejection, stale hashes, missing evidence, wrong status, duplicate semantics, deprecated rules, and malformed state fail closed.
+Installation emits an immutable receipt binding the proposal to one rule ID and semantic hash. Service execution requires that receipt and rejects another rule. State, step, and trace limits fail with typed errors; failures are audited without raw state.
 
-Audit records are JSONL events linked by `previous_hash` and `event_hash`. Replay rejects missing, reordered, or modified events.
+Audit events carry the content hashes needed to reconstruct the workflow. The hash chain is tamper-evident for existing records, but deletion of the tail requires an external checkpoint or anchor to detect.

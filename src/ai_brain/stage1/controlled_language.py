@@ -73,6 +73,20 @@ def parse_controlled_language(text: str, language: str | None = None) -> ParseOu
             "language",
         )
     folded = _normalize(text)
+    if _mixed_language(folded, lang):
+        return _out(
+            ProposalStatus.UNSUPPORTED,
+            lang,
+            IssueCode.UNSUPPORTED_OPERATION,
+            "language",
+        )
+    if re.search(r"\bE\b", text, re.IGNORECASE) or _malformed_explicit_answer(folded):
+        return _out(
+            ProposalStatus.CONTRADICTORY,
+            lang,
+            IssueCode.CONTRADICTION,
+            "specification",
+        )
     if re.search(r"\b(copy|duplicate|скопируй|дублируй)\b", folded):
         return _out(
             ProposalStatus.UNSUPPORTED,
@@ -250,25 +264,9 @@ def _preserve(text: str, language: str) -> tuple[bool, tuple[str, ...]]:
     )
     if any(marker in text for marker in none_markers):
         return True, ()
-    patterns = {
-        "en": (
-            r"\bleave\b.*\bunchanged\b",
-            r"\bpreserve\b",
-            r"\bdo not modify\b",
-            r"\bretain\b.*\buntouched\b",
-            r"\bmaintain\b.*\bintact\b",
-        ),
-        "ru": (
-            r"\bне изменяй\b",
-            r"\bсохрани\b.*\bбез изменений\b",
-            r"\bне меняй\b",
-            r"\bсбереги\b.*\bкак есть\b",
-            r"\bподдерживай\b.*\bбез изменений\b",
-        ),
-    }
     for clause in re.split(r"[.;!]+", text):
-        if any(re.search(pattern, clause) for pattern in patterns[language]):
-            roles = _roles(clause)
+        if _contains_flexible(clause, LEXICON[language]["preserve"]):
+            roles = _preserved_roles(clause, LEXICON[language]["preserve"])
             if not roles:
                 roles = _answer_roles(text, "reference")
             return True, roles
@@ -325,17 +323,92 @@ def _partial_actions(
 
 
 def _contradictory(text: str, language: str) -> bool:
-    for role in "ABCD":
-        source = role.casefold()
-        if language == "en":
-            if re.search(
-                rf"(?:move|transfer)[^.;]*\b{source}\b[^.;]*(?:leave|preserve)[^.;]*\b{source}\b",
-                text,
-            ):
-                return True
-        elif re.search(
-            rf"(?:перемести|перенеси)[^.;]*\b{source}\b[^.;]*(?:не изменяй|сохрани)[^.;]*\b{source}\b",
-            text,
+    moved: set[str] = set()
+    dropped: set[str] = set()
+    preserved: set[str] = set()
+    for clause in re.split(r"[.;!]+", text):
+        if _contains(clause, LEXICON[language]["move"]):
+            roles = _roles_after_lexeme(clause, LEXICON[language]["move"])
+            if len(roles) >= 2:
+                sources = roles[:-1]
+                destination = roles[-1]
+                if destination in sources or len(set(sources)) != len(sources):
+                    return True
+                moved.update(sources)
+            elif roles:
+                moved.add(roles[0])
+        if _contains(clause, LEXICON[language]["drop"]):
+            roles = _roles_after_lexeme(clause, LEXICON[language]["drop"])
+            if roles:
+                dropped.add(roles[0])
+        if _contains_flexible(clause, LEXICON[language]["preserve"]):
+            roles = _preserved_roles(clause, LEXICON[language]["preserve"])
+            preserved.update(roles or _answer_roles(text, "reference"))
+    explicit_preserved = set(_answer_roles(text, "preserve"))
+    preserved.update(explicit_preserved)
+    return bool((moved | dropped) & preserved or moved & dropped)
+
+
+def _mixed_language(text: str, language: str) -> bool:
+    other = "ru" if language == "en" else "en"
+    own_terms = tuple(
+        value for values in LEXICON[language].values() for value in values
+    )
+    other_terms = tuple(value for values in LEXICON[other].values() for value in values)
+    return _contains(text, own_terms) and _contains(text, other_terms)
+
+
+def _roles_after_lexeme(text: str, values: tuple[str, ...]) -> list[str]:
+    matches = [
+        match
+        for value in values
+        if (match := re.search(rf"(?<!\w){re.escape(value)}(?!\w)", text))
+    ]
+    if not matches:
+        return []
+    suffix = text[min(matches, key=lambda item: item.start()).end() :]
+    return [item.upper() for item in re.findall(r"\b([a-d])\b", suffix, re.IGNORECASE)]
+
+
+def _contains_flexible(text: str, values: tuple[str, ...]) -> bool:
+    return any(_lexeme_match(text, value) is not None for value in values)
+
+
+def _lexeme_match(text: str, value: str) -> re.Match[str] | None:
+    words = [re.escape(item) for item in value.split()]
+    pattern = r"(?<!\w)" + r"(?!\w).*?".join(words) + r"(?!\w)"
+    return re.search(pattern, text)
+
+
+def _preserved_roles(text: str, values: tuple[str, ...]) -> tuple[str, ...]:
+    for value in values:
+        match = _lexeme_match(text, value)
+        if match is None:
+            continue
+        words = value.split()
+        first = re.search(rf"(?<!\w){re.escape(words[0])}(?!\w)", match.group())
+        last_matches = list(
+            re.finditer(rf"(?<!\w){re.escape(words[-1])}(?!\w)", match.group())
+        )
+        if first is None or not last_matches:
+            continue
+        last = last_matches[-1]
+        middle = _roles(match.group()[first.end() : last.start()])
+        if middle:
+            return middle
+        suffix = _roles(text[match.end() :])
+        if suffix:
+            return suffix
+        prefix = _roles(text[: match.start()])
+        if prefix:
+            return prefix
+    return ()
+
+
+def _malformed_explicit_answer(text: str) -> bool:
+    for key in ("destination", "reference", "preserve", "terminate", "order"):
+        if f"{key}=" in text and not re.search(
+            rf"\b{key}=([a-d](?:\s*,\s*[a-d])*)\b", text, re.IGNORECASE
         ):
             return True
     return False

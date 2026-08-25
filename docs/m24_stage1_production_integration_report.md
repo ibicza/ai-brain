@@ -2,7 +2,7 @@
 
 ## Outcome
 
-Outcome **A**. The deterministic Stage-1 production path passed the local acceptance battery. Release tagging remains conditional on the final remote gate matching the pushed SHA.
+Outcome **A**. This historical M-24 report records the production acceptance that led to released tag `stage1-v1.0.0` at commit `937f1133d17fdae9012308d329534b881cdf6e09`.
 
 ## Source Control
 
@@ -16,7 +16,7 @@ Outcome **A**. The deterministic Stage-1 production path passed the local accept
 - local Windows: `ruff format --check` passed, `ruff check` passed, `360 passed`
 - Karina M-23.1 source verification at `54aafbc0`: `365 passed`, 2 non-failing torch warnings
 - production acceptance: `1267` checks, Outcome A
-- final pushed-SHA Karina gate: required immediately before release tagging
+- released v1.0.0 tag target: `937f1133d17fdae9012308d329534b881cdf6e09`
 
 ## Architecture
 

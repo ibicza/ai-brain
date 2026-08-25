@@ -167,16 +167,22 @@ def run() -> dict:
                         "parse status",
                     )
                     require(parsed.specification == specification, "parse semantics")
-            proposal = service.propose_form(asdict(specification))
+            proposal = service.propose_form(
+                json.loads(json.dumps(asdict(specification)))
+            )
             proposal, _ = service.review(proposal)
             proposal, candidate = service.verify(proposal)
+            proposal, verified_review = service.review_verification(proposal, candidate)
             proposal, approval = service.approve(
                 proposal,
                 candidate,
+                verified_review,
                 identity="m24-acceptance",
                 identity_type="TRUSTED_SUPERVISOR",
             )
-            proposal, record = service.install(proposal, candidate, approval)
+            proposal, record, _ = service.install(
+                proposal, candidate, verified_review, approval
+            )
             rule_ids.append(record.rule_id)
             require(
                 record.rule_id.startswith(f"rule-{index + 1:05d}-"), "deterministic id"
@@ -186,7 +192,7 @@ def run() -> dict:
                 record.rule_id,
                 {"R0": 1000, "R1": 13, "R2": 29, "R3": 71},
             )
-            require(result.actions[-1] == "H", "installed rule execution")
+            require(result.halted and not result.actions, "installed rule execution")
 
         memory = RuleMemory.load(service.memory_path)
         require(len(memory.records) == 89, "all structural rules retained")
@@ -219,7 +225,7 @@ def run() -> dict:
                 record.rule_id,
                 {"R0": 2, "R1": 3, "R2": 4, "R3": 5},
             )
-            require(result.actions[-1] == "H", "execute every active record")
+            require(result.halted and not result.actions, "execute every active record")
         events = service.audit.replay()
         require(bool(events), "audit is non-empty")
         require(events[-1].sequence == len(events), "audit replay sequence")
@@ -279,15 +285,14 @@ def write_outputs(result: dict) -> None:
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     manifest = {
-        "stage1_version": STAGE1_VERSION,
+        "release_version": STAGE1_VERSION,
+        "intended_release_tag": "stage1-v1.0.1",
+        "base_release_tag": "stage1-v1.0.0",
         "controlled_language_version": CONTROLLED_LANGUAGE_VERSION,
         "specification_schema_version": SPECIFICATION_SCHEMA_VERSION,
         "rule_memory_schema_version": RULE_MEMORY_SCHEMA_VERSION,
-        "frozen_backend_tag": "stage1-acquisition-v1",
-        "frozen_backend_sha": "11b573ee46",
-        "m231_source_sha": "54aafbc0fd",
-        "integration_base_sha": result["source_sha"],
-        "final_integration_sha": "git:stage1-v1.0.0^{commit}",
+        "frozen_acquisition_tag": "stage1-acquisition-v1",
+        "frozen_acquisition_sha": "11b573ee46c6df552d6a44b91d4f1712a62b5273",
         "languages": ["ru", "en"],
         "families": [item.value for item in SemanticFamily],
         "primitives": ["MOVE_ONE", "DROP_ONE", "HALT"],
@@ -296,6 +301,11 @@ def write_outputs(result: dict) -> None:
         "policies": {
             "explicit_approval": True,
             "hash_bound_approval": True,
+            "verified_review_required": True,
+            "installed_rule_receipt_required": True,
+            "bounded_execution": True,
+            "bounded_trace": True,
+            "mandatory_rule_memory_checksum": True,
             "atomic_rule_memory": True,
             "append_only_audit": True,
             "cpu_only_trusted_path": True,
@@ -321,25 +331,21 @@ def report_markdown(result: dict) -> str:
 
 ## Outcome
 
-Outcome **{result["outcome"]}**. The deterministic Stage-1 production path passed the local acceptance battery. Release tagging remains conditional on the final remote gate matching the pushed SHA.
+Outcome **{result["outcome"]}**. The deterministic Stage-1 structural and bilingual regression matrix passed at source `{result["source_sha"]}`. M-24.1 release evidence is recorded separately by its two-commit protocol.
 
 ## Source Control
 
 - integration base: annotated tag `stage1-acquisition-v1`, commit `11b573ee46`
 - selectively audited M-23.1 source: commit `54aafbc0fd`
-- integration source SHA used by this generated report: `{result["source_sha"]}`
-- branch: `exp/stage1-v1-integration`
+- source SHA used by this generated report: `{result["source_sha"]}`
 
 ## Checks
 
-- local Windows: `ruff format --check` passed, `ruff check` passed, `360 passed`
-- Karina M-23.1 source verification at `54aafbc0`: `365 passed`, 2 non-failing torch warnings
-- production acceptance: `{result['acceptance_checks']}` checks, Outcome {result['outcome']}
-- final pushed-SHA Karina gate: required immediately before release tagging
+- production acceptance: `{result["acceptance_checks"]}` checks, Outcome {result["outcome"]}
 
 ## Architecture
 
-Trusted form/JSON, canonical DSL, and deterministic controlled RU/EN input produce an immutable proposal. Review precedes property verification. Explicit approval binds proposal, specification, candidate, and evidence hashes. Installation re-verifies and atomically persists to RuleMemory. Execution uses the exact external-state interpreter and appends a hash-chained audit event. The trusted import path does not initialize torch.
+Trusted form/JSON, canonical DSL, and deterministic controlled RU/EN input produce an immutable proposal. Proposal review and verified-bundle review precede hash-bound approval. Installation re-verifies, persists to checksummed RuleMemory, and emits a rule-bound receipt. Production execution is bounded and appends hash-rich success or failure audit evidence. The standalone trusted path does not initialize torch.
 
 ## Acceptance
 
@@ -362,7 +368,7 @@ The RU/EN frontend is a documented controlled language, not open-ended natural-l
 
 ## Recommendation
 
-Freeze Stage 1 after local and remote acceptance agree on the exact pushed commit. Begin Stage 2 as a separate effort; do not widen the frozen Stage-1 grammar or import research neural components into this release line.
+Keep Stage 1 frozen. Begin Stage 2 as a separate effort; do not widen the frozen Stage-1 grammar or import research neural components into this release line.
 """
 
 
