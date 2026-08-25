@@ -140,6 +140,9 @@ def _add_commands(parser: argparse.ArgumentParser) -> None:
     migration.add_argument("--destination", type=Path, required=True)
     migration.add_argument("--evidence-output", type=Path)
 
+    recovery = commands.add_parser("recover-rule-memory")
+    recovery.add_argument("--evidence-output", type=Path)
+
 
 def run_stage1(args: argparse.Namespace) -> int:
     command = args.stage1_command
@@ -149,6 +152,11 @@ def run_stage1(args: argparse.Namespace) -> int:
             _write_json(args.evidence_output, evidence)
         return _print(evidence)
     service = Stage1Service(memory_path=args.memory, audit_path=args.audit)
+    if command == "recover-rule-memory":
+        evidence = service.recover_rule_memory()
+        if args.evidence_output:
+            _write_json(args.evidence_output, evidence)
+        return _print(evidence)
     if command == "language-help":
         print(language_help(args.lang))
         return 0

@@ -213,6 +213,7 @@ class ApprovalEnvelope:
 @dataclass(frozen=True)
 class InstalledRuleReceipt:
     proposal_id: str
+    proposal_revision: int
     proposal_hash: str
     installed_rule_id: str
     rule_semantic_hash: str
@@ -249,6 +250,11 @@ class ExecutionFailureCode(StrEnum):
     UNKNOWN_RULE = "UNKNOWN_RULE"
     RULE_NOT_ACTIVE = "RULE_NOT_ACTIVE"
     RULE_BINDING_MISMATCH = "RULE_BINDING_MISMATCH"
+    RULE_MEMORY_INTEGRITY_FAILURE = "RULE_MEMORY_INTEGRITY_FAILURE"
+    RULE_MEMORY_RECOVERY_FAILURE = "RULE_MEMORY_RECOVERY_FAILURE"
+    RULE_MEMORY_RECOVERY_REQUIRED = "RULE_MEMORY_RECOVERY_REQUIRED"
+    STORED_RULE_PARSE_FAILURE = "STORED_RULE_PARSE_FAILURE"
+    EXECUTION_IO_FAILURE = "EXECUTION_IO_FAILURE"
 
 
 @dataclass(frozen=True)

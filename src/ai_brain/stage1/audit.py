@@ -37,6 +37,15 @@ class AuditEvent:
 
 
 @dataclass(frozen=True)
+class AuditRevision:
+    revision: int
+    status: str
+    valid: bool
+    errors: tuple[str, ...]
+    event_types: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class AuditReconstruction:
     proposal_id: str
     valid: bool
@@ -51,6 +60,42 @@ class AuditReconstruction:
     approval_hash: str | None
     installed_rule_id: str | None
     execution_hashes: tuple[str, ...]
+    active_revision: int | None
+    revisions: tuple[AuditRevision, ...]
+
+
+_REVISION_EVENTS = {
+    "PROPOSAL_RECEIVED",
+    "PROPOSAL_PARSED",
+    "CLARIFICATION_RESOLVED",
+    "PROPOSAL_EDITED_VERIFICATION_INVALIDATED",
+    "PROPOSAL_REVIEWED",
+    "VERIFICATION_FAILED",
+    "CANDIDATE_VERIFIED",
+    "VERIFIED_REVIEWED",
+    "APPROVAL_REJECTED",
+    "PROPOSAL_APPROVED",
+    "RULE_MEMORY_WRITE_FAILED",
+    "RULE_INSTALLED",
+    "EXECUTION_FAILED",
+    "RULE_EXECUTED",
+}
+_EVENT_RANK = {
+    "PROPOSAL_RECEIVED": 0,
+    "PROPOSAL_PARSED": 1,
+    "CLARIFICATION_RESOLVED": 1,
+    "PROPOSAL_EDITED_VERIFICATION_INVALIDATED": 1,
+    "PROPOSAL_REVIEWED": 2,
+    "VERIFICATION_FAILED": 3,
+    "CANDIDATE_VERIFIED": 3,
+    "VERIFIED_REVIEWED": 4,
+    "APPROVAL_REJECTED": 5,
+    "PROPOSAL_APPROVED": 5,
+    "RULE_MEMORY_WRITE_FAILED": 6,
+    "RULE_INSTALLED": 6,
+    "EXECUTION_FAILED": 7,
+    "RULE_EXECUTED": 7,
+}
 
 
 class AuditLog:
@@ -115,39 +160,59 @@ def reconstruct_audit(
     receipt: InstalledRuleReceipt | None = None,
     require_execution: bool = False,
 ) -> AuditReconstruction:
-    """Reconstruct and validate one proposal's content-binding audit history."""
+    """Reconstruct a proposal while preserving and validating every revision."""
     events = [item for item in audit.replay() if item.proposal_id == proposal_id]
     errors: list[str] = []
-    expected = (
-        "PROPOSAL_RECEIVED",
-        "PROPOSAL_PARSED",
-        "PROPOSAL_REVIEWED",
-        "CANDIDATE_VERIFIED",
-        "VERIFIED_REVIEWED",
-        "PROPOSAL_APPROVED",
-        "RULE_INSTALLED",
-    )
-    positions: list[int] = []
-    selected: dict[str, AuditEvent] = {}
-    for event_type in expected:
-        matches = [
-            (index, event)
-            for index, event in enumerate(events)
-            if event.event_type == event_type
-        ]
-        if len(matches) != 1:
-            errors.append(
-                f"{event_type}: expected exactly one event, got {len(matches)}"
-            )
+    grouped: dict[int, list[AuditEvent]] = {}
+    latest_seen = 0
+    for event in events:
+        if event.event_type not in _REVISION_EVENTS:
             continue
-        position, event = matches[0]
-        positions.append(position)
-        selected[event_type] = event
-    if positions != sorted(positions):
-        errors.append("workflow events are reordered")
+        revision = event.payload.get("revision")
+        if isinstance(revision, bool) or not isinstance(revision, int) or revision < 1:
+            errors.append(f"{event.event_type}: missing or malformed revision")
+            continue
+        if revision < latest_seen:
+            errors.append(
+                f"stale revision {revision} event after revision {latest_seen}"
+            )
+        latest_seen = max(latest_seen, revision)
+        grouped.setdefault(revision, []).append(event)
+    active_revision = max(grouped, default=None)
+    if active_revision is None:
+        errors.append("proposal workflow events are missing")
+    elif sorted(grouped) != list(range(1, active_revision + 1)):
+        errors.append("proposal revision sequence has gaps")
 
-    received = selected.get("PROPOSAL_RECEIVED")
-    parsed = selected.get("PROPOSAL_PARSED")
+    revision_rows: list[AuditRevision] = []
+    for revision, revision_events in sorted(grouped.items()):
+        revision_errors = _validate_revision(
+            revision,
+            revision_events,
+            active=revision == active_revision,
+            require_execution=require_execution,
+        )
+        errors.extend(f"revision {revision}: {item}" for item in revision_errors)
+        revision_rows.append(
+            AuditRevision(
+                revision=revision,
+                status="ACTIVE" if revision == active_revision else "SUPERSEDED",
+                valid=not revision_errors,
+                errors=tuple(revision_errors),
+                event_types=tuple(item.event_type for item in revision_events),
+            )
+        )
+
+    active_events = grouped.get(active_revision, [])
+    selected = _successful_events(active_events)
+    received = next(
+        (item for item in events if item.event_type == "PROPOSAL_RECEIVED"), None
+    )
+    parsed = (
+        selected.get("PROPOSAL_PARSED")
+        or selected.get("PROPOSAL_EDITED_VERIFICATION_INVALIDATED")
+        or selected.get("CLARIFICATION_RESOLVED")
+    )
     reviewed = selected.get("PROPOSAL_REVIEWED")
     verified = selected.get("CANDIDATE_VERIFIED")
     verified_reviewed = selected.get("VERIFIED_REVIEWED")
@@ -185,11 +250,9 @@ def reconstruct_audit(
             errors.append("installed rule semantic hash mismatch")
     execution_events = [
         item
-        for item in events
+        for item in active_events
         if item.event_type in {"RULE_EXECUTED", "EXECUTION_FAILED"}
     ]
-    if require_execution and not execution_events:
-        errors.append("execution event is missing")
     execution_hashes: list[str] = []
     for event in execution_events:
         if event.payload.get("rule_id") != rule_id:
@@ -204,6 +267,7 @@ def reconstruct_audit(
     if receipt is not None:
         receipt_values = {
             "proposal_id": receipt.proposal_id,
+            "proposal_revision": receipt.proposal_revision,
             "proposal_hash": receipt.proposal_hash,
             "specification_hash": receipt.specification_hash,
             "candidate_hash": receipt.candidate_hash,
@@ -214,6 +278,7 @@ def reconstruct_audit(
         }
         actual_values = {
             "proposal_id": proposal_id,
+            "proposal_revision": active_revision,
             "proposal_hash": proposal,
             "specification_hash": specification,
             "candidate_hash": candidate,
@@ -225,6 +290,17 @@ def reconstruct_audit(
         for name, value in receipt_values.items():
             if actual_values[name] != value:
                 errors.append(f"receipt {name} mismatch")
+        if rule_id is not None and rule_id in memory.records:
+            try:
+                provenance = json.loads(memory.records[rule_id].provenance)
+            except (TypeError, json.JSONDecodeError):
+                errors.append("installed rule provenance is malformed")
+            else:
+                if (
+                    not isinstance(provenance, dict)
+                    or provenance.get("proposal_revision") != active_revision
+                ):
+                    errors.append("installed rule proposal_revision mismatch")
     return AuditReconstruction(
         proposal_id=proposal_id,
         valid=not errors,
@@ -239,6 +315,112 @@ def reconstruct_audit(
         approval_hash=approval,
         installed_rule_id=rule_id,
         execution_hashes=tuple(execution_hashes),
+        active_revision=active_revision,
+        revisions=tuple(revision_rows),
+    )
+
+
+def _validate_revision(
+    revision: int,
+    events: list[AuditEvent],
+    *,
+    active: bool,
+    require_execution: bool,
+) -> list[str]:
+    errors: list[str] = []
+    event_types = [item.event_type for item in events]
+    starts = (
+        ("PROPOSAL_RECEIVED", "PROPOSAL_PARSED")
+        if revision == 1
+        else (
+            "PROPOSAL_EDITED_VERIFICATION_INVALIDATED",
+            "CLARIFICATION_RESOLVED",
+        )
+    )
+    if revision == 1:
+        for event_type in starts:
+            if event_types.count(event_type) != 1:
+                errors.append(
+                    f"{event_type}: expected exactly one event, got "
+                    f"{event_types.count(event_type)}"
+                )
+    elif sum(event_types.count(item) for item in starts) != 1:
+        errors.append("revision must start with exactly one edit or clarification")
+
+    unique_success = (
+        "PROPOSAL_REVIEWED",
+        "CANDIDATE_VERIFIED",
+        "VERIFIED_REVIEWED",
+        "PROPOSAL_APPROVED",
+        "RULE_INSTALLED",
+    )
+    for event_type in unique_success:
+        count = event_types.count(event_type)
+        if count > 1 or (active and count != 1):
+            errors.append(f"{event_type}: expected exactly one event, got {count}")
+    if (
+        active
+        and require_execution
+        and not any(
+            item in {"RULE_EXECUTED", "EXECUTION_FAILED"} for item in event_types
+        )
+    ):
+        errors.append("execution event is missing")
+
+    ranks = [_EVENT_RANK[item] for item in event_types]
+    if ranks != sorted(ranks):
+        errors.append("workflow events are reordered")
+    _validate_revision_hashes(events, errors)
+    return errors
+
+
+def _successful_events(events: list[AuditEvent]) -> dict[str, AuditEvent | None]:
+    return {
+        event_type: next(
+            (item for item in events if item.event_type == event_type), None
+        )
+        for event_type in _REVISION_EVENTS
+    }
+
+
+def _validate_revision_hashes(events: list[AuditEvent], errors: list[str]) -> None:
+    selected = _successful_events(events)
+    start = (
+        selected.get("PROPOSAL_PARSED")
+        or selected.get("PROPOSAL_EDITED_VERIFICATION_INVALIDATED")
+        or selected.get("CLARIFICATION_RESOLVED")
+    )
+    chain = (
+        start,
+        selected.get("PROPOSAL_REVIEWED"),
+        selected.get("CANDIDATE_VERIFIED"),
+        selected.get("VERIFIED_REVIEWED"),
+        selected.get("PROPOSAL_APPROVED"),
+        selected.get("RULE_INSTALLED"),
+    )
+    _consistent_hash(chain, "proposal_hash", errors)
+    _consistent_hash(chain, "specification_hash", errors)
+    candidate_chain = (
+        selected.get("CANDIDATE_VERIFIED"),
+        selected.get("VERIFIED_REVIEWED"),
+        selected.get("PROPOSAL_APPROVED"),
+        selected.get("RULE_INSTALLED"),
+    )
+    _consistent_hash(candidate_chain, "candidate_hash", errors)
+    _consistent_hash(candidate_chain, "evidence_hash", errors)
+    _consistent_hash(
+        (
+            selected.get("VERIFIED_REVIEWED"),
+            selected.get("PROPOSAL_APPROVED"),
+            selected.get("RULE_INSTALLED"),
+        ),
+        "verified_review_hash",
+        errors,
+    )
+    _consistent_hash(
+        (selected.get("PROPOSAL_APPROVED"), selected.get("RULE_INSTALLED")),
+        "approval_hash",
+        errors,
     )
 
 

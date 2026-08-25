@@ -3,12 +3,23 @@
 from __future__ import annotations
 
 import json
+import uuid
+from collections.abc import Callable
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
 from ai_brain.rules.ast import REG_BINDING, parse_canonical_dsl
-from ai_brain.rules.memory import RuleMemory, RuleRecord
+from ai_brain.rules.memory import (
+    RuleMemory,
+    RuleMemoryIntegrityError,
+    RuleMemoryIOError,
+    RuleMemoryRecoveryError,
+    RuleMemoryRecoveryRequiredError,
+    RuleRecord,
+    StoredRuleParseError,
+    recover_rule_memory,
+)
 from ai_brain.stage1.acquisition import verify_proposal
 from ai_brain.stage1.approval import approve_candidate
 from ai_brain.stage1.audit import AuditLog
@@ -55,9 +66,17 @@ from ai_brain.stage1.version import (
 
 
 class Stage1Service:
-    def __init__(self, *, memory_path: Path, audit_path: Path) -> None:
+    def __init__(
+        self,
+        *,
+        memory_path: Path,
+        audit_path: Path,
+        proposal_id_factory: Callable[[], str] | None = None,
+    ) -> None:
         self.memory_path = memory_path
         self.audit = AuditLog(audit_path)
+        self._proposal_id_factory = proposal_id_factory or _default_proposal_id
+        self._issued_proposal_ids: set[str] = set()
 
     def propose_language(
         self, text: str, *, language: str | None = None
@@ -227,6 +246,7 @@ class Stage1Service:
                 "proposal_hash": proposal_hash(reviewed),
                 "specification_hash": reviewed.specification_hash,
                 "review_hash": content_hash(view),
+                "revision": reviewed.revision,
                 "stage1_version": STAGE1_VERSION,
             },
             reviewed.proposal_id,
@@ -249,7 +269,22 @@ class Stage1Service:
         )
         if canonical is not None and not isinstance(canonical, str):
             raise TypeError("Canonical candidate provenance must be a string")
-        candidate = verify_proposal(verified, canonical_candidate=canonical)
+        try:
+            candidate = verify_proposal(verified, canonical_candidate=canonical)
+        except ValueError as exc:
+            self.audit.append(
+                "VERIFICATION_FAILED",
+                {
+                    "proposal_hash": proposal_hash(verified),
+                    "specification_hash": verified.specification_hash,
+                    "failure_type": type(exc).__name__,
+                    "failure_message_hash": content_hash(str(exc)),
+                    "revision": verified.revision,
+                    "stage1_version": STAGE1_VERSION,
+                },
+                verified.proposal_id,
+            )
+            raise
         self.audit.append(
             "CANDIDATE_VERIFIED",
             {
@@ -258,6 +293,7 @@ class Stage1Service:
                 "candidate_hash": candidate.candidate_hash,
                 "evidence_hash": candidate.evidence_hash,
                 "compiler_name": candidate.compiler_name,
+                "revision": verified.revision,
                 "stage1_version": STAGE1_VERSION,
             },
             verified.proposal_id,
@@ -279,6 +315,7 @@ class Stage1Service:
                 "verified_review_hash": review.review_hash,
                 "candidate_hash": review.candidate_hash,
                 "evidence_hash": review.evidence_hash,
+                "revision": reviewed.revision,
                 "stage1_version": STAGE1_VERSION,
             },
             reviewed.proposal_id,
@@ -311,6 +348,7 @@ class Stage1Service:
                 {
                     "approval_hash": approval_hash(approval),
                     "identity_type": approval.identity_type,
+                    "revision": proposal.revision,
                 },
                 proposal.proposal_id,
             )
@@ -326,6 +364,7 @@ class Stage1Service:
                 "candidate_hash": approval.candidate_hash,
                 "evidence_hash": approval.evidence_hash,
                 "verified_review_hash": approval.verified_review_hash,
+                "revision": approved.revision,
                 "stage1_version": approval.stage1_version,
             },
             approved.proposal_id,
@@ -341,13 +380,32 @@ class Stage1Service:
     ) -> tuple[RuleProposal, RuleRecord, InstalledRuleReceipt]:
         if proposal.status != ProposalStatus.APPROVED:
             raise ValueError("Approval is required before installation")
-        record, receipt = install_candidate(
-            memory_path=self.memory_path,
-            proposal=proposal,
-            candidate=candidate,
-            review=review,
-            approval=approval,
-        )
+        try:
+            record, receipt = install_candidate(
+                memory_path=self.memory_path,
+                proposal=proposal,
+                candidate=candidate,
+                review=review,
+                approval=approval,
+            )
+        except (
+            RuleMemoryIntegrityError,
+            RuleMemoryRecoveryError,
+            RuleMemoryRecoveryRequiredError,
+            RuleMemoryIOError,
+        ) as exc:
+            self.audit.append(
+                "RULE_MEMORY_WRITE_FAILED",
+                {
+                    "failure_code": str(_memory_failure_code(exc)),
+                    "proposal_hash": proposal_hash(proposal),
+                    "specification_hash": proposal.specification_hash,
+                    "revision": proposal.revision,
+                    "stage1_version": STAGE1_VERSION,
+                },
+                proposal.proposal_id,
+            )
+            raise
         installed = proposal.transition(ProposalStatus.INSTALLED)
         self.audit.append(
             "RULE_INSTALLED",
@@ -361,6 +419,7 @@ class Stage1Service:
                 "evidence_hash": receipt.evidence_hash,
                 "verified_review_hash": receipt.verified_review_hash,
                 "approval_hash": receipt.approval_hash,
+                "revision": installed.revision,
                 "stage1_version": STAGE1_VERSION,
             },
             installed.proposal_id,
@@ -395,6 +454,27 @@ class Stage1Service:
                     "failure_code": str(exc.code),
                     "executed_steps": exc.executed_steps,
                     "limits": asdict(actual_limits),
+                    "revision": proposal.revision,
+                    "stage1_version": STAGE1_VERSION,
+                },
+                proposal.proposal_id,
+            )
+            raise
+        except (
+            RuleMemoryIntegrityError,
+            RuleMemoryRecoveryError,
+            RuleMemoryRecoveryRequiredError,
+            RuleMemoryIOError,
+        ) as exc:
+            self.audit.append(
+                "EXECUTION_FAILED",
+                {
+                    "rule_id": rule_id,
+                    "initial_state_hash": content_hash(state),
+                    "failure_code": str(_memory_failure_code(exc)),
+                    "executed_steps": 0,
+                    "limits": asdict(actual_limits),
+                    "revision": proposal.revision,
                     "stage1_version": STAGE1_VERSION,
                 },
                 proposal.proposal_id,
@@ -411,6 +491,7 @@ class Stage1Service:
                 "executed_steps": result.executed_steps,
                 "trace_requested": result.trace_requested,
                 "trace_truncated": result.trace_truncated,
+                "revision": executed.revision,
                 "stage1_version": STAGE1_VERSION,
             },
             proposal.proposal_id,
@@ -430,10 +511,48 @@ class Stage1Service:
     def clarification(self, proposal: RuleProposal) -> ClarificationRequest | None:
         return clarification_for(proposal)
 
+    def recover_rule_memory(self) -> dict[str, Any]:
+        try:
+            _, evidence = recover_rule_memory(self.memory_path)
+        except (
+            RuleMemoryIntegrityError,
+            RuleMemoryRecoveryError,
+            RuleMemoryRecoveryRequiredError,
+            RuleMemoryIOError,
+        ) as exc:
+            self.audit.append(
+                "RULE_MEMORY_RECOVERY_FAILED",
+                {
+                    "failure_code": str(_memory_failure_code(exc)),
+                    "memory_path_hash": content_hash(str(self.memory_path.resolve())),
+                    "stage1_version": STAGE1_VERSION,
+                },
+            )
+            raise
+        self.audit.append(
+            "RULE_MEMORY_RECOVERED",
+            {
+                **evidence,
+                "evidence_hash": content_hash(evidence),
+                "stage1_version": STAGE1_VERSION,
+            },
+        )
+        return evidence
+
     def _received(
         self, source_kind: SourceKind, original: str, language: str | None
     ) -> RuleProposal:
-        identifier = f"proposal-{content_hash({'source_kind': source_kind, 'input': original})[:16]}"
+        identifier = self._proposal_id_factory()
+        if not isinstance(identifier, str) or not identifier.strip():
+            raise ValueError("proposal_id_factory must return a non-empty string")
+        existing_ids = {
+            event.proposal_id
+            for event in self.audit.replay()
+            if event.proposal_id is not None
+        }
+        if identifier in self._issued_proposal_ids or identifier in existing_ids:
+            raise ValueError("proposal_id_factory returned a duplicate proposal ID")
+        self._issued_proposal_ids.add(identifier)
         proposal = RuleProposal(
             identifier,
             source_kind,
@@ -448,6 +567,7 @@ class Stage1Service:
                 "source_kind": str(source_kind),
                 "original_input_hash": content_hash(original),
                 "proposal_id": proposal.proposal_id,
+                "revision": proposal.revision,
                 "stage1_version": STAGE1_VERSION,
             },
             proposal.proposal_id,
@@ -487,6 +607,11 @@ class Stage1Service:
                 ExecutionFailureCode.RULE_BINDING_MISMATCH,
                 "Receipt Stage-1 version mismatch",
             )
+        if receipt.proposal_revision != proposal.revision:
+            raise BoundedExecutionError(
+                ExecutionFailureCode.RULE_BINDING_MISMATCH,
+                "Receipt proposal revision mismatch",
+            )
         if receipt.rule_memory_schema_version != RULE_MEMORY_SCHEMA_VERSION:
             raise BoundedExecutionError(
                 ExecutionFailureCode.RULE_BINDING_MISMATCH,
@@ -525,6 +650,7 @@ class Stage1Service:
             ) from exc
         expected = {
             "proposal_id": receipt.proposal_id,
+            "proposal_revision": receipt.proposal_revision,
             "proposal_hash": receipt.proposal_hash,
             "specification_hash": receipt.specification_hash,
             "candidate_hash": receipt.candidate_hash,
@@ -539,3 +665,19 @@ class Stage1Service:
                 ExecutionFailureCode.RULE_BINDING_MISMATCH,
                 "Receipt does not match installed rule provenance",
             )
+
+
+def _default_proposal_id() -> str:
+    return f"proposal-{uuid.uuid4().hex}"
+
+
+def _memory_failure_code(exc: Exception) -> ExecutionFailureCode:
+    if isinstance(exc, StoredRuleParseError):
+        return ExecutionFailureCode.STORED_RULE_PARSE_FAILURE
+    if isinstance(exc, RuleMemoryRecoveryRequiredError):
+        return ExecutionFailureCode.RULE_MEMORY_RECOVERY_REQUIRED
+    if isinstance(exc, RuleMemoryRecoveryError):
+        return ExecutionFailureCode.RULE_MEMORY_RECOVERY_FAILURE
+    if isinstance(exc, RuleMemoryIOError):
+        return ExecutionFailureCode.EXECUTION_IO_FAILURE
+    return ExecutionFailureCode.RULE_MEMORY_INTEGRITY_FAILURE

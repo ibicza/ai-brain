@@ -125,7 +125,13 @@ def execute_rule(
             ExecutionFailureCode.RULE_NOT_ACTIVE,
             f"Rule {rule_id} is not active and verified",
         )
-    program, _ = parse_canonical_dsl(record.program_json)
+    try:
+        program, _ = parse_canonical_dsl(record.program_json)
+    except (TypeError, ValueError) as exc:
+        raise BoundedExecutionError(
+            ExecutionFailureCode.STORED_RULE_PARSE_FAILURE,
+            f"Stored rule {rule_id} cannot be parsed",
+        ) from exc
     binding = default_binding()
     current = state
     captured: list[str] = []

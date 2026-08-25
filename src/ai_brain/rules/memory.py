@@ -33,6 +33,26 @@ _ROOT_FIELDS = {
 _LEGACY_ROOT_FIELDS = _ROOT_FIELDS - {"content_sha256"}
 
 
+class RuleMemoryIntegrityError(ValueError):
+    """The primary RuleMemory fails trusted schema or checksum validation."""
+
+
+class StoredRuleParseError(RuleMemoryIntegrityError):
+    """A checksummed RuleMemory contains malformed canonical rule DSL."""
+
+
+class RuleMemoryRecoveryError(RuntimeError, ValueError):
+    """Neither the primary nor its designated backup can be trusted."""
+
+
+class RuleMemoryRecoveryRequiredError(RuntimeError):
+    """A write was refused until explicit backup recovery is completed."""
+
+
+class RuleMemoryIOError(OSError):
+    """Expected filesystem I/O prevented a RuleMemory operation."""
+
+
 @dataclass(frozen=True)
 class RuleRecord:
     rule_id: str
@@ -112,26 +132,49 @@ class RuleMemory:
         return record
 
     def save(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            raise RuleMemoryIOError(
+                f"RuleMemory directory creation failed: {path.parent}: {exc}"
+            ) from exc
         rendered = _render(self)
         # Validate the exact bytes before they are eligible to replace anything.
         self._load_text(rendered, source="temporary validation")
         backup = path.with_suffix(path.suffix + ".bak")
         if path.exists():
-            current = path.read_text(encoding="utf-8")
-            self._load_text(current, source="primary before backup")
+            try:
+                current_memory = self.load(path)
+                current = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeError) as exc:
+                raise RuleMemoryRecoveryRequiredError(
+                    "RuleMemory primary is not writable until explicit recovery"
+                ) from exc
+            except (RuleMemoryIntegrityError, RuleMemoryIOError) as exc:
+                raise RuleMemoryRecoveryRequiredError(
+                    "RuleMemory primary is not writable until explicit recovery"
+                ) from exc
+            if current_memory.recovery_source != "primary":
+                raise RuleMemoryRecoveryRequiredError(
+                    "RuleMemory write requires a validated primary"
+                )
             _atomic_write(backup, current)
-            self._load_text(backup.read_text(encoding="utf-8"), source="backup")
+            self.load(backup)
         _atomic_write(path, rendered)
-        self._load_text(path.read_text(encoding="utf-8"), source="saved primary")
+        self.load(path)
 
     @classmethod
     def load(cls, path: Path) -> RuleMemory:
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeError) as exc:
-            raise ValueError(f"Corrupt RuleMemory: {exc}") from exc
-        return cls._load_text(text, source="primary")
+            raise RuleMemoryIOError(f"RuleMemory read failed: {path}: {exc}") from exc
+        try:
+            return cls._load_text(text, source="primary")
+        except RuleMemoryIntegrityError:
+            raise
+        except (TypeError, ValueError, KeyError, IndexError) as exc:
+            raise RuleMemoryIntegrityError(f"Corrupt RuleMemory: {exc}") from exc
 
     @classmethod
     def _load_text(cls, text: str, *, source: str) -> RuleMemory:
@@ -180,7 +223,7 @@ class RuleMemory:
             try:
                 program = parse_canonical_dsl(record.program_json)[0]
             except (TypeError, ValueError) as exc:
-                raise ValueError(
+                raise StoredRuleParseError(
                     f"Corrupt RuleMemory record {index}: malformed AST"
                 ) from exc
             if record.rule_id in memory.records:
@@ -210,19 +253,14 @@ class RuleMemory:
             memory = cls.load(path)
             memory.recovery_source = "primary"
             return memory
-        except (
-            OSError,
-            UnicodeError,
-            TypeError,
-            ValueError,
-            KeyError,
-            IndexError,
-        ) as primary_error:
+        except (RuleMemoryIntegrityError, RuleMemoryIOError) as primary_error:
             backup = path.with_suffix(path.suffix + ".bak")
+            if not backup.exists():
+                raise
             try:
                 memory = cls.load(backup)
-            except Exception as backup_error:
-                raise ValueError(
+            except (RuleMemoryIntegrityError, RuleMemoryIOError) as backup_error:
+                raise RuleMemoryRecoveryError(
                     "RuleMemory recovery failed: both primary and backup are invalid; "
                     f"primary={primary_error}; backup={backup_error}"
                 ) from backup_error
@@ -290,6 +328,55 @@ def migrate_legacy_rule_memory(source: Path, destination: Path) -> dict[str, Any
     }
 
 
+def recover_rule_memory(path: Path) -> tuple[RuleMemory, dict[str, Any]]:
+    """Explicitly restore a corrupt primary from its fully validated backup."""
+    try:
+        RuleMemory.load(path)
+    except (RuleMemoryIntegrityError, RuleMemoryIOError):
+        pass
+    else:
+        raise RuleMemoryRecoveryRequiredError(
+            "RuleMemory recovery refused because the primary is already valid"
+        )
+    backup = path.with_suffix(path.suffix + ".bak")
+    try:
+        backup_memory = RuleMemory.load(backup)
+        corrupt_bytes = path.read_bytes()
+        backup_bytes = backup.read_bytes()
+    except (RuleMemoryIntegrityError, RuleMemoryIOError, OSError) as exc:
+        raise RuleMemoryRecoveryError(
+            f"RuleMemory backup cannot restore the primary: {exc}"
+        ) from exc
+    timestamp = datetime.now(UTC)
+    suffix = timestamp.strftime("%Y%m%dT%H%M%S%fZ")
+    corrupt_path = path.with_name(f"{path.name}.{suffix}.corrupt")
+    _atomic_write_bytes(corrupt_path, corrupt_bytes)
+    _atomic_write_bytes(path, backup_bytes)
+    try:
+        restored = RuleMemory.load(path)
+    except (RuleMemoryIntegrityError, RuleMemoryIOError) as exc:
+        raise RuleMemoryRecoveryError(
+            "Restored RuleMemory primary failed post-write validation"
+        ) from exc
+    if set(restored.records) != set(backup_memory.records):
+        raise RuleMemoryRecoveryError(
+            "Restored RuleMemory record set differs from backup"
+        )
+    evidence = {
+        "primary": str(path),
+        "backup": str(backup),
+        "preserved_corrupt_primary": str(corrupt_path),
+        "corrupt_primary_sha256": hashlib.sha256(corrupt_bytes).hexdigest(),
+        "restored_primary_sha256": hashlib.sha256(backup_bytes).hexdigest(),
+        "backup_sha256": hashlib.sha256(backup_bytes).hexdigest(),
+        "record_count": len(restored.records),
+        "active_rule_count": len(restored.active_records()),
+        "recovered_at": timestamp.isoformat(),
+        "schema_version": RULE_MEMORY_SCHEMA_VERSION,
+    }
+    return restored, evidence
+
+
 def _render(memory: RuleMemory) -> str:
     body = {
         "schema_version": RULE_MEMORY_SCHEMA_VERSION,
@@ -322,20 +409,32 @@ def _digest(body: dict[str, Any]) -> str:
 
 
 def _atomic_write(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temp_name = tempfile.mkstemp(
-        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
-    )
+    _atomic_write_bytes(path, text.encode("utf-8"))
+
+
+def _atomic_write_bytes(path: Path, content: bytes) -> None:
+    temp_name: str | None = None
     try:
-        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as stream:
-            stream.write(text)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temp_name = tempfile.mkstemp(
+            prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+        )
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(content)
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temp_name, path)
         _fsync_directory(path.parent)
+    except OSError as exc:
+        raise RuleMemoryIOError(
+            f"RuleMemory atomic write failed: {path}: {exc}"
+        ) from exc
     finally:
-        if os.path.exists(temp_name):
-            os.unlink(temp_name)
+        if temp_name is not None and os.path.exists(temp_name):
+            try:
+                os.unlink(temp_name)
+            except OSError:
+                pass
 
 
 def _fsync_directory(path: Path) -> None:

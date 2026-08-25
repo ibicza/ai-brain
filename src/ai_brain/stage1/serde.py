@@ -209,6 +209,7 @@ def receipt_from_json(row: dict[str, Any]) -> InstalledRuleReceipt:
     _schema(row)
     return InstalledRuleReceipt(
         proposal_id=_string(row, "proposal_id"),
+        proposal_revision=_positive_int(row, "proposal_revision"),
         proposal_hash=_hash(row, "proposal_hash"),
         installed_rule_id=_string(row, "installed_rule_id"),
         rule_semantic_hash=_hash(row, "rule_semantic_hash"),

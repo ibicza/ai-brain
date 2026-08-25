@@ -18,6 +18,7 @@ from ai_brain.stage1.controlled_language import LEXICON, parse_controlled_langua
 from ai_brain.stage1.execution import BoundedExecutionError, validate_initial_state
 from ai_brain.stage1.models import ExecutionLimits, ProposalStatus
 from ai_brain.stage1.serde import receipt_from_json
+from ai_brain.stage1.service import Stage1Service
 from ai_brain.stage1.specifications import specification_from_dict
 from ai_brain.stage1.version import STAGE1_VERSION
 
@@ -134,6 +135,8 @@ def run() -> dict:
             "legacy migration re-verification",
         )
         require(bool(RuleMemory.load(migrated).records), "migrated memory load")
+        workflow_checks = _revision_and_id_smoke(directory / "workflow")
+        checks += workflow_checks
 
     return {
         "outcome": "A",
@@ -144,6 +147,9 @@ def run() -> dict:
         "standalone_cli": "passed",
         "no_torch": True,
         "rule_memory_migration": "passed",
+        "rule_memory_recovery": "passed",
+        "audit_revision_reconstruction": "passed",
+        "proposal_id_collision_isolation": "passed",
         "elapsed_seconds": round(time.perf_counter() - started, 3),
         "python": sys.version.split()[0],
         "platform": platform.platform(),
@@ -259,6 +265,37 @@ def _standalone_smoke(directory: Path) -> dict[str, int]:
         ]
     )
     _cli([*common, "audit-replay"])
+    _cli(
+        [
+            *common,
+            "audit-reconstruct",
+            "--proposal-id",
+            receipt_row["proposal_id"],
+            "--receipt",
+            str(receipt),
+            "--require-execution",
+        ]
+    )
+    RuleMemory.load(memory).save(memory)
+    corrupt_primary = b"{m241-corrupt-primary\xff"
+    memory.write_bytes(corrupt_primary)
+    recovery_evidence = directory / "recovery-evidence.json"
+    _cli(
+        [
+            *common,
+            "recover-rule-memory",
+            "--evidence-output",
+            str(recovery_evidence),
+        ]
+    )
+    evidence = json.loads(recovery_evidence.read_text(encoding="utf-8"))
+    preserved = Path(evidence["preserved_corrupt_primary"])
+    if preserved.read_bytes() != corrupt_primary:
+        raise AssertionError("recovery did not preserve exact corrupt primary bytes")
+    if not RuleMemory.load(memory).records:
+        raise AssertionError("recovered RuleMemory has no records")
+    if AuditLog(audit).replay()[-1].event_type != "RULE_MEMORY_RECOVERED":
+        raise AssertionError("recovery audit event missing")
     probe = subprocess.run(
         [
             sys.executable,
@@ -278,7 +315,68 @@ def _standalone_smoke(directory: Path) -> dict[str, int]:
         raise AssertionError("standalone execution result mismatch")
     if final_result["captured_actions"] != []:
         raise AssertionError("standalone trace default is not disabled")
-    return {"checks": len(commands) + 5}
+    return {"checks": len(commands) + 12}
+
+
+def _revision_and_id_smoke(directory: Path) -> int:
+    service = Stage1Service(
+        memory_path=directory / "memory.json",
+        audit_path=directory / "audit.jsonl",
+    )
+    text = (
+        "Move every item from A into B; leave C and D unchanged; stop when A is empty."
+    )
+    first = service.propose_language(text, language="en")
+    second = service.propose_language(text, language="en")
+    if first.proposal_id == second.proposal_id:
+        raise AssertionError("identical submissions collided")
+    received = [
+        item
+        for item in service.audit.replay()
+        if item.event_type == "PROPOSAL_RECEIVED"
+    ]
+    if (
+        received[0].payload["original_input_hash"]
+        != received[1].payload["original_input_hash"]
+    ):
+        raise AssertionError("identical inputs have different deterministic hashes")
+
+    first, _ = service.review(first)
+    first, _ = service.verify(first)
+    edited_specification = {
+        "inputs": ["A"],
+        "outputs": ["C"],
+        "transfers": [["A", "C"]],
+        "drops": [],
+        "preserve": ["B", "D"],
+        "terminate_when_empty": ["A"],
+        "allowed_variables": ["A", "B", "C", "D"],
+        "allowed_primitives": ["HALT", "MOVE_ONE"],
+        "phase_constraints": [["MOVE_ONE", "A", "C"]],
+        "unsupported": False,
+    }
+    first = service.edit(first, edited_specification)
+    first, _ = service.review(first)
+    first, candidate = service.verify(first)
+    first, review = service.review_verification(first, candidate)
+    first, approval = service.approve(
+        first, candidate, review, identity="m241-acceptance"
+    )
+    first, _, receipt = service.install(first, candidate, review, approval)
+    reconstruction = reconstruct_audit(
+        service.audit,
+        RuleMemory.load(service.memory_path),
+        first.proposal_id,
+        receipt=receipt,
+    )
+    if not reconstruction.valid:
+        raise AssertionError(f"revision reconstruction: {reconstruction.errors}")
+    if [item.status for item in reconstruction.revisions] != [
+        "SUPERSEDED",
+        "ACTIVE",
+    ]:
+        raise AssertionError("revision statuses are not preserved")
+    return 7
 
 
 def _cli(arguments: list[str]) -> None:

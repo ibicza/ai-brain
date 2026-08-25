@@ -6,7 +6,11 @@ import json
 from pathlib import Path
 
 from ai_brain.rules.ast import parse_canonical_dsl
-from ai_brain.rules.memory import RuleMemory, RuleRecord
+from ai_brain.rules.memory import (
+    RuleMemory,
+    RuleMemoryRecoveryRequiredError,
+    RuleRecord,
+)
 from ai_brain.rules.statuses import VerificationStatus
 from ai_brain.rules.verifier import property_verify
 from ai_brain.stage1.approval import validate_approval
@@ -44,9 +48,14 @@ def install_candidate(
         if memory_path.exists()
         else RuleMemory()
     )
+    if memory.recovery_source.startswith("backup:"):
+        raise RuleMemoryRecoveryRequiredError(
+            "Installation refused until RuleMemory primary is explicitly recovered"
+        )
     provenance = json.dumps(
         {
             "proposal_id": proposal.proposal_id,
+            "proposal_revision": proposal.revision,
             "proposal_hash": proposal_hash(proposal),
             "specification_hash": candidate.specification_hash,
             "source_kind": str(proposal.source_kind),
@@ -72,6 +81,7 @@ def install_candidate(
     memory.save(memory_path)
     receipt = InstalledRuleReceipt(
         proposal_id=proposal.proposal_id,
+        proposal_revision=proposal.revision,
         proposal_hash=proposal_hash(proposal),
         installed_rule_id=record.rule_id,
         rule_semantic_hash=record.semantic_hash,
