@@ -6,6 +6,7 @@ from ai_brain.stage2.models import (
     QuerySourceKind,
     RetrievalMode,
     SearchStatus,
+    SemanticEquivalenceGroup,
     SkillCandidate,
     SkillDispatchReceipt,
     SkillQuery,
@@ -19,6 +20,11 @@ from ai_brain.stage2.registry import (
     SkillRegistryIntegrityError,
     SkillRegistryStaleError,
     rebuild_from_rule_memory,
+)
+from ai_brain.stage2.semantics import (
+    build_equivalence_groups,
+    semantic_effect_hash,
+    semantic_effect_signature,
 )
 from ai_brain.stage2.service import (
     ConfirmationRequiredError,
@@ -37,6 +43,7 @@ __all__ = [
     "QuerySourceKind",
     "RetrievalMode",
     "SearchStatus",
+    "SemanticEquivalenceGroup",
     "SkillCandidate",
     "SkillDispatchError",
     "SkillDispatchReceipt",
@@ -49,6 +56,9 @@ __all__ = [
     "SkillSearchResult",
     "SkillSelectionReceipt",
     "Stage2Router",
+    "build_equivalence_groups",
     "ensure_stage1_compatible",
     "rebuild_from_rule_memory",
+    "semantic_effect_hash",
+    "semantic_effect_signature",
 ]

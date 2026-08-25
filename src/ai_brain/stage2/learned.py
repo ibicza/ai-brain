@@ -24,6 +24,7 @@ from ai_brain.stage1.models import content_hash, utc_now
 from ai_brain.stage2.dataset import load_jsonl, model_visible_text
 from ai_brain.stage2.models import SkillRecord
 from ai_brain.stage2.registry import SkillRegistry
+from ai_brain.stage2.skill_corpora import build_skill_corpus
 
 
 @dataclass(frozen=True)
@@ -37,6 +38,9 @@ class BiEncoderConfig:
     steps: int = 1500
     seed: int = 25_101
     false_known_bound: float = 0.02
+    corpus_condition: str = "rich"
+    hard_negative_weight: float = 0.0
+    hard_negative_margin: float = 0.15
 
 
 class SkillBiEncoder(nn.Module):
@@ -124,7 +128,7 @@ def train_bi_encoder(
     config = config or BiEncoderConfig()
     actual_device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     _seed_everything(config.seed)
-    skill_ids, skill_texts = _skill_corpus(registry)
+    skill_ids, skill_texts = _skill_corpus(registry, config.corpus_condition)
     skill_to_index = {skill_id: index for index, skill_id in enumerate(skill_ids)}
     known_rows = [
         row for row in train_rows if row.get("target_skill_id") in skill_to_index
@@ -144,6 +148,11 @@ def train_bi_encoder(
         dtype=torch.long,
         device=actual_device,
     )
+    hard_targets = torch.tensor(
+        [skill_to_index.get(row.get("neighbor_skill_id"), -1) for row in known_rows],
+        dtype=torch.long,
+        device=actual_device,
+    )
     rng = random.Random(config.seed)
     losses: list[float] = []
     model.train()
@@ -159,6 +168,16 @@ def train_bi_encoder(
         skill_embeddings = model.encode_skills(skill_features)
         logits = query_embeddings @ skill_embeddings.transpose(0, 1)
         loss = nn.functional.cross_entropy(logits / config.temperature, targets)
+        selected_hard = hard_targets.index_select(0, indices)
+        has_hard = selected_hard >= 0
+        if config.hard_negative_weight and bool(has_hard.any()):
+            rows = torch.arange(len(indices), device=actual_device)[has_hard]
+            positive_scores = logits[rows, targets[has_hard]]
+            negative_scores = logits[rows, selected_hard[has_hard]]
+            hard_loss = nn.functional.relu(
+                config.hard_negative_margin - positive_scores + negative_scores
+            ).mean()
+            loss = loss + config.hard_negative_weight * hard_loss
         if not torch.isfinite(loss):
             raise ValueError(f"Non-finite retriever loss at step {step}")
         optimizer.zero_grad(set_to_none=True)
@@ -199,6 +218,8 @@ def train_bi_encoder(
         "final_loss": losses[-1],
         "min_loss": min(losses),
         "threshold": threshold,
+        "corpus_condition": config.corpus_condition,
+        "hard_negative_weight": config.hard_negative_weight,
         "calibration": calibration,
     }
     return retriever, training
@@ -401,7 +422,9 @@ def _score_rows(
             scores = retriever.model.encode_queries(features) @ skill_embeddings.T
         order = torch.argsort(scores, dim=1, descending=True).cpu()
         max_scores = scores.max(dim=1).values.cpu().tolist()
-        for row, ranking, score in zip(batch, order, max_scores, strict=True):
+        for batch_index, (row, ranking, score) in enumerate(
+            zip(batch, order, max_scores, strict=True)
+        ):
             target = row.get("target_skill_id")
             target_index = skill_to_index.get(target)
             rank = (
@@ -409,6 +432,7 @@ def _score_rows(
                 if target_index is not None
                 else 0
             )
+            neighbor_index = skill_to_index.get(row.get("neighbor_skill_id"))
             scored.append(
                 {
                     "query_id": row["query_id"],
@@ -419,6 +443,21 @@ def _score_rows(
                     "prediction": retriever.skill_ids[int(ranking[0])],
                     "rank": rank,
                     "score": float(score),
+                    "target_score": (
+                        float(scores[batch_index, target_index])
+                        if target_index is not None
+                        else None
+                    ),
+                    "neighbor_score": (
+                        float(scores[batch_index, neighbor_index])
+                        if neighbor_index is not None
+                        else None
+                    ),
+                    "evaluation_slice": row.get("evaluation_slice", "UNKNOWN"),
+                    "ambiguous": bool(row.get("ambiguous", False)),
+                    "unknown_family": row.get("unknown_family"),
+                    "changed_field": row.get("changed_field"),
+                    "query_pair_id": row.get("query_pair_id"),
                 }
             )
     return scored
@@ -504,12 +543,10 @@ def _risk_at_coverage(rows: list[dict[str, Any]], coverage: float) -> float:
     )
 
 
-def _skill_corpus(registry: SkillRegistry) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    skills = sorted(registry.active_records(), key=lambda item: item.skill_id)
-    return (
-        tuple(item.skill_id for item in skills),
-        tuple(_skill_text(item) for item in skills),
-    )
+def _skill_corpus(
+    registry: SkillRegistry, condition: str = "rich"
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    return build_skill_corpus(registry.active_records(), condition)
 
 
 def _skill_text(skill: SkillRecord) -> str:

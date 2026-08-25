@@ -29,6 +29,7 @@ from ai_brain.stage2.models import (
     SkillSearchResult,
 )
 from ai_brain.stage2.registry import SkillRegistry, SkillRegistryStaleError
+from ai_brain.stage2.semantics import build_equivalence_groups, semantic_effect_hash
 
 _TOKENS = re.compile(r"[A-Za-zА-Яа-яЁё0-9]+")
 
@@ -181,9 +182,94 @@ def retrieve_structured(
 def retrieve_semantic_signature(
     query: SkillQuery, registry: SkillRegistry, memory: RuleMemory
 ) -> SkillSearchResult:
-    """Trusted semantic-effect lookup over the canonical structured signature."""
-    return retrieve_structured(
-        query, registry, memory, mode=RetrievalMode.EXACT_SEMANTIC
+    """Retrieve one proven effect class and its deterministic representative."""
+    if query.source_kind != QuerySourceKind.STRUCTURED_SPEC:
+        raise ValueError("Semantic retrieval requires a structured query")
+    if query.specification is None:
+        raise ValueError("Semantic retrieval requires ProgramSpecification")
+    if validate_specification(query.specification):
+        return _result(
+            query,
+            registry,
+            memory,
+            RetrievalMode.EXACT_SEMANTIC,
+            SearchStatus.UNSUPPORTED,
+            (),
+            next_action=NextAction.UNSUPPORTED,
+            novel=True,
+        )
+    try:
+        registry.validate_against_rule_memory(memory)
+    except SkillRegistryStaleError:
+        return _result(
+            query,
+            registry,
+            memory,
+            RetrievalMode.EXACT_SEMANTIC,
+            SearchStatus.STALE_REGISTRY,
+            (),
+            next_action=NextAction.UNSUPPORTED,
+        )
+    effect_hash = semantic_effect_hash(query.specification)
+    groups = [
+        item
+        for item in build_equivalence_groups(registry.active_records())
+        if item.semantic_effect_hash == effect_hash
+    ]
+    if not groups:
+        return _result(
+            query,
+            registry,
+            memory,
+            RetrievalMode.EXACT_SEMANTIC,
+            SearchStatus.NO_MATCH,
+            (),
+            next_action=NextAction.RUN_SYNTHESIS,
+            novel=True,
+        )
+    if len(groups) != 1:
+        return _result(
+            query,
+            registry,
+            memory,
+            RetrievalMode.EXACT_SEMANTIC,
+            SearchStatus.AMBIGUOUS_VERSION,
+            (),
+            next_action=NextAction.ASK_CLARIFICATION,
+            ambiguous=True,
+            clarification_target="rule_version",
+        )
+    group = groups[0]
+    canonical = registry.records[group.canonical_skill_id]
+    structural_hash = specification_hash(query.specification)
+    structural_members = tuple(
+        item.skill_id
+        for item in registry.active_records()
+        if item.specification_hash == structural_hash
+    )
+    candidate = replace(
+        _candidate(canonical, 1.0, 1, "semantic_effect_class"),
+        evidence={
+            "type": "semantic_effect_class",
+            "semantic_effect_hash": group.semantic_effect_hash,
+            "canonical_skill_id": group.canonical_skill_id,
+            "member_skill_ids": list(group.member_skill_ids),
+            "member_count": group.member_count,
+            "equivalence_proof_kind": group.equivalence_proof_kind,
+            "order_sensitive": group.order_sensitive,
+            "structural_match_skill_ids": list(structural_members),
+            "structural_identity_differs": canonical.skill_id not in structural_members,
+        },
+    )
+    return _result(
+        query,
+        registry,
+        memory,
+        RetrievalMode.EXACT_SEMANTIC,
+        SearchStatus.EXACT_MATCH,
+        (candidate,),
+        next_action=NextAction.SELECT_EXACT,
+        exact=True,
     )
 
 
@@ -218,12 +304,20 @@ def retrieve_controlled(
         )
     if parsed.status == ProposalStatus.SUPPORTED_FOR_REVIEW and parsed.specification:
         enriched = replace(query, specification=parsed.specification)
-        return retrieve_structured(
+        result = retrieve_structured(
             enriched,
             registry,
             memory,
             mode=RetrievalMode.CONTROLLED_EXACT,
         )
+        # The parsed specification is trusted retrieval evidence, but selection
+        # and dispatch must remain bound to the original user query artifact.
+        result = replace(
+            result,
+            query_hash=content_hash(query),
+            result_hash="0" * 64,
+        )
+        return replace(result, result_hash=_result_content_hash(result))
     status_map = {
         ProposalStatus.CLARIFICATION_REQUIRED: SearchStatus.AMBIGUOUS,
         ProposalStatus.CONTRADICTORY: SearchStatus.CONTRADICTORY,

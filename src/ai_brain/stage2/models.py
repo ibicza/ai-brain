@@ -60,6 +60,7 @@ class SkillRecord:
     rule_id: str
     rule_semantic_hash: str
     specification_hash: str
+    semantic_effect_hash: str
     installed_receipt_hash: str
     rule_version: int
     active: bool
@@ -120,8 +121,29 @@ class SkillRegistryManifest:
     family_counts: dict[str, int]
     alias_count: int
     description_count: int
+    semantic_effect_class_count: int
+    order_sensitive_class_count: int
+    order_insensitive_class_count: int
     created_at: str
     updated_at: str
+
+
+@dataclass(frozen=True)
+class SemanticEquivalenceGroup:
+    semantic_effect_hash: str
+    member_skill_ids: tuple[str, ...]
+    canonical_skill_id: str
+    equivalence_proof_kind: str
+    order_sensitive: bool
+    member_count: int
+
+    def __post_init__(self) -> None:
+        members = tuple(sorted(self.member_skill_ids))
+        object.__setattr__(self, "member_skill_ids", members)
+        if self.member_count != len(members):
+            raise ValueError("semantic equivalence member count mismatch")
+        if self.canonical_skill_id not in members:
+            raise ValueError("canonical skill must be an equivalence member")
 
 
 @dataclass(frozen=True)

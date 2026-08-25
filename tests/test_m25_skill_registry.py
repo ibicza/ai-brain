@@ -20,6 +20,18 @@ from ai_brain.stage2.dataset import (
     model_visible_text,
     verify_blind_freeze,
 )
+from ai_brain.stage2.dispatch_validation import validate_all_skill_dispatches
+from ai_brain.stage2.fair_dataset import (
+    LEXICAL_TRUE_OOD,
+    TEMPLATE_HOLDOUT,
+    generate_fair_query_dataset,
+    semantic_field_difference,
+    verify_fair_blind_freeze,
+)
+from ai_brain.stage2.fair_diagnostics import (
+    diagnose_label_leakage,
+    exact_catalog_substring_rates,
+)
 from ai_brain.stage2.models import (
     ConfirmationDecision,
     RetrievalMode,
@@ -32,8 +44,14 @@ from ai_brain.stage2.registry import (
     SkillRegistryStaleError,
     rebuild_from_rule_memory,
     recover_skill_registry,
+    registry_hash,
 )
 from ai_brain.stage2.retrieval import candidate_list_hash
+from ai_brain.stage2.semantics import (
+    build_equivalence_groups,
+    semantic_effect_hash,
+    semantic_effect_signature,
+)
 from ai_brain.stage2.service import (
     ConfirmationRequiredError,
     SkillDispatchError,
@@ -41,6 +59,7 @@ from ai_brain.stage2.service import (
     validate_dispatch_receipt,
     validate_selection_receipt,
 )
+from ai_brain.stage2.skill_corpora import build_skill_corpus
 from ai_brain.stage2.version import (
     EXPECTED_STAGE1_RELEASE_COMMIT,
     EXPECTED_STAGE1_VERSION,
@@ -67,6 +86,24 @@ def _router(catalog, suffix: str = "main") -> Stage2Router:
         stage1_audit_path=installed.service.audit.path,
         stage2_audit_path=directory / f"stage2-{suffix}.jsonl",
     )
+
+
+@pytest.fixture(scope="module")
+def fair_dataset(catalog, tmp_path_factory: pytest.TempPathFactory):
+    _, _, _, registry, _ = catalog
+    directory = tmp_path_factory.mktemp("m251-fair")
+    manifest = generate_fair_query_dataset(
+        registry,
+        directory,
+        split_counts={
+            "train": 240,
+            "validation": 120,
+            "calibration": 120,
+            "development": 240,
+            "blind": 240,
+        },
+    )
+    return directory, manifest
 
 
 def test_release_dependency_guard() -> None:
@@ -153,6 +190,105 @@ def test_exact_semantic_signature_retrieval_is_trusted(catalog) -> None:
     assert result.retrieval_mode == RetrievalMode.EXACT_SEMANTIC
 
 
+def test_true_semantic_signatures_normalize_only_commuting_merge_phases() -> None:
+    noop_full = build_family_specification(SemanticFamily.NOOP)
+    noop_sparse_metadata = replace(noop_full, preserve=("A",))
+    assert semantic_effect_hash(noop_full) == semantic_effect_hash(noop_sparse_metadata)
+
+    merge_ab = build_family_specification(
+        SemanticFamily.MERGE_TWO, sources=("A", "B"), destination="C"
+    )
+    merge_ba = build_family_specification(
+        SemanticFamily.MERGE_TWO, sources=("B", "A"), destination="C"
+    )
+    assert merge_ab != merge_ba
+    assert semantic_effect_signature(merge_ab) == semantic_effect_signature(merge_ba)
+    assert semantic_effect_hash(merge_ab) == semantic_effect_hash(merge_ba)
+
+    merge_three_abc = build_family_specification(
+        SemanticFamily.MERGE_THREE, sources=("A", "B", "C"), destination="D"
+    )
+    merge_three_cab = build_family_specification(
+        SemanticFamily.MERGE_THREE, sources=("C", "A", "B"), destination="D"
+    )
+    assert semantic_effect_hash(merge_three_abc) == semantic_effect_hash(
+        merge_three_cab
+    )
+
+    drop_ab = build_family_specification(
+        SemanticFamily.DROP_THEN_TRANSFER,
+        sources=("A", "B"),
+        destination="C",
+    )
+    drop_ba = build_family_specification(
+        SemanticFamily.DROP_THEN_TRANSFER,
+        sources=("B", "A"),
+        destination="C",
+    )
+    assert semantic_effect_hash(drop_ab) != semantic_effect_hash(drop_ba)
+
+
+def test_semantic_equivalence_groups_and_canonical_evidence(catalog) -> None:
+    _, _, _, registry, _ = catalog
+    groups = build_equivalence_groups(registry.active_records())
+    assert len(groups) == 57
+    assert registry.manifest.semantic_effect_class_count == 57
+    assert registry.manifest.order_sensitive_class_count == 24
+    assert registry.manifest.order_insensitive_class_count == 33
+    assert sorted(group.member_count for group in groups).count(2) == 12
+    assert sorted(group.member_count for group in groups).count(6) == 4
+
+    router = _router(catalog, "semantic-equivalence")
+    first = build_family_specification(
+        SemanticFamily.MERGE_TWO, sources=("A", "B"), destination="C"
+    )
+    second = build_family_specification(
+        SemanticFamily.MERGE_TWO, sources=("B", "A"), destination="C"
+    )
+    _, first_result = router.search_semantic_signature(
+        first, query_id_factory=lambda: "semantic-merge-first"
+    )
+    _, second_result = router.search_semantic_signature(
+        second, query_id_factory=lambda: "semantic-merge-second"
+    )
+    assert first_result.candidates[0].skill_id == second_result.candidates[0].skill_id
+    assert (
+        first_result.candidates[0].evidence["member_skill_ids"]
+        == second_result.candidates[0].evidence["member_skill_ids"]
+    )
+    evidence = first_result.candidates[0].evidence
+    assert evidence["member_count"] == 2
+    assert evidence["equivalence_proof_kind"] == ("COMMUTING_DRAINS_SAME_DESTINATION")
+    assert not evidence["order_sensitive"]
+    assert len(evidence["structural_match_skill_ids"]) == 1
+
+
+@pytest.mark.parametrize(
+    ("field_name", "bad_value"),
+    [
+        ("skill_count", 88),
+        ("active_skill_count", 88),
+        ("family_counts", {"NOOP": 89}),
+        ("alias_count", 0),
+        ("description_count", 0),
+        ("semantic_effect_class_count", 56),
+        ("order_sensitive_class_count", 23),
+        ("order_insensitive_class_count", 32),
+    ],
+)
+def test_registry_recomputes_every_manifest_count(
+    catalog, field_name: str, bad_value
+) -> None:
+    _, _, memory, registry, _ = catalog
+    changed = replace(
+        registry.manifest, **{field_name: bad_value}, registry_hash="0" * 64
+    )
+    changed = replace(changed, registry_hash=registry_hash(registry.records, changed))
+    corrupted = SkillRegistry(registry.records, changed)
+    with pytest.raises(SkillRegistryStaleError, match=field_name.replace("_", " ")):
+        corrupted.validate_against_rule_memory(memory)
+
+
 def test_all_356_controlled_cases_and_cross_language_equality(catalog) -> None:
     router = _router(catalog, "controlled")
     counter = 0
@@ -174,6 +310,126 @@ def test_all_356_controlled_cases_and_cross_language_equality(catalog) -> None:
                 language_skills[language] = result.candidates[0].skill_id
         assert language_skills["ru"] == language_skills["en"]
     assert counter == 356
+
+
+def test_all_89_skills_complete_dispatch_matrix(catalog, tmp_path: Path) -> None:
+    _, installed, _, registry, _ = catalog
+    result = validate_all_skill_dispatches(installed, registry, tmp_path)
+    assert result["structural_dispatch_success"] == 89
+    assert result["structural_dispatch_total"] == 89
+    assert result["representative_state_checks"] == 42
+    assert result["controlled_ru_en_dispatch_success"] == 12
+
+
+def test_fair_v2_holdouts_are_generation_realities(catalog, fair_dataset) -> None:
+    directory, manifest = fair_dataset
+    train = load_jsonl(directory / "train.jsonl")
+    development = load_jsonl(directory / "development.jsonl")
+    blind_public = load_jsonl(directory / "blind_public.jsonl")
+    blind_targets = load_jsonl(directory / "blind_targets.hidden.jsonl")
+    targets = {row["query_id"]: row for row in blind_targets}
+    blind = [{**row, **targets[row["query_id"]]} for row in blind_public]
+
+    train_text = " ".join(row["text"].casefold() for row in train)
+    preblind_text = " ".join(row["text"].casefold() for row in (*train, *development))
+    for language in LEXICAL_TRUE_OOD.values():
+        for values in language.values():
+            for phrase in values:
+                assert phrase.casefold() not in preblind_text
+    assert not {row["template_id"] for row in train} & set(TEMPLATE_HOLDOUT)
+    assert all(value == 0 for value in manifest.prompt_intersections.values())
+
+    train_targets = {row["target_skill_id"] for row in train if row["known"]}
+    assert not train_targets & set(manifest.zero_query_skill_ids)
+    assert not train_targets & set(manifest.variable_holdout_skill_ids)
+    assert len(manifest.zero_query_skill_ids) >= 18
+
+    for row in train:
+        if row["target_skill_id"] in manifest.ru_train_only_skill_ids:
+            assert row["language"] == "ru"
+        if row["target_skill_id"] in manifest.en_train_only_skill_ids:
+            assert row["language"] == "en"
+    cross = [
+        row
+        for row in (*development, *blind)
+        if row["evaluation_slice"] == "CROSS_LANGUAGE_TRANSFER"
+    ]
+    assert cross
+    assert all(
+        (
+            row["target_skill_id"] in manifest.ru_train_only_skill_ids
+            and row["language"] == "en"
+        )
+        or (
+            row["target_skill_id"] in manifest.en_train_only_skill_ids
+            and row["language"] == "ru"
+        )
+        for row in cross
+    )
+    assert "unsupported" not in train_text
+
+
+def test_fair_v2_true_ood_corpus_and_substring_audits(catalog, fair_dataset) -> None:
+    directory, _ = fair_dataset
+    _, _, _, registry, _ = catalog
+    skills = registry.active_records()
+    corpus_text = "\n".join(
+        text
+        for condition in ("rich", "sanitized", "minimal")
+        for text in build_skill_corpus(skills, condition)[1]
+    ).casefold()
+    for language in LEXICAL_TRUE_OOD.values():
+        for values in language.values():
+            for phrase in values:
+                assert phrase.casefold() not in corpus_text
+    blind_public = load_jsonl(directory / "blind_public.jsonl")
+    audit = exact_catalog_substring_rates(blind_public, skills)
+    assert audit["overall_rate"] == 0.0
+
+
+def test_fair_v2_hard_neighbors_change_one_conceptual_field(
+    catalog, fair_dataset
+) -> None:
+    directory, _ = fair_dataset
+    _, _, _, registry, _ = catalog
+    rows = [
+        row
+        for row in load_jsonl(directory / "development.jsonl")
+        if row["query_kind"] == "hard_neighbor"
+    ]
+    assert rows
+    for row in rows:
+        differences = semantic_field_difference(
+            registry.records[row["target_skill_id"]],
+            registry.records[row["neighbor_skill_id"]],
+        )
+        assert differences == (row["changed_field"],)
+        assert row["counterfactual_text"]
+        assert row["counterfactual_target_skill_id"] == row["neighbor_skill_id"]
+        assert row["counterfactual_text"] != row["text"]
+
+
+def test_fair_v2_blind_freeze_and_leakage_diagnostics(
+    catalog, fair_dataset, tmp_path: Path
+) -> None:
+    directory, _ = fair_dataset
+    _, _, _, registry, _ = catalog
+    verify_fair_blind_freeze(directory)
+    train = load_jsonl(directory / "train.jsonl")
+    development = load_jsonl(directory / "development.jsonl")
+    diagnostics = diagnose_label_leakage(train, development, registry.active_records())
+    assert isinstance(diagnostics["wrapper_only"]["alert"], bool)
+    assert 0.0 <= diagnostics["wrapper_only"]["auroc"] <= 1.0
+    assert diagnostics["exact_catalog_substring"]["overall_rate"] == 0.0
+
+    copied = tmp_path / "freeze"
+    copied.mkdir()
+    for name in ("manifest.json", "blind_public.jsonl", "blind_targets.hidden.jsonl"):
+        (copied / name).write_bytes((directory / name).read_bytes())
+    with (copied / "blind_public.jsonl").open("a", encoding="utf-8") as stream:
+        stream.write("{}\n")
+    with pytest.raises(ValueError, match="Frozen blind artifact changed"):
+        verify_fair_blind_freeze(copied)
 
 
 @pytest.mark.parametrize(

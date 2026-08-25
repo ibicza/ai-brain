@@ -28,6 +28,7 @@ from ai_brain.stage1.specifications import infer_family
 from ai_brain.stage1.version import STAGE1_VERSION
 from ai_brain.stage2.catalog import controlled_command
 from ai_brain.stage2.models import SkillRecord, SkillRegistryManifest
+from ai_brain.stage2.semantics import build_equivalence_groups, semantic_effect_hash
 from ai_brain.stage2.version import (
     SKILL_REGISTRY_SCHEMA_VERSION,
     STAGE2_SCHEMA_VERSION,
@@ -78,6 +79,8 @@ class SkillRegistry:
         errors: list[str] = []
         if self.manifest.stage1_version != STAGE1_VERSION:
             errors.append("incompatible Stage-1 version")
+        if self.manifest.stage2_schema_version != STAGE2_SCHEMA_VERSION:
+            errors.append("incompatible Stage-2 schema")
         actual_memory_hash = rule_memory_hash(memory)
         if self.manifest.rule_memory_hash != actual_memory_hash:
             errors.append("RuleMemory changed after registry build")
@@ -104,13 +107,17 @@ class SkillRegistry:
                 errors.append(f"rule semantic hash mismatch: {skill.skill_id}")
             if specification_hash(rule.specification) != skill.specification_hash:
                 errors.append(f"specification hash mismatch: {skill.skill_id}")
+            if semantic_effect_hash(rule.specification) != skill.semantic_effect_hash:
+                errors.append(f"semantic effect hash mismatch: {skill.skill_id}")
             if rule.version != skill.rule_version:
                 errors.append(f"rule version mismatch: {skill.skill_id}")
             if _binding_hash(skill.provenance, rule) != skill.installed_receipt_hash:
                 errors.append(f"installation binding mismatch: {skill.skill_id}")
             _validate_language_metadata(skill, errors)
-        if len(self.active_records()) != self.manifest.active_skill_count:
-            errors.append("active skill count mismatch")
+        expected_counts = _manifest_counts(self.records)
+        for field_name, expected in expected_counts.items():
+            if getattr(self.manifest, field_name) != expected:
+                errors.append(f"{field_name.replace('_', ' ')} mismatch")
         if registry_hash(self.records, self.manifest) != self.manifest.registry_hash:
             errors.append("registry hash mismatch")
         if errors:
@@ -267,22 +274,14 @@ def _build_manifest(
     created_at: str,
     updated_at: str,
 ) -> SkillRegistryManifest:
+    counts = _manifest_counts(records)
     placeholder = SkillRegistryManifest(
         registry_version=registry_version,
         registry_hash="0" * 64,
         rule_memory_hash=memory_hash,
         stage1_version=STAGE1_VERSION,
         stage2_schema_version=STAGE2_SCHEMA_VERSION,
-        skill_count=len(records),
-        active_skill_count=len(records),
-        family_counts=dict(Counter(item.semantic_family for item in records.values())),
-        alias_count=sum(
-            len(item.aliases_ru) + len(item.aliases_en) for item in records.values()
-        ),
-        description_count=sum(
-            2 + len(item.controlled_examples_ru) + len(item.controlled_examples_en)
-            for item in records.values()
-        ),
+        **counts,
         created_at=created_at,
         updated_at=updated_at,
     )
@@ -293,6 +292,28 @@ def _build_manifest(
         }
     )
     return manifest
+
+
+def _manifest_counts(records: Mapping[str, SkillRecord]) -> dict[str, Any]:
+    active = [item for item in records.values() if item.active and not item.deprecated]
+    groups = build_equivalence_groups(active)
+    return {
+        "skill_count": len(records),
+        "active_skill_count": len(active),
+        "family_counts": dict(Counter(item.semantic_family for item in active)),
+        "alias_count": sum(
+            len(item.aliases_ru) + len(item.aliases_en) for item in records.values()
+        ),
+        "description_count": sum(
+            2 + len(item.controlled_examples_ru) + len(item.controlled_examples_en)
+            for item in records.values()
+        ),
+        "semantic_effect_class_count": len(groups),
+        "order_sensitive_class_count": sum(item.order_sensitive for item in groups),
+        "order_insensitive_class_count": sum(
+            not item.order_sensitive for item in groups
+        ),
+    }
 
 
 def recover_skill_registry(path: Path) -> dict[str, Any]:
@@ -377,6 +398,7 @@ def _skill_from_rule(
         rule_id=rule.rule_id,
         rule_semantic_hash=rule.semantic_hash,
         specification_hash=specification_hash(rule.specification),
+        semantic_effect_hash=semantic_effect_hash(rule.specification),
         installed_receipt_hash=binding_hash,
         rule_version=rule.version,
         active=not rule.deprecated,
@@ -507,6 +529,9 @@ def _manifest_from_json(value: Any) -> SkillRegistryManifest:
         "active_skill_count",
         "alias_count",
         "description_count",
+        "semantic_effect_class_count",
+        "order_sensitive_class_count",
+        "order_insensitive_class_count",
     ):
         item = getattr(manifest, name)
         if isinstance(item, bool) or not isinstance(item, int) or item < 0:
@@ -558,6 +583,7 @@ def _record_from_json(value: Any) -> SkillRecord:
         "rule_id",
         "rule_semantic_hash",
         "specification_hash",
+        "semantic_effect_hash",
         "installed_receipt_hash",
         "canonical_name_ru",
         "canonical_name_en",
@@ -571,6 +597,7 @@ def _record_from_json(value: Any) -> SkillRecord:
     for name in (
         "rule_semantic_hash",
         "specification_hash",
+        "semantic_effect_hash",
         "installed_receipt_hash",
     ):
         if _SHA256.fullmatch(row[name]) is None:
