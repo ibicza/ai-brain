@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from ai_brain.rules.memory import RuleMemory
-from ai_brain.stage1.models import SemanticFamily, content_hash
+from ai_brain.stage1.models import ExecutionLimits, SemanticFamily, content_hash
 from ai_brain.stage1.specifications import build_family_specification
 from ai_brain.stage2.catalog import (
     controlled_command,
@@ -614,6 +614,47 @@ def test_selection_confirmation_dispatch_and_receipt_bindings(catalog) -> None:
             dispatch, initial_state={"R0": 3, "R1": 3, "R2": 4, "R3": 5}
         )
     assert registry.records[candidate.skill_id].rule_id == execution.rule_id
+
+
+def test_semantic_canonical_member_dispatch_and_limit_tamper(catalog) -> None:
+    _, installed, _, _, _ = catalog
+    router = _router(catalog, "semantic-canonical-dispatch")
+    results = []
+    for index, sources in enumerate((("A", "B"), ("B", "A"))):
+        query, result = router.search_semantic_signature(
+            build_family_specification(
+                SemanticFamily.MERGE_TWO, sources=sources, destination="C"
+            ),
+            query_id_factory=lambda i=index: f"semantic-canonical-{i}",
+        )
+        results.append((query, result))
+    query, result = next(
+        item
+        for item in results
+        if item[1].candidates[0].evidence["structural_identity_differs"]
+    )
+    candidate = result.candidates[0]
+    selection = router.confirm_selection(
+        router.prepare_selection(query, result, candidate.skill_id),
+        identity="semantic-operator",
+    )
+    initial_state = {"R0": 2, "R1": 3, "R2": 5, "R3": 7}
+    _, execution, dispatch = router.dispatch(
+        query=query,
+        result=result,
+        selection=selection,
+        proposal=installed.proposals[candidate.rule_id],
+        installed_receipt=installed.receipts[candidate.rule_id],
+        initial_state=initial_state,
+    )
+    assert execution.final_state == {"R0": 0, "R1": 0, "R2": 10, "R3": 7}
+    with pytest.raises(SkillDispatchError, match="hash mismatch"):
+        validate_dispatch_receipt(
+            replace(
+                dispatch,
+                execution_limits=ExecutionLimits(max_execution_steps=99),
+            )
+        )
 
 
 def test_dispatch_rejects_tampering_replay_and_unrelated_rule(catalog) -> None:
