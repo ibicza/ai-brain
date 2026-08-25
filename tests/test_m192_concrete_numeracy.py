@@ -4,6 +4,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+from ai_brain.language.tokenizer import ByteLevelBpeTokenizer
+
 MODULE_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "m192_concrete_numeracy.py"
 )
@@ -28,8 +30,17 @@ def test_quantity_surface_keeps_count_structurally_visible() -> None:
     assert len(m192._object_spans("ITEM X ITEM X ITEM X", "X")) == 3
 
 
-def test_tokenization_audit_has_no_single_aggregate_stick_tokens() -> None:
+def test_tokenization_audit_has_no_single_aggregate_stick_tokens(
+    tmp_path: Path,
+) -> None:
     m192 = _load_module()
+    tokenizer_path = tmp_path / "tokenizer.json"
+    ByteLevelBpeTokenizer.train(
+        ("EMPTY", "ITEM X ITEM X", "ITEM A | ITEM A"),
+        vocab_size=263,
+        min_frequency=1,
+    ).save(tokenizer_path)
+    m192.TOKENIZER_PATH = tokenizer_path
 
     rows = m192.tokenization_audit()
 

@@ -4,6 +4,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+from ai_brain.language.tokenizer import ByteLevelBpeTokenizer
+
 MODULE_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "m192a_cardinality_lab.py"
 )
@@ -19,8 +21,15 @@ def _load_module():
     return module
 
 
-def test_object_count_tokenization_has_no_aggregate_leak() -> None:
+def test_object_count_tokenization_has_no_aggregate_leak(tmp_path: Path) -> None:
     m192a = _load_module()
+    tokenizer_path = tmp_path / "tokenizer.json"
+    ByteLevelBpeTokenizer.train(
+        ("EMPTY", "OBJ_X OBJ_X", "OBJ_A | OBJ_A"),
+        vocab_size=263,
+        min_frequency=1,
+    ).save(tokenizer_path)
+    m192a.TOKENIZER_PATH = tokenizer_path
 
     rows = m192a.tokenization_audit()
 
