@@ -1,7 +1,9 @@
 # Stage-1 v1 RuleMemory
 
-RuleMemory schema version 1 stores canonical programs, concrete semantic hashes, verification status, complete specification, evidence, version, deprecation state, and provenance.
+Schema version 1 stores canonical programs, concrete semantic hashes, verification status, complete specification, evidence, versions, deprecation state, and provenance. `content_sha256` is mandatory. Normal load rejects a missing, malformed, or mismatched checksum, unknown fields, malformed records/specifications/DSL, duplicate IDs, duplicate active semantics, and status/evidence mismatch.
 
-Writes use a same-directory temporary file, flush and `fsync`, then atomic `os.replace`. An existing file is retained as `.bak`. New files include a SHA-256 checksum over canonical content. Loading validates schema, checksum, record shape, canonical DSL, unique IDs, and semantic hashes. `load_with_backup` uses the validated backup only when the primary is corrupt.
+Save renders and validates the future payload before replacement. It writes a same-directory temporary file, flushes and `fsync`s it, atomically replaces the target, and attempts parent-directory `fsync`. Windows filesystems may not support directory `fsync`; that failure is an explicit documented fallback. An existing primary must validate before it becomes a validated `.bak`.
 
-Rule identity is concrete and order-sensitive because `A-D` have fixed external register bindings and ordered phases are observable in execution traces. An active semantic duplicate is rejected. A deprecated rule may be followed by a new semantic version. Deprecated rules cannot execute.
+`load_with_backup` is fail-closed. It uses only a fully valid backup and exposes `recovery_source` as `primary` or `backup:<path>`; if both copies fail it reports both failures.
+
+Checksum-less schema-v1 files are legacy inputs, never normal production inputs. They require explicit migration, strict legacy parsing, active-rule property re-verification, a checksummed destination, a preserved legacy backup, and migration evidence.

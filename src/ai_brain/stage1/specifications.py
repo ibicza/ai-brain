@@ -120,6 +120,8 @@ def validate_specification(specification: ProgramSpecification) -> tuple[str, ..
 
 
 def specification_from_dict(row: dict[str, Any]) -> ProgramSpecification:
+    if not isinstance(row, dict):
+        raise TypeError("ProgramSpecification must be a JSON object")
     expected = {field.name for field in fields(ProgramSpecification)}
     if set(row) != expected:
         raise ValueError(
@@ -128,4 +130,72 @@ def specification_from_dict(row: dict[str, Any]) -> ProgramSpecification:
         )
     if not isinstance(row["unsupported"], bool):
         raise TypeError("unsupported must be bool")
-    return ProgramSpecification(**row)
+    simple_fields = (
+        "inputs",
+        "outputs",
+        "drops",
+        "preserve",
+        "terminate_when_empty",
+        "allowed_variables",
+        "allowed_primitives",
+    )
+    values: dict[str, Any] = {}
+    for field_name in simple_fields:
+        values[field_name] = _strict_string_list(row[field_name], field_name)
+    transfers = _strict_rows(row["transfers"], "transfers", 2)
+    phases = _strict_rows(row["phase_constraints"], "phase_constraints", 3)
+    for index, (action, source, destination) in enumerate(phases):
+        if not isinstance(action, str) or not isinstance(source, str):
+            raise TypeError(f"phase_constraints[{index}] action/source must be strings")
+        if action == "DROP_ONE":
+            if destination is not None:
+                raise TypeError(
+                    f"phase_constraints[{index}] DROP_ONE destination must be null"
+                )
+        elif action == "MOVE_ONE":
+            if not isinstance(destination, str):
+                raise TypeError(
+                    f"phase_constraints[{index}] MOVE_ONE destination must be a string"
+                )
+        else:
+            raise ValueError(
+                f"phase_constraints[{index}] has invalid action {action!r}"
+            )
+    for index, transfer in enumerate(transfers):
+        if any(not isinstance(value, str) for value in transfer):
+            raise TypeError(f"transfers[{index}] values must be strings")
+    if len(set(transfers)) != len(transfers):
+        raise ValueError("transfers contains duplicate rows")
+    if len(set(phases)) != len(phases):
+        raise ValueError("phase_constraints contains duplicate rows")
+    return ProgramSpecification(
+        **values,
+        transfers=transfers,
+        phase_constraints=phases,
+        unsupported=row["unsupported"],
+    )
+
+
+def _strict_string_list(value: Any, field_name: str) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        raise TypeError(f"{field_name} must be a JSON array")
+    if any(not isinstance(item, str) for item in value):
+        raise TypeError(f"{field_name} must contain only strings")
+    if len(set(value)) != len(value):
+        raise ValueError(f"{field_name} contains duplicate values")
+    return tuple(value)
+
+
+def _strict_rows(
+    value: Any, field_name: str, arity: int
+) -> tuple[tuple[Any, ...], ...]:
+    if not isinstance(value, list):
+        raise TypeError(f"{field_name} must be a JSON array")
+    rows: list[tuple[Any, ...]] = []
+    for index, item in enumerate(value):
+        if not isinstance(item, list):
+            raise TypeError(f"{field_name}[{index}] must be a JSON array")
+        if len(item) != arity:
+            raise ValueError(f"{field_name}[{index}] must have exactly {arity} items")
+        rows.append(tuple(item))
+    return tuple(rows)

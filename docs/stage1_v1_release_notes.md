@@ -1,7 +1,9 @@
-# Stage-1 v1.0.0 Release Notes
+# Stage-1 v1 Release Notes
 
-Stage-1 v1.0.0 integrates the frozen verified rule-acquisition backend with deterministic controlled RU/EN input, immutable proposals, bounded clarification, comprehensive review, hash-bound explicit approval, atomic RuleMemory persistence, exact execution, and hash-chained audit replay.
+## v1.0.1
 
-The release includes all 89 structural configurations of the six supported families, strict form and canonical DSL frontends, CLI and service APIs, corruption recovery, concrete/order-sensitive duplicate handling, and CPU-only import validation.
+Stage-1 v1.0.1 hardens the frozen v1.0.0 architecture with bounded state, execution, and trace policies; strict ProgramSpecification and workflow artifact schemas; explicit verified-bundle review; approval binding to the review hash; proposal-to-rule installation receipts; complete audit evidence and failure events; audit reconstruction; mandatory RuleMemory checksums and explicit legacy migration; durable validated writes and explicit backup recovery; full RU/EN synonym contradiction coverage; and a standalone UTF-8 no-torch production CLI.
 
-The neural M-23/M-23.1 frontend is not included in the production trust boundary. The release tag is created only after local and Karina checks pass on the same pushed commit.
+Release evidence uses two commits: the annotated `stage1-v1.0.1` tag targets the exact locally and remotely tested code commit H, while logs and generated evidence live in later evidence-only commit E. No self-referential commit SHA is embedded in H.
+
+The six families, four registers, three primitives, controlled language, compiler, CEGIS budget, and verifier semantics are unchanged.

@@ -41,6 +41,10 @@ def structural_specs():
         yield SemanticFamily.DROP_THEN_TRANSFER, (dropped, source), destination
 
 
+def json_row(value):
+    return json.loads(json.dumps(asdict(value)))
+
+
 def language_command(
     family: SemanticFamily,
     sources: tuple[str, ...],
@@ -205,20 +209,26 @@ def complete_merge(service: Stage1Service):
     )
     proposal, _ = service.review(proposal)
     proposal, candidate = service.verify(proposal)
+    proposal, verified_review = service.review_verification(proposal, candidate)
     proposal, approval = service.approve(
-        proposal, candidate, identity="acceptance-user"
+        proposal, candidate, verified_review, identity="acceptance-user"
     )
-    proposal, record = service.install(proposal, candidate, approval)
-    return proposal, candidate, approval, record
+    proposal, record, receipt = service.install(
+        proposal, candidate, verified_review, approval
+    )
+    return proposal, candidate, verified_review, approval, record, receipt
 
 
 def test_end_to_end_mandatory_example_and_audit(tmp_path: Path) -> None:
     service = Stage1Service(
         memory_path=tmp_path / "memory.json", audit_path=tmp_path / "audit.jsonl"
     )
-    proposal, _, _, record = complete_merge(service)
+    proposal, _, _, _, record, receipt = complete_merge(service)
     proposal, result = service.execute(
-        proposal, record.rule_id, {"R0": 2, "R1": 3, "R2": 4, "R3": 5}
+        proposal,
+        receipt,
+        record.rule_id,
+        {"R0": 2, "R1": 3, "R2": 4, "R3": 5},
     )
     assert result.final_state == {"R0": 0, "R1": 0, "R2": 9, "R3": 5}
     assert proposal.status == ProposalStatus.EXECUTED
@@ -235,7 +245,7 @@ def test_trusted_canonical_dsl_path(tmp_path: Path) -> None:
         SemanticFamily.DRAIN, sources=("C",), destination="A"
     )
     dsl = render_canonical_program(compile_known_family(specification))
-    proposal = service.propose_dsl(dsl, asdict(specification))
+    proposal = service.propose_dsl(dsl, json_row(specification))
     proposal, _ = service.review(proposal)
     proposal, candidate = service.verify(proposal)
     assert candidate.compiler_name == "trusted_canonical_dsl_v1"
@@ -247,7 +257,7 @@ def test_generic_cegis_fallback_is_public_and_verified(tmp_path: Path) -> None:
         memory_path=tmp_path / "memory.json", audit_path=tmp_path / "audit.jsonl"
     )
     specification = build_family_specification(SemanticFamily.CLEAR, sources=("A",))
-    proposal = service.propose_form(asdict(specification))
+    proposal = service.propose_form(json_row(specification))
     proposal = replace(proposal, semantic_family=None)
     proposal, _ = service.review(proposal)
     _, candidate = service.verify(proposal)
@@ -265,36 +275,48 @@ def test_approval_security_rejects_stale_and_tampered_data(tmp_path: Path) -> No
     )
     proposal, _ = service.review(proposal)
     proposal, candidate = service.verify(proposal)
-    approval = approve_candidate(proposal, candidate, identity="reviewer")
+    with pytest.raises(ValueError, match="review is required"):
+        service.approve(proposal, candidate, None, identity="reviewer")
+    proposal, verified_review = service.review_verification(proposal, candidate)
+    approval = approve_candidate(
+        proposal, candidate, verified_review, identity="reviewer"
+    )
     with pytest.raises(ValueError, match="Stale candidate"):
         approve_candidate(
             replace(proposal, revision=proposal.revision + 1),
             candidate,
+            verified_review,
             identity="reviewer",
         )
-    approved, _ = service.approve(proposal, candidate, identity="reviewer")
+    approved, _ = service.approve(
+        proposal, candidate, verified_review, identity="reviewer"
+    )
     with pytest.raises(ValueError, match="candidate_hash mismatch"):
         service.install(
             approved,
             candidate,
+            verified_review,
             replace(approval, candidate_hash="0" * 64),
         )
     with pytest.raises(ValueError, match="evidence_hash mismatch"):
         service.install(
             approved,
             replace(candidate, verification_evidence={"accepted": False}),
+            verified_review,
             approval,
         )
     with pytest.raises(ValueError, match="candidate_hash mismatch"):
         service.install(
             approved,
             replace(candidate, candidate_dsl=candidate.candidate_dsl + "\n"),
+            verified_review,
             approval,
         )
     with pytest.raises(ValueError, match="Explicit APPROVE"):
         service.install(
             approved,
             candidate,
+            verified_review,
             replace(approval, decision="REJECT"),
         )
 
@@ -303,7 +325,7 @@ def test_rule_memory_atomic_backup_corruption_and_recovery(tmp_path: Path) -> No
     service = Stage1Service(
         memory_path=tmp_path / "memory.json", audit_path=tmp_path / "audit.jsonl"
     )
-    _, _, _, record = complete_merge(service)
+    _, _, _, _, record, _ = complete_merge(service)
     memory = RuleMemory.load(service.memory_path)
     memory.save(service.memory_path)
     backup = service.memory_path.with_suffix(".json.bak")

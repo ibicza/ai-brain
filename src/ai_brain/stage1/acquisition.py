@@ -6,7 +6,7 @@ from ai_brain.rules.ast import parse_canonical_dsl, render_canonical_program
 from ai_brain.rules.blackbox import PublicAcquisitionTask, acquire_public_task
 from ai_brain.rules.specifications import ProgramSpecification
 from ai_brain.rules.statuses import VerificationStatus
-from ai_brain.rules.verifier import property_verify
+from ai_brain.rules.verifier import abstract_verify, property_verify, static_verify
 from ai_brain.stage1.known_family_compiler import compile_known_family
 from ai_brain.stage1.models import (
     RuleProposal,
@@ -34,6 +34,8 @@ def verify_proposal(
     else:
         program = _generic_cegis(specification)
         compiler_name = "frozen_public_generic_cegis"
+    static = static_verify(program)
+    abstract = abstract_verify(program)
     verification = property_verify(program, specification, large=True)
     if (
         not verification.accepted
@@ -48,6 +50,9 @@ def verify_proposal(
         "counterexample": verification.counterexample,
         "verifier": "property_verify_large_v1",
         "specification_hash": specification_hash(specification),
+        "static_verification": _verification_row(static),
+        "abstract_verification": _verification_row(abstract),
+        "property_verification": _verification_row(verification),
     }
     return VerifiedCandidateBundle(
         proposal_id=proposal.proposal_id,
@@ -84,3 +89,12 @@ def _generic_cegis(specification: ProgramSpecification):
 
 def known_family_for(value: str | None) -> SemanticFamily | None:
     return SemanticFamily(value) if value else None
+
+
+def _verification_row(result) -> dict:
+    return {
+        "accepted": result.accepted,
+        "status": str(result.status),
+        "reason": result.reason,
+        "counterexample": result.counterexample,
+    }

@@ -1,11 +1,12 @@
 # Stage-1 v1 Limitations
 
-- The language frontend is controlled RU/EN, not unrestricted natural language.
-- Its vocabulary is the frozen train plus extended production vocabulary audited in M-23.1.
-- There are four non-negative integer registers and three exact primitives.
-- The six known families are intentionally narrow.
-- Clarification is bounded to one typed round.
-- Generic CEGIS is budgeted and safely abstains when it cannot verify a candidate.
-- Rule execution is deterministic and can take a number of primitive steps proportional to register contents.
-- Neural language-to-spec models remain research-only and are excluded from the trusted package.
-- Stage-1 v1 does not learn new primitives or change its own grammar at runtime.
+- Exactly four registers, `R0-R3`, represent non-negative integer counts.
+- Exactly three primitives and six controlled semantic families are supported.
+- RU/EN controlled language is finite and programmed, not unrestricted natural language.
+- Neural frontends remain research-only and outside the trusted package.
+- Generic CEGIS has a finite candidate budget.
+- Property verification is scoped to the current DSL and specification semantics.
+- Execution limits are intentionally conservative and reject larger trusted workloads.
+- RuleMemory and audit are single-host, file-based persistence.
+- Atomic replacement and directory durability depend on filesystem guarantees; directory `fsync` may be unavailable on Windows.
+- The audit hash chain cannot prove that its tail was not deleted without an external anchor.
