@@ -1,0 +1,100 @@
+{
+  "blind": {
+    "blind_target_hash": "2048463c83b9da9bad1e778c0b56c316ef134dd83ec5ae37ca507a08514f4e54",
+    "count": 8000,
+    "evidence_hash": "e8503a2b0937b02f510afb1bff16f9216c255ddfa203398c8b0db9e078d67389",
+    "opened_at": "2026-08-26T14:12:12.263908Z",
+    "prediction_hash": "ee77c47fcc87d1346dfb540862ad8dc39c2ec09c25f5da14981a0ac1a304c031",
+    "top1": 0.99125
+  },
+  "calibration": {
+    "by_label": {
+      "CLARIFICATION": 1.0,
+      "COMPOSITE_REQUIRED": 1.0,
+      "FACT_QUERY": 1.0,
+      "SKILL_REQUEST": 0.9338461538461539,
+      "TOOL_REQUEST": 1.0,
+      "UNSUPPORTED": 1.0
+    },
+    "by_slice": {
+      "AMBIGUOUS": 1.0,
+      "COMPOSITE_OOD": 1.0,
+      "CROSS_LANGUAGE": 1.0,
+      "ENTITY_HOLDOUT": 1.0,
+      "HARD_CROSS_DOMAIN": 0.7892156862745098,
+      "ID": 1.0,
+      "LEXICAL_HOLDOUT": 1.0,
+      "PREDICATE_HOLDOUT": 1.0,
+      "SKILL_BINDING_HOLDOUT": 1.0,
+      "TEMPLATE_HOLDOUT": 1.0,
+      "TOOL_ARGUMENT_HOLDOUT": 1.0,
+      "UNKNOWN": 1.0
+    },
+    "coverage": 1.0,
+    "covered_accuracy": 0.98925,
+    "false_exact_authority": 0,
+    "top1": 0.98925
+  },
+  "development": {
+    "character_ngram": {
+      "by_label": {
+        "CLARIFICATION": 1.0,
+        "COMPOSITE_REQUIRED": 1.0,
+        "FACT_QUERY": 1.0,
+        "SKILL_REQUEST": 0.9417781274586939,
+        "TOOL_REQUEST": 0.9985119047619048,
+        "UNSUPPORTED": 1.0
+      },
+      "by_slice": {
+        "AMBIGUOUS": 1.0,
+        "COMPOSITE_OOD": 1.0,
+        "CROSS_LANGUAGE": 1.0,
+        "ENTITY_HOLDOUT": 1.0,
+        "HARD_CROSS_DOMAIN": 0.8271028037383178,
+        "ID": 1.0,
+        "LEXICAL_HOLDOUT": 0.9957356076759062,
+        "PREDICATE_HOLDOUT": 1.0,
+        "SKILL_BINDING_HOLDOUT": 1.0,
+        "TEMPLATE_HOLDOUT": 1.0,
+        "TOOL_ARGUMENT_HOLDOUT": 1.0,
+        "UNKNOWN": 1.0
+      },
+      "coverage": 1.0,
+      "covered_accuracy": 0.9905,
+      "false_exact_authority": 0,
+      "top1": 0.9905
+    },
+    "token_overlap": {
+      "by_label": {
+        "CLARIFICATION": 0.48846153846153845,
+        "COMPOSITE_REQUIRED": 1.0,
+        "FACT_QUERY": 1.0,
+        "SKILL_REQUEST": 1.0,
+        "TOOL_REQUEST": 0.7782738095238095,
+        "UNSUPPORTED": 1.0
+      },
+      "by_slice": {
+        "AMBIGUOUS": 0.48846153846153845,
+        "COMPOSITE_OOD": 1.0,
+        "CROSS_LANGUAGE": 1.0,
+        "ENTITY_HOLDOUT": 1.0,
+        "HARD_CROSS_DOMAIN": 0.822429906542056,
+        "ID": 1.0,
+        "LEXICAL_HOLDOUT": 0.6950959488272921,
+        "PREDICATE_HOLDOUT": 1.0,
+        "SKILL_BINDING_HOLDOUT": 1.0,
+        "TEMPLATE_HOLDOUT": 0.8149882903981265,
+        "TOOL_ARGUMENT_HOLDOUT": 1.0,
+        "UNKNOWN": 1.0
+      },
+      "coverage": 1.0,
+      "covered_accuracy": 0.879625,
+      "false_exact_authority": 0,
+      "top1": 0.879625
+    }
+  },
+  "false_exact_authority": 0,
+  "manifest_hash": "dd2aa0d1ad60113346b5d368f5e2acf0d13fc6c4806c75948eb8135909e92240",
+  "recipe_freeze_hash": "d5f06ca3fda6307d93948eafe710501fbc9dba3cae95f970b60e7f7e215c796c",
+  "status": "PASS"
+}

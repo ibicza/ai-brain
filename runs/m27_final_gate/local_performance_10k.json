@@ -1,0 +1,55 @@
+{
+  "manifest": {
+    "schema_version": 3,
+    "seed": 26000,
+    "entity_count": 1000,
+    "predicate_count": 25,
+    "source_count": 100,
+    "accepted_claim_count": 10000,
+    "temporal_update_count": 1000,
+    "intentional_conflict_count": 500,
+    "claim_retraction_count": 500,
+    "duplicate_support_count": 500,
+    "source_retraction_count": 5,
+    "source_lineage_duplicate_count": 5,
+    "value_kind_counts": {
+      "STRING": 1300,
+      "DECIMAL": 1400,
+      "DATE": 1000,
+      "DATETIME": 1300,
+      "ENTITY_REF": 1400,
+      "QUANTITY": 700,
+      "ENUM": 600,
+      "INTEGER": 1400,
+      "BOOLEAN": 900
+    },
+    "temporal_mode_counts": {
+      "ATEMPORAL": 1300,
+      "EVENT": 5600,
+      "VALID_INTERVAL": 3100
+    },
+    "memory_snapshot_hash": "f5f89ccb5ec9984d2baa53d6633bb9d230d03a8e12f41c49a3731b1065e6ccd6",
+    "ground_truth_hash": "62118589c92885397ad9fa54cefb9be90733f176f72a4ec8d8fa20686eee282b",
+    "generation_seconds": 41.7156740000064,
+    "import_claims_per_second": 239.71804938351147,
+    "python_peak_memory_bytes": 15597975
+  },
+  "latency": {
+    "samples": 100,
+    "INDEXED_SQL_LOOKUP": {
+      "p50_ms": 6.1759,
+      "p95_ms": 7.0464,
+      "p99_ms": 7.207
+    },
+    "END_TO_END_FACT_QUERY": {
+      "p50_ms": 47.0725,
+      "p95_ms": 54.1979,
+      "p99_ms": 58.3981
+    },
+    "UNIFIED_ROUTER_FACT_RESPONSE": {
+      "p50_ms": 60.4936,
+      "p95_ms": 65.7298,
+      "p99_ms": 68.0918
+    }
+  }
+}

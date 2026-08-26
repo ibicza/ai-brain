@@ -1,0 +1,35 @@
+{
+  "schema_version": 3,
+  "seed": 26000,
+  "entity_count": 1000,
+  "predicate_count": 25,
+  "source_count": 200,
+  "accepted_claim_count": 100000,
+  "temporal_update_count": 10000,
+  "intentional_conflict_count": 5000,
+  "claim_retraction_count": 5000,
+  "duplicate_support_count": 5000,
+  "source_retraction_count": 10,
+  "source_lineage_duplicate_count": 10,
+  "value_kind_counts": {
+    "STRING": 13000,
+    "DECIMAL": 14000,
+    "DATE": 10000,
+    "DATETIME": 13000,
+    "ENTITY_REF": 14000,
+    "QUANTITY": 7000,
+    "ENUM": 6000,
+    "INTEGER": 14000,
+    "BOOLEAN": 9000
+  },
+  "temporal_mode_counts": {
+    "ATEMPORAL": 13000,
+    "EVENT": 56000,
+    "VALID_INTERVAL": 31000
+  },
+  "memory_snapshot_hash": "5f896993e266a6d407962536313d1ffd173b9801dbb16f193d87b8ce4e6aff90",
+  "ground_truth_hash": "80d9d60cad10d797893adc6e462e0503a17fe4193d8f20f60286e9bfe2aaba0f",
+  "generation_seconds": 235.4894493430038,
+  "import_claims_per_second": 424.64747477643596,
+  "python_peak_memory_bytes": 143101573
+}

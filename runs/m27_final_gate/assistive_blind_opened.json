@@ -1,0 +1,8 @@
+{
+  "blind_target_hash": "2048463c83b9da9bad1e778c0b56c316ef134dd83ec5ae37ca507a08514f4e54",
+  "count": 8000,
+  "evidence_hash": "e8503a2b0937b02f510afb1bff16f9216c255ddfa203398c8b0db9e078d67389",
+  "opened_at": "2026-08-26T14:12:12.263908Z",
+  "prediction_hash": "ee77c47fcc87d1346dfb540862ad8dc39c2ec09c25f5da14981a0ac1a304c031",
+  "top1": 0.99125
+}

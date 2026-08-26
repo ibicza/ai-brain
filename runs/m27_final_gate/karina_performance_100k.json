@@ -1,0 +1,18 @@
+{
+  "END_TO_END_FACT_QUERY": {
+    "p50_ms": 101.141539,
+    "p95_ms": 107.789383,
+    "p99_ms": 109.431008
+  },
+  "INDEXED_SQL_LOOKUP": {
+    "p50_ms": 4.573697,
+    "p95_ms": 5.447428,
+    "p99_ms": 6.123418
+  },
+  "UNIFIED_ROUTER_FACT_RESPONSE": {
+    "p50_ms": 117.878425,
+    "p95_ms": 121.929248,
+    "p99_ms": 122.901797
+  },
+  "samples": 100
+}
