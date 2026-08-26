@@ -9,6 +9,7 @@ from typing import Any
 from ai_brain.stage2.facts.canonical import canonical_json, validate_interval
 from ai_brain.stage2.facts.memory import FactMemory
 from ai_brain.stage2.facts.models import (
+    ActorIdentityType,
     Cardinality,
     EvidenceLocationKind,
     EvidenceRelation,
@@ -144,7 +145,10 @@ def build_acceptance_pack(root: Path) -> tuple[FactMemory, dict[str, str]]:
         memory, "retracted", "place.06", "note", FactValue.create("STRING", "withdraw")
     )
     memory.retract_claim(
-        claims["retracted"], actor="acceptance", reason="synthetic correction"
+        claims["retracted"],
+        actor="acceptance",
+        actor_identity_type=ActorIdentityType.TRUSTED_PROCESS,
+        reason="synthetic correction",
     )
     claims["source_retracted"] = _commit(
         memory,
@@ -154,7 +158,10 @@ def build_acceptance_pack(root: Path) -> tuple[FactMemory, dict[str, str]]:
         FactValue.create("STRING", "source"),
     )
     memory.retract_source(
-        "source.source-retracted", actor="publisher", reason="synthetic withdrawal"
+        "source.source-retracted",
+        actor="publisher",
+        actor_identity_type=ActorIdentityType.HUMAN,
+        reason="synthetic withdrawal",
     )
     claims["source_unavailable"] = _commit(
         memory,
@@ -167,6 +174,7 @@ def build_acceptance_pack(root: Path) -> tuple[FactMemory, dict[str, str]]:
         "source.source-unavailable",
         status=SourceStatus.UNAVAILABLE,
         actor="operator",
+        actor_identity_type=ActorIdentityType.TRUSTED_PROCESS,
         reason="synthetic outage",
     )
     claims["superseded_old"] = _commit(
@@ -179,6 +187,7 @@ def build_acceptance_pack(root: Path) -> tuple[FactMemory, dict[str, str]]:
         claims["superseded_old"],
         claims["superseded_new"],
         actor="acceptance",
+        actor_identity_type=ActorIdentityType.TRUSTED_PROCESS,
         reason="synthetic replacement",
     )
     for index in range(10, 18):
@@ -340,6 +349,7 @@ def _commit(
         extraction_method=ExtractionMethod.DETERMINISTIC,
         extraction_confidence=Decimal(1),
         reviewer="acceptance-generator",
+        reviewer_identity_type=ActorIdentityType.TRUSTED_PROCESS,
         approved=True,
         evidence_id=f"evidence.{suffix}",
     )
@@ -354,8 +364,14 @@ def _commit(
         evidence_ids=(evidence.evidence_id,),
         proposal_id=f"proposal.{suffix}",
     )
-    memory.prepare_for_review(proposal.proposal_id, reviewer="acceptance-reviewer")
+    memory.prepare_for_review(
+        proposal.proposal_id,
+        reviewer="acceptance-reviewer",
+        reviewer_identity_type=ActorIdentityType.HUMAN,
+    )
     approval = memory.approve_proposal(
-        proposal.proposal_id, reviewer_identity="acceptance-reviewer"
+        proposal.proposal_id,
+        reviewer_identity="acceptance-reviewer",
+        reviewer_identity_type=ActorIdentityType.HUMAN,
     )
     return memory.commit_proposal(proposal.proposal_id, approval.approval_id).claim_id

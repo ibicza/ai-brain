@@ -19,14 +19,20 @@ def render_answer(bundle: FactAnswerBundle, *, language: str = "en") -> str:
                 f"{labels['value']}: {value}",
                 f"{labels['valid']}: [{claim.valid_from or '-inf'}, {claim.valid_to or '+inf'})",
                 f"{labels['recorded']}: [{claim.recorded_at}, {claim.transaction_to or '+inf'})",
-                f"{labels['evidence']}: {claim.evidence_count}",
-                f"{labels['corroboration']}: {claim.independent_source_family_count}",
+                f"{labels['support']}: {len(claim.supporting_evidence_ids)}",
+                f"{labels['contradiction']}: {len(claim.contradicting_evidence_ids)}",
+                f"{labels['corroboration']}: {claim.independent_supporting_source_family_count}",
             )
         )
-        for citation in claim.source_citations:
+        for citation in claim.supporting_source_citations:
             locator = citation["locator"] or "-"
             lines.append(
                 f"{labels['source']}: {citation['title']} | {locator} | {citation['source_id']}"
+            )
+        for citation in claim.contradicting_source_citations:
+            locator = citation["locator"] or "-"
+            lines.append(
+                f"{labels['contradicting_source']}: {citation['title']} | {locator} | {citation['source_id']}"
             )
         if claim.source_retraction_state != "CLEAR":
             lines.append(labels["source_warning"])
@@ -55,9 +61,11 @@ _EN = {
     "value": "Value",
     "valid": "Valid time",
     "recorded": "Transaction time",
-    "evidence": "Evidence count",
+    "support": "Supporting evidence",
+    "contradiction": "Contradicting evidence",
     "corroboration": "Independent source families",
     "source": "Source",
+    "contradicting_source": "Contradicting source",
     "conflict": "Unresolved conflict",
     "warning": "Warning",
     "source_warning": "Warning: a supporting source is stale or retracted",
@@ -69,9 +77,11 @@ _RU = {
     "value": "Значение",
     "valid": "Время применимости",
     "recorded": "Время знания системы",
-    "evidence": "Количество свидетельств",
+    "support": "Поддерживающие свидетельства",
+    "contradiction": "Опровергающие свидетельства",
     "corroboration": "Независимые семейства источников",
     "source": "Источник",
+    "contradicting_source": "Опровергающий источник",
     "conflict": "Неразрешённый конфликт",
     "warning": "Предупреждение",
     "source_warning": "Предупреждение: источник устарел или отозван",

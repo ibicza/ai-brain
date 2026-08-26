@@ -26,18 +26,23 @@ from ai_brain.stage2.facts.canonical import (
     validate_interval,
 )
 from ai_brain.stage2.facts.models import (
+    ActorIdentityType,
     ApprovalDecision,
     ApprovalStatus,
     Cardinality,
     ClaimAnswer,
     ClaimRecord,
+    ClaimState,
     ClaimStatus,
     ConflictGroup,
+    ConflictResolutionEvent,
+    ConflictResolutionKind,
     ConflictResolutionStatus,
     EntityRecord,
     EntityResolution,
     EntityResolutionStatus,
     EntityStatus,
+    EvidenceConflictState,
     EvidenceLocationKind,
     EvidenceRecord,
     EvidenceRelation,
@@ -49,23 +54,28 @@ from ai_brain.stage2.facts.models import (
     PredicateDefinition,
     ProposalSource,
     ProposalStatus,
+    ProvenanceDetailMode,
     QueryStatus,
     ReplayStatus,
     SourceKind,
     SourceRecord,
+    SourceState,
     SourceStatus,
     TemporalMode,
+    TransactionIntervalState,
 )
 from ai_brain.stage2.facts.persistence import FactDatabase, FactMemoryIntegrityError
 from ai_brain.stage2.facts.sources import SourceIntegrityError, extract_evidence
 from ai_brain.stage2.facts.values import FactValue, FactValueKind
 from ai_brain.stage2.facts.version import (
+    FACT_ANSWER_SCHEMA_VERSION,
     FACT_APPROVAL_POLICY_VERSION,
     FACT_MEMORY_SCHEMA_VERSION,
     FACT_RENDERING_VERSION,
 )
 
 _ID = re.compile(r"[A-Za-z][A-Za-z0-9_.:-]{0,127}\Z")
+_RESERVED_MODEL_IDENTITIES = {"ai", "assistant", "model", "self"}
 _WORKFLOW_NEXT = {
     ProposalStatus.RECEIVED: ProposalStatus.PARSED,
     ProposalStatus.PARSED: ProposalStatus.EVIDENCE_ATTACHED,
@@ -416,6 +426,7 @@ class FactMemory:
         extraction_method: ExtractionMethod | str,
         extraction_confidence: Decimal | str,
         reviewer: str | None = None,
+        reviewer_identity_type: ActorIdentityType | str | None = None,
         approved: bool = False,
         evidence_id: str | None = None,
     ) -> EvidenceRecord:
@@ -423,14 +434,14 @@ class FactMemory:
         _validate_id(identifier, "evidence_id")
         method = ExtractionMethod(extraction_method)
         confidence = _confidence_text(extraction_confidence)
-        if (
-            method == ExtractionMethod.MODEL_PROPOSED
-            and approved
-            and (not reviewer or reviewer.casefold() in {"model", "self", "ai"})
-        ):
-            raise FactApprovalError(
-                "model-proposed evidence requires an independent reviewer"
+        if approved:
+            reviewer, actor_type = self._trusted_actor(
+                reviewer,
+                reviewer_identity_type,
+                purpose="evidence review",
             )
+        else:
+            actor_type = _parse_actor_type(reviewer_identity_type)
         with self.database.connect() as connection:
             source = self._source(connection, source_id)
         content = self.database.blobs.read(source.snapshot_hash)
@@ -451,6 +462,7 @@ class FactMemory:
             "extraction_method": method,
             "extraction_confidence": confidence,
             "reviewer": reviewer,
+            "reviewer_identity_type": actor_type,
             "approval_status": ApprovalStatus.APPROVED
             if approved
             else ApprovalStatus.PENDING,
@@ -477,7 +489,9 @@ class FactMemory:
             )
             self.database.append_audit(
                 connection,
-                "EVIDENCE_ADDED",
+                "CONTRADICTING_EVIDENCE_ATTACHED"
+                if record.relation == EvidenceRelation.CONTRADICTS
+                else "EVIDENCE_ADDED",
                 {
                     "evidence_hash": record.evidence_hash,
                     "source_hash": source.record_hash,
@@ -505,18 +519,27 @@ class FactMemory:
             raise SourceIntegrityError("evidence excerpt hash mismatch")
         payload = asdict(evidence)
         digest = payload.pop("evidence_hash")
-        if content_hash(payload) != digest:
-            raise SourceIntegrityError("evidence record hash mismatch")
+        interpreted_hash = content_hash(payload)
+        if interpreted_hash != digest:
+            with self.database.connect() as connection:
+                migrated = self._migration_hash_allows(
+                    connection,
+                    "evidence",
+                    evidence.evidence_id,
+                    digest,
+                    interpreted_hash,
+                )
+            if not migrated:
+                raise SourceIntegrityError("evidence record hash mismatch")
         if require_approved and evidence.approval_status != ApprovalStatus.APPROVED:
             raise FactApprovalError(
                 "unapproved evidence cannot support a trusted claim"
             )
-        if (
-            require_approved
-            and evidence.extraction_method == ExtractionMethod.MODEL_PROPOSED
-            and not evidence.reviewer
+        if require_approved and (
+            not evidence.reviewer
+            or evidence.reviewer_identity_type in {None, ActorIdentityType.MODEL}
         ):
-            raise FactApprovalError("model-proposed evidence lacks independent review")
+            raise FactApprovalError("approved evidence lacks an independent reviewer")
         return evidence
 
     def receive_proposal(
@@ -549,6 +572,8 @@ class FactMemory:
             "valid_to": normalize_temporal(valid_to),
             "source_ids": tuple(sorted(set(source_ids))),
             "evidence_ids": tuple(sorted(set(evidence_ids))),
+            "reviewer_identity": None,
+            "reviewer_identity_type": None,
             "created_at": now,
             "updated_at": now,
             "schema_version": FACT_MEMORY_SCHEMA_VERSION,
@@ -563,10 +588,12 @@ class FactMemory:
         target: ProposalStatus | str,
         *,
         reviewer: str | None = None,
+        reviewer_identity_type: ActorIdentityType | str | None = None,
     ) -> FactProposal:
         requested = ProposalStatus(target)
         with self.database.connect() as connection:
             current = self._latest_proposal(connection, proposal_id)
+        actor_type = current.reviewer_identity_type
         expected = _WORKFLOW_NEXT.get(current.status)
         if requested in _TERMINAL_PROPOSAL_STATUSES:
             if current.status in _TERMINAL_PROPOSAL_STATUSES | {
@@ -587,13 +614,26 @@ class FactMemory:
                 self.verify_evidence(evidence_id, require_approved=True)
         elif requested == ProposalStatus.VALIDATED:
             self._validate_proposal(current)
-        elif requested == ProposalStatus.REVIEWED and not reviewer:
-            raise FactWorkflowError("reviewer identity is required")
+        elif requested == ProposalStatus.REVIEWED:
+            reviewer, actor_type = self._trusted_actor(
+                reviewer,
+                reviewer_identity_type,
+                purpose="proposal review",
+            )
         elif requested in {ProposalStatus.APPROVED, ProposalStatus.COMMITTED}:
             raise FactWorkflowError(
                 "use approve_proposal/commit_proposal for trusted transitions"
             )
-        proposal = self._proposal_revision(current, requested)
+        proposal = self._proposal_revision(
+            current,
+            requested,
+            reviewer_identity=reviewer
+            if requested == ProposalStatus.REVIEWED
+            else current.reviewer_identity,
+            reviewer_identity_type=actor_type
+            if requested == ProposalStatus.REVIEWED
+            else current.reviewer_identity_type,
+        )
         event = {
             ProposalStatus.PARSED: "CLAIM_PARSED",
             ProposalStatus.EVIDENCE_ATTACHED: "CLAIM_EVIDENCE_ATTACHED",
@@ -601,16 +641,32 @@ class FactMemory:
             ProposalStatus.REVIEWED: "CLAIM_REVIEWED",
         }.get(requested, "CLAIM_PROPOSAL_TERMINATED")
         self._store_proposal(
-            proposal, event, extra={"reviewer": reviewer} if reviewer else None
+            proposal,
+            event,
+            extra={
+                "reviewer": reviewer,
+                "reviewer_identity_type": actor_type,
+            }
+            if requested == ProposalStatus.REVIEWED
+            else None,
         )
         return proposal
 
-    def prepare_for_review(self, proposal_id: str, *, reviewer: str) -> FactProposal:
+    def prepare_for_review(
+        self,
+        proposal_id: str,
+        *,
+        reviewer: str,
+        reviewer_identity_type: ActorIdentityType | str,
+    ) -> FactProposal:
         current = self.get_proposal(proposal_id)
         while current.status != ProposalStatus.REVIEWED:
             if current.status == ProposalStatus.VALIDATED:
                 current = self.advance_proposal(
-                    current.proposal_id, ProposalStatus.REVIEWED, reviewer=reviewer
+                    current.proposal_id,
+                    ProposalStatus.REVIEWED,
+                    reviewer=reviewer,
+                    reviewer_identity_type=reviewer_identity_type,
                 )
             else:
                 target = _WORKFLOW_NEXT.get(current.status)
@@ -626,7 +682,7 @@ class FactMemory:
         proposal_id: str,
         *,
         reviewer_identity: str,
-        reviewer_identity_type: str = "HUMAN",
+        reviewer_identity_type: ActorIdentityType | str,
         decision: ApprovalDecision | str = ApprovalDecision.APPROVE,
         contested_approval: bool = False,
     ) -> FactApprovalEnvelope:
@@ -642,11 +698,11 @@ class FactMemory:
             )
         if proposal.status != ProposalStatus.REVIEWED:
             raise FactApprovalError("proposal must be REVIEWED before approval")
-        if (
-            proposal.source == ProposalSource.MODEL_EXTRACTION
-            and reviewer_identity_type == "MODEL"
-        ):
-            raise FactApprovalError("a model-produced proposal cannot approve itself")
+        reviewer_identity, actor_type = self._trusted_actor(
+            reviewer_identity,
+            reviewer_identity_type,
+            purpose="claim approval",
+        )
         chosen = ApprovalDecision(decision)
         if chosen not in {ApprovalDecision.APPROVE, ApprovalDecision.MARK_CONTESTED}:
             terminal = (
@@ -663,6 +719,26 @@ class FactMemory:
         self._validate_proposal(proposal)
         for item in evidence:
             self.verify_evidence(item.evidence_id, require_approved=True)
+        supporting = tuple(
+            item for item in evidence if item.relation == EvidenceRelation.SUPPORTS
+        )
+        non_model_support = tuple(
+            item
+            for item in supporting
+            if next(
+                source for source in sources if source.source_id == item.source_id
+            ).source_kind
+            != SourceKind.MODEL_INFERENCE
+        )
+        if not non_model_support:
+            self._audit_rejection(
+                "MODEL_SOURCE_REQUIRES_INDEPENDENT_SUPPORT",
+                proposal.proposal_id,
+                {"proposal_hash": proposal.proposal_hash},
+            )
+            raise FactApprovalError(
+                "trusted claim requires independently approved non-model support"
+            )
         payload = {
             "approval_id": f"fact_approval_{uuid4().hex}",
             "proposal_id": proposal.proposal_id,
@@ -676,7 +752,11 @@ class FactMemory:
             "source_hashes": tuple(sorted(item.record_hash for item in sources)),
             "evidence_hashes": tuple(sorted(item.evidence_hash for item in evidence)),
             "reviewer_identity": reviewer_identity,
-            "reviewer_identity_type": reviewer_identity_type,
+            "reviewer_identity_type": actor_type,
+            "supporting_evidence_hashes": tuple(
+                sorted(item.evidence_hash for item in supporting)
+            ),
+            "independent_non_model_support": True,
             "decision": chosen,
             "contested_approval": contested_approval,
             "policy_version": FACT_APPROVAL_POLICY_VERSION,
@@ -738,7 +818,7 @@ class FactMemory:
                 self._insert_proposal(connection, committed)
                 self.database.append_audit(
                     connection,
-                    "CLAIM_CORROBORATED",
+                    "CLAIM_EVIDENCE_MERGED",
                     {
                         "proposal_hash": proposal.proposal_hash,
                         "claim_id": claim_id,
@@ -753,9 +833,22 @@ class FactMemory:
                 else ClaimStatus.SUPPORTED
             )
             claim_id = f"claim_{uuid4().hex}"
-            sources = tuple(
-                self._source(connection, self._evidence(connection, item).source_id)
-                for item in proposal.evidence_ids
+            evidence = tuple(
+                self._evidence(connection, item) for item in proposal.evidence_ids
+            )
+            supporting = tuple(
+                item for item in evidence if item.relation == EvidenceRelation.SUPPORTS
+            )
+            contradicting = tuple(
+                item
+                for item in evidence
+                if item.relation == EvidenceRelation.CONTRADICTS
+            )
+            supporting_sources = tuple(
+                self._source(connection, item.source_id) for item in supporting
+            )
+            contradicting_sources = tuple(
+                self._source(connection, item.source_id) for item in contradicting
             )
             payload = {
                 "claim_id": claim_id,
@@ -768,8 +861,23 @@ class FactMemory:
                 "recorded_at": self._now(),
                 "status": status,
                 "evidence_ids": tuple(sorted(proposal.evidence_ids)),
+                "supporting_evidence_ids": tuple(
+                    sorted(item.evidence_id for item in supporting)
+                ),
+                "contradicting_evidence_ids": tuple(
+                    sorted(item.evidence_id for item in contradicting)
+                ),
                 "source_family_support_set": tuple(
-                    sorted({item.source_family for item in sources})
+                    sorted(
+                        {
+                            item.source_family
+                            for item in supporting_sources
+                            if item.source_kind != SourceKind.MODEL_INFERENCE
+                        }
+                    )
+                ),
+                "source_family_contradiction_set": tuple(
+                    sorted({item.source_family for item in contradicting_sources})
                 ),
                 "supersedes_claim_ids": (),
                 "retraction_reason": None,
@@ -804,9 +912,14 @@ class FactMemory:
             )
             self._attach_claim_evidence(connection, claim_id, proposal.evidence_ids)
             connection.execute(
-                "INSERT INTO claim_status_events VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO claim_status_events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 _status_event_values(
-                    claim_id, status, "FACT_MEMORY", None, claim.recorded_at
+                    claim_id,
+                    status,
+                    "FACT_MEMORY",
+                    ActorIdentityType.TRUSTED_PROCESS,
+                    None,
+                    claim.recorded_at,
                 ),
             )
             conflicts = self._create_conflicts(connection, claim)
@@ -835,6 +948,18 @@ class FactMemory:
                     },
                     claim_id,
                 )
+            if contradicting:
+                self.database.append_audit(
+                    connection,
+                    "CLAIM_EVIDENCE_CONTESTED",
+                    {
+                        "claim_hash": claim.canonical_claim_hash,
+                        "contradicting_evidence_hashes": tuple(
+                            sorted(item.evidence_hash for item in contradicting)
+                        ),
+                    },
+                    claim_id,
+                )
             return self._claim(connection, claim_id)
 
     def supersede_claim(
@@ -843,8 +968,14 @@ class FactMemory:
         new_claim_id: str,
         *,
         actor: str,
+        actor_identity_type: ActorIdentityType | str,
         reason: str,
     ) -> None:
+        actor, actor_type = self._trusted_actor(
+            actor,
+            actor_identity_type,
+            purpose="claim supersession",
+        )
         if old_claim_id == new_claim_id:
             raise ValueError("claim cannot supersede itself")
         with self.database.write() as connection:
@@ -859,14 +990,30 @@ class FactMemory:
                 target_claim_id=old_claim_id,
                 relation_type="SUPERSEDES",
                 actor=actor,
+                actor_identity_type=actor_type,
                 reason=reason,
                 recorded_at=recorded_at,
             )
             connection.execute(
-                "INSERT INTO claim_status_events VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO claim_status_events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 _status_event_values(
-                    old_claim_id, ClaimStatus.SUPERSEDED, actor, reason, recorded_at
+                    old_claim_id,
+                    ClaimStatus.SUPERSEDED,
+                    actor,
+                    actor_type,
+                    reason,
+                    recorded_at,
                 ),
+            )
+            self._resolve_conflicts_for_claim_event(
+                connection,
+                old_claim_id,
+                ConflictResolutionKind.CLAIM_SUPERSEDED,
+                actor,
+                actor_type,
+                reason,
+                recorded_at,
+                selected_claim_ids=(new_claim_id,),
             )
             self.database.append_audit(
                 connection,
@@ -875,17 +1022,43 @@ class FactMemory:
                 old_claim_id,
             )
 
-    def retract_claim(self, claim_id: str, *, actor: str, reason: str) -> None:
+    def retract_claim(
+        self,
+        claim_id: str,
+        *,
+        actor: str,
+        actor_identity_type: ActorIdentityType | str,
+        reason: str,
+    ) -> None:
         if not reason.strip():
             raise ValueError("retraction reason is required")
+        actor, actor_type = self._trusted_actor(
+            actor,
+            actor_identity_type,
+            purpose="claim retraction",
+        )
         with self.database.write() as connection:
             self._claim_row(connection, claim_id)
             recorded_at = self._now()
             connection.execute(
-                "INSERT INTO claim_status_events VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO claim_status_events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 _status_event_values(
-                    claim_id, ClaimStatus.RETRACTED, actor, reason, recorded_at
+                    claim_id,
+                    ClaimStatus.RETRACTED,
+                    actor,
+                    actor_type,
+                    reason,
+                    recorded_at,
                 ),
+            )
+            self._resolve_conflicts_for_claim_event(
+                connection,
+                claim_id,
+                ConflictResolutionKind.CLAIM_RETRACTED,
+                actor,
+                actor_type,
+                reason,
+                recorded_at,
             )
             self.database.append_audit(
                 connection,
@@ -894,11 +1067,19 @@ class FactMemory:
                 claim_id,
             )
 
-    def retract_source(self, source_id: str, *, actor: str, reason: str) -> None:
+    def retract_source(
+        self,
+        source_id: str,
+        *,
+        actor: str,
+        actor_identity_type: ActorIdentityType | str,
+        reason: str,
+    ) -> None:
         self.set_source_status(
             source_id,
             status=SourceStatus.RETRACTED,
             actor=actor,
+            actor_identity_type=actor_identity_type,
             reason=reason,
         )
 
@@ -908,11 +1089,17 @@ class FactMemory:
         *,
         status: SourceStatus | str,
         actor: str,
+        actor_identity_type: ActorIdentityType | str,
         reason: str,
     ) -> None:
         if not reason.strip():
             raise ValueError("source status reason is required")
         selected = SourceStatus(status)
+        actor, actor_type = self._trusted_actor(
+            actor,
+            actor_identity_type,
+            purpose="source status change",
+        )
         if selected == SourceStatus.ACTIVE:
             raise ValueError("source reactivation requires a future reviewed policy")
         with self.database.write() as connection:
@@ -923,12 +1110,13 @@ class FactMemory:
                 "source_id": source_id,
                 "status": selected,
                 "actor": actor,
+                "actor_identity_type": actor_type,
                 "reason": reason,
                 "recorded_at": recorded_at,
             }
             event_hash = content_hash(payload)
             connection.execute(
-                "INSERT INTO source_status_events VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO source_status_events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (*payload.values(), event_hash),
             )
             self.database.append_audit(
@@ -936,7 +1124,11 @@ class FactMemory:
                 "SOURCE_RETRACTED"
                 if selected == SourceStatus.RETRACTED
                 else "SOURCE_UNAVAILABLE",
-                {"actor": actor, "reason_hash": content_hash(reason)},
+                {
+                    "actor": actor,
+                    "actor_identity_type": actor_type,
+                    "reason_hash": content_hash(reason),
+                },
                 source_id,
             )
 
@@ -956,6 +1148,7 @@ class FactMemory:
         language: str = "en",
         memory_snapshot: str | None = None,
     ) -> FactQuery:
+        now = self._now()
         payload = {
             "query_id": f"fact_query_{uuid4().hex}",
             "subject": subject,
@@ -963,7 +1156,7 @@ class FactMemory:
             "object_filter": object_filter,
             "qualifier_filters": dict(sorted((qualifier_filters or {}).items())),
             "valid_at": normalize_temporal(valid_at_value),
-            "known_at": normalize_temporal(known_at),
+            "known_at": normalize_temporal(known_at) or now,
             "accepted_statuses": accepted_statuses
             or (
                 ClaimStatus.SUPPORTED,
@@ -975,7 +1168,7 @@ class FactMemory:
             "include_evidence": include_evidence,
             "language": language,
             "memory_snapshot": memory_snapshot,
-            "created_at": self._now(),
+            "created_at": now,
         }
         semantic = dict(payload)
         semantic.pop("query_id")
@@ -1054,25 +1247,51 @@ class FactMemory:
                     for key, value in query.qualifier_filters.items()
                 ):
                     continue
-                evidence_ids = self._claim_evidence_at(
-                    connection, claim.claim_id, known_point
+                supporting, contradicting = self._claim_evidence_by_polarity_at(
+                    connection,
+                    claim.claim_id,
+                    known_point,
                 )
-                claim = replace(claim, evidence_ids=evidence_ids)
+                evidence_ids = tuple(
+                    sorted(item.evidence_id for item in (*supporting, *contradicting))
+                )
+                supporting_sources = tuple(
+                    self._source(connection, item.source_id) for item in supporting
+                )
+                contradicting_sources = tuple(
+                    self._source(connection, item.source_id) for item in contradicting
+                )
                 status = self._claim_status_at(connection, claim.claim_id, known_point)
-                families = {
-                    self._source(
-                        connection, self._evidence(connection, item).source_id
-                    ).source_family
-                    for item in evidence_ids
-                }
+                active_supporting_sources = tuple(
+                    item
+                    for item in supporting_sources
+                    if self._source_status_at(connection, item.source_id, known_point)
+                    == SourceStatus.ACTIVE
+                    and item.source_kind != SourceKind.MODEL_INFERENCE
+                )
+                families = {item.source_family for item in active_supporting_sources}
                 if status == ClaimStatus.SUPPORTED and len(families) >= 2:
                     status = ClaimStatus.CORROBORATED
                 claim = replace(
                     claim,
                     status=status,
+                    evidence_ids=evidence_ids,
+                    supporting_evidence_ids=tuple(
+                        item.evidence_id for item in supporting
+                    ),
+                    contradicting_evidence_ids=tuple(
+                        item.evidence_id for item in contradicting
+                    ),
                     source_family_support_set=tuple(sorted(families)),
+                    source_family_contradiction_set=tuple(
+                        sorted({item.source_family for item in contradicting_sources})
+                    ),
                 )
-                source_state = self._claim_source_state(connection, claim, known_point)
+                source_state = self._claim_support_state(
+                    connection,
+                    supporting_sources,
+                    known_point,
+                )
                 if source_state != "ACTIVE":
                     stale_claims.append(claim)
                     if not query.include_retracted:
@@ -1099,7 +1318,11 @@ class FactMemory:
                     self._build_answer(query, status, snapshot, (), (), ()),
                 )
             conflict_pool = [*visible, *stale_claims]
-            conflicts = self._matching_conflicts(connection, conflict_pool)
+            conflicts = self._matching_conflicts(
+                connection,
+                conflict_pool,
+                known_point,
+            )
             stale_conflict_ids = {
                 claim_id
                 for group in conflicts
@@ -1113,6 +1336,26 @@ class FactMemory:
                     if item.claim_id in stale_conflict_ids
                     and item.claim_id not in {row.claim_id for row in visible}
                 )
+            resolved_history = self._resolved_conflict_history(
+                connection,
+                conflict_pool,
+                known_point,
+            )
+            for group in resolved_history:
+                event = self._conflict_resolution_event_at(
+                    connection,
+                    group.conflict_group_id,
+                    known_point,
+                )
+                if event is None:
+                    continue
+                allowed = set(event.remaining_claim_ids)
+                visible = [
+                    item
+                    for item in visible
+                    if item.claim_id not in set(group.claim_ids)
+                    or item.claim_id in allowed
+                ]
             if conflicts and query.include_conflicts:
                 status = QueryStatus.CONFLICT
                 warnings = ("UNRESOLVED_CONFLICT",) + (
@@ -1128,10 +1371,25 @@ class FactMemory:
                     else QueryStatus.EXACT_SINGLE
                 )
                 warnings = ("CONFLICTS_EXCLUDED",) if conflicts else ()
+                if resolved_history:
+                    warnings += ("RESOLVED_CONFLICT_HISTORY",)
             answers = tuple(
-                self._claim_answer(connection, claim, known_point, bool(conflicts))
+                self._claim_answer(
+                    connection,
+                    claim,
+                    known_point,
+                    bool(conflicts),
+                    include_details=query.include_evidence,
+                )
                 for claim in visible
             )
+            if any(
+                item.evidence_conflict_state == EvidenceConflictState.CONTESTED
+                for item in answers
+            ):
+                warnings += ("CONTRADICTING_EVIDENCE_PRESENT",)
+            if not query.include_evidence:
+                warnings += ("EVIDENCE_DETAILS_OMITTED",)
             bundle = self._build_answer(
                 query,
                 status,
@@ -1139,6 +1397,14 @@ class FactMemory:
                 answers,
                 tuple(item.conflict_group_id for item in conflicts),
                 warnings,
+                conflict_resolution_statuses=tuple(
+                    (item.conflict_group_id, ConflictResolutionStatus.UNRESOLVED)
+                    for item in conflicts
+                )
+                + tuple(
+                    (item.conflict_group_id, ConflictResolutionStatus.RESOLVED)
+                    for item in resolved_history
+                ),
             )
             return self._store_answer(connection, query, bundle)
 
@@ -1159,15 +1425,114 @@ class FactMemory:
                     (claim_id, claim_id),
                 )
             ]
-        return {"claim": asdict(claim), "status_events": states, "relations": relations}
+            evidence_attachments = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT * FROM claim_evidence WHERE claim_id = ? ORDER BY attached_at, evidence_id",
+                    (claim_id,),
+                )
+            ]
+            conflict_resolution_events = [
+                json.loads(row[0])
+                for row in connection.execute(
+                    """SELECT e.payload_json FROM conflict_resolution_events e
+                       JOIN conflict_group_claims c
+                         ON c.conflict_group_id = e.conflict_group_id
+                       WHERE c.claim_id = ? ORDER BY e.recorded_at, e.event_id""",
+                    (claim_id,),
+                )
+            ]
+        return {
+            "claim": asdict(claim),
+            "status_events": states,
+            "relations": relations,
+            "evidence_attachments": evidence_attachments,
+            "conflict_resolution_events": conflict_resolution_events,
+        }
+
+    def get_claim_record(self, claim_id: str) -> ClaimRecord:
+        with self.database.connect() as connection:
+            return self._claim_record(connection, claim_id)
+
+    def get_claim_state(self, claim_id: str) -> ClaimState:
+        return self.get_claim_state_at(claim_id, self._now())
+
+    def get_claim_state_at(self, claim_id: str, known_at: str) -> ClaimState:
+        point = normalize_temporal(known_at)
+        if point is None:
+            raise ValueError("known_at is required")
+        with self.database.connect() as connection:
+            record = self._claim_record(connection, claim_id)
+            supporting, contradicting = self._claim_evidence_by_polarity_at(
+                connection,
+                claim_id,
+                point,
+            )
+            transaction = self.transaction_interval_as_known_at(
+                claim_id,
+                point,
+                connection=connection,
+            )
+            supporting_families = {
+                source.source_family
+                for evidence in supporting
+                if (source := self._source(connection, evidence.source_id)).source_kind
+                != SourceKind.MODEL_INFERENCE
+                and self._source_status_at(connection, source.source_id, point)
+                == SourceStatus.ACTIVE
+            }
+            derived_status = transaction.status
+            if (
+                derived_status == ClaimStatus.SUPPORTED
+                and len(supporting_families) >= 2
+            ):
+                derived_status = ClaimStatus.CORROBORATED
+            return ClaimState(
+                record=record,
+                status=derived_status,
+                transaction=transaction,
+                supporting_evidence_ids=tuple(item.evidence_id for item in supporting),
+                contradicting_evidence_ids=tuple(
+                    item.evidence_id for item in contradicting
+                ),
+                evidence_conflict_state=EvidenceConflictState.CONTESTED
+                if contradicting
+                else EvidenceConflictState.CLEAR,
+            )
 
     def get_claim(self, claim_id: str) -> ClaimRecord:
+        """Compatibility alias returning the explicit current projection."""
         with self.database.connect() as connection:
             return self._claim(connection, claim_id)
 
-    def get_source(self, source_id: str) -> SourceRecord:
+    def get_source_record(self, source_id: str) -> SourceRecord:
         with self.database.connect() as connection:
             return self._source(connection, source_id)
+
+    def get_source_state_at(self, source_id: str, known_at: str) -> SourceState:
+        point = normalize_temporal(known_at)
+        if point is None:
+            raise ValueError("known_at is required")
+        with self.database.connect() as connection:
+            record = self._source(connection, source_id)
+            status, event_hash = self._source_status_projection(
+                connection,
+                source_id,
+                point,
+            )
+            return SourceState(
+                record=record,
+                status=status,
+                known_at=point,
+                status_event_hash=event_hash,
+            )
+
+    def get_source_at(self, source_id: str, known_at: str) -> SourceRecord:
+        state = self.get_source_state_at(source_id, known_at)
+        return replace(state.record, status=state.status)
+
+    def get_source(self, source_id: str) -> SourceRecord:
+        return self.get_source_at(source_id, self._now())
 
     def claims_affected_by_source(self, source_id: str) -> tuple[ClaimRecord, ...]:
         with self.database.connect() as connection:
@@ -1182,14 +1547,135 @@ class FactMemory:
             return tuple(self._claim(connection, row[0]) for row in rows)
 
     def conflicts(self, *, unresolved_only: bool = True) -> tuple[ConflictGroup, ...]:
+        return self.conflicts_at(self._now(), unresolved_only=unresolved_only)
+
+    def conflicts_at(
+        self,
+        known_at: str,
+        *,
+        unresolved_only: bool = True,
+    ) -> tuple[ConflictGroup, ...]:
+        point = normalize_temporal(known_at)
+        if point is None:
+            raise ValueError("known_at is required")
         with self.database.connect() as connection:
-            sql = "SELECT payload_json FROM conflict_groups"
-            if unresolved_only:
-                sql += " WHERE resolution_status = 'UNRESOLVED'"
-            sql += " ORDER BY created_at, conflict_group_id"
-            return tuple(_conflict_from_json(row[0]) for row in connection.execute(sql))
+            rows = connection.execute(
+                "SELECT payload_json FROM conflict_groups WHERE created_at <= ? ORDER BY created_at, conflict_group_id",
+                (point,),
+            )
+            projected = tuple(
+                self._conflict_as_known_at(
+                    connection,
+                    _conflict_from_json(row[0]),
+                    point,
+                )
+                for row in rows
+            )
+            return tuple(
+                item
+                for item in projected
+                if not unresolved_only
+                or item.resolution_status == ConflictResolutionStatus.UNRESOLVED
+            )
+
+    def resolve_conflict(
+        self,
+        conflict_group_id: str,
+        *,
+        resolution_kind: ConflictResolutionKind | str,
+        selected_claim_ids: tuple[str, ...] | list[str],
+        remaining_claim_ids: tuple[str, ...] | list[str],
+        evidence_ids: tuple[str, ...] | list[str],
+        actor_identity: str,
+        actor_identity_type: ActorIdentityType | str,
+        reason: str,
+    ) -> ConflictResolutionEvent:
+        kind = ConflictResolutionKind(resolution_kind)
+        if kind not in {
+            ConflictResolutionKind.MANUAL_RESOLUTION,
+            ConflictResolutionKind.DISMISSED_AS_NOT_CONFLICTING,
+        }:
+            raise FactApprovalError(
+                "claim retraction/supersession resolutions require their reviewed claim event"
+            )
+        actor_identity, actor_type = self._trusted_actor(
+            actor_identity,
+            actor_identity_type,
+            purpose="conflict resolution",
+        )
+        if not reason.strip() or not evidence_ids:
+            self._audit_rejection(
+                "CONFLICT_RESOLUTION_REJECTED",
+                conflict_group_id,
+                {"reason": "resolution requires evidence and reason"},
+            )
+            raise FactApprovalError("manual conflict resolution requires evidence")
+        for evidence_id in evidence_ids:
+            self.verify_evidence(evidence_id, require_approved=True)
+        with self.database.write() as connection:
+            row = connection.execute(
+                "SELECT payload_json FROM conflict_groups WHERE conflict_group_id = ?",
+                (conflict_group_id,),
+            ).fetchone()
+            if row is None:
+                raise KeyError(f"unknown conflict group: {conflict_group_id}")
+            group = self._conflict_as_known_at(
+                connection,
+                _conflict_from_json(row[0]),
+                self._now(),
+            )
+            if group.resolution_status != ConflictResolutionStatus.UNRESOLVED:
+                raise FactWorkflowError("conflict is already resolved")
+            selected = tuple(sorted(set(selected_claim_ids)))
+            remaining = tuple(sorted(set(remaining_claim_ids)))
+            if not {*selected, *remaining} <= set(group.claim_ids):
+                raise ValueError("resolution claims must belong to the conflict group")
+            if not remaining and kind == ConflictResolutionKind.MANUAL_RESOLUTION:
+                raise ValueError("manual resolution must retain at least one claim")
+            self.database.append_audit(
+                connection,
+                "CONFLICT_RESOLUTION_PROPOSED",
+                {
+                    "kind": kind,
+                    "evidence_hashes": tuple(
+                        sorted(
+                            self._evidence(connection, item).evidence_hash
+                            for item in evidence_ids
+                        )
+                    ),
+                },
+                conflict_group_id,
+            )
+            event = self._insert_conflict_resolution_event(
+                connection,
+                group,
+                kind=kind,
+                new_status=ConflictResolutionStatus.RESOLVED,
+                actor_identity=actor_identity,
+                actor_identity_type=actor_type,
+                reason=reason,
+                evidence_ids=tuple(sorted(set(evidence_ids))),
+                selected_claim_ids=selected,
+                remaining_claim_ids=remaining,
+                recorded_at=self._now(),
+            )
+            self.database.append_audit(
+                connection,
+                "CONFLICT_RESOLVED",
+                {"resolution_event_hash": event.event_hash, "kind": kind},
+                conflict_group_id,
+            )
+            return event
 
     def replay_answer(self, bundle: FactAnswerBundle) -> ReplayStatus:
+        if (
+            bundle.fact_memory_schema_version != FACT_MEMORY_SCHEMA_VERSION
+            or bundle.answer_schema_version != FACT_ANSWER_SCHEMA_VERSION
+            or bundle.rendering_version != FACT_RENDERING_VERSION
+        ):
+            raise FactMemoryIntegrityError(
+                "answer receipt requires explicit schema-v2 re-query"
+            )
         payload = asdict(bundle)
         digest = payload.pop("answer_hash")
         if content_hash(payload) != digest:
@@ -1273,6 +1759,7 @@ class FactMemory:
                         "target_claim_id",
                         "relation_type",
                         "actor",
+                        "actor_identity_type",
                         "reason",
                         "recorded_at",
                     ),
@@ -1285,6 +1772,7 @@ class FactMemory:
                         "claim_id",
                         "status",
                         "actor",
+                        "actor_identity_type",
                         "reason",
                         "recorded_at",
                     ),
@@ -1297,6 +1785,7 @@ class FactMemory:
                         "source_id",
                         "status",
                         "actor",
+                        "actor_identity_type",
                         "reason",
                         "recorded_at",
                     ),
@@ -1304,9 +1793,58 @@ class FactMemory:
             ):
                 for row in connection.execute(f"SELECT * FROM {table}"):
                     payload = {field: row[field] for field in fields}
-                    if content_hash(payload) != row[hash_column]:
+                    interpreted_hash = content_hash(payload)
+                    record_id = (
+                        f"{row['claim_id']}:{row['evidence_id']}"
+                        if table == "claim_evidence"
+                        else str(row[fields[0]])
+                    )
+                    if interpreted_hash != row[
+                        hash_column
+                    ] and not self._migration_hash_allows(
+                        connection,
+                        table,
+                        record_id,
+                        str(row[hash_column]),
+                        interpreted_hash,
+                    ):
                         raise FactMemoryIntegrityError(f"{table} row hash mismatch")
+            self._verify_payload_table(
+                connection,
+                "conflict_resolution_events",
+                "event_hash",
+                "event_hash",
+            )
+            for row in connection.execute(
+                """SELECT ce.relation, e.payload_json FROM claim_evidence ce
+                   JOIN evidence e ON e.evidence_id = ce.evidence_id"""
+            ):
+                if EvidenceRelation(row[0]) != _evidence_from_json(row[1]).relation:
+                    raise FactMemoryIntegrityError(
+                        "claim evidence polarity does not match immutable evidence"
+                    )
+            for row in connection.execute("SELECT * FROM migration_record_hashes"):
+                if not re.fullmatch(
+                    r"[0-9a-f]{64}", row["source_hash"]
+                ) or not re.fullmatch(r"[0-9a-f]{64}", row["interpreted_v2_hash"]):
+                    raise FactMemoryIntegrityError("migration record hash is invalid")
         return result
+
+    @staticmethod
+    def _migration_hash_allows(
+        connection: sqlite3.Connection,
+        table: str,
+        record_id: str,
+        source_hash: str,
+        interpreted_hash: str,
+    ) -> bool:
+        row = connection.execute(
+            """SELECT 1 FROM migration_record_hashes
+               WHERE table_name = ? AND record_id = ?
+                 AND source_hash = ? AND interpreted_v2_hash = ?""",
+            (table, record_id, source_hash, interpreted_hash),
+        ).fetchone()
+        return row is not None
 
     @staticmethod
     def _verify_payload_table(
@@ -1399,6 +1937,26 @@ class FactMemory:
             evidence = tuple(
                 self._evidence(connection, item) for item in proposal.evidence_ids
             )
+        self._trusted_actor(
+            approval.reviewer_identity,
+            approval.reviewer_identity_type,
+            purpose="claim approval replay",
+        )
+        if not proposal.reviewer_identity or proposal.reviewer_identity_type in {
+            None,
+            ActorIdentityType.MODEL,
+        }:
+            raise FactApprovalError(
+                "proposal reviewer artifact is missing or untrusted"
+            )
+        supporting = tuple(
+            item for item in evidence if item.relation == EvidenceRelation.SUPPORTS
+        )
+        independent_non_model_support = any(
+            source.source_kind != SourceKind.MODEL_INFERENCE
+            for source in sources
+            if source.source_id in {item.source_id for item in supporting}
+        )
         expected = {
             "entity_hash": entity.content_hash,
             "predicate_definition_hash": predicate.content_hash,
@@ -1408,6 +1966,10 @@ class FactMemory:
             "valid_to": proposal.valid_to,
             "source_hashes": tuple(sorted(item.record_hash for item in sources)),
             "evidence_hashes": tuple(sorted(item.evidence_hash for item in evidence)),
+            "supporting_evidence_hashes": tuple(
+                sorted(item.evidence_hash for item in supporting)
+            ),
+            "independent_non_model_support": independent_non_model_support,
             "policy_version": FACT_APPROVAL_POLICY_VERSION,
             "fact_memory_schema_version": FACT_MEMORY_SCHEMA_VERSION,
         }
@@ -1417,6 +1979,10 @@ class FactMemory:
         )
         if changed is not None:
             raise FactApprovalError(f"approval dependency changed: {changed}")
+        if not independent_non_model_support:
+            raise FactApprovalError(
+                "approval lacks independently approved non-model support"
+            )
         payload = asdict(approval)
         digest = payload.pop("approval_hash")
         if content_hash(payload) != digest:
@@ -1436,7 +2002,10 @@ class FactMemory:
         self, connection: sqlite3.Connection, claim: ClaimRecord
     ) -> tuple[ConflictGroup, ...]:
         predicate = self._predicate(connection, claim.predicate_id)
-        if predicate.cardinality != Cardinality.SINGLE:
+        if (
+            predicate.cardinality != Cardinality.SINGLE
+            or predicate.overlapping_intervals_permitted
+        ):
             return ()
         groups = []
         rows = connection.execute(
@@ -1499,11 +2068,27 @@ class FactMemory:
                 "INSERT INTO conflict_group_claims VALUES (?, ?)",
                 ((group.conflict_group_id, item) for item in group.claim_ids),
             )
+            self._insert_conflict_resolution_event(
+                connection,
+                group,
+                kind=ConflictResolutionKind.INITIAL_STATE,
+                new_status=ConflictResolutionStatus.UNRESOLVED,
+                actor_identity="FACT_MEMORY",
+                actor_identity_type=ActorIdentityType.TRUSTED_PROCESS,
+                reason="conflict group created",
+                evidence_ids=(),
+                selected_claim_ids=(),
+                remaining_claim_ids=group.claim_ids,
+                recorded_at=group.created_at,
+            )
             groups.append(group)
         return tuple(groups)
 
     def _matching_conflicts(
-        self, connection: sqlite3.Connection, claims: list[ClaimRecord]
+        self,
+        connection: sqlite3.Connection,
+        claims: list[ClaimRecord],
+        known_at: str,
     ) -> tuple[ConflictGroup, ...]:
         ids = {item.claim_id for item in claims}
         if not ids:
@@ -1512,14 +2097,206 @@ class FactMemory:
         rows = connection.execute(
             f"""SELECT DISTINCT g.payload_json FROM conflict_groups g
                 JOIN conflict_group_claims c ON c.conflict_group_id = g.conflict_group_id
-                WHERE g.resolution_status = 'UNRESOLVED' AND c.claim_id IN ({placeholders})""",
-            tuple(sorted(ids)),
+                WHERE g.created_at <= ? AND c.claim_id IN ({placeholders})""",
+            (normalize_temporal(known_at), *tuple(sorted(ids))),
         )
         return tuple(
-            group
+            projected
             for row in rows
             if len(ids & set((group := _conflict_from_json(row[0])).claim_ids)) >= 2
+            and (
+                projected := self._conflict_as_known_at(
+                    connection,
+                    group,
+                    known_at,
+                )
+            ).resolution_status
+            == ConflictResolutionStatus.UNRESOLVED
         )
+
+    def _resolved_conflict_history(
+        self,
+        connection: sqlite3.Connection,
+        claims: list[ClaimRecord],
+        known_at: str,
+    ) -> tuple[ConflictGroup, ...]:
+        ids = {item.claim_id for item in claims}
+        if not ids:
+            return ()
+        placeholders = ",".join("?" for _ in ids)
+        rows = connection.execute(
+            f"""SELECT DISTINCT g.payload_json FROM conflict_groups g
+                JOIN conflict_group_claims c ON c.conflict_group_id = g.conflict_group_id
+                WHERE g.created_at <= ? AND c.claim_id IN ({placeholders})""",
+            (normalize_temporal(known_at), *tuple(sorted(ids))),
+        )
+        projected = tuple(
+            self._conflict_as_known_at(
+                connection,
+                _conflict_from_json(row[0]),
+                known_at,
+            )
+            for row in rows
+        )
+        return tuple(
+            item
+            for item in projected
+            if item.resolution_status == ConflictResolutionStatus.RESOLVED
+        )
+
+    def _conflict_as_known_at(
+        self,
+        connection: sqlite3.Connection,
+        group: ConflictGroup,
+        known_at: str,
+    ) -> ConflictGroup:
+        event = self._conflict_resolution_event_at(
+            connection,
+            group.conflict_group_id,
+            known_at,
+        )
+        if event is None:
+            return group
+        return replace(
+            group,
+            resolution_status=event.new_status,
+            resolved_at=event.recorded_at
+            if event.new_status == ConflictResolutionStatus.RESOLVED
+            else None,
+            resolution_evidence_ids=event.evidence_ids,
+        )
+
+    @staticmethod
+    def _conflict_resolution_event_at(
+        connection: sqlite3.Connection,
+        conflict_group_id: str,
+        known_at: str,
+    ) -> ConflictResolutionEvent | None:
+        row = connection.execute(
+            """SELECT payload_json FROM conflict_resolution_events
+               WHERE conflict_group_id = ? AND recorded_at <= ?
+               ORDER BY recorded_at DESC, rowid DESC LIMIT 1""",
+            (conflict_group_id, normalize_temporal(known_at)),
+        ).fetchone()
+        if row is None:
+            return None
+        return _conflict_resolution_from_json(row[0])
+
+    def _insert_conflict_resolution_event(
+        self,
+        connection: sqlite3.Connection,
+        group: ConflictGroup,
+        *,
+        kind: ConflictResolutionKind,
+        new_status: ConflictResolutionStatus,
+        actor_identity: str,
+        actor_identity_type: ActorIdentityType,
+        reason: str,
+        evidence_ids: tuple[str, ...],
+        selected_claim_ids: tuple[str, ...],
+        remaining_claim_ids: tuple[str, ...],
+        recorded_at: str,
+    ) -> ConflictResolutionEvent:
+        current = self._conflict_as_known_at(connection, group, recorded_at)
+        payload = {
+            "event_id": f"conflict_resolution_{uuid4().hex}",
+            "conflict_group_id": group.conflict_group_id,
+            "prior_status": current.resolution_status,
+            "new_status": new_status,
+            "resolution_kind": kind,
+            "selected_claim_ids": tuple(sorted(selected_claim_ids)),
+            "remaining_claim_ids": tuple(sorted(remaining_claim_ids)),
+            "evidence_ids": tuple(sorted(evidence_ids)),
+            "actor_identity": actor_identity,
+            "actor_identity_type": actor_identity_type,
+            "reason": reason.strip(),
+            "recorded_at": recorded_at,
+        }
+        event = ConflictResolutionEvent(
+            **payload,
+            event_hash=content_hash(payload),
+        )
+        connection.execute(
+            """INSERT INTO conflict_resolution_events(
+                event_id, conflict_group_id, prior_status, new_status,
+                resolution_kind, actor_identity, actor_identity_type,
+                recorded_at, event_hash, payload_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                event.event_id,
+                event.conflict_group_id,
+                event.prior_status,
+                event.new_status,
+                event.resolution_kind,
+                event.actor_identity,
+                event.actor_identity_type,
+                event.recorded_at,
+                event.event_hash,
+                canonical_json(event),
+            ),
+        )
+        return event
+
+    def _resolve_conflicts_for_claim_event(
+        self,
+        connection: sqlite3.Connection,
+        claim_id: str,
+        kind: ConflictResolutionKind,
+        actor_identity: str,
+        actor_identity_type: ActorIdentityType,
+        reason: str,
+        recorded_at: str,
+        *,
+        selected_claim_ids: tuple[str, ...] = (),
+    ) -> None:
+        rows = connection.execute(
+            """SELECT g.payload_json FROM conflict_groups g
+               JOIN conflict_group_claims c
+                 ON c.conflict_group_id = g.conflict_group_id
+               WHERE c.claim_id = ?""",
+            (claim_id,),
+        )
+        for row in rows:
+            group = _conflict_from_json(row[0])
+            projected = self._conflict_as_known_at(connection, group, recorded_at)
+            if projected.resolution_status != ConflictResolutionStatus.UNRESOLVED:
+                continue
+            remaining = tuple(
+                item
+                for item in group.claim_ids
+                if item != claim_id
+                and self._claim_status_at(connection, item, recorded_at)
+                not in {ClaimStatus.RETRACTED, ClaimStatus.SUPERSEDED}
+            )
+            if not remaining:
+                continue
+            evidence_ids = self._claim_evidence_at(
+                connection,
+                claim_id,
+                recorded_at,
+            )
+            event = self._insert_conflict_resolution_event(
+                connection,
+                group,
+                kind=kind,
+                new_status=ConflictResolutionStatus.RESOLVED,
+                actor_identity=actor_identity,
+                actor_identity_type=actor_identity_type,
+                reason=reason,
+                evidence_ids=evidence_ids,
+                selected_claim_ids=selected_claim_ids or remaining,
+                remaining_claim_ids=remaining,
+                recorded_at=recorded_at,
+            )
+            self.database.append_audit(
+                connection,
+                "CONFLICT_RESOLVED",
+                {
+                    "resolution_event_hash": event.event_hash,
+                    "kind": kind,
+                },
+                group.conflict_group_id,
+            )
 
     def _claim_answer(
         self,
@@ -1527,16 +2304,42 @@ class FactMemory:
         claim: ClaimRecord,
         known_at: str,
         conflicted: bool,
+        *,
+        include_details: bool,
     ) -> ClaimAnswer:
-        evidence = tuple(
-            self._evidence(connection, item) for item in claim.evidence_ids
+        supporting = tuple(
+            self._evidence(connection, item) for item in claim.supporting_evidence_ids
         )
-        sources = tuple(self._source(connection, item.source_id) for item in evidence)
-        source_states = tuple(
+        contradicting = tuple(
+            self._evidence(connection, item)
+            for item in claim.contradicting_evidence_ids
+        )
+        supporting_sources = tuple(
+            self._source(connection, item.source_id) for item in supporting
+        )
+        contradicting_sources = tuple(
+            self._source(connection, item.source_id) for item in contradicting
+        )
+        supporting_states = tuple(
             self._source_status_at(connection, item.source_id, known_at)
-            for item in sources
+            for item in supporting_sources
         )
-        transaction_to = self._claim_transaction_end(connection, claim.claim_id)
+        contradicting_states = tuple(
+            self._source_status_at(connection, item.source_id, known_at)
+            for item in contradicting_sources
+        )
+        evidence = (*supporting, *contradicting)
+        sources = (*supporting_sources, *contradicting_sources)
+        transaction = self.transaction_interval_as_known_at(
+            claim.claim_id,
+            known_at,
+            connection=connection,
+        )
+        evidence_state = (
+            EvidenceConflictState.CONTESTED
+            if contradicting
+            else EvidenceConflictState.CLEAR
+        )
         return ClaimAnswer(
             claim_id=claim.claim_id,
             claim_hash=claim.canonical_claim_hash,
@@ -1545,19 +2348,78 @@ class FactMemory:
             valid_from=claim.valid_from,
             valid_to=claim.valid_to,
             recorded_at=claim.recorded_at,
-            transaction_to=transaction_to,
+            transaction_to=transaction.transaction_to,
+            transaction_status_as_known_at=transaction.status,
+            known_at=known_at,
+            supporting_evidence_ids=tuple(item.evidence_id for item in supporting),
+            supporting_evidence_hashes=tuple(
+                sorted(item.evidence_hash for item in supporting)
+            ),
+            supporting_source_ids=tuple(
+                sorted({item.source_id for item in supporting_sources})
+            ),
+            supporting_source_hashes=tuple(
+                sorted({item.record_hash for item in supporting_sources})
+            ),
+            supporting_source_citations=tuple(
+                _source_citation(item)
+                for item in sorted(supporting_sources, key=lambda row: row.source_id)
+            )
+            if include_details
+            else (),
+            supporting_source_trust_tiers=tuple(
+                sorted({item.trust_tier for item in supporting_sources})
+            ),
+            independent_supporting_source_family_count=len(
+                {
+                    item.source_family
+                    for item in supporting_sources
+                    if item.source_kind != SourceKind.MODEL_INFERENCE
+                    and self._source_status_at(connection, item.source_id, known_at)
+                    == SourceStatus.ACTIVE
+                }
+            ),
+            contradicting_evidence_ids=tuple(
+                item.evidence_id for item in contradicting
+            ),
+            contradicting_evidence_hashes=tuple(
+                sorted(item.evidence_hash for item in contradicting)
+            ),
+            contradicting_source_ids=tuple(
+                sorted({item.source_id for item in contradicting_sources})
+            ),
+            contradicting_source_hashes=tuple(
+                sorted({item.record_hash for item in contradicting_sources})
+            ),
+            contradicting_source_citations=tuple(
+                _source_citation(item)
+                for item in sorted(
+                    contradicting_sources,
+                    key=lambda row: row.source_id,
+                )
+            )
+            if include_details
+            else (),
+            contradicting_source_trust_tiers=tuple(
+                sorted({item.trust_tier for item in contradicting_sources})
+            ),
+            independent_contradicting_source_family_count=len(
+                {item.source_family for item in contradicting_sources}
+            ),
+            support_freshness_state=_freshness_state(supporting_states),
+            contradiction_freshness_state=_freshness_state(
+                contradicting_states,
+                empty="NONE",
+            ),
+            evidence_conflict_state=evidence_state,
             source_ids=tuple(sorted({item.source_id for item in sources})),
             source_hashes=tuple(sorted({item.record_hash for item in sources})),
             source_citations=tuple(
-                {
-                    "source_id": item.source_id,
-                    "title": item.title,
-                    "locator": item.locator,
-                    "trust_tier": item.trust_tier,
-                    "source_hash": item.record_hash,
-                }
+                _source_citation(item)
                 for item in sorted(sources, key=lambda row: row.source_id)
-            ),
+            )
+            if include_details
+            else (),
             evidence_ids=claim.evidence_ids,
             evidence_hashes=tuple(sorted(item.evidence_hash for item in evidence)),
             source_trust_tiers=tuple(sorted({item.trust_tier for item in sources})),
@@ -1565,13 +2427,13 @@ class FactMemory:
                 {item.source_family for item in sources}
             ),
             evidence_count=len(evidence),
-            freshness_state="CURRENT"
-            if all(item == SourceStatus.ACTIVE for item in source_states)
-            else "STALE",
+            freshness_state=_freshness_state(supporting_states),
             review_state="APPROVED",
-            conflict_state="CONTESTED" if conflicted else "UNCONTESTED",
+            conflict_state="CONTESTED"
+            if conflicted or evidence_state == EvidenceConflictState.CONTESTED
+            else "UNCONTESTED",
             source_retraction_state="AFFECTED"
-            if SourceStatus.RETRACTED in source_states
+            if SourceStatus.RETRACTED in (*supporting_states, *contradicting_states)
             else "CLEAR",
         )
 
@@ -1583,16 +2445,28 @@ class FactMemory:
         claims: tuple[ClaimAnswer, ...],
         conflict_ids: tuple[str, ...],
         warnings: tuple[str, ...],
+        *,
+        conflict_resolution_statuses: tuple[
+            tuple[str, ConflictResolutionStatus], ...
+        ] = (),
     ) -> FactAnswerBundle:
+        known_at = query.known_at or query.created_at
         payload = {
             "query_id": query.query_id,
             "query_hash": query.query_hash,
             "fact_memory_schema_version": FACT_MEMORY_SCHEMA_VERSION,
+            "answer_schema_version": FACT_ANSWER_SCHEMA_VERSION,
             "memory_snapshot_hash": snapshot,
+            "valid_at": query.valid_at,
+            "known_at": known_at,
             "answer_status": status,
             "selected_claim_ids": tuple(item.claim_id for item in claims),
             "conflict_group_ids": conflict_ids,
+            "conflict_resolution_statuses": conflict_resolution_statuses,
             "claims": claims,
+            "provenance_detail_mode": ProvenanceDetailMode.FULL
+            if query.include_evidence
+            else ProvenanceDetailMode.REFERENCES_ONLY,
             "warnings": warnings,
             "generated_at": self._now(),
             "rendering_version": FACT_RENDERING_VERSION,
@@ -1649,11 +2523,20 @@ class FactMemory:
         }
         self.database.append_audit(
             connection,
-            "FACT_QUERY_FAILED" if failed else "FACT_QUERY_EXECUTED",
+            "FACT_QUERY_FAILED"
+            if failed
+            else (
+                "HISTORICAL_QUERY_EXECUTED"
+                if query.known_at is not None
+                and temporal_key(query.known_at) < temporal_key(bundle.generated_at)
+                else "FACT_QUERY_EXECUTED"
+            ),
             {
                 "query_hash": query.query_hash,
                 "snapshot_hash": bundle.memory_snapshot_hash,
                 "answer_status": bundle.answer_status,
+                "valid_at": query.valid_at,
+                "known_at": bundle.known_at,
             },
             query.query_id,
             advance_snapshot=False,
@@ -1677,14 +2560,24 @@ class FactMemory:
         connection.commit()
         return bundle
 
-    def _claim_source_state(
-        self, connection: sqlite3.Connection, claim: ClaimRecord, known_at: str
+    def _claim_support_state(
+        self,
+        connection: sqlite3.Connection,
+        supporting_sources: tuple[SourceRecord, ...],
+        known_at: str,
     ) -> str:
+        trusted_sources = tuple(
+            item
+            for item in supporting_sources
+            if item.source_kind != SourceKind.MODEL_INFERENCE
+        )
         states = {
             self._source_status_at(
-                connection, self._evidence(connection, item).source_id, known_at
+                connection,
+                item.source_id,
+                known_at,
             )
-            for item in claim.evidence_ids
+            for item in trusted_sources
         }
         if SourceStatus.ACTIVE in states:
             return "ACTIVE"
@@ -1706,24 +2599,64 @@ class FactMemory:
     def _source_status_at(
         self, connection: sqlite3.Connection, source_id: str, point: str
     ) -> SourceStatus:
+        return self._source_status_projection(connection, source_id, point)[0]
+
+    @staticmethod
+    def _source_status_projection(
+        connection: sqlite3.Connection,
+        source_id: str,
+        point: str,
+    ) -> tuple[SourceStatus, str | None]:
         row = connection.execute(
-            """SELECT status FROM source_status_events
+            """SELECT status, event_hash FROM source_status_events
                WHERE source_id = ? AND recorded_at <= ?
                ORDER BY recorded_at DESC, rowid DESC LIMIT 1""",
             (source_id, normalize_temporal(point)),
         ).fetchone()
-        return SourceStatus(row[0]) if row else SourceStatus.ACTIVE
+        if row is None:
+            return SourceStatus.ACTIVE, None
+        return SourceStatus(row[0]), str(row[1])
 
-    def _claim_transaction_end(
-        self, connection: sqlite3.Connection, claim_id: str
-    ) -> str | None:
+    def transaction_interval_as_known_at(
+        self,
+        claim_id: str,
+        known_at: str,
+        *,
+        connection: sqlite3.Connection | None = None,
+    ) -> TransactionIntervalState:
+        point = normalize_temporal(known_at)
+        if point is None:
+            raise ValueError("known_at is required")
+        if connection is None:
+            with self.database.connect() as opened:
+                return self.transaction_interval_as_known_at(
+                    claim_id,
+                    point,
+                    connection=opened,
+                )
+        claim = self._claim_record(connection, claim_id)
         row = connection.execute(
-            """SELECT recorded_at FROM claim_status_events
-               WHERE claim_id = ? AND status IN ('SUPERSEDED', 'RETRACTED')
-               ORDER BY recorded_at LIMIT 1""",
-            (claim_id,),
+            """SELECT status, recorded_at, event_hash FROM claim_status_events
+               WHERE claim_id = ? AND recorded_at <= ?
+               ORDER BY recorded_at DESC, rowid DESC LIMIT 1""",
+            (claim_id, point),
         ).fetchone()
-        return row[0] if row else None
+        status = ClaimStatus(row[0]) if row else ClaimStatus.PROPOSED
+        terminal = connection.execute(
+            """SELECT recorded_at FROM claim_status_events
+               WHERE claim_id = ? AND recorded_at <= ?
+                 AND status IN ('SUPERSEDED', 'RETRACTED')
+               ORDER BY recorded_at LIMIT 1""",
+            (claim_id, point),
+        ).fetchone()
+        return TransactionIntervalState(
+            claim_id=claim_id,
+            transaction_from=claim.recorded_at,
+            transaction_to=terminal[0] if terminal else None,
+            status=status,
+            known_at=point,
+            status_event_hash=str(row[2]) if row else None,
+        )
 
     @staticmethod
     def _claim_evidence_at(
@@ -1737,6 +2670,32 @@ class FactMemory:
                 (claim_id, normalize_temporal(point)),
             )
         )
+
+    def _claim_evidence_by_polarity_at(
+        self,
+        connection: sqlite3.Connection,
+        claim_id: str,
+        point: str,
+    ) -> tuple[tuple[EvidenceRecord, ...], tuple[EvidenceRecord, ...]]:
+        rows = connection.execute(
+            """SELECT ce.relation, e.payload_json FROM claim_evidence ce
+               JOIN evidence e ON e.evidence_id = ce.evidence_id
+               WHERE ce.claim_id = ? AND ce.attached_at <= ?
+               ORDER BY ce.evidence_id""",
+            (claim_id, normalize_temporal(point)),
+        )
+        supporting: list[EvidenceRecord] = []
+        contradicting: list[EvidenceRecord] = []
+        for row in rows:
+            evidence = _evidence_from_json(row[1])
+            relation = EvidenceRelation(row[0])
+            if relation != evidence.relation:
+                raise FactMemoryIntegrityError("claim evidence polarity mismatch")
+            target = (
+                supporting if relation == EvidenceRelation.SUPPORTS else contradicting
+            )
+            target.append(evidence)
+        return tuple(supporting), tuple(contradicting)
 
     def _attach_claim_evidence(
         self,
@@ -1753,15 +2712,28 @@ class FactMemory:
                 "relation": evidence.relation,
                 "attached_at": attached_at,
             }
-            connection.execute(
+            cursor = connection.execute(
                 "INSERT OR IGNORE INTO claim_evidence VALUES (?, ?, ?, ?, ?)",
                 (*payload.values(), content_hash(payload)),
             )
+            if cursor.rowcount:
+                self.database.append_audit(
+                    connection,
+                    "CLAIM_EVIDENCE_CONTESTED"
+                    if evidence.relation == EvidenceRelation.CONTRADICTS
+                    else "CLAIM_EVIDENCE_ATTACHED",
+                    {
+                        "evidence_hash": evidence.evidence_hash,
+                        "relation": evidence.relation,
+                        "attached_at": attached_at,
+                    },
+                    claim_id,
+                )
 
     def _insert_relation(self, connection: sqlite3.Connection, **payload: Any) -> None:
         row = {"relation_id": f"claim_relation_{uuid4().hex}", **payload}
         connection.execute(
-            "INSERT INTO claim_relations VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO claim_relations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (*row.values(), content_hash(row)),
         )
 
@@ -1816,11 +2788,24 @@ class FactMemory:
         )
 
     def _proposal_revision(
-        self, current: FactProposal, status: ProposalStatus
+        self,
+        current: FactProposal,
+        status: ProposalStatus,
+        *,
+        reviewer_identity: str | None = None,
+        reviewer_identity_type: ActorIdentityType | None = None,
     ) -> FactProposal:
         payload = asdict(current)
         payload.update(
-            revision=current.revision + 1, status=status, updated_at=self._now()
+            revision=current.revision + 1,
+            status=status,
+            updated_at=self._now(),
+            reviewer_identity=reviewer_identity
+            if reviewer_identity is not None
+            else current.reviewer_identity,
+            reviewer_identity_type=reviewer_identity_type
+            if reviewer_identity_type is not None
+            else current.reviewer_identity_type,
         )
         payload.pop("proposal_hash")
         payload["object_value"] = current.object_value
@@ -1869,20 +2854,35 @@ class FactMemory:
             raise KeyError(f"unknown claim: {claim_id}")
         return row
 
+    def _claim_record(
+        self,
+        connection: sqlite3.Connection,
+        claim_id: str,
+    ) -> ClaimRecord:
+        return _claim_from_json(self._claim_row(connection, claim_id)["payload_json"])
+
     def _claim(self, connection: sqlite3.Connection, claim_id: str) -> ClaimRecord:
-        claim = _claim_from_json(self._claim_row(connection, claim_id)["payload_json"])
-        evidence_ids = tuple(
-            row[0]
-            for row in connection.execute(
-                "SELECT evidence_id FROM claim_evidence WHERE claim_id = ? ORDER BY evidence_id",
-                (claim_id,),
-            )
+        claim = self._claim_record(connection, claim_id)
+        point = self._now()
+        supporting, contradicting = self._claim_evidence_by_polarity_at(
+            connection,
+            claim_id,
+            point,
         )
-        sources = tuple(
-            self._source(connection, self._evidence(connection, item).source_id)
-            for item in evidence_ids
+        supporting_sources = tuple(
+            self._source(connection, item.source_id) for item in supporting
         )
-        status = self._claim_status_at(connection, claim_id, self._now())
+        contradicting_sources = tuple(
+            self._source(connection, item.source_id) for item in contradicting
+        )
+        active_supporting_families = {
+            item.source_family
+            for item in supporting_sources
+            if item.source_kind != SourceKind.MODEL_INFERENCE
+            and self._source_status_at(connection, item.source_id, point)
+            == SourceStatus.ACTIVE
+        }
+        status = self._claim_status_at(connection, claim_id, point)
         supersedes = tuple(
             row[0]
             for row in connection.execute(
@@ -1895,12 +2895,19 @@ class FactMemory:
             status=(
                 ClaimStatus.CORROBORATED
                 if status == ClaimStatus.SUPPORTED
-                and len({item.source_family for item in sources}) >= 2
+                and len(active_supporting_families) >= 2
                 else status
             ),
-            evidence_ids=evidence_ids,
-            source_family_support_set=tuple(
-                sorted({item.source_family for item in sources})
+            evidence_ids=tuple(
+                sorted(item.evidence_id for item in (*supporting, *contradicting))
+            ),
+            supporting_evidence_ids=tuple(item.evidence_id for item in supporting),
+            contradicting_evidence_ids=tuple(
+                item.evidence_id for item in contradicting
+            ),
+            source_family_support_set=tuple(sorted(active_supporting_families)),
+            source_family_contradiction_set=tuple(
+                sorted({item.source_family for item in contradicting_sources})
             ),
             supersedes_claim_ids=supersedes,
         )
@@ -1949,6 +2956,56 @@ class FactMemory:
             raise KeyError(f"unknown approval: {approval_id}")
         return _approval_from_json(row[0])
 
+    def _trusted_actor(
+        self,
+        identity: str | None,
+        actor_type: ActorIdentityType | str | None,
+        *,
+        purpose: str,
+    ) -> tuple[str, ActorIdentityType]:
+        normalized = identity.strip() if isinstance(identity, str) else ""
+        try:
+            parsed_type = (
+                ActorIdentityType(actor_type) if actor_type is not None else None
+            )
+        except (TypeError, ValueError):
+            parsed_type = None
+        rejected = (
+            not normalized
+            or parsed_type is None
+            or parsed_type == ActorIdentityType.MODEL
+            or normalized.casefold() in _RESERVED_MODEL_IDENTITIES
+        )
+        if rejected:
+            self._audit_rejection(
+                "FACT_ACTOR_REJECTED",
+                None,
+                {
+                    "purpose": purpose,
+                    "identity_present": bool(normalized),
+                    "actor_identity_type": parsed_type,
+                    "actor_identity_type_valid": parsed_type is not None,
+                },
+            )
+            raise FactApprovalError(
+                f"{purpose} requires a non-model typed actor identity"
+            )
+        return normalized, parsed_type
+
+    def _audit_rejection(
+        self,
+        event_type: str,
+        object_id: str | None,
+        payload: dict[str, Any],
+    ) -> None:
+        with self.database.write() as connection:
+            self.database.append_audit(
+                connection,
+                event_type,
+                payload,
+                object_id,
+            )
+
     def _now(self) -> str:
         return normalize_datetime(self._clock())
 
@@ -1976,14 +3033,16 @@ def _status_event_values(
     claim_id: str,
     status: ClaimStatus,
     actor: str,
+    actor_identity_type: ActorIdentityType,
     reason: str | None,
     recorded_at: str,
-) -> tuple[str, str, ClaimStatus, str, str | None, str, str]:
+) -> tuple[str, str, ClaimStatus, str, ActorIdentityType, str | None, str, str]:
     payload = {
         "event_id": f"claim_status_{uuid4().hex}",
         "claim_id": claim_id,
         "status": status,
         "actor": actor,
+        "actor_identity_type": actor_identity_type,
         "reason": reason,
         "recorded_at": recorded_at,
     }
@@ -2074,6 +3133,10 @@ def _evidence_from_json(payload: str) -> EvidenceRecord:
     row["location_kind"] = EvidenceLocationKind(row["location_kind"])
     row["extraction_method"] = ExtractionMethod(row["extraction_method"])
     row["approval_status"] = ApprovalStatus(row["approval_status"])
+    reviewer_type = row.get("reviewer_identity_type")
+    row["reviewer_identity_type"] = (
+        ActorIdentityType(reviewer_type) if reviewer_type else None
+    )
     return EvidenceRecord(**row)
 
 
@@ -2085,6 +3148,11 @@ def _proposal_from_json(payload: str) -> FactProposal:
     row["qualifiers"] = _fact_values(row["qualifiers"])
     row["source_ids"] = tuple(row["source_ids"])
     row["evidence_ids"] = tuple(row["evidence_ids"])
+    row.setdefault("reviewer_identity", None)
+    reviewer_type = row.get("reviewer_identity_type")
+    row["reviewer_identity_type"] = (
+        ActorIdentityType(reviewer_type) if reviewer_type else None
+    )
     return FactProposal(**row)
 
 
@@ -2093,6 +3161,11 @@ def _approval_from_json(payload: str) -> FactApprovalEnvelope:
     row["decision"] = ApprovalDecision(row["decision"])
     row["source_hashes"] = tuple(row["source_hashes"])
     row["evidence_hashes"] = tuple(row["evidence_hashes"])
+    row["reviewer_identity_type"] = ActorIdentityType(row["reviewer_identity_type"])
+    row["supporting_evidence_hashes"] = tuple(
+        row.get("supporting_evidence_hashes", row["evidence_hashes"])
+    )
+    row.setdefault("independent_non_model_support", True)
     return FactApprovalEnvelope(**row)
 
 
@@ -2102,7 +3175,14 @@ def _claim_from_json(payload: str) -> ClaimRecord:
     row["object_value"] = FactValue.from_dict(row["object_value"])
     row["qualifiers"] = _fact_values(row["qualifiers"])
     row["evidence_ids"] = tuple(row["evidence_ids"])
+    row["supporting_evidence_ids"] = tuple(
+        row.get("supporting_evidence_ids", row["evidence_ids"])
+    )
+    row["contradicting_evidence_ids"] = tuple(row.get("contradicting_evidence_ids", ()))
     row["source_family_support_set"] = tuple(row["source_family_support_set"])
+    row["source_family_contradiction_set"] = tuple(
+        row.get("source_family_contradiction_set", ())
+    )
     row["supersedes_claim_ids"] = tuple(row["supersedes_claim_ids"])
     return ClaimRecord(**row)
 
@@ -2114,3 +3194,48 @@ def _conflict_from_json(payload: str) -> ConflictGroup:
     row["resolution_status"] = ConflictResolutionStatus(row["resolution_status"])
     row["resolution_evidence_ids"] = tuple(row["resolution_evidence_ids"])
     return ConflictGroup(**row)
+
+
+def _conflict_resolution_from_json(payload: str) -> ConflictResolutionEvent:
+    row = json.loads(payload)
+    row["prior_status"] = ConflictResolutionStatus(row["prior_status"])
+    row["new_status"] = ConflictResolutionStatus(row["new_status"])
+    row["resolution_kind"] = ConflictResolutionKind(row["resolution_kind"])
+    row["selected_claim_ids"] = tuple(row["selected_claim_ids"])
+    row["remaining_claim_ids"] = tuple(row["remaining_claim_ids"])
+    row["evidence_ids"] = tuple(row["evidence_ids"])
+    row["actor_identity_type"] = ActorIdentityType(row["actor_identity_type"])
+    return ConflictResolutionEvent(**row)
+
+
+def _parse_actor_type(
+    value: ActorIdentityType | str | None,
+) -> ActorIdentityType | None:
+    if value is None:
+        return None
+    return ActorIdentityType(value)
+
+
+def _source_citation(source: SourceRecord) -> dict[str, Any]:
+    return {
+        "source_id": source.source_id,
+        "title": source.title,
+        "locator": source.locator,
+        "trust_tier": source.trust_tier,
+        "source_hash": source.record_hash,
+    }
+
+
+def _freshness_state(
+    states: tuple[SourceStatus, ...],
+    *,
+    empty: str = "STALE",
+) -> str:
+    if not states:
+        return empty
+    active = sum(item == SourceStatus.ACTIVE for item in states)
+    if active == len(states):
+        return "CURRENT"
+    if active:
+        return "PARTIALLY_STALE"
+    return "STALE"

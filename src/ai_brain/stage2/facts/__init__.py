@@ -2,6 +2,7 @@
 
 from ai_brain.stage2.facts.memory import FactMemory
 from ai_brain.stage2.facts.models import (
+    ActorIdentityType,
     FactAnswerBundle,
     FactApprovalEnvelope,
     FactProposal,
@@ -11,6 +12,7 @@ from ai_brain.stage2.facts.models import (
 from ai_brain.stage2.facts.values import FactValue, FactValueKind
 
 __all__ = [
+    "ActorIdentityType",
     "FactAnswerBundle",
     "FactApprovalEnvelope",
     "FactMemory",

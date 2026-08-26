@@ -48,6 +48,12 @@ class SourceStatus(StrEnum):
     UNAVAILABLE = "UNAVAILABLE"
 
 
+class ActorIdentityType(StrEnum):
+    HUMAN = "HUMAN"
+    TRUSTED_PROCESS = "TRUSTED_PROCESS"
+    MODEL = "MODEL"
+
+
 class EvidenceRelation(StrEnum):
     SUPPORTS = "SUPPORTS"
     CONTRADICTS = "CONTRADICTS"
@@ -114,6 +120,24 @@ class ApprovalDecision(StrEnum):
 class ConflictResolutionStatus(StrEnum):
     UNRESOLVED = "UNRESOLVED"
     RESOLVED = "RESOLVED"
+
+
+class ConflictResolutionKind(StrEnum):
+    INITIAL_STATE = "INITIAL_STATE"
+    CLAIM_RETRACTED = "CLAIM_RETRACTED"
+    CLAIM_SUPERSEDED = "CLAIM_SUPERSEDED"
+    MANUAL_RESOLUTION = "MANUAL_RESOLUTION"
+    DISMISSED_AS_NOT_CONFLICTING = "DISMISSED_AS_NOT_CONFLICTING"
+
+
+class EvidenceConflictState(StrEnum):
+    CLEAR = "CLEAR"
+    CONTESTED = "CONTESTED"
+
+
+class ProvenanceDetailMode(StrEnum):
+    FULL = "FULL"
+    REFERENCES_ONLY = "REFERENCES_ONLY"
 
 
 class QueryStatus(StrEnum):
@@ -212,6 +236,7 @@ class EvidenceRecord:
     extraction_method: ExtractionMethod
     extraction_confidence: str
     reviewer: str | None
+    reviewer_identity_type: ActorIdentityType | None
     approval_status: ApprovalStatus
     created_at: str
     evidence_hash: str
@@ -231,6 +256,8 @@ class FactProposal:
     valid_to: str | None
     source_ids: tuple[str, ...]
     evidence_ids: tuple[str, ...]
+    reviewer_identity: str | None
+    reviewer_identity_type: ActorIdentityType | None
     created_at: str
     updated_at: str
     proposal_hash: str
@@ -251,7 +278,9 @@ class FactApprovalEnvelope:
     source_hashes: tuple[str, ...]
     evidence_hashes: tuple[str, ...]
     reviewer_identity: str
-    reviewer_identity_type: str
+    reviewer_identity_type: ActorIdentityType
+    supporting_evidence_hashes: tuple[str, ...]
+    independent_non_model_support: bool
     decision: ApprovalDecision
     contested_approval: bool
     policy_version: str
@@ -272,7 +301,10 @@ class ClaimRecord:
     recorded_at: str
     status: ClaimStatus
     evidence_ids: tuple[str, ...]
+    supporting_evidence_ids: tuple[str, ...]
+    contradicting_evidence_ids: tuple[str, ...]
     source_family_support_set: tuple[str, ...]
+    source_family_contradiction_set: tuple[str, ...]
     supersedes_claim_ids: tuple[str, ...]
     retraction_reason: str | None
     proposal_hash: str
@@ -294,6 +326,51 @@ class ConflictGroup:
     resolved_at: str | None
     resolution_evidence_ids: tuple[str, ...]
     group_hash: str
+
+
+@dataclass(frozen=True)
+class ConflictResolutionEvent:
+    event_id: str
+    conflict_group_id: str
+    prior_status: ConflictResolutionStatus
+    new_status: ConflictResolutionStatus
+    resolution_kind: ConflictResolutionKind
+    selected_claim_ids: tuple[str, ...]
+    remaining_claim_ids: tuple[str, ...]
+    evidence_ids: tuple[str, ...]
+    actor_identity: str
+    actor_identity_type: ActorIdentityType
+    reason: str
+    recorded_at: str
+    event_hash: str
+
+
+@dataclass(frozen=True)
+class TransactionIntervalState:
+    claim_id: str
+    transaction_from: str
+    transaction_to: str | None
+    status: ClaimStatus
+    known_at: str
+    status_event_hash: str | None
+
+
+@dataclass(frozen=True)
+class ClaimState:
+    record: ClaimRecord
+    status: ClaimStatus
+    transaction: TransactionIntervalState
+    supporting_evidence_ids: tuple[str, ...]
+    contradicting_evidence_ids: tuple[str, ...]
+    evidence_conflict_state: EvidenceConflictState
+
+
+@dataclass(frozen=True)
+class SourceState:
+    record: SourceRecord
+    status: SourceStatus
+    known_at: str
+    status_event_hash: str | None
 
 
 @dataclass(frozen=True)
@@ -329,6 +406,25 @@ class ClaimAnswer:
     valid_to: str | None
     recorded_at: str
     transaction_to: str | None
+    transaction_status_as_known_at: ClaimStatus
+    known_at: str
+    supporting_evidence_ids: tuple[str, ...]
+    supporting_evidence_hashes: tuple[str, ...]
+    supporting_source_ids: tuple[str, ...]
+    supporting_source_hashes: tuple[str, ...]
+    supporting_source_citations: tuple[dict[str, Any], ...]
+    supporting_source_trust_tiers: tuple[str, ...]
+    independent_supporting_source_family_count: int
+    contradicting_evidence_ids: tuple[str, ...]
+    contradicting_evidence_hashes: tuple[str, ...]
+    contradicting_source_ids: tuple[str, ...]
+    contradicting_source_hashes: tuple[str, ...]
+    contradicting_source_citations: tuple[dict[str, Any], ...]
+    contradicting_source_trust_tiers: tuple[str, ...]
+    independent_contradicting_source_family_count: int
+    support_freshness_state: str
+    contradiction_freshness_state: str
+    evidence_conflict_state: EvidenceConflictState
     source_ids: tuple[str, ...]
     source_hashes: tuple[str, ...]
     source_citations: tuple[dict[str, Any], ...]
@@ -348,11 +444,16 @@ class FactAnswerBundle:
     query_id: str
     query_hash: str
     fact_memory_schema_version: int
+    answer_schema_version: int
     memory_snapshot_hash: str
+    valid_at: str | None
+    known_at: str
     answer_status: QueryStatus
     selected_claim_ids: tuple[str, ...]
     conflict_group_ids: tuple[str, ...]
+    conflict_resolution_statuses: tuple[tuple[str, ConflictResolutionStatus], ...]
     claims: tuple[ClaimAnswer, ...]
+    provenance_detail_mode: ProvenanceDetailMode
     warnings: tuple[str, ...]
     generated_at: str
     rendering_version: str

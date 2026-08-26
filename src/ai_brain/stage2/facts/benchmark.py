@@ -20,12 +20,15 @@ from ai_brain.stage2.facts.canonical import (
     temporal_key,
 )
 from ai_brain.stage2.facts.models import (
+    ActorIdentityType,
     ApprovalDecision,
     ApprovalStatus,
     Cardinality,
     ClaimRecord,
     ClaimStatus,
     ConflictGroup,
+    ConflictResolutionEvent,
+    ConflictResolutionKind,
     ConflictResolutionStatus,
     EntityRecord,
     EntityStatus,
@@ -547,6 +550,8 @@ def _insert_claim_artifacts(
         "valid_to": spec["valid_to"],
         "source_ids": (source.source_id,),
         "evidence_ids": (evidence.evidence_id,),
+        "reviewer_identity": None,
+        "reviewer_identity_type": None,
         "created_at": created_at,
         "updated_at": created_at,
         "schema_version": FACT_MEMORY_SCHEMA_VERSION,
@@ -563,6 +568,11 @@ def _insert_claim_artifacts(
         1,
     ):
         payload = {"revision": revision, "status": status, **base}
+        if status == ProposalStatus.REVIEWED:
+            payload.update(
+                reviewer_identity="m26-synthetic-generator",
+                reviewer_identity_type=ActorIdentityType.TRUSTED_PROCESS,
+            )
         proposals.append(FactProposal(**payload, proposal_hash=content_hash(payload)))
     reviewed = proposals[-1]
     approval_payload = {
@@ -581,7 +591,9 @@ def _insert_claim_artifacts(
         "source_hashes": (source.record_hash,),
         "evidence_hashes": (evidence.evidence_hash,),
         "reviewer_identity": "m26-synthetic-generator",
-        "reviewer_identity_type": "TRUSTED_DETERMINISTIC_GENERATOR",
+        "reviewer_identity_type": ActorIdentityType.TRUSTED_PROCESS,
+        "supporting_evidence_hashes": (evidence.evidence_hash,),
+        "independent_non_model_support": True,
         "decision": ApprovalDecision.APPROVE,
         "contested_approval": False,
         "policy_version": FACT_APPROVAL_POLICY_VERSION,
@@ -595,6 +607,8 @@ def _insert_claim_artifacts(
         "revision": 6,
         "status": ProposalStatus.APPROVED,
         **base,
+        "reviewer_identity": "m26-synthetic-generator",
+        "reviewer_identity_type": ActorIdentityType.TRUSTED_PROCESS,
     }
     approved = FactProposal(
         **approved_payload, proposal_hash=content_hash(approved_payload)
@@ -603,6 +617,8 @@ def _insert_claim_artifacts(
         "revision": 7,
         "status": ProposalStatus.COMMITTED,
         **base,
+        "reviewer_identity": "m26-synthetic-generator",
+        "reviewer_identity_type": ActorIdentityType.TRUSTED_PROCESS,
     }
     committed = FactProposal(
         **committed_payload, proposal_hash=content_hash(committed_payload)
@@ -644,7 +660,10 @@ def _insert_claim_artifacts(
         recorded_at=created_at,
         status=ClaimStatus.SUPPORTED,
         evidence_ids=(evidence.evidence_id,),
+        supporting_evidence_ids=(evidence.evidence_id,),
+        contradicting_evidence_ids=(),
         source_family_support_set=(source.source_family,),
+        source_family_contradiction_set=(),
         supersedes_claim_ids=(),
         retraction_reason=None,
         proposal_hash=approved.proposal_hash,
@@ -698,6 +717,7 @@ def _evidence(
         "extraction_method": ExtractionMethod.DETERMINISTIC,
         "extraction_confidence": "1",
         "reviewer": "m26-synthetic-generator",
+        "reviewer_identity_type": ActorIdentityType.TRUSTED_PROCESS,
         "approval_status": ApprovalStatus.APPROVED,
         "created_at": created_at,
     }
@@ -721,6 +741,7 @@ def _insert_duplicate_support(
         "extraction_method": ExtractionMethod.DETERMINISTIC,
         "extraction_confidence": "1",
         "reviewer": "m26-synthetic-generator",
+        "reviewer_identity_type": ActorIdentityType.TRUSTED_PROCESS,
         "approval_status": ApprovalStatus.APPROVED,
         "created_at": created_at,
     }
@@ -785,6 +806,39 @@ def _insert_conflicts(
             "INSERT INTO conflict_group_claims VALUES (?, ?)",
             ((group.conflict_group_id, claim_id) for claim_id in group.claim_ids),
         )
+        event_payload = {
+            "event_id": f"resolution.{group.conflict_group_id}.initial",
+            "conflict_group_id": group.conflict_group_id,
+            "prior_status": ConflictResolutionStatus.UNRESOLVED,
+            "new_status": ConflictResolutionStatus.UNRESOLVED,
+            "resolution_kind": ConflictResolutionKind.INITIAL_STATE,
+            "selected_claim_ids": (),
+            "remaining_claim_ids": group.claim_ids,
+            "evidence_ids": (),
+            "actor_identity": "m26-synthetic-generator",
+            "actor_identity_type": ActorIdentityType.TRUSTED_PROCESS,
+            "reason": "synthetic conflict created",
+            "recorded_at": created_at,
+        }
+        event = ConflictResolutionEvent(
+            **event_payload,
+            event_hash=content_hash(event_payload),
+        )
+        connection.execute(
+            "INSERT INTO conflict_resolution_events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                event.event_id,
+                event.conflict_group_id,
+                event.prior_status,
+                event.new_status,
+                event.resolution_kind,
+                event.actor_identity,
+                event.actor_identity_type,
+                event.recorded_at,
+                event.event_hash,
+                canonical_json(event),
+            ),
+        )
 
 
 def _insert_retractions(
@@ -810,11 +864,12 @@ def _insert_source_retractions(
             "source_id": source.source_id,
             "status": SourceStatus.RETRACTED,
             "actor": "m26-synthetic-generator",
+            "actor_identity_type": ActorIdentityType.TRUSTED_PROCESS,
             "reason": "synthetic source retraction",
             "recorded_at": "2026-02-01T00:00:00Z",
         }
         connection.execute(
-            "INSERT INTO source_status_events VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO source_status_events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (*payload.values(), content_hash(payload)),
         )
 
@@ -832,11 +887,12 @@ def _insert_status_event(
         "claim_id": claim_id,
         "status": status,
         "actor": "m26-synthetic-generator",
+        "actor_identity_type": ActorIdentityType.TRUSTED_PROCESS,
         "reason": reason,
         "recorded_at": recorded_at,
     }
     connection.execute(
-        "INSERT INTO claim_status_events VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO claim_status_events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         (*payload.values(), content_hash(payload)),
     )
 

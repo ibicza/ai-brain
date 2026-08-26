@@ -11,6 +11,7 @@ from typing import Any
 from ai_brain.stage2.facts.canonical import canonical_json
 from ai_brain.stage2.facts.memory import FactMemory
 from ai_brain.stage2.facts.models import (
+    ActorIdentityType,
     ApprovalDecision,
     ProposalStatus,
 )
@@ -27,6 +28,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--root", type=Path, required=True)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("init")
+    migrate = commands.add_parser("migrate")
+    migrate.add_argument("--source-root", type=Path, required=True)
 
     for name in ("add-entity", "add-predicate", "propose-claim", "query"):
         command = commands.add_parser(name)
@@ -43,11 +46,20 @@ def build_parser() -> argparse.ArgumentParser:
     review = commands.add_parser("review-claim")
     review.add_argument("--proposal-id", required=True)
     review.add_argument("--reviewer", required=True)
+    review.add_argument(
+        "--reviewer-type",
+        choices=tuple(ActorIdentityType),
+        required=True,
+    )
 
     approve = commands.add_parser("approve-claim")
     approve.add_argument("--proposal-id", required=True)
     approve.add_argument("--reviewer", required=True)
-    approve.add_argument("--reviewer-type", default="HUMAN")
+    approve.add_argument(
+        "--reviewer-type",
+        choices=tuple(ActorIdentityType),
+        required=True,
+    )
     approve.add_argument(
         "--decision",
         choices=("APPROVE", "MARK_CONTESTED"),
@@ -70,16 +82,25 @@ def build_parser() -> argparse.ArgumentParser:
     supersede.add_argument("--old-claim-id", required=True)
     supersede.add_argument("--new-claim-id", required=True)
     supersede.add_argument("--actor", required=True)
+    supersede.add_argument(
+        "--actor-type", choices=tuple(ActorIdentityType), required=True
+    )
     supersede.add_argument("--reason", required=True)
 
     retract_claim = commands.add_parser("retract-claim")
     retract_claim.add_argument("--claim-id", required=True)
     retract_claim.add_argument("--actor", required=True)
+    retract_claim.add_argument(
+        "--actor-type", choices=tuple(ActorIdentityType), required=True
+    )
     retract_claim.add_argument("--reason", required=True)
 
     retract_source = commands.add_parser("retract-source")
     retract_source.add_argument("--source-id", required=True)
     retract_source.add_argument("--actor", required=True)
+    retract_source.add_argument(
+        "--actor-type", choices=tuple(ActorIdentityType), required=True
+    )
     retract_source.add_argument("--reason", required=True)
 
     commands.add_parser("verify")
@@ -105,6 +126,11 @@ def main() -> None:
     if args.command == "restore":
         memory = FactMemory(FactDatabase.restore(args.backup_dir, args.root))
         _print({"status": "RESTORED", "snapshot_hash": memory.database.snapshot_hash()})
+        return
+    if args.command == "migrate":
+        from ai_brain.stage2.facts.migration import migrate_v1_to_v2
+
+        _print(migrate_v1_to_v2(args.source_root, args.root))
         return
     memory = FactMemory.open(args.root)
     if args.command == "add-entity":
@@ -144,13 +170,19 @@ def main() -> None:
         _print(asdict(memory.receive_proposal(**row)))
     elif args.command == "review-claim":
         _print(
-            asdict(memory.prepare_for_review(args.proposal_id, reviewer=args.reviewer))
+            asdict(
+                memory.prepare_for_review(
+                    args.proposal_id,
+                    reviewer=args.reviewer,
+                    reviewer_identity_type=ActorIdentityType(args.reviewer_type),
+                )
+            )
         )
     elif args.command == "approve-claim":
         envelope = memory.approve_proposal(
             args.proposal_id,
             reviewer_identity=args.reviewer,
-            reviewer_identity_type=args.reviewer_type,
+            reviewer_identity_type=ActorIdentityType(args.reviewer_type),
             decision=ApprovalDecision(args.decision),
             contested_approval=args.contested,
         )
@@ -185,14 +217,25 @@ def main() -> None:
             args.old_claim_id,
             args.new_claim_id,
             actor=args.actor,
+            actor_identity_type=ActorIdentityType(args.actor_type),
             reason=args.reason,
         )
         _print({"status": "SUPERSEDED"})
     elif args.command == "retract-claim":
-        memory.retract_claim(args.claim_id, actor=args.actor, reason=args.reason)
+        memory.retract_claim(
+            args.claim_id,
+            actor=args.actor,
+            actor_identity_type=ActorIdentityType(args.actor_type),
+            reason=args.reason,
+        )
         _print({"status": "RETRACTED"})
     elif args.command == "retract-source":
-        memory.retract_source(args.source_id, actor=args.actor, reason=args.reason)
+        memory.retract_source(
+            args.source_id,
+            actor=args.actor,
+            actor_identity_type=ActorIdentityType(args.actor_type),
+            reason=args.reason,
+        )
         _print(
             {
                 "status": "SOURCE_RETRACTED",

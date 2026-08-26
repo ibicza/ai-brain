@@ -77,6 +77,8 @@ CREATE TABLE IF NOT EXISTS source_status_events (
     source_id TEXT NOT NULL REFERENCES sources(source_id),
     status TEXT NOT NULL,
     actor TEXT NOT NULL,
+    actor_identity_type TEXT NOT NULL
+        CHECK(actor_identity_type IN ('HUMAN', 'TRUSTED_PROCESS', 'MODEL')),
     reason TEXT,
     recorded_at TEXT NOT NULL,
     event_hash TEXT NOT NULL UNIQUE
@@ -94,6 +96,8 @@ CREATE TABLE IF NOT EXISTS evidence (
     payload_json TEXT NOT NULL
 ) STRICT;
 CREATE INDEX IF NOT EXISTS idx_evidence_source ON evidence(source_id);
+CREATE INDEX IF NOT EXISTS idx_evidence_relation_source
+    ON evidence(relation, source_id, created_at);
 CREATE TABLE IF NOT EXISTS proposals (
     proposal_id TEXT NOT NULL,
     revision INTEGER NOT NULL,
@@ -140,12 +144,16 @@ CREATE TABLE IF NOT EXISTS claim_evidence (
     transaction_hash TEXT NOT NULL UNIQUE,
     PRIMARY KEY (claim_id, evidence_id)
 ) STRICT;
+CREATE INDEX IF NOT EXISTS idx_claim_evidence_polarity_time
+    ON claim_evidence(claim_id, relation, attached_at);
 CREATE TABLE IF NOT EXISTS claim_relations (
     relation_id TEXT PRIMARY KEY,
     source_claim_id TEXT NOT NULL REFERENCES claims(claim_id),
     target_claim_id TEXT NOT NULL REFERENCES claims(claim_id),
     relation_type TEXT NOT NULL,
     actor TEXT NOT NULL,
+    actor_identity_type TEXT NOT NULL
+        CHECK(actor_identity_type IN ('HUMAN', 'TRUSTED_PROCESS', 'MODEL')),
     reason TEXT,
     recorded_at TEXT NOT NULL,
     relation_hash TEXT NOT NULL UNIQUE
@@ -159,6 +167,8 @@ CREATE TABLE IF NOT EXISTS claim_status_events (
     claim_id TEXT NOT NULL REFERENCES claims(claim_id),
     status TEXT NOT NULL,
     actor TEXT NOT NULL,
+    actor_identity_type TEXT NOT NULL
+        CHECK(actor_identity_type IN ('HUMAN', 'TRUSTED_PROCESS', 'MODEL')),
     reason TEXT,
     recorded_at TEXT NOT NULL,
     event_hash TEXT NOT NULL UNIQUE
@@ -181,6 +191,21 @@ CREATE TABLE IF NOT EXISTS conflict_group_claims (
     claim_id TEXT NOT NULL REFERENCES claims(claim_id),
     PRIMARY KEY (conflict_group_id, claim_id)
 ) STRICT;
+CREATE TABLE IF NOT EXISTS conflict_resolution_events (
+    event_id TEXT PRIMARY KEY,
+    conflict_group_id TEXT NOT NULL REFERENCES conflict_groups(conflict_group_id),
+    prior_status TEXT NOT NULL,
+    new_status TEXT NOT NULL,
+    resolution_kind TEXT NOT NULL,
+    actor_identity TEXT NOT NULL,
+    actor_identity_type TEXT NOT NULL
+        CHECK(actor_identity_type IN ('HUMAN', 'TRUSTED_PROCESS', 'MODEL')),
+    recorded_at TEXT NOT NULL,
+    event_hash TEXT NOT NULL UNIQUE,
+    payload_json TEXT NOT NULL
+) STRICT;
+CREATE INDEX IF NOT EXISTS idx_conflict_resolution_time
+    ON conflict_resolution_events(conflict_group_id, recorded_at);
 CREATE TABLE IF NOT EXISTS fact_queries (
     query_id TEXT PRIMARY KEY,
     query_hash TEXT NOT NULL,
@@ -207,6 +232,13 @@ CREATE TABLE IF NOT EXISTS audit_events (
     previous_hash TEXT NOT NULL,
     event_hash TEXT NOT NULL UNIQUE,
     payload_json TEXT NOT NULL
+) STRICT;
+CREATE TABLE IF NOT EXISTS migration_record_hashes (
+    table_name TEXT NOT NULL,
+    record_id TEXT NOT NULL,
+    source_hash TEXT NOT NULL,
+    interpreted_v2_hash TEXT NOT NULL,
+    PRIMARY KEY (table_name, record_id)
 ) STRICT;
 """
 
@@ -429,18 +461,25 @@ class FactDatabase:
             "predicates.jsonl": "SELECT payload_json FROM predicate_definitions ORDER BY predicate_id",
             "sources.jsonl": "SELECT payload_json FROM sources ORDER BY source_id",
             "evidence.jsonl": "SELECT payload_json FROM evidence ORDER BY evidence_id",
+            "proposals.jsonl": "SELECT payload_json FROM proposals ORDER BY proposal_id, revision",
+            "approvals.jsonl": "SELECT payload_json FROM approvals ORDER BY approval_id",
             "claims.jsonl": "SELECT payload_json FROM claims ORDER BY claim_id",
+            "claim_evidence.jsonl": "SELECT * FROM claim_evidence ORDER BY claim_id, evidence_id",
             "relations.jsonl": "SELECT * FROM claim_relations ORDER BY relation_id",
+            "claim_status_events.jsonl": "SELECT * FROM claim_status_events ORDER BY recorded_at, event_id",
+            "source_status_events.jsonl": "SELECT * FROM source_status_events ORDER BY recorded_at, event_id",
+            "conflicts.jsonl": "SELECT payload_json FROM conflict_groups ORDER BY conflict_group_id",
+            "conflict_resolution_events.jsonl": "SELECT payload_json FROM conflict_resolution_events ORDER BY recorded_at, event_id",
         }
         files: dict[str, dict[str, Any]] = {}
         with self.connect() as connection:
             for name, statement in mapping.items():
                 lines = []
                 for row in connection.execute(statement):
-                    if name == "relations.jsonl":
-                        lines.append(canonical_json(dict(row)))
-                    else:
+                    if tuple(row.keys()) == ("payload_json",):
                         lines.append(row[0])
+                    else:
+                        lines.append(canonical_json(dict(row)))
                 content = (("\n".join(lines) + "\n") if lines else "").encode("utf-8")
                 (output / name).write_bytes(content)
                 files[name] = {"sha256": bytes_hash(content), "count": len(lines)}

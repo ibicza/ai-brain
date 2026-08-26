@@ -17,6 +17,7 @@ from ai_brain.stage2.facts.memory import (
     FactWorkflowError,
 )
 from ai_brain.stage2.facts.models import (
+    ActorIdentityType,
     Cardinality,
     ClaimStatus,
     EvidenceLocationKind,
@@ -95,7 +96,8 @@ def _source_evidence(
         location={"start": 11, "end": len(text)},
         extraction_method=method,
         extraction_confidence=Decimal(1),
-        reviewer=reviewer,
+        reviewer=reviewer or "evidence-reviewer",
+        reviewer_identity_type=ActorIdentityType.HUMAN,
         approved=True,
         evidence_id=f"evidence.{suffix}",
     )
@@ -126,10 +128,15 @@ def _commit(
         evidence_ids=(evidence_id,),
         proposal_id=f"proposal.{suffix}",
     )
-    reviewed = memory.prepare_for_review(proposal.proposal_id, reviewer="reviewer")
+    reviewed = memory.prepare_for_review(
+        proposal.proposal_id,
+        reviewer="reviewer",
+        reviewer_identity_type=ActorIdentityType.HUMAN,
+    )
     approval = memory.approve_proposal(
         reviewed.proposal_id,
         reviewer_identity="reviewer",
+        reviewer_identity_type=ActorIdentityType.HUMAN,
     )
     claim = memory.commit_proposal(reviewed.proposal_id, approval.approval_id)
     return claim.claim_id, source_id, evidence_id
@@ -187,12 +194,16 @@ def test_workflow_cannot_skip_or_self_approve_model_proposal(fact_memory) -> Non
     )
     with pytest.raises(FactWorkflowError):
         memory.advance_proposal(proposal.proposal_id, ProposalStatus.REVIEWED)
-    reviewed = memory.prepare_for_review(proposal.proposal_id, reviewer="human")
-    with pytest.raises(FactApprovalError, match="cannot approve itself"):
+    reviewed = memory.prepare_for_review(
+        proposal.proposal_id,
+        reviewer="human",
+        reviewer_identity_type=ActorIdentityType.HUMAN,
+    )
+    with pytest.raises(FactApprovalError, match="non-model typed actor"):
         memory.approve_proposal(
             reviewed.proposal_id,
             reviewer_identity="model",
-            reviewer_identity_type="MODEL",
+            reviewer_identity_type=ActorIdentityType.MODEL,
         )
 
 
@@ -258,7 +269,12 @@ def test_source_retraction_cannot_silently_win_a_conflict(fact_memory) -> None:
     first, first_source, _ = _commit(memory, value=100, suffix="stale-conflict-a")
     second, _, _ = _commit(memory, value=200, suffix="stale-conflict-b")
     clock.value = "2026-03-01T00:00:00Z"
-    memory.retract_source(first_source, actor="publisher", reason="withdrawn")
+    memory.retract_source(
+        first_source,
+        actor="publisher",
+        actor_identity_type=ActorIdentityType.HUMAN,
+        reason="withdrawn",
+    )
     bundle = memory.query(
         memory.make_query(
             subject="city.alpha",
@@ -304,7 +320,12 @@ def test_known_at_preserves_pre_retraction_history(fact_memory) -> None:
     clock.value = "2026-01-01T00:00:00Z"
     claim_id, _, _ = _commit(memory, value=100, suffix="history")
     clock.value = "2026-02-01T00:00:00Z"
-    memory.retract_claim(claim_id, actor="reviewer", reason="source correction")
+    memory.retract_claim(
+        claim_id,
+        actor="reviewer",
+        actor_identity_type=ActorIdentityType.HUMAN,
+        reason="source correction",
+    )
     historical = memory.query(
         memory.make_query(
             subject="city.alpha",
@@ -328,7 +349,12 @@ def test_source_retraction_propagates_without_deletion(fact_memory) -> None:
     memory, clock = fact_memory
     claim_id, source_id, _ = _commit(memory, value=100, suffix="source-retract")
     clock.value = "2026-03-01T00:00:00Z"
-    memory.retract_source(source_id, actor="publisher", reason="withdrawn")
+    memory.retract_source(
+        source_id,
+        actor="publisher",
+        actor_identity_type=ActorIdentityType.HUMAN,
+        reason="withdrawn",
+    )
     result = memory.query(
         memory.make_query(
             subject="city.alpha",
@@ -457,9 +483,21 @@ def test_write_transaction_rolls_back_and_supersession_cycles_fail(fact_memory) 
 
     first, _, _ = _commit(memory, value=100, suffix="cycle-a")
     second, _, _ = _commit(memory, value=200, suffix="cycle-b")
-    memory.supersede_claim(first, second, actor="reviewer", reason="new version")
+    memory.supersede_claim(
+        first,
+        second,
+        actor="reviewer",
+        actor_identity_type=ActorIdentityType.HUMAN,
+        reason="new version",
+    )
     with pytest.raises(ValueError, match="cycle"):
-        memory.supersede_claim(second, first, actor="reviewer", reason="bad cycle")
+        memory.supersede_claim(
+            second,
+            first,
+            actor="reviewer",
+            actor_identity_type=ActorIdentityType.HUMAN,
+            reason="bad cycle",
+        )
 
 
 def test_synthetic_generator_has_required_coverage(tmp_path: Path) -> None:
