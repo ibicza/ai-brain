@@ -190,7 +190,9 @@ class Stage2Router:
             equivalence_scope=result.equivalence_scope,
             search_status=result.status,
             structural_identity_differs=structural_difference,
-            full_trace_equivalent=not structural_difference,
+            full_trace_equivalent=(
+                result.status == SearchStatus.EXACT_MATCH and not structural_difference
+            ),
             retrieval_mode=result.retrieval_mode,
             retrieval_evidence=evidence,
             candidate_list_hash=candidate_list_hash(result),
@@ -642,6 +644,15 @@ def validate_selection_receipt(receipt: SkillSelectionReceipt) -> None:
             raise SkillDispatchError("Equivalent receipt evidence is inconsistent")
         if not isinstance(evidence.get("warning"), str) or not evidence["warning"]:
             raise SkillDispatchError("Equivalent receipt lacks structural warning")
+    if (
+        receipt.search_status
+        not in {
+            SearchStatus.EXACT_MATCH,
+            SearchStatus.FINAL_STATE_EQUIVALENT,
+        }
+        and receipt.full_trace_equivalent
+    ):
+        raise SkillDispatchError("Assistive receipt cannot claim execution identity")
 
 
 def validate_dispatch_receipt(

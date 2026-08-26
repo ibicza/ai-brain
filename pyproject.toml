@@ -17,6 +17,7 @@ dependencies = [
 ai-brain = "ai_brain:main"
 ai-brain-stage1 = "ai_brain.stage1.cli:main"
 ai-brain-stage2 = "ai_brain.stage2.cli:main"
+ai-brain-facts = "ai_brain.stage2.facts.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]

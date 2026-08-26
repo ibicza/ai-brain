@@ -849,3 +849,25 @@ def test_research_biencoder_smoke_is_assistive_only(catalog, tmp_path: Path) -> 
     save_retriever(retriever, checkpoint, training)
     loaded = load_retriever(checkpoint)
     assert loaded.registry_hash == registry.manifest.registry_hash
+
+    import torch
+
+    from ai_brain.stage2.learned import LearnedCheckpointCompatibility
+
+    legacy_payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
+    legacy_payload["schema_version"] = 1
+    legacy_payload.pop("skill_registry_schema_version")
+    legacy_payload.pop("compatibility")
+    legacy = tmp_path / "retriever-v2-archival.pt"
+    torch.save(legacy_payload, legacy)
+    with pytest.raises(ValueError, match="ARCHIVAL_RESEARCH_ONLY.*REBIND"):
+        load_retriever(legacy)
+    archival = load_retriever(legacy, allow_archival_research=True)
+    assert (
+        archival.checkpoint_compatibility
+        == LearnedCheckpointCompatibility.ARCHIVAL_RESEARCH_ONLY
+    )
+    assert (
+        archival.checkpoint_required_action
+        == LearnedCheckpointCompatibility.REBIND_OR_REEXPORT_REQUIRED
+    )

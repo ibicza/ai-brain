@@ -279,6 +279,21 @@ def test_equivalent_only_route_requires_special_confirmation_and_dispatches(
         assert required in event_types
 
 
+def test_assistive_selection_never_claims_execution_identity(m252_catalog) -> None:
+    root, catalog, _, registry = m252_catalog
+    router = _router(root, catalog, registry, "assistive-identity")
+    query, result = router.search_assistive(
+        "clear register A",
+        "en",
+        query_id_factory=lambda: "assistive-identity-query",
+    )
+    assert result.status == SearchStatus.CANDIDATES
+    selection = router.prepare_selection(query, result, result.candidates[0].skill_id)
+    assert not selection.full_trace_equivalent
+    assert selection.requested_specification_hash is None
+    validate_selection_receipt(selection)
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     [

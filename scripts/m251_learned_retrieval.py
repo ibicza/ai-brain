@@ -126,7 +126,9 @@ def open_blind_once(registry_path, dataset_dir, output_dir, *, device="cpu"):
     results = {}
     for condition in recipe["conditions"]:
         checkpoint = output_dir / f"{condition}_seed_{recipe['seed']}.pt"
-        retriever = load_retriever(checkpoint, device=device)
+        retriever = load_retriever(
+            checkpoint, device=device, allow_archival_research=True
+        )
         if retriever.registry_hash != registry.manifest.registry_hash:
             raise ValueError("checkpoint registry hash mismatch")
         results[condition] = evaluate_fair_retriever(retriever, blind)
@@ -157,7 +159,9 @@ def verify_evidence(registry_path, dataset_dir, output_dir, *, device="cpu"):
     registry = SkillRegistry.load(registry_path)
     for condition in recipe["conditions"]:
         retriever = load_retriever(
-            output_dir / f"{condition}_seed_{recipe['seed']}.pt", device=device
+            output_dir / f"{condition}_seed_{recipe['seed']}.pt",
+            device=device,
+            allow_archival_research=True,
         )
         if retriever.registry_hash != registry.manifest.registry_hash:
             raise ValueError("checkpoint registry hash mismatch")

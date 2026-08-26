@@ -15,6 +15,7 @@ import statistics
 import time
 from collections import Counter
 from dataclasses import asdict, dataclass
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,13 @@ from ai_brain.stage2.dataset import load_jsonl, model_visible_text
 from ai_brain.stage2.models import SkillRecord
 from ai_brain.stage2.registry import SkillRegistry
 from ai_brain.stage2.skill_corpora import build_skill_corpus
+from ai_brain.stage2.version import SKILL_REGISTRY_SCHEMA_VERSION
+
+
+class LearnedCheckpointCompatibility(StrEnum):
+    CURRENT = "CURRENT"
+    ARCHIVAL_RESEARCH_ONLY = "ARCHIVAL_RESEARCH_ONLY"
+    REBIND_OR_REEXPORT_REQUIRED = "REBIND_OR_REEXPORT_REQUIRED"
 
 
 @dataclass(frozen=True)
@@ -81,6 +89,10 @@ class LearnedRetriever:
     registry_hash: str
     threshold: float
     device: str
+    checkpoint_compatibility: LearnedCheckpointCompatibility = (
+        LearnedCheckpointCompatibility.CURRENT
+    )
+    checkpoint_required_action: LearnedCheckpointCompatibility | None = None
 
     @torch.inference_mode()
     def rank(
@@ -361,7 +373,10 @@ def save_retriever(
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(
         {
-            "schema_version": 1,
+            "schema_version": 2,
+            "skill_registry_schema_version": SKILL_REGISTRY_SCHEMA_VERSION,
+            "compatibility": LearnedCheckpointCompatibility.CURRENT,
+            "required_action": None,
             "config": asdict(retriever.config),
             "state_dict": retriever.model.state_dict(),
             "skill_ids": retriever.skill_ids,
@@ -375,10 +390,36 @@ def save_retriever(
     )
 
 
-def load_retriever(path: Path, *, device: str = "cpu") -> LearnedRetriever:
+def load_retriever(
+    path: Path,
+    *,
+    device: str = "cpu",
+    allow_archival_research: bool = False,
+) -> LearnedRetriever:
     payload = torch.load(path, map_location=device, weights_only=False)
-    if not isinstance(payload, dict) or payload.get("schema_version") != 1:
-        raise ValueError("Unsupported learned retriever checkpoint")
+    if not isinstance(payload, dict):
+        raise TypeError("Unsupported learned retriever checkpoint")
+    checkpoint_schema = payload.get("schema_version")
+    registry_schema = payload.get("skill_registry_schema_version")
+    compatibility = LearnedCheckpointCompatibility.CURRENT
+    required_action = None
+    if checkpoint_schema == 1 and registry_schema is None:
+        compatibility = LearnedCheckpointCompatibility.ARCHIVAL_RESEARCH_ONLY
+        required_action = LearnedCheckpointCompatibility.REBIND_OR_REEXPORT_REQUIRED
+        if not allow_archival_research:
+            raise ValueError(
+                "ARCHIVAL_RESEARCH_ONLY: v2 learned checkpoint is not bound to "
+                "SkillRegistry v3; REBIND_OR_REEXPORT_REQUIRED"
+            )
+    elif (
+        checkpoint_schema != 2
+        or registry_schema != SKILL_REGISTRY_SCHEMA_VERSION
+        or payload.get("compatibility") != LearnedCheckpointCompatibility.CURRENT
+        or payload.get("required_action") is not None
+    ):
+        raise ValueError(
+            "REBIND_OR_REEXPORT_REQUIRED: learned checkpoint registry schema mismatch"
+        )
     config = BiEncoderConfig(**payload["config"])
     model = SkillBiEncoder(config).to(device)
     model.load_state_dict(payload["state_dict"], strict=True)
@@ -390,6 +431,8 @@ def load_retriever(path: Path, *, device: str = "cpu") -> LearnedRetriever:
         registry_hash=payload["registry_hash"],
         threshold=float(payload["threshold"]),
         device=device,
+        checkpoint_compatibility=compatibility,
+        checkpoint_required_action=required_action,
     )
 
 

@@ -129,7 +129,9 @@ def open_blind(
     blind_rows = [{**row, **targets[row["query_id"]]} for row in public]
     seed_results = []
     for seed in recipe["confirmed_seeds"]:
-        retriever = load_retriever(output_dir / f"seed_{seed}.pt")
+        retriever = load_retriever(
+            output_dir / f"seed_{seed}.pt", allow_archival_research=True
+        )
         if retriever.registry_hash != registry.manifest.registry_hash:
             raise ValueError("Checkpoint registry hash mismatch")
         seed_results.append(
@@ -161,7 +163,9 @@ def verify_evidence(
         raise ValueError("Blind result seed set mismatch")
     cross_language = {}
     for seed in recipe["confirmed_seeds"]:
-        retriever = load_retriever(output_dir / f"seed_{seed}.pt")
+        retriever = load_retriever(
+            output_dir / f"seed_{seed}.pt", allow_archival_research=True
+        )
         if retriever.registry_hash != registry.manifest.registry_hash:
             raise ValueError("Checkpoint registry hash mismatch")
         cross_language[str(seed)] = evaluate_cross_language_consistency(
