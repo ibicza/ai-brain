@@ -17,6 +17,7 @@ from ai_brain.stage2.router.models import (
     DependencySnapshot,
     RequestEnvelope,
     RequestSourceKind,
+    ResponseStage,
     RouteAuthority,
     RouteDecision,
     RouteStatus,
@@ -25,8 +26,11 @@ from ai_brain.stage2.router.models import (
     ToolCallProposal,
     UnifiedResponseEnvelope,
 )
-from ai_brain.stage2.router.persistence import RouterStore
-from ai_brain.stage2.router.request import create_request
+from ai_brain.stage2.router.persistence import (
+    RouterStore,
+    migrate_router_store_v1_to_v2,
+)
+from ai_brain.stage2.router.request import create_request, validate_request
 from ai_brain.stage2.router.service import UnifiedRouterService
 from ai_brain.stage2.router.tool_registry import ToolRegistry
 from ai_brain.stage2.service import Stage2Router
@@ -42,6 +46,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--stage2-audit", type=Path)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("init")
+    migrate = commands.add_parser("migrate")
+    migrate.add_argument("--source-root", type=Path, required=True)
     route = commands.add_parser("route")
     route.add_argument("--request", type=Path, required=True)
     text = commands.add_parser("route-text")
@@ -88,6 +94,9 @@ def main() -> None:
         return
     if args.command == "restore":
         _print(RouterStore.restore(args.backup_dir, args.root).verify())
+        return
+    if args.command == "migrate":
+        _print(migrate_router_store_v1_to_v2(args.source_root, args.root))
         return
     store = RouterStore(args.root)
     if args.command == "show-route":
@@ -156,19 +165,28 @@ def main() -> None:
         request, decision = _route_context(store, args.route_id)
         service._requests[request.request_id] = request
         service._decisions[decision.route_decision_hash] = decision
-        service.respond(request, decision)
+        prepared = service.respond(request, decision)
         service.confirm_skill(decision, identity=args.identity)
         proposal = proposal_from_json(read_json(args.proposal))
         receipt = receipt_from_json(read_json(args.installed_receipt))
         state = _read(args.initial_state)
-        _, execution, dispatch = service.dispatch_skill(
+        dispatched, final_response = service.dispatch_skill_and_respond(
+            prepared,
             request,
             decision,
             proposal=proposal,
             installed_receipt=receipt,
             initial_state=state,
         )
-        _print({"execution": asdict(execution), "dispatch": asdict(dispatch)})
+        assert dispatched is not None
+        _, execution, dispatch = dispatched
+        _print(
+            {
+                "execution": asdict(execution),
+                "dispatch": asdict(dispatch),
+                "response": asdict(final_response),
+            }
+        )
     elif args.command == "confirm-tool":
         proposal = _proposal(_artifact(store, args.proposal_hash, "tool_proposal"))
         _restore_context(service, store, proposal)
@@ -185,10 +203,20 @@ def main() -> None:
             _artifact(store, args.confirmation_hash, "tool_confirmation")
         )
         _restore_context(service, store, proposal, confirmation)
-        _print(asdict(service.execute_tool(proposal, confirmation)))
+        prepared = _prepared_response(store, proposal.proposal_hash)
+        service._responses[prepared.response_hash] = prepared
+        result, response = service.execute_tool_and_respond(
+            prepared, proposal, confirmation
+        )
+        _print(
+            {
+                "result": asdict(result) if result is not None else None,
+                "response": asdict(response),
+            }
+        )
     elif args.command == "replay":
         response = _response(_artifact(store, args.response_hash, "response"))
-        _print({"status": service.replay(response)})
+        _print(asdict(service.replay(response)))
 
 
 def _service(args, store: RouterStore) -> UnifiedRouterService:
@@ -253,12 +281,16 @@ def _route_context(
 
 def _request(row: dict[str, Any]) -> RequestEnvelope:
     row = dict(row)
+    _exact_keys(row, RequestEnvelope)
     row["source_kind"] = RequestSourceKind(row["source_kind"])
-    return RequestEnvelope(**row)
+    request = RequestEnvelope(**row)
+    validate_request(request)
+    return request
 
 
 def _decision(row: dict[str, Any]) -> RouteDecision:
     row = dict(row)
+    _exact_keys(row, RouteDecision)
     row["selected_target"] = RouteTarget(row["selected_target"])
     row["route_status"] = RouteStatus(row["route_status"])
     row["route_authority"] = RouteAuthority(row["route_authority"])
@@ -269,27 +301,60 @@ def _decision(row: dict[str, Any]) -> RouteDecision:
 
     row["required_next_action"] = NextAction(row["required_next_action"])
     row["ambiguity_fields"] = tuple(row["ambiguity_fields"])
-    row["dependencies"] = DependencySnapshot(**row["dependencies"])
+    dependencies = dict(row["dependencies"])
+    dependencies["tool_implementation_manifest_hashes"] = tuple(
+        tuple(item) for item in dependencies["tool_implementation_manifest_hashes"]
+    )
+    row["dependencies"] = DependencySnapshot(**dependencies)
     return RouteDecision(**row)
 
 
 def _proposal(row: dict[str, Any]) -> ToolCallProposal:
+    _exact_keys(row, ToolCallProposal)
     return ToolCallProposal(**row)
 
 
 def _confirmation(row: dict[str, Any]) -> ToolCallConfirmation:
     row = dict(row)
+    _exact_keys(row, ToolCallConfirmation)
     row["decision"] = ConfirmationDecision(row["decision"])
     return ToolCallConfirmation(**row)
 
 
 def _response(row: dict[str, Any]) -> UnifiedResponseEnvelope:
     row = dict(row)
+    _exact_keys(row, UnifiedResponseEnvelope)
     row["route_target"] = RouteTarget(row["route_target"])
     row["route_authority"] = RouteAuthority(row["route_authority"])
     row["route_status"] = RouteStatus(row["route_status"])
+    row["response_stage"] = ResponseStage(row["response_stage"])
     row["warnings"] = tuple(row["warnings"])
     return UnifiedResponseEnvelope(**row)
+
+
+def _prepared_response(
+    store: RouterStore, proposal_hash: str
+) -> UnifiedResponseEnvelope:
+    with store.connect() as connection:
+        rows = connection.execute(
+            "SELECT payload_json FROM artifacts WHERE artifact_type = 'response' ORDER BY created_at"
+        )
+        for item in rows:
+            row = json.loads(item[0])
+            if row.get("tool_proposal_hash") == proposal_hash:
+                return _response(row)
+    raise KeyError("prepared response for proposal is unavailable")
+
+
+def _exact_keys(row: dict[str, Any], artifact_type: type) -> None:
+    from dataclasses import fields
+
+    expected = {item.name for item in fields(artifact_type)}
+    if set(row) != expected:
+        raise ValueError(
+            f"{artifact_type.__name__} schema mismatch: "
+            f"missing={sorted(expected - set(row))}, extra={sorted(set(row) - expected)}"
+        )
 
 
 def _read(path: Path) -> dict[str, Any]:

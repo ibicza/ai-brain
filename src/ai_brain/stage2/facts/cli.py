@@ -133,6 +133,7 @@ def main() -> None:
         from ai_brain.stage2.facts.migration import (
             migrate_v1_to_v2,
             migrate_v2_to_v3,
+            migrate_v3_to_v4,
         )
 
         connection = sqlite3.connect(args.source_root / "fact_memory.sqlite3")
@@ -146,8 +147,10 @@ def main() -> None:
             _print(migrate_v1_to_v2(args.source_root, args.root))
         elif version == "2":
             _print(migrate_v2_to_v3(args.source_root, args.root))
+        elif version == "3":
+            _print(migrate_v3_to_v4(args.source_root, args.root))
         else:
-            raise ValueError("migration source must use FactMemory schema v1 or v2")
+            raise ValueError("migration source must use FactMemory schema v1, v2 or v3")
         return
     memory = FactMemory.open(args.root)
     if args.command == "add-entity":

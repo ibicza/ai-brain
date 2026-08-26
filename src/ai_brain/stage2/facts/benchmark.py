@@ -28,6 +28,7 @@ from ai_brain.stage2.facts.models import (
     ClaimStatus,
     ConflictGroup,
     ConflictResolutionEvent,
+    ConflictResolutionIntegrityStatus,
     ConflictResolutionKind,
     ConflictResolutionStatus,
     EntityRecord,
@@ -50,6 +51,7 @@ from ai_brain.stage2.facts.persistence import FactDatabase
 from ai_brain.stage2.facts.values import FactValue, FactValueKind
 from ai_brain.stage2.facts.version import (
     FACT_APPROVAL_POLICY_VERSION,
+    FACT_CONFLICT_POLICY_VERSION,
     FACT_MEMORY_SCHEMA_VERSION,
 )
 
@@ -823,6 +825,9 @@ def _insert_conflicts(
             "actor_identity_type": ActorIdentityType.TRUSTED_PROCESS,
             "reason": "synthetic conflict created",
             "recorded_at": created_at,
+            "policy_version": FACT_CONFLICT_POLICY_VERSION,
+            "integrity_status": ConflictResolutionIntegrityStatus.VERIFIED_V4,
+            "legacy_event_hash": None,
         }
         event = ConflictResolutionEvent(
             **event_payload,

@@ -136,6 +136,11 @@ class ResolutionEvidenceRole(StrEnum):
     SUPPORTS_DISMISSAL = "SUPPORTS_DISMISSAL"
 
 
+class ConflictResolutionIntegrityStatus(StrEnum):
+    VERIFIED_V4 = "VERIFIED_V4"
+    LEGACY_RESOLUTION_REVIEW_REQUIRED = "LEGACY_RESOLUTION_REVIEW_REQUIRED"
+
+
 class EvidenceConflictState(StrEnum):
     CLEAR = "CLEAR"
     CONTESTED = "CONTESTED"
@@ -351,6 +356,11 @@ class ConflictResolutionEvent:
     recorded_at: str
     event_hash: str
     evidence_links: tuple[ResolutionEvidenceLink, ...] = ()
+    policy_version: str = "4.0"
+    integrity_status: ConflictResolutionIntegrityStatus = (
+        ConflictResolutionIntegrityStatus.VERIFIED_V4
+    )
+    legacy_event_hash: str | None = None
 
 
 @dataclass(frozen=True)

@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import shutil
 import sqlite3
+import tempfile
+import time
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
@@ -55,7 +57,10 @@ _ARTIFACT_HASH_FIELDS = {
     "tool_proposal": "proposal_hash",
     "tool_confirmation": "confirmation_hash",
     "tool_result": "result_hash",
+    "tool_manifest": "manifest_hash",
     "response": "response_hash",
+    "failure": "failure_hash",
+    "replay_report": "report_hash",
 }
 
 
@@ -122,6 +127,8 @@ class RouterStore:
         request_id: str | None,
         event_type: str,
     ) -> None:
+        if artifact_type not in _ARTIFACT_HASH_FIELDS:
+            raise RouterStoreIntegrityError("unsupported router artifact type")
         payload = asdict(artifact) if is_dataclass(artifact) else artifact
         payload_json = canonical_json(payload)
         created_at = str(
@@ -185,6 +192,16 @@ class RouterStore:
             raise
         finally:
             connection.close()
+
+    def audit_replay(self, object_id: str | None = None) -> list[dict[str, Any]]:
+        sql = "SELECT * FROM audit_events"
+        parameters: tuple[Any, ...] = ()
+        if object_id is not None:
+            sql += " WHERE object_id = ?"
+            parameters = (object_id,)
+        sql += " ORDER BY sequence"
+        with self.connect() as connection:
+            return [dict(row) for row in connection.execute(sql, parameters)]
 
     @staticmethod
     def _append_audit(
@@ -261,6 +278,7 @@ class RouterStore:
                     raise RouterStoreIntegrityError(
                         "router artifact payload must be an object"
                     )
+                _validate_artifact_payload(row["artifact_type"], payload)
                 stored_hash = payload.pop(hash_field, None)
                 if (
                     stored_hash != row["artifact_hash"]
@@ -320,3 +338,311 @@ class RouterStore:
         store = cls(target)
         store.verify()
         return store
+
+
+def create_router_v1_compatibility_fixture(
+    v2_root: Path, v1_root: Path
+) -> dict[str, Any]:
+    source = RouterStore(v2_root)
+    source.verify()
+    target = v1_root.resolve()
+    if target.exists() and any(target.iterdir()):
+        raise RouterStoreIntegrityError("router v1 fixture target must be empty")
+    shutil.copytree(source.root, target, dirs_exist_ok=True)
+    connection = sqlite3.connect(target / "unified_router.sqlite3")
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute(
+            "UPDATE metadata SET value = '1' WHERE key = 'schema_version'"
+        )
+        for row in tuple(
+            connection.execute(
+                "SELECT artifact_id, payload_json FROM artifacts WHERE artifact_type = 'response'"
+            )
+        ):
+            payload = json.loads(row["payload_json"])
+            for name in (
+                "response_stage",
+                "dependency_snapshot_hash",
+                "parent_prepared_response_hash",
+                "confirmation_hash",
+                "stage1_execution_hash",
+                "failure_artifact_hash",
+                "completed_at",
+                "schema_version",
+                "legacy_status",
+            ):
+                payload.pop(name, None)
+            payload.pop("response_hash")
+            digest = content_hash(payload)
+            payload["response_hash"] = digest
+            connection.execute(
+                "UPDATE artifacts SET artifact_hash = ?, payload_json = ? "
+                "WHERE artifact_type = 'response' AND artifact_id = ?",
+                (digest, canonical_json(payload), row["artifact_id"]),
+            )
+        connection.commit()
+    finally:
+        connection.close()
+    _verify_v1_store(target)
+    return _tree_manifest(target)
+
+
+def migrate_router_store_v1_to_v2(
+    source_root: Path, target_root: Path
+) -> dict[str, Any]:
+    """Publish a verified v2 copy while preserving the v1 source bytes."""
+    source = source_root.resolve()
+    target = target_root.resolve()
+    if source == target or source in target.parents or target in source.parents:
+        raise RouterStoreIntegrityError("migration source and target must be separate")
+    if target.exists() and any(target.iterdir()):
+        raise RouterStoreIntegrityError("migration target must be new or empty")
+    source_before = _tree_manifest(source)
+    _verify_v1_store(source)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix="router-v2-migration-", dir=target.parent))
+    work = staging / "router-v2"
+    started = time.perf_counter()
+    try:
+        shutil.copytree(source, work)
+        path = work / "unified_router.sqlite3"
+        connection = sqlite3.connect(path)
+        connection.row_factory = sqlite3.Row
+        try:
+            connection.execute(
+                "UPDATE metadata SET value = ? WHERE key = 'schema_version'",
+                (str(ROUTER_STORE_SCHEMA_VERSION),),
+            )
+            legacy_responses = 0
+            for row in tuple(
+                connection.execute(
+                    "SELECT artifact_id, payload_json FROM artifacts WHERE artifact_type = 'response'"
+                )
+            ):
+                payload = json.loads(row["payload_json"])
+                payload["legacy_status"] = "LEGACY_INCOMPLETE_DEPENDENCY_BINDING"
+                payload["schema_version"] = 1
+                payload["response_stage"] = (
+                    "PREPARED"
+                    if payload.get("skill_selection_hash") is not None
+                    or payload.get("tool_proposal_hash") is not None
+                    else "COMPLETED"
+                )
+                payload["dependency_snapshot_hash"] = "0" * 64
+                payload.setdefault("parent_prepared_response_hash", None)
+                payload.setdefault("confirmation_hash", None)
+                payload.setdefault("stage1_execution_hash", None)
+                payload.setdefault("failure_artifact_hash", None)
+                payload.setdefault("completed_at", None)
+                payload["response_hash"] = ""
+                body = dict(payload)
+                body.pop("response_hash")
+                digest = content_hash(body)
+                payload["response_hash"] = digest
+                connection.execute(
+                    "UPDATE artifacts SET artifact_hash = ?, payload_json = ? "
+                    "WHERE artifact_type = 'response' AND artifact_id = ?",
+                    (digest, canonical_json(payload), row["artifact_id"]),
+                )
+                legacy_responses += 1
+            connection.commit()
+        finally:
+            connection.close()
+        store = RouterStore(work)
+        store.append_audit(
+            "ROUTER_STORE_MIGRATED_V1_TO_V2",
+            {
+                "source_tree_sha256": source_before["tree_sha256"],
+                "legacy_incomplete_response_count": legacy_responses,
+            },
+        )
+        integrity = store.verify()
+        if _tree_manifest(source) != source_before:
+            raise RouterStoreIntegrityError("router v1 source changed during migration")
+        manifest_body = {
+            "migration": "ROUTER_STORE_V1_TO_V2",
+            "source_schema_version": 1,
+            "target_schema_version": ROUTER_STORE_SCHEMA_VERSION,
+            "source_tree_sha256": source_before["tree_sha256"],
+            "source_database_sha256": source_before["files"].get(
+                "unified_router.sqlite3"
+            ),
+            "target_database_sha256": bytes_hash(store.path.read_bytes()),
+            "legacy_incomplete_response_count": legacy_responses,
+            "source_unchanged": True,
+            "integrity": integrity,
+            "duration_seconds": format(time.perf_counter() - started, ".6f"),
+            "created_at": utc_now(),
+        }
+        manifest = {
+            **manifest_body,
+            "migration_manifest_sha256": content_hash(manifest_body),
+        }
+        (work / "migration_manifest.json").write_text(
+            canonical_json(manifest) + "\n", encoding="utf-8"
+        )
+        if target.exists():
+            target.rmdir()
+        work.replace(target)
+        shutil.rmtree(staging, ignore_errors=True)
+        RouterStore(target).verify()
+        return manifest
+    except BaseException as error:
+        shutil.rmtree(staging, ignore_errors=True)
+        if target.exists() and not any(target.iterdir()):
+            target.rmdir()
+        if _tree_manifest(source) != source_before:
+            raise RouterStoreIntegrityError(
+                "migration failed and source preservation could not be proven"
+            ) from error
+        if isinstance(error, RouterStoreIntegrityError):
+            raise
+        raise RouterStoreIntegrityError(
+            "router v1 migration failed; source was left untouched"
+        ) from error
+
+
+def _validate_artifact_payload(artifact_type: str, payload: dict[str, Any]) -> None:
+    from dataclasses import fields
+
+    from ai_brain.stage2.router.models import (
+        ClarificationRequest,
+        ReplayReport,
+        RequestEnvelope,
+        ResponseStage,
+        RouteDecision,
+        RouteReceipt,
+        RouterFailureArtifact,
+        ToolCallConfirmation,
+        ToolCallProposal,
+        ToolImplementationManifest,
+        ToolResultBundle,
+        UnifiedResponseEnvelope,
+    )
+    from ai_brain.stage2.router.version import (
+        TOOL_CALL_SCHEMA_VERSION,
+        UNIFIED_RESPONSE_SCHEMA_VERSION,
+    )
+
+    if artifact_type == "response":
+        legacy = payload.get("legacy_status") == "LEGACY_INCOMPLETE_DEPENDENCY_BINDING"
+        if legacy:
+            if payload.get("schema_version") != 1:
+                raise RouterStoreIntegrityError("legacy response schema is invalid")
+            return
+        if payload.get("schema_version") != UNIFIED_RESPONSE_SCHEMA_VERSION:
+            raise RouterStoreIntegrityError("response schema is incompatible")
+        try:
+            ResponseStage(payload["response_stage"])
+        except (KeyError, ValueError) as error:
+            raise RouterStoreIntegrityError("response stage is invalid") from error
+        if not _is_sha256(payload.get("dependency_snapshot_hash")):
+            raise RouterStoreIntegrityError("response dependency hash is invalid")
+    elif artifact_type in {"tool_proposal", "tool_confirmation", "tool_result"}:
+        if payload.get("schema_version") != TOOL_CALL_SCHEMA_VERSION:
+            raise RouterStoreIntegrityError("tool-call schema is incompatible")
+        for name in (
+            "dependency_snapshot_hash",
+            "tool_implementation_manifest_hash",
+        ):
+            if not _is_sha256(payload.get(name)):
+                raise RouterStoreIntegrityError(f"tool artifact {name} is invalid")
+    classes = {
+        "request": RequestEnvelope,
+        "route_decision": RouteDecision,
+        "route_receipt": RouteReceipt,
+        "clarification": ClarificationRequest,
+        "tool_proposal": ToolCallProposal,
+        "tool_confirmation": ToolCallConfirmation,
+        "tool_result": ToolResultBundle,
+        "tool_manifest": ToolImplementationManifest,
+        "response": UnifiedResponseEnvelope,
+        "failure": RouterFailureArtifact,
+        "replay_report": ReplayReport,
+    }
+    artifact_class = classes[artifact_type]
+    current = (
+        artifact_type in {"clarification", "tool_manifest", "failure", "replay_report"}
+        or payload.get("schema_version")
+        in {
+            UNIFIED_RESPONSE_SCHEMA_VERSION,
+            TOOL_CALL_SCHEMA_VERSION,
+            2,
+        }
+        or (
+            artifact_type == "route_decision"
+            and payload.get("dependencies", {}).get("unified_router_schema_version")
+            == 2
+        )
+    )
+    if current:
+        expected = {item.name for item in fields(artifact_class)}
+        if set(payload) != expected:
+            raise RouterStoreIntegrityError(
+                f"{artifact_type} has an inexact trusted schema"
+            )
+
+
+def _is_sha256(value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(item in "0123456789abcdef" for item in value)
+    )
+
+
+def _verify_v1_store(root: Path) -> None:
+    path = root / "unified_router.sqlite3"
+    if not path.is_file():
+        raise RouterStoreIntegrityError("router v1 database is missing")
+    connection = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
+    connection.row_factory = sqlite3.Row
+    try:
+        metadata = dict(connection.execute("SELECT key, value FROM metadata"))
+        if metadata.get("schema_version") != "1":
+            raise RouterStoreIntegrityError("migration requires router schema v1")
+        if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+            raise RouterStoreIntegrityError("router v1 SQLite integrity failed")
+        previous = "0" * 64
+        for row in connection.execute("SELECT * FROM audit_events ORDER BY sequence"):
+            if row["previous_hash"] != previous:
+                raise RouterStoreIntegrityError("router v1 audit chain is broken")
+            if bytes_hash(row["payload_json"].encode("utf-8")) != row["payload_hash"]:
+                raise RouterStoreIntegrityError("router v1 audit payload changed")
+            body = {
+                key: row[key]
+                for key in (
+                    "event_id",
+                    "event_type",
+                    "object_id",
+                    "recorded_at",
+                    "payload_hash",
+                    "previous_hash",
+                )
+            }
+            if content_hash(body) != row["event_hash"]:
+                raise RouterStoreIntegrityError("router v1 audit hash changed")
+            previous = row["event_hash"]
+        for row in connection.execute("SELECT * FROM artifacts"):
+            try:
+                hash_field = _ARTIFACT_HASH_FIELDS[row["artifact_type"]]
+                payload = json.loads(row["payload_json"])
+            except (KeyError, TypeError, json.JSONDecodeError) as error:
+                raise RouterStoreIntegrityError(
+                    "router v1 artifact is invalid"
+                ) from error
+            stored = payload.pop(hash_field, None)
+            if stored != row["artifact_hash"] or content_hash(payload) != stored:
+                raise RouterStoreIntegrityError("router v1 artifact hash mismatch")
+    finally:
+        connection.close()
+
+
+def _tree_manifest(root: Path) -> dict[str, Any]:
+    files = {
+        item.relative_to(root).as_posix(): bytes_hash(item.read_bytes())
+        for item in sorted(root.rglob("*"))
+        if item.is_file()
+    }
+    return {"files": files, "tree_sha256": content_hash(files)}

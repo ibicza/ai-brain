@@ -8,8 +8,9 @@ from typing import Any
 
 from ai_brain.stage2.router.version import (
     ROUTE_RECEIPT_SCHEMA_VERSION,
+    TOOL_CALL_SCHEMA_VERSION,
     TOOL_REGISTRY_SCHEMA_VERSION,
-    UNIFIED_ROUTER_SCHEMA_VERSION,
+    UNIFIED_RESPONSE_SCHEMA_VERSION,
 )
 
 
@@ -88,6 +89,7 @@ class ToolExecutionStatus(StrEnum):
     TOOL_UNAVAILABLE = "TOOL_UNAVAILABLE"
     TOOL_REQUIRES_FUTURE_INTEGRATION = "TOOL_REQUIRES_FUTURE_INTEGRATION"
     STALE_DEPENDENCY = "STALE_DEPENDENCY"
+    INVALID_REQUEST = "INVALID_REQUEST"
 
 
 class ConfirmationDecision(StrEnum):
@@ -97,7 +99,25 @@ class ConfirmationDecision(StrEnum):
 
 class ReplayStatus(StrEnum):
     CURRENT = "CURRENT"
-    STALE_SNAPSHOT = "STALE_SNAPSHOT"
+    STALE_FACT_MEMORY = "STALE_FACT_MEMORY"
+    STALE_SKILL_REGISTRY = "STALE_SKILL_REGISTRY"
+    STALE_RULE_MEMORY = "STALE_RULE_MEMORY"
+    STALE_TOOL_REGISTRY = "STALE_TOOL_REGISTRY"
+    STALE_TOOL_IMPLEMENTATION = "STALE_TOOL_IMPLEMENTATION"
+    INCOMPATIBLE_VERSION = "INCOMPATIBLE_VERSION"
+    INCOMPATIBLE_LEGACY_ARTIFACT = "INCOMPATIBLE_LEGACY_ARTIFACT"
+    INVALID_ARTIFACT = "INVALID_ARTIFACT"
+
+
+class ResponseStage(StrEnum):
+    PREPARED = "PREPARED"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class ToolArgumentValidationStatus(StrEnum):
+    VALID = "VALID"
+    INVALID = "INVALID"
 
 
 @dataclass(frozen=True)
@@ -123,10 +143,19 @@ class DependencySnapshot:
     skill_registry_hash: str | None
     rule_memory_hash: str | None
     tool_registry_hash: str
+    tool_implementation_manifest_hashes: tuple[tuple[str, str], ...]
     stage1_version: str
     stage2_schema_version: int
     fact_memory_schema_version: int
-    unified_router_schema_version: int = UNIFIED_ROUTER_SCHEMA_VERSION
+    skill_registry_schema_version: int
+    rule_memory_schema_version: int
+    tool_registry_schema_version: int
+    unified_router_schema_version: int
+    route_policy_version: str
+    tool_policy_version: str
+    conflict_policy_version: str
+    equivalence_policy_version: str
+    dependency_snapshot_hash: str
 
 
 @dataclass(frozen=True)
@@ -143,6 +172,7 @@ class RouteDecision:
     ambiguity_fields: tuple[str, ...]
     required_next_action: NextAction
     dependencies: DependencySnapshot
+    dependency_snapshot_hash: str
     created_at: str
     route_decision_hash: str
 
@@ -171,6 +201,7 @@ class RouteReceipt:
     route_authority: RouteAuthority
     exact_parser_evidence_hash: str
     dependency_hash: str
+    dependency_snapshot_hash: str
     clarification_hash: str | None
     confirmer_identity: str | None
     confirmer_identity_type: str | None
@@ -194,6 +225,7 @@ class ToolDescriptor:
     network_required: bool
     approval_policy: ToolApprovalPolicy
     implementation_hash: str
+    implementation_manifest_hash: str
     active: bool
     deprecated: bool
     created_at: str
@@ -212,10 +244,13 @@ class ToolCallProposal:
     typed_arguments: dict[str, Any]
     argument_hash: str
     tool_implementation_hash: str
+    tool_implementation_manifest_hash: str
     tool_registry_hash: str
+    dependency_snapshot_hash: str
     confirmation_required: bool
     created_at: str
     proposal_hash: str
+    schema_version: int = TOOL_CALL_SCHEMA_VERSION
 
 
 @dataclass(frozen=True)
@@ -225,12 +260,15 @@ class ToolCallConfirmation:
     request_hash: str
     route_decision_hash: str
     tool_registry_hash: str
+    tool_implementation_manifest_hash: str
+    dependency_snapshot_hash: str
     argument_hash: str
     decision: ConfirmationDecision
     confirmer_identity: str
     confirmer_identity_type: str
     created_at: str
     confirmation_hash: str
+    schema_version: int = TOOL_CALL_SCHEMA_VERSION
 
 
 @dataclass(frozen=True)
@@ -244,12 +282,69 @@ class ToolResultBundle:
     tool_id: str
     tool_version: int
     tool_implementation_hash: str
+    tool_implementation_manifest_hash: str
     tool_registry_hash: str
+    dependency_snapshot_hash: str
     argument_hash: str
     status: ToolExecutionStatus
     output: dict[str, Any]
     executed_at: str
     result_hash: str
+    schema_version: int = TOOL_CALL_SCHEMA_VERSION
+
+
+@dataclass(frozen=True)
+class ToolImplementationManifest:
+    tool_id: str
+    tool_version: int
+    module: str
+    entry_function_qualified_name: str
+    entry_function_source_hash: str
+    helper_function_source_hashes: tuple[tuple[str, str], ...]
+    constant_value_hashes: tuple[tuple[str, str], ...]
+    input_normalization_policy: str
+    numeric_context_policy: str
+    output_canonicalization_policy: str
+    runtime_contract: str
+    implementation_policy_version: str
+    manifest_hash: str
+
+
+@dataclass(frozen=True)
+class ToolArgumentValidation:
+    tool_id: str
+    status: ToolArgumentValidationStatus
+    canonical_arguments: dict[str, Any] | None
+    argument_hash: str | None
+    issues: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ReplayReport:
+    overall_status: ReplayStatus
+    artifact_hash: str
+    stored_dependency_snapshot: DependencySnapshot | None
+    current_dependency_snapshot: DependencySnapshot
+    stale_components: tuple[str, ...]
+    incompatible_versions: tuple[str, ...]
+    checked_at: str
+    report_hash: str
+
+
+@dataclass(frozen=True)
+class RouterFailureArtifact:
+    failure_id: str
+    request_id: str
+    request_hash: str
+    route_decision_hash: str
+    proposal_hash: str | None
+    tool_id: str | None
+    tool_version: int | None
+    tool_implementation_manifest_hash: str | None
+    argument_hash: str | None
+    failure_code: str
+    created_at: str
+    failure_hash: str
 
 
 @dataclass(frozen=True)
@@ -261,15 +356,24 @@ class UnifiedResponseEnvelope:
     route_target: RouteTarget
     route_authority: RouteAuthority
     route_status: RouteStatus
+    response_stage: ResponseStage
+    dependency_snapshot_hash: str
     fact_answer_hash: str | None = None
     skill_selection_hash: str | None = None
     skill_dispatch_hash: str | None = None
     tool_proposal_hash: str | None = None
     tool_result_hash: str | None = None
+    parent_prepared_response_hash: str | None = None
+    confirmation_hash: str | None = None
+    stage1_execution_hash: str | None = None
+    failure_artifact_hash: str | None = None
     clarification_hash: str | None = None
     warnings: tuple[str, ...] = ()
     dependency_snapshots: dict[str, str | int | None] = field(default_factory=dict)
     created_at: str = ""
+    completed_at: str | None = None
+    schema_version: int = UNIFIED_RESPONSE_SCHEMA_VERSION
+    legacy_status: str | None = None
     response_hash: str = ""
 
     def __post_init__(self) -> None:
@@ -283,3 +387,12 @@ class UnifiedResponseEnvelope:
             raise ValueError("unified response contains multiple authority domains")
         if self.route_target == RouteTarget.COMPOSITE_REQUIRED and any(authorities):
             raise ValueError("composite response cannot contain an executed payload")
+        if self.response_stage == ResponseStage.PREPARED and (
+            self.fact_answer_hash is not None
+            or self.skill_dispatch_hash is not None
+            or self.tool_result_hash is not None
+            or self.failure_artifact_hash is not None
+        ):
+            raise ValueError("prepared response contains a final authority payload")
+        if self.response_stage == ResponseStage.FAILED and any(authorities):
+            raise ValueError("failed response cannot contain successful authority")

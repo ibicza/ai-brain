@@ -45,6 +45,7 @@ def make_decision(
         "ambiguity_fields": ambiguity_fields,
         "required_next_action": next_action,
         "dependencies": dependencies,
+        "dependency_snapshot_hash": dependencies.dependency_snapshot_hash,
         "created_at": clock(),
     }
     return RouteDecision(**body, route_decision_hash=content_hash(body))
@@ -101,6 +102,7 @@ def make_route_receipt(
         "route_authority": decision.route_authority,
         "exact_parser_evidence_hash": content_hash(decision.parser_evidence),
         "dependency_hash": content_hash(asdict(decision.dependencies)),
+        "dependency_snapshot_hash": decision.dependency_snapshot_hash,
         "clarification_hash": clarification_hash,
         "confirmer_identity": confirmer_identity,
         "confirmer_identity_type": confirmer_identity_type,
@@ -131,5 +133,6 @@ def validate_route_receipt(
         or receipt.route_authority != decision.route_authority
         or receipt.exact_parser_evidence_hash != content_hash(decision.parser_evidence)
         or receipt.dependency_hash != content_hash(asdict(decision.dependencies))
+        or receipt.dependency_snapshot_hash != decision.dependency_snapshot_hash
     ):
         raise ValueError("route receipt binding mismatch")

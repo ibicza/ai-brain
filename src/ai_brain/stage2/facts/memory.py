@@ -36,6 +36,7 @@ from ai_brain.stage2.facts.models import (
     ClaimStatus,
     ConflictGroup,
     ConflictResolutionEvent,
+    ConflictResolutionIntegrityStatus,
     ConflictResolutionKind,
     ConflictResolutionStatus,
     EntityRecord,
@@ -72,6 +73,7 @@ from ai_brain.stage2.facts.values import FactValue, FactValueKind
 from ai_brain.stage2.facts.version import (
     FACT_ANSWER_SCHEMA_VERSION,
     FACT_APPROVAL_POLICY_VERSION,
+    FACT_CONFLICT_POLICY_VERSION,
     FACT_MEMORY_SCHEMA_VERSION,
     FACT_RENDERING_VERSION,
 )
@@ -1886,18 +1888,40 @@ class FactMemory:
                 raise FactApprovalError(
                     "resolution evidence role or polarity is invalid"
                 )
-        if kind == ConflictResolutionKind.MANUAL_RESOLUTION and removed:
+        if kind == ConflictResolutionKind.MANUAL_RESOLUTION:
             directly_justified = {
                 item.claim_id
                 for item in links
                 if item.role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
             }
-            support_selected = any(
-                item.role == ResolutionEvidenceRole.SUPPORTS_REMAINING for item in links
+            supported_retained = {
+                item.claim_id
+                for item in links
+                if item.role == ResolutionEvidenceRole.SUPPORTS_REMAINING
+            }
+            removed_links = tuple(
+                item
+                for item in links
+                if item.role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
             )
-            if not support_selected and directly_justified != removed:
+            if (
+                supported_retained != retained
+                or directly_justified != removed
+                or len({item.evidence_id for item in removed_links})
+                != len(removed_links)
+            ):
                 raise FactApprovalError(
-                    "resolution evidence does not justify every removed side"
+                    "resolution evidence must justify every retained and removed side"
+                )
+        if kind == ConflictResolutionKind.DISMISSED_AS_NOT_CONFLICTING:
+            dismissal_supported = {
+                item.claim_id
+                for item in links
+                if item.role == ResolutionEvidenceRole.SUPPORTS_DISMISSAL
+            }
+            if dismissal_supported != group_claims:
+                raise FactApprovalError(
+                    "dismissal evidence must support every retained claim"
                 )
         return tuple(
             sorted(links, key=lambda item: (item.claim_id, item.evidence_id, item.role))
@@ -1949,6 +1973,7 @@ class FactMemory:
             "SELECT event_id, conflict_group_id, payload_json FROM conflict_resolution_events"
         ):
             payload = json.loads(row["payload_json"])
+            event = _conflict_resolution_from_json(row["payload_json"])
             payload_links = {
                 (
                     str(item["evidence_id"]),
@@ -1970,6 +1995,59 @@ class FactMemory:
                 )
             }
             remaining = set(payload.get("remaining_claim_ids", ()))
+            selected = set(payload.get("selected_claim_ids", ()))
+            if not selected <= group_claims or not remaining <= group_claims:
+                raise FactMemoryIntegrityError(
+                    "conflict resolution contains a foreign claim"
+                )
+            if event.integrity_status == ConflictResolutionIntegrityStatus.VERIFIED_V4:
+                if event.policy_version != FACT_CONFLICT_POLICY_VERSION:
+                    raise FactMemoryIntegrityError(
+                        "conflict resolution policy version is incompatible"
+                    )
+                if event.resolution_kind == ConflictResolutionKind.MANUAL_RESOLUTION:
+                    if selected != remaining or not remaining:
+                        raise FactMemoryIntegrityError(
+                            "manual conflict partition is invalid"
+                        )
+                    supported = {
+                        claim_id
+                        for _, claim_id, role, _ in payload_links
+                        if role == ResolutionEvidenceRole.SUPPORTS_REMAINING
+                    }
+                    contradicted = {
+                        claim_id
+                        for _, claim_id, role, _ in payload_links
+                        if role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
+                    }
+                    if (
+                        supported != remaining
+                        or contradicted != group_claims - remaining
+                    ):
+                        raise FactMemoryIntegrityError(
+                            "manual conflict evidence partition is incomplete"
+                        )
+                if (
+                    event.resolution_kind
+                    == ConflictResolutionKind.DISMISSED_AS_NOT_CONFLICTING
+                ):
+                    dismissal_supported = {
+                        claim_id
+                        for _, claim_id, role, _ in payload_links
+                        if role == ResolutionEvidenceRole.SUPPORTS_DISMISSAL
+                    }
+                    if (
+                        selected != group_claims
+                        or remaining != group_claims
+                        or dismissal_supported != group_claims
+                    ):
+                        raise FactMemoryIntegrityError(
+                            "dismissal conflict evidence partition is incomplete"
+                        )
+            elif event.new_status != ConflictResolutionStatus.UNRESOLVED:
+                raise FactMemoryIntegrityError(
+                    "legacy review-required resolution cannot be trusted as resolved"
+                )
             for _, claim_id, role_value, _ in payload_links:
                 role = ResolutionEvidenceRole(role_value)
                 if claim_id not in group_claims:
@@ -1977,14 +2055,32 @@ class FactMemory:
                         "resolution evidence claim is outside conflict group"
                     )
                 if (
-                    role == ResolutionEvidenceRole.SUPPORTS_REMAINING
-                    and claim_id not in remaining
-                ) or (
-                    role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
-                    and claim_id in remaining
+                    event.integrity_status
+                    == ConflictResolutionIntegrityStatus.VERIFIED_V4
+                    and (
+                        (
+                            role == ResolutionEvidenceRole.SUPPORTS_REMAINING
+                            and claim_id not in remaining
+                        )
+                        or (
+                            role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
+                            and claim_id in remaining
+                        )
+                    )
                 ):
                     raise FactMemoryIntegrityError(
                         "resolution evidence partition binding changed"
+                    )
+            for evidence_id, _, _, _ in payload_links:
+                evidence_row = connection.execute(
+                    "SELECT created_at FROM evidence WHERE evidence_id = ?",
+                    (evidence_id,),
+                ).fetchone()
+                if evidence_row is None or temporal_key(evidence_row[0]) > temporal_key(
+                    event.recorded_at
+                ):
+                    raise FactMemoryIntegrityError(
+                        "resolution evidence postdates the resolution"
                     )
 
     def verify(self) -> dict[str, Any]:
@@ -2510,6 +2606,9 @@ class FactMemory:
             "actor_identity_type": actor_identity_type,
             "reason": reason.strip(),
             "recorded_at": recorded_at,
+            "policy_version": FACT_CONFLICT_POLICY_VERSION,
+            "integrity_status": ConflictResolutionIntegrityStatus.VERIFIED_V4,
+            "legacy_event_hash": None,
         }
         event = ConflictResolutionEvent(
             **payload,
@@ -2572,6 +2671,18 @@ class FactMemory:
             group = _conflict_from_json(row[0])
             projected = self._conflict_as_known_at(connection, group, recorded_at)
             if projected.resolution_status != ConflictResolutionStatus.UNRESOLVED:
+                continue
+            foreign_selected = set(selected_claim_ids) - set(group.claim_ids)
+            if foreign_selected:
+                self.database.append_audit(
+                    connection,
+                    "SUPERSESSION_OUTSIDE_GROUP_NO_AUTO_RESOLUTION",
+                    {
+                        "claim_id": claim_id,
+                        "foreign_selected_claim_ids": tuple(sorted(foreign_selected)),
+                    },
+                    group.conflict_group_id,
+                )
                 continue
             remaining = tuple(
                 item
@@ -3526,6 +3637,11 @@ def _conflict_resolution_from_json(payload: str) -> ConflictResolutionEvent:
         for item in row.get("evidence_links", ())
     )
     row["actor_identity_type"] = ActorIdentityType(row["actor_identity_type"])
+    row["integrity_status"] = ConflictResolutionIntegrityStatus(
+        row.get("integrity_status", "LEGACY_RESOLUTION_REVIEW_REQUIRED")
+    )
+    row.setdefault("policy_version", "3.0")
+    row.setdefault("legacy_event_hash", None)
     return ConflictResolutionEvent(**row)
 
 

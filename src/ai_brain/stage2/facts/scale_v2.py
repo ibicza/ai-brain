@@ -21,6 +21,7 @@ from ai_brain.stage2.facts.migration import migrate_v1_to_v2
 from ai_brain.stage2.facts.models import (
     ActorIdentityType,
     ConflictResolutionEvent,
+    ConflictResolutionIntegrityStatus,
     ConflictResolutionKind,
     ConflictResolutionStatus,
     EvidenceRelation,
@@ -164,7 +165,7 @@ def augment_v2_scale_mix(
                 "event_id": f"conflict_resolution_m261_{uuid4().hex}",
                 "conflict_group_id": group.conflict_group_id,
                 "prior_status": ConflictResolutionStatus.UNRESOLVED,
-                "new_status": ConflictResolutionStatus.RESOLVED,
+                "new_status": ConflictResolutionStatus.UNRESOLVED,
                 "resolution_kind": ConflictResolutionKind.MANUAL_RESOLUTION,
                 "selected_claim_ids": remaining,
                 "remaining_claim_ids": remaining,
@@ -174,6 +175,9 @@ def augment_v2_scale_mix(
                 "actor_identity_type": ActorIdentityType.TRUSTED_PROCESS,
                 "reason": "synthetic reviewed scale resolution",
                 "recorded_at": created_at,
+                "policy_version": "3.0",
+                "integrity_status": ConflictResolutionIntegrityStatus.LEGACY_RESOLUTION_REVIEW_REQUIRED,
+                "legacy_event_hash": None,
             }
             event = ConflictResolutionEvent(
                 **payload,

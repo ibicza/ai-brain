@@ -23,6 +23,7 @@ from ai_brain.stage2.facts.memory import FactMemory, _evidence_from_json
 from ai_brain.stage2.facts.models import (
     ActorIdentityType,
     ConflictResolutionEvent,
+    ConflictResolutionIntegrityStatus,
     ConflictResolutionKind,
     ConflictResolutionStatus,
     EvidenceRelation,
@@ -33,6 +34,7 @@ from ai_brain.stage2.facts.persistence import (
 )
 from ai_brain.stage2.facts.sources import ContentAddressedSourceStore
 from ai_brain.stage2.facts.version import (
+    FACT_CONFLICT_POLICY_VERSION,
     FACT_MEMORY_APPLICATION_ID,
     FACT_MEMORY_MIGRATION_VERSION,
     FACT_MEMORY_SCHEMA_VERSION,
@@ -41,6 +43,45 @@ from ai_brain.stage2.facts.version import (
 
 class FactMemoryMigrationError(RuntimeError):
     pass
+
+
+def create_v3_compatibility_fixture(v4_root: Path, v3_root: Path) -> dict[str, Any]:
+    """Project a verified v4 memory into a structural v3 migration fixture."""
+    source = FactMemory.open(v4_root)
+    source.verify()
+    target = v3_root.resolve()
+    if target.exists() and any(target.iterdir()):
+        raise ValueError("schema-v3 fixture target must be empty")
+    shutil.copytree(v4_root.resolve(), target, dirs_exist_ok=True)
+    connection = sqlite3.connect(target / "fact_memory.sqlite3")
+    connection.row_factory = sqlite3.Row
+    try:
+        for row in tuple(
+            connection.execute(
+                "SELECT event_id, payload_json FROM conflict_resolution_events"
+            )
+        ):
+            payload = json.loads(row["payload_json"])
+            payload.pop("event_hash")
+            payload.pop("policy_version", None)
+            payload.pop("integrity_status", None)
+            payload.pop("legacy_event_hash", None)
+            digest = content_hash(payload)
+            payload["event_hash"] = digest
+            connection.execute(
+                "UPDATE conflict_resolution_events SET event_hash = ?, payload_json = ? WHERE event_id = ?",
+                (digest, canonical_json(payload), row["event_id"]),
+            )
+        connection.execute(
+            "UPDATE metadata SET value = '3' WHERE key IN ('schema_version', 'migration_version')"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+    return {
+        **_verify_v3(target),
+        "fixture_tree_sha256": _tree_manifest(target)["tree_sha256"],
+    }
 
 
 def create_v2_compatibility_fixture(v3_root: Path, v2_root: Path) -> dict[str, Any]:
@@ -301,6 +342,7 @@ def migrate_v2_to_v3(source_root: Path, target_root: Path) -> dict[str, Any]:
     try:
         shutil.copytree(source, work)
         claim_count = _upgrade_v2_to_v3(work)
+        _upgrade_conflict_policy_v4(work)
         database = FactDatabase(work)
         with database.write() as connection:
             database.append_audit(
@@ -361,6 +403,218 @@ def migrate_v2_to_v3(source_root: Path, target_root: Path) -> dict[str, Any]:
         raise FactMemoryMigrationError(
             "schema-v2 migration failed; source was left untouched"
         ) from error
+
+
+def migrate_v3_to_v4(source_root: Path, target_root: Path) -> dict[str, Any]:
+    """Create a verified schema-v4 copy while preserving schema-v3 bytes."""
+    source = source_root.resolve()
+    target = target_root.resolve()
+    if source == target or source in target.parents or target in source.parents:
+        raise FactMemoryMigrationError("migration source and target must be separate")
+    if not source.is_dir():
+        raise FactMemoryMigrationError("schema-v3 source directory is missing")
+    if target.exists() and any(target.iterdir()):
+        raise FactMemoryMigrationError("migration target must be new or empty")
+    source_before = _tree_manifest(source)
+    verification = _verify_v3(source)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix="fact-v4-migration-", dir=target.parent))
+    work = staging / "target-v4"
+    started = time.perf_counter()
+    try:
+        shutil.copytree(source, work)
+        counts = _upgrade_conflict_policy_v4(work)
+        database = FactDatabase(work)
+        with database.write() as connection:
+            database.append_audit(
+                connection,
+                "FACT_MEMORY_MIGRATED_V3_TO_V4",
+                {
+                    "source_root_hash": source_before["tree_sha256"],
+                    "source_snapshot_hash": verification["snapshot_hash"],
+                    **counts,
+                },
+            )
+        integrity = FactMemory.open(work).verify()
+        with database.connect() as connection:
+            connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        if _tree_manifest(source) != source_before:
+            raise FactMemoryMigrationError("schema-v3 source changed during migration")
+        manifest_body = {
+            "migration": "FACT_MEMORY_V3_TO_V4",
+            "source_schema_version": 3,
+            "target_schema_version": FACT_MEMORY_SCHEMA_VERSION,
+            "target_migration_version": FACT_MEMORY_MIGRATION_VERSION,
+            "source_root_hash": source_before["tree_sha256"],
+            "source_database_sha256": source_before["files"].get("fact_memory.sqlite3"),
+            "target_database_sha256": bytes_hash(database.db_path.read_bytes()),
+            "source_snapshot_hash": verification["snapshot_hash"],
+            "target_snapshot_hash": database.snapshot_hash(),
+            **counts,
+            "record_counts": _table_counts(database),
+            "source_unchanged": True,
+            "integrity": integrity,
+            "duration_seconds": format(time.perf_counter() - started, ".6f"),
+            "created_at": utc_now(),
+        }
+        manifest = {
+            **manifest_body,
+            "migration_manifest_sha256": content_hash(manifest_body),
+        }
+        (work / "migration_manifest.json").write_text(
+            canonical_json(manifest) + "\n", encoding="utf-8"
+        )
+        if target.exists():
+            target.rmdir()
+        work.replace(target)
+        shutil.rmtree(staging, ignore_errors=True)
+        FactMemory.open(target).verify()
+        return manifest
+    except BaseException as error:
+        shutil.rmtree(staging, ignore_errors=True)
+        if target.exists() and not any(target.iterdir()):
+            target.rmdir()
+        if _tree_manifest(source) != source_before:
+            raise FactMemoryMigrationError(
+                "migration failed and source-byte preservation could not be proven"
+            ) from error
+        if isinstance(error, FactMemoryMigrationError):
+            raise
+        raise FactMemoryMigrationError(
+            "schema-v3 migration failed; source was left untouched"
+        ) from error
+
+
+def _verify_v3(root: Path) -> dict[str, Any]:
+    db_path = root / "fact_memory.sqlite3"
+    if not db_path.is_file():
+        raise FactMemoryMigrationError("schema-v3 database is missing")
+    connection = sqlite3.connect(
+        f"file:{db_path.as_posix()}?mode=ro&immutable=1", uri=True
+    )
+    connection.row_factory = sqlite3.Row
+    try:
+        metadata = dict(connection.execute("SELECT key, value FROM metadata"))
+        if (
+            metadata.get("schema_version") != "3"
+            or metadata.get("migration_version") != "3"
+        ):
+            raise FactMemoryMigrationError(
+                "migration requires explicit schema-v3 source"
+            )
+        if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+            raise FactMemoryMigrationError("schema-v3 SQLite integrity failed")
+        _verify_audit_chain(connection, schema="v3")
+        snapshot = metadata.get("snapshot_hash")
+        if (
+            not isinstance(snapshot, str)
+            or re.fullmatch(r"[0-9a-f]{64}", snapshot) is None
+        ):
+            raise FactMemoryMigrationError("schema-v3 snapshot hash is invalid")
+        return {"status": "VALID", "snapshot_hash": snapshot}
+    finally:
+        connection.close()
+
+
+def _upgrade_conflict_policy_v4(root: Path) -> dict[str, int]:
+    connection = sqlite3.connect(root / "fact_memory.sqlite3")
+    connection.row_factory = sqlite3.Row
+    safe_count = 0
+    review_count = 0
+    try:
+        for row in tuple(
+            connection.execute("SELECT * FROM conflict_resolution_events")
+        ):
+            payload = json.loads(row["payload_json"])
+            old_hash = str(payload["event_hash"])
+            group_claims = {
+                str(item[0])
+                for item in connection.execute(
+                    "SELECT claim_id FROM conflict_group_claims WHERE conflict_group_id = ?",
+                    (row["conflict_group_id"],),
+                )
+            }
+            selected = set(payload.get("selected_claim_ids", ()))
+            remaining = set(payload.get("remaining_claim_ids", ()))
+            links = payload.get("evidence_links", ())
+            supported = {
+                str(item["claim_id"])
+                for item in links
+                if item.get("role") == "SUPPORTS_REMAINING"
+            }
+            contradicted = {
+                str(item["claim_id"])
+                for item in links
+                if item.get("role") == "CONTRADICTS_REMOVED"
+            }
+            kind = str(payload["resolution_kind"])
+            safe = selected <= group_claims and remaining <= group_claims
+            if kind == str(ConflictResolutionKind.MANUAL_RESOLUTION):
+                safe = (
+                    safe
+                    and bool(remaining)
+                    and selected == remaining
+                    and supported == remaining
+                    and contradicted == group_claims - remaining
+                )
+            if kind == str(ConflictResolutionKind.DISMISSED_AS_NOT_CONFLICTING):
+                dismissal_supported = {
+                    str(item["claim_id"])
+                    for item in links
+                    if item.get("role") == "SUPPORTS_DISMISSAL"
+                }
+                safe = (
+                    safe
+                    and selected == group_claims
+                    and remaining == group_claims
+                    and dismissal_supported == group_claims
+                )
+            if kind in {
+                str(ConflictResolutionKind.CLAIM_SUPERSEDED),
+                str(ConflictResolutionKind.CLAIM_RETRACTED),
+            }:
+                safe = safe and selected <= group_claims
+            payload.pop("event_hash", None)
+            payload["policy_version"] = FACT_CONFLICT_POLICY_VERSION if safe else "3.0"
+            payload["integrity_status"] = (
+                ConflictResolutionIntegrityStatus.VERIFIED_V4
+                if safe
+                else ConflictResolutionIntegrityStatus.LEGACY_RESOLUTION_REVIEW_REQUIRED
+            )
+            payload["legacy_event_hash"] = None if safe else old_hash
+            if not safe:
+                payload["new_status"] = ConflictResolutionStatus.UNRESOLVED
+                payload["selected_claim_ids"] = ()
+                payload["remaining_claim_ids"] = tuple(sorted(group_claims))
+                review_count += 1
+            else:
+                safe_count += 1
+            digest = content_hash(payload)
+            payload["event_hash"] = digest
+            connection.execute(
+                "UPDATE conflict_resolution_events SET new_status = ?, event_hash = ?, payload_json = ? WHERE event_id = ?",
+                (
+                    payload["new_status"],
+                    digest,
+                    canonical_json(payload),
+                    row["event_id"],
+                ),
+            )
+        connection.execute(
+            "UPDATE metadata SET value = ? WHERE key = 'schema_version'",
+            (str(FACT_MEMORY_SCHEMA_VERSION),),
+        )
+        connection.execute(
+            "UPDATE metadata SET value = ? WHERE key = 'migration_version'",
+            (str(FACT_MEMORY_MIGRATION_VERSION),),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+    return {
+        "verified_v4_resolution_count": safe_count,
+        "legacy_resolution_review_required_count": review_count,
+    }
 
 
 def _verify_v2(root: Path) -> dict[str, Any]:
@@ -839,6 +1093,9 @@ def _seed_conflict_history(connection: sqlite3.Connection) -> int:
             "actor_identity_type": ActorIdentityType.TRUSTED_PROCESS,
             "reason": "initial state derived from immutable schema-v1 conflict group",
             "recorded_at": group["created_at"],
+            "policy_version": FACT_CONFLICT_POLICY_VERSION,
+            "integrity_status": ConflictResolutionIntegrityStatus.VERIFIED_V4,
+            "legacy_event_hash": None,
         }
         event = ConflictResolutionEvent(
             **payload,

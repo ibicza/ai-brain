@@ -278,17 +278,24 @@ def run_m261_acceptance(output_dir: Path) -> dict[str, Any]:
     )
 
     memory, clock = _scenario(root / "19-manual")
-    first = _commit(memory, "first", 100)
+    first_support = _evidence(memory, "first-support", 100)
+    first_contradiction = _evidence(
+        memory,
+        "first-contradiction",
+        100,
+        relation=EvidenceRelation.CONTRADICTS,
+    )
+    first = _commit(memory, "first", 100, (first_support, first_contradiction))
     second = _commit(memory, "second", 200)
     conflict = memory.conflicts()[0]
-    evidence_id = memory.get_claim(second).supporting_evidence_ids[0]
+    retained_evidence_id = memory.get_claim(second).supporting_evidence_ids[0]
     clock.value = "2026-02-01T00:00:00Z"
     memory.resolve_conflict(
         conflict.conflict_group_id,
         resolution_kind=ConflictResolutionKind.MANUAL_RESOLUTION,
         selected_claim_ids=(second,),
         remaining_claim_ids=(second,),
-        evidence_ids=(evidence_id,),
+        evidence_ids=(retained_evidence_id, first_contradiction[1]),
         actor_identity="reviewer",
         actor_identity_type=ActorIdentityType.HUMAN,
         reason=f"manual evidence rejects {first}",

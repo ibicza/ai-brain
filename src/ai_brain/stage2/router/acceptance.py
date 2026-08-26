@@ -221,14 +221,10 @@ def run_m27_acceptance(output_dir: Path) -> dict[str, Any]:
                     },
                 },
             )
-            _, response = service.handle(request)
-            proposal = service._tool_proposals[response.tool_proposal_hash]
-            result = service.execute_tool(
-                proposal,
-                service.confirm_tool(proposal, identity="m27-acceptance"),
-            )
+            decision, response = service.handle(request)
             require(
-                result.status == ToolExecutionStatus.REJECTED,
+                decision.route_status == RouteStatus.INVALID_REQUEST
+                and response.tool_proposal_hash is None,
                 "unsafe division accepted",
             )
             tool_errors += 1

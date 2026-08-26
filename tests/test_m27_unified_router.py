@@ -237,13 +237,9 @@ def test_date_tool_and_division_by_zero(tmp_path: Path) -> None:
             "arguments": {"operation": "DIVIDE", "operands": ["1", "0"]},
         },
     )
-    _, response = service.handle(request)
-    proposal = service._tool_proposals[response.tool_proposal_hash]
-    result = service.execute_tool(
-        proposal, service.confirm_tool(proposal, identity="user")
-    )
-    assert result.status == ToolExecutionStatus.REJECTED
-    assert result.output == {"error": "division by zero"}
+    decision, response = service.handle(request)
+    assert decision.route_status == RouteStatus.INVALID_REQUEST
+    assert response.tool_proposal_hash is None
 
 
 def test_tampered_tool_argument_fails_closed(tmp_path: Path) -> None:
@@ -460,17 +456,17 @@ def test_cross_domain_supersession_and_unrelated_resolution_evidence_fail(
             actor_identity_type=ActorIdentityType.HUMAN,
             reason="unrelated evidence",
         )
-    event = facts.resolve_conflict(
-        group.conflict_group_id,
-        resolution_kind=ConflictResolutionKind.MANUAL_RESOLUTION,
-        selected_claim_ids=(second,),
-        remaining_claim_ids=(second,),
-        evidence_ids=(second_evidence,),
-        actor_identity="reviewer",
-        actor_identity_type=ActorIdentityType.HUMAN,
-        reason="use retained support",
-    )
-    assert event.evidence_links[0].claim_id == second
+    with pytest.raises(FactApprovalError, match="every retained and removed"):
+        facts.resolve_conflict(
+            group.conflict_group_id,
+            resolution_kind=ConflictResolutionKind.MANUAL_RESOLUTION,
+            selected_claim_ids=(second,),
+            remaining_claim_ids=(second,),
+            evidence_ids=(second_evidence,),
+            actor_identity="reviewer",
+            actor_identity_type=ActorIdentityType.HUMAN,
+            reason="winner support alone is insufficient under policy v4",
+        )
 
 
 def test_router_backup_restore(tmp_path: Path) -> None:
