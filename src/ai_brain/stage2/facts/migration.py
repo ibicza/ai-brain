@@ -43,6 +43,80 @@ class FactMemoryMigrationError(RuntimeError):
     pass
 
 
+def create_v2_compatibility_fixture(v3_root: Path, v2_root: Path) -> dict[str, Any]:
+    """Project a verified v3 memory into a structural v2 migration fixture."""
+    source = FactMemory.open(v3_root)
+    source.verify()
+    target = v2_root.resolve()
+    if target.exists() and any(target.iterdir()):
+        raise ValueError("schema-v2 fixture target must be empty")
+    shutil.copytree(v3_root.resolve(), target, dirs_exist_ok=True)
+    connection = sqlite3.connect(target / "fact_memory.sqlite3")
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute("PRAGMA foreign_keys = OFF")
+        connection.execute("DROP TABLE IF EXISTS resolution_evidence_links")
+        connection.execute("DROP INDEX IF EXISTS idx_claim_record_hash")
+        connection.execute(
+            """CREATE TABLE claims_v2 (
+                claim_id TEXT PRIMARY KEY,
+                subject_entity_id TEXT NOT NULL REFERENCES entities(entity_id),
+                predicate_id TEXT NOT NULL REFERENCES predicate_definitions(predicate_id),
+                object_hash TEXT NOT NULL,
+                qualifier_hash TEXT NOT NULL,
+                valid_from_key TEXT NOT NULL,
+                valid_to_key TEXT NOT NULL,
+                recorded_at TEXT NOT NULL,
+                base_status TEXT NOT NULL,
+                canonical_claim_hash TEXT NOT NULL UNIQUE,
+                proposal_hash TEXT NOT NULL,
+                approval_hash TEXT NOT NULL,
+                payload_json TEXT NOT NULL
+            ) STRICT"""
+        )
+        for row in tuple(connection.execute("SELECT * FROM claims")):
+            payload = json.loads(row["payload_json"])
+            payload.pop("claim_record_hash", None)
+            payload["schema_version"] = 2
+            connection.execute(
+                "INSERT INTO claims_v2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    row["claim_id"],
+                    row["subject_entity_id"],
+                    row["predicate_id"],
+                    row["object_hash"],
+                    row["qualifier_hash"],
+                    row["valid_from_key"],
+                    row["valid_to_key"],
+                    row["recorded_at"],
+                    row["base_status"],
+                    row["canonical_claim_hash"],
+                    row["proposal_hash"],
+                    row["approval_hash"],
+                    canonical_json(payload),
+                ),
+            )
+        connection.execute("DROP TABLE claims")
+        connection.execute("ALTER TABLE claims_v2 RENAME TO claims")
+        connection.execute(
+            "CREATE INDEX idx_claim_exact ON claims(subject_entity_id, predicate_id, recorded_at)"
+        )
+        connection.execute(
+            "CREATE INDEX idx_claim_valid ON claims(subject_entity_id, predicate_id, valid_from_key, valid_to_key)"
+        )
+        connection.execute(
+            "UPDATE metadata SET value = '2' WHERE key IN ('schema_version', 'migration_version')"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+    verification = _verify_v2(target)
+    return {
+        **verification,
+        "fixture_tree_sha256": _tree_manifest(target)["tree_sha256"],
+    }
+
+
 def create_v1_compatibility_fixture(v2_root: Path, v1_root: Path) -> dict[str, Any]:
     """Freeze a deterministic structural schema-v1 fixture from trusted v2 rows."""
     source = FactMemory.open(v2_root)
@@ -85,6 +159,16 @@ def create_v1_compatibility_fixture(v2_root: Path, v1_root: Path) -> dict[str, A
                 (tuple(row) for row in rows),
             )
         _rewrite_projected_v1_transaction_hashes(destination)
+        for row in tuple(
+            destination.execute("SELECT claim_id, payload_json FROM claims")
+        ):
+            payload = json.loads(row[1])
+            payload.pop("claim_record_hash", None)
+            payload["schema_version"] = 1
+            destination.execute(
+                "UPDATE claims SET payload_json = ? WHERE claim_id = ?",
+                (canonical_json(payload), row[0]),
+            )
         destination.execute(
             "UPDATE metadata SET value = '1' WHERE key IN ('schema_version', 'migration_version')"
         )
@@ -138,6 +222,7 @@ def migrate_v1_to_v2(source_root: Path, target_root: Path) -> dict[str, Any]:
                     "initial_conflict_event_count": conflict_event_count,
                 },
             )
+        _upgrade_v2_to_v3(work)
         memory = FactMemory.open(work)
         integrity = memory.verify()
         with database.connect() as connection:
@@ -148,7 +233,7 @@ def migrate_v1_to_v2(source_root: Path, target_root: Path) -> dict[str, Any]:
         counts = _table_counts(database)
         polarity = _polarity_counts(database)
         manifest_body = {
-            "migration": "FACT_MEMORY_V1_TO_V2",
+            "migration": "FACT_MEMORY_V1_TO_V3",
             "source_schema_version": 1,
             "target_schema_version": FACT_MEMORY_SCHEMA_VERSION,
             "target_migration_version": FACT_MEMORY_MIGRATION_VERSION,
@@ -194,6 +279,237 @@ def migrate_v1_to_v2(source_root: Path, target_root: Path) -> dict[str, Any]:
         raise FactMemoryMigrationError(
             "schema-v1 migration failed; source was left untouched"
         ) from error
+
+
+def migrate_v2_to_v3(source_root: Path, target_root: Path) -> dict[str, Any]:
+    """Create a verified schema-v3 copy while preserving schema-v2 bytes."""
+    source = source_root.resolve()
+    target = target_root.resolve()
+    if source == target or source in target.parents or target in source.parents:
+        raise FactMemoryMigrationError("migration source and target must be separate")
+    if not source.is_dir():
+        raise FactMemoryMigrationError("schema-v2 source directory is missing")
+    if target.exists() and any(target.iterdir()):
+        raise FactMemoryMigrationError("migration target must be new or empty")
+
+    source_before = _tree_manifest(source)
+    verification = _verify_v2(source)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix="fact-v3-migration-", dir=target.parent))
+    work = staging / "target-v3"
+    started = time.perf_counter()
+    try:
+        shutil.copytree(source, work)
+        claim_count = _upgrade_v2_to_v3(work)
+        database = FactDatabase(work)
+        with database.write() as connection:
+            database.append_audit(
+                connection,
+                "FACT_MEMORY_MIGRATED_V2_TO_V3",
+                {
+                    "source_root_hash": source_before["tree_sha256"],
+                    "source_snapshot_hash": verification["snapshot_hash"],
+                    "claim_record_hash_count": claim_count,
+                },
+            )
+        integrity = FactMemory.open(work).verify()
+        with database.connect() as connection:
+            connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        if _tree_manifest(source) != source_before:
+            raise FactMemoryMigrationError("schema-v2 source changed during migration")
+        manifest_body = {
+            "migration": "FACT_MEMORY_V2_TO_V3",
+            "source_schema_version": 2,
+            "target_schema_version": FACT_MEMORY_SCHEMA_VERSION,
+            "target_migration_version": FACT_MEMORY_MIGRATION_VERSION,
+            "source_root_hash": source_before["tree_sha256"],
+            "source_database_sha256": source_before["files"].get("fact_memory.sqlite3"),
+            "target_database_sha256": bytes_hash(database.db_path.read_bytes()),
+            "source_snapshot_hash": verification["snapshot_hash"],
+            "target_snapshot_hash": database.snapshot_hash(),
+            "record_counts": _table_counts(database),
+            "claim_record_hash_count": claim_count,
+            "evidence_polarity_counts": _polarity_counts(database),
+            "source_unchanged": True,
+            "integrity": integrity,
+            "duration_seconds": format(time.perf_counter() - started, ".6f"),
+            "created_at": utc_now(),
+        }
+        manifest = {
+            **manifest_body,
+            "migration_manifest_sha256": content_hash(manifest_body),
+        }
+        (work / "migration_manifest.json").write_text(
+            canonical_json(manifest) + "\n", encoding="utf-8"
+        )
+        if target.exists():
+            target.rmdir()
+        work.replace(target)
+        shutil.rmtree(staging, ignore_errors=True)
+        FactMemory.open(target).verify()
+        return manifest
+    except BaseException as error:
+        shutil.rmtree(staging, ignore_errors=True)
+        if target.exists() and not any(target.iterdir()):
+            target.rmdir()
+        if _tree_manifest(source) != source_before:
+            raise FactMemoryMigrationError(
+                "migration failed and source-byte preservation could not be proven"
+            ) from error
+        if isinstance(error, FactMemoryMigrationError):
+            raise
+        raise FactMemoryMigrationError(
+            "schema-v2 migration failed; source was left untouched"
+        ) from error
+
+
+def _verify_v2(root: Path) -> dict[str, Any]:
+    db_path = root / "fact_memory.sqlite3"
+    if not db_path.is_file():
+        raise FactMemoryMigrationError("schema-v2 database is missing")
+    connection = sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True)
+    connection.row_factory = sqlite3.Row
+    try:
+        metadata = dict(connection.execute("SELECT key, value FROM metadata"))
+        if (
+            metadata.get("schema_version") != "2"
+            or metadata.get("migration_version") != "2"
+        ):
+            raise FactMemoryMigrationError(
+                "migration requires an explicit schema-v2 source"
+            )
+        if int(metadata.get("application_id", "0")) != FACT_MEMORY_APPLICATION_ID:
+            raise FactMemoryMigrationError("schema-v2 application ID mismatch")
+        if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+            raise FactMemoryMigrationError("schema-v2 SQLite integrity failed")
+        _verify_audit_chain(connection, schema="v2")
+        _verify_v2_records(connection)
+        snapshots = tuple(
+            row[0]
+            for row in connection.execute("SELECT DISTINCT snapshot_hash FROM sources")
+        )
+    finally:
+        connection.close()
+    blobs = ContentAddressedSourceStore(root / "blobs")
+    for snapshot_hash in snapshots:
+        blobs.verify(snapshot_hash)
+    return {
+        "status": "VALID_V2",
+        "snapshot_hash": metadata["snapshot_hash"],
+        "blob_count": len(snapshots),
+    }
+
+
+def _verify_audit_chain(connection: sqlite3.Connection, *, schema: str) -> None:
+    previous = "0" * 64
+    for row in connection.execute("SELECT * FROM audit_events ORDER BY sequence"):
+        if row["previous_hash"] != previous:
+            raise FactMemoryMigrationError(f"schema-{schema} audit chain is broken")
+        if bytes_hash(row["payload_json"].encode("utf-8")) != row["payload_hash"]:
+            raise FactMemoryMigrationError(f"schema-{schema} audit payload changed")
+        expected = content_hash(
+            {
+                "event_id": row["event_id"],
+                "event_type": row["event_type"],
+                "object_id": row["object_id"],
+                "recorded_at": row["recorded_at"],
+                "payload_hash": row["payload_hash"],
+                "previous_hash": row["previous_hash"],
+            }
+        )
+        if expected != row["event_hash"]:
+            raise FactMemoryMigrationError(f"schema-{schema} audit hash mismatch")
+        previous = row["event_hash"]
+
+
+def _verify_v2_records(connection: sqlite3.Connection) -> None:
+    for table, hash_column, hash_field in (
+        ("entities", "content_hash", "content_hash"),
+        ("predicate_definitions", "content_hash", "content_hash"),
+        ("sources", "record_hash", "record_hash"),
+        ("evidence", "evidence_hash", "evidence_hash"),
+        ("proposals", "proposal_hash", "proposal_hash"),
+        ("approvals", "approval_hash", "approval_hash"),
+        ("conflict_groups", "group_hash", "group_hash"),
+        ("conflict_resolution_events", "event_hash", "event_hash"),
+    ):
+        for row in connection.execute(
+            f"SELECT {hash_column}, payload_json FROM {table}"
+        ):
+            payload = json.loads(row[1])
+            stored = payload.pop(hash_field, None)
+            if stored != row[0] or content_hash(payload) != row[0]:
+                raise FactMemoryMigrationError(f"schema-v2 {table} row hash mismatch")
+    for row in connection.execute(
+        "SELECT canonical_claim_hash, payload_json FROM claims"
+    ):
+        payload = json.loads(row[1])
+        identity = {
+            key: payload[key]
+            for key in (
+                "subject_entity_id",
+                "predicate_id",
+                "object_value",
+                "qualifiers",
+                "valid_from",
+                "valid_to",
+            )
+        }
+        if (
+            payload.get("canonical_claim_hash") != row[0]
+            or content_hash(identity) != row[0]
+        ):
+            raise FactMemoryMigrationError("schema-v2 claims row hash mismatch")
+    for row in connection.execute(
+        """SELECT ce.relation AS attached_relation, e.payload_json
+           FROM claim_evidence ce JOIN evidence e USING(evidence_id)"""
+    ):
+        if row["attached_relation"] != json.loads(row["payload_json"])["relation"]:
+            raise FactMemoryMigrationError("schema-v2 evidence polarity mismatch")
+
+
+def _upgrade_v2_to_v3(root: Path) -> int:
+    connection = sqlite3.connect(root / "fact_memory.sqlite3")
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute("PRAGMA foreign_keys = OFF")
+        columns = {row[1] for row in connection.execute("PRAGMA table_info(claims)")}
+        if "claim_record_hash" in columns:
+            raise FactMemoryMigrationError("schema-v2 claims already contain v3 hash")
+        connection.execute(
+            "ALTER TABLE claims ADD COLUMN claim_record_hash TEXT NOT NULL DEFAULT ''"
+        )
+        claim_count = 0
+        for row in tuple(
+            connection.execute("SELECT claim_id, payload_json FROM claims")
+        ):
+            payload = json.loads(row["payload_json"])
+            payload.pop("claim_record_hash", None)
+            payload["schema_version"] = FACT_MEMORY_SCHEMA_VERSION
+            record_hash = content_hash(payload)
+            payload["claim_record_hash"] = record_hash
+            connection.execute(
+                """UPDATE claims SET claim_record_hash = ?, payload_json = ?
+                   WHERE claim_id = ?""",
+                (record_hash, canonical_json(payload), row["claim_id"]),
+            )
+            claim_count += 1
+        connection.execute(
+            "CREATE UNIQUE INDEX idx_claim_record_hash ON claims(claim_record_hash)"
+        )
+        connection.executescript(_SCHEMA)
+        connection.execute(
+            "UPDATE metadata SET value = ? WHERE key = 'schema_version'",
+            (str(FACT_MEMORY_SCHEMA_VERSION),),
+        )
+        connection.execute(
+            "UPDATE metadata SET value = ? WHERE key = 'migration_version'",
+            (str(FACT_MEMORY_MIGRATION_VERSION),),
+        )
+        connection.commit()
+        return claim_count
+    finally:
+        connection.close()
 
 
 def _verify_v1(root: Path) -> dict[str, Any]:
@@ -518,6 +834,7 @@ def _seed_conflict_history(connection: sqlite3.Connection) -> int:
             "selected_claim_ids": (),
             "remaining_claim_ids": tuple(group["claim_ids"]),
             "evidence_ids": (),
+            "evidence_links": (),
             "actor_identity": "M26_V1_TO_V2_MIGRATION",
             "actor_identity_type": ActorIdentityType.TRUSTED_PROCESS,
             "reason": "initial state derived from immutable schema-v1 conflict group",
@@ -600,6 +917,17 @@ def _legacy_schema_sql() -> str:
         r"        CHECK\(actor_identity_type IN \('HUMAN', 'TRUSTED_PROCESS', 'MODEL'\)\),",
         "",
         _SCHEMA,
+    )
+    schema = re.sub(
+        r"    claim_record_hash TEXT NOT NULL UNIQUE,\n",
+        "",
+        schema,
+    )
+    schema = re.sub(
+        r"CREATE TABLE IF NOT EXISTS resolution_evidence_links \(.*?\) STRICT;\n",
+        "",
+        schema,
+        flags=re.DOTALL,
     )
     schema = re.sub(
         r"CREATE TABLE IF NOT EXISTS conflict_resolution_events \(.*?"

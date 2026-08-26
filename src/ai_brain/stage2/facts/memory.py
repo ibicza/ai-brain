@@ -57,6 +57,8 @@ from ai_brain.stage2.facts.models import (
     ProvenanceDetailMode,
     QueryStatus,
     ReplayStatus,
+    ResolutionEvidenceLink,
+    ResolutionEvidenceRole,
     SourceKind,
     SourceRecord,
     SourceState,
@@ -886,14 +888,16 @@ class FactMemory:
                 "canonical_claim_hash": canonical_claim_hash,
                 "schema_version": FACT_MEMORY_SCHEMA_VERSION,
             }
+            payload["claim_record_hash"] = content_hash(payload)
             claim = ClaimRecord(**payload)
             connection.execute(
                 """INSERT INTO claims(
                     claim_id, subject_entity_id, predicate_id, object_hash,
                     qualifier_hash, valid_from_key, valid_to_key, recorded_at,
-                    base_status, canonical_claim_hash, proposal_hash, approval_hash,
+                    base_status, canonical_claim_hash, claim_record_hash,
+                    proposal_hash, approval_hash,
                     payload_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     claim.claim_id,
                     claim.subject_entity_id,
@@ -905,6 +909,7 @@ class FactMemory:
                     claim.recorded_at,
                     claim.status,
                     claim.canonical_claim_hash,
+                    claim.claim_record_hash,
                     claim.proposal_hash,
                     claim.approval_hash,
                     canonical_json(claim),
@@ -979,10 +984,11 @@ class FactMemory:
         if old_claim_id == new_claim_id:
             raise ValueError("claim cannot supersede itself")
         with self.database.write() as connection:
-            self._claim_row(connection, old_claim_id)
-            self._claim_row(connection, new_claim_id)
+            old_claim = self._claim(connection, old_claim_id)
+            new_claim = self._claim(connection, new_claim_id)
             if self._relation_reaches(connection, old_claim_id, new_claim_id):
                 raise ValueError("supersession cycle detected")
+            self._validate_supersession_domain(connection, old_claim, new_claim)
             recorded_at = self._now()
             self._insert_relation(
                 connection,
@@ -1157,6 +1163,7 @@ class FactMemory:
             "qualifier_filters": dict(sorted((qualifier_filters or {}).items())),
             "valid_at": normalize_temporal(valid_at_value),
             "known_at": normalize_temporal(known_at) or now,
+            "known_at_explicitly_requested": known_at is not None,
             "accepted_statuses": accepted_statuses
             or (
                 ClaimStatus.SUPPORTED,
@@ -1356,6 +1363,19 @@ class FactMemory:
                     if item.claim_id not in set(group.claim_ids)
                     or item.claim_id in allowed
                 ]
+            if not visible:
+                return self._store_answer(
+                    connection,
+                    query,
+                    self._build_answer(
+                        query,
+                        QueryStatus.NO_FACT,
+                        snapshot,
+                        (),
+                        (),
+                        ("RESOLUTION_HAS_NO_VISIBLE_CLAIMS",),
+                    ),
+                )
             if conflicts and query.include_conflicts:
                 status = QueryStatus.CONFLICT
                 warnings = ("UNRESOLVED_CONFLICT",) + (
@@ -1586,6 +1606,9 @@ class FactMemory:
         selected_claim_ids: tuple[str, ...] | list[str],
         remaining_claim_ids: tuple[str, ...] | list[str],
         evidence_ids: tuple[str, ...] | list[str],
+        evidence_links: tuple[ResolutionEvidenceLink, ...]
+        | list[ResolutionEvidenceLink]
+        | None = None,
         actor_identity: str,
         actor_identity_type: ActorIdentityType | str,
         reason: str,
@@ -1628,10 +1651,30 @@ class FactMemory:
                 raise FactWorkflowError("conflict is already resolved")
             selected = tuple(sorted(set(selected_claim_ids)))
             remaining = tuple(sorted(set(remaining_claim_ids)))
-            if not {*selected, *remaining} <= set(group.claim_ids):
+            group_claims = set(group.claim_ids)
+            if not {*selected, *remaining} <= group_claims:
                 raise ValueError("resolution claims must belong to the conflict group")
-            if not remaining and kind == ConflictResolutionKind.MANUAL_RESOLUTION:
-                raise ValueError("manual resolution must retain at least one claim")
+            if kind == ConflictResolutionKind.MANUAL_RESOLUTION:
+                if not remaining:
+                    raise ValueError("manual resolution must retain at least one claim")
+                if selected != remaining:
+                    raise ValueError(
+                        "manual resolution selected claims must equal remaining claims"
+                    )
+            elif selected != tuple(sorted(group_claims)) or remaining != tuple(
+                sorted(group_claims)
+            ):
+                raise ValueError(
+                    "dismissal must retain and select every conflict claim"
+                )
+            links = self._resolution_evidence_links(
+                connection,
+                group,
+                kind,
+                remaining,
+                tuple(sorted(set(evidence_ids))),
+                tuple(evidence_links or ()),
+            )
             self.database.append_audit(
                 connection,
                 "CONFLICT_RESOLUTION_PROPOSED",
@@ -1655,6 +1698,7 @@ class FactMemory:
                 actor_identity_type=actor_type,
                 reason=reason,
                 evidence_ids=tuple(sorted(set(evidence_ids))),
+                evidence_links=links,
                 selected_claim_ids=selected,
                 remaining_claim_ids=remaining,
                 recorded_at=self._now(),
@@ -1699,6 +1743,250 @@ class FactMemory:
             else ReplayStatus.STALE_SNAPSHOT
         )
 
+    @staticmethod
+    def _validate_supersession_domain(
+        connection: sqlite3.Connection,
+        old_claim: ClaimRecord,
+        new_claim: ClaimRecord,
+    ) -> None:
+        if (
+            old_claim.subject_entity_id != new_claim.subject_entity_id
+            or old_claim.predicate_id != new_claim.predicate_id
+        ):
+            raise ValueError("supersession claims must share subject and predicate")
+        predicate = FactMemory._predicate(connection, old_claim.predicate_id)
+        if old_claim.object_value.kind != new_claim.object_value.kind:
+            raise ValueError("supersession claims have incompatible value kinds")
+        if any(
+            old_claim.qualifiers.get(field) != new_claim.qualifiers.get(field)
+            for field in predicate.conflict_key_fields
+        ):
+            raise ValueError("supersession claims have different conflict qualifiers")
+        if new_claim.status in {ClaimStatus.RETRACTED, ClaimStatus.SUPERSEDED}:
+            raise ValueError("inactive claim cannot supersede another claim")
+        if (
+            old_claim.valid_from is not None
+            and new_claim.valid_to is not None
+            and temporal_key(new_claim.valid_to) < temporal_key(old_claim.valid_from)
+        ):
+            raise ValueError(
+                "supersession cannot replace a later claim with an older interval"
+            )
+
+    def _resolution_evidence_links(
+        self,
+        connection: sqlite3.Connection,
+        group: ConflictGroup,
+        kind: ConflictResolutionKind,
+        remaining: tuple[str, ...],
+        evidence_ids: tuple[str, ...],
+        supplied: tuple[ResolutionEvidenceLink, ...],
+    ) -> tuple[ResolutionEvidenceLink, ...]:
+        group_claims = set(group.claim_ids)
+        retained = set(remaining)
+        removed = group_claims - retained
+        links: list[ResolutionEvidenceLink] = []
+        if supplied:
+            for item in supplied:
+                if not isinstance(item, ResolutionEvidenceLink):
+                    raise TypeError("resolution evidence links must be typed")
+                body = {
+                    "evidence_id": item.evidence_id,
+                    "claim_id": item.claim_id,
+                    "role": item.role,
+                }
+                if content_hash(body) != item.link_hash:
+                    raise FactApprovalError("resolution evidence link hash mismatch")
+                links.append(item)
+        else:
+            for evidence_id in evidence_ids:
+                candidates = tuple(
+                    connection.execute(
+                        """SELECT claim_id, relation FROM claim_evidence
+                           WHERE evidence_id = ? ORDER BY claim_id""",
+                        (evidence_id,),
+                    )
+                )
+                selected: tuple[str, ResolutionEvidenceRole] | None = None
+                for row in candidates:
+                    claim_id = str(row["claim_id"])
+                    relation = EvidenceRelation(row["relation"])
+                    if claim_id not in group_claims:
+                        continue
+                    if kind == ConflictResolutionKind.DISMISSED_AS_NOT_CONFLICTING:
+                        if relation == EvidenceRelation.SUPPORTS:
+                            selected = (
+                                claim_id,
+                                ResolutionEvidenceRole.SUPPORTS_DISMISSAL,
+                            )
+                            break
+                    elif claim_id in retained and relation == EvidenceRelation.SUPPORTS:
+                        selected = (
+                            claim_id,
+                            ResolutionEvidenceRole.SUPPORTS_REMAINING,
+                        )
+                        break
+                    elif (
+                        claim_id in removed and relation == EvidenceRelation.CONTRADICTS
+                    ):
+                        selected = (
+                            claim_id,
+                            ResolutionEvidenceRole.CONTRADICTS_REMOVED,
+                        )
+                        break
+                if selected is None:
+                    raise FactApprovalError(
+                        "resolution evidence is unrelated to the conflict partition"
+                    )
+                body = {
+                    "evidence_id": evidence_id,
+                    "claim_id": selected[0],
+                    "role": selected[1],
+                }
+                links.append(
+                    ResolutionEvidenceLink(**body, link_hash=content_hash(body))
+                )
+        if {item.evidence_id for item in links} != set(evidence_ids):
+            raise FactApprovalError(
+                "resolution evidence links do not bind all evidence"
+            )
+        for link in links:
+            if link.claim_id not in group_claims:
+                raise FactApprovalError(
+                    "resolution evidence claim is outside the group"
+                )
+            row = connection.execute(
+                """SELECT relation FROM claim_evidence
+                   WHERE claim_id = ? AND evidence_id = ?""",
+                (link.claim_id, link.evidence_id),
+            ).fetchone()
+            if row is None:
+                raise FactApprovalError(
+                    "resolution evidence is not attached to its claim"
+                )
+            relation = EvidenceRelation(row[0])
+            valid = (
+                (
+                    link.role == ResolutionEvidenceRole.SUPPORTS_REMAINING
+                    and link.claim_id in retained
+                    and relation == EvidenceRelation.SUPPORTS
+                )
+                or (
+                    link.role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
+                    and link.claim_id in removed
+                    and relation == EvidenceRelation.CONTRADICTS
+                )
+                or (
+                    link.role == ResolutionEvidenceRole.SUPPORTS_DISMISSAL
+                    and kind == ConflictResolutionKind.DISMISSED_AS_NOT_CONFLICTING
+                    and relation == EvidenceRelation.SUPPORTS
+                )
+            )
+            if not valid:
+                raise FactApprovalError(
+                    "resolution evidence role or polarity is invalid"
+                )
+        if kind == ConflictResolutionKind.MANUAL_RESOLUTION and removed:
+            directly_justified = {
+                item.claim_id
+                for item in links
+                if item.role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
+            }
+            support_selected = any(
+                item.role == ResolutionEvidenceRole.SUPPORTS_REMAINING for item in links
+            )
+            if not support_selected and directly_justified != removed:
+                raise FactApprovalError(
+                    "resolution evidence does not justify every removed side"
+                )
+        return tuple(
+            sorted(links, key=lambda item: (item.claim_id, item.evidence_id, item.role))
+        )
+
+    @staticmethod
+    def _verify_resolution_evidence_links(connection: sqlite3.Connection) -> None:
+        rows = tuple(connection.execute("SELECT * FROM resolution_evidence_links"))
+        for row in rows:
+            body = {
+                "evidence_id": row["evidence_id"],
+                "claim_id": row["claim_id"],
+                "role": ResolutionEvidenceRole(row["role"]),
+            }
+            if content_hash(body) != row["link_hash"]:
+                raise FactMemoryIntegrityError("resolution evidence link hash mismatch")
+            relation_row = connection.execute(
+                """SELECT relation FROM claim_evidence
+                   WHERE claim_id = ? AND evidence_id = ?""",
+                (row["claim_id"], row["evidence_id"]),
+            ).fetchone()
+            if relation_row is None:
+                raise FactMemoryIntegrityError("resolution evidence link is detached")
+            role = ResolutionEvidenceRole(row["role"])
+            relation = EvidenceRelation(relation_row[0])
+            if (
+                role
+                in {
+                    ResolutionEvidenceRole.SUPPORTS_REMAINING,
+                    ResolutionEvidenceRole.SUPPORTS_DISMISSAL,
+                }
+                and relation != EvidenceRelation.SUPPORTS
+            ) or (
+                role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
+                and relation != EvidenceRelation.CONTRADICTS
+            ):
+                raise FactMemoryIntegrityError("resolution evidence polarity changed")
+        by_event: dict[str, set[tuple[str, str, str, str]]] = {}
+        for row in rows:
+            by_event.setdefault(str(row["event_id"]), set()).add(
+                (
+                    str(row["evidence_id"]),
+                    str(row["claim_id"]),
+                    str(row["role"]),
+                    str(row["link_hash"]),
+                )
+            )
+        for row in connection.execute(
+            "SELECT event_id, conflict_group_id, payload_json FROM conflict_resolution_events"
+        ):
+            payload = json.loads(row["payload_json"])
+            payload_links = {
+                (
+                    str(item["evidence_id"]),
+                    str(item["claim_id"]),
+                    str(item["role"]),
+                    str(item["link_hash"]),
+                )
+                for item in payload.get("evidence_links", ())
+            }
+            if payload_links != by_event.get(str(row["event_id"]), set()):
+                raise FactMemoryIntegrityError(
+                    "resolution event and evidence links differ"
+                )
+            group_claims = {
+                str(item[0])
+                for item in connection.execute(
+                    "SELECT claim_id FROM conflict_group_claims WHERE conflict_group_id = ?",
+                    (row["conflict_group_id"],),
+                )
+            }
+            remaining = set(payload.get("remaining_claim_ids", ()))
+            for _, claim_id, role_value, _ in payload_links:
+                role = ResolutionEvidenceRole(role_value)
+                if claim_id not in group_claims:
+                    raise FactMemoryIntegrityError(
+                        "resolution evidence claim is outside conflict group"
+                    )
+                if (
+                    role == ResolutionEvidenceRole.SUPPORTS_REMAINING
+                    and claim_id not in remaining
+                ) or (
+                    role == ResolutionEvidenceRole.CONTRADICTS_REMOVED
+                    and claim_id in remaining
+                ):
+                    raise FactMemoryIntegrityError(
+                        "resolution evidence partition binding changed"
+                    )
+
     def verify(self) -> dict[str, Any]:
         result = self.database.integrity_check()
         with self.database.connect() as connection:
@@ -1719,9 +2007,10 @@ class FactMemory:
                     if stored != row[0] or content_hash(payload) != row[0]:
                         raise FactMemoryIntegrityError(f"{table} row hash mismatch")
             for row in connection.execute(
-                "SELECT canonical_claim_hash, payload_json FROM claims"
+                "SELECT canonical_claim_hash, claim_record_hash, payload_json FROM claims"
             ):
-                claim = _claim_from_json(row[1])
+                raw = json.loads(row[2])
+                claim = _claim_from_json(row[2])
                 identity = {
                     "subject_entity_id": claim.subject_entity_id,
                     "predicate_id": claim.predicate_id,
@@ -1735,6 +2024,13 @@ class FactMemory:
                     or content_hash(identity) != row[0]
                 ):
                     raise FactMemoryIntegrityError("claims row hash mismatch")
+                stored_record_hash = raw.pop("claim_record_hash", None)
+                if (
+                    stored_record_hash != row[1]
+                    or claim.claim_record_hash != row[1]
+                    or content_hash(raw) != row[1]
+                ):
+                    raise FactMemoryIntegrityError("claim full-record hash mismatch")
             self._verify_payload_table(
                 connection, "proposals", "proposal_hash", "proposal_hash"
             )
@@ -1815,6 +2111,7 @@ class FactMemory:
                 "event_hash",
                 "event_hash",
             )
+            self._verify_resolution_evidence_links(connection)
             for row in connection.execute(
                 """SELECT ce.relation, e.payload_json FROM claim_evidence ce
                    JOIN evidence e ON e.evidence_id = ce.evidence_id"""
@@ -2193,6 +2490,7 @@ class FactMemory:
         actor_identity_type: ActorIdentityType,
         reason: str,
         evidence_ids: tuple[str, ...],
+        evidence_links: tuple[ResolutionEvidenceLink, ...] = (),
         selected_claim_ids: tuple[str, ...],
         remaining_claim_ids: tuple[str, ...],
         recorded_at: str,
@@ -2207,6 +2505,7 @@ class FactMemory:
             "selected_claim_ids": tuple(sorted(selected_claim_ids)),
             "remaining_claim_ids": tuple(sorted(remaining_claim_ids)),
             "evidence_ids": tuple(sorted(evidence_ids)),
+            "evidence_links": tuple(evidence_links),
             "actor_identity": actor_identity,
             "actor_identity_type": actor_identity_type,
             "reason": reason.strip(),
@@ -2233,6 +2532,19 @@ class FactMemory:
                 event.recorded_at,
                 event.event_hash,
                 canonical_json(event),
+            ),
+        )
+        connection.executemany(
+            "INSERT INTO resolution_evidence_links VALUES (?, ?, ?, ?, ?)",
+            (
+                (
+                    event.event_id,
+                    link.evidence_id,
+                    link.claim_id,
+                    link.role,
+                    link.link_hash,
+                )
+                for link in event.evidence_links
             ),
         )
         return event
@@ -2284,6 +2596,7 @@ class FactMemory:
                 actor_identity_type=actor_identity_type,
                 reason=reason,
                 evidence_ids=evidence_ids,
+                evidence_links=(),
                 selected_claim_ids=selected_claim_ids or remaining,
                 remaining_claim_ids=remaining,
                 recorded_at=recorded_at,
@@ -2527,8 +2840,7 @@ class FactMemory:
             if failed
             else (
                 "HISTORICAL_QUERY_EXECUTED"
-                if query.known_at is not None
-                and temporal_key(query.known_at) < temporal_key(bundle.generated_at)
+                if query.known_at_explicitly_requested
                 else "FACT_QUERY_EXECUTED"
             ),
             {
@@ -3204,6 +3516,15 @@ def _conflict_resolution_from_json(payload: str) -> ConflictResolutionEvent:
     row["selected_claim_ids"] = tuple(row["selected_claim_ids"])
     row["remaining_claim_ids"] = tuple(row["remaining_claim_ids"])
     row["evidence_ids"] = tuple(row["evidence_ids"])
+    row["evidence_links"] = tuple(
+        ResolutionEvidenceLink(
+            evidence_id=item["evidence_id"],
+            claim_id=item["claim_id"],
+            role=ResolutionEvidenceRole(item["role"]),
+            link_hash=item["link_hash"],
+        )
+        for item in row.get("evidence_links", ())
+    )
     row["actor_identity_type"] = ActorIdentityType(row["actor_identity_type"])
     return ConflictResolutionEvent(**row)
 

@@ -130,6 +130,12 @@ class ConflictResolutionKind(StrEnum):
     DISMISSED_AS_NOT_CONFLICTING = "DISMISSED_AS_NOT_CONFLICTING"
 
 
+class ResolutionEvidenceRole(StrEnum):
+    SUPPORTS_REMAINING = "SUPPORTS_REMAINING"
+    CONTRADICTS_REMOVED = "CONTRADICTS_REMOVED"
+    SUPPORTS_DISMISSAL = "SUPPORTS_DISMISSAL"
+
+
 class EvidenceConflictState(StrEnum):
     CLEAR = "CLEAR"
     CONTESTED = "CONTESTED"
@@ -310,6 +316,7 @@ class ClaimRecord:
     proposal_hash: str
     approval_hash: str
     canonical_claim_hash: str
+    claim_record_hash: str
     schema_version: int = FACT_MEMORY_SCHEMA_VERSION
 
 
@@ -343,6 +350,15 @@ class ConflictResolutionEvent:
     reason: str
     recorded_at: str
     event_hash: str
+    evidence_links: tuple[ResolutionEvidenceLink, ...] = ()
+
+
+@dataclass(frozen=True)
+class ResolutionEvidenceLink:
+    evidence_id: str
+    claim_id: str
+    role: ResolutionEvidenceRole
+    link_hash: str
 
 
 @dataclass(frozen=True)
@@ -382,6 +398,7 @@ class FactQuery:
     qualifier_filters: dict[str, FactValue] = field(default_factory=dict)
     valid_at: str | None = None
     known_at: str | None = None
+    known_at_explicitly_requested: bool = False
     accepted_statuses: tuple[ClaimStatus, ...] = (
         ClaimStatus.SUPPORTED,
         ClaimStatus.CORROBORATED,

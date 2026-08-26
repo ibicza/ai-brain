@@ -25,6 +25,7 @@ from ai_brain.stage2.facts.models import (
     TemporalMode,
 )
 from ai_brain.stage2.facts.values import FactValue, FactValueKind
+from ai_brain.stage2.facts.version import FACT_MEMORY_SCHEMA_VERSION
 
 
 class AcceptanceClock:
@@ -356,12 +357,12 @@ def run_m261_acceptance(output_dir: Path) -> dict[str, Any]:
     )
 
     source_v1 = root / "27-v1"
-    target_v2 = root / "27-v2"
+    target_current = root / "27-current"
     create_v1_compatibility_fixture(memory.root, source_v1)
-    manifest = migrate_v1_to_v2(source_v1, target_v2)
+    manifest = migrate_v1_to_v2(source_v1, target_current)
     record(
-        "v1_to_v2_migration",
-        "VALID:2:TRUE",
+        "v1_to_current_migration",
+        f"VALID:{FACT_MEMORY_SCHEMA_VERSION}:TRUE",
         f"{manifest['integrity']['status']}:{manifest['target_schema_version']}:"
         f"{str(manifest['source_unchanged']).upper()}",
     )

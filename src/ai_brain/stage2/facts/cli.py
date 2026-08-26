@@ -128,9 +128,26 @@ def main() -> None:
         _print({"status": "RESTORED", "snapshot_hash": memory.database.snapshot_hash()})
         return
     if args.command == "migrate":
-        from ai_brain.stage2.facts.migration import migrate_v1_to_v2
+        import sqlite3
 
-        _print(migrate_v1_to_v2(args.source_root, args.root))
+        from ai_brain.stage2.facts.migration import (
+            migrate_v1_to_v2,
+            migrate_v2_to_v3,
+        )
+
+        connection = sqlite3.connect(args.source_root / "fact_memory.sqlite3")
+        try:
+            version = dict(connection.execute("SELECT key, value FROM metadata"))[
+                "schema_version"
+            ]
+        finally:
+            connection.close()
+        if version == "1":
+            _print(migrate_v1_to_v2(args.source_root, args.root))
+        elif version == "2":
+            _print(migrate_v2_to_v3(args.source_root, args.root))
+        else:
+            raise ValueError("migration source must use FactMemory schema v1 or v2")
         return
     memory = FactMemory.open(args.root)
     if args.command == "add-entity":

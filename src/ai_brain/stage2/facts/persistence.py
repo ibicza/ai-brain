@@ -128,6 +128,7 @@ CREATE TABLE IF NOT EXISTS claims (
     recorded_at TEXT NOT NULL,
     base_status TEXT NOT NULL,
     canonical_claim_hash TEXT NOT NULL UNIQUE,
+    claim_record_hash TEXT NOT NULL UNIQUE,
     proposal_hash TEXT NOT NULL,
     approval_hash TEXT NOT NULL,
     payload_json TEXT NOT NULL
@@ -206,6 +207,16 @@ CREATE TABLE IF NOT EXISTS conflict_resolution_events (
 ) STRICT;
 CREATE INDEX IF NOT EXISTS idx_conflict_resolution_time
     ON conflict_resolution_events(conflict_group_id, recorded_at);
+CREATE TABLE IF NOT EXISTS resolution_evidence_links (
+    event_id TEXT NOT NULL REFERENCES conflict_resolution_events(event_id),
+    evidence_id TEXT NOT NULL REFERENCES evidence(evidence_id),
+    claim_id TEXT NOT NULL REFERENCES claims(claim_id),
+    role TEXT NOT NULL CHECK(role IN (
+        'SUPPORTS_REMAINING', 'CONTRADICTS_REMOVED', 'SUPPORTS_DISMISSAL'
+    )),
+    link_hash TEXT NOT NULL UNIQUE,
+    PRIMARY KEY (event_id, evidence_id, claim_id, role)
+) STRICT;
 CREATE TABLE IF NOT EXISTS fact_queries (
     query_id TEXT PRIMARY KEY,
     query_hash TEXT NOT NULL,

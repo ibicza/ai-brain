@@ -169,6 +169,7 @@ def augment_v2_scale_mix(
                 "selected_claim_ids": remaining,
                 "remaining_claim_ids": remaining,
                 "evidence_ids": evidence_ids,
+                "evidence_links": (),
                 "actor_identity": "m261-scale-generator",
                 "actor_identity_type": ActorIdentityType.TRUSTED_PROCESS,
                 "reason": "synthetic reviewed scale resolution",
