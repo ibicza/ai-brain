@@ -1,0 +1,221 @@
+{
+  "status": "PASS",
+  "schema_version": 2,
+  "sizes": [
+    10000,
+    100000
+  ],
+  "samples": 500,
+  "results": [
+    {
+      "claim_count": 10000,
+      "database_size_bytes": 136220672,
+      "source_blob_size_bytes": 849219,
+      "latency_ms": {
+        "exact_subject_predicate": {
+          "p50": 0.0034815000000000002,
+          "p95": 0.006943,
+          "p99": 0.022212
+        },
+        "valid_at": {
+          "p50": 0.003247,
+          "p95": 0.004739,
+          "p99": 0.014628
+        },
+        "bitemporal": {
+          "p50": 0.003326,
+          "p95": 0.004278,
+          "p99": 0.011942
+        },
+        "conflict": {
+          "p50": 0.003006,
+          "p95": 0.003166,
+          "p99": 0.004669
+        },
+        "alias": {
+          "p50": 0.003266,
+          "p95": 0.003637,
+          "p99": 0.006042
+        },
+        "history": {
+          "p50": 0.00532,
+          "p95": 0.006963,
+          "p99": 0.011071
+        }
+      },
+      "query_plans": {
+        "exact_subject_predicate": [
+          "SEARCH claims USING INDEX idx_claim_valid (subject_entity_id=? AND predicate_id=?)"
+        ],
+        "valid_at": [
+          "SEARCH claims USING INDEX idx_claim_valid (subject_entity_id=? AND predicate_id=? AND valid_from_key<?)"
+        ],
+        "bitemporal": [
+          "SEARCH c USING INDEX idx_claim_valid (subject_entity_id=? AND predicate_id=? AND valid_from_key<?)",
+          "SEARCH s USING COVERING INDEX idx_claim_status_time (claim_id=?)"
+        ],
+        "conflict": [
+          "SEARCH g USING INDEX idx_conflict_lookup (subject_entity_id=? AND predicate_id=? AND resolution_status=?)"
+        ],
+        "alias": [
+          "SEARCH entity_aliases USING COVERING INDEX sqlite_autoindex_entity_aliases_1 (normalized_alias=?)"
+        ],
+        "history": [
+          "SEARCH claim_status_events USING INDEX idx_claim_status_time (claim_id=?)"
+        ]
+      },
+      "full_scan_queries": [],
+      "backup_seconds": 0.3055734029985615,
+      "restore_seconds": 0.8209562190022552,
+      "export_seconds": 0.3294562430019141,
+      "integrity_check_seconds": 0.2657318519995897,
+      "integrity": {
+        "status": "VALID",
+        "audit_event_count": 13,
+        "blob_count": 200
+      },
+      "migration_seconds": 59.974415010001394,
+      "migration_manifest_sha256": "1680d151804ba97d0493f22cbd4ef7199b7d92e576c13a14cd1b42d40e11f989",
+      "polarity_and_history": {
+        "latency_ms": {
+          "evidence_polarity": {
+            "p50": 0.0032814999999999997,
+            "p95": 0.005029,
+            "p99": 0.007545
+          },
+          "historical_status": {
+            "p50": 0.004744,
+            "p95": 0.007243,
+            "p99": 0.007905
+          },
+          "conflict_as_of": {
+            "p50": 0.0032465000000000003,
+            "p95": 0.004569,
+            "p99": 0.005861
+          }
+        },
+        "query_plans": {
+          "evidence_polarity": [
+            "SEARCH claim_evidence USING COVERING INDEX idx_claim_evidence_polarity_time (claim_id=?)"
+          ],
+          "historical_status": [
+            "SEARCH claim_status_events USING INDEX idx_claim_status_time (claim_id=? AND recorded_at<?)"
+          ],
+          "conflict_as_of": [
+            "SEARCH conflict_resolution_events USING INDEX idx_conflict_resolution_time (conflict_group_id=? AND recorded_at<?)"
+          ]
+        },
+        "full_scan_queries": []
+      },
+      "mixed_artifacts": {
+        "contradicting_evidence_count": 100,
+        "conflict_resolution_event_count": 50
+      }
+    },
+    {
+      "claim_count": 100000,
+      "database_size_bytes": 1342599168,
+      "source_blob_size_bytes": 8645785,
+      "latency_ms": {
+        "exact_subject_predicate": {
+          "p50": 0.005245,
+          "p95": 0.024747,
+          "p99": 0.344889
+        },
+        "valid_at": {
+          "p50": 0.004719,
+          "p95": 0.006713,
+          "p99": 0.196549
+        },
+        "bitemporal": {
+          "p50": 0.004659,
+          "p95": 0.006292,
+          "p99": 0.027823
+        },
+        "conflict": {
+          "p50": 0.003146,
+          "p95": 0.004638,
+          "p99": 0.023424
+        },
+        "alias": {
+          "p50": 0.003266,
+          "p95": 0.003467,
+          "p99": 0.00512
+        },
+        "history": {
+          "p50": 0.006863,
+          "p95": 0.008937,
+          "p99": 0.012704
+        }
+      },
+      "query_plans": {
+        "exact_subject_predicate": [
+          "SEARCH claims USING INDEX idx_claim_valid (subject_entity_id=? AND predicate_id=?)"
+        ],
+        "valid_at": [
+          "SEARCH claims USING INDEX idx_claim_valid (subject_entity_id=? AND predicate_id=? AND valid_from_key<?)"
+        ],
+        "bitemporal": [
+          "SEARCH c USING INDEX idx_claim_valid (subject_entity_id=? AND predicate_id=? AND valid_from_key<?)",
+          "SEARCH s USING COVERING INDEX idx_claim_status_time (claim_id=?)"
+        ],
+        "conflict": [
+          "SEARCH g USING INDEX idx_conflict_lookup (subject_entity_id=? AND predicate_id=? AND resolution_status=?)"
+        ],
+        "alias": [
+          "SEARCH entity_aliases USING COVERING INDEX sqlite_autoindex_entity_aliases_1 (normalized_alias=?)"
+        ],
+        "history": [
+          "SEARCH claim_status_events USING INDEX idx_claim_status_time (claim_id=?)"
+        ]
+      },
+      "full_scan_queries": [],
+      "backup_seconds": 3.36550975299906,
+      "restore_seconds": 12.181191842995759,
+      "export_seconds": 3.3609158800027217,
+      "integrity_check_seconds": 4.247865789999196,
+      "integrity": {
+        "status": "VALID",
+        "audit_event_count": 103,
+        "blob_count": 200
+      },
+      "migration_seconds": 667.5054338619957,
+      "migration_manifest_sha256": "f659703d56bc352b0811b0341fa625b451b407ab195d77ca65bd3547c34a40b6",
+      "polarity_and_history": {
+        "latency_ms": {
+          "evidence_polarity": {
+            "p50": 0.004799,
+            "p95": 0.011882,
+            "p99": 0.013686
+          },
+          "historical_status": {
+            "p50": 0.0062315,
+            "p95": 0.007934,
+            "p99": 0.013686
+          },
+          "conflict_as_of": {
+            "p50": 0.0045885000000000006,
+            "p95": 0.006011,
+            "p99": 0.008116
+          }
+        },
+        "query_plans": {
+          "evidence_polarity": [
+            "SEARCH claim_evidence USING COVERING INDEX idx_claim_evidence_polarity_time (claim_id=?)"
+          ],
+          "historical_status": [
+            "SEARCH claim_status_events USING INDEX idx_claim_status_time (claim_id=? AND recorded_at<?)"
+          ],
+          "conflict_as_of": [
+            "SEARCH conflict_resolution_events USING INDEX idx_conflict_resolution_time (conflict_group_id=? AND recorded_at<?)"
+          ]
+        },
+        "full_scan_queries": []
+      },
+      "mixed_artifacts": {
+        "contradicting_evidence_count": 1000,
+        "conflict_resolution_event_count": 500
+      }
+    }
+  ]
+}
