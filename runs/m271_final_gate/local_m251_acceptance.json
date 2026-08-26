@@ -1,0 +1,639 @@
+{
+  "dataset": {
+    "blind_public_sha256": "ea564e41d0677c16169b9349f579e8d7e80aa5797423f0c4e9482393f979e7ee",
+    "blind_targets_sha256": "082bbe603581e581cd8f47d54c99eeb8e7b718a737ddbbc66ebd0d876b83c1d0",
+    "evaluation_slices": {
+      "AMBIGUOUS": 3578,
+      "CATALOG_LEXICAL_HOLDOUT": 1046,
+      "COMPOSED_OOD": 1045,
+      "CROSS_LANGUAGE_TRANSFER": 1045,
+      "HARD_NEIGHBOR": 4911,
+      "ID": 22114,
+      "ORDER_HOLDOUT": 1045,
+      "TEMPLATE_HOLDOUT": 1046,
+      "TRUE_LEXICAL_OOD": 500,
+      "UNKNOWN": 3578,
+      "VARIABLE_PERMUTATION": 1046,
+      "ZERO_QUERY_SKILL": 1046
+    },
+    "ood_split_definition_hash": "2c193a110d8dbb5022e429cf4d39cbb08d62928aa2d6b0e168958abd14fdd3d8",
+    "prompt_intersections": {
+      "calibration_x_blind": 0,
+      "calibration_x_development": 0,
+      "development_x_blind": 0,
+      "train_x_blind": 0,
+      "train_x_calibration": 0,
+      "train_x_development": 0,
+      "train_x_validation": 0,
+      "validation_x_blind": 0,
+      "validation_x_calibration": 0,
+      "validation_x_development": 0
+    },
+    "query_surface_inventory_hash": "dfe39cdfbc7655ed9fd2ef85aa90316b7efe46ce6fb8693585144d066279c79c",
+    "split_counts": {
+      "blind": 6000,
+      "calibration": 3000,
+      "development": 6000,
+      "train": 24000,
+      "validation": 3000
+    },
+    "zero_query_skill_count": 18
+  },
+  "deterministic_baselines": {
+    "bm25": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.08474795766756867,
+          "top1": 0.009157509157509158,
+          "top3": 0.06776556776556776,
+          "top5": 0.15934065934065933
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.06396001064406603,
+          "top1": 0.0,
+          "top3": 0.03853211009174312,
+          "top5": 0.07889908256880734
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.07422347531268673,
+          "top1": 0.0,
+          "top3": 0.025688073394495414,
+          "top5": 0.12110091743119267
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.11598169333874321,
+          "top1": 0.04220183486238532,
+          "top3": 0.10091743119266056,
+          "top5": 0.1577981651376147
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.07872835550455559,
+          "top1": 0.003663003663003663,
+          "top3": 0.05128205128205128,
+          "top5": 0.11538461538461539
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.08920700032156235,
+          "top1": 0.007339449541284404,
+          "top3": 0.06972477064220184,
+          "top5": 0.1688073394495413
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.06506319898685926,
+          "top1": 0.0,
+          "top3": 0.029304029304029304,
+          "top5": 0.08791208791208792
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.1497887131703075,
+          "top1": 0.007326007326007326,
+          "top3": 0.19597069597069597,
+          "top5": 0.27106227106227104
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.20079024145166563,
+          "top1": 0.1043956043956044,
+          "top3": 0.21611721611721613,
+          "top5": 0.26556776556776557
+        }
+      },
+      "hard_neighbor_pairwise": 0.03486238532110092,
+      "known_count": 4910,
+      "mrr": 0.1025125296850711,
+      "top1": 0.019348268839103868,
+      "top3": 0.08839103869653768,
+      "top5": 0.15845213849287168,
+      "trusted_selector": false
+    },
+    "character_ngram": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.466515047637452,
+          "top1": 0.35714285714285715,
+          "top3": 0.510989010989011,
+          "top5": 0.5622710622710623
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.4171177606021853,
+          "top1": 0.3504587155963303,
+          "top3": 0.4091743119266055,
+          "top5": 0.44587155963302755
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.36548505088503513,
+          "top1": 0.3174311926605505,
+          "top3": 0.3486238532110092,
+          "top5": 0.363302752293578
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.4416885488559611,
+          "top1": 0.3706422018348624,
+          "top3": 0.44220183486238535,
+          "top5": 0.4917431192660551
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.4123421292887961,
+          "top1": 0.3333333333333333,
+          "top3": 0.42857142857142855,
+          "top5": 0.47619047619047616
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.40900218999291166,
+          "top1": 0.3192660550458716,
+          "top3": 0.42935779816513764,
+          "top5": 0.47522935779816516
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.407140096653769,
+          "top1": 0.336996336996337,
+          "top3": 0.3992673992673993,
+          "top5": 0.44871794871794873
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.5104016892204076,
+          "top1": 0.41025641025641024,
+          "top3": 0.5256410256410257,
+          "top5": 0.5879120879120879
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.5121633571131297,
+          "top1": 0.45054945054945056,
+          "top3": 0.510989010989011,
+          "top5": 0.5439560439560439
+        }
+      },
+      "hard_neighbor_pairwise": 0.7431192660550459,
+      "known_count": 4910,
+      "mrr": 0.4380081490032529,
+      "top1": 0.36069246435845215,
+      "top3": 0.445010183299389,
+      "top5": 0.48839103869653766,
+      "trusted_selector": false
+    },
+    "exact_catalog_substring": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.030240752086415933,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.02878338755502245,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.03823239248316882,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.06039339393090618,
+          "top1": 0.005504587155963303,
+          "top3": 0.04220183486238532,
+          "top5": 0.06788990825688074
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.02975702149749298,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.028639652918806137,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.02950811389166046,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.04241009924591049,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.15196600711180402,
+          "top1": 0.047619047619047616,
+          "top3": 0.1575091575091575,
+          "top5": 0.2673992673992674
+        }
+      },
+      "hard_neighbor_pairwise": 0.0,
+      "known_count": 4910,
+      "mrr": 0.048889242217287264,
+      "top1": 0.005906313645621181,
+      "top3": 0.02219959266802444,
+      "top5": 0.037270875763747456,
+      "trusted_selector": false
+    },
+    "lexical_token_overlap": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.08804829149109665,
+          "top1": 0.0,
+          "top3": 0.06227106227106227,
+          "top5": 0.13186813186813187
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.06501325254853853,
+          "top1": 0.0,
+          "top3": 0.03669724770642202,
+          "top5": 0.06972477064220184
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.06302328049462523,
+          "top1": 0.0,
+          "top3": 0.044036697247706424,
+          "top5": 0.044036697247706424
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.10810672915962932,
+          "top1": 0.027522935779816515,
+          "top3": 0.08807339449541285,
+          "top5": 0.14862385321100918
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.07290203252201886,
+          "top1": 0.0,
+          "top3": 0.04395604395604396,
+          "top5": 0.08791208791208792
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.06580467330044751,
+          "top1": 0.0,
+          "top3": 0.027522935779816515,
+          "top5": 0.06605504587155964
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.06432341166013408,
+          "top1": 0.0,
+          "top3": 0.027472527472527472,
+          "top5": 0.06043956043956044
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.0945989746985236,
+          "top1": 0.0,
+          "top3": 0.06776556776556776,
+          "top5": 0.06776556776556776
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.20476789190964156,
+          "top1": 0.10805860805860806,
+          "top3": 0.18864468864468864,
+          "top5": 0.2802197802197802
+        }
+      },
+      "hard_neighbor_pairwise": 0.0,
+      "known_count": 4910,
+      "mrr": 0.09185649566087956,
+      "top1": 0.015071283095723014,
+      "top3": 0.06517311608961303,
+      "top5": 0.10631364562118126,
+      "trusted_selector": false
+    },
+    "minimal_structured_feature": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.034228114692710566,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0018315018315018315
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.03461876850556227,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.04164600620347217,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.06256867484173861,
+          "top1": 0.0,
+          "top3": 0.045871559633027525,
+          "top5": 0.08073394495412844
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.03321501727263369,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.03383260411918558,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.033724915953389785,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.044199386417066375,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.1391941391941392
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.13746761287393008,
+          "top1": 0.054945054945054944,
+          "top3": 0.15934065934065933,
+          "top5": 0.21062271062271062
+        }
+      },
+      "hard_neighbor_pairwise": 0.0,
+      "known_count": 4910,
+      "mrr": 0.050617298376097825,
+      "top1": 0.006109979633401222,
+      "top3": 0.022810590631364563,
+      "top5": 0.04806517311608961,
+      "trusted_selector": false
+    },
+    "random": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.037792386726101544,
+          "top1": 0.009157509157509158,
+          "top3": 0.009157509157509158,
+          "top5": 0.009157509157509158
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.04388552079503238,
+          "top1": 0.01651376146788991,
+          "top3": 0.01651376146788991,
+          "top5": 0.01651376146788991
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.04487698225145307,
+          "top1": 0.009174311926605505,
+          "top3": 0.009174311926605505,
+          "top5": 0.009174311926605505
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.06371735246841775,
+          "top1": 0.012844036697247707,
+          "top3": 0.023853211009174313,
+          "top5": 0.07155963302752294
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.03736022078850413,
+          "top1": 0.009157509157509158,
+          "top3": 0.009157509157509158,
+          "top5": 0.009157509157509158
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.04011098253133182,
+          "top1": 0.012844036697247707,
+          "top3": 0.012844036697247707,
+          "top5": 0.012844036697247707
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.04257484223856141,
+          "top1": 0.014652014652014652,
+          "top3": 0.014652014652014652,
+          "top5": 0.014652014652014652
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.042237107069717825,
+          "top1": 0.003663003663003663,
+          "top3": 0.003663003663003663,
+          "top5": 0.003663003663003663
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.12340498390906897,
+          "top1": 0.016483516483516484,
+          "top3": 0.1282051282051282,
+          "top5": 0.23809523809523808
+        }
+      },
+      "hard_neighbor_pairwise": 0.012844036697247707,
+      "known_count": 4910,
+      "mrr": 0.052888345412392034,
+      "top1": 0.011608961303462322,
+      "top3": 0.02525458248472505,
+      "top5": 0.04276985743380855,
+      "trusted_selector": false
+    }
+  },
+  "dispatch": {
+    "controlled_ru_en_dispatch_success": 12,
+    "controlled_ru_en_dispatch_total": 12,
+    "family_counts": {
+      "CLEAR": 4,
+      "DRAIN": 12,
+      "DROP_THEN_TRANSFER": 24,
+      "MERGE_THREE": 24,
+      "MERGE_TWO": 24,
+      "NOOP": 1
+    },
+    "representative_state_checks": 42,
+    "status": "PASS",
+    "structural_dispatch_success": 89,
+    "structural_dispatch_total": 89
+  },
+  "dispatch_evidence_hash": "e42193f54a09c4be52f6608748e363f7b1bf2957dcc4665e6464d38038e6917a",
+  "duration_seconds": 152.6027647999872,
+  "git_sha": "0e93f5ba0f68da6022a80d9309f350359e455eaa",
+  "label_leakage": {
+    "exact_catalog_substring": {
+      "by_slice": {
+        "AMBIGUOUS": 0.0,
+        "CATALOG_LEXICAL_HOLDOUT": 0.0,
+        "COMPOSED_OOD": 0.0,
+        "CROSS_LANGUAGE_TRANSFER": 0.0,
+        "HARD_NEIGHBOR": 0.0,
+        "ID": 0.0,
+        "ORDER_HOLDOUT": 0.0,
+        "TEMPLATE_HOLDOUT": 0.0,
+        "UNKNOWN": 0.0,
+        "VARIABLE_PERMUTATION": 0.0,
+        "ZERO_QUERY_SKILL": 0.0
+      },
+      "examples": [],
+      "overall_rate": 0.0
+    },
+    "length_punctuation": {
+      "alert": false,
+      "alert_threshold": 0.6,
+      "auroc": 0.5719996636708459,
+      "features": [
+        "length",
+        "punctuation",
+        "sentence_count",
+        "line_count"
+      ]
+    },
+    "query_to_skill_corpus_overlap": {
+      "minimal": {
+        "by_slice_mean": {
+          "AMBIGUOUS": 0.0057902733996571,
+          "CATALOG_LEXICAL_HOLDOUT": 0.002814705327631434,
+          "COMPOSED_OOD": 0.0019167490743252557,
+          "CROSS_LANGUAGE_TRANSFER": 0.0020837428367418203,
+          "HARD_NEIGHBOR": 0.0024262630493702346,
+          "ID": 0.002005633320098181,
+          "ORDER_HOLDOUT": 0.0022761608763830843,
+          "TEMPLATE_HOLDOUT": 0.0018791320846969334,
+          "UNKNOWN": 0.002515276836764992,
+          "VARIABLE_PERMUTATION": 0.0016954998061138953,
+          "ZERO_QUERY_SKILL": 0.0022475913017892557
+        },
+        "char_ngram_jaccard": {
+          "max": 0.024390243902439025,
+          "mean": 0.0025134087957895284,
+          "p50": 0.0,
+          "p90": 0.011299435028248588
+        },
+        "complete_line_subsequence_rate": 0.0,
+        "condition": "minimal"
+      },
+      "rich": {
+        "by_slice_mean": {
+          "AMBIGUOUS": 0.05002113161246644,
+          "CATALOG_LEXICAL_HOLDOUT": 0.09283617714274506,
+          "COMPOSED_OOD": 0.05667367435990692,
+          "CROSS_LANGUAGE_TRANSFER": 0.05919254195044983,
+          "HARD_NEIGHBOR": 0.05960270419981847,
+          "ID": 0.05919688262730726,
+          "ORDER_HOLDOUT": 0.058994317396529945,
+          "TEMPLATE_HOLDOUT": 0.05676582825745384,
+          "UNKNOWN": 0.04140390362311124,
+          "VARIABLE_PERMUTATION": 0.06029543198693768,
+          "ZERO_QUERY_SKILL": 0.059927665772858886
+        },
+        "char_ngram_jaccard": {
+          "max": 0.14463452566096424,
+          "mean": 0.059542518850401904,
+          "p50": 0.058655221745350504,
+          "p90": 0.07575757575757576
+        },
+        "complete_line_subsequence_rate": 0.0,
+        "condition": "rich"
+      },
+      "sanitized": {
+        "by_slice_mean": {
+          "AMBIGUOUS": 0.0073913039533908265,
+          "CATALOG_LEXICAL_HOLDOUT": 0.015560030647874859,
+          "COMPOSED_OOD": 0.016543799250141527,
+          "CROSS_LANGUAGE_TRANSFER": 0.01718264207251138,
+          "HARD_NEIGHBOR": 0.017564746157420333,
+          "ID": 0.01802490994670224,
+          "ORDER_HOLDOUT": 0.01787622546906174,
+          "TEMPLATE_HOLDOUT": 0.016294435668603377,
+          "UNKNOWN": 0.00641328587498092,
+          "VARIABLE_PERMUTATION": 0.016770696883426063,
+          "ZERO_QUERY_SKILL": 0.016064522965772893
+        },
+        "char_ngram_jaccard": {
+          "max": 0.07547169811320754,
+          "mean": 0.015063651831850057,
+          "p50": 0.0,
+          "p90": 0.0410958904109589
+        },
+        "complete_line_subsequence_rate": 0.0,
+        "condition": "sanitized"
+      }
+    },
+    "wrapper_only": {
+      "alert": false,
+      "alert_threshold": 0.6,
+      "auroc": 0.5015907434742801,
+      "feature_count": 12
+    }
+  },
+  "milestone": "M-25.1",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13 (main, Aug  7 2026, 02:26:41) [MSC v.1944 64 bit (AMD64)]",
+  "registry": {
+    "class_size_distribution": {
+      "1": 41,
+      "2": 12,
+      "6": 4
+    },
+    "final_state_effect_class_count": 57,
+    "full_execution_equivalence_class_count": 89,
+    "order_insensitive_class_count": 33,
+    "order_sensitive_class_count": 24,
+    "registry_hash": "b0296794b12a15aa237cef6aadc87b364e7a12f8ea5207c9f098d845cbcbcf00",
+    "rule_memory_hash": "0dbeb08ba5e2d54c827cac2d7b5b84f2b26716ae28cf86feedc027da9a5ae4b2",
+    "structural_skill_count": 89,
+    "trace_distinct_class_count": 16
+  },
+  "skill_corpus_hashes": {
+    "minimal": "627aaa7e154d313054f0bb14caf65f780607279bd74d3ab921625f6b69dc28e4",
+    "rich": "219792ddf3563c1eef97b533e6dd58a3e92eb09a895fa142008318dbb3bade79",
+    "sanitized": "47fff640d6a6d6aa275cb7aac2250bc37ab79428bfababd4ab8f4581b285fbe5"
+  },
+  "status": "PASS",
+  "trusted_import_no_torch": true
+}

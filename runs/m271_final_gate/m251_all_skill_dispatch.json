@@ -1,0 +1,3210 @@
+{
+  "controlled_rows": [
+    {
+      "dispatch_receipt_hash": "ee509930470c4ca1ec710bb33007550439a753f24630958769cb05d31e1c86d6",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "02390a95c0631f2caa27369d7033e0937779033aae8004996413629027025995",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "17f26a44ecb358c63ecbcd6987933bbc1378f8ae5fce4daed0bc3c24235b2276"
+    },
+    {
+      "dispatch_receipt_hash": "b3c6d6ae97b8619862f0667b3d6a84f7d9a2d4675fc3122a8a5af563f392dcaa",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "93d3dd6486d9c567eafb3c0735c65b5e0fbf7e8eb6345b808e4602e6f969a023",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "17f26a44ecb358c63ecbcd6987933bbc1378f8ae5fce4daed0bc3c24235b2276"
+    },
+    {
+      "dispatch_receipt_hash": "18915dd8f67c30770f8348b89cb46c8da9fab3196479d93325767d6b5e756fdd",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "891945ab1cc4081ca09afca22925de9ce0617ee4110ef7e1b1bd1fc369e82b08",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "6aa57c625eb5b1da361086ff9269328ce3b91bdeebd85946def631d977e4561e"
+    },
+    {
+      "dispatch_receipt_hash": "52e4c18d8eaf2aaa41e0d9ed699657e3de52095bd1c5fb0fde2725d2949eb346",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "f0ffc05a33725b656207c977d93702e4e2139376720eaf2544a694541d758711",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "6aa57c625eb5b1da361086ff9269328ce3b91bdeebd85946def631d977e4561e"
+    },
+    {
+      "dispatch_receipt_hash": "ea19a5c072937c913ec1d7d5545a8d37dd41727efe69a069cec5069712b3da33",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 5,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "b718e99f89f19a9fe47485145c8f056be36e2745922a99cdea39eeabbc0c0164",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "96cd2745bd91866f5ea6394fd087bea3be045574471931d89444a5fa7e106d95"
+    },
+    {
+      "dispatch_receipt_hash": "0c6545ecccfedd2583131a9c7edf19a4a192356775c9482c6a7fec0d85bf5012",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 5,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "8782436dd18ffd784cdbc8221fd250dd16c40af693062d892842b9c85924c293",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "96cd2745bd91866f5ea6394fd087bea3be045574471931d89444a5fa7e106d95"
+    },
+    {
+      "dispatch_receipt_hash": "db369d27c077c51030a3a71ba8b7da8799a09ea0528ad3181ebb87682fcf20f2",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 10,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "814ef0949ca776bb0ed698e67006f40bfd40c0db94faa85604faccb466d054f5",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "7acea93ed19f4686f4607e71cc8c3b452fd72bc6b9383b40b60de4ae2eaf8dfc"
+    },
+    {
+      "dispatch_receipt_hash": "e441c2dabec948775195c140e82a9fdde8513377cb32b1baf22553dac74b819b",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 10,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "1f60cb00bfb9c73b0939eba3501aea06b360793e144956398781c8713ede712b",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "7acea93ed19f4686f4607e71cc8c3b452fd72bc6b9383b40b60de4ae2eaf8dfc"
+    },
+    {
+      "dispatch_receipt_hash": "456d442a2dcfb24dc48e949891762617ffcf80dfb9b98ff743e644590197b652",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "acd5713d178b8a1e43a0b0ad6ce9e0461e567254c40093b8b27fa89e415d3268",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "aca5e7d6353bcb16b94f84ff391edab1bba2614fdd9a881253bd6d3ee30f1840"
+    },
+    {
+      "dispatch_receipt_hash": "e88651a0350da9e55b1a630ccb71c8b7f52cc29a53cdc21f870dbd65cb61814f",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "c1df4de171b8f0c171c727efba0f17440bfdbdda1ad802ab33118d2e7bfa768d",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "aca5e7d6353bcb16b94f84ff391edab1bba2614fdd9a881253bd6d3ee30f1840"
+    },
+    {
+      "dispatch_receipt_hash": "6837602fff4357c3b8fde1903396324dbc29fc80dfe32f29481f20a8cce0fceb",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 8,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "99f647ae330450195a43e88dce9d202d5cd391af224269c9bbfeaff4591711bb",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "9b1bee048fd8565d18aa7ac15f2577420c516d89eb4050003d21d7f9114921c6"
+    },
+    {
+      "dispatch_receipt_hash": "3ac2b20639e0b63b37eb87a288245741fe55175587efab71ba889dd7764809af",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 8,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "b5765b33854955a15d836873767c6044cbbfa4e36b8b74f109d7ae5faccdcc36",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "9b1bee048fd8565d18aa7ac15f2577420c516d89eb4050003d21d7f9114921c6"
+    }
+  ],
+  "controlled_ru_en_dispatch_success": 12,
+  "controlled_ru_en_dispatch_total": 12,
+  "family_counts": {
+    "CLEAR": 4,
+    "DRAIN": 12,
+    "DROP_THEN_TRANSFER": 24,
+    "MERGE_THREE": 24,
+    "MERGE_TWO": 24,
+    "NOOP": 1
+  },
+  "representative_battery": [
+    {
+      "dispatch_receipt_hash": "6251fe5af4335c34839a377bb68313add04ab9ddde2a00707e12f67da82f349e",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "3762df04ce99da235dc9d6b2507d6e642349e247ebe42a014a73966ddbdc515f",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "b35b29119735f4db8e3477d2fb66c014bdf10fc419b339a95f91630719421aeb",
+      "state_case": "all_zero"
+    },
+    {
+      "dispatch_receipt_hash": "a750970ee46d7f75fb24686aa0524b46240d770917ec17fe4b4ebcb7c0d23362",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "ea2a03c2406d606adf71f85ff0ac478e884247d09bbfe50d61d405a0d35e91b7",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "17f26a44ecb358c63ecbcd6987933bbc1378f8ae5fce4daed0bc3c24235b2276",
+      "state_case": "multiple_active"
+    },
+    {
+      "dispatch_receipt_hash": "62f16ef8a01a8d918975e369ca83abef5054c0484d9eff7e452bedd2b17fab02",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "f326af623406dd66c245d96ae44a597f3614f0c3732d37978f0a2ef141e9bb24",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "b35b29119735f4db8e3477d2fb66c014bdf10fc419b339a95f91630719421aeb",
+      "state_case": "one_active_source"
+    },
+    {
+      "dispatch_receipt_hash": "d8d438e9f9ac70d23d12b10f363a231a25d8f9eb910aa6337253bbdaf92d248d",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "a97871746dce1deb1c6540c59110249c153ae932bd519b9635bdb6e438e1dead",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "b35b29119735f4db8e3477d2fb66c014bdf10fc419b339a95f91630719421aeb",
+      "state_case": "destination_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "0b6cce908fc06ac1551770afaef347256a15cfce0369ea059053ef58a035250a",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 11,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 11,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "1699562555bdf11d5b5b697727edd5b4e67c163f1a5117661b585ab0cc3a7c86",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "2969e7dae478fcf41e213084a65f22a3a1b9a6b2e7d9fab08505dd702db849fa",
+      "state_case": "preserved_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "3267cc69c9bcb10440ba978091fa13249c6615117a054c6f84a1907b18cdcad5",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "b5f741476a3618a8152281bb33fc206929654335b837159cf76090172acf586c",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "b35b29119735f4db8e3477d2fb66c014bdf10fc419b339a95f91630719421aeb",
+      "state_case": "count_10"
+    },
+    {
+      "dispatch_receipt_hash": "ddccaa956c07a996325f8d52aba87eacb8548add8b53c3406a23773312dfedf0",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "6c9f89eae5550d6bdfc3ce445c3f8665a53139a58ad43989c7340b03d2fbebf3",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "b35b29119735f4db8e3477d2fb66c014bdf10fc419b339a95f91630719421aeb",
+      "state_case": "count_100"
+    },
+    {
+      "dispatch_receipt_hash": "4843b81cecc0198c66622520a3412d4574af5eab21176c4e51d310cc3149b1b0",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "6638b12610f2025e069508dcdb1119f8d63b5498830206bcef31d8418b4f6322",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "53550bf7dd5e916f3e0b86e50706576631d8c800b68c71266b94d45edc000e4a",
+      "state_case": "all_zero"
+    },
+    {
+      "dispatch_receipt_hash": "bd7560b6071d4f5bd370d176bafe3d8bb76a92721a1ec53b2cc9094da25953b7",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "d57f324a7f0deb01ce88214ba4ab82a51dbfa1295a2be4cdaa9b959d99c56a65",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "6aa57c625eb5b1da361086ff9269328ce3b91bdeebd85946def631d977e4561e",
+      "state_case": "multiple_active"
+    },
+    {
+      "dispatch_receipt_hash": "76642601759f249a99e7fce7810ecf09e5754d05f1da47935ecb64ab713b006a",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 1,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "bc70e2c6b1f1c359c2e8785146087df29ef2d62da6db8fede569d42a2e91e96d",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "6a4b84ef4c9f2cfcbf41808134dfe987f90d902c25e4105114f5c89f26adff2f",
+      "state_case": "one_active_source"
+    },
+    {
+      "dispatch_receipt_hash": "d6784e4ffc6284af9dd1b3e26ad2de354a4b294838fa59653e9dc68855f854b7",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "2618f2c1134d73ad76d6dc9ca0168f4e77fd46c727c712948c70ca682541fb5f",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "daeb8da5b3561b7f57d00bf9f52f457b28b2cee22254fa3082c28d509d0bdf90",
+      "state_case": "destination_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "816636373784d91f54a63452a4ebf235bdcecc1a72326b6e51b6a391c8d6a504",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 11,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 11,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "afecf27b8a1bfe264cd390b6ef1e75cb14abf8cc7fcf4e7d5e318fc70cea70c4",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "5e1d697bb75dcbd66db00c47b2fdeffd7f67b518a98be66bc8c204c6c5b130e5",
+      "state_case": "preserved_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "e8f827ceda41597e127efd17dd597dc8b89cab47c01a2e96033b02414ee14b7b",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 10,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "87503d6d49dc07367b08c9860486d2c18d82fe18e3544b8140de1f4a34d31a6b",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "0ae70926f63dffba6beb5454e17df03aed87c2f6cda9fc73352f2044d3f273fc",
+      "state_case": "count_10"
+    },
+    {
+      "dispatch_receipt_hash": "a8f3948c7027bb6cbce5e2403469b8ffcbb92e2ec679bd03d23a41cdb0a41a83",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 100,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "7eee4834217b466640bee70879217912774b43fce0abc2aecb59be3bebaf7068",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "cbfbb278345ce9a18c32b23a075b45183b28cbed09ad1367f33d078746d986f4",
+      "state_case": "count_100"
+    },
+    {
+      "dispatch_receipt_hash": "de75428013789f46265aa87f3c02c9a98761dc00896d1a23eb8b9456cb39f4d9",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "c9153fe32f675adfdd2ac848f08f1d3dd537eb2fd9687439917c34e19ddabda7",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "5146c8c7281efa259167d4e96b89fd006db41925f3a91153d0a27cdd610ddc1d",
+      "state_case": "all_zero"
+    },
+    {
+      "dispatch_receipt_hash": "28f2ea19a40590a268d28f6b16167fb6aeb0eb011cca045c775e7c442627c46e",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 5,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "4e8b8674aabe463af7981b5a945ba2423034bf11d7602720586a2f1ef8f7657d",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "96cd2745bd91866f5ea6394fd087bea3be045574471931d89444a5fa7e106d95",
+      "state_case": "multiple_active"
+    },
+    {
+      "dispatch_receipt_hash": "7e03314ce0f241bf2dca5f2c0dc149dee90e004bb47789a1bf09a9f187bc4b44",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 1,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 1,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "ccfa3c32729e2ec6ff2144c6f6b30e02df7af469abace20ce4aeea8fa72942c4",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "a6a710f96c8bdf6f6435f11e4b9f7ef0b5d86cf7947d57a1a517f4d6b0be0e82",
+      "state_case": "one_active_source"
+    },
+    {
+      "dispatch_receipt_hash": "79d754d93ac10028111086b0f37072679eacea7900ebf7b540ed947cc88c4b1e",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 11,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 9,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "2ccecc127018181972b933145dbbbe96b6f8b6d3a37aedb6f973616554e66a4f",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "8cc93fc190c9c677adcb66b9ced1e02a93032946adc595ffec2c66a294d791d0",
+      "state_case": "destination_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "47831baa72ef177921f4258f6c04ff1a6d4a5265544d490f6a9033a10c94d587",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 2,
+        "R2": 11,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 11,
+        "R3": 0
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "b8d0d68b2184c92ecd0d0220c2a5beb7a628c49271ae4b9dbebb2efb0f670e09",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "ecd5bbde717bc08917c0bac2d640932a00bdc20ce2f581bca0677ef436496862",
+      "state_case": "preserved_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "7da9a6f8f4207825dd13d637b3123e604fa4202f1b868080fef66ad287672332",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 10,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 10,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "45a4d243e5a1b33b98509214ddc478d3328185a164d7ac5c807d8707d3a149d3",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "6a0eb193c1aa7be7c30d46f0043f417c7f47513355398f4454758c68ec4f7b27",
+      "state_case": "count_10"
+    },
+    {
+      "dispatch_receipt_hash": "491fee30f1d120a2d939fcbdc42543a60271ca18be1128e69bdab7b9d30cabac",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 100,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 100,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "fd469c5d1af976671bb80dec6364084893feca374905e130e4cbf3b2b982fb23",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "ffcedc1deff10e37db2b0ebfaf50278d344d33b67bcb929160687a21501fde22",
+      "state_case": "count_100"
+    },
+    {
+      "dispatch_receipt_hash": "693436fded23b807af85cfc71f8e0f97c41f6c858e9666cc25dfa15f6f3f34a9",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "4fb8622d737b4b2fb12aae2a87e5e7144682a3cf3d8827688b91a95dea2ae8e5",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "ec9beaaead983a43aff8d35683c82547b7e2df18f2b326e05c77fba8d52b547b",
+      "state_case": "all_zero"
+    },
+    {
+      "dispatch_receipt_hash": "d254fd22f92e6a9965cdc6bb497b8301b8bcdb3a7a84b16fcb47ba8500bf494d",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 10,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "81798835d6ce8cb9d834994ceff772fb69c87af4dde7b9f3366d5e55ca110836",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "7acea93ed19f4686f4607e71cc8c3b452fd72bc6b9383b40b60de4ae2eaf8dfc",
+      "state_case": "multiple_active"
+    },
+    {
+      "dispatch_receipt_hash": "acd14c5744bad9158c855a53211e5fef95ffd44702b12188c6dcd915a7daf548",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 1,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 1,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "cfb659c745d8ed0a8ff084de6ea73057a32451310ddc1bcc677fdd41d3135f11",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "488050a92bb27d2a3839d298f41ac9d2c7addf8c7a29858c1a6370c893436b85",
+      "state_case": "one_active_source"
+    },
+    {
+      "dispatch_receipt_hash": "05a40ee47ba2b38e5aa5cea9a29f8ca1b1dfc9a822a31f048098fd57ddae2817",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 11,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 9,
+        "R3": 0
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "0cd9f23da2fa37d7f6587ed45bc88670ce88a1a5c3d046b176d65270a6e7af56",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "e815385cdc9559cf91acb1aff9f0488e29821b4d32dd416fb1785237810499a0",
+      "state_case": "destination_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "f6fe92ff01c16194af57a2070e70769ef822fd2720e4d6e265655b9577df7746",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 2,
+        "R3": 11
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 11
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "d4067ef6a078bc4b6518597e63a50048bf6b349f23430d890aecbbbb86ea6300",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "9cf1601cf8229c21af4c898e8cc8f8179cbf72ce37e74afb8f01ddb271dc6a6b",
+      "state_case": "preserved_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "7eb3346a7574120f42add66b267eda5cf4c89b2d9d79e2782b0d403d2c0021df",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 10,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 10,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "6903a23f2f8942e44a869d09f0e8a17522424677c19622b097669cd3c6d8dd93",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "6db8f49869d7b7f2ac2fd5f8b701cc4212c97cdfe4cf4cabe9fe1c586a3c9d1d",
+      "state_case": "count_10"
+    },
+    {
+      "dispatch_receipt_hash": "30f1f5e7b7f2d9d2d32c75ba55bbf9ae35702db3b880aefbb05341f3b603fcac",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 100,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 100,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "30ba9a05599d8fb790b7c90485bb090601fdf71fa310b00cd896901a4071e92b",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "e964b0cdeca73ec12abc2861ef1bcac5d7d1edab22e168e1b57f86984aeca429",
+      "state_case": "count_100"
+    },
+    {
+      "dispatch_receipt_hash": "12f3004550b933457b0321d818133e2d38eb448cac1b6eba2341944b78961aef",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "946fa582249d1fd625f559685645c393af09612e56dfbd4066254abfc21af04d",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "4a2eabc31a44f353b746d461c9da6c0da2085f3279b6c2cb564cb8e5edd5dc1e",
+      "state_case": "all_zero"
+    },
+    {
+      "dispatch_receipt_hash": "38d331aaaa102f78e0ec2971524bfac0d8b00ff240ac78e0433cdf07b020bb2a",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "11ba1fa48c83b1838d407cf1658eaba125e8a3732900e7b06170730c87773dc0",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "aca5e7d6353bcb16b94f84ff391edab1bba2614fdd9a881253bd6d3ee30f1840",
+      "state_case": "multiple_active"
+    },
+    {
+      "dispatch_receipt_hash": "36f16f0b7bf7c274831d75435a58fd2a006c6ec3acfd787a20191c58ecf34adf",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 1
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 1,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "ecff64eb48f36ffa68423d16b1a5db9fa2a20457f894ca94d2747503f4905b42",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "682973e130ff80b21014975c2c887f7a299433e9f3b8001fb60829dcf7f1a499",
+      "state_case": "one_active_source"
+    },
+    {
+      "dispatch_receipt_hash": "19232ab1166922769eee4df225828333e6ee7e9869c451470d28a9e9aa0580c4",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 11
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 9
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "ad1e99d3b004e81e8e91ffe6a05b081be5806530313e8b1a37a8b4d19d05816c",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "43cdb613053b6e5320bcd33dc58cad426c7bf5038cc32ebf4698f993c71ca81a",
+      "state_case": "destination_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "f097ef6b1e7174cd0fd4689a20e2ae2cab5074e8000dded55dd518ef7ea62940",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 2
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "9b1ed11bc93ad6b2e2941fddaf0f0a1aaf8551a441e5a302768cb12b7081fda2",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "b4653717bfead613b6cc4a350727dd6d5699d4e06bfba54515e610c55f09a71e",
+      "state_case": "preserved_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "63ab6a5d98513c0cf9be154d2a3bae72c8c4b8fe0bd211416793b5c4b29df63a",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 10
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 10,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "b2e9ec3ab02bf352884ad0b8e17bcb63246e33576d2e1ab34384d61cccafe897",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "c241e6dcade5a53859a09f599ab27344a802a501b097609db3966920b541ea15",
+      "state_case": "count_10"
+    },
+    {
+      "dispatch_receipt_hash": "4c63e1439106f96f72baa67a6a66d34875b9abd198228b0b908828083de4861e",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 100
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 100,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "a061266ad397f072710f46aaa61bb85def49ac7b094961537a6f039437bb4491",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "3364e14ee19beb0f8325513bf0287ad24db6d43fd9a9b2acf17cefba4c14b130",
+      "state_case": "count_100"
+    },
+    {
+      "dispatch_receipt_hash": "7925bb93d0ea70952a4436574f1bb4c608019410461823284df489144b92103c",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "2f33ed92db908f79dda61719ccc8c955634b39f77d50f91e2d50ac20786094a2",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "22a4401090fba2cdce06864fba0e51106cf069231c4c9dda7715a9a18d43acaa",
+      "state_case": "all_zero"
+    },
+    {
+      "dispatch_receipt_hash": "5ecd4d9a2070d01a9e25e2a9d68451d42f19b60e8fc81352dd18e96855d4132c",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 8,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "6c06c70b09f1befc704f2060bea05e859687a9c7795660714d1c043bc1943d8f",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "9b1bee048fd8565d18aa7ac15f2577420c516d89eb4050003d21d7f9114921c6",
+      "state_case": "multiple_active"
+    },
+    {
+      "dispatch_receipt_hash": "86c6f18b6d094aa0cc431ebc01b33fc2a7bd3e81327820441cba9c1a733c550d",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 1,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "1faf9f5ae754de77a6448c71c1769dbcd9384168b534d1ffd5cbf41f5e673ae2",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "4b2fd959cd8a7eeae4cfa2565bd8b0fa3bfdf5c78020b037a0f54cb6cc8eaae2",
+      "state_case": "one_active_source"
+    },
+    {
+      "dispatch_receipt_hash": "9644db25074ca3a8218435617c551799357370b15d5319da1b9ab09da0c624f6",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 9,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 9,
+        "R3": 0
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "8d9d78062550fdeb1def135df2d19cada7cf81cd143a2d7c11d297458dcdd449",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "41d5723850961eaa72aeb02f0641d601d5c4dbac0fbb69c48ce16db3c8a31579",
+      "state_case": "destination_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "bd66db2fad52d060bc5bd41368dc0cc94b24ce2c727beea1960ca2ed352db2fb",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 11
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 11
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "42b35990ba5b63d4f337fcdb8659512c92b616ca0132d3e99ee714110316808b",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "9cf193b695517f592108127ecc1b4371c9dedf5e8b5df18a11ab64462af5732c",
+      "state_case": "preserved_nonzero"
+    },
+    {
+      "dispatch_receipt_hash": "b734300245d4c2f2889acfa910d837f5127f2bce952fb24df62140b4e4d04b68",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 10,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "600069414e45dab3bf940dfc65f845fc6bf7bf3b807c4b33cdf8a8acff4e13f3",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "0b76b6247c2fb09b890972498afc4846105456da8dc253d4fabcf7c02e487a28",
+      "state_case": "count_10"
+    },
+    {
+      "dispatch_receipt_hash": "2193f0cf6b7c64b3b9c21a5a0f4129f5f2c630f13e70420e1a7a1278b96c0acd",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 100,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "cb52a465410066f91f82a2813f7cbcb77679fdac81899e88b54b90f7305a3ef4",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "75631cca45fb9172337212ee5351ae8370b44b98b4b85b33074055963d29e839",
+      "state_case": "count_100"
+    }
+  ],
+  "representative_state_checks": 42,
+  "rows": [
+    {
+      "dispatch_receipt_hash": "dc7407cb37697d23313a5304e87ed93b9d54aa8babf4a455a1678e1e0d6f803d",
+      "family": "NOOP",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "51f70c36c09b16065c9d4c1322fd97dc5b6b6a5513db9c3467303ab0d23e45cf",
+      "rule_semantic_hash": "397734e1a64f02249c8d9b440a39408896b4d5dfc3b3dd16df8fe1157c4189da",
+      "selection_receipt_hash": "b07c8e40a362bc48c0e85df870710f8d15ea690903dada9f49afeeda4591c525",
+      "skill_id": "skill-397734e1a64f02249c8d",
+      "stage1_execution_hash": "17f26a44ecb358c63ecbcd6987933bbc1378f8ae5fce4daed0bc3c24235b2276"
+    },
+    {
+      "dispatch_receipt_hash": "933c721f0e6e2af655d406212bf5bc6a2433f8ce7d077dcd2daea88fbfc10071",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "cd0b2d3c48d57685c33ce6b27de2c3634fd4cf42b84f6346d5d4a5fdcfa57d48",
+      "rule_semantic_hash": "a77dfc34f13c1ab02494cc088f17ccc08a0d521c94dd40865276ad26ad31bf59",
+      "selection_receipt_hash": "84b8bbd17edc45b0ea4de95b0f2e81fb8bbb87b538a4778569a42702b8735608",
+      "skill_id": "skill-a77dfc34f13c1ab02494",
+      "stage1_execution_hash": "6aa57c625eb5b1da361086ff9269328ce3b91bdeebd85946def631d977e4561e"
+    },
+    {
+      "dispatch_receipt_hash": "e0e74c89b75334400b901e6dfc6fb1e818ab9e35b93d65c5f29927116c77f03e",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "0a3c050c6369cef0fc65540a74228ad3be17c184e56efac71feb89a53191e416",
+      "rule_semantic_hash": "a56ec25933f9e84297e00073b70263c77edb55b5bf672326584e47a9d8bcf845",
+      "selection_receipt_hash": "95bd889e3c884ff5b0db394d66d9e590fa42929e3e007fc91c23d10ad2f8dd75",
+      "skill_id": "skill-a56ec25933f9e84297e0",
+      "stage1_execution_hash": "4b32674d454bff35700314864146de57e72e176228d43386beea6700ede44ce9"
+    },
+    {
+      "dispatch_receipt_hash": "f19654113de9d9bef6ec4cf488e7d67fe402bf9b7208a16d02d3194015c2858f",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "f52e489ba23eaf85c6434b882d475e2470d1e78df7a15e0e32ebbbc1fa80ab8c",
+      "rule_semantic_hash": "9b6ab6fffcc331b6312287f3ccf736d919372e0bf67956c73c8ae5eb44128d53",
+      "selection_receipt_hash": "1b1bc13bf0c07a5af6eef985990644fd334c5d27d747bfff167ab7231084a931",
+      "skill_id": "skill-9b6ab6fffcc331b63122",
+      "stage1_execution_hash": "4b5fdaefa28ea9df09f678bab216c67582f0a3ae34ee1fc650d68be5f8d66d1f"
+    },
+    {
+      "dispatch_receipt_hash": "3bf2170689336d5f0c200da8a61cafa635e47cb1a8df13ccc31452ff2f418947",
+      "family": "CLEAR",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "cff3644aa8431d5de5d794ca6546da7043f6c996c40b8ce6571a867a038471e4",
+      "rule_semantic_hash": "32b7cf630118731a1329746fd92e16d5ae9647451f818d6216581b7d889754b8",
+      "selection_receipt_hash": "5b5aa8c34e83671cfe607e142d1671781203e529c0d928d68e2900128160f582",
+      "skill_id": "skill-32b7cf630118731a1329",
+      "stage1_execution_hash": "4861a6ea7e67b883b659ace455ac3ba2ccfe056e5fb716abf40259458cf76d74"
+    },
+    {
+      "dispatch_receipt_hash": "8835696a9156eaf395b448cb62b14bad211ff39ed7483277f0f8ede845a0d4da",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 5,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+      "rule_semantic_hash": "b41f14d40ef34442eb2b1f0d0d980d74babd6b03541e34bb88dec181b12c9549",
+      "selection_receipt_hash": "a16931e31a891ce8d31f10aac5a7f3305827c74d0df2e981f72c0edb3207d0d1",
+      "skill_id": "skill-b41f14d40ef34442eb2b",
+      "stage1_execution_hash": "96cd2745bd91866f5ea6394fd087bea3be045574471931d89444a5fa7e106d95"
+    },
+    {
+      "dispatch_receipt_hash": "8afbaf2501f240dad6e3d0bc8a97c0ec0b26386ab850ac40aa88c56a013a89dc",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 7,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "d15217c53deac898fb5bca0ff110e6b8a109219fb057cabba030331f435e8219",
+      "rule_semantic_hash": "4ad0c87c279a22a1ee49484d1032b3fd49ab6d1d4adefe53dc1aae89c4c594ab",
+      "selection_receipt_hash": "4381c9ad40d98d894592e9731b33b58b487769b1ed6d996ed3ffab1326eb803c",
+      "skill_id": "skill-4ad0c87c279a22a1ee49",
+      "stage1_execution_hash": "ac2882a8429657fce12a96486e018513954321f66e38826c0b640484ab4bd863"
+    },
+    {
+      "dispatch_receipt_hash": "dbfba6141f60409b9307e24a0586c6264ade20028428c55d7195b08c23e27d5f",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 5,
+        "R3": 9
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "5f8c948f714c6d74e8a2fa8e014e3392523118f243ef8546976f1a15b46ab766",
+      "rule_semantic_hash": "2e7f15b06617d724f440325cff1b626bf682432d69507e2118f4210fba2d662f",
+      "selection_receipt_hash": "077a9b5a316f7537d5cbc9ac89a882547ec9d5cfde9ede77064648b9df0c6a26",
+      "skill_id": "skill-2e7f15b06617d724f440",
+      "stage1_execution_hash": "206fc604f3ec38b67100dffa6d44f1e94a2d27b1c0cc48acae96b1344590bf06"
+    },
+    {
+      "dispatch_receipt_hash": "3dfe380fcaea63a3d82f8480f52210ebf47b784f727381009f7a47b3fc61db6a",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 5,
+        "R1": 0,
+        "R2": 5,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "93c94a61a01217a25d8fb49c899543f17bdfb4157278753cacd33063a92f3abc",
+      "rule_semantic_hash": "4980d62e189d3305fec868779603542e569d9d4848e8073785954c9ee9e32fe7",
+      "selection_receipt_hash": "9c6351a514c9ccac0a98a4cf4e0ac6116014edc9450ef0dcf714d31f301f06ef",
+      "skill_id": "skill-4980d62e189d3305fec8",
+      "stage1_execution_hash": "1c211843da54401f7aba9e61750e4689c97bf1f7b8a7b8af57f8f1665d7beed4"
+    },
+    {
+      "dispatch_receipt_hash": "bce5b1dda23a338dcd51bcd4edde89cec4e87dcd1baf8fa64f715542f26eef93",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 8,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "f0e392bbcc8d36996e44d15154b87d5797da35e1dbe6997cc8dab385793bf03c",
+      "rule_semantic_hash": "c4339617b735f96d82fe9cbb67d7a3575043ff9fd20f5bf20dd93adb2d88ea3b",
+      "selection_receipt_hash": "1b149d9ca9638386bd5ec1e2b31dd5c992b66293ca985dd0099048b5f71e2363",
+      "skill_id": "skill-c4339617b735f96d82fe",
+      "stage1_execution_hash": "ad135344e9d2b5c83cb64ee056fb5a6954a25c45938534e1811b7cca1dfe3acd"
+    },
+    {
+      "dispatch_receipt_hash": "1b90661cfb217b1431fb249f70bd26c851ec426657e0fb59edce5f3756cdfdf3",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 5,
+        "R3": 10
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "274ab6212570d04781b7862f9a509e035d875036917ef5df1aa890849efa0a45",
+      "rule_semantic_hash": "2d453c90a48d94b21d498369902ebefc4fd7ad23a5ecb0d11f0d064079125e49",
+      "selection_receipt_hash": "b14cbe148ff906a4893d2c2c5d1a250c72c012571bd328b3fe6c3d155f81ffce",
+      "skill_id": "skill-2d453c90a48d94b21d49",
+      "stage1_execution_hash": "d87e3ce74ea3cb3dfc9592a8de532b694acb76ddde128c653966ecbfa599b3f0"
+    },
+    {
+      "dispatch_receipt_hash": "c4922fddaa9879ff9caa5eb32620701247b842a006f1e3f6e7d9e83d8da911e8",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 7,
+        "R1": 3,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "dd61272aa239af2f62dffaecda86bb9e6a533f8f44c8e5c53cf4ecc2be007ee8",
+      "rule_semantic_hash": "1051d0ddc4b7b141fee30cc0713bc9d383b14df5359620d5396df98ab7094cee",
+      "selection_receipt_hash": "1a74f548fd646ead6fc44972ebd5302e2809a750b064a643f05e9f3d21745d94",
+      "skill_id": "skill-1051d0ddc4b7b141fee3",
+      "stage1_execution_hash": "890bbdf357a9ee1c5aba523a4b0b061b6e299bcc728756a3a2359919bae3f0ab"
+    },
+    {
+      "dispatch_receipt_hash": "6e76f5ddaa78c55f0a0f9481ba5f11b771e5c47697e360cb53e4eec92cb94266",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 2,
+        "R1": 8,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "a396bf8cd32f65f6c493f8d9ec26df169b6baffdfe35827b9dc78cd78bf14030",
+      "rule_semantic_hash": "24c593312c452766835b6977fafdcae51c361442bbd5af7ff109317bb67b6515",
+      "selection_receipt_hash": "da1c8a37d304542945c445d18c5a766e1d31f4eb47ca6d55c98f15c46dea1ce1",
+      "skill_id": "skill-24c593312c452766835b",
+      "stage1_execution_hash": "7283113dc9203072b670939139a50fbf4cb390b18035aaed0b80e33a459d386b"
+    },
+    {
+      "dispatch_receipt_hash": "4ed8ee85002d6a410b30bc5d58f6a9a421ba511038acaf1e1a9061d57351170e",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 0,
+        "R3": 12
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "e5953e1503325f1b0e0bd84a017a8ca9d61d4f6416640f7903b99458904e4787",
+      "rule_semantic_hash": "6f13a5f1ab256d36db54e69436ab3568546bbd6450782daecd6e399c29ef1b3c",
+      "selection_receipt_hash": "d95f0cab304901da2fcaae5ab20161bc9d57681fe33025a57970a2203ffa3bee",
+      "skill_id": "skill-6f13a5f1ab256d36db54",
+      "stage1_execution_hash": "18ad525ceb8dc26df9d6ea0519c3549437a97e08875cce63cc0c1a06c2d61d26"
+    },
+    {
+      "dispatch_receipt_hash": "9a9df3dd8e1d146852957e00531cf6ea92da46688c4747d8003ca1a19ec0f7ae",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 9,
+        "R1": 3,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "ce9181149db2ed7750161b19c0d71640b42336eca020f19d2a29a022d88c6eab",
+      "rule_semantic_hash": "b9be155078669183e218b8eae59d8f478c8637f5d0f4eb3eecc6b476190328dd",
+      "selection_receipt_hash": "56c41f2a0fb09299d6c34dae41c0df0903bafd6b4dc01c32f7ed22a0c34f1f55",
+      "skill_id": "skill-b9be155078669183e218",
+      "stage1_execution_hash": "9644f43baff92a054f9f63a4a464b7a3f874a25b82c6f04f63e7f4522f069f98"
+    },
+    {
+      "dispatch_receipt_hash": "d2fb492e8b1e66e900ba991f7e2217dca1d5a5c94502468df4252720d8ebff69",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 2,
+        "R1": 10,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "7974f3b4e74bcdf132189d27e039f98e8ebd455eff00838b92383d85b9e61cc2",
+      "rule_semantic_hash": "2d41141a67193ce2e5fbe5635c0b42888810f9bc503718723ab05f09c4638c49",
+      "selection_receipt_hash": "2578870bbe137a0a189db2550662880e307392796b1de30fa2ca0251fe55092a",
+      "skill_id": "skill-2d41141a67193ce2e5fb",
+      "stage1_execution_hash": "416361a18c405118466734523aec3056a36a29f0476db2e99f85af4f6ab86b7c"
+    },
+    {
+      "dispatch_receipt_hash": "beef1bbf229dc6d37b8a7528e927cf71b87e70e1699f984fe00e5bcec11b41cf",
+      "family": "DRAIN",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 12,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "e262c5e7288a93da9307db20e56f3dc0e62654fa263fcfd073d4315b8116099c",
+      "rule_semantic_hash": "392b4969ec1e1c1372f3f26baea043c328ee71776e5e99666e0f3658ce50da1d",
+      "selection_receipt_hash": "259048e599c7b4d08070e6155e1e583c133784303e5e235ae7f15df010cab355",
+      "skill_id": "skill-392b4969ec1e1c1372f3",
+      "stage1_execution_hash": "77ab42bcce3e1cc9950c2645284dd906c4946243c472ca963f9b7095f8edb8fe"
+    },
+    {
+      "dispatch_receipt_hash": "09c948bb7aceb5d499f18664d547aa2dadfddca713720558928cbe5e559c1355",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 10,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "b762ccfbe7e1aae5f57a729c92b873264fbee50892171cb2957c1c4234d46e8f",
+      "rule_semantic_hash": "0da922f8a48e7f36753484cde3160fd86adfcfa46031164c6c45d7a4d07ad4f9",
+      "selection_receipt_hash": "76efe7db8026a77b06630e9b3f789589d14b84f977d467e83f5a34653ec5fe85",
+      "skill_id": "skill-0da922f8a48e7f367534",
+      "stage1_execution_hash": "7acea93ed19f4686f4607e71cc8c3b452fd72bc6b9383b40b60de4ae2eaf8dfc"
+    },
+    {
+      "dispatch_receipt_hash": "f2b794e6026e9143039f37c31051fa28d6d4c288328db02a3262e4740090033e",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 5,
+        "R3": 12
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "642e90498401096bbf16b89c804f352aabd2d4db982d8450cf9f1bcf3f34b6d6",
+      "rule_semantic_hash": "629de91731d283fdb6b640f0014b2f534c23787c40d29ed261cda0cb92cbf36f",
+      "selection_receipt_hash": "ea3f67e4a5efbee47bbb56be029e702250db86efabe30e85915b51216e0eab13",
+      "skill_id": "skill-629de91731d283fdb6b6",
+      "stage1_execution_hash": "6017930d8494603e110d1c2b91efc90e7080638fc9c955f33df5dba51f2ecce5"
+    },
+    {
+      "dispatch_receipt_hash": "102f1a13ae7040bbc7680693d87ee846527c2c650ef2f216542caa77154a2d23",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 10,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "f069fe5bd9d275fc05371bdce214a51f12848cc45237f925927848e35b69af42",
+      "rule_semantic_hash": "1f728595b904dcd32290322f56c156a2abb60876bb585b1b6d140006087bf4c1",
+      "selection_receipt_hash": "6fbdafd0fb385680c30c8f77c6b3e2abd3c52ffe907c8bf433c31f150868ec8d",
+      "skill_id": "skill-1f728595b904dcd32290",
+      "stage1_execution_hash": "7febf8d4c8e928f6a7e158a0a8825837a02cac9be1390ebd40b78a11764c4bbe"
+    },
+    {
+      "dispatch_receipt_hash": "07dff2b91cdc8a0132ef0ace81e9ad34706a5e37b7587d7ab042697fa5816a7a",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 0,
+        "R3": 14
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "5e4acc7d2e1037b2552a8898f750d161d90368d47979091410ab39ec6bb704f5",
+      "rule_semantic_hash": "a730f3294c299212ad1b8f02db9facfa70ae05334e3f230666c505cda36c594e",
+      "selection_receipt_hash": "58c848c7bb346da6a7cc630b4b87e67a3441cee9c24ae73c67f9a548810db39a",
+      "skill_id": "skill-a730f3294c299212ad1b",
+      "stage1_execution_hash": "f0879d48caa15759723ffea9405856c65099a14d716f9229039b451368c882c1"
+    },
+    {
+      "dispatch_receipt_hash": "8e922b129e4639d403c0958b1526443c4a02731e945f61e26cd80ced30cafe22",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 12,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "4803d8d138eabce98f6a22ea6573a9fc42b7c28edea604ffd13445e842da2ee3",
+      "rule_semantic_hash": "2bb97b79af461f4cd0a96756580914fd2536756131be3d323dc6c905515ef8d8",
+      "selection_receipt_hash": "9bd95683347dcbc54b4be719a59f5e8216c2a60b662bb3fc81dc64b008e30d71",
+      "skill_id": "skill-2bb97b79af461f4cd0a9",
+      "stage1_execution_hash": "1928271683fb9744b492c273a2e521b70759ac2496b1d3a924c9c87c50a57786"
+    },
+    {
+      "dispatch_receipt_hash": "9e3845bcf09c2062abdd9f0417fb840c5ba9bb70407f0e1cd18364df2a02d27b",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 14,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "cda1052d88f771d1a6c2ea861315eca8474bcb4577743d0c3d47a6dff42c7de3",
+      "rule_semantic_hash": "ffcfd4f418e3af7c212c0155e9143c6dca8cf340e159815ac099dd9ce90de8a5",
+      "selection_receipt_hash": "a1c506b38cdbe47df6e40fccbf9b60f57f2a1ca5c6df9840a26bbc19c3953b73",
+      "skill_id": "skill-ffcfd4f418e3af7c212c",
+      "stage1_execution_hash": "129864a3bde5eccfe9a9d4d16854bff7b4e0f4e618180ed77f686b76e0e3df06"
+    },
+    {
+      "dispatch_receipt_hash": "1582c298857527a7ccc3264d93f66ecdaabc7f67711d667b6ba3009f6843f036",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 10,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "e375b7e659b130fd5c72af84340fb0b89f2f7622b6a00b9e7d47d74df6b8235b",
+      "rule_semantic_hash": "f1fee3991b066345a6ec90462e1f52af73e0fc0b33350e7578eb19d284cce73d",
+      "selection_receipt_hash": "be00c5c5ead9f89b88c0f06185b48964fe752761a9c295936b07ce433d74cdea",
+      "skill_id": "skill-f1fee3991b066345a6ec",
+      "stage1_execution_hash": "3d6693e3af01b556c9a75ae33a220f20380a11641c8a3e965cd6e8af95258ac1"
+    },
+    {
+      "dispatch_receipt_hash": "4a3fcc86fc7cf67823952e7bca8a6f0ab69553ff18b618929d747dcc083bd2e1",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 5,
+        "R3": 12
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "a4d4e339766dc532bdb323a232a1824db589e7fc6eb59e21bf3ac55e397793b1",
+      "rule_semantic_hash": "91bd979fdebff54d3493d4ddfba11f451e7fc4e40b161ad857dbb4693689b9af",
+      "selection_receipt_hash": "01b68df3311d235643ce97847f934783fb60c565b06e031bed126687afb89844",
+      "skill_id": "skill-91bd979fdebff54d3493",
+      "stage1_execution_hash": "c9be0e58523ae295c30a4cc3fb9052c884e1a8c0aa4cb3b863c740eb9e3b08b1"
+    },
+    {
+      "dispatch_receipt_hash": "49dcd26774819ac830c363a2679c5e938e1a335468f37552cc9cb199a396991c",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 10,
+        "R1": 0,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "8736bafceded5e6f9406e57590ad1e2d9d15614d5a5f68af81fa18f19ed8ba66",
+      "rule_semantic_hash": "7e832b546cd45bbc684ced2a6fc4ff25df27fe07747999b7d72e826ed8ac27a2",
+      "selection_receipt_hash": "bb334f5235dee35a921b21d7788746f81468dfca21234e9ae6f1e379b6471e11",
+      "skill_id": "skill-7e832b546cd45bbc684c",
+      "stage1_execution_hash": "cc35aafbdcf972a8e7d1da0ade7f7cb45bfec546f6ebd62cffc732514887468f"
+    },
+    {
+      "dispatch_receipt_hash": "01f5bc2d90401b315b8eff631617697889eb0e86cd98b4ed628c0472d5ac6a0e",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 15
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "7ba990df97cdc2410c8c21419a95208d7bfea2bac9ed68893ce28f7007492fac",
+      "rule_semantic_hash": "b73a0927e17c09cf94cb19096ba1424548487241459123a6a34f96a543695961",
+      "selection_receipt_hash": "02f95e06c3b519f5b6acca01469a0fc57d3079c90b85558ec58fd19f25b92098",
+      "skill_id": "skill-b73a0927e17c09cf94cb",
+      "stage1_execution_hash": "9898a9209ab7f33a717531a366511a9d45b78443ed446aa695ebda8167ea901d"
+    },
+    {
+      "dispatch_receipt_hash": "e586b56f2f4e3e9bd2d3edcd5a122f2896347f508cbaf798a4c472c8853e74ed",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 12,
+        "R1": 0,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "777ca100b4d17a9369bd5d7997dfded3eb42b33c0bfad7e2c1e4f5643ef4f5f1",
+      "rule_semantic_hash": "dc7a8b677de0007bbe8b5af83cec9f585f6b55ad03cb092fc2bf3ca34141b8a9",
+      "selection_receipt_hash": "fe0b13fa8f6f9d163e9b6d0757e5e3ef2fe37b71e38f23771920ff8f7f72dc48",
+      "skill_id": "skill-dc7a8b677de0007bbe8b",
+      "stage1_execution_hash": "c153165a1f86cf7fe55f4a389e05733ee435b8774e74d146d9187380a58eeabe"
+    },
+    {
+      "dispatch_receipt_hash": "0109426d30dc0e327c5635d2f0cb19c45e86def8a538a86c319bb440c971b444",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 15,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "a7f9dc4d5ecdc6dbd34afaa74ad47ef737c15035e6742e5d9d450bd451aa31e0",
+      "rule_semantic_hash": "2a29cad0d1267ac51f3e292549e52a5699788e57455d7d2db26d2da12e6fbfb5",
+      "selection_receipt_hash": "733b14f2c99bf8024129605a253a828ad7879f40ffa602353c7c6f2216c0d2b9",
+      "skill_id": "skill-2a29cad0d1267ac51f3e",
+      "stage1_execution_hash": "679bc1711d4e0ba142433fa401d899689c3ba9bc940f08c09cdddd64db48d53b"
+    },
+    {
+      "dispatch_receipt_hash": "680a3bcca278e4153046f71a838fd02e17300f7f0f5cde4a88f246c5bdced0b2",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 10,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "e6ebed0e762d622be598e9fc6fe3d19764513221d5b409200b9e2c0dc5ac9c21",
+      "rule_semantic_hash": "b62c26fe730a7cf7b1ea539941f53960c112968fb5ecd629ede2219ad6ed27af",
+      "selection_receipt_hash": "7ecf29be40f7891213d625a5ce7e96586ddbbdc88e6f99f15084a855130a279f",
+      "skill_id": "skill-b62c26fe730a7cf7b1ea",
+      "stage1_execution_hash": "3cd8c4c4b061afe7d56b50a1931f13fe2230ea579a6f05e9f4ebbbee3d06f2c4"
+    },
+    {
+      "dispatch_receipt_hash": "208471a48c597e7952567ec50ec0eaeba6f1a40fc971cbb01fb86a55518fd0ae",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 0,
+        "R3": 14
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "042684b575caddc51ca43c95f89bb67b9b3c65e3b0f076605e482c8d3eb4b7fa",
+      "rule_semantic_hash": "966f69fc1ad06817b5443a9e94481540725c5bd28cca51bd75e093b47cd29906",
+      "selection_receipt_hash": "29de0c4a0d475764b7752b116dbf1f59490458f0e084e3c59268f5ba65dfbcf2",
+      "skill_id": "skill-966f69fc1ad06817b544",
+      "stage1_execution_hash": "c611dba1496d76730382587f4371c6aa263a1afb7c1e65d94d7183f8db661100"
+    },
+    {
+      "dispatch_receipt_hash": "6cba922e6185a77df807092d5de365c6e201e44e5ed10f4e31539c4c2a6aa3bd",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 10,
+        "R1": 0,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "4bc82eecbfdf1b78107f6e7eb121007755a17daf8600692028885f75144f1ee9",
+      "rule_semantic_hash": "9d9ab329db6c92fd7741dce7d5220e383c67d32afeca15792d76212a9f1531c2",
+      "selection_receipt_hash": "c6a44dc8c15d2fc2737f54f3a0b8f7973a9fdb2f67fdbbc76ecaf7fa6ed5e838",
+      "skill_id": "skill-9d9ab329db6c92fd7741",
+      "stage1_execution_hash": "d754b7d11d3e5276af5ac1ba9ab999852d3722e7d87ddda2c66fca57be6bf21f"
+    },
+    {
+      "dispatch_receipt_hash": "1cf91bf590d501ec5669f463253a66acb37cc79434daabefb6633147557b305a",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 15
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "1eeb463eb8491f474aeae473b49510543668f432033b3dbeea2a19e1040212d4",
+      "rule_semantic_hash": "3c24eec9560750d93d666a83152b356b9c9800bc4f54de9acf4e158da511538d",
+      "selection_receipt_hash": "f0fde42b85889833706925b5ce4a922a6f504ecf49b5472a9135af3134bbb733",
+      "skill_id": "skill-3c24eec9560750d93d66",
+      "stage1_execution_hash": "9d90766c619bcdf8c6afea87203ed7589ac3af3771a3f6b1a3f8015d0cd70929"
+    },
+    {
+      "dispatch_receipt_hash": "1ac45a6d53657cfc64eaf4ed2f956a0bf8da748e98884493e1cd0e4a1f4e127d",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 14,
+        "R1": 3,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "75e0be8564d6c4675f080403efe8d2c0d4ab02f0c320eaf70c599a75b9f8d90c",
+      "rule_semantic_hash": "38ad1f77dcd9a97067b40288835732994e0774255731d7895d44019cbfb3066f",
+      "selection_receipt_hash": "34bf209249e97bbbd74354906051a5ba97bfcd5953acad70c172342de6d337e9",
+      "skill_id": "skill-38ad1f77dcd9a97067b4",
+      "stage1_execution_hash": "9ab64131b7dadc67d4e8f0b1acd9e6ba1d52588ac5bebbabf74032dfa1efe372"
+    },
+    {
+      "dispatch_receipt_hash": "368067eba21d59e3679998e1273a03739698964f3a6fc0d528adf338ee7bf96b",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 2,
+        "R1": 15,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "21c6df977b7b67f6f7a21ee7127215039d6d9bd2c9c25cefa05e69d2286250c9",
+      "rule_semantic_hash": "34da4f566b50d05039d668462e2ad6948f6ad6c5033d72bbe5b0ee9d2352b541",
+      "selection_receipt_hash": "8d4873af84ceb81d5f597d1374dc8a9570f177bedf6100cca65ab39242887b91",
+      "skill_id": "skill-34da4f566b50d05039d6",
+      "stage1_execution_hash": "bcc544470aa98d4640db7eccaf952454a1c70bc1b26ac2ec07f66a324bc54e0f"
+    },
+    {
+      "dispatch_receipt_hash": "ae43cda17b769566599a378a3de8d50aa05d120ce64fba8401b8fe5c39f18e4a",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 12,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "b4298f85fdae81c1471f8555621a331ccedafdcfd77f3472d714073d99bee677",
+      "rule_semantic_hash": "3df0a15e877a751eecf0a1da7c787cc511da035c856ab601be00040cff4408d2",
+      "selection_receipt_hash": "6abd463748d061112115c9d51655be93b484465cf3c3eb6415f4e70d64fcbbd1",
+      "skill_id": "skill-3df0a15e877a751eecf0",
+      "stage1_execution_hash": "ec316c391d87703f95afb90bdf308707aa538ba93b12ebaaced2657dcb3a277c"
+    },
+    {
+      "dispatch_receipt_hash": "ac34a82a06486bb1b3bf38cb911b0d864e89360bb2e4fad489d62bc74cffaf27",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 14,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "8dd264a6e92df14d950f9d01c52c7709a58fb725c34b493b224d663d55043f3c",
+      "rule_semantic_hash": "a6fb124662165edd47419674f266ba30119e190b65ade53e251bafe717a0c146",
+      "selection_receipt_hash": "7b40f4467de88f89cf249f1eb67f3b273fcc68a9022a29d7bc80a4dc89f30885",
+      "skill_id": "skill-a6fb124662165edd4741",
+      "stage1_execution_hash": "569ed64fc2e6492eea35b51b2e48722ce0d6b0ca9b25484380d8330a8783259c"
+    },
+    {
+      "dispatch_receipt_hash": "f6fa6f4f4daba2c71c43369bc89d26130f1cca6a4b5d3222b72cd7203b8d9b9f",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 12,
+        "R1": 0,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "d89ad0ca61c40372de419c12e98228397c1fb2ba4a2e1fe859d0c0f38175fba4",
+      "rule_semantic_hash": "b1b62d07af5c25e288ad2e47a6f628624cc863904977c3a1820e3a891fe6708c",
+      "selection_receipt_hash": "3acd516849a66170c09b532d4f6aed617088f93bf4aff622099881ce73279bdd",
+      "skill_id": "skill-b1b62d07af5c25e288ad",
+      "stage1_execution_hash": "5279bd5355cd4c7dc307a8bf1b8361e6f05e8e2ed834467b849faeedefdd4e9e"
+    },
+    {
+      "dispatch_receipt_hash": "144454311a4c908ee8a1d0b6a1b38d8eea5205226a55ea3cc724592abcc5db14",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 15,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "851720643ff9e791a6a7d48e7eddeca3113dd5501223ac69284167b3447ffa01",
+      "rule_semantic_hash": "c78c21d1b5edaf9a712d7d751d9bb4809376ab00d5a1232681e28001342e2911",
+      "selection_receipt_hash": "5c5cf1209e43b697c423e1a72c3046c85ba7f2b831af5db460b24f879e4de7dd",
+      "skill_id": "skill-c78c21d1b5edaf9a712d",
+      "stage1_execution_hash": "ff32551b2ace0084a900afb7d5f34820ccb5277da6f1e9aa5451d128d280f3e7"
+    },
+    {
+      "dispatch_receipt_hash": "c2cc426d0056759600fdf9c342e70cc5b48815b24729b9fb11e95c8b19febc11",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 14,
+        "R1": 3,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "17bc71e79eb14516fa2e2d1382ebaccd82e1ae04c9fbf746337054c8e1f29e43",
+      "rule_semantic_hash": "587adb6ce4021b6b145425e0f661a802b2b1587b1f16c3a1a28a0079b976344b",
+      "selection_receipt_hash": "0a28d4643218083808886c12b9c7441638bec736fe33c617a6ec0aacd47c13b4",
+      "skill_id": "skill-587adb6ce4021b6b1454",
+      "stage1_execution_hash": "8117924087495afecc5905b4c09c442d4f08d821c84150267ab2ad454ddd64db"
+    },
+    {
+      "dispatch_receipt_hash": "242783c8f9df883eb15aa87b6b3e5e00a8b575da0b4cf752f2f1985237df94fd",
+      "family": "MERGE_TWO",
+      "final_state": {
+        "R0": 2,
+        "R1": 15,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "31e3e237a84718c8fe3122036e7d5622144a3e38bfec2fe58334e02129c8cfc8",
+      "rule_semantic_hash": "95899755aea956511150effbabda373101f7c21ff09f027bc8d87558f0c064cd",
+      "selection_receipt_hash": "0f9242b821f4348cd61bdae49752d32a01d85700803467ff65f934bcc13effe9",
+      "skill_id": "skill-95899755aea956511150",
+      "stage1_execution_hash": "e74f097be8acbf0bd8a5e1297830b706fdc5b664f4afce770c25697abc3c67b5"
+    },
+    {
+      "dispatch_receipt_hash": "dca95cd64eb6da8dea24907a7a8c9d7039bb3a4df623edb3bff5bb7825bf7fdb",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "999a8a0c7f5d4d13cfc6190c0e1923708dfefe91d3d7a8a6e153699e07f9b1c7",
+      "rule_semantic_hash": "a89c71b888339f78409517fd8bf005a7a8a6e27279b61b16cbc1a01e6fd67fd4",
+      "selection_receipt_hash": "63430e59d363d43c96af248c0fbb37bee84c535c1c20e4131601ef484fc3b091",
+      "skill_id": "skill-a89c71b888339f784095",
+      "stage1_execution_hash": "aca5e7d6353bcb16b94f84ff391edab1bba2614fdd9a881253bd6d3ee30f1840"
+    },
+    {
+      "dispatch_receipt_hash": "9558b9e72401d59090b2488f044d4384b83abfea5bdf7692b1704367ad195c22",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 17,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "778783bdc0be11edfe9598f39cb1ea94a3ebe59d546118517cf0c4a1c3fd79fd",
+      "rule_semantic_hash": "c3bcdc8bd58a800124fd0725527c3b0de607956fae1f7b4fbf30e8ea7bd07b8b",
+      "selection_receipt_hash": "8a0164c76b64d637a814dad6624cfa52f5bb664c687f547b1551340b4b8daa69",
+      "skill_id": "skill-c3bcdc8bd58a800124fd",
+      "stage1_execution_hash": "9b70d538826b501b677d6e91a19ab7a33dd3bdf1b1e8a6c63abfb99583e57af7"
+    },
+    {
+      "dispatch_receipt_hash": "fee58b401025febcfe832395b9c01f45f97a025e0b12f6ca99300aa0a8b63f20",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "2cc2125a20d07eff5642166462d39da5a6ccc3109643d2d2b9f83630e24c585a",
+      "rule_semantic_hash": "4a685eb62ea3dab86b4fd4dd51d3227b528869f0ad498bb5ed87680d1b49f3a6",
+      "selection_receipt_hash": "6917a508c24dc6802a4abf82c10226505f42bd5658392a8430cd6dc8c735eba9",
+      "skill_id": "skill-4a685eb62ea3dab86b4f",
+      "stage1_execution_hash": "eeaa1a833b08a0d86d861364a823f0dd629a0ad46077b405bb530590918545b1"
+    },
+    {
+      "dispatch_receipt_hash": "03ab9c573854f753fad3475403f6c29f95cba501e8a16d7c404c4feeb2c3b273",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 17,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "b5e79f078a1009ebe209e770f19464344442a74cef309b5f6842a3b8eccbe078",
+      "rule_semantic_hash": "a73a108ea7379025b48c530ea650f299c1bc5c9456a76089d6043da2be161421",
+      "selection_receipt_hash": "f3bb7dba621088f8e1134cbb452aa67efaf755c65e46efd704a0ff5a76c33c54",
+      "skill_id": "skill-a73a108ea7379025b48c",
+      "stage1_execution_hash": "91761c0b551aac2050e322fd82926873164dfd1740fcf6877e65bdfe205030c9"
+    },
+    {
+      "dispatch_receipt_hash": "ea61330ca76de5959ea9ae642624846561032cfe4e3a487bdf24934e58a793db",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 17,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "7b133c1d57d4eb6bbfa442040da36dd5a97dcc53a1d300bc3b884330687cb17c",
+      "rule_semantic_hash": "8b0f75ea465f39c67a39914175adec196a1ea7da724361665f2d193fb09e64ee",
+      "selection_receipt_hash": "8c266c06d4c1a8c3fdc49455a8c12b34f43a916c1dd37648d54b647646ec6c7d",
+      "skill_id": "skill-8b0f75ea465f39c67a39",
+      "stage1_execution_hash": "415662a05d539804b348b824988b3787a3b16a9048b225a2198e77db8632c4ce"
+    },
+    {
+      "dispatch_receipt_hash": "0243d29f9f3956bf5c3bfe667b447c6d820f974ea1554ae0ec225a37d55e49fe",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 17,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "d391f7410f4bb86ec1a20014e24e7f50188f34a6db95b751dcd3196e6c1b43af",
+      "rule_semantic_hash": "ace38be3b0ab68506c786f1b0a0327ce01b8d3b5daedf2632c71dd9bd6c4ae8a",
+      "selection_receipt_hash": "b84d3215a1ea60d7ceb2d27d4940a0d52a314df28ffca49e737f55b2ae9df87d",
+      "skill_id": "skill-ace38be3b0ab68506c78",
+      "stage1_execution_hash": "5d813e97187dd39dadaa9b9c3a58a431e3706b96576ce0eb50eaf58f2de20980"
+    },
+    {
+      "dispatch_receipt_hash": "05ef1c2182457d1cfc91c2b455e73633e1507f27bfb181639065b71bce016408",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "7444403391b82a2808d94687c54b05b68d96249883a8fbc2d02b597eea353e81",
+      "rule_semantic_hash": "e0dbbf14ae399a7215e98e4a83e1aa6e13e81ba3a55dcf3592b2f45b334e946a",
+      "selection_receipt_hash": "ca77be5570daf1c3ea6e6190050373f3bffaa468dae23d6cc2ddde749854b8cb",
+      "skill_id": "skill-e0dbbf14ae399a7215e9",
+      "stage1_execution_hash": "35e3c4731269d0459122ada12d56731edd6201cebdd13b0fde7deb08892da573"
+    },
+    {
+      "dispatch_receipt_hash": "6dd0cb829c782132ae05b66dabc2e2aea29c43fbb6f41875be8a16c92f441a69",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 17,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "2081c83d7b6bae74d73a3124d53b309a1df6c650b20b5b24216d744401f847a7",
+      "rule_semantic_hash": "89372de5fc983db8072bd5cac79e743a84327813071563b8de93bae20047596d",
+      "selection_receipt_hash": "c1ba7649b5db48f01bb01f259d612fa78329505a1ea23a8e24f11ed1b9b992ad",
+      "skill_id": "skill-89372de5fc983db8072b",
+      "stage1_execution_hash": "28f88ee1475216c92e67133c77ef099cdfa64c2c5cbba64ed6f341284ee2e86a"
+    },
+    {
+      "dispatch_receipt_hash": "90e8f433a02cb61fb5574343f119abe95dc7605417fdc8f69c60640975021480",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "e46b51d015512d4e1a9c3c8b13b59067339a2ae8e00cfd96d81e36b2bbdf9355",
+      "rule_semantic_hash": "9933075b555183d0a20d0d86fdadc2b8345d62865268b7089be10a528887cbfe",
+      "selection_receipt_hash": "a8b4fbdca6729c234efc9157aa070a7c92fa553cdff15829d5de389c59215c28",
+      "skill_id": "skill-9933075b555183d0a20d",
+      "stage1_execution_hash": "2d7af11e0ba1b9e8fbed2bfc3071e03471ea0b582272dca002266966494d5a6f"
+    },
+    {
+      "dispatch_receipt_hash": "b1097c1398124fb948fb73bac4ed49f00da4f3b6ca2a8014bc9c55eebcd24d47",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 17,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "0e3a01f52e82ccddac11286bd7ab4e167c5df555b5a74ccee159cc132096b9bf",
+      "rule_semantic_hash": "b57bd8d684d1d77cced3be5e2a479658e39ae0d1d0a1e9331ec07eeab0edf940",
+      "selection_receipt_hash": "f902a3ee9c9b80fdb5a4dab031635d46483958e2a3fc082c154e4eaaba31cb76",
+      "skill_id": "skill-b57bd8d684d1d77cced3",
+      "stage1_execution_hash": "71fe8bc3ab7156188b0910ab2d8c32ef10fa0cf2f7d0d377417d2c4bdc1d8405"
+    },
+    {
+      "dispatch_receipt_hash": "d52ebc140260dc647440cc7508e0749abe713e6db8c29cab1884038c1b83bbcf",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 17,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "17238adaa1663b0fe813efa7e27465a174009362b38a2128d2febecd60f485a1",
+      "rule_semantic_hash": "49ff3be1a5490855d6d02de3883e77015f0e1ae1f7aa06f6774056c68f2c0eca",
+      "selection_receipt_hash": "44005eff8f4118e383e93ea1c785dbf0e2f792ae56e5ab001c6ed74ea6d40ce5",
+      "skill_id": "skill-49ff3be1a5490855d6d0",
+      "stage1_execution_hash": "eef4686f0d34721b46bb6e75cef9a32bd04507ef57a77db40cc608bfaeaea521"
+    },
+    {
+      "dispatch_receipt_hash": "84458b5702e7b01be376693667513b51fb9399836adbb63a44e6aa52ec49117d",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 17,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "99e57795112d9bb0f6159d88c111a5d6ee01c60908e4d2d1823954aa46b488d9",
+      "rule_semantic_hash": "e0bf2195c1ea4a62c77d102237cd7364d5c08d95e45f44fed4e4e1c25b97b78a",
+      "selection_receipt_hash": "cd89ee3ba7ca9b18b43b3d19c75287aab519588fe318922803aa97a4b5e30122",
+      "skill_id": "skill-e0bf2195c1ea4a62c77d",
+      "stage1_execution_hash": "baa2cc3064c637c5b592ce54a6d3ceeaf9ca141d7b83d4048086bd083154cd89"
+    },
+    {
+      "dispatch_receipt_hash": "215f46278269a4332a0f2a5e3612ade36c0795328b85dd52fb3cd3f332b8f971",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "ce2a2294b904b8122c62d14fc26001fb5b6c5ac222726f7d223f52e4316743a8",
+      "rule_semantic_hash": "b3607b52b66aef33896a3cd7d5b675c57435507eebada725836d7d0d0a09e49f",
+      "selection_receipt_hash": "55f035aba4e42407bc8b10401b45842c2dbcdeb81215a0e7f57cb5ca41e439a5",
+      "skill_id": "skill-b3607b52b66aef33896a",
+      "stage1_execution_hash": "8ffa3f77d71655cb6da03edd7d58ee561b0d3d5d7245f80a8acc0d647a705b62"
+    },
+    {
+      "dispatch_receipt_hash": "257874d427aae5967f4453e9448a7e6deffcfc8d74afaf030c475e5024c1c479",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 17,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "cfd1b867e7024351a49a0f41b45a578171e0a4948186ea6bce9d49d88221c3f3",
+      "rule_semantic_hash": "47377194946c6629e076ab7cfcaa87f0e27fbd9dcfb4635a0520b365adf004b2",
+      "selection_receipt_hash": "61ff81cebbb587d6e3118db22e936d47c32f8c42fd8d6628efde5858cdcf35d6",
+      "skill_id": "skill-47377194946c6629e076",
+      "stage1_execution_hash": "c79781110e696d6bfe3346e458552a4d4a942eaa148f9ebe39583a0244ad66c5"
+    },
+    {
+      "dispatch_receipt_hash": "7ecc8f96c71bc27649f6437bc2c3b6e25b2f634467bbdfa449596296db16fbbf",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "e14a5923d514c8088126b48aaec20178213c63d94e76ce40f5ff66a591b1ed8d",
+      "rule_semantic_hash": "e51a9d9d1560cca6a483c195dcb7222211e95b625c7c6733745676e318532478",
+      "selection_receipt_hash": "ece8b3ea5a267ce12ff2c02b640a9f711ff00b32e02db31cbd3e2b05fa2675ac",
+      "skill_id": "skill-e51a9d9d1560cca6a483",
+      "stage1_execution_hash": "9141c2f17ec1253a05ed98e04e5683f849aace2a8e33ce5ab596f1132088eeae"
+    },
+    {
+      "dispatch_receipt_hash": "54552c174eeace5d8b6db9d814cb7b32e839ccd02af03a91ef9332768499f34b",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 17,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "5a6758db580cfcbb38c319adcdf0795b0ec615c992b4727a60c2e518656b7fe7",
+      "rule_semantic_hash": "a7cd9e66abe859dff3cea83a0a55df16156fe510b0cd244633714ee43598762e",
+      "selection_receipt_hash": "ce2ae13156a3438a6c44fb56e392b86dcfcfcdf2133ab19bf5224c420abd693e",
+      "skill_id": "skill-a7cd9e66abe859dff3ce",
+      "stage1_execution_hash": "668edaeaf58f730c06a700d606efd699cceabf8ad005919b9107ee54c9e38767"
+    },
+    {
+      "dispatch_receipt_hash": "34fcdb5e90e7aadbabd821fecac08757467a5734a8c3c1fdb41b6839f8251915",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 17,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "044c06f014b09ca1df8b433fb374fbb2da89b9d3e3ecd7a1f5c62922bb5cd793",
+      "rule_semantic_hash": "0ba8533e75aeced9eadf01d0e751d366a2a093e622b27fd254c6ab6c03a361d3",
+      "selection_receipt_hash": "1499bb7113f1b97f48b0ee9c4036957a2c05ba2257d6066ac52b4d3a74917188",
+      "skill_id": "skill-0ba8533e75aeced9eadf",
+      "stage1_execution_hash": "0204d82216b0afa68cb8ef5f6ec8b96b9b3c568ec8b8be7616619bc12b56034e"
+    },
+    {
+      "dispatch_receipt_hash": "52e5fd66b0d97f5d4eceb37c18a369b02ffcc4653d0e1abac875395c0c430d64",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 17,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "5f31a53c5d62ebf2c4d582e5139cd15a76a7418f862029cf54d8190f257deb54",
+      "rule_semantic_hash": "198267d0f07cd4346bee8d7be9de876ff50fb31dd81508a9116730e4bc2f66c8",
+      "selection_receipt_hash": "3878344d96cacb6a367c2a1ee023ab5f198fd78f8d3f03486facfc769a588b3f",
+      "skill_id": "skill-198267d0f07cd4346bee",
+      "stage1_execution_hash": "046c351444d997ac99e30a6b299f9278d41124d38773643951518bc570f6030c"
+    },
+    {
+      "dispatch_receipt_hash": "3f0ad7b178fce5e54bdb4daaac3a31818045755d0f335cf4731e0010bd09835b",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 17,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "3dcea92374a67df11c50504ef6619906de31d951e8fb0f84372024ac43b90338",
+      "rule_semantic_hash": "6630cededa449bb9873716599537ccf8d4262f6ac7e63f364b21518e58b65983",
+      "selection_receipt_hash": "94f11757a4d44da44784fe68f323b1ee6b825a0243d10379d3a37f70e155b930",
+      "skill_id": "skill-6630cededa449bb98737",
+      "stage1_execution_hash": "12e1472540eff71ff8c4885f5dbe6de65d3f2f2de2960caa0680088550094de4"
+    },
+    {
+      "dispatch_receipt_hash": "7ff5fa2ad0cdefdb509845fe8c92c71a44aac22e25d3da2ba11c8e0e0f573ded",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 17,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "20628d269ec0e9dd1d6efc2100d84dcca7763a3ee996c690a68c44cf2b3f6073",
+      "rule_semantic_hash": "9cc80f8d7664a389633301c461535834ebac398fc84e05accf4baff60754824d",
+      "selection_receipt_hash": "baffa90316cdf3f37c653cb57c2ae611300ddfa074c73bd2e0b49e13be95a537",
+      "skill_id": "skill-9cc80f8d7664a3896333",
+      "stage1_execution_hash": "8b190c53ab270a2b9f7020991144ee6a5c1422a971f6bd188b0b2d94acf0652b"
+    },
+    {
+      "dispatch_receipt_hash": "af069f0cd9692d810786341d5d12a1de87bab19fb013501e0f328fa9f18fb94d",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 17,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "4b9eee413335d387d3fa754f30ccf596e0ae94ce3a5fd142164b461be83a7a33",
+      "rule_semantic_hash": "d517b0b3e939208cc13e03836c4e64074853952eb1d20157247310e55b26a42e",
+      "selection_receipt_hash": "6283f84dafcb7a4ce449ea8e1e1f36beed23a95c663234a3ded6192e446728d2",
+      "skill_id": "skill-d517b0b3e939208cc13e",
+      "stage1_execution_hash": "a77f0739d91961dd16ceb9d7938a844eff0827e0f9ff5aae37bc07bf1e21362b"
+    },
+    {
+      "dispatch_receipt_hash": "bf558f137ef64619bc5981de53ed5ea69652627605cbf86243f383ade0321d15",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 17,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "b558aefb7f0a56b5bdde4cd71f608d663e251f5f1514f80bdea068504b4c1308",
+      "rule_semantic_hash": "2ea82f1d5ad16e25eca08fac114e40d4ad779294a73e92e8c54ddc4e36e182b2",
+      "selection_receipt_hash": "786c3a88208e5266bfd81e134f9d6892314ac9bf3cebace0fb4dd9788a08883f",
+      "skill_id": "skill-2ea82f1d5ad16e25eca0",
+      "stage1_execution_hash": "b62b7841ac495d0cb0bdd29515ef5a0623bc5a86000bf62a16fa56101f7ee813"
+    },
+    {
+      "dispatch_receipt_hash": "a6e6a7dc9afc6bedca07297e405b00a75823951bca57a8df6c9c776a622d6cd4",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 0,
+        "R1": 17,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "7a704e78a1369c030a30953b4fc97a1bf0bfdff71a97d29f99c3b8aac17023b1",
+      "rule_semantic_hash": "7530fc1947b8e773d36624dbed3b9c37d7ea4687dca3ad13cc877e54b3405f5b",
+      "selection_receipt_hash": "93f52ce15b4a940da884f5e38b58e7da731039ecd17168925fb9d51d29c8eb94",
+      "skill_id": "skill-7530fc1947b8e773d366",
+      "stage1_execution_hash": "c37e89d1cb2918e1a172600814e7bca0417d2e77a98be464551155a1d061b3b1"
+    },
+    {
+      "dispatch_receipt_hash": "8ad1b55b670397defd8f5b8507570cc18fab8b1d6acfcaf596a9b9b7b6888313",
+      "family": "MERGE_THREE",
+      "final_state": {
+        "R0": 17,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "16a8658e28a0adc8eb771db2eac21182b7eb903d57fddbd2cfcc80153db1579e",
+      "rule_semantic_hash": "dfb4de2461888d593b5f2e9e59874ab224e6066cea02bacdbf36098d07018c83",
+      "selection_receipt_hash": "e437a69c644ed65fb51a8219efa0a77904f442c215675067ced94a3c1c2d9909",
+      "skill_id": "skill-dfb4de2461888d593b5f",
+      "stage1_execution_hash": "d6e7ce6582387872bf0b20d90fb1335a2094022af2d86fc0cd3b58bd4234ff14"
+    },
+    {
+      "dispatch_receipt_hash": "d6950cab79faef60dbbaadc519b1624592d2d5b28e2a4a0c5ca0df0b4cbdd1e2",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 8,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "f88044da9f0a5bbb9c40ea81d736a8c70c0ee2d792a5d3c60eb3bf5f80361036",
+      "rule_semantic_hash": "09848f107d9665b9053ceea2e6c4d1de11c4a6bc73607ef0f0c08e017a9adf23",
+      "selection_receipt_hash": "16e386867585c5d87bb7f730cd459d05878129ce2dfc70cddf92d8ba531e7d77",
+      "skill_id": "skill-09848f107d9665b9053c",
+      "stage1_execution_hash": "9b1bee048fd8565d18aa7ac15f2577420c516d89eb4050003d21d7f9114921c6"
+    },
+    {
+      "dispatch_receipt_hash": "2ccf4d448dd63d9681089b4659e405a469f219d5fc2b2f53e434533506f623d1",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 5,
+        "R3": 10
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "8690e723d0bb9f2bd3eaccdcc6067573c0511bb9dc4c3905a91a59f9883f4393",
+      "rule_semantic_hash": "e5346f403b0faca5f00a2c5aee0716de120c54c3bda693eb5c5c12e41969e85f",
+      "selection_receipt_hash": "565e4b06109363a3d3ea7d5975b407f74de4ea1a6f078922452e3ef90f7da219",
+      "skill_id": "skill-e5346f403b0faca5f00a",
+      "stage1_execution_hash": "bcaf097b423c15e5969f7da70323329982c4db384816b59a89eedabe718145a6"
+    },
+    {
+      "dispatch_receipt_hash": "a175334ce4e3fc9b4609808eeff38bfe5bc23f576d06abd59d135a300b23d505",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 8,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "73a08b0ecb9d0313afc3e1e5ad9389a7bfeb9e2d4c7390814b6b3d5a1a32a1cb",
+      "rule_semantic_hash": "6f6edec2f02d32c420608be39c63a0e3d1f8199c20fd8e3d34d4b39641dcee45",
+      "selection_receipt_hash": "0547a0013aba600b51c68e4819059c50c92d6c72c3588e931e10c484f5333a0d",
+      "skill_id": "skill-6f6edec2f02d32c42060",
+      "stage1_execution_hash": "46ce10d69ac2b2edbda48f68301b752a0a45fbfc35e01901e773354ddd4091ea"
+    },
+    {
+      "dispatch_receipt_hash": "64af1ec7d0c3634bff6f697c81e60cc8b7746ca27c4474550cdad2887a880524",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 0,
+        "R3": 12
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "0bc41572b5fc76e082f205a909bec66b674a9ea8a78fbd5a3d0545c5c244b78d",
+      "rule_semantic_hash": "c22d34b04bc381e2e40b5824350fcdc9b36c330a95d06c99af42f6feb59a99c5",
+      "selection_receipt_hash": "0068ebd80af7833efbfdd509485cbeb7613a85cdd97c0aba7383e84afda447d8",
+      "skill_id": "skill-c22d34b04bc381e2e40b",
+      "stage1_execution_hash": "88db69ef5e932aac77cc3a94ec444e1388e485b992cdef3690c8b1f3cd2f2346"
+    },
+    {
+      "dispatch_receipt_hash": "cd0cc7bca33aae5dd56a5f121cf523cf25556d7aef94b1945bba6e7208782416",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 10,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "57d07e7383a007a3028be8b51f65c14b2522375444f16838bd7b7fc74f6bea1e",
+      "rule_semantic_hash": "241eda0de1a5d3ad1b3e71e901ec8f7266d3b612fe685028bd61efbf6e9f6732",
+      "selection_receipt_hash": "38dd58d118511154cac089d8381d14cd534e56b3b91db77b8013c0c919cc10cd",
+      "skill_id": "skill-241eda0de1a5d3ad1b3e",
+      "stage1_execution_hash": "93356b09a23ee4b944762cbeb6c53048703c603bb6299332b8d03f0d4322bc12"
+    },
+    {
+      "dispatch_receipt_hash": "28248757c3da3b10e56dc78bb9628ba7c5e8eac507cef3d1d88d61192fe2baea",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 12,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "8899a75714b46281d4b91ca1998ed41486d5ac0da61bfc2a084fd3d92848e5b8",
+      "rule_semantic_hash": "6892513df27efaa0f7f3aaf6052d7c34035261bb9056a62221451f06f2ece86b",
+      "selection_receipt_hash": "f9ed4ee353a6f0cc6d052022563f97155a744798c1f720fa7bd4b77a1d77b73e",
+      "skill_id": "skill-6892513df27efaa0f7f3",
+      "stage1_execution_hash": "fdef715e1b241f113e027ca0a1e2e417977f3ba69445c5349924a10df5621557"
+    },
+    {
+      "dispatch_receipt_hash": "e2b112570b6044f1c9f259a057471833493bc55beebaea581279b9ae731e8e4f",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 7,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "f95acc57ca1a93699c2389199f7c42192fe54a0b7696dcd889dcccfa63fbe914",
+      "rule_semantic_hash": "a7d9efc71fdcdfb323f49638b40ac74f7c380e1a20aad70173acaae3e32bc867",
+      "selection_receipt_hash": "5c8a5f6a1c7802f0800e411f4642f81b76effaecbbe8d2df86d4de8877a47a79",
+      "skill_id": "skill-a7d9efc71fdcdfb323f4",
+      "stage1_execution_hash": "e2736b5529a8afe442615220b3954390609b436e20e05dfe886be8e1bbdcebb7"
+    },
+    {
+      "dispatch_receipt_hash": "d59b8253666083f92d3b9dc6ef7f4b4623c1cc69ed9a2cf86a2224237eaa9e6c",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 5,
+        "R3": 9
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "9084808879f7ca7a6285bd59c00871ea94b9068af2b6a46b83693ba7dee49a60",
+      "rule_semantic_hash": "28f10266ad48a54671c0db5ad35c26ec12c56a27cccfd2d2234df91970892d05",
+      "selection_receipt_hash": "706a37f8b2154a7ed8a40b958f5b63c7d84cda0e68f5081b4fc1c2d3eb529b47",
+      "skill_id": "skill-28f10266ad48a54671c0",
+      "stage1_execution_hash": "ba45389efdfcacad0e8eddd3de393f93f7b17c9471efa037dcc0fd3e93c149a0"
+    },
+    {
+      "dispatch_receipt_hash": "8a2c4e421f28d400d1e5807c3a7ca6b4e35eb3fcf9f4c35274e0331cc9aebd16",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 7,
+        "R1": 0,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "37ad0df3fc3a375548608e284fad9955b15583be25545e01ed513beabee0deda",
+      "rule_semantic_hash": "5b51821b1afc55bf489e42008cdc62ec3925d3947d90e625c7fa91fa50627b0d",
+      "selection_receipt_hash": "d0012729de62eaabc2e728fe083baeb3430d339d78a488166cef7a5bdff2e4b5",
+      "skill_id": "skill-5b51821b1afc55bf489e",
+      "stage1_execution_hash": "cd40d3674a3e8fc810c28b26c7d4903b342219b5bd49370219409ae5a715e10b"
+    },
+    {
+      "dispatch_receipt_hash": "862106815dea8c12b37e8a60b92c904c9d06f88815777415cc4099f160a26af6",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 12
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "50fd2cd660f07dc8807ee926165a29dd9fc7fafe62d29a416287867c98083b31",
+      "rule_semantic_hash": "c294c692d47bb814babe47d461b064d01ce5a9010dada8354b7621f4a5e257a9",
+      "selection_receipt_hash": "597b4621ff7b0b11ec2b7517c79e507ffd6e739f5237be8be87dad3ed9d7a0a4",
+      "skill_id": "skill-c294c692d47bb814babe",
+      "stage1_execution_hash": "79ec321a09463c59ac43fdeb830c6574088f10eeb54a88eca96e86be306b3749"
+    },
+    {
+      "dispatch_receipt_hash": "97140dcc1087e9b3f9beecfa69f4a93103b985cbd89e5b5fe8060665eeebd5f4",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 9,
+        "R1": 0,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "8ca341850b99a27f8b1e58b816211241ca21ba9f4c543f6d222b1052a87bbb0b",
+      "rule_semantic_hash": "6b910bf064c06e85e76a91a50138b4848d88c55fbb5eaa5fe0db28929cace8e9",
+      "selection_receipt_hash": "1bbac8507a93938801679aebc6279ecf90767f93571913aaa0b33ac57bafb3fa",
+      "skill_id": "skill-6b910bf064c06e85e76a",
+      "stage1_execution_hash": "18990274466fdb4ac7168e6978caf89f652b303c5ef0dc5b0ffcd6e4054b822b"
+    },
+    {
+      "dispatch_receipt_hash": "d7990da01eeddb57083710e61032543ade1286e03d05d1427f2e19e2489a2ee4",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 12,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "1a614b5aabc6cdf857f79f0a9b500b2f12ad2c7ad38483999b8b96043e30c84b",
+      "rule_semantic_hash": "4582025069e242e000ff688d9334a59ef84cd2b0943c4e9e0f9230753c294e1d",
+      "selection_receipt_hash": "2a7c3f97ae467b85ad7d87d9f6862b00ef1aac3a7b5eb7d223301f579844bfe1",
+      "skill_id": "skill-4582025069e242e000ff",
+      "stage1_execution_hash": "bd57efbfc149a4d581e906df9e3c49a2c67e447303eb8e32d44f879b6d92e6c0"
+    },
+    {
+      "dispatch_receipt_hash": "df4d18325246b3c6a288857efcc848c557972b8c2b30ce06280c5e370b280b4f",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 5,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "6bf358cdeaa7b5f297a5be8e00a998905858978cd86c0c8c967f4b9fbc014fb6",
+      "rule_semantic_hash": "1a3799af8f726151328316ea1926f6aa136efadfac34406962199efed1d7fbfc",
+      "selection_receipt_hash": "586c39526c5dc1fdc6f3f8d2b8dcad84e1fa9e2b713d7904494bbbea5d417b67",
+      "skill_id": "skill-1a3799af8f7261513283",
+      "stage1_execution_hash": "b88c83de7942b538386c7e4ae932e576e770c85563ba7d925e083d137310f1a3"
+    },
+    {
+      "dispatch_receipt_hash": "575ea785918536a88ae577e64966c57e83c80ebfe7aad73b6126a591c20ea713",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 0,
+        "R3": 9
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "32be88803e672b399343da3e7f2244f29d8a5abc324e62521360cec4e77b087e",
+      "rule_semantic_hash": "ec033bd411046db88747c715a732f26d960577521034b8876fb9dc4af946e914",
+      "selection_receipt_hash": "1fc4ebe98860fcf321044092750766ea7ea3abd0a7e61a7aa0a1071cf5f91570",
+      "skill_id": "skill-ec033bd411046db88747",
+      "stage1_execution_hash": "aff39af16b1053bba6b599748a68c3c95bf3151052fd54d11cd692e0f408e7c0"
+    },
+    {
+      "dispatch_receipt_hash": "04bd1db01cbcf1e0ba0eb0ed6ce22f5c32005b1d5ae64e79cdc7a4a37abee8bb",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 5,
+        "R1": 0,
+        "R2": 0,
+        "R3": 7
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "6c6b6ab60672a38a07862594fcd27a57611a32378da57719ef4f8e9d536175e3",
+      "rule_semantic_hash": "b30f7fc44f933406df7a79005aa0106303da972b165c6931340df1736ba96e3b",
+      "selection_receipt_hash": "55703281b343f06b5ae008eeefe16c74ece6da47b8402528f2618535b8a6c8ad",
+      "skill_id": "skill-b30f7fc44f933406df7a",
+      "stage1_execution_hash": "e2ce6e9cc5994f06cdd4b98c35dfac37d75c079b017f346567e0fe255446d2ba"
+    },
+    {
+      "dispatch_receipt_hash": "4ca549963ff07d58181bc1cc2fd0670fa3073925f2eaad482c98948e9ca2a053",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 0,
+        "R3": 10
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "91452914a6b2df394767804ed21b89150767b359aeed0e6124d8f3f9f57ec284",
+      "rule_semantic_hash": "dd7c7eecc80e7dd726814facb4289fbaf8d576929d833260e072fbaa9c83f516",
+      "selection_receipt_hash": "10dc52219802c15875f74fe0e2c5594dab2ddd0da8944c20d4cd2db85f52d764",
+      "skill_id": "skill-dd7c7eecc80e7dd72681",
+      "stage1_execution_hash": "16732301ba7946600dbca46d7351acd8e575605fe0e95d55e4eb4f18c3dad538"
+    },
+    {
+      "dispatch_receipt_hash": "559f38343517405fe4b075a3362f84ddbe89aaca9d41fc8537f0b48f0f986bb9",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 9,
+        "R1": 3,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "247a30b8dc9c888bc46462df2bfca1e63cb4aa587a08302cef65fd44fe7da7a5",
+      "rule_semantic_hash": "07c0a4758944569a70b464a8fe73d2c14242958c1822810062b866019466d6d1",
+      "selection_receipt_hash": "9af75c938755db0736d13b9c0b1b42705660f8419a5baeb567a464fd8b4fe9ec",
+      "skill_id": "skill-07c0a4758944569a70b4",
+      "stage1_execution_hash": "6348eb332c9aae8a689403a86c4d10422ee9b61f3d028623866624a042a5959f"
+    },
+    {
+      "dispatch_receipt_hash": "b655e7d83e47b4f97d99e66c69ff2fe346af3ecaaf47ecfe274be73984f64aec",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 2,
+        "R1": 10,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "b52e0ca1363b027d35c3c6009e320c2f6a0ff2df19b8a5e406a8db1d6aba34a0",
+      "rule_semantic_hash": "3da062a4343847fa3cde3d44a2f006434de992e99a233831289e8f5df0fa1199",
+      "selection_receipt_hash": "edc8eadb1faa77443ce80cea3a3a7cdca3019702b1ee655e9888150c7a272598",
+      "skill_id": "skill-3da062a4343847fa3cde",
+      "stage1_execution_hash": "f14ee2bdd49032148a43cd48f5509b6f9daa5c96f32eb1ac810a2fa50cf92742"
+    },
+    {
+      "dispatch_receipt_hash": "b25471e92395aaa1fbc7e55fe8d8ec125100679e570595c5d204e3dea5493c7b",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 5,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "32bcc231d4ce5650bc73af56afad34e2379f7c342b26fe42cf7ab282951aab1a",
+      "rule_semantic_hash": "77d480d6544f27c916dcc8fe5bf2be39aa55d97308f5ff6ae2a9bb12d63660bb",
+      "selection_receipt_hash": "d751738a5972edf98798c78260d4f8718294b6b44099bb52fd7acb4c8c887f8f",
+      "skill_id": "skill-77d480d6544f27c916dc",
+      "stage1_execution_hash": "05bed77530d29729d8e1f8aed5b056438eaaca6602663fbf1c9574198d8089ce"
+    },
+    {
+      "dispatch_receipt_hash": "f0a48531985827f7c5eb175043e911ce05e116309dbad742b07e8234d1727167",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 0,
+        "R1": 3,
+        "R2": 7,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "cb77b5efc00ed08c36ab1bf1f3bf81285258dc85fa7a5b125e47738498243950",
+      "rule_semantic_hash": "998cb61824fa943dcf3d8a0c6585a496ac960aab1b19f110edfc848cc8bba23c",
+      "selection_receipt_hash": "2cfde74443a3001f9180e3c75f2567639853c1d79215820a08132041b4b1dfc8",
+      "skill_id": "skill-998cb61824fa943dcf3d",
+      "stage1_execution_hash": "98a3e88dc22932eb9870a7aedcffd410f59b620a979494d05df9d59fe1bcfd59"
+    },
+    {
+      "dispatch_receipt_hash": "3669cda94220b5513a18d815845808cdb0d5d74ee6d341983256c0fa5904a590",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 5,
+        "R1": 0,
+        "R2": 5,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "c4142e8205f787f3b3515700c375b9242476cc64ada4fd4ff1d643cb0bc31af9",
+      "rule_semantic_hash": "2f9d02d5767cd8335881f0904f00f9d03f3b66c8e5712427b0f3b9841bc8b5c9",
+      "selection_receipt_hash": "8613800d0e5206addc7407a5ddea45687508c3aae5691ef2bd0b909454a6b98f",
+      "skill_id": "skill-2f9d02d5767cd8335881",
+      "stage1_execution_hash": "cddd6952fc49165e43bcbeca0f43a16283d329608941875162851e075c848f2e"
+    },
+    {
+      "dispatch_receipt_hash": "e631e405a576d5b9552f4654757e164da7785c6f9890cdaa93945fc1cabf699f",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 2,
+        "R1": 0,
+        "R2": 8,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "42391e4be562276db69c56ad0e8ad31eb1b52df754638f5a72403c479347cc29",
+      "rule_semantic_hash": "356d81677c58d00a516ccc0171748384891988b9d2c68c3cf5d3356a77d7657c",
+      "selection_receipt_hash": "bdf233ec97040dee00fa859f8fb6e9254a33eb806f607fc44c2a40620e59b2f9",
+      "skill_id": "skill-356d81677c58d00a516c",
+      "stage1_execution_hash": "bb75155fbe3c69894ee1da323ce76fd54f78eea887f2d84398f4752f181fada2"
+    },
+    {
+      "dispatch_receipt_hash": "e5cc05820f376d73835e4e33126ade4b3e93ad5b753fb8ca27ade7da12ede750",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 7,
+        "R1": 3,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "e2e4ed183ba6e2009513c3dc5fe2e3b978daaf05009d47fbe16ca88cec09f2dd",
+      "rule_semantic_hash": "b33b41ef3274ac8d6336dde709a127222c4bb7a201f2b55fe61c778c8a91df42",
+      "selection_receipt_hash": "d5c9b74123d189a76ab38f1dcda65340f2876d1f5a82d8abd26610d71a4f39cb",
+      "skill_id": "skill-b33b41ef3274ac8d6336",
+      "stage1_execution_hash": "0b3cfb6c706f391db294cccec67b108a55cf64ec0a711a6a3d9f2f5135aba7c0"
+    },
+    {
+      "dispatch_receipt_hash": "4f992ec8087202ca7afefb9b9239cd231988eaa34f61042c510b2abb071da1be",
+      "family": "DROP_THEN_TRANSFER",
+      "final_state": {
+        "R0": 2,
+        "R1": 8,
+        "R2": 0,
+        "R3": 0
+      },
+      "halted": true,
+      "initial_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "rule_id_hash": "073f0411ac300b98c90b392db538cfe8a016947a4f17dd5e2c109dc5f4adf480",
+      "rule_semantic_hash": "d8197063de01e2b33ba437075717ba3a9c4cd108b889574ab1bdcbaf44867f39",
+      "selection_receipt_hash": "cb0702ed3e43b4875a7e65f1078c27eea1682091eb08b2025b1a73f0d8a12795",
+      "skill_id": "skill-d8197063de01e2b33ba4",
+      "stage1_execution_hash": "89799fde7033e659148cd28a324e9d37626374018f6b68f4baf970a41951c660"
+    }
+  ],
+  "status": "PASS",
+  "structural_dispatch_success": 89,
+  "structural_dispatch_total": 89
+}

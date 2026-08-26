@@ -1,0 +1,157 @@
+{
+  "checks": 453,
+  "dataset_counts": {
+    "blind": 4000,
+    "calibration": 2000,
+    "development": 4000,
+    "train": 20000,
+    "validation": 2000
+  },
+  "deterministic_assistive": {
+    "BM25": {
+      "hard_neighbor_top1": 0.14940239043824702,
+      "known_count": 3215,
+      "latency_ms_mean": 27.536066438898466,
+      "latency_ms_p95": 40.68800000823103,
+      "mrr": 0.4087627440815621,
+      "top1": 0.1891135303265941,
+      "top3": 0.5710730948678071,
+      "top5": 0.815552099533437,
+      "trusted_selector": false,
+      "wrong_destination_rate": 0.44292379471228616,
+      "wrong_family_rate": 0.29673405909797823,
+      "wrong_order_rate": 0.8108864696734059,
+      "wrong_register_rate": 0.6883359253499223
+    },
+    "CHARACTER_NGRAM": {
+      "hard_neighbor_top1": 0.9920318725099602,
+      "known_count": 3215,
+      "latency_ms_mean": 28.817472815023688,
+      "latency_ms_p95": 41.97849999764003,
+      "mrr": 0.9961638154484188,
+      "top1": 0.9925349922239503,
+      "top3": 1.0,
+      "top5": 1.0,
+      "trusted_selector": false,
+      "wrong_destination_rate": 0.0,
+      "wrong_family_rate": 0.004043545878693624,
+      "wrong_order_rate": 0.007465007776049767,
+      "wrong_register_rate": 0.007465007776049767
+    },
+    "LEXICAL": {
+      "hard_neighbor_top1": 0.045816733067729085,
+      "known_count": 3215,
+      "latency_ms_mean": 24.393167931734602,
+      "latency_ms_p95": 36.11829999135807,
+      "mrr": 0.13947468463798168,
+      "top1": 0.06251944012441679,
+      "top3": 0.17262830482115085,
+      "top5": 0.2737169517884914,
+      "trusted_selector": false,
+      "wrong_destination_rate": 0.7013996889580093,
+      "wrong_family_rate": 0.0255054432348367,
+      "wrong_order_rate": 0.9374805598755832,
+      "wrong_register_rate": 0.8982892690513219
+    }
+  },
+  "dispatch": {
+    "dispatch_receipt_hash": "f7d9aa1d4448b8293b2a74990cbc8c9c3cc80714599590a115b70f648baf7622",
+    "execution_hash": "bf47879926c047e2f42d1bd0723d47f1752c08a107bc4f600dcf2d827d2c66d3",
+    "halted": true,
+    "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+    "selection_receipt_hash": "b291ffddce6f052fd08648658a698ad2867530846d89ff301708e37366061705"
+  },
+  "duration_seconds": 363.13626200001454,
+  "expected_stage1_release_commit": "4e9520a16bd3aeb7579ea92ce44060fd7f1a705a",
+  "git_sha": "0e93f5ba0f68da6022a80d9309f350359e455eaa",
+  "milestone": "M-25",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13 (main, Aug  7 2026, 02:26:41) [MSC v.1944 64 bit (AMD64)]",
+  "registry": {
+    "active_skills": 89,
+    "family_counts": {
+      "CLEAR": 4,
+      "DRAIN": 12,
+      "DROP_THEN_TRANSFER": 24,
+      "MERGE_THREE": 24,
+      "MERGE_TWO": 24,
+      "NOOP": 1
+    },
+    "load_latency": {
+      "max_ms": 31.224499980453402,
+      "mean_ms": 23.000119999051094
+    },
+    "registry_hash": "17e216a9bd5207d254b7b4a4261320ab7024c3c003d4e9b1a3ba3f0c4b207c4e",
+    "rule_memory_hash": "dfd84934cc2115abe2e4ac3a905081abd1c12c635e7be7845943ba0ffa6af76b",
+    "unique_skills": 89
+  },
+  "scale": [
+    {
+      "catalog_text_entries": 100,
+      "index_build_ms": 7.350599975325167,
+      "index_entries": 100,
+      "lexical_query_ms": 0.09370001498609781,
+      "peak_memory_bytes": 464853,
+      "query_examples": 100,
+      "unique_skills": 89
+    },
+    {
+      "catalog_text_entries": 500,
+      "index_build_ms": 38.10999999404885,
+      "index_entries": 500,
+      "lexical_query_ms": 0.3632000007200986,
+      "peak_memory_bytes": 2335895,
+      "query_examples": 500,
+      "unique_skills": 89
+    },
+    {
+      "catalog_text_entries": 1000,
+      "index_build_ms": 85.9974000195507,
+      "index_entries": 1000,
+      "lexical_query_ms": 0.6685999978799373,
+      "peak_memory_bytes": 4678604,
+      "query_examples": 1000,
+      "unique_skills": 89
+    },
+    {
+      "catalog_text_entries": 5000,
+      "index_build_ms": 469.455399987055,
+      "index_entries": 5000,
+      "lexical_query_ms": 3.409299999475479,
+      "peak_memory_bytes": 23410863,
+      "query_examples": 5000,
+      "unique_skills": 89
+    },
+    {
+      "catalog_text_entries": 10000,
+      "index_build_ms": 980.1489999808837,
+      "index_entries": 10000,
+      "lexical_query_ms": 7.914600020740181,
+      "peak_memory_bytes": 46826843,
+      "query_examples": 10000,
+      "unique_skills": 89
+    }
+  ],
+  "stage1_version": "1.0.1",
+  "status": "PASS",
+  "trusted_import_no_torch": true,
+  "trusted_retrieval": {
+    "controlled_exact": 356,
+    "controlled_total": 356,
+    "cross_language_equal": 1.0,
+    "elapsed_seconds": 49.090265000006184,
+    "latency_ms": {
+      "en": 109.99184887656115,
+      "ru": 111.88758258430518
+    },
+    "structured_exact": 89,
+    "structured_total": 89,
+    "wrong_automatic_skill_selection": 0
+  },
+  "unknown_policy": {
+    "automatic_selection_count": 0,
+    "count": 785,
+    "exact_marked_count": 0,
+    "safe_rate": 1.0
+  }
+}

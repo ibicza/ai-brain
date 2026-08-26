@@ -1,0 +1,26 @@
+{
+  "ambiguous_requests": 100,
+  "checks": 1317,
+  "composite_requests": 100,
+  "controlled_fact_routes": 6,
+  "controlled_skill_routes": 356,
+  "cross_authority_writes": 0,
+  "date_tool_executions": 30,
+  "duration_seconds": 249.29260920002707,
+  "milestone": "M-27",
+  "partial_composite_executions": 0,
+  "router_store": {
+    "artifact_count": 3462,
+    "audit_event_count": 3755,
+    "status": "VALID"
+  },
+  "skill_dispatches": 89,
+  "status": "PASS",
+  "structured_skill_routes": 89,
+  "tool_error_rejections": 20,
+  "tool_executions": 50,
+  "trusted_import_loads_torch": false,
+  "unsupported_requests": 100,
+  "wrong_auto_executions": 0,
+  "wrong_exact_routes": 0
+}

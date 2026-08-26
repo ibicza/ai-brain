@@ -1,0 +1,3642 @@
+date: 2026-08-26T19:58:47+00:00
+hostname: karina
+pwd: /home/ibicza/m271-exact-0e93f5b/repo
+git rev-parse HEAD: 0e93f5ba0f68da6022a80d9309f350359e455eaa
+git status --porcelain:
+
+python --version: Python 3.12.14
+uv --version: uv 0.12.5 (x86_64-unknown-linux-gnu)
+COMMAND: uv run ruff format --check src tests scripts
+225 files already formatted
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+COMMAND: uv run ruff check src tests scripts
+All checks passed!
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+COMMAND: uv run pytest -q
+........................................................................ [ 11%]
+........................................................................ [ 23%]
+........................................................................ [ 34%]
+........................................................................ [ 46%]
+........................................................................ [ 57%]
+........................................................................ [ 69%]
+........................................................................ [ 80%]
+........................................................................ [ 92%]
+...............................................                          [100%]
+623 passed in 80.46s (0:01:20)
+EXIT_CODE: 0
+DURATION_SECONDS: 82
+COMMAND: M-25 acceptance
+{
+  "checks": 453,
+  "dataset_counts": {
+    "blind": 4000,
+    "calibration": 2000,
+    "development": 4000,
+    "train": 20000,
+    "validation": 2000
+  },
+  "deterministic_assistive": {
+    "BM25": {
+      "hard_neighbor_top1": 0.14940239043824702,
+      "known_count": 3215,
+      "latency_ms_mean": 9.133195394621495,
+      "latency_ms_p95": 9.26255900412798,
+      "mrr": 0.4087627440815621,
+      "top1": 0.1891135303265941,
+      "top3": 0.5710730948678071,
+      "top5": 0.815552099533437,
+      "trusted_selector": false,
+      "wrong_destination_rate": 0.44292379471228616,
+      "wrong_family_rate": 0.29673405909797823,
+      "wrong_order_rate": 0.8108864696734059,
+      "wrong_register_rate": 0.6883359253499223
+    },
+    "CHARACTER_NGRAM": {
+      "hard_neighbor_top1": 0.9920318725099602,
+      "known_count": 3215,
+      "latency_ms_mean": 9.888646149532406,
+      "latency_ms_p95": 10.111294002854265,
+      "mrr": 0.9961638154484188,
+      "top1": 0.9925349922239503,
+      "top3": 1.0,
+      "top5": 1.0,
+      "trusted_selector": false,
+      "wrong_destination_rate": 0.0,
+      "wrong_family_rate": 0.004043545878693624,
+      "wrong_order_rate": 0.007465007776049767,
+      "wrong_register_rate": 0.007465007776049767
+    },
+    "LEXICAL": {
+      "hard_neighbor_top1": 0.045816733067729085,
+      "known_count": 3215,
+      "latency_ms_mean": 8.470688685878002,
+      "latency_ms_p95": 8.558846995583735,
+      "mrr": 0.13947468463798168,
+      "top1": 0.06251944012441679,
+      "top3": 0.17262830482115085,
+      "top5": 0.2737169517884914,
+      "trusted_selector": false,
+      "wrong_destination_rate": 0.7013996889580093,
+      "wrong_family_rate": 0.0255054432348367,
+      "wrong_order_rate": 0.9374805598755832,
+      "wrong_register_rate": 0.8982892690513219
+    }
+  },
+  "dispatch": {
+    "dispatch_receipt_hash": "7d7a89ba16755fd2a89c60ffa0710da614885874a85eafbceed13dd26815a443",
+    "execution_hash": "cb5e3dcb99fd3a150c70235ae03ac093f6b8dfa3c87503ce2006b170a2f46022",
+    "halted": true,
+    "rule_id_hash": "d7cf34979f127eb6daf549539f768701e45461e5605292e1b1e144fa9abcea8c",
+    "selection_receipt_hash": "14cd75dfe74229ca20f646bf719ba6ee7c0679e27324d3bb4e87e3cd13321177"
+  },
+  "duration_seconds": 115.54738320301112,
+  "expected_stage1_release_commit": "4e9520a16bd3aeb7579ea92ce44060fd7f1a705a",
+  "git_sha": "0e93f5ba0f68da6022a80d9309f350359e455eaa",
+  "milestone": "M-25",
+  "platform": "Linux-7.0.0-30-generic-x86_64-with-glibc2.43",
+  "python": "3.12.14 (main, Aug 14 2026, 15:34:45) [Clang 22.1.3 ]",
+  "registry": {
+    "active_skills": 89,
+    "family_counts": {
+      "CLEAR": 4,
+      "DRAIN": 12,
+      "DROP_THEN_TRANSFER": 24,
+      "MERGE_THREE": 24,
+      "MERGE_TWO": 24,
+      "NOOP": 1
+    },
+    "load_latency": {
+      "max_ms": 10.27525300742127,
+      "mean_ms": 7.702773800701834
+    },
+    "registry_hash": "6ecc6034686f9fb35d4dcfeb5128bd3cb68c74911221992d42e7fd975cbf3f61",
+    "rule_memory_hash": "8f302ac8cc6bdffe2284750f660113273adc1ea9f2d6afc1839e574200b52191",
+    "unique_skills": 89
+  },
+  "scale": [
+    {
+      "catalog_text_entries": 100,
+      "index_build_ms": 4.441538010723889,
+      "index_entries": 100,
+      "lexical_query_ms": 0.018385006114840508,
+      "peak_memory_bytes": 464853,
+      "query_examples": 100,
+      "unique_skills": 89
+    },
+    {
+      "catalog_text_entries": 500,
+      "index_build_ms": 22.176109996507876,
+      "index_entries": 500,
+      "lexical_query_ms": 0.0748309976188466,
+      "peak_memory_bytes": 2335895,
+      "query_examples": 500,
+      "unique_skills": 89
+    },
+    {
+      "catalog_text_entries": 1000,
+      "index_build_ms": 45.883771002991125,
+      "index_entries": 1000,
+      "lexical_query_ms": 0.16152400348801166,
+      "peak_memory_bytes": 4678604,
+      "query_examples": 1000,
+      "unique_skills": 89
+    },
+    {
+      "catalog_text_entries": 5000,
+      "index_build_ms": 245.01629799488,
+      "index_entries": 5000,
+      "lexical_query_ms": 1.965986011782661,
+      "peak_memory_bytes": 23410863,
+      "query_examples": 5000,
+      "unique_skills": 89
+    },
+    {
+      "catalog_text_entries": 10000,
+      "index_build_ms": 536.8698070087703,
+      "index_entries": 10000,
+      "lexical_query_ms": 4.281857996829785,
+      "peak_memory_bytes": 46826843,
+      "query_examples": 10000,
+      "unique_skills": 89
+    }
+  ],
+  "stage1_version": "1.0.1",
+  "status": "PASS",
+  "trusted_import_no_torch": true,
+  "trusted_retrieval": {
+    "controlled_exact": 356,
+    "controlled_total": 356,
+    "cross_language_equal": 1.0,
+    "elapsed_seconds": 12.259508686009212,
+    "latency_ms": {
+      "en": 27.65278680993341,
+      "ru": 27.626425820763167
+    },
+    "structured_exact": 89,
+    "structured_total": 89,
+    "wrong_automatic_skill_selection": 0
+  },
+  "unknown_policy": {
+    "automatic_selection_count": 0,
+    "count": 785,
+    "exact_marked_count": 0,
+    "safe_rate": 1.0
+  }
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 116
+COMMAND: M-25.1 fair acceptance without blind reopen
+{
+  "dataset": {
+    "blind_public_sha256": "178c5ac7ee6669f4cb0e50582834ffa86be489edf29ace4f31e54eb075926792",
+    "blind_targets_sha256": "b74b52b73b34b37e17cbecec84d58a21c344f0394403813f8d8b5db8c8b874bb",
+    "evaluation_slices": {
+      "AMBIGUOUS": 3578,
+      "CATALOG_LEXICAL_HOLDOUT": 1046,
+      "COMPOSED_OOD": 1045,
+      "CROSS_LANGUAGE_TRANSFER": 1045,
+      "HARD_NEIGHBOR": 4911,
+      "ID": 22114,
+      "ORDER_HOLDOUT": 1045,
+      "TEMPLATE_HOLDOUT": 1046,
+      "TRUE_LEXICAL_OOD": 500,
+      "UNKNOWN": 3578,
+      "VARIABLE_PERMUTATION": 1046,
+      "ZERO_QUERY_SKILL": 1046
+    },
+    "ood_split_definition_hash": "2c193a110d8dbb5022e429cf4d39cbb08d62928aa2d6b0e168958abd14fdd3d8",
+    "prompt_intersections": {
+      "calibration_x_blind": 0,
+      "calibration_x_development": 0,
+      "development_x_blind": 0,
+      "train_x_blind": 0,
+      "train_x_calibration": 0,
+      "train_x_development": 0,
+      "train_x_validation": 0,
+      "validation_x_blind": 0,
+      "validation_x_calibration": 0,
+      "validation_x_development": 0
+    },
+    "query_surface_inventory_hash": "dfe39cdfbc7655ed9fd2ef85aa90316b7efe46ce6fb8693585144d066279c79c",
+    "split_counts": {
+      "blind": 6000,
+      "calibration": 3000,
+      "development": 6000,
+      "train": 24000,
+      "validation": 3000
+    },
+    "zero_query_skill_count": 18
+  },
+  "deterministic_baselines": {
+    "bm25": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.08474795766756867,
+          "top1": 0.009157509157509158,
+          "top3": 0.06776556776556776,
+          "top5": 0.15934065934065933
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.06396001064406603,
+          "top1": 0.0,
+          "top3": 0.03853211009174312,
+          "top5": 0.07889908256880734
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.07422347531268673,
+          "top1": 0.0,
+          "top3": 0.025688073394495414,
+          "top5": 0.12110091743119267
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.11598169333874321,
+          "top1": 0.04220183486238532,
+          "top3": 0.10091743119266056,
+          "top5": 0.1577981651376147
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.07872835550455559,
+          "top1": 0.003663003663003663,
+          "top3": 0.05128205128205128,
+          "top5": 0.11538461538461539
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.08920700032156235,
+          "top1": 0.007339449541284404,
+          "top3": 0.06972477064220184,
+          "top5": 0.1688073394495413
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.06506319898685926,
+          "top1": 0.0,
+          "top3": 0.029304029304029304,
+          "top5": 0.08791208791208792
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.1497887131703075,
+          "top1": 0.007326007326007326,
+          "top3": 0.19597069597069597,
+          "top5": 0.27106227106227104
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.20079024145166563,
+          "top1": 0.1043956043956044,
+          "top3": 0.21611721611721613,
+          "top5": 0.26556776556776557
+        }
+      },
+      "hard_neighbor_pairwise": 0.03486238532110092,
+      "known_count": 4910,
+      "mrr": 0.1025125296850711,
+      "top1": 0.019348268839103868,
+      "top3": 0.08839103869653768,
+      "top5": 0.15845213849287168,
+      "trusted_selector": false
+    },
+    "character_ngram": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.466515047637452,
+          "top1": 0.35714285714285715,
+          "top3": 0.510989010989011,
+          "top5": 0.5622710622710623
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.4171177606021853,
+          "top1": 0.3504587155963303,
+          "top3": 0.4091743119266055,
+          "top5": 0.44587155963302755
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.36548505088503513,
+          "top1": 0.3174311926605505,
+          "top3": 0.3486238532110092,
+          "top5": 0.363302752293578
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.4416885488559611,
+          "top1": 0.3706422018348624,
+          "top3": 0.44220183486238535,
+          "top5": 0.4917431192660551
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.4123421292887961,
+          "top1": 0.3333333333333333,
+          "top3": 0.42857142857142855,
+          "top5": 0.47619047619047616
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.40900218999291166,
+          "top1": 0.3192660550458716,
+          "top3": 0.42935779816513764,
+          "top5": 0.47522935779816516
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.407140096653769,
+          "top1": 0.336996336996337,
+          "top3": 0.3992673992673993,
+          "top5": 0.44871794871794873
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.5104016892204076,
+          "top1": 0.41025641025641024,
+          "top3": 0.5256410256410257,
+          "top5": 0.5879120879120879
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.5121633571131297,
+          "top1": 0.45054945054945056,
+          "top3": 0.510989010989011,
+          "top5": 0.5439560439560439
+        }
+      },
+      "hard_neighbor_pairwise": 0.7431192660550459,
+      "known_count": 4910,
+      "mrr": 0.4380081490032529,
+      "top1": 0.36069246435845215,
+      "top3": 0.445010183299389,
+      "top5": 0.48839103869653766,
+      "trusted_selector": false
+    },
+    "exact_catalog_substring": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.030240752086415933,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.02878338755502245,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.03823239248316882,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.06039339393090618,
+          "top1": 0.005504587155963303,
+          "top3": 0.04220183486238532,
+          "top5": 0.06788990825688074
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.02975702149749298,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.028639652918806137,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.02950811389166046,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.04241009924591049,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.15196600711180402,
+          "top1": 0.047619047619047616,
+          "top3": 0.1575091575091575,
+          "top5": 0.2673992673992674
+        }
+      },
+      "hard_neighbor_pairwise": 0.0,
+      "known_count": 4910,
+      "mrr": 0.048889242217287264,
+      "top1": 0.005906313645621181,
+      "top3": 0.02219959266802444,
+      "top5": 0.037270875763747456,
+      "trusted_selector": false
+    },
+    "lexical_token_overlap": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.08804829149109665,
+          "top1": 0.0,
+          "top3": 0.06227106227106227,
+          "top5": 0.13186813186813187
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.06501325254853853,
+          "top1": 0.0,
+          "top3": 0.03669724770642202,
+          "top5": 0.06972477064220184
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.06302328049462523,
+          "top1": 0.0,
+          "top3": 0.044036697247706424,
+          "top5": 0.044036697247706424
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.10810672915962932,
+          "top1": 0.027522935779816515,
+          "top3": 0.08807339449541285,
+          "top5": 0.14862385321100918
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.07290203252201886,
+          "top1": 0.0,
+          "top3": 0.04395604395604396,
+          "top5": 0.08791208791208792
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.06580467330044751,
+          "top1": 0.0,
+          "top3": 0.027522935779816515,
+          "top5": 0.06605504587155964
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.06432341166013408,
+          "top1": 0.0,
+          "top3": 0.027472527472527472,
+          "top5": 0.06043956043956044
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.0945989746985236,
+          "top1": 0.0,
+          "top3": 0.06776556776556776,
+          "top5": 0.06776556776556776
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.20476789190964156,
+          "top1": 0.10805860805860806,
+          "top3": 0.18864468864468864,
+          "top5": 0.2802197802197802
+        }
+      },
+      "hard_neighbor_pairwise": 0.0,
+      "known_count": 4910,
+      "mrr": 0.09185649566087956,
+      "top1": 0.015071283095723014,
+      "top3": 0.06517311608961303,
+      "top5": 0.10631364562118126,
+      "trusted_selector": false
+    },
+    "minimal_structured_feature": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.034228114692710566,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0018315018315018315
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.03461876850556227,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.04164600620347217,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.06256867484173861,
+          "top1": 0.0,
+          "top3": 0.045871559633027525,
+          "top5": 0.08073394495412844
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.03321501727263369,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.03383260411918558,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.033724915953389785,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.0
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.044199386417066375,
+          "top1": 0.0,
+          "top3": 0.0,
+          "top5": 0.1391941391941392
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.13746761287393008,
+          "top1": 0.054945054945054944,
+          "top3": 0.15934065934065933,
+          "top5": 0.21062271062271062
+        }
+      },
+      "hard_neighbor_pairwise": 0.0,
+      "known_count": 4910,
+      "mrr": 0.050617298376097825,
+      "top1": 0.006109979633401222,
+      "top3": 0.022810590631364563,
+      "top5": 0.04806517311608961,
+      "trusted_selector": false
+    },
+    "random": {
+      "by_slice": {
+        "CATALOG_LEXICAL_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.037792386726101544,
+          "top1": 0.009157509157509158,
+          "top3": 0.009157509157509158,
+          "top5": 0.009157509157509158
+        },
+        "COMPOSED_OOD": {
+          "count": 545,
+          "mrr": 0.04388552079503238,
+          "top1": 0.01651376146788991,
+          "top3": 0.01651376146788991,
+          "top5": 0.01651376146788991
+        },
+        "CROSS_LANGUAGE_TRANSFER": {
+          "count": 545,
+          "mrr": 0.04487698225145307,
+          "top1": 0.009174311926605505,
+          "top3": 0.009174311926605505,
+          "top5": 0.009174311926605505
+        },
+        "HARD_NEIGHBOR": {
+          "count": 545,
+          "mrr": 0.06371735246841775,
+          "top1": 0.012844036697247707,
+          "top3": 0.023853211009174313,
+          "top5": 0.07155963302752294
+        },
+        "ID": {
+          "count": 546,
+          "mrr": 0.03736022078850413,
+          "top1": 0.009157509157509158,
+          "top3": 0.009157509157509158,
+          "top5": 0.009157509157509158
+        },
+        "ORDER_HOLDOUT": {
+          "count": 545,
+          "mrr": 0.04011098253133182,
+          "top1": 0.012844036697247707,
+          "top3": 0.012844036697247707,
+          "top5": 0.012844036697247707
+        },
+        "TEMPLATE_HOLDOUT": {
+          "count": 546,
+          "mrr": 0.04257484223856141,
+          "top1": 0.014652014652014652,
+          "top3": 0.014652014652014652,
+          "top5": 0.014652014652014652
+        },
+        "VARIABLE_PERMUTATION": {
+          "count": 546,
+          "mrr": 0.042237107069717825,
+          "top1": 0.003663003663003663,
+          "top3": 0.003663003663003663,
+          "top5": 0.003663003663003663
+        },
+        "ZERO_QUERY_SKILL": {
+          "count": 546,
+          "mrr": 0.12340498390906897,
+          "top1": 0.016483516483516484,
+          "top3": 0.1282051282051282,
+          "top5": 0.23809523809523808
+        }
+      },
+      "hard_neighbor_pairwise": 0.012844036697247707,
+      "known_count": 4910,
+      "mrr": 0.052888345412392034,
+      "top1": 0.011608961303462322,
+      "top3": 0.02525458248472505,
+      "top5": 0.04276985743380855,
+      "trusted_selector": false
+    }
+  },
+  "dispatch": {
+    "controlled_ru_en_dispatch_success": 12,
+    "controlled_ru_en_dispatch_total": 12,
+    "family_counts": {
+      "CLEAR": 4,
+      "DRAIN": 12,
+      "DROP_THEN_TRANSFER": 24,
+      "MERGE_THREE": 24,
+      "MERGE_TWO": 24,
+      "NOOP": 1
+    },
+    "representative_state_checks": 42,
+    "status": "PASS",
+    "structural_dispatch_success": 89,
+    "structural_dispatch_total": 89
+  },
+  "dispatch_evidence_hash": "0fa16fd67000bb9e0d4c6707fc8e1c20c384e6501f7bf18524b553f30256a327",
+  "duration_seconds": 38.39707700400322,
+  "git_sha": "0e93f5ba0f68da6022a80d9309f350359e455eaa",
+  "label_leakage": {
+    "exact_catalog_substring": {
+      "by_slice": {
+        "AMBIGUOUS": 0.0,
+        "CATALOG_LEXICAL_HOLDOUT": 0.0,
+        "COMPOSED_OOD": 0.0,
+        "CROSS_LANGUAGE_TRANSFER": 0.0,
+        "HARD_NEIGHBOR": 0.0,
+        "ID": 0.0,
+        "ORDER_HOLDOUT": 0.0,
+        "TEMPLATE_HOLDOUT": 0.0,
+        "UNKNOWN": 0.0,
+        "VARIABLE_PERMUTATION": 0.0,
+        "ZERO_QUERY_SKILL": 0.0
+      },
+      "examples": [],
+      "overall_rate": 0.0
+    },
+    "length_punctuation": {
+      "alert": false,
+      "alert_threshold": 0.6,
+      "auroc": 0.5719996636708459,
+      "features": [
+        "length",
+        "punctuation",
+        "sentence_count",
+        "line_count"
+      ]
+    },
+    "query_to_skill_corpus_overlap": {
+      "minimal": {
+        "by_slice_mean": {
+          "AMBIGUOUS": 0.0057902733996571,
+          "CATALOG_LEXICAL_HOLDOUT": 0.002814705327631434,
+          "COMPOSED_OOD": 0.0019167490743252557,
+          "CROSS_LANGUAGE_TRANSFER": 0.0020837428367418203,
+          "HARD_NEIGHBOR": 0.0024262630493702346,
+          "ID": 0.002005633320098181,
+          "ORDER_HOLDOUT": 0.0022761608763830843,
+          "TEMPLATE_HOLDOUT": 0.0018791320846969334,
+          "UNKNOWN": 0.002515276836764992,
+          "VARIABLE_PERMUTATION": 0.0016954998061138953,
+          "ZERO_QUERY_SKILL": 0.0022475913017892557
+        },
+        "char_ngram_jaccard": {
+          "max": 0.024390243902439025,
+          "mean": 0.0025134087957895284,
+          "p50": 0.0,
+          "p90": 0.011299435028248588
+        },
+        "complete_line_subsequence_rate": 0.0,
+        "condition": "minimal"
+      },
+      "rich": {
+        "by_slice_mean": {
+          "AMBIGUOUS": 0.05002113161246644,
+          "CATALOG_LEXICAL_HOLDOUT": 0.09283617714274506,
+          "COMPOSED_OOD": 0.05667367435990692,
+          "CROSS_LANGUAGE_TRANSFER": 0.05919254195044983,
+          "HARD_NEIGHBOR": 0.05960270419981847,
+          "ID": 0.05919688262730726,
+          "ORDER_HOLDOUT": 0.058994317396529945,
+          "TEMPLATE_HOLDOUT": 0.05676582825745384,
+          "UNKNOWN": 0.04140390362311124,
+          "VARIABLE_PERMUTATION": 0.06029543198693768,
+          "ZERO_QUERY_SKILL": 0.059927665772858886
+        },
+        "char_ngram_jaccard": {
+          "max": 0.14463452566096424,
+          "mean": 0.059542518850401904,
+          "p50": 0.058655221745350504,
+          "p90": 0.07575757575757576
+        },
+        "complete_line_subsequence_rate": 0.0,
+        "condition": "rich"
+      },
+      "sanitized": {
+        "by_slice_mean": {
+          "AMBIGUOUS": 0.0073913039533908265,
+          "CATALOG_LEXICAL_HOLDOUT": 0.015560030647874859,
+          "COMPOSED_OOD": 0.016543799250141527,
+          "CROSS_LANGUAGE_TRANSFER": 0.01718264207251138,
+          "HARD_NEIGHBOR": 0.017564746157420333,
+          "ID": 0.01802490994670224,
+          "ORDER_HOLDOUT": 0.01787622546906174,
+          "TEMPLATE_HOLDOUT": 0.016294435668603377,
+          "UNKNOWN": 0.00641328587498092,
+          "VARIABLE_PERMUTATION": 0.016770696883426063,
+          "ZERO_QUERY_SKILL": 0.016064522965772893
+        },
+        "char_ngram_jaccard": {
+          "max": 0.07547169811320754,
+          "mean": 0.015063651831850057,
+          "p50": 0.0,
+          "p90": 0.0410958904109589
+        },
+        "complete_line_subsequence_rate": 0.0,
+        "condition": "sanitized"
+      }
+    },
+    "wrapper_only": {
+      "alert": false,
+      "alert_threshold": 0.6,
+      "auroc": 0.5015907434742801,
+      "feature_count": 12
+    }
+  },
+  "milestone": "M-25.1",
+  "platform": "Linux-7.0.0-30-generic-x86_64-with-glibc2.43",
+  "python": "3.12.14 (main, Aug 14 2026, 15:34:45) [Clang 22.1.3 ]",
+  "registry": {
+    "class_size_distribution": {
+      "1": 41,
+      "2": 12,
+      "6": 4
+    },
+    "final_state_effect_class_count": 57,
+    "full_execution_equivalence_class_count": 89,
+    "order_insensitive_class_count": 33,
+    "order_sensitive_class_count": 24,
+    "registry_hash": "46590c1f02ec8d82e59b1686f99263b9fedf4f21727df17c8eb2b8480de3753b",
+    "rule_memory_hash": "7bb9ddfc9563d92bb9b299ee651075d964fb3c681738b3da67ffb76bcf91a58b",
+    "structural_skill_count": 89,
+    "trace_distinct_class_count": 16
+  },
+  "skill_corpus_hashes": {
+    "minimal": "627aaa7e154d313054f0bb14caf65f780607279bd74d3ab921625f6b69dc28e4",
+    "rich": "219792ddf3563c1eef97b533e6dd58a3e92eb09a895fa142008318dbb3bade79",
+    "sanitized": "47fff640d6a6d6aa275cb7aac2250bc37ab79428bfababd4ab8f4581b285fbe5"
+  },
+  "status": "PASS",
+  "trusted_import_no_torch": true
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 38
+COMMAND: M-25.2 acceptance
+{
+  "checks": 1293,
+  "controlled_retrieval": {
+    "cross_language_equality": 1.0,
+    "success": 356,
+    "total": 356
+  },
+  "dispatch": {
+    "controlled_success": 12,
+    "controlled_total": 12,
+    "structural_success": 89,
+    "structural_total": 89
+  },
+  "duration_seconds": 35.628608593993704,
+  "equivalence_validation": {
+    "checked_execution_count": 640,
+    "checked_pair_count": 32,
+    "class_size_distribution": {
+      "1": 41,
+      "2": 12,
+      "6": 4
+    },
+    "final_state_effect_class_count": 57,
+    "full_execution_equivalence_class_count": 89,
+    "order_insensitive_class_count": 33,
+    "order_sensitive_class_count": 24,
+    "representative_pairs": [
+      {
+        "equivalence_class_hash": "334824275c4c9f3b24b0d2ed5e4e67794b91ed718fce58a02274caf4e3d1f92c",
+        "first": {
+          "action_stream_hash": "1e507f5846757ff4b3949ed223d6c002b9551c0b508d09c28bce6c4eb57c6fbb",
+          "captured_actions": [
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "H"
+          ],
+          "executed_steps": 9,
+          "execution_hash": "85dbdecf0395370c204746030a9893b4190f1d83e9e5d9efef0c457821b9894a",
+          "final_state": {
+            "R0": 10,
+            "R1": 0,
+            "R2": 0,
+            "R3": 7
+          },
+          "final_state_effect_hash": "01be337b6e4d38d6556964941685f3c8163ddeec5b6e51e8002f7c28487954f1",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 2,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 1,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 0,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 0,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 0,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 0,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 9,
+              "R1": 0,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            }
+          ],
+          "skill_id": "skill-7e832b546cd45bbc684c",
+          "specification_hash": "d860d95a22fabf21fdd95fc4ed3b7251ff48eab77cb9427eaaa8261350137619"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "24deec2b015c76a7d80398c9840052ef26174fa02fd04c84bff9de2b02d88931",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 9,
+          "execution_hash": "9b3fa72ab33d9f648aedee41a0ede469e78e0962ac13b9a8210c96a9392ed68f",
+          "final_state": {
+            "R0": 10,
+            "R1": 0,
+            "R2": 0,
+            "R3": 7
+          },
+          "final_state_effect_hash": "01be337b6e4d38d6556964941685f3c8163ddeec5b6e51e8002f7c28487954f1",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 2,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 9,
+              "R1": 1,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            }
+          ],
+          "skill_id": "skill-9d9ab329db6c92fd7741",
+          "specification_hash": "8949427626911e2977b60bf212ece207b98fdd1d7f5bf382e20b917a2e0848fc"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "6c1c6638e0fd94532591252a3374811d05b7a70a01922e3f6f540841ca7ae82e",
+          "captured_actions": [
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "208cc592819c0b40408d9eaf79b031c81fbef164fe1ef434c19e193cf25cecaa",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 5,
+              "R3": 6
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 5,
+              "R3": 5
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 5,
+              "R3": 4
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 5,
+              "R3": 3
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 5,
+              "R3": 2
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 5,
+              "R3": 1
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 10,
+              "R1": 2,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 11,
+              "R1": 1,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 12,
+              "R1": 0,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 13,
+              "R1": 0,
+              "R2": 4,
+              "R3": 0
+            },
+            {
+              "R0": 14,
+              "R1": 0,
+              "R2": 3,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 0,
+              "R2": 2,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 0,
+              "R2": 1,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-2ea82f1d5ad16e25eca0",
+          "specification_hash": "201b94326227fbc92247ca6bc9dd576d1ccd0b62cc662281586c7025b40887a9"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "7421ba3a48535615ed3f781992fae7775223cd48a2c02e8d8f02b4bcb21483e2",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "a1ee2b40c3320f676ff4504865d690d4c237c002dc55ea0c3539fbb676f56b33",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 2,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 9,
+              "R1": 1,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 11,
+              "R1": 0,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 12,
+              "R1": 0,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 13,
+              "R1": 0,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 14,
+              "R1": 0,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 15,
+              "R1": 0,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 16,
+              "R1": 0,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-a7cd9e66abe859dff3ce",
+          "specification_hash": "f7acccdc95097d0479dfa16e17f414f18a862e0239f6275a31b2cfc84fdaafe9"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "1180b111d713687b12bfcfb41dd8d5e3f36e7850851c672fe78ce316904114f2",
+          "captured_actions": [
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "2a6336c1370c7f2195f27f96ea74fa5ec835b4ad1e409597775ceac4e5698b8a",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 2,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 1,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 0,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 0,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 0,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 0,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 9,
+              "R1": 0,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 11,
+              "R1": 0,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 12,
+              "R1": 0,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 13,
+              "R1": 0,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 14,
+              "R1": 0,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 15,
+              "R1": 0,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 16,
+              "R1": 0,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-b57bd8d684d1d77cced3",
+          "specification_hash": "05b7a3dd94329e6b2d30ec510de9b047e7b58fce183408407dfbb9337da5cb7d"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "df811bee7325d8e10a002da15dfa310023d5e1f12e36ec105c9ea1cf6f5dcdc1",
+          "captured_actions": [
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "7df2b7ace325dfc009b9d3b668b155100abd08170b7c68ea28c28dcb4ad4bed1",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 5,
+              "R3": 6
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 5,
+              "R3": 5
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 5,
+              "R3": 4
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 5,
+              "R3": 3
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 5,
+              "R3": 2
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 5,
+              "R3": 1
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 4,
+              "R3": 0
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 3,
+              "R3": 0
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 2,
+              "R3": 0
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 1,
+              "R3": 0
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-dfb4de2461888d593b5f",
+          "specification_hash": "fad4bf1425523c0019d60e6c9d39b54afb884885407a96b45c276a9541091e86"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "af3891bc7a74d57f98d862ecdc7106bf03ad688379e704ce55e27e3f0b96c64b",
+          "captured_actions": [
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "f2e404595a08cd64b53d74feb62925522c0af57038076d6474587bfc3fe33c9a",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 2,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 1,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 0,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 0,
+              "R2": 5,
+              "R3": 6
+            },
+            {
+              "R0": 7,
+              "R1": 0,
+              "R2": 5,
+              "R3": 5
+            },
+            {
+              "R0": 8,
+              "R1": 0,
+              "R2": 5,
+              "R3": 4
+            },
+            {
+              "R0": 9,
+              "R1": 0,
+              "R2": 5,
+              "R3": 3
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 5,
+              "R3": 2
+            },
+            {
+              "R0": 11,
+              "R1": 0,
+              "R2": 5,
+              "R3": 1
+            },
+            {
+              "R0": 12,
+              "R1": 0,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 13,
+              "R1": 0,
+              "R2": 4,
+              "R3": 0
+            },
+            {
+              "R0": 14,
+              "R1": 0,
+              "R2": 3,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 0,
+              "R2": 2,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 0,
+              "R2": 1,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-e0bf2195c1ea4a62c77d",
+          "specification_hash": "fafcb4f20b2409e14ad5ab633163cac26d5586e3e529da77263ae2c326e36411"
+        }
+      },
+      {
+        "equivalence_class_hash": "87bf47ace41d549d51030becd9944ab50a129f88ac3817686b1b3b4ec0af2d64",
+        "first": {
+          "action_stream_hash": "575f586273715239492efb5ef53af1594dfe406139f153535139baacb991c176",
+          "captured_actions": [
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R0 R1",
+            "M R0 R1",
+            "H"
+          ],
+          "executed_steps": 15,
+          "execution_hash": "6a655160ba00d7a3d69bbfb37ebb734504abc31302a14fc4c81f71c7b5a4a3ec",
+          "final_state": {
+            "R0": 0,
+            "R1": 17,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "687797e505b798747101c060ac26b6831e724df145e51480daa1783dbbe4d16a",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 2,
+              "R1": 4,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 5,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 6,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 7,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 8,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 9,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 2,
+              "R1": 10,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 2,
+              "R1": 11,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 2,
+              "R1": 12,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 2,
+              "R1": 13,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 2,
+              "R1": 14,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 2,
+              "R1": 15,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 1,
+              "R1": 16,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-0ba8533e75aeced9eadf",
+          "specification_hash": "f3e88f9e6d32e8c5773454d9f9349e95052201c1a3425dacf7e2646037f4e825"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "144ab34923213bf89415ca10eb80084cffbcaab5ba0ae42812285b57c7711b74",
+          "captured_actions": [
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R0 R1",
+            "M R0 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "H"
+          ],
+          "executed_steps": 15,
+          "execution_hash": "d34f696fff9c49711853dff4c0e4b88188b25c413bdabcfe551cd38392588958",
+          "final_state": {
+            "R0": 0,
+            "R1": 17,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "687797e505b798747101c060ac26b6831e724df145e51480daa1783dbbe4d16a",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 2,
+              "R1": 4,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 5,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 6,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 7,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 8,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 1,
+              "R1": 9,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 0,
+              "R1": 10,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 0,
+              "R1": 11,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 0,
+              "R1": 12,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 0,
+              "R1": 13,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 0,
+              "R1": 14,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 0,
+              "R1": 15,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 0,
+              "R1": 16,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-47377194946c6629e076",
+          "specification_hash": "909c381d6bad7128f79b6ab4e637f1348fd1fbbc9291abda8feb1cce86a31f8d"
+        }
+      },
+      {
+        "equivalence_class_hash": "87bf47ace41d549d51030becd9944ab50a129f88ac3817686b1b3b4ec0af2d64",
+        "first": {
+          "action_stream_hash": "575f586273715239492efb5ef53af1594dfe406139f153535139baacb991c176",
+          "captured_actions": [
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R0 R1",
+            "M R0 R1",
+            "H"
+          ],
+          "executed_steps": 15,
+          "execution_hash": "6a655160ba00d7a3d69bbfb37ebb734504abc31302a14fc4c81f71c7b5a4a3ec",
+          "final_state": {
+            "R0": 0,
+            "R1": 17,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "687797e505b798747101c060ac26b6831e724df145e51480daa1783dbbe4d16a",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 2,
+              "R1": 4,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 5,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 6,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 7,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 8,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 9,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 2,
+              "R1": 10,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 2,
+              "R1": 11,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 2,
+              "R1": 12,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 2,
+              "R1": 13,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 2,
+              "R1": 14,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 2,
+              "R1": 15,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 1,
+              "R1": 16,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-0ba8533e75aeced9eadf",
+          "specification_hash": "f3e88f9e6d32e8c5773454d9f9349e95052201c1a3425dacf7e2646037f4e825"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "68eb1d6d1430cd3a502a49cae6ff7f7cf5c28152de04af125100dcc57776bbf3",
+          "captured_actions": [
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R0 R1",
+            "M R0 R1",
+            "H"
+          ],
+          "executed_steps": 15,
+          "execution_hash": "0b282774d88f18d86f2f4594a9522977e278ac9299ae1049aa25a01f623289ff",
+          "final_state": {
+            "R0": 0,
+            "R1": 17,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "687797e505b798747101c060ac26b6831e724df145e51480daa1783dbbe4d16a",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 2,
+              "R1": 4,
+              "R2": 5,
+              "R3": 6
+            },
+            {
+              "R0": 2,
+              "R1": 5,
+              "R2": 5,
+              "R3": 5
+            },
+            {
+              "R0": 2,
+              "R1": 6,
+              "R2": 5,
+              "R3": 4
+            },
+            {
+              "R0": 2,
+              "R1": 7,
+              "R2": 5,
+              "R3": 3
+            },
+            {
+              "R0": 2,
+              "R1": 8,
+              "R2": 5,
+              "R3": 2
+            },
+            {
+              "R0": 2,
+              "R1": 9,
+              "R2": 5,
+              "R3": 1
+            },
+            {
+              "R0": 2,
+              "R1": 10,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 11,
+              "R2": 4,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 12,
+              "R2": 3,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 13,
+              "R2": 2,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 14,
+              "R2": 1,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 15,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 1,
+              "R1": 16,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-7530fc1947b8e773d366",
+          "specification_hash": "2687ae62eebd9f45aa32e3e2706b254304668d3cf1bc2f1e3d5efdd4903f69e7"
+        }
+      }
+    ],
+    "state_battery": [
+      {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      {
+        "R0": 1,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      {
+        "R0": 0,
+        "R1": 1,
+        "R2": 0,
+        "R3": 0
+      },
+      {
+        "R0": 0,
+        "R1": 0,
+        "R2": 1,
+        "R3": 0
+      },
+      {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 1
+      },
+      {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      {
+        "R0": 10,
+        "R1": 1,
+        "R2": 4,
+        "R3": 2
+      },
+      {
+        "R0": 1,
+        "R1": 10,
+        "R2": 2,
+        "R3": 4
+      },
+      {
+        "R0": 4,
+        "R1": 2,
+        "R2": 10,
+        "R3": 1
+      },
+      {
+        "R0": 2,
+        "R1": 4,
+        "R2": 1,
+        "R3": 10
+      }
+    ],
+    "status": "PASS",
+    "structural_skill_count": 89,
+    "trace_distinct_class_count": 16,
+    "trace_distinct_class_hashes": [
+      "334824275c4c9f3b24b0d2ed5e4e67794b91ed718fce58a02274caf4e3d1f92c",
+      "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+      "87bf47ace41d549d51030becd9944ab50a129f88ac3817686b1b3b4ec0af2d64",
+      "e6112aab81f1f4d7d34bce353ed91325e2666e166ea247d2bcaf11dcc4cca83c",
+      "a63062e828abec2007053706ecd9d008d460c05004c17672b302924cf54ce082",
+      "a0f473d3b575853824037bd8db50fcec21819e0864cf2147e728d3cafb649917",
+      "3a8a4f0a337f5ddd111937bf0bce3b7f7094934b85c32edc5688023314c9e725",
+      "733c5f4078702328123995f401ae3efc6004159b8846b7cbe11c8ece9b2cae92",
+      "dc74200d6fb42a8199cd9ef697b1315b95f4491977968add632cd020f99d5577",
+      "215e2b482fa1f56a9ef35d37cbf5888e7504605d4fc29aa4cf8ff6fcdbd6fbcf",
+      "acd5eef5423f87d4457aae72f5593c2aed01145d6970ebea48430e351760c682",
+      "eb64022ae6e1a4f0e2a3f60393f9ac639468f38c4478756f30dd1916996925a6",
+      "b8a974d0d33a6cec9aad986616d044b316fb6a042f176b32f22c7792aab868f8",
+      "41a1b47f6f4dd0951599d93bc0b95207d30932458ce99a9c495700b126450ad8",
+      "56720a713080ac5fd5f11469ba7085ad0107b88330f46ca0cb94107b6483c57a",
+      "1c51c37d164758cef3d093924e803ee003f226e4dc1c491a831818ce51485120"
+    ]
+  },
+  "equivalent_integrations": [
+    {
+      "active_case_skill_count": 88,
+      "audit_events": [
+        "SKILL_QUERY_RECEIVED",
+        "SKILL_UNKNOWN",
+        "SKILL_QUERY_RECEIVED",
+        "FINAL_STATE_EQUIVALENT_FOUND",
+        "EQUIVALENT_SELECTION_REVIEWED",
+        "EQUIVALENT_SELECTION_CONFIRMED",
+        "EQUIVALENT_SKILL_DISPATCHED"
+      ],
+      "candidate_count": 1,
+      "case": "merge_two",
+      "dispatch_hash": "55a60559eff292abbbfb192ed20a12610b0bfe9be15a06dcafd6179bfe1a4fa2",
+      "equivalence_class_hash": "ff8bf9492220201b7a3c00c6ed1c23f19e51bad933bd5df4c59da0b89ad66a9d",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 10,
+        "R3": 7
+      },
+      "requested_specification_hash": "e3c711218c23524f38da22cc66b4b500c2d3c4607f02835ff8c044a668e0a50b",
+      "selected_specification_hash": "5db6ab5f2bb84e756049d8a468f491e269d91ebdb0558f8d750126b4f2f44b00"
+    },
+    {
+      "active_case_skill_count": 88,
+      "audit_events": [
+        "SKILL_QUERY_RECEIVED",
+        "SKILL_UNKNOWN",
+        "SKILL_QUERY_RECEIVED",
+        "FINAL_STATE_EQUIVALENT_FOUND",
+        "EQUIVALENT_SELECTION_REVIEWED",
+        "EQUIVALENT_SELECTION_CONFIRMED",
+        "EQUIVALENT_SKILL_DISPATCHED"
+      ],
+      "candidate_count": 5,
+      "case": "merge_three",
+      "dispatch_hash": "cb50dc84d2a0b5f41468f4ddfd7e9af9104768657ceebf91fd1e5c90e25ad687",
+      "equivalence_class_hash": "089be00812a34106b2a847460d1e27ad67285f024720cbb8d2b49e015381ba6b",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "requested_specification_hash": "0202a8a02d7073daace5f3e7046e5d543af8506bcdddea0762bda490e5660598",
+      "selected_specification_hash": "85eb708862170faeff24308534753ebb37f18e6402b7a940ecf2c3a3998a552a"
+    },
+    {
+      "active_case_skill_count": 89,
+      "audit_events": [
+        "SKILL_QUERY_RECEIVED",
+        "SKILL_UNKNOWN",
+        "SKILL_QUERY_RECEIVED",
+        "FINAL_STATE_EQUIVALENT_FOUND",
+        "EQUIVALENT_SELECTION_REVIEWED",
+        "EQUIVALENT_SELECTION_CONFIRMED",
+        "EQUIVALENT_SKILL_DISPATCHED"
+      ],
+      "candidate_count": 1,
+      "case": "singleton_noop",
+      "dispatch_hash": "f7607246af488ef94c76b09d14780e89723c11c999f74a66d7695823f5defde7",
+      "equivalence_class_hash": "d8789050d55c125f6edfa4960901086324c370cb95f226e8c41d3ea56930c23e",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "requested_specification_hash": "f687091f6850231a86ac669cc15a5107e8fbbb46ef8e95bd202d1d5e0f2b71db",
+      "selected_specification_hash": "8bf0e6651a7cbbca8e2aa0ccf3d4e657ca00cc9a949a834858c21d164b3165d1"
+    }
+  ],
+  "exact_scope_matrix": {
+    "structurally_different_returned_as_exact": 0,
+    "success": 178,
+    "total": 178
+  },
+  "git_sha": "0e93f5ba0f68da6022a80d9309f350359e455eaa",
+  "learned_semantic_authority": 0,
+  "milestone": "M-25.2",
+  "negative_checks": [
+    "merge_two:normal_confirmation_rejected",
+    "merge_two:equivalence_scope_tamper_rejected",
+    "merge_two:requested_specification_hash_tamper_rejected",
+    "merge_two:selected_specification_hash_tamper_rejected",
+    "merge_two:equivalence_class_hash_tamper_rejected",
+    "merge_three:normal_confirmation_rejected",
+    "merge_three:equivalence_scope_tamper_rejected",
+    "merge_three:requested_specification_hash_tamper_rejected",
+    "merge_three:selected_specification_hash_tamper_rejected",
+    "merge_three:equivalence_class_hash_tamper_rejected",
+    "singleton_noop:normal_confirmation_rejected",
+    "singleton_noop:equivalence_scope_tamper_rejected",
+    "singleton_noop:requested_specification_hash_tamper_rejected",
+    "singleton_noop:selected_specification_hash_tamper_rejected",
+    "singleton_noop:equivalence_class_hash_tamper_rejected",
+    "drop:FULL_EXECUTION_TRACE:substitution_rejected",
+    "drop:FINAL_STATE_ONLY:substitution_rejected",
+    "merge_two:stale_membership_rejected"
+  ],
+  "outcome": "OUTCOME_A",
+  "platform": "Linux-7.0.0-30-generic-x86_64-with-glibc2.43",
+  "python": "3.12.14 (main, Aug 14 2026, 15:34:45) [Clang 22.1.3 ]",
+  "schema": {
+    "skill_registry": 3,
+    "stage2": 3,
+    "v2_policy": "REBUILD_FROM_VERIFIED_RULE_MEMORY"
+  },
+  "status": "PASS",
+  "trusted_import_no_torch": true,
+  "unsafe_automatic_selections": 0
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 36
+COMMAND: M-26 acceptance
+{
+  "status": "PASS",
+  "case_count": 18,
+  "correct_count": 18,
+  "accuracy": "1.0000",
+  "failures": [],
+  "cases": [
+    {
+      "name": "current_exact",
+      "expected": "EXACT_SINGLE",
+      "actual": "EXACT_SINGLE"
+    },
+    {
+      "name": "historical_valid_at",
+      "expected": "EXACT_SINGLE",
+      "actual": "EXACT_SINGLE"
+    },
+    {
+      "name": "bitemporal",
+      "expected": "EXACT_SINGLE",
+      "actual": "EXACT_SINGLE"
+    },
+    {
+      "name": "multi",
+      "expected": "EXACT_MULTI",
+      "actual": "EXACT_MULTI"
+    },
+    {
+      "name": "corroborated",
+      "expected": "EXACT_SINGLE",
+      "actual": "EXACT_SINGLE"
+    },
+    {
+      "name": "conflict",
+      "expected": "CONFLICT",
+      "actual": "CONFLICT"
+    },
+    {
+      "name": "retracted",
+      "expected": "RETRACTED_ONLY",
+      "actual": "RETRACTED_ONLY"
+    },
+    {
+      "name": "source_retracted",
+      "expected": "STALE_ONLY",
+      "actual": "STALE_ONLY"
+    },
+    {
+      "name": "source_unavailable",
+      "expected": "STALE_ONLY",
+      "actual": "STALE_ONLY"
+    },
+    {
+      "name": "supersession",
+      "expected": "EXACT_SINGLE",
+      "actual": "EXACT_SINGLE"
+    },
+    {
+      "name": "quantity",
+      "expected": "EXACT_SINGLE",
+      "actual": "EXACT_SINGLE"
+    },
+    {
+      "name": "event",
+      "expected": "EXACT_MULTI",
+      "actual": "EXACT_MULTI"
+    },
+    {
+      "name": "no_fact",
+      "expected": "NO_FACT",
+      "actual": "NO_FACT"
+    },
+    {
+      "name": "unknown_entity",
+      "expected": "UNKNOWN_ENTITY",
+      "actual": "UNKNOWN_ENTITY"
+    },
+    {
+      "name": "ambiguous_alias",
+      "expected": "AMBIGUOUS_ENTITY",
+      "actual": "AMBIGUOUS_ENTITY"
+    },
+    {
+      "name": "unknown_predicate",
+      "expected": "UNKNOWN_PREDICATE",
+      "actual": "UNKNOWN_PREDICATE"
+    },
+    {
+      "name": "invalid_unit",
+      "expected": "REJECTED",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "invalid_interval",
+      "expected": "REJECTED",
+      "actual": "REJECTED"
+    }
+  ],
+  "claim_ids": {
+    "population_old": "claim_2ec735b9a43d455897e1250fab878109",
+    "population_current": "claim_2a4d6103de4449019646f46e6ce8f872",
+    "tag_a": "claim_57857d5e3ecf4002a71b14884133fe6f",
+    "tag_b": "claim_3b5a438bfd7c4e97bc5f908c64b85775",
+    "conflict_a": "claim_c6b6739a296c43bfbb2135402eb0bcc2",
+    "conflict_b": "claim_330133a7f15940788092b804cd7356b6",
+    "duplicate": "claim_123a44db3b2842c7aa95f716d967a871",
+    "quantity": "claim_4f5355eb35b848e2bc453b86ed8dc35d",
+    "event": "claim_33ceceec15854fa99cf50183fbbbee81",
+    "retracted": "claim_13d7bcb565f04f01bf6e18e815b5d8c5",
+    "source_retracted": "claim_a69c212fc9aa46cda149216f77080f03",
+    "source_unavailable": "claim_fbbcdda818c14933b24c5cad1d0377ae",
+    "superseded_old": "claim_0c817c75da9e4b90ada90f8c8e911656",
+    "superseded_new": "claim_83fbb7c55ba8407289d28f7db873a6ce",
+    "extra_10": "claim_35efa622f64046a5b4508249c4f00938",
+    "extra_11": "claim_00928594483d42f393e61bae3353b5e3",
+    "extra_12": "claim_6ba0ce4752d34fb0861f10f93792c000",
+    "extra_13": "claim_5db3531a1b92464fba72566050c1aea9",
+    "extra_14": "claim_4c774eb910c24eabbd94659f1028382b",
+    "extra_15": "claim_83a18abff6334f7e97705bb8fab3f510",
+    "extra_16": "claim_c2f698a1bbf94aed8f89bc989ce0f156",
+    "extra_17": "claim_220221db09ab48a9887ce8da4d2c7d42"
+  },
+  "memory_snapshot_hash": "8b48a37487a8654c8ae32027b3698d80a208a97a4ffea5902e9ff6787135cd7f",
+  "integrity": {
+    "status": "VALID",
+    "audit_event_count": 299,
+    "blob_count": 22
+  }
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 3
+COMMAND: M-26.1 acceptance
+{
+  "status": "PASS",
+  "case_count": 28,
+  "correct_count": 28,
+  "accuracy": "1.0000",
+  "cases": [
+    {
+      "name": "one_supporting_source",
+      "expected": "SUPPORTED:1",
+      "actual": "SUPPORTED:1",
+      "passed": true
+    },
+    {
+      "name": "two_independent_supports",
+      "expected": "CORROBORATED:2",
+      "actual": "CORROBORATED:2",
+      "passed": true
+    },
+    {
+      "name": "mirrored_support",
+      "expected": "SUPPORTED:1",
+      "actual": "SUPPORTED:1",
+      "passed": true
+    },
+    {
+      "name": "support_plus_contradiction",
+      "expected": "SUPPORTED:CONTESTED:1:1",
+      "actual": "SUPPORTED:CONTESTED:1:1",
+      "passed": true
+    },
+    {
+      "name": "two_supports_plus_contradiction",
+      "expected": "2:1:CONTESTED",
+      "actual": "2:1:CONTESTED",
+      "passed": true
+    },
+    {
+      "name": "supporting_source_retracted",
+      "expected": "STALE_ONLY",
+      "actual": "STALE_ONLY",
+      "passed": true
+    },
+    {
+      "name": "contradicting_source_retracted",
+      "expected": "EXACT_SINGLE:STALE",
+      "actual": "EXACT_SINGLE:STALE",
+      "passed": true
+    },
+    {
+      "name": "model_source_only",
+      "expected": "REJECTED",
+      "actual": "REJECTED",
+      "passed": true
+    },
+    {
+      "name": "model_plus_official_support",
+      "expected": "COMMITTED",
+      "actual": "COMMITTED",
+      "passed": true
+    },
+    {
+      "name": "blank_reviewer",
+      "expected": "REJECTED",
+      "actual": "REJECTED",
+      "passed": true
+    },
+    {
+      "name": "lowercase_model_actor_bypass",
+      "expected": "REJECTED",
+      "actual": "REJECTED",
+      "passed": true
+    },
+    {
+      "name": "known_at_before_claim_retraction",
+      "expected": "EXACT_SINGLE:NONE",
+      "actual": "EXACT_SINGLE:NONE",
+      "passed": true
+    },
+    {
+      "name": "known_at_before_source_retraction",
+      "expected": "CURRENT",
+      "actual": "CURRENT",
+      "passed": true
+    },
+    {
+      "name": "known_at_before_conflict_resolution",
+      "expected": "CONFLICT",
+      "actual": "CONFLICT",
+      "passed": true
+    },
+    {
+      "name": "unresolved_conflict",
+      "expected": "CONFLICT",
+      "actual": "CONFLICT",
+      "passed": true
+    },
+    {
+      "name": "source_retracted_conflict",
+      "expected": "CONFLICT:SOURCE_RETRACTED_OR_UNAVAILABLE_SIDE",
+      "actual": "CONFLICT:SOURCE_RETRACTED_OR_UNAVAILABLE_SIDE",
+      "passed": true
+    },
+    {
+      "name": "claim_retraction_resolution",
+      "expected": "EXACT_SINGLE:claim_c63310f24760489a96fe551739c34c67:RESOLVED_CONFLICT_HISTORY",
+      "actual": "EXACT_SINGLE:claim_c63310f24760489a96fe551739c34c67:RESOLVED_CONFLICT_HISTORY",
+      "passed": true
+    },
+    {
+      "name": "supersession_resolution",
+      "expected": "EXACT_SINGLE:claim_0374a73285c44c9a9792149b3f036e78:RESOLVED_CONFLICT_HISTORY",
+      "actual": "EXACT_SINGLE:claim_0374a73285c44c9a9792149b3f036e78:RESOLVED_CONFLICT_HISTORY",
+      "passed": true
+    },
+    {
+      "name": "manual_resolution",
+      "expected": "EXACT_SINGLE:claim_be2eeee4a9484d6ba91af03e9bc55962:RESOLVED_CONFLICT_HISTORY",
+      "actual": "EXACT_SINGLE:claim_be2eeee4a9484d6ba91af03e9bc55962:RESOLVED_CONFLICT_HISTORY",
+      "passed": true
+    },
+    {
+      "name": "overlap_allowed",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "name": "overlap_forbidden",
+      "expected": "1",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "name": "include_evidence_true",
+      "expected": "FULL:1",
+      "actual": "FULL:1",
+      "passed": true
+    },
+    {
+      "name": "include_evidence_false",
+      "expected": "REFERENCES_ONLY:0:1",
+      "actual": "REFERENCES_ONLY:0:1",
+      "passed": true
+    },
+    {
+      "name": "current_source_status",
+      "expected": "RETRACTED",
+      "actual": "RETRACTED",
+      "passed": true
+    },
+    {
+      "name": "source_status_as_of",
+      "expected": "ACTIVE",
+      "actual": "ACTIVE",
+      "passed": true
+    },
+    {
+      "name": "duplicate_mixed_polarity",
+      "expected": "2:1:CONTESTED",
+      "actual": "2:1:CONTESTED",
+      "passed": true
+    },
+    {
+      "name": "v1_to_current_migration",
+      "expected": "VALID:4:TRUE",
+      "actual": "VALID:4:TRUE",
+      "passed": true
+    },
+    {
+      "name": "migration_corrupt_source_rollback",
+      "expected": "ROLLED_BACK",
+      "actual": "ROLLED_BACK",
+      "passed": true
+    }
+  ],
+  "failures": []
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 5
+COMMAND: M-27 trusted acceptance including all-89 dispatch/fact/tool/composite/authority/no-torch
+{
+  "ambiguous_requests": 100,
+  "checks": 1317,
+  "composite_requests": 100,
+  "controlled_fact_routes": 6,
+  "controlled_skill_routes": 356,
+  "cross_authority_writes": 0,
+  "date_tool_executions": 30,
+  "duration_seconds": 48.27619924400642,
+  "milestone": "M-27",
+  "partial_composite_executions": 0,
+  "router_store": {
+    "artifact_count": 3462,
+    "audit_event_count": 3755,
+    "status": "VALID"
+  },
+  "skill_dispatches": 89,
+  "status": "PASS",
+  "structured_skill_routes": 89,
+  "tool_error_rejections": 20,
+  "tool_executions": 50,
+  "trusted_import_loads_torch": false,
+  "unsupported_requests": 100,
+  "wrong_auto_executions": 0,
+  "wrong_exact_routes": 0
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 48
+COMMAND: M-27.1 hardening acceptance including migrations/replay/Decimal/conflicts/lifecycle/no-torch
+{
+  "milestone": "M-27.1",
+  "status": "PASS",
+  "checks": 42,
+  "dependency_replay_mutations": 8,
+  "tool_manifest_mutations": 7,
+  "decimal_attack_rejections": 14,
+  "conflict_policy_cases": 28,
+  "router_store_migration": "PASS",
+  "fact_memory_migration": "PASS",
+  "tool_lifecycle": "PREPARED_TO_COMPLETED_AND_FAILED",
+  "trusted_import_loads_torch": false,
+  "router_store": {
+    "status": "VALID",
+    "artifact_count": 33,
+    "audit_event_count": 34
+  },
+  "duration_seconds": "0.647735"
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 1
+COMMAND: M-27.1 complete focused hardening matrix
+......................................                                   [100%]
+38 passed in 6.34s
+EXIT_CODE: 0
+DURATION_SECONDS: 6
+COMMAND: M-27.1 performance
+{
+  "COMPLETE_SKILL_RESPONSE": {
+    "p50_ms": 104.657888,
+    "p95_ms": 116.620563,
+    "p99_ms": 118.418131
+  },
+  "COMPLETE_TOOL_RESPONSE": {
+    "p50_ms": 22.642728,
+    "p95_ms": 25.110987,
+    "p99_ms": 25.374342
+  },
+  "DECIMAL_VALIDATION": {
+    "p50_ms": 0.009568,
+    "p95_ms": 0.01027,
+    "p99_ms": 0.013626
+  },
+  "DEPENDENCY_SNAPSHOT": {
+    "p50_ms": 0.762984,
+    "p95_ms": 0.780778,
+    "p99_ms": 0.806336
+  },
+  "FULL_REPLAY": {
+    "p50_ms": 1.202089,
+    "p95_ms": 1.236223,
+    "p99_ms": 1.246604
+  },
+  "ROUTER_STORE_VERIFY": {
+    "p50_ms": 50.35298,
+    "p95_ms": 51.078344,
+    "p99_ms": 51.078344
+  },
+  "TOOL_IMPLEMENTATION_MANIFEST": {
+    "p50_ms": 0.587264,
+    "p95_ms": 0.605648,
+    "p99_ms": 0.623511
+  },
+  "router_store": {
+    "artifact_count": 1405,
+    "audit_event_count": 1504,
+    "status": "VALID"
+  },
+  "samples": 100
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 13
+COMMAND: 100k FactMemory v4 corpus generation
+{
+  "schema_version": 4,
+  "seed": 127100,
+  "entity_count": 1000,
+  "predicate_count": 25,
+  "source_count": 200,
+  "accepted_claim_count": 100000,
+  "temporal_update_count": 10000,
+  "intentional_conflict_count": 5000,
+  "claim_retraction_count": 5000,
+  "duplicate_support_count": 5000,
+  "source_retraction_count": 10,
+  "source_lineage_duplicate_count": 10,
+  "value_kind_counts": {
+    "STRING": 13000,
+    "DECIMAL": 14000,
+    "DATE": 10000,
+    "DATETIME": 13000,
+    "ENTITY_REF": 14000,
+    "QUANTITY": 7000,
+    "ENUM": 6000,
+    "INTEGER": 14000,
+    "BOOLEAN": 9000
+  },
+  "temporal_mode_counts": {
+    "ATEMPORAL": 13000,
+    "EVENT": 56000,
+    "VALID_INTERVAL": 31000
+  },
+  "memory_snapshot_hash": "6e34ae663ceae6d4ecc0abe59f75992d9a00976f304665483a9fdd1e266e0249",
+  "ground_truth_hash": "80d9d60cad10d797893adc6e462e0503a17fe4193d8f20f60286e9bfe2aaba0f",
+  "generation_seconds": 237.5375815360021,
+  "import_claims_per_second": 420.9860155743129,
+  "python_peak_memory_bytes": 143453673
+}
+EXIT_CODE: 0
+DURATION_SECONDS: 238
+COMMAND: 100k FactMemory verify and counts
+{"audit_event_count": 101, "blob_count": 200, "status": "VALID"}
+EXIT_CODE: 0
+DURATION_SECONDS: 170
+COMMAND: 100k FactMemory v3 compatibility fixture and v3-to-v4 migration
+{"created_at": "2026-08-26T20:17:17.836192Z", "duration_seconds": "173.507657", "integrity": {"audit_event_count": 102, "blob_count": 200, "status": "VALID"}, "legacy_resolution_review_required_count": 0, "migration": "FACT_MEMORY_V3_TO_V4", "migration_manifest_sha256": "172fda6f82e2d045cb191034a5cc6c40ec6d9720aba501a0cb2290846b88bc8e", "record_counts": {"approvals": 100000, "audit_events": 102, "claim_evidence": 105000, "claim_relations": 0, "claim_status_events": 105000, "claims": 100000, "conflict_groups": 5000, "conflict_resolution_events": 5000, "entities": 1000, "evidence": 105000, "fact_answers": 0, "fact_queries": 0, "predicate_definitions": 25, "proposals": 700000, "source_status_events": 10, "sources": 200}, "source_database_sha256": "ffa3079fb349b33a0f3fed4ebca3d717b1f0d51b8700ea4ce277a6952e8d2e0b", "source_root_hash": "b67e1c7a335790ccb08212eb3d9b984290ffe0f65999cbd845b6a491efb8c9a4", "source_schema_version": 3, "source_snapshot_hash": "6e34ae663ceae6d4ecc0abe59f75992d9a00976f304665483a9fdd1e266e0249", "source_unchanged": true, "target_database_sha256": "a5d6a82ad2dd008a12cd6977df8708a3476bdc9d8110ddfd30bb0051b75e5205", "target_migration_version": 4, "target_schema_version": 4, "target_snapshot_hash": "1d83561cec1ea0c0d2b2f77580390403f7e94e4a52d2154eff5bcd6cfb4ce2b9", "verified_v4_resolution_count": 5000}
+EXIT_CODE: 0
+DURATION_SECONDS: 699
+COMMAND: 100k FactMemory backup restore and verify
+{"backup": {"created_at": "2026-08-26T20:23:05.484287Z", "database_sha256": "4023021686f0851e46a42bb6b2fbd08a1cf82e6d2c4915e881883a91ffe7370c", "manifest_sha256": "f2a0e8dec00c18a2cf0ac5a30207ff256e9a16353969a0df1279e45e8f907c1b", "memory_snapshot_hash": "1d83561cec1ea0c0d2b2f77580390403f7e94e4a52d2154eff5bcd6cfb4ce2b9", "schema_version": 4, "source_blobs": [{"sha256": "0155e9c847c113c646a85cf24f6c60a38860c576e5da61818eca0dff0dcf0951", "size": 48464}, {"sha256": "051acb1834acf4f419a65fe15db13e3f0ef1ddbde9e06e84a6806045b86fd5bb", "size": 43480}, {"sha256": "07185314bb42ec5efd5d53540d69c9224feceabf9e6792689d1c275eb56ece9c", "size": 49966}, {"sha256": "074bfadff2c4ab49e454ba45f15d3f7df191dbc7ecfb9cc9831fc072853eed3e", "size": 41477}, {"sha256": "07e27d77dd380ca411397c1be51f838b7b53c18df52b29ee742e2557b4b4274a", "size": 48114}, {"sha256": "081073a1c80721ad420f7d2c4a57d4f1618c80bffea77dbd79602cbd32186c71", "size": 40106}, {"sha256": "0870b899502c770e772bc4d6abf52083d287433d0d4a06466751807fb781cff2", "size": 49608}, {"sha256": "0967be660a0170eff9b15e9ab6665932fc3b4ccb3599f40c4de4e676aec49a78", "size": 48036}, {"sha256": "0aff8eed23667d7b853d95801e6783adf87dc4b8414be287f5742bf63511fab2", "size": 48114}, {"sha256": "0b3c022ff904cce1d3567bcb5afdc9d541c2ca6e8284723f9f99c692cf5c9c7a", "size": 41481}, {"sha256": "0b751a7a700c5ed9f8da8678907f140a9b47ad60bd88472e07e3f96abb0ed754", "size": 48033}, {"sha256": "0b90c381b43c8bc14417e3c5d53999fc1610ee720ef57ee13cc93ce2a536dc54", "size": 39232}, {"sha256": "0c648a44a238cb50d1584e274af0591771230f8e7ad6717cf99f25aafe92e194", "size": 39108}, {"sha256": "0cee76b409bdc9b8d9a5a50e29d49a443ed6e87dac6b266e1c1f0d9a3d2fbf49", "size": 41016}, {"sha256": "0ef24cdc04a21dd31d52c5193ae235f1b1417e8bcfb31d5bba7001bdb7f0cb5e", "size": 40106}, {"sha256": "10a1c513fe729f0531bdb65b24519bda09ee2a3a2cbb2b98401615d1d64d4fc5", "size": 49964}, {"sha256": "10a8898207ee60598a5ed096664b12ad3df759a7d2c26e10bc75c25656bb5773", "size": 43483}, {"sha256": "116fcd3dad9c0c03bc58437b979e92bcaf3429055283d85eafa50e6679974e79", "size": 41558}, {"sha256": "121a1d8660fafbb806d529b912b4712f22d056e516856b2d0f98d7e8d60275f8", "size": 42463}, {"sha256": "12871336bb82f9cbff669acd6470c333090c0ddd9f30f8b932dc332fa8222588", "size": 42552}, {"sha256": "137142c20575cb4393630f3a5b7c345d62dd27ff60225bfe9a5c9f840bb51243", "size": 48116}, {"sha256": "1554e676fb6d2d9063d139dddf363d39db96db31f55a670a6ac28230f244dfea", "size": 48114}, {"sha256": "159ddf056bf58c4d8e69edd45b49db242ca879efbf034eb71a57ba2f3748644c", "size": 42908}, {"sha256": "170119d69c0e4bfc7248bdae93b0c7684c6f2e9ddfcb86184affc6023d509fd7", "size": 48033}, {"sha256": "171af993ae2072dbaddd2277fa2afdf23f15d8ec636086fe25a8bd63851f9701", "size": 48112}, {"sha256": "17a5dfe87b22acb1adfed826d31c70fdb65e44cd6ba835e633b4d4fcabbe3f0c", "size": 43408}, {"sha256": "181c18c78eda8e49a9b9b360e1a57e7423bbb901b3ea3ff0facadfdfb758dfe3", "size": 41477}, {"sha256": "18bffdf012d383145c85eba1abb3b52cc95a8de405b1eb5c734894ac872b20eb", "size": 40483}, {"sha256": "19911ba898b89ffcb651f5900b51dba2072e54f0cccbccb6ec670e587c4f0890", "size": 41016}, {"sha256": "19a92599f26570e0c15a51ae1f69f646b2fefdf6d08a4cab0402263e72e6892f", "size": 42460}, {"sha256": "1aa2d19f44acbf3e2843eaecdd65c39951b4fc3fce7cdedd4b207612859bbdc7", "size": 48116}, {"sha256": "1c64dca7ee7853bc6a97894bb470ab9ba345e4d284ec906b0c77985606aed1e8", "size": 43411}, {"sha256": "1d1e575449b5bba49343c6876e4b7585564eec07ce06f5d279f888ce607f5a62", "size": 41477}, {"sha256": "1efe9c3d8ae5ca5ef6e00c985170ffb7d1a8268dcb85f68b4c010dfa71ab7e31", "size": 48186}, {"sha256": "2283a1bda5b248f05449b2bd0e812c593c3ce130a6a5fb23d2dcb6fcf91bd2fe", "size": 42556}, {"sha256": "22b493aea304034adfa64859e035db0347060f6e3689270045293a321bd96621", "size": 48036}, {"sha256": "2326b7858ef949578fe1baa887224dcc66a615fe045f1d1b796efbcedadd53b5", "size": 41481}, {"sha256": "24029a71ea9c3f5afca870c6b098f80b1e418d48c43b957bf7f04273e2744c4c", "size": 39228}, {"sha256": "2610a12b81b36b47eceab88050d458aacd129a1580996c7a828d4331dabe5e1f", "size": 49966}, {"sha256": "262f861f06fe293c82b28f4ab353e6e68915418fa8306bdbc03afbb2bd9532e8", "size": 38611}, {"sha256": "26ad55d584e92b28625db8194429c6a270107949ec3f8a1f2c6ad884d104acab", "size": 40102}, {"sha256": "2a4472d68cb152840f2eeb7395b6b5571e1ee43702c280c109c3d2c9f3fbb133", "size": 41161}, {"sha256": "2bee1f1fa9ac1ac26def9d36f8739732c5361ad777d98e7786787e0c76946445", "size": 42986}, {"sha256": "2f2182c577b95b821c22dc23df777eb02e12d06ff534b516a51759680091e867", "size": 49966}, {"sha256": "2f6867caaf3f2c24849b48f507bb315d36f9531a9b9dc1e221d6a497e142f67b", "size": 48183}, {"sha256": "3079ba3cb9dd20d71b56f2c3b4eb1b0fa956556b92ef30eeada0dbfec7f8eda9", "size": 39111}, {"sha256": "33628d9943f2a01a7d06c2ae979f94da84c330bb93003a82779a6a3029baf568", "size": 39036}, {"sha256": "343fdfb28a5fbbdb854d10a612afb8f2d86ab64d3e4dc8f2b35fb37eea88950f", "size": 40100}, {"sha256": "355171e7d1bed051c6f95dc8636a5beb3f27afc921a2b2c4cc0e77fb7a11937d", "size": 39108}, {"sha256": "370d239e5a65844ccb009c3ef162dd1e5c0d9e5800195e2abcb0d7e1f3593f87", "size": 41481}, {"sha256": "37e5462069253430753aeefae776f927cce8e62f3f32f2fe8bf65641219249a9", "size": 39231}, {"sha256": "3868233fbdd9509ca9806909ce64ab942f703bffff575fdcbfd21e3cf4bc53ed", "size": 39961}, {"sha256": "39a963f300cec6ddbe687067ba708f784ef38ede1fbe0ebc1c71e8e339e1bd2a", "size": 41477}, {"sha256": "3aa7822c1a54d09f4ed5634c91add597589bd838211df43b087540a97aed3c23", "size": 50041}, {"sha256": "3bd2de61759d09947e6ebaee553cb71f05be59e925839b5d223b7d61b4358f98", "size": 42908}, {"sha256": "3c37996563f2c210c44eccaf61468082d7439749e1b106dbf4ad733e9485ec56", "size": 42985}, {"sha256": "3d225ef856a1cf76075fb4a7a762a709eccb51b26fe2ea6b5e6655e3502e0608", "size": 43486}, {"sha256": "3d2f8e3889109bf4d55b6fb0d3ff0dd0503264594953a089581fbc9af043fdba", "size": 41481}, {"sha256": "3d6a7c70ac84f25e30c28807d1914e21339b23c43baa717f318709a9b586ec4d", "size": 42911}, {"sha256": "3e39de993a7c46ea269a48966f9c4139b89daa7292d236f042cf33fb9f5b4b87", "size": 39977}, {"sha256": "3e436d0fba31b9cc25a78a7061168bbc7f4bb168f10c1a1b9df2f4aaff722a0f", "size": 49964}, {"sha256": "3e6089c069f377e25006a04df99427c23b1eb91989186f8ac48ea4d6c3ca4857", "size": 49966}, {"sha256": "40d72bba46b8c928dd29c144241463ff116f45e0dbc8da2a397dc70fb459c157", "size": 49964}, {"sha256": "421e62c5b63d87bb97c7e7b53acf8e584822a13ac231af0c706c558a691d98f4", "size": 49611}, {"sha256": "4331df1ad7ca200d655e0df76770690bc44c5f1492cea45a51d196c33436b64b", "size": 39226}, {"sha256": "4478daef556d98dbdaeb5c3f9f56ddc12d2a53e883e311fab27717cde4bcdeb5", "size": 41558}, {"sha256": "46df879629938d5bc29e29635e3215f35c02260baf5787e3cc74aba672734d34", "size": 48114}, {"sha256": "4708600500f2ab13cfd644c2586ac706a248c7df2035900e410f4e161809724d", "size": 40102}, {"sha256": "478482569d7abbde105a153802a7478314823893962d711562582e2a88c5d993", "size": 41477}, {"sha256": "48774286256ef8077bfdaf47dad358d460d42a674d7bae0de77edabd1b3a9604", "size": 40106}, {"sha256": "495438be985e6da0d2f96c1b1ea9e1f65e93bbb41c034fea6255249b89f5f4b5", "size": 49966}, {"sha256": "49fa6c8fdadd4c0d7b96cd8eff0d0312ceff1267438b98b34eb937971974baa5", "size": 39229}, {"sha256": "4a83f7068fe68d5584ae00c0c18c0e509a425e8ea3ce5d6c788251d88cddc70d", "size": 49966}, {"sha256": "4aaf918d4dfb941e46819a4ee1d8d2edc99bd28d0c7ce32df461c38b31a7333f", "size": 39228}, {"sha256": "4ba460057f2c7d917966c2c2ac8b8a2363356e22c39dd9ca6a8da1c338046933", "size": 40106}, {"sha256": "4cedd5d989139067070ab252bd787fdf4f4e25b7806787651e5cd6d47270fb84", "size": 43486}, {"sha256": "4d40d181f57777855dbf14522ad546b00af744f722025de7ebb7962bbf08d350", "size": 42463}, {"sha256": "4e7cdb33d98591901c0b1f54ca4788d2693a9c8b0ea160479a8a6f1d2025b229", "size": 38608}, {"sha256": "4ecc6dc7cefd7f54b164cb660d887b09b4b7e9e7b9b3a048ac1a3301dec35f7a", "size": 41556}, {"sha256": "4f19b94e986f00af187b7d78a7ae3aa58925081da3f80bc3ae3731d5f107f40b", "size": 49516}, {"sha256": "4f2912a2bdb9ee0d09388235a4914580b1443eae88e109aebf3ed10da812786f", "size": 48114}, {"sha256": "52f55b870438fb235f482ec084ff3549bb3be94f44359a041e92bae010f27b78", "size": 39111}, {"sha256": "5abbe691fba81afb6e65a499fbeae5399de17528c311ac74f1b63ce72f9ac561", "size": 41606}, {"sha256": "5b30ad3ccc4566d61c02223e6e91bd5f749146d245ee24fd2eeb3d232556d109", "size": 48114}, {"sha256": "5bad097d177e69f8ff0d8428017aba2232417c693e3b86fa0ced9699c13098b9", "size": 39981}, {"sha256": "5d4fe2ee1e23111c00714bbbc63309dac486e42b00c35e83fc5b03f332ca41f1", "size": 49962}, {"sha256": "5d7b5b9b585c1a19b6680e621d717d40671fe9e06a3d869549dfa2c250346578", "size": 40483}, {"sha256": "5f0c52edc6738d47eb975141298e809db2edf4dea3bfc64ced3814e55a40cdc9", "size": 39108}, {"sha256": "5f908a065c63ba96cf1fc46583fc2f94225b14572b368ee4678edc9d15867773", "size": 41477}, {"sha256": "61b76e123da25123ab6bea017e42db2f3a47d63cb9f1f0f34657f62382582088", "size": 42461}, {"sha256": "6294701dfa8ba524adab50dfc96009806b0254f25f119d9e47994a0077b930f1", "size": 40102}, {"sha256": "62df897c9baafd11a6818c1cf868b7a6c8e823eb72dc087ee8b5688f5bc8f9ed", "size": 42556}, {"sha256": "63e99a75c3bec8c8eeade4e276c158d1a9be54dcd90e49764d5e470cec3fa31a", "size": 40106}, {"sha256": "63ea6e747157132dc7cba6970d4ed1d1bd8a891f913e6cbbca930661466627f5", "size": 39033}, {"sha256": "64579b21434a9cd66aa52de91fbcba46f47206305734746ca4577122609ce7e4", "size": 49966}, {"sha256": "681e538c0a18fef1a479e9dc4396366b430c72723e17eae137f56ea7294fe7f0", "size": 43486}, {"sha256": "6820f7e1db4e7c4dd6cb33414de114dbe165e06fa02dd83f6bbbe803886abdc1", "size": 39231}, {"sha256": "6894a6e9b969cbfcc60a4c64b49564cd1852eb3df66977342d432edf0229faf2", "size": 48116}, {"sha256": "68ba90795b27289789fb1bcf44df54b413228481e21ed779f4a50e39f031c465", "size": 41014}, {"sha256": "68d05a5baeb711bb8244c6a1c2a23b00ea78f1c45a860c4301975f624b426463", "size": 41477}, {"sha256": "6a29dcc991615cba1ba34b2c13dc1aca07207b7c7a0d69acff1b162ea17b54fd", "size": 48116}, {"sha256": "6ae621073d701a0deca4eceef0d43354f3276bb467d5ebf5730697cd676cd60a", "size": 50039}, {"sha256": "6d1a0a7885e481864b9e5023ddd1b3eef3beefb10602498a4162dbd0aabff57a", "size": 42460}, {"sha256": "6eb177ea8e63ac76c7696d9a2d468e017fa736a3799af0222108dce740358fc3", "size": 41016}, {"sha256": "6ef155c68054def8482dbea19d8c15cbc1c45708c490c7a6eaf22174aee0c2df", "size": 41561}, {"sha256": "70a8ee62946856ae28f5dc768a68c0f45e81256029cb78383ccc718cd9085a57", "size": 42986}, {"sha256": "712eeb9b4bfd80fdf303d2d860dc31e8b1becad5933e1f1458b9775ba96cc4d3", "size": 40991}, {"sha256": "71ad2db8d4672546258eb968249217f0f192cf74ff76f55af0cc04175c5155f5", "size": 49964}, {"sha256": "7355e4fc06ec03b26f82cf99a66cd22fc209f8ed1b2acac8c4111155cc02494f", "size": 40989}, {"sha256": "7356aac209c7e196cdc2cffba014467c15376b3accf692c038b6e796fda19336", "size": 40989}, {"sha256": "739547d72119671d48d0d84a4dd57e5aa8ac82df418d92d67c66ac4264357a77", "size": 41108}, {"sha256": "73fe8e14df2d4e4ddd9f410d36531dfff8be9c5070e19032933cad9a380440db", "size": 42598}, {"sha256": "741a2f0ea46d38178db0d2b432470e37c62014fca575560ccbde7faf2ed22d01", "size": 39111}, {"sha256": "748f5fd18d4d4caa71d7b3fb6ecb2bb0885c451540456da9fed7b0d73ce539fa", "size": 41477}, {"sha256": "74f53620216c03e5763f9a6dc7de1e55c21e70e00f665d9b009a3ae6bb76cd3a", "size": 41014}, {"sha256": "7713cb1356e4d85023a5227bac20af56f6c00ec6f03dd166362998206c87f9a1", "size": 39958}, {"sha256": "77c1d050b140e61c3822423076ec9764eaaad8d72ab79a35ce76edc7862a0f56", "size": 49611}, {"sha256": "79189824cb2357a101c68589b71fc03bd22a76433361c74798af201c8595ae4f", "size": 49966}, {"sha256": "79e67c2f1806a1555e1a55d049e1d189df8500348fd2916ea5adad29f74bdb37", "size": 41111}, {"sha256": "7be0bfa9181693ffa012770c2a805114550b2b07e9c08140585811e682e8bc62", "size": 39111}, {"sha256": "7e4ffa170fdd1fcc479d833a7258660e77037c2659a4d859717af24e9c79bec8", "size": 41481}, {"sha256": "814195bdd85801a3756c670ccb62c019fcd34309536fe705e7bfb62cd2f32333", "size": 48114}, {"sha256": "8297a27b9de4fd260b6cb265c13e181cd76e86a3641a11c69a3429641bec2471", "size": 40106}, {"sha256": "8448471ea8618dee06bfd49413b54a822cb0cbc90c0bc7034822a21c357a29c3", "size": 42986}, {"sha256": "857a665404202b473f4f372595cd91c5550add8bfe1ed093d018df7aba513011", "size": 38608}, {"sha256": "862244c5531987e42a1a6aedb04d4783e7ae5c70c6274530f6c1666c9bb14b4a", "size": 43486}, {"sha256": "879475e1738d013d46970dae10ad404cc7604f5d7a389b9e2abf145a271c3a09", "size": 40486}, {"sha256": "87c6d11a4f07d3989ca741990d0b97733708b424ec98d5ecf178a458c765648b", "size": 42548}, {"sha256": "881a213388fcda22db435c18d24eb6fb060607f680f680ff26e28346b27c771c", "size": 43486}, {"sha256": "88253cedfc4a38a12a757a4cc7c0d356a5892d10f0af52299824081661fbbcbe", "size": 43483}, {"sha256": "8867215ea5e24b162cc5afd1551f1720b9122676b255552cbe2e9e1a68404290", "size": 49519}, {"sha256": "8c2002999ffe06a3ed61c11a3b9e9360990d63455b2dc90a62d6d61cbbf1a3ac", "size": 43486}, {"sha256": "8f79323e54c7f4864af0cc947d71d48209c0b680db8f874d87531b2786dc73a0", "size": 42463}, {"sha256": "90a230dda83c3c7424864856c58b549f9f089c3512d455dd47a7e06de441ff46", "size": 39232}, {"sha256": "91296145cc870ae55b7fb2551d738382fa068fea910814b963c873372df04e13", "size": 39231}, {"sha256": "948e89eb9e82d7be1130a7f1a8cd1a5e2cddda4aed4b0f5f0ce70c87deedbccd", "size": 43483}, {"sha256": "99e5ce56e0c8658ddb113d3d267aef884a621c3555c9bdd0fc45168bbc0aa4f2", "size": 48183}, {"sha256": "9cd156592644c4361575b8ffc270c637d53aa91ce97692061594124ae7a9478c", "size": 39958}, {"sha256": "9f832e9f85ba659dcfbff3cbdd0055f73a73d0276640f20ded78dccef19dae90", "size": 49964}, {"sha256": "9fde73fdc9fc4ca1bf7d0092f912e143664d2b2f5dede02dcdb4f8598040349b", "size": 41481}, {"sha256": "a07737a2bcd3db410b95029ffb5b50712340ce86693a5ed83fb0d993866c45f9", "size": 42463}, {"sha256": "a4fe24f0057580b9e7afbd08036de07cd5c254c467b74c5fd8ec8196cc35ddc1", "size": 49964}, {"sha256": "a574dbbe14f3280f6753cc1fda3284363cc964dc546340db63022a964219f59d", "size": 41014}, {"sha256": "a58d51aea8cd4178a0d079e49d4bfea828375c09fc6086b14c20e4ac419ee33a", "size": 49516}, {"sha256": "a6788f2386d0060b3db48bd97686d936b3a47b398991c329d70a753ba6cd121d", "size": 40102}, {"sha256": "a7e31c83b4fd6aefa5719cd207224601006bd34b172c0c9b98888ab4e2f38f24", "size": 41561}, {"sha256": "a90699c6361c4cd698a09c8b75f007778fc9c1cf2abf16653ae6ece555b13c35", "size": 49518}, {"sha256": "aa21ae050d0e6be0d61f3e1c7bb43919995c34236ad980a9c06379ff28882029", "size": 42983}, {"sha256": "aa385ebb009c31a4744186b4d8e5fb19efc719ddced83ea583539020bc5cb3a5", "size": 40991}, {"sha256": "abe840236c0adf6d3aa741ee8be77289d248951bcac600409cadaa085fdd7616", "size": 49964}, {"sha256": "ac950509adeba8d90a7085b8aa3499062224059d4b0b659ee589c6c94e9a4102", "size": 38611}, {"sha256": "acb982e50759d3f84abbf7a53b58680dd67667e45ae9897603328f5dd5091c6e", "size": 49966}, {"sha256": "ad22511697c5751f12977d841474a297f93aae6a6bc93a67246c9434c80cf501", "size": 41481}, {"sha256": "adeb5aecc17348b8c9c783765c44131ed336719f0d79adf1db2bd0f15c3dd2de", "size": 41481}, {"sha256": "af45e23d4c3741355f2062d02eba9cfc24a6f75534f1f54ef4b6604ae3e4d5f1", "size": 48466}, {"sha256": "b33ad98e2e77305e49149effccf8f34500781e038e6013c0aed8b77b62fe29f9", "size": 41161}, {"sha256": "b65676d2e766b363df0492afffc346c08ea3a77a72f88cebbb9d897c7df2cecb", "size": 42983}, {"sha256": "b937355245fc02c8012963b2d38f5b3650ac7797df0834d3eba9356b87924521", "size": 42911}, {"sha256": "b954f6c6f0dccaeb4fcb5651a9638855d6b41fcecf398f038d079553cce3dbef", "size": 43483}, {"sha256": "ba890be810b2e6c53500ce053e63efa2b2ed26738686828a6250a1c22e68bddc", "size": 40102}, {"sha256": "bae6e55526d88eb529bba597f6a7278b35b099a6ae2d200fb02fcc200776102f", "size": 41598}, {"sha256": "bf6daddee11d35672cd3b96114854d67c0fd4f9f65aef64f2f38cfae527c5f66", "size": 39108}, {"sha256": "c01f2b05a253fcd0180b0b2156f88bc83c26e8f9c3ce698b6102578a585b0ab0", "size": 41481}, {"sha256": "c1270995daf907d2bff0750f565dce4b0b01d8be8d8e991d0bab48f8575f6dce", "size": 40486}, {"sha256": "c242adb06f470acbcf6eb727c5bc103ba2d89d7135715ebeb92a704617c55ba8", "size": 39108}, {"sha256": "c28e3ccbc601aaf6c89989edfc2405939e4ec9bb7ce76e304e441104c33c9129", "size": 40106}, {"sha256": "c31fcda4eb7225b64cc277839dbb9ad8cd8b14b7f17894147df3c47fb9409e55", "size": 41552}, {"sha256": "c35ac7c472911dbf1af34de40fee52c84c41ad1f602851ad005333389e2adba6", "size": 48116}, {"sha256": "c727e1d98cb30d86795cc0722b87faad662a6c1ed5c67599874377b9bbb57c51", "size": 40991}, {"sha256": "c9bddeaf100f33e364157bfadf31e17725135ddfb507c55f77c96fcaaec38cf4", "size": 40102}, {"sha256": "cdd079f3433d1e10c9555ca95f9164056f26e805e5f3da1fcadb43dbd68db324", "size": 41158}, {"sha256": "cff6709e985a74a4793652a63db9bc018713e8e26573ee1c1958b3acb201519b", "size": 39584}, {"sha256": "d1cf5c61beff6cdcc34f769943b9e92e8bde250875845434df5dd3599a17948f", "size": 49964}, {"sha256": "d40ac360956f0053ed7d7c725ce36930833602250497be4007e36aab644ec364", "size": 42458}, {"sha256": "d5938e96ee25aba3709027b545484800e71c5129096615c21d6569b92d023ed4", "size": 40989}, {"sha256": "d6cf254bd2f12308403019a49f015eed26a41b6b9344eb24d7bc45d41f4bd875", "size": 39229}, {"sha256": "d7cc8c654af7c12a9614a02f286b0871c221deaaf8c29a03720ba3a996c41817", "size": 40102}, {"sha256": "dbaa72439e7a2bc68b8c7ff80065ba9a20cf623cd94b00701c1f1346c0c0dfb4", "size": 41477}, {"sha256": "df5b15be96b02a29d4b8a83da4bcac87b11a742784b44e4089718b43d4aeef4d", "size": 48116}, {"sha256": "e04f198f119a14f0a277e0dc1662a84688d3f4ee201cd2837f76295a5fe92f1e", "size": 41016}, {"sha256": "e2c126a867da97bcccc42e6d243974613ef5d360347d4c9e830d8e371618924b", "size": 39961}, {"sha256": "e2c5d4f6e0a2515ce571ea1f5120dfd72e917d4da076293f29d31456abbaecd4", "size": 39587}, {"sha256": "e2ea682a9011fc13a1d4eee9e1114f9d4360a642902de6b93e83d161cbaef872", "size": 42606}, {"sha256": "e32e03ef2d32118a460dffc9325e1d119c38007bd0f83266917dfc28effdedeb", "size": 40106}, {"sha256": "e4f4ef48bab315ab17d9f1ef45f52bebc0a52d28229c7c469aac177a37e58084", "size": 49608}, {"sha256": "e5360a05f3db59603c4e79f9234ab8fb9e608c59fc32652228bbcfb7760a2eb6", "size": 48186}, {"sha256": "e578c62f38bc087adc193ab27e8f8804a0149f69e7aae382e03e1a7c8582cc1a", "size": 38611}, {"sha256": "e79c250e68942b6b34d51fb81bb68398fd2ec913a851a318735571faba71b9ec", "size": 39111}, {"sha256": "e7dce3358a595cd24bb570d64c14f1e4ebdc77dafde161f4d18b152726573aa3", "size": 41014}, {"sha256": "ea2548470dcea42c33ff09a00273a7ff7b886b1925fd69fd9fb8a28c1206f221", "size": 43483}, {"sha256": "ec5118a38573917787074ac1a1417cd25bd92d723d9acdae69fa10cdfe3eab3a", "size": 42982}, {"sha256": "f0202f15add1874ac879d72efbb65716b0074c9a65aa6cff36b809f27d9db83d", "size": 42983}, {"sha256": "f0e8eb730e8f33dbb3eab8281a94b7b202a3117df67b78b960d7ee29bb10a96a", "size": 40106}, {"sha256": "f191885cc4cfd625e07dd310a4539eddf73d8ae61f29089025edb748a203c886", "size": 40102}, {"sha256": "f2b56fb3830bd1b83ae2a14e0aeb108821b01f0365556aef35f394f6c36bad1e", "size": 38608}, {"sha256": "f2c0975baab6e596e9cb32ee717878d7f635f9ba33df43f5464d14dbf9dee99f", "size": 41477}, {"sha256": "f67b2274bf397bc8ba549ae3cf6cfadaaf491eb16353c9d808de832fc07840a5", "size": 48116}, {"sha256": "fa5d64d25bd5d8f6cd2bd60bdcc21b3c5427624e64be49a9414569b21b522e0b", "size": 41155}, {"sha256": "ff71709acb2f5949f578a7e9f4750c079364910284b6db0068518c0ee51a76e3", "size": 41481}, {"sha256": "ff80b9ce895c497f55456b8c18bf42179f2a11ed2c3efb2cc2295b5035ac78d1", "size": 48116}]}, "restored": {"audit_event_count": 103, "blob_count": 200, "status": "VALID"}}
+EXIT_CODE: 0
+DURATION_SECONDS: 183
+COMMAND: router CLI init
+{"artifact_count":0,"audit_event_count":0,"status":"VALID"}
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+COMMAND: router CLI exact controlled tool route
+{"decision":{"ambiguity_fields":[],"candidate_targets":["TOOL_REQUEST"],"created_at":"2026-08-26T20:26:05.876569Z","dependencies":{"conflict_policy_version":"4.0","dependency_snapshot_hash":"e8d19969e73dba31de1d3f79d94afd05ae8dd0383c2748e714ebb0222452a268","equivalence_policy_version":"stage2-final-state-v3","fact_memory_hash":null,"fact_memory_schema_version":4,"route_policy_version":"2.0","rule_memory_hash":null,"rule_memory_schema_version":1,"skill_registry_hash":null,"skill_registry_schema_version":3,"stage1_version":"1.0.1","stage2_schema_version":3,"tool_implementation_manifest_hashes":[["date_difference","9740d74e68512b7129422949f19f0500a3cd0de4184763f5ce17a27faa1cec65"],["decimal_arithmetic","57d4adc67374105d135809534057126173589b57713ccfcdd3cd87861f8550ec"]],"tool_policy_version":"2.0","tool_registry_hash":"de921f0a7c2283dea02bdbfdab6e5566f1337bbac6da82b6ff8569c016b70244","tool_registry_schema_version":2,"unified_router_schema_version":2},"dependency_snapshot_hash":"e8d19969e73dba31de1d3f79d94afd05ae8dd0383c2748e714ebb0222452a268","exact_match":true,"parser_evidence":{"parser":"controlled_tool","pattern":"decimal_arithmetic","payload":{"argument_hash":"501e3369bd5418cc9d5c89fb159ca10342cf4c8deea7b9bf5e0efe6d79f99efd","arguments":{"operands":["12.5","3"],"operation":"ADD"},"tool_id":"decimal_arithmetic","tool_implementation_manifest_hash":"57d4adc67374105d135809534057126173589b57713ccfcdd3cd87861f8550ec"}},"request_hash":"3a77f0353f66c047d2434ad26255e232db155a7d85aa3a631c93177f7032726d","request_id":"request_e3797eb3b14e420fb5927540a1bd179e","required_next_action":"CONFIRM_TOOL","route_authority":"EXACT_CONTROLLED","route_decision_hash":"4b38e39d1b24936cdc6c97dc4cbecf335d6183a8ee878fbf2b6845949a32bd0c","route_id":"route_233db86ba0fb41e4a67c7c04f1f74eb5","route_status":"EXACT_ROUTE","selected_target":"TOOL_REQUEST"},"request":{"created_at":"2026-08-26T20:26:05.874697Z","language":"en","original_input":"Calculate 12.5 plus 3.","original_input_hash":"2d3208d117dda3ca86409f345686117eb6a80f7aa69e00e781ff52630de15155","request_hash":"3a77f0353f66c047d2434ad26255e232db155a7d85aa3a631c93177f7032726d","request_id":"request_e3797eb3b14e420fb5927540a1bd179e","requested_equivalence_scope":null,"requested_known_at":null,"requested_valid_at":null,"schema_version":2,"semantic_input_hash":"e9fada695fe5e07a4e49469b7100d35a3e79c69cafc1c21de5c34d608f9ab7e2","source_kind":"CONTROLLED_LANGUAGE","structured_payload":null},"response":{"clarification_hash":null,"completed_at":null,"confirmation_hash":null,"created_at":"2026-08-26T20:26:05.896167Z","dependency_snapshot_hash":"e8d19969e73dba31de1d3f79d94afd05ae8dd0383c2748e714ebb0222452a268","dependency_snapshots":{"conflict_policy_version":"4.0","dependency_snapshot_hash":"e8d19969e73dba31de1d3f79d94afd05ae8dd0383c2748e714ebb0222452a268","equivalence_policy_version":"stage2-final-state-v3","fact_memory_hash":null,"fact_memory_schema_version":4,"route_policy_version":"2.0","rule_memory_hash":null,"rule_memory_schema_version":1,"skill_registry_hash":null,"skill_registry_schema_version":3,"stage1_version":"1.0.1","stage2_schema_version":3,"tool_implementation_manifest_hashes":[["date_difference","9740d74e68512b7129422949f19f0500a3cd0de4184763f5ce17a27faa1cec65"],["decimal_arithmetic","57d4adc67374105d135809534057126173589b57713ccfcdd3cd87861f8550ec"]],"tool_policy_version":"2.0","tool_registry_hash":"de921f0a7c2283dea02bdbfdab6e5566f1337bbac6da82b6ff8569c016b70244","tool_registry_schema_version":2,"unified_router_schema_version":2},"fact_answer_hash":null,"failure_artifact_hash":null,"legacy_status":null,"parent_prepared_response_hash":null,"request_hash":"3a77f0353f66c047d2434ad26255e232db155a7d85aa3a631c93177f7032726d","request_id":"request_e3797eb3b14e420fb5927540a1bd179e","response_hash":"56391d29caf279ef818eab71fe3be4f15a95b826e93768d538636537cf785e29","response_id":"response_f4e9034a1c2940809cd500cb73fd2572","response_stage":"PREPARED","route_authority":"EXACT_CONTROLLED","route_decision_hash":"4b38e39d1b24936cdc6c97dc4cbecf335d6183a8ee878fbf2b6845949a32bd0c","route_status":"EXACT_ROUTE","route_target":"TOOL_REQUEST","schema_version":2,"skill_dispatch_hash":null,"skill_selection_hash":null,"stage1_execution_hash":null,"tool_proposal_hash":"05054d19d8623df1851d2225a77c1948ee59b85f632abc6ee0bdc366126c1e48","tool_result_hash":null,"warnings":["EXPLICIT_TOOL_CONFIRMATION_REQUIRED"]}}
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+COMMAND: router CLI verify
+{"artifact_count":7,"audit_event_count":7,"status":"VALID"}
+EXIT_CODE: 0
+DURATION_SECONDS: 1
+COMMAND: router CLI audit replay
+{"artifact_count":7,"audit_event_count":7,"status":"VALID"}
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+COMMAND: router CLI backup
+{"created_at":"2026-08-26T20:26:06.207666Z","database_sha256":"974abdf173bcaf0fe3c0de81c7acf4e2d0c556fcb124b121f2eff6662cefd8f6","schema_version":2}
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+COMMAND: router CLI restore
+{"artifact_count":7,"audit_event_count":7,"status":"VALID"}
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+COMMAND: router CLI restored verify
+{"artifact_count":7,"audit_event_count":7,"status":"VALID"}
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+COMMAND: trusted router no-torch probe
+False
+EXIT_CODE: 0
+DURATION_SECONDS: 0
+FINAL_GIT_SHA: 0e93f5ba0f68da6022a80d9309f350359e455eaa
+FINAL_GIT_STATUS:
+
+KARINA_EXACT_GATE: PASS

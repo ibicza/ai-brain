@@ -1,0 +1,43 @@
+{
+  "COMPLETE_SKILL_RESPONSE": {
+    "p50_ms": 533.9079,
+    "p95_ms": 654.8887,
+    "p99_ms": 689.7705
+  },
+  "COMPLETE_TOOL_RESPONSE": {
+    "p50_ms": 175.43,
+    "p95_ms": 229.3069,
+    "p99_ms": 258.1213
+  },
+  "DECIMAL_VALIDATION": {
+    "p50_ms": 0.0259,
+    "p95_ms": 0.0492,
+    "p99_ms": 0.058
+  },
+  "DEPENDENCY_SNAPSHOT": {
+    "p50_ms": 2.1633,
+    "p95_ms": 3.1827,
+    "p99_ms": 3.6075
+  },
+  "FULL_REPLAY": {
+    "p50_ms": 10.7306,
+    "p95_ms": 23.5799,
+    "p99_ms": 25.8368
+  },
+  "ROUTER_STORE_VERIFY": {
+    "p50_ms": 158.4309,
+    "p95_ms": 187.2903,
+    "p99_ms": 187.2903
+  },
+  "TOOL_IMPLEMENTATION_MANIFEST": {
+    "p50_ms": 1.6575,
+    "p95_ms": 2.6589,
+    "p99_ms": 12.6527
+  },
+  "router_store": {
+    "artifact_count": 1405,
+    "audit_event_count": 1504,
+    "status": "VALID"
+  },
+  "samples": 100
+}

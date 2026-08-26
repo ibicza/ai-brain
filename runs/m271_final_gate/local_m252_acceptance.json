@@ -1,0 +1,2308 @@
+{
+  "checks": 1293,
+  "controlled_retrieval": {
+    "cross_language_equality": 1.0,
+    "success": 356,
+    "total": 356
+  },
+  "dispatch": {
+    "controlled_success": 12,
+    "controlled_total": 12,
+    "structural_success": 89,
+    "structural_total": 89
+  },
+  "duration_seconds": 147.7074483000033,
+  "equivalence_validation": {
+    "checked_execution_count": 640,
+    "checked_pair_count": 32,
+    "class_size_distribution": {
+      "1": 41,
+      "2": 12,
+      "6": 4
+    },
+    "final_state_effect_class_count": 57,
+    "full_execution_equivalence_class_count": 89,
+    "order_insensitive_class_count": 33,
+    "order_sensitive_class_count": 24,
+    "representative_pairs": [
+      {
+        "equivalence_class_hash": "334824275c4c9f3b24b0d2ed5e4e67794b91ed718fce58a02274caf4e3d1f92c",
+        "first": {
+          "action_stream_hash": "1e507f5846757ff4b3949ed223d6c002b9551c0b508d09c28bce6c4eb57c6fbb",
+          "captured_actions": [
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "H"
+          ],
+          "executed_steps": 9,
+          "execution_hash": "85dbdecf0395370c204746030a9893b4190f1d83e9e5d9efef0c457821b9894a",
+          "final_state": {
+            "R0": 10,
+            "R1": 0,
+            "R2": 0,
+            "R3": 7
+          },
+          "final_state_effect_hash": "01be337b6e4d38d6556964941685f3c8163ddeec5b6e51e8002f7c28487954f1",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 2,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 1,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 0,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 0,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 0,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 0,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 9,
+              "R1": 0,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            }
+          ],
+          "skill_id": "skill-7e832b546cd45bbc684c",
+          "specification_hash": "d860d95a22fabf21fdd95fc4ed3b7251ff48eab77cb9427eaaa8261350137619"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "24deec2b015c76a7d80398c9840052ef26174fa02fd04c84bff9de2b02d88931",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 9,
+          "execution_hash": "9b3fa72ab33d9f648aedee41a0ede469e78e0962ac13b9a8210c96a9392ed68f",
+          "final_state": {
+            "R0": 10,
+            "R1": 0,
+            "R2": 0,
+            "R3": 7
+          },
+          "final_state_effect_hash": "01be337b6e4d38d6556964941685f3c8163ddeec5b6e51e8002f7c28487954f1",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 2,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 9,
+              "R1": 1,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            }
+          ],
+          "skill_id": "skill-9d9ab329db6c92fd7741",
+          "specification_hash": "8949427626911e2977b60bf212ece207b98fdd1d7f5bf382e20b917a2e0848fc"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "6c1c6638e0fd94532591252a3374811d05b7a70a01922e3f6f540841ca7ae82e",
+          "captured_actions": [
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "208cc592819c0b40408d9eaf79b031c81fbef164fe1ef434c19e193cf25cecaa",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 5,
+              "R3": 6
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 5,
+              "R3": 5
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 5,
+              "R3": 4
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 5,
+              "R3": 3
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 5,
+              "R3": 2
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 5,
+              "R3": 1
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 10,
+              "R1": 2,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 11,
+              "R1": 1,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 12,
+              "R1": 0,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 13,
+              "R1": 0,
+              "R2": 4,
+              "R3": 0
+            },
+            {
+              "R0": 14,
+              "R1": 0,
+              "R2": 3,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 0,
+              "R2": 2,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 0,
+              "R2": 1,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-2ea82f1d5ad16e25eca0",
+          "specification_hash": "201b94326227fbc92247ca6bc9dd576d1ccd0b62cc662281586c7025b40887a9"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "7421ba3a48535615ed3f781992fae7775223cd48a2c02e8d8f02b4bcb21483e2",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "a1ee2b40c3320f676ff4504865d690d4c237c002dc55ea0c3539fbb676f56b33",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 2,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 9,
+              "R1": 1,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 11,
+              "R1": 0,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 12,
+              "R1": 0,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 13,
+              "R1": 0,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 14,
+              "R1": 0,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 15,
+              "R1": 0,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 16,
+              "R1": 0,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-a7cd9e66abe859dff3ce",
+          "specification_hash": "f7acccdc95097d0479dfa16e17f414f18a862e0239f6275a31b2cfc84fdaafe9"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "1180b111d713687b12bfcfb41dd8d5e3f36e7850851c672fe78ce316904114f2",
+          "captured_actions": [
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "2a6336c1370c7f2195f27f96ea74fa5ec835b4ad1e409597775ceac4e5698b8a",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 2,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 1,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 0,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 0,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 0,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 0,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 9,
+              "R1": 0,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 11,
+              "R1": 0,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 12,
+              "R1": 0,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 13,
+              "R1": 0,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 14,
+              "R1": 0,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 15,
+              "R1": 0,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 16,
+              "R1": 0,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-b57bd8d684d1d77cced3",
+          "specification_hash": "05b7a3dd94329e6b2d30ec510de9b047e7b58fce183408407dfbb9337da5cb7d"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "df811bee7325d8e10a002da15dfa310023d5e1f12e36ec105c9ea1cf6f5dcdc1",
+          "captured_actions": [
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "7df2b7ace325dfc009b9d3b668b155100abd08170b7c68ea28c28dcb4ad4bed1",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 5,
+              "R3": 6
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 5,
+              "R3": 5
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 5,
+              "R3": 4
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 5,
+              "R3": 3
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 5,
+              "R3": 2
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 5,
+              "R3": 1
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 4,
+              "R3": 0
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 3,
+              "R3": 0
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 2,
+              "R3": 0
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 1,
+              "R3": 0
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-dfb4de2461888d593b5f",
+          "specification_hash": "fad4bf1425523c0019d60e6c9d39b54afb884885407a96b45c276a9541091e86"
+        }
+      },
+      {
+        "equivalence_class_hash": "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+        "first": {
+          "action_stream_hash": "2deb36ee244fbcc6acbceb9c2a83c5423407c108dc417bf152dec7e366438d3e",
+          "captured_actions": [
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "946144f5d361fbd3dc309e137bc136fb1664994d8c06bf6aa04d15e6192a30cb",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 3,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 3,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 3,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 3,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 7,
+              "R1": 3,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 8,
+              "R1": 3,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 9,
+              "R1": 3,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 10,
+              "R1": 3,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 11,
+              "R1": 3,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 12,
+              "R1": 3,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 13,
+              "R1": 3,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 14,
+              "R1": 3,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 2,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 1,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-198267d0f07cd4346bee",
+          "specification_hash": "989a63c5a212ed3005e506f0884a6cb8041121a232d98e8148719cad4ed70b8f"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "af3891bc7a74d57f98d862ecdc7106bf03ad688379e704ce55e27e3f0b96c64b",
+          "captured_actions": [
+            "M R1 R0",
+            "M R1 R0",
+            "M R1 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R3 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "M R2 R0",
+            "H"
+          ],
+          "executed_steps": 16,
+          "execution_hash": "f2e404595a08cd64b53d74feb62925522c0af57038076d6474587bfc3fe33c9a",
+          "final_state": {
+            "R0": 17,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "4840eb7aaed4c4b4bc91a8c89f63d1c5a1fe9e3363dc9098a7402ed537578f65",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 3,
+              "R1": 2,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 4,
+              "R1": 1,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 5,
+              "R1": 0,
+              "R2": 5,
+              "R3": 7
+            },
+            {
+              "R0": 6,
+              "R1": 0,
+              "R2": 5,
+              "R3": 6
+            },
+            {
+              "R0": 7,
+              "R1": 0,
+              "R2": 5,
+              "R3": 5
+            },
+            {
+              "R0": 8,
+              "R1": 0,
+              "R2": 5,
+              "R3": 4
+            },
+            {
+              "R0": 9,
+              "R1": 0,
+              "R2": 5,
+              "R3": 3
+            },
+            {
+              "R0": 10,
+              "R1": 0,
+              "R2": 5,
+              "R3": 2
+            },
+            {
+              "R0": 11,
+              "R1": 0,
+              "R2": 5,
+              "R3": 1
+            },
+            {
+              "R0": 12,
+              "R1": 0,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 13,
+              "R1": 0,
+              "R2": 4,
+              "R3": 0
+            },
+            {
+              "R0": 14,
+              "R1": 0,
+              "R2": 3,
+              "R3": 0
+            },
+            {
+              "R0": 15,
+              "R1": 0,
+              "R2": 2,
+              "R3": 0
+            },
+            {
+              "R0": 16,
+              "R1": 0,
+              "R2": 1,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 17,
+              "R1": 0,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-e0bf2195c1ea4a62c77d",
+          "specification_hash": "fafcb4f20b2409e14ad5ab633163cac26d5586e3e529da77263ae2c326e36411"
+        }
+      },
+      {
+        "equivalence_class_hash": "87bf47ace41d549d51030becd9944ab50a129f88ac3817686b1b3b4ec0af2d64",
+        "first": {
+          "action_stream_hash": "575f586273715239492efb5ef53af1594dfe406139f153535139baacb991c176",
+          "captured_actions": [
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R0 R1",
+            "M R0 R1",
+            "H"
+          ],
+          "executed_steps": 15,
+          "execution_hash": "6a655160ba00d7a3d69bbfb37ebb734504abc31302a14fc4c81f71c7b5a4a3ec",
+          "final_state": {
+            "R0": 0,
+            "R1": 17,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "687797e505b798747101c060ac26b6831e724df145e51480daa1783dbbe4d16a",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 2,
+              "R1": 4,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 5,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 6,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 7,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 8,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 9,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 2,
+              "R1": 10,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 2,
+              "R1": 11,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 2,
+              "R1": 12,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 2,
+              "R1": 13,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 2,
+              "R1": 14,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 2,
+              "R1": 15,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 1,
+              "R1": 16,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-0ba8533e75aeced9eadf",
+          "specification_hash": "f3e88f9e6d32e8c5773454d9f9349e95052201c1a3425dacf7e2646037f4e825"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "144ab34923213bf89415ca10eb80084cffbcaab5ba0ae42812285b57c7711b74",
+          "captured_actions": [
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R0 R1",
+            "M R0 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "H"
+          ],
+          "executed_steps": 15,
+          "execution_hash": "d34f696fff9c49711853dff4c0e4b88188b25c413bdabcfe551cd38392588958",
+          "final_state": {
+            "R0": 0,
+            "R1": 17,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "687797e505b798747101c060ac26b6831e724df145e51480daa1783dbbe4d16a",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 2,
+              "R1": 4,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 5,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 6,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 7,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 8,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 1,
+              "R1": 9,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 0,
+              "R1": 10,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 0,
+              "R1": 11,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 0,
+              "R1": 12,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 0,
+              "R1": 13,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 0,
+              "R1": 14,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 0,
+              "R1": 15,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 0,
+              "R1": 16,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-47377194946c6629e076",
+          "specification_hash": "909c381d6bad7128f79b6ab4e637f1348fd1fbbc9291abda8feb1cce86a31f8d"
+        }
+      },
+      {
+        "equivalence_class_hash": "87bf47ace41d549d51030becd9944ab50a129f88ac3817686b1b3b4ec0af2d64",
+        "first": {
+          "action_stream_hash": "575f586273715239492efb5ef53af1594dfe406139f153535139baacb991c176",
+          "captured_actions": [
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R0 R1",
+            "M R0 R1",
+            "H"
+          ],
+          "executed_steps": 15,
+          "execution_hash": "6a655160ba00d7a3d69bbfb37ebb734504abc31302a14fc4c81f71c7b5a4a3ec",
+          "final_state": {
+            "R0": 0,
+            "R1": 17,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "687797e505b798747101c060ac26b6831e724df145e51480daa1783dbbe4d16a",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 2,
+              "R1": 4,
+              "R2": 4,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 5,
+              "R2": 3,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 6,
+              "R2": 2,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 7,
+              "R2": 1,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 8,
+              "R2": 0,
+              "R3": 7
+            },
+            {
+              "R0": 2,
+              "R1": 9,
+              "R2": 0,
+              "R3": 6
+            },
+            {
+              "R0": 2,
+              "R1": 10,
+              "R2": 0,
+              "R3": 5
+            },
+            {
+              "R0": 2,
+              "R1": 11,
+              "R2": 0,
+              "R3": 4
+            },
+            {
+              "R0": 2,
+              "R1": 12,
+              "R2": 0,
+              "R3": 3
+            },
+            {
+              "R0": 2,
+              "R1": 13,
+              "R2": 0,
+              "R3": 2
+            },
+            {
+              "R0": 2,
+              "R1": 14,
+              "R2": 0,
+              "R3": 1
+            },
+            {
+              "R0": 2,
+              "R1": 15,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 1,
+              "R1": 16,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-0ba8533e75aeced9eadf",
+          "specification_hash": "f3e88f9e6d32e8c5773454d9f9349e95052201c1a3425dacf7e2646037f4e825"
+        },
+        "proof_kind": "COMMUTING_DRAINS_SAME_DESTINATION",
+        "second": {
+          "action_stream_hash": "68eb1d6d1430cd3a502a49cae6ff7f7cf5c28152de04af125100dcc57776bbf3",
+          "captured_actions": [
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R3 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R2 R1",
+            "M R0 R1",
+            "M R0 R1",
+            "H"
+          ],
+          "executed_steps": 15,
+          "execution_hash": "0b282774d88f18d86f2f4594a9522977e278ac9299ae1049aa25a01f623289ff",
+          "final_state": {
+            "R0": 0,
+            "R1": 17,
+            "R2": 0,
+            "R3": 0
+          },
+          "final_state_effect_hash": "687797e505b798747101c060ac26b6831e724df145e51480daa1783dbbe4d16a",
+          "initial_state": {
+            "R0": 2,
+            "R1": 3,
+            "R2": 5,
+            "R3": 7
+          },
+          "intermediate_states": [
+            {
+              "R0": 2,
+              "R1": 4,
+              "R2": 5,
+              "R3": 6
+            },
+            {
+              "R0": 2,
+              "R1": 5,
+              "R2": 5,
+              "R3": 5
+            },
+            {
+              "R0": 2,
+              "R1": 6,
+              "R2": 5,
+              "R3": 4
+            },
+            {
+              "R0": 2,
+              "R1": 7,
+              "R2": 5,
+              "R3": 3
+            },
+            {
+              "R0": 2,
+              "R1": 8,
+              "R2": 5,
+              "R3": 2
+            },
+            {
+              "R0": 2,
+              "R1": 9,
+              "R2": 5,
+              "R3": 1
+            },
+            {
+              "R0": 2,
+              "R1": 10,
+              "R2": 5,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 11,
+              "R2": 4,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 12,
+              "R2": 3,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 13,
+              "R2": 2,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 14,
+              "R2": 1,
+              "R3": 0
+            },
+            {
+              "R0": 2,
+              "R1": 15,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 1,
+              "R1": 16,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            },
+            {
+              "R0": 0,
+              "R1": 17,
+              "R2": 0,
+              "R3": 0
+            }
+          ],
+          "skill_id": "skill-7530fc1947b8e773d366",
+          "specification_hash": "2687ae62eebd9f45aa32e3e2706b254304668d3cf1bc2f1e3d5efdd4903f69e7"
+        }
+      }
+    ],
+    "state_battery": [
+      {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      {
+        "R0": 1,
+        "R1": 0,
+        "R2": 0,
+        "R3": 0
+      },
+      {
+        "R0": 0,
+        "R1": 1,
+        "R2": 0,
+        "R3": 0
+      },
+      {
+        "R0": 0,
+        "R1": 0,
+        "R2": 1,
+        "R3": 0
+      },
+      {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 1
+      },
+      {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      {
+        "R0": 10,
+        "R1": 1,
+        "R2": 4,
+        "R3": 2
+      },
+      {
+        "R0": 1,
+        "R1": 10,
+        "R2": 2,
+        "R3": 4
+      },
+      {
+        "R0": 4,
+        "R1": 2,
+        "R2": 10,
+        "R3": 1
+      },
+      {
+        "R0": 2,
+        "R1": 4,
+        "R2": 1,
+        "R3": 10
+      }
+    ],
+    "status": "PASS",
+    "structural_skill_count": 89,
+    "trace_distinct_class_count": 16,
+    "trace_distinct_class_hashes": [
+      "334824275c4c9f3b24b0d2ed5e4e67794b91ed718fce58a02274caf4e3d1f92c",
+      "fe06eac69a5ad6001ee85180361268726a782b77844cd6149b0df3d7b3b0988f",
+      "87bf47ace41d549d51030becd9944ab50a129f88ac3817686b1b3b4ec0af2d64",
+      "e6112aab81f1f4d7d34bce353ed91325e2666e166ea247d2bcaf11dcc4cca83c",
+      "a63062e828abec2007053706ecd9d008d460c05004c17672b302924cf54ce082",
+      "a0f473d3b575853824037bd8db50fcec21819e0864cf2147e728d3cafb649917",
+      "3a8a4f0a337f5ddd111937bf0bce3b7f7094934b85c32edc5688023314c9e725",
+      "733c5f4078702328123995f401ae3efc6004159b8846b7cbe11c8ece9b2cae92",
+      "dc74200d6fb42a8199cd9ef697b1315b95f4491977968add632cd020f99d5577",
+      "215e2b482fa1f56a9ef35d37cbf5888e7504605d4fc29aa4cf8ff6fcdbd6fbcf",
+      "acd5eef5423f87d4457aae72f5593c2aed01145d6970ebea48430e351760c682",
+      "eb64022ae6e1a4f0e2a3f60393f9ac639468f38c4478756f30dd1916996925a6",
+      "b8a974d0d33a6cec9aad986616d044b316fb6a042f176b32f22c7792aab868f8",
+      "41a1b47f6f4dd0951599d93bc0b95207d30932458ce99a9c495700b126450ad8",
+      "56720a713080ac5fd5f11469ba7085ad0107b88330f46ca0cb94107b6483c57a",
+      "1c51c37d164758cef3d093924e803ee003f226e4dc1c491a831818ce51485120"
+    ]
+  },
+  "equivalent_integrations": [
+    {
+      "active_case_skill_count": 88,
+      "audit_events": [
+        "SKILL_QUERY_RECEIVED",
+        "SKILL_UNKNOWN",
+        "SKILL_QUERY_RECEIVED",
+        "FINAL_STATE_EQUIVALENT_FOUND",
+        "EQUIVALENT_SELECTION_REVIEWED",
+        "EQUIVALENT_SELECTION_CONFIRMED",
+        "EQUIVALENT_SKILL_DISPATCHED"
+      ],
+      "candidate_count": 1,
+      "case": "merge_two",
+      "dispatch_hash": "56e5acd424f7a860bcb01ff585610872bf661001b2f46a5eb3406345d75bdb8d",
+      "equivalence_class_hash": "ff8bf9492220201b7a3c00c6ed1c23f19e51bad933bd5df4c59da0b89ad66a9d",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 10,
+        "R3": 7
+      },
+      "requested_specification_hash": "e3c711218c23524f38da22cc66b4b500c2d3c4607f02835ff8c044a668e0a50b",
+      "selected_specification_hash": "5db6ab5f2bb84e756049d8a468f491e269d91ebdb0558f8d750126b4f2f44b00"
+    },
+    {
+      "active_case_skill_count": 88,
+      "audit_events": [
+        "SKILL_QUERY_RECEIVED",
+        "SKILL_UNKNOWN",
+        "SKILL_QUERY_RECEIVED",
+        "FINAL_STATE_EQUIVALENT_FOUND",
+        "EQUIVALENT_SELECTION_REVIEWED",
+        "EQUIVALENT_SELECTION_CONFIRMED",
+        "EQUIVALENT_SKILL_DISPATCHED"
+      ],
+      "candidate_count": 5,
+      "case": "merge_three",
+      "dispatch_hash": "e4e15c063bee17367b4f29c78f4f8f89f3c92491beadb9903dfd9a3a64f72c56",
+      "equivalence_class_hash": "089be00812a34106b2a847460d1e27ad67285f024720cbb8d2b49e015381ba6b",
+      "final_state": {
+        "R0": 0,
+        "R1": 0,
+        "R2": 0,
+        "R3": 17
+      },
+      "requested_specification_hash": "0202a8a02d7073daace5f3e7046e5d543af8506bcdddea0762bda490e5660598",
+      "selected_specification_hash": "85eb708862170faeff24308534753ebb37f18e6402b7a940ecf2c3a3998a552a"
+    },
+    {
+      "active_case_skill_count": 89,
+      "audit_events": [
+        "SKILL_QUERY_RECEIVED",
+        "SKILL_UNKNOWN",
+        "SKILL_QUERY_RECEIVED",
+        "FINAL_STATE_EQUIVALENT_FOUND",
+        "EQUIVALENT_SELECTION_REVIEWED",
+        "EQUIVALENT_SELECTION_CONFIRMED",
+        "EQUIVALENT_SKILL_DISPATCHED"
+      ],
+      "candidate_count": 1,
+      "case": "singleton_noop",
+      "dispatch_hash": "d84bf97a793540d2bbfa32e5b71b3f36e7c43a2fd256730b8d1b3d8b15bdceab",
+      "equivalence_class_hash": "d8789050d55c125f6edfa4960901086324c370cb95f226e8c41d3ea56930c23e",
+      "final_state": {
+        "R0": 2,
+        "R1": 3,
+        "R2": 5,
+        "R3": 7
+      },
+      "requested_specification_hash": "f687091f6850231a86ac669cc15a5107e8fbbb46ef8e95bd202d1d5e0f2b71db",
+      "selected_specification_hash": "8bf0e6651a7cbbca8e2aa0ccf3d4e657ca00cc9a949a834858c21d164b3165d1"
+    }
+  ],
+  "exact_scope_matrix": {
+    "structurally_different_returned_as_exact": 0,
+    "success": 178,
+    "total": 178
+  },
+  "git_sha": "0e93f5ba0f68da6022a80d9309f350359e455eaa",
+  "learned_semantic_authority": 0,
+  "milestone": "M-25.2",
+  "negative_checks": [
+    "merge_two:normal_confirmation_rejected",
+    "merge_two:equivalence_scope_tamper_rejected",
+    "merge_two:requested_specification_hash_tamper_rejected",
+    "merge_two:selected_specification_hash_tamper_rejected",
+    "merge_two:equivalence_class_hash_tamper_rejected",
+    "merge_three:normal_confirmation_rejected",
+    "merge_three:equivalence_scope_tamper_rejected",
+    "merge_three:requested_specification_hash_tamper_rejected",
+    "merge_three:selected_specification_hash_tamper_rejected",
+    "merge_three:equivalence_class_hash_tamper_rejected",
+    "singleton_noop:normal_confirmation_rejected",
+    "singleton_noop:equivalence_scope_tamper_rejected",
+    "singleton_noop:requested_specification_hash_tamper_rejected",
+    "singleton_noop:selected_specification_hash_tamper_rejected",
+    "singleton_noop:equivalence_class_hash_tamper_rejected",
+    "drop:FULL_EXECUTION_TRACE:substitution_rejected",
+    "drop:FINAL_STATE_ONLY:substitution_rejected",
+    "merge_two:stale_membership_rejected"
+  ],
+  "outcome": "OUTCOME_A",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.13 (main, Aug  7 2026, 02:26:41) [MSC v.1944 64 bit (AMD64)]",
+  "schema": {
+    "skill_registry": 3,
+    "stage2": 3,
+    "v2_policy": "REBUILD_FROM_VERIFIED_RULE_MEMORY"
+  },
+  "status": "PASS",
+  "trusted_import_no_torch": true,
+  "unsafe_automatic_selections": 0
+}
