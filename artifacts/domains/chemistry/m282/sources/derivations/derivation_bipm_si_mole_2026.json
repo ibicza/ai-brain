@@ -1,0 +1,145 @@
+{
+  "derivation_hash": "d7709c67557fe818b259a768e9af502ec48a730cc8850a59405c3b9ad1c7e903",
+  "derivation_id": "derivation_bipm_si_mole_2026",
+  "derivation_method": "REVIEWED_MANUAL_MAPPING",
+  "derived_canonical_content_hash": "8e925751e1febefdd4b8620a4106fa2a45e6d9e9d4f9cc6916b4c31ab463565d",
+  "derived_file_byte_sha256": "4e87868d5fdb58580cd75e2bfcfa56ecb6387cd586c33ece88d07e263de51b9b",
+  "derived_file_path": "derived/bipm_si_mole_2026.json",
+  "derived_media_type": "application/json",
+  "derived_source_id": "derived_bipm_si_mole_2026",
+  "derived_source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+  "expected_source_record_hash": null,
+  "expected_source_snapshot_hash": "4e87868d5fdb58580cd75e2bfcfa56ecb6387cd586c33ece88d07e263de51b9b",
+  "extraction_policy_version": "verified-selected-chemistry-fields-v3",
+  "extractor_implementation_manifest_hash": "7d0a06219da973477eed1c335132382d95fae136b2be10b8d881aca505d8c01b",
+  "extractor_reviewer_identity": "m282-human-reviewed-source-mapping",
+  "field_level_mappings": [
+    {
+      "evidence_hash": "b2d71f80313677290b8374fcbce9b8758728a0248929738817186f5af4777885",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "mole",
+      "output_field_name": "/mole/unit_name",
+      "parser_mapping_implementation_hash": "7d0a06219da973477eed1c335132382d95fae136b2be10b8d881aca505d8c01b",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_location_type": "PDF_REVIEWED_SPAN",
+      "upstream_locator": {
+        "field": "unit_name",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      },
+      "upstream_snapshot_hash": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+      "upstream_source_id": "official_bipm_si_brochure_4_01"
+    },
+    {
+      "evidence_hash": "6acf9656cc9cb2e9f9f0ace3a4e8628f5aa81fdd1a513d85e70b0f7019583c58",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "mol",
+      "output_field_name": "/mole/unit_symbol",
+      "parser_mapping_implementation_hash": "7d0a06219da973477eed1c335132382d95fae136b2be10b8d881aca505d8c01b",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_location_type": "PDF_REVIEWED_SPAN",
+      "upstream_locator": {
+        "field": "unit_symbol",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      },
+      "upstream_snapshot_hash": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+      "upstream_source_id": "official_bipm_si_brochure_4_01"
+    },
+    {
+      "evidence_hash": "fc26bad32de149f2ef08e0ae836b8d263315a884d1b9686020df4269be2e518d",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "6.02214076E+23",
+      "output_field_name": "/mole/avogadro_constant",
+      "parser_mapping_implementation_hash": "7d0a06219da973477eed1c335132382d95fae136b2be10b8d881aca505d8c01b",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_location_type": "PDF_REVIEWED_SPAN",
+      "upstream_locator": {
+        "field": "avogadro_constant",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      },
+      "upstream_snapshot_hash": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+      "upstream_source_id": "official_bipm_si_brochure_4_01"
+    },
+    {
+      "evidence_hash": "1f12e24fab6e0550c46253ee0127113f57e748af521ef5f7d41d8a3a383aaa85",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "mol^-1",
+      "output_field_name": "/mole/avogadro_unit",
+      "parser_mapping_implementation_hash": "7d0a06219da973477eed1c335132382d95fae136b2be10b8d881aca505d8c01b",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_location_type": "PDF_REVIEWED_SPAN",
+      "upstream_locator": {
+        "field": "avogadro_unit",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      },
+      "upstream_snapshot_hash": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+      "upstream_source_id": "official_bipm_si_brochure_4_01"
+    },
+    {
+      "evidence_hash": "a548aa73d544037cf2a42bd78a173aa3132aeac132f57dc11226b3dd50615a40",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": true,
+      "output_field_name": "/mole/exact",
+      "parser_mapping_implementation_hash": "7d0a06219da973477eed1c335132382d95fae136b2be10b8d881aca505d8c01b",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_location_type": "PDF_REVIEWED_SPAN",
+      "upstream_locator": {
+        "field": "exact",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      },
+      "upstream_snapshot_hash": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+      "upstream_source_id": "official_bipm_si_brochure_4_01"
+    },
+    {
+      "evidence_hash": "1c37fa2acd367432428cf3d26fd6ffcd025f15393cc5e41180c43e341cf7ecf3",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": [
+        "atoms",
+        "molecules",
+        "formula_units",
+        "generic_entities"
+      ],
+      "output_field_name": "/mole/entity_scope",
+      "parser_mapping_implementation_hash": "7d0a06219da973477eed1c335132382d95fae136b2be10b8d881aca505d8c01b",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_location_type": "PDF_REVIEWED_SPAN",
+      "upstream_locator": {
+        "field": "entity_scope",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      },
+      "upstream_snapshot_hash": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+      "upstream_source_id": "official_bipm_si_brochure_4_01"
+    }
+  ],
+  "generated_at": "2026-08-27T00:00:00Z",
+  "manual_mapping_approval_hash": "3c80e5ff81b11b22ddfb4cbd5dcbb855f18b716d764ed0ea77f1ed970cecd9b8",
+  "manual_mapping_approval_id": "approval_bipm_si_mole_2026",
+  "reviewed_at": "2026-08-27T00:00:00Z",
+  "reviewer_identity": "m282-human-reviewed-source-mapping",
+  "reviewer_identity_type": "HUMAN",
+  "schema_version": 2,
+  "upstream_sources": [
+    {
+      "expected_source_record_hash": null,
+      "field_location_used": [
+        "PDF_REVIEWED_SPAN"
+      ],
+      "reference_hash": "720e1e46272f4abcc6367ec9be2b1d28833b82ae4e110a6f89e2c28a85056a49",
+      "snapshot_hash": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+      "source_family": "BIPM_SI_BROCHURE",
+      "source_id": "official_bipm_si_brochure_4_01",
+      "source_kind": "OFFICIAL_PRIMARY"
+    }
+  ]
+}

@@ -48,6 +48,15 @@ class ChemistryReplayStatus(StrEnum):
     STALE_SOURCE = "STALE_SOURCE"
     RETRACTED_SOURCE = "RETRACTED_SOURCE"
     STALE_DERIVATION_CHAIN = "STALE_DERIVATION_CHAIN"
+    RETRACTED_UPSTREAM_SOURCE = "RETRACTED_UPSTREAM_SOURCE"
+    UNAVAILABLE_UPSTREAM_SOURCE = "UNAVAILABLE_UPSTREAM_SOURCE"
+    STALE_UPSTREAM_SOURCE = "STALE_UPSTREAM_SOURCE"
+    STALE_DERIVED_SOURCE = "STALE_DERIVED_SOURCE"
+    DERIVATION_SOURCE_MISMATCH = "DERIVATION_SOURCE_MISMATCH"
+    DERIVATION_CONTENT_MISMATCH = "DERIVATION_CONTENT_MISMATCH"
+    DERIVATION_METHOD_CHANGED = "DERIVATION_METHOD_CHANGED"
+    STALE_EXTRACTION_POLICY = "STALE_EXTRACTION_POLICY"
+    STALE_SOURCE_CHAIN = "STALE_SOURCE_CHAIN"
     STALE_DOMAIN_MANIFEST = "STALE_DOMAIN_MANIFEST"
     STALE_ATOMIC_WEIGHT_POLICY = "STALE_ATOMIC_WEIGHT_POLICY"
     STALE_ROUNDING_POLICY = "STALE_ROUNDING_POLICY"
@@ -92,20 +101,81 @@ class ChemistryRoundingSpec:
     policy_version: str = "2.0"
 
 
+class DerivationMethod(StrEnum):
+    DETERMINISTIC_EXTRACTION = "DETERMINISTIC_EXTRACTION"
+    REVIEWED_MANUAL_MAPPING = "REVIEWED_MANUAL_MAPPING"
+    POLICY_TRANSFORMATION = "POLICY_TRANSFORMATION"
+
+
 @dataclass(frozen=True)
-class SourceDerivationRecord:
+class UpstreamSourceReference:
+    source_id: str
+    source_kind: str
+    snapshot_hash: str
+    expected_source_record_hash: str | None
+    source_family: str
+    field_location_used: tuple[str, ...]
+    reference_hash: str
+
+
+@dataclass(frozen=True)
+class FieldExtractionEvidence:
+    output_field_name: str
+    output_canonical_value: Any
+    upstream_source_id: str
+    upstream_snapshot_hash: str
+    upstream_location_type: str
+    upstream_locator: dict[str, Any]
+    upstream_excerpt_hash: str | None
+    extraction_method: DerivationMethod
+    parser_mapping_implementation_hash: str
+    reviewer: str | None
+    evidence_hash: str
+
+
+@dataclass(frozen=True)
+class ManualSourceMappingApproval:
+    approval_id: str
+    official_source_id: str
+    official_snapshot_hash: str
+    selected_fields: tuple[dict[str, Any], ...]
+    reviewer_identity: str
+    reviewer_identity_type: str
+    review_decision: str
+    policy_version: str
+    mapping_hash: str
+    timestamp: str
+    approval_hash: str
+
+
+@dataclass(frozen=True)
+class SourceDerivationRecordV2:
     derivation_id: str
-    official_source_ids: tuple[str, ...]
-    official_snapshot_hashes: tuple[str, ...]
-    derived_extract_source_id: str
-    derived_extract_hash: str
-    extractor_module: str
-    extractor_implementation_hash: str
+    schema_version: int
+    derivation_method: DerivationMethod
+    derived_source_id: str
+    derived_source_kind: str
+    derived_media_type: str
+    derived_file_path: str
+    derived_file_byte_sha256: str
+    derived_canonical_content_hash: str
+    expected_source_snapshot_hash: str
+    expected_source_record_hash: str | None
+    upstream_sources: tuple[UpstreamSourceReference, ...]
+    extractor_reviewer_identity: str
+    extractor_implementation_manifest_hash: str
     extraction_policy_version: str
-    selected_row_field_mapping: tuple[dict[str, Any], ...]
+    field_level_mappings: tuple[FieldExtractionEvidence, ...]
     generated_at: str
-    reviewer: str
+    reviewed_at: str | None
+    reviewer_identity: str | None
+    reviewer_identity_type: str | None
+    manual_mapping_approval_id: str | None
+    manual_mapping_approval_hash: str | None
     derivation_hash: str
+
+
+SourceDerivationRecord = SourceDerivationRecordV2
 
 
 @dataclass(frozen=True)
@@ -150,7 +220,17 @@ class KnowledgeBinding:
     source_record_hashes: tuple[str, ...]
     source_state_hashes: tuple[str, ...]
     source_status_event_hashes: tuple[str | None, ...]
+    derived_exact_file_hashes: tuple[str, ...]
+    derived_canonical_content_hashes: tuple[str, ...]
+    derivation_ids: tuple[str, ...]
     derivation_hashes: tuple[str, ...]
+    derivation_methods: tuple[str, ...]
+    upstream_source_ids: tuple[str, ...]
+    upstream_source_record_hashes: tuple[str, ...]
+    upstream_source_snapshot_hashes: tuple[str, ...]
+    upstream_source_state_hashes: tuple[str, ...]
+    upstream_status_event_hashes: tuple[str | None, ...]
+    field_mapping_evidence_hashes: tuple[str, ...]
     binding_hash: str
 
 
@@ -228,7 +308,7 @@ class AtomicWeightAnswerBundle:
 
 
 @dataclass(frozen=True)
-class ChemistryKnowledgeSnapshotV2:
+class ChemistryKnowledgeSnapshotV3:
     knowledge_snapshot_version: int
     domain_manifest_hash: str
     fact_memory_snapshot_hash: str
@@ -238,10 +318,13 @@ class ChemistryKnowledgeSnapshotV2:
     calculation_policy_version: str
     rounding_policy_hash: str
     element_records: tuple[AtomicWeightRecordV2, ...]
-    avogadro_constant: str
-    avogadro_claim_id: str
-    avogadro_claim_record_hash: str
-    avogadro_claim_state_hash: str
+    source_chain_version: str
+    source_chain_hash: str
+    requirements: tuple[str, ...]
+    avogadro_constant: str | None
+    avogadro_claim_id: str | None
+    avogadro_claim_record_hash: str | None
+    avogadro_claim_state_hash: str | None
     avogadro_evidence_hashes: tuple[str, ...]
     avogadro_source_record_hashes: tuple[str, ...]
     bindings: tuple[KnowledgeBinding, ...]
@@ -252,6 +335,14 @@ class ChemistryKnowledgeSnapshotV2:
     source_record_hashes: tuple[str, ...]
     source_state_hashes: tuple[str, ...]
     derivation_hashes: tuple[str, ...]
+    derivation_ids: tuple[str, ...]
+    derivation_methods: tuple[str, ...]
+    upstream_source_ids: tuple[str, ...]
+    upstream_source_record_hashes: tuple[str, ...]
+    upstream_source_snapshot_hashes: tuple[str, ...]
+    upstream_source_state_hashes: tuple[str, ...]
+    upstream_status_event_hashes: tuple[str | None, ...]
+    field_mapping_evidence_hashes: tuple[str, ...]
     created_at: str
     snapshot_hash: str
 
@@ -272,7 +363,8 @@ class ChemistryKnowledgeSnapshotV2:
         return self.source_record_hashes
 
 
-ChemistryKnowledgeSnapshot = ChemistryKnowledgeSnapshotV2
+ChemistryKnowledgeSnapshot = ChemistryKnowledgeSnapshotV3
+ChemistryKnowledgeSnapshotV2 = ChemistryKnowledgeSnapshotV3
 
 
 @dataclass(frozen=True)
@@ -294,7 +386,21 @@ class ChemistryResultBundle:
     source_ids: tuple[str, ...]
     source_hashes: tuple[str, ...]
     source_state_hashes: tuple[str, ...]
+    derived_source_ids: tuple[str, ...]
+    derived_source_record_hashes: tuple[str, ...]
+    derived_source_snapshot_hashes: tuple[str, ...]
+    derived_source_state_hashes: tuple[str, ...]
+    derivation_ids: tuple[str, ...]
     derivation_hashes: tuple[str, ...]
+    derivation_methods: tuple[str, ...]
+    upstream_source_ids: tuple[str, ...]
+    upstream_source_record_hashes: tuple[str, ...]
+    upstream_source_snapshot_hashes: tuple[str, ...]
+    upstream_source_state_hashes: tuple[str, ...]
+    upstream_status_event_hashes: tuple[str | None, ...]
+    field_mapping_evidence_hashes: tuple[str, ...]
+    source_chain_version: str
+    source_chain_hash: str
     calculation_steps: tuple[dict[str, Any], ...]
     result: dict[str, Any]
     warnings: tuple[str, ...]

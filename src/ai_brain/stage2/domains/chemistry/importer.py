@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ai_brain.stage2.domains.chemistry.source_derivation import GENERATED_AT
 from ai_brain.stage2.domains.chemistry.sources import (
     SOURCE_FILES,
     default_source_dir,
@@ -27,7 +28,8 @@ from ai_brain.stage2.facts.models import (
 )
 from ai_brain.stage2.facts.values import FactValue, FactValueKind
 
-IMPORT_IDENTITY = "m281-curated-chemistry-import"
+IMPORT_IDENTITY = "m282-curated-chemistry-import"
+MANUAL_REVIEW_IDENTITY = "m282-human-reviewed-source-mapping"
 
 
 @dataclass(frozen=True)
@@ -51,7 +53,7 @@ def build_chemistry_fact_memory(
     documents = load_frozen_sources(source_root)
     derivations = load_derivations(source_root)
     chain = source_manifest(source_root)
-    memory = FactMemory.initialize(root)
+    memory = FactMemory.initialize(root, clock=lambda: GENERATED_AT)
     source_records = _add_sources(memory, documents, source_root, chain, derivations)
     _add_predicates(memory)
     elements = documents["iupac_elements_2022.json"]["elements"]
@@ -228,7 +230,11 @@ def build_chemistry_fact_memory(
         computational_element_count=len(weights),
         entity_count=len(elements) + 1,
         predicate_count=16,
-        source_count=len(chain["official_snapshots"]) + len(source_records),
+        source_count=(
+            len(chain["official_snapshots"])
+            + len(chain["local_policy_snapshots"])
+            + len(source_records)
+        ),
         evidence_count=evidence_count,
         claim_count=claim_count,
         fact_memory_snapshot_hash=memory.database.snapshot_hash(),
@@ -244,7 +250,7 @@ def _add_sources(
     derivations: dict[str, Any],
 ) -> dict[str, Any]:
     records: dict[str, Any] = {}
-    for row in chain["official_snapshots"]:
+    for row in (*chain["official_snapshots"], *chain["local_policy_snapshots"]):
         path = (source_root / row["file"]).resolve()
         memory.add_source(
             content=path.read_bytes(),
@@ -271,8 +277,9 @@ def _add_sources(
         metadata = document["source"]
         derived_row = derived_rows[name]
         derivation = derivations[derived_row["source_id"]]
+        derived_path = (source_root / derived_row["file"]).resolve()
         records[name] = memory.add_source(
-            content=document,
+            content=derived_path.read_bytes(),
             source_kind=SourceKind.DETERMINISTIC_DERIVED_EXTRACT,
             title=metadata["title"],
             author=metadata["authority"],
@@ -284,16 +291,29 @@ def _add_sources(
             retrieved_at=metadata["retrieved_at"],
             language=metadata["language"],
             source_family=metadata["source_family"],
-            trust_tier="VERIFIED_DERIVED_PRIMARY"
-            if name != "ru_element_names_policy_v1.json"
-            else "REVIEWED_DOMAIN_POLICY",
+            trust_tier=(
+                "VERIFIED_DETERMINISTIC_DERIVED"
+                if derivation.derivation_method.value == "DETERMINISTIC_EXTRACTION"
+                else "REVIEWED_DERIVED_MAPPING"
+                if derivation.derivation_method.value == "REVIEWED_MANUAL_MAPPING"
+                else "REVIEWED_DOMAIN_POLICY"
+            ),
             license_metadata={
                 "license": metadata.get("license", "unknown"),
                 "limitations": metadata.get("limitations", ""),
-                "derived_file_sha256": derived_row["sha256"],
+                "derived_file_sha256": derivation.derived_file_byte_sha256,
+                "derived_canonical_content_hash": (
+                    derivation.derived_canonical_content_hash
+                ),
+                "derivation_id": derivation.derivation_id,
                 "derivation_hash": derivation.derivation_hash,
-                "upstream_source_ids": derivation.official_source_ids,
-                "upstream_snapshot_hashes": derivation.official_snapshot_hashes,
+                "derivation_method": derivation.derivation_method.value,
+                "upstream_source_ids": tuple(
+                    row.source_id for row in derivation.upstream_sources
+                ),
+                "upstream_snapshot_hashes": tuple(
+                    row.snapshot_hash for row in derivation.upstream_sources
+                ),
             },
             original_filename=name,
             media_type="application/json",
@@ -419,15 +439,25 @@ def _add_predicates(memory: FactMemory) -> None:
 
 
 def _evidence(memory: FactMemory, source_id: str, pointer: str, evidence_id: str):
+    source = memory.get_source_record(source_id)
+    deterministic = (
+        source.license_metadata.get("derivation_method") == "DETERMINISTIC_EXTRACTION"
+    )
     return memory.add_evidence(
         source_id=source_id,
         relation=EvidenceRelation.SUPPORTS,
         location_kind=EvidenceLocationKind.JSON_POINTER,
         location={"pointer": pointer},
-        extraction_method=ExtractionMethod.DETERMINISTIC,
+        extraction_method=(
+            ExtractionMethod.DETERMINISTIC if deterministic else ExtractionMethod.MANUAL
+        ),
         extraction_confidence="1",
-        reviewer=IMPORT_IDENTITY,
-        reviewer_identity_type=ActorIdentityType.TRUSTED_PROCESS,
+        reviewer=IMPORT_IDENTITY if deterministic else MANUAL_REVIEW_IDENTITY,
+        reviewer_identity_type=(
+            ActorIdentityType.TRUSTED_PROCESS
+            if deterministic
+            else ActorIdentityType.HUMAN
+        ),
         approved=True,
         evidence_id=evidence_id,
     )

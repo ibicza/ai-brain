@@ -1,4 +1,4 @@
-"""Frozen M-28.1 source-chain loading and integrity metadata."""
+"""Frozen M-28.2 source-chain loading and integrity metadata."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ SOURCE_FILES = (
 
 
 def default_source_dir() -> Path:
-    return Path("artifacts/domains/chemistry/m281/sources")
+    return Path("artifacts/domains/chemistry/m282/sources")
 
 
 def load_frozen_sources(source_dir: Path | None = None) -> dict[str, dict[str, Any]]:

@@ -441,7 +441,31 @@ def _bundle(
         ),
         "source_hashes": snapshot.source_record_hashes,
         "source_state_hashes": snapshot.source_state_hashes,
+        "derived_source_ids": tuple(
+            sorted({value for item in snapshot.bindings for value in item.source_ids})
+        ),
+        "derived_source_record_hashes": snapshot.source_record_hashes,
+        "derived_source_snapshot_hashes": tuple(
+            sorted(
+                {
+                    value
+                    for item in snapshot.bindings
+                    for value in item.derived_exact_file_hashes
+                }
+            )
+        ),
+        "derived_source_state_hashes": snapshot.source_state_hashes,
+        "derivation_ids": snapshot.derivation_ids,
         "derivation_hashes": snapshot.derivation_hashes,
+        "derivation_methods": snapshot.derivation_methods,
+        "upstream_source_ids": snapshot.upstream_source_ids,
+        "upstream_source_record_hashes": snapshot.upstream_source_record_hashes,
+        "upstream_source_snapshot_hashes": snapshot.upstream_source_snapshot_hashes,
+        "upstream_source_state_hashes": snapshot.upstream_source_state_hashes,
+        "upstream_status_event_hashes": snapshot.upstream_status_event_hashes,
+        "field_mapping_evidence_hashes": snapshot.field_mapping_evidence_hashes,
+        "source_chain_version": snapshot.source_chain_version,
+        "source_chain_hash": snapshot.source_chain_hash,
         "calculation_steps": steps,
         "result": result,
         "warnings": warnings,

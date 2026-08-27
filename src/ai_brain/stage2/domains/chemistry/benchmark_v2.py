@@ -34,9 +34,7 @@ def run_m281_benchmark(
     service: ChemistryDomainService, *, calculation_count: int = 10_000
 ) -> dict[str, Any]:
     parser = FormulaParser(set(service.manifest["supported_elements"]))
-    snapshot = build_knowledge_snapshot(
-        service.memory, service.manifest["domain_manifest_hash"]
-    )
+    snapshot = build_knowledge_snapshot(service.memory, service.manifest)
     formulas = ("H2O", "CO2", "NaCl", "CaCO3", "H2SO4", "Al2(SO4)3", "C6H12O6")
     tracemalloc.start()
     started = time.perf_counter_ns()
@@ -107,7 +105,7 @@ def run_m281_benchmark(
     matrix["atomic_weight_answer"] = _measure(
         lambda index: atomic_weight_answer(
             service.memory,
-            service.manifest["domain_manifest_hash"],
+            service.manifest,
             ("H", "C", "Fe")[index % 3],
         ),
         10,
@@ -117,7 +115,7 @@ def run_m281_benchmark(
     )
     matrix["knowledge_snapshot"] = _measure(
         lambda _: build_knowledge_snapshot(
-            service.memory, service.manifest["domain_manifest_hash"], ("H", "O")
+            service.memory, service.manifest, ("H", "O")
         ),
         5,
     )

@@ -36,9 +36,7 @@ from ai_brain.stage2.router.request import create_request
 
 def run_m281_acceptance(service: ChemistryDomainService) -> dict[str, Any]:
     parser = FormulaParser(set(service.manifest["supported_elements"]))
-    snapshot = build_knowledge_snapshot(
-        service.memory, service.manifest["domain_manifest_hash"]
-    )
+    snapshot = build_knowledge_snapshot(service.memory, service.manifest)
     report = {
         "source_chain": verify_source_chain(service.root / "sources"),
         "atomic_weight": _atomic_weight_acceptance(service),
@@ -86,7 +84,7 @@ def _atomic_weight_acceptance(service: ChemistryDomainService) -> dict[str, Any]
     for symbol in service.manifest["supported_elements"]:
         answer = atomic_weight_answer(
             service.memory,
-            service.manifest["domain_manifest_hash"],
+            service.manifest,
             symbol,
         )
         assert answer.exact_symbol == symbol

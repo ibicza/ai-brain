@@ -25,3 +25,4 @@
 
 # Trusted chemistry snapshots and derivations are verified byte-for-byte.
 artifacts/domains/chemistry/m281/** binary
+artifacts/domains/chemistry/m282/** binary

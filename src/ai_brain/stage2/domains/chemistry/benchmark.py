@@ -21,9 +21,7 @@ def run_benchmark(
     service: ChemistryDomainService, *, calculation_count: int = 10_000
 ) -> dict[str, Any]:
     parser = FormulaParser(set(service.manifest["supported_elements"]))
-    snapshot = build_knowledge_snapshot(
-        service.memory, service.manifest["domain_manifest_hash"]
-    )
+    snapshot = build_knowledge_snapshot(service.memory, service.manifest)
     formulas = ("H2O", "CO2", "NaCl", "CaCO3", "H2SO4", "Al2(SO4)3", "C6H12O6")
     parse_samples = _measure(
         lambda index: parser.parse(formulas[index % len(formulas)]), 1000

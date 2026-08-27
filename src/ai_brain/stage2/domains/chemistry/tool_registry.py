@@ -14,6 +14,7 @@ from ai_brain.stage2.domains.chemistry import (
     formula_parser,
     knowledge_snapshot,
     models,
+    provenance,
     resolver,
     source_derivation,
     tools,
@@ -22,9 +23,12 @@ from ai_brain.stage2.domains.chemistry import (
 from ai_brain.stage2.domains.chemistry.calculations import canonical_decimal
 from ai_brain.stage2.domains.chemistry.formula_parser import FormulaParser
 from ai_brain.stage2.domains.chemistry.knowledge_snapshot import (
+    ATOMIC_WEIGHTS,
+    AVOGADRO,
     build_knowledge_snapshot,
     snapshot_from_dict,
     snapshot_to_dict,
+    verify_knowledge_snapshot,
 )
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage2.facts.memory import FactMemory
@@ -55,7 +59,7 @@ TOOL_IDS = (
 )
 CHEMISTRY_TOOL_INPUT_POLICY = version.CHEMISTRY_TOOL_INPUT_POLICY
 CHEMISTRY_TOOL_NUMERIC_POLICY = "shared-bounded-decimal-v2"
-CHEMISTRY_TOOL_OUTPUT_POLICY = "hashed-chemistry-result-bundle-v2"
+CHEMISTRY_TOOL_OUTPUT_POLICY = "hashed-chemistry-result-bundle-v3"
 
 
 def chemistry_tool_manifests() -> dict[str, ToolImplementationManifest]:
@@ -64,6 +68,7 @@ def chemistry_tool_manifests() -> dict[str, ToolImplementationManifest]:
         formula_parser,
         knowledge_snapshot,
         models,
+        provenance,
         resolver,
         source_derivation,
         tools,
@@ -121,14 +126,18 @@ def chemistry_tool_manifests() -> dict[str, ToolImplementationManifest]:
 
 
 class ChemistryToolRegistry(ToolRegistry):
-    def __init__(self, memory: FactMemory, domain_manifest_hash: str) -> None:
+    def __init__(self, memory: FactMemory, domain_manifest: dict[str, Any]) -> None:
         self.memory = memory
-        self.domain_manifest_hash = domain_manifest_hash
+        self.domain_manifest = domain_manifest
+        self.domain_manifest_hash = domain_manifest["domain_manifest_hash"]
         self.supported_symbols = frozenset(
             item.external_identifiers["symbol"]
             for item in self.memory.list_entities(entity_type="chemical_element")
         )
-        self._snapshot_cache: dict[tuple[str, tuple[str, ...]], Any] = {}
+        self._snapshot_cache: dict[
+            tuple[str, tuple[str, ...], tuple[str, ...]], Any
+        ] = {}
+        self._trusted_snapshot_hashes: dict[str, str] = {}
         self.manifests = chemistry_tool_manifests()
         self._implementations = {
             tool_id: getattr(tools, tool_id) for tool_id in TOOL_IDS
@@ -259,25 +268,24 @@ class ChemistryToolRegistry(ToolRegistry):
                 entry.symbol
                 for entry in parser.parse(_text(raw["formula"], "formula")).composition
             )
+        requirements = _tool_requirements(tool_id)
         snapshot = (
-            self._current_snapshot(selected_symbols)
+            self._current_snapshot(selected_symbols, requirements)
             if supplied_snapshot is None
             else snapshot_from_dict(supplied_snapshot)
         )
         snapshot_body = asdict(snapshot)
         snapshot_hash = snapshot_body.pop("snapshot_hash")
-        if (
-            content_hash(snapshot_body) != snapshot_hash
-            or snapshot.domain_manifest_hash != self.domain_manifest_hash
-            or snapshot.fact_memory_snapshot_hash
-            != self.memory.database.snapshot_hash()
-            or snapshot.atomic_weight_policy != version.CHEMISTRY_ATOMIC_WEIGHT_POLICY
-        ):
+        if content_hash(snapshot_body) != snapshot_hash:
             raise ToolInputError("invalid or stale chemistry knowledge snapshot")
-        current = self._current_snapshot(
-            tuple(record.symbol for record in snapshot.element_records)
-        )
-        if snapshot.snapshot_hash != current.snapshot_hash:
+        if supplied_snapshot is not None and not self._is_trusted_snapshot(
+            snapshot.snapshot_hash
+        ):
+            try:
+                verify_knowledge_snapshot(snapshot, self.memory, self.domain_manifest)
+            except ValueError as error:
+                raise ToolInputError("stale chemistry knowledge snapshot") from error
+        if snapshot.atomic_weight_policy != version.CHEMISTRY_ATOMIC_WEIGHT_POLICY:
             raise ToolInputError("stale chemistry knowledge snapshot")
         if tool_id == "chemistry_formula_composition":
             _exact_keys(raw, {"formula"})
@@ -408,21 +416,46 @@ class ChemistryToolRegistry(ToolRegistry):
             raise ToolInputError(validation.issues[0])
         canonical = dict(validation.canonical_arguments)
         snapshot = snapshot_from_dict(canonical.pop("knowledge_snapshot"))
-        current = self._current_snapshot(
-            tuple(record.symbol for record in snapshot.element_records)
-        )
-        if snapshot.snapshot_hash != current.snapshot_hash:
-            raise ToolInputError("stale chemistry knowledge snapshot")
+        if not self._is_trusted_snapshot(snapshot.snapshot_hash):
+            try:
+                verify_knowledge_snapshot(snapshot, self.memory, self.domain_manifest)
+            except ValueError as error:
+                raise ToolInputError("stale chemistry knowledge snapshot") from error
         parser = FormulaParser(self.supported_symbols)
         return self._implementations[tool_id](canonical, parser, snapshot)
 
-    def _current_snapshot(self, symbols: tuple[str, ...]):
-        key = (self.memory.database.snapshot_hash(), tuple(sorted(symbols)))
+    def _current_snapshot(
+        self, symbols: tuple[str, ...], requirements: tuple[str, ...]
+    ):
+        key = (
+            self.memory.database.snapshot_hash(),
+            tuple(sorted(symbols)),
+            tuple(sorted(requirements)),
+        )
         if key not in self._snapshot_cache:
             self._snapshot_cache[key] = build_knowledge_snapshot(
-                self.memory, self.domain_manifest_hash, key[1]
+                self.memory,
+                self.domain_manifest,
+                key[1],
+                requirements=key[2],
+            )
+            self._trusted_snapshot_hashes[self._snapshot_cache[key].snapshot_hash] = (
+                key[0]
             )
         return self._snapshot_cache[key]
+
+    def _is_trusted_snapshot(self, snapshot_hash: str) -> bool:
+        return self._trusted_snapshot_hashes.get(snapshot_hash) == (
+            self.memory.database.snapshot_hash()
+        )
+
+
+def _tool_requirements(tool_id: str) -> tuple[str, ...]:
+    if tool_id in {"chemistry_molar_mass", "chemistry_mass_amount"}:
+        return (ATOMIC_WEIGHTS,)
+    if tool_id == "chemistry_entity_amount":
+        return (AVOGADRO,)
+    return ()
 
 
 def _exact_keys(arguments: dict[str, Any], expected: set[str]) -> None:

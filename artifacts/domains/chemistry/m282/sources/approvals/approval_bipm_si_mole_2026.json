@@ -1,0 +1,79 @@
+{
+  "approval_hash": "3c80e5ff81b11b22ddfb4cbd5dcbb855f18b716d764ed0ea77f1ed970cecd9b8",
+  "approval_id": "approval_bipm_si_mole_2026",
+  "mapping_hash": "0b478a51bd6ec2856c55084b66739a0c3cfb8832cc6c788564002a5d718e18d3",
+  "official_snapshot_hash": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+  "official_source_id": "official_bipm_si_brochure_4_01",
+  "policy_version": "verified-selected-chemistry-fields-v3",
+  "review_decision": "APPROVED",
+  "reviewer_identity": "m282-human-reviewed-source-mapping",
+  "reviewer_identity_type": "HUMAN",
+  "selected_fields": [
+    {
+      "output_canonical_value": "mole",
+      "output_field_name": "/mole/unit_name",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_locator": {
+        "field": "unit_name",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      }
+    },
+    {
+      "output_canonical_value": "mol",
+      "output_field_name": "/mole/unit_symbol",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_locator": {
+        "field": "unit_symbol",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      }
+    },
+    {
+      "output_canonical_value": "6.02214076E+23",
+      "output_field_name": "/mole/avogadro_constant",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_locator": {
+        "field": "avogadro_constant",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      }
+    },
+    {
+      "output_canonical_value": "mol^-1",
+      "output_field_name": "/mole/avogadro_unit",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_locator": {
+        "field": "avogadro_unit",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      }
+    },
+    {
+      "output_canonical_value": true,
+      "output_field_name": "/mole/exact",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_locator": {
+        "field": "exact",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      }
+    },
+    {
+      "output_canonical_value": [
+        "atoms",
+        "molecules",
+        "formula_units",
+        "generic_entities"
+      ],
+      "output_field_name": "/mole/entity_scope",
+      "upstream_excerpt_hash": "572c1958f2877c1f9afcd159c499f2648adeb8250eab1aaebfe8dbd14ddf0611",
+      "upstream_locator": {
+        "field": "entity_scope",
+        "printed_page": 134,
+        "section": "2.3.6 The mole"
+      }
+    }
+  ],
+  "timestamp": "2026-08-27T00:00:00Z"
+}

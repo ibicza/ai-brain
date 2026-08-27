@@ -59,7 +59,7 @@ class ChemistryDomainService:
         bundled_sources = (source_dir or (resolved / "sources")).resolve()
         manifest = load_domain_manifest(resolved / "domain_manifest.json")
         if manifest.get("domain_schema_version") != CHEMISTRY_DOMAIN_SCHEMA_VERSION:
-            raise ValueError("REBUILD_REQUIRED_FROM_FROZEN_SOURCES")
+            raise ValueError("REBUILD_REQUIRED_FROM_VERIFIED_SOURCE_CHAIN_V3")
         if manifest.get("domain_version") != CHEMISTRY_DOMAIN_VERSION:
             raise ValueError("incompatible chemistry domain pack")
         memory = FactMemory.open(resolved / "fact_memory")
@@ -70,7 +70,7 @@ class ChemistryDomainService:
         )
         if tuple(tuple(row) for row in manifest["tool_manifest_hashes"]) != current:
             raise ValueError("chemistry tool manifests are stale")
-        registry = ChemistryToolRegistry(memory, manifest["domain_manifest_hash"])
+        registry = ChemistryToolRegistry(memory, manifest)
         router = ChemistryUnifiedRouter(tool_registry=registry, fact_memory=memory)
         return cls(
             resolved,

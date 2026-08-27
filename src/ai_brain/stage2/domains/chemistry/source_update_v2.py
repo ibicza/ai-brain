@@ -157,9 +157,7 @@ def _claim_supersession(service: ChemistryDomainService, output: dict[str, Any])
         actor_identity_type=ActorIdentityType.HUMAN,
         reason="reviewed atomic-weight successor",
     )
-    snapshot = build_knowledge_snapshot(
-        service.memory, service.manifest["domain_manifest_hash"], ("O",)
-    )
+    snapshot = build_knowledge_snapshot(service.memory, service.manifest, ("O",))
     return {
         "status": "PASS",
         "old_result_replay_status": replay_chemistry_result(
@@ -229,9 +227,7 @@ def _unsafe_state(
 ) -> dict[str, Any]:
     available = True
     try:
-        build_knowledge_snapshot(
-            service.memory, service.manifest["domain_manifest_hash"], ("O",)
-        )
+        build_knowledge_snapshot(service.memory, service.manifest, ("O",))
     except ChemistryKnowledgeError:
         available = False
     return {

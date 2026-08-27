@@ -27,7 +27,7 @@ from ai_brain.stage2.domains.chemistry.tool_registry import chemistry_tool_manif
 from ai_brain.stage2.facts.memory import FactMemory
 from ai_brain.stage2.facts.persistence import FactDatabase
 
-DEFAULT_ROOT = Path("artifacts/domains/chemistry/m281")
+DEFAULT_ROOT = Path("artifacts/domains/chemistry/m282")
 
 
 def main() -> None:
@@ -131,7 +131,7 @@ def main() -> None:
             asdict(
                 atomic_weight_answer(
                     service.memory,
-                    service.manifest["domain_manifest_hash"],
+                    service.manifest,
                     args.element,
                     language=args.language,
                     requested=args.requested,

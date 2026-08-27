@@ -1,4 +1,4 @@
-"""Current-state FactMemory-bound chemistry knowledge snapshots (schema v2)."""
+"""Current-state chemistry knowledge snapshots with closed provenance."""
 
 from __future__ import annotations
 
@@ -10,9 +10,14 @@ from ai_brain.stage2.domains.chemistry.models import (
     AtomicWeightKind,
     AtomicWeightRecordV2,
     AtomicWeightRequest,
-    ChemistryKnowledgeSnapshotV2,
+    ChemistryKnowledgeSnapshotV3,
     ChemistryRoundingSpec,
     KnowledgeBinding,
+)
+from ai_brain.stage2.domains.chemistry.provenance import (
+    DerivationResolutionError,
+    resolve_source_derivation,
+    source_state_hash,
 )
 from ai_brain.stage2.domains.chemistry.resolver import resolve_chemistry_element
 from ai_brain.stage2.domains.chemistry.version import (
@@ -29,9 +34,14 @@ from ai_brain.stage2.facts.models import (
     EvidenceConflictState,
     EvidenceRelation,
     QueryStatus,
+    SourceKind,
     SourceStatus,
 )
 from ai_brain.stage2.facts.values import FactValue
+
+ATOMIC_WEIGHTS = "ATOMIC_WEIGHTS"
+AVOGADRO = "AVOGADRO"
+_REQUIREMENTS = frozenset({ATOMIC_WEIGHTS, AVOGADRO})
 
 
 class ChemistryKnowledgeError(ValueError):
@@ -47,14 +57,24 @@ class _CurrentValue:
 
 def build_knowledge_snapshot(
     memory: FactMemory,
-    domain_manifest_hash: str,
+    domain_manifest: dict[str, Any],
     symbols: tuple[str, ...] | None = None,
-) -> ChemistryKnowledgeSnapshotV2:
+    *,
+    requirements: tuple[str, ...] = (ATOMIC_WEIGHTS, AVOGADRO),
+) -> ChemistryKnowledgeSnapshotV3:
+    _verify_manifest_hash(domain_manifest)
+    selected_requirements = tuple(sorted(set(requirements)))
+    if not set(selected_requirements) <= _REQUIREMENTS:
+        raise ChemistryKnowledgeError("unknown chemistry knowledge requirement")
     selected = (
-        _element_symbols(memory) if symbols is None else tuple(sorted(set(symbols)))
+        (_element_symbols(memory) if symbols is None else tuple(sorted(set(symbols))))
+        if ATOMIC_WEIGHTS in selected_requirements
+        else ()
     )
+    resolution_cache: dict[str, Any] = {}
     records_and_bindings = tuple(
-        _atomic_weight_record(memory, symbol) for symbol in selected
+        _atomic_weight_record(memory, symbol, domain_manifest, resolution_cache)
+        for symbol in selected
     )
     records = tuple(item[0] for item in records_and_bindings)
     bindings = tuple(
@@ -62,11 +82,23 @@ def build_knowledge_snapshot(
         for _, record_bindings in records_and_bindings
         for value in record_bindings
     )
-    avogadro = _single(memory, "constant.avogadro", "avogadro_constant")
-    bindings += (avogadro.binding,)
+    avogadro = (
+        _single(
+            memory,
+            "constant.avogadro",
+            "avogadro_constant",
+            domain_manifest,
+            resolution_cache,
+        )
+        if AVOGADRO in selected_requirements
+        else None
+    )
+    if avogadro is not None:
+        bindings += (avogadro.binding,)
+    chain = domain_manifest["source_chain"]
     body = {
         "knowledge_snapshot_version": CHEMISTRY_KNOWLEDGE_SNAPSHOT_VERSION,
-        "domain_manifest_hash": domain_manifest_hash,
+        "domain_manifest_hash": domain_manifest["domain_manifest_hash"],
         "fact_memory_snapshot_hash": memory.database.snapshot_hash(),
         "atomic_weight_policy": CHEMISTRY_ATOMIC_WEIGHT_POLICY,
         "source_policy_version": CHEMISTRY_SOURCE_POLICY_VERSION,
@@ -74,29 +106,48 @@ def build_knowledge_snapshot(
         "calculation_policy_version": CHEMISTRY_CALCULATION_POLICY_VERSION,
         "rounding_policy_hash": content_hash(ChemistryRoundingSpec()),
         "element_records": records,
-        "avogadro_constant": str(avogadro.value.value),
-        "avogadro_claim_id": avogadro.binding.claim_id,
-        "avogadro_claim_record_hash": avogadro.binding.claim_record_hash,
-        "avogadro_claim_state_hash": avogadro.binding.claim_state_hash,
-        "avogadro_evidence_hashes": avogadro.binding.evidence_hashes,
-        "avogadro_source_record_hashes": avogadro.binding.source_record_hashes,
+        "source_chain_version": chain["source_chain_version"],
+        "source_chain_hash": chain["source_chain_hash"],
+        "requirements": selected_requirements,
+        "avogadro_constant": str(avogadro.value.value) if avogadro else None,
+        "avogadro_claim_id": avogadro.binding.claim_id if avogadro else None,
+        "avogadro_claim_record_hash": (
+            avogadro.binding.claim_record_hash if avogadro else None
+        ),
+        "avogadro_claim_state_hash": (
+            avogadro.binding.claim_state_hash if avogadro else None
+        ),
+        "avogadro_evidence_hashes": (
+            avogadro.binding.evidence_hashes if avogadro else ()
+        ),
+        "avogadro_source_record_hashes": (
+            avogadro.binding.source_record_hashes if avogadro else ()
+        ),
         "bindings": bindings,
-        "claim_ids": tuple(sorted(item.claim_id for item in bindings)),
-        "claim_record_hashes": tuple(
-            sorted(item.claim_record_hash for item in bindings)
+        "claim_ids": _collect(bindings, "claim_id"),
+        "claim_record_hashes": _collect(bindings, "claim_record_hash"),
+        "claim_state_hashes": _collect(bindings, "claim_state_hash"),
+        "evidence_hashes": _flatten(bindings, "evidence_hashes"),
+        "source_record_hashes": _flatten(bindings, "source_record_hashes"),
+        "source_state_hashes": _flatten(bindings, "source_state_hashes"),
+        "derivation_hashes": _flatten(bindings, "derivation_hashes"),
+        "derivation_ids": _flatten(bindings, "derivation_ids"),
+        "derivation_methods": _flatten(bindings, "derivation_methods"),
+        "upstream_source_ids": _flatten(bindings, "upstream_source_ids"),
+        "upstream_source_record_hashes": _flatten(
+            bindings, "upstream_source_record_hashes"
         ),
-        "claim_state_hashes": tuple(sorted(item.claim_state_hash for item in bindings)),
-        "evidence_hashes": tuple(
-            sorted({value for item in bindings for value in item.evidence_hashes})
+        "upstream_source_snapshot_hashes": _flatten(
+            bindings, "upstream_source_snapshot_hashes"
         ),
-        "source_record_hashes": tuple(
-            sorted({value for item in bindings for value in item.source_record_hashes})
+        "upstream_source_state_hashes": _flatten(
+            bindings, "upstream_source_state_hashes"
         ),
-        "source_state_hashes": tuple(
-            sorted({value for item in bindings for value in item.source_state_hashes})
+        "upstream_status_event_hashes": _flatten_optional(
+            bindings, "upstream_status_event_hashes"
         ),
-        "derivation_hashes": tuple(
-            sorted({value for item in bindings for value in item.derivation_hashes})
+        "field_mapping_evidence_hashes": _flatten(
+            bindings, "field_mapping_evidence_hashes"
         ),
         "created_at": max(
             (
@@ -105,19 +156,19 @@ def build_knowledge_snapshot(
                     *tuple(
                         value for _, values in records_and_bindings for value in values
                     ),
-                    avogadro,
+                    *((avogadro,) if avogadro else ()),
                 )
             ),
             default="1970-01-01T00:00:00Z",
         ),
     }
-    return ChemistryKnowledgeSnapshotV2(**body, snapshot_hash=content_hash(body))
+    return ChemistryKnowledgeSnapshotV3(**body, snapshot_hash=content_hash(body))
 
 
 def verify_knowledge_snapshot(
-    snapshot: ChemistryKnowledgeSnapshotV2,
+    snapshot: ChemistryKnowledgeSnapshotV3,
     memory: FactMemory,
-    expected_domain_manifest_hash: str,
+    expected_domain_manifest: dict[str, Any],
 ) -> None:
     body = asdict(snapshot)
     digest = body.pop("snapshot_hash")
@@ -125,26 +176,24 @@ def verify_knowledge_snapshot(
         raise ChemistryKnowledgeError("chemistry knowledge snapshot hash mismatch")
     if snapshot.knowledge_snapshot_version != CHEMISTRY_KNOWLEDGE_SNAPSHOT_VERSION:
         raise ChemistryKnowledgeError("incompatible chemistry knowledge snapshot")
-    if snapshot.domain_manifest_hash != expected_domain_manifest_hash:
+    if (
+        snapshot.domain_manifest_hash
+        != expected_domain_manifest["domain_manifest_hash"]
+    ):
         raise ChemistryKnowledgeError("stale chemistry domain manifest")
-    if snapshot.fact_memory_snapshot_hash != memory.database.snapshot_hash():
-        raise ChemistryKnowledgeError("stale chemistry FactMemory snapshot")
-    if snapshot.atomic_weight_policy != CHEMISTRY_ATOMIC_WEIGHT_POLICY:
-        raise ChemistryKnowledgeError("stale atomic-weight policy")
     current = build_knowledge_snapshot(
         memory,
-        expected_domain_manifest_hash,
+        expected_domain_manifest,
         tuple(record.symbol for record in snapshot.element_records),
+        requirements=snapshot.requirements,
     )
-    if current.snapshot_hash != snapshot.snapshot_hash:
-        raise ChemistryKnowledgeError(
-            "chemistry current claim/evidence/source state changed"
-        )
+    if _dependency_hash(current) != _dependency_hash(snapshot):
+        raise ChemistryKnowledgeError("chemistry current provenance state changed")
 
 
 def atomic_weight_answer(
     memory: FactMemory,
-    domain_manifest_hash: str,
+    domain_manifest: dict[str, Any],
     element: str,
     *,
     language: str = "en",
@@ -155,7 +204,9 @@ def atomic_weight_answer(
         raise ChemistryKnowledgeError("unknown or case-invalid chemistry element")
     entity = memory.get_entity(resolution.entity_ids[0])
     symbol = entity.external_identifiers["symbol"]
-    snapshot = build_knowledge_snapshot(memory, domain_manifest_hash, (symbol,))
+    snapshot = build_knowledge_snapshot(
+        memory, domain_manifest, (symbol,), requirements=(ATOMIC_WEIGHTS,)
+    )
     record = snapshot.element_records[0]
     selected = AtomicWeightRequest(requested)
     warnings = (
@@ -184,11 +235,29 @@ def atomic_weight_answer(
     return AtomicWeightAnswerBundle(**body, answer_hash=content_hash(body))
 
 
-def snapshot_to_dict(snapshot: ChemistryKnowledgeSnapshotV2) -> dict[str, Any]:
+def validate_fact_provenance(
+    memory: FactMemory,
+    domain_manifest: dict[str, Any],
+    subject: str,
+    predicate: str,
+    *,
+    resolution_cache: dict[str, Any] | None = None,
+) -> KnowledgeBinding:
+    """Resolve one controlled fact through its exact derived/upstream chain."""
+    return _single(
+        memory,
+        subject,
+        predicate,
+        domain_manifest,
+        resolution_cache,
+    ).binding
+
+
+def snapshot_to_dict(snapshot: ChemistryKnowledgeSnapshotV3) -> dict[str, Any]:
     return asdict(snapshot)
 
 
-def snapshot_from_dict(payload: dict[str, Any]) -> ChemistryKnowledgeSnapshotV2:
+def snapshot_from_dict(payload: dict[str, Any]) -> ChemistryKnowledgeSnapshotV3:
     rows = tuple(
         AtomicWeightRecordV2(
             **{
@@ -204,39 +273,34 @@ def snapshot_from_dict(payload: dict[str, Any]) -> ChemistryKnowledgeSnapshotV2:
         )
         for row in payload["element_records"]
     )
-    bindings = tuple(
-        KnowledgeBinding(
-            **{
-                **row,
-                "evidence_ids": tuple(row["evidence_ids"]),
-                "evidence_hashes": tuple(row["evidence_hashes"]),
-                "evidence_relations": tuple(row["evidence_relations"]),
-                "source_ids": tuple(row["source_ids"]),
-                "source_record_hashes": tuple(row["source_record_hashes"]),
-                "source_state_hashes": tuple(row["source_state_hashes"]),
-                "source_status_event_hashes": tuple(row["source_status_event_hashes"]),
-                "derivation_hashes": tuple(row["derivation_hashes"]),
-            }
-        )
-        for row in payload["bindings"]
-    )
-    normalized = {
-        **payload,
-        "element_records": rows,
-        "bindings": bindings,
-        "avogadro_evidence_hashes": tuple(payload["avogadro_evidence_hashes"]),
-        "avogadro_source_record_hashes": tuple(
-            payload["avogadro_source_record_hashes"]
-        ),
-        "claim_ids": tuple(payload["claim_ids"]),
-        "claim_record_hashes": tuple(payload["claim_record_hashes"]),
-        "claim_state_hashes": tuple(payload["claim_state_hashes"]),
-        "evidence_hashes": tuple(payload["evidence_hashes"]),
-        "source_record_hashes": tuple(payload["source_record_hashes"]),
-        "source_state_hashes": tuple(payload["source_state_hashes"]),
-        "derivation_hashes": tuple(payload["derivation_hashes"]),
+    bindings = tuple(_binding_from_dict(row) for row in payload["bindings"])
+    tuple_fields = {
+        "requirements",
+        "avogadro_evidence_hashes",
+        "avogadro_source_record_hashes",
+        "claim_ids",
+        "claim_record_hashes",
+        "claim_state_hashes",
+        "evidence_hashes",
+        "source_record_hashes",
+        "source_state_hashes",
+        "derivation_hashes",
+        "derivation_ids",
+        "derivation_methods",
+        "upstream_source_ids",
+        "upstream_source_record_hashes",
+        "upstream_source_snapshot_hashes",
+        "upstream_source_state_hashes",
+        "upstream_status_event_hashes",
+        "field_mapping_evidence_hashes",
     }
-    return ChemistryKnowledgeSnapshotV2(**normalized)
+    normalized = {
+        key: tuple(value) if key in tuple_fields else value
+        for key, value in payload.items()
+    }
+    normalized["element_records"] = rows
+    normalized["bindings"] = bindings
+    return ChemistryKnowledgeSnapshotV3(**normalized)
 
 
 def _element_symbols(memory: FactMemory) -> tuple[str, ...]:
@@ -249,21 +313,46 @@ def _element_symbols(memory: FactMemory) -> tuple[str, ...]:
 
 
 def _atomic_weight_record(
-    memory: FactMemory, symbol: str
+    memory: FactMemory,
+    symbol: str,
+    manifest: dict[str, Any],
+    resolution_cache: dict[str, Any],
 ) -> tuple[AtomicWeightRecordV2, tuple[_CurrentValue, ...]]:
     resolution = resolve_chemistry_element(memory, symbol, "en")
     if len(resolution.entity_ids) != 1:
         raise ChemistryKnowledgeError(f"unknown exact element symbol: {symbol}")
     entity_id = resolution.entity_ids[0]
-    number = _single(memory, entity_id, "atomic_number")
-    symbol_value = _single(memory, entity_id, "element_symbol")
-    kind_value = _single(memory, entity_id, "atomic_weight_kind")
-    abridged = _single(memory, entity_id, "conventional_atomic_weight")
-    abridged_uncertainty = _single(
-        memory, entity_id, "conventional_atomic_weight_uncertainty"
+    number = _single(memory, entity_id, "atomic_number", manifest, resolution_cache)
+    symbol_value = _single(
+        memory, entity_id, "element_symbol", manifest, resolution_cache
     )
-    standard_notation = _single(memory, entity_id, "atomic_weight_standard_notation")
-    abridged_notation = _single(memory, entity_id, "atomic_weight_abridged_notation")
+    kind_value = _single(
+        memory, entity_id, "atomic_weight_kind", manifest, resolution_cache
+    )
+    abridged = _single(
+        memory, entity_id, "conventional_atomic_weight", manifest, resolution_cache
+    )
+    abridged_uncertainty = _single(
+        memory,
+        entity_id,
+        "conventional_atomic_weight_uncertainty",
+        manifest,
+        resolution_cache,
+    )
+    standard_notation = _single(
+        memory,
+        entity_id,
+        "atomic_weight_standard_notation",
+        manifest,
+        resolution_cache,
+    )
+    abridged_notation = _single(
+        memory,
+        entity_id,
+        "atomic_weight_abridged_notation",
+        manifest,
+        resolution_cache,
+    )
     kind = AtomicWeightKind(str(kind_value.value.value))
     common = (
         number,
@@ -275,15 +364,35 @@ def _atomic_weight_record(
         abridged_notation,
     )
     if kind == AtomicWeightKind.SINGLE:
-        nominal = _single(memory, entity_id, "standard_atomic_weight")
-        uncertainty = _single(memory, entity_id, "standard_atomic_weight_uncertainty")
+        nominal = _single(
+            memory, entity_id, "standard_atomic_weight", manifest, resolution_cache
+        )
+        uncertainty = _single(
+            memory,
+            entity_id,
+            "standard_atomic_weight_uncertainty",
+            manifest,
+            resolution_cache,
+        )
         related = (*common, nominal, uncertainty)
         standard_nominal = str(nominal.value.value)
         standard_uncertainty = str(uncertainty.value.value)
         lower = upper = None
     elif kind == AtomicWeightKind.INTERVAL:
-        lower_value = _single(memory, entity_id, "standard_atomic_weight_lower")
-        upper_value = _single(memory, entity_id, "standard_atomic_weight_upper")
+        lower_value = _single(
+            memory,
+            entity_id,
+            "standard_atomic_weight_lower",
+            manifest,
+            resolution_cache,
+        )
+        upper_value = _single(
+            memory,
+            entity_id,
+            "standard_atomic_weight_upper",
+            manifest,
+            resolution_cache,
+        )
         related = (*common, lower_value, upper_value)
         standard_nominal = standard_uncertainty = None
         lower = str(lower_value.value.value)
@@ -310,23 +419,21 @@ def _atomic_weight_record(
             sorted(item.claim_record_hash for item in bindings)
         ),
         "claim_state_hashes": tuple(sorted(item.claim_state_hash for item in bindings)),
-        "evidence_hashes": tuple(
-            sorted({item for binding in bindings for item in binding.evidence_hashes})
-        ),
-        "source_record_hashes": tuple(
-            sorted(
-                {item for binding in bindings for item in binding.source_record_hashes}
-            )
-        ),
-        "derivation_hashes": tuple(
-            sorted({item for binding in bindings for item in binding.derivation_hashes})
-        ),
+        "evidence_hashes": _flatten(bindings, "evidence_hashes"),
+        "source_record_hashes": _flatten(bindings, "source_record_hashes"),
+        "derivation_hashes": _flatten(bindings, "derivation_hashes"),
         "policy_version": CHEMISTRY_SOURCE_POLICY_VERSION,
     }
     return AtomicWeightRecordV2(**body, record_hash=content_hash(body)), related
 
 
-def _single(memory: FactMemory, subject: str, predicate: str) -> _CurrentValue:
+def _single(
+    memory: FactMemory,
+    subject: str,
+    predicate: str,
+    manifest: dict[str, Any],
+    resolution_cache: dict[str, Any] | None = None,
+) -> _CurrentValue:
     answer = memory.query(
         memory.make_query(
             subject=subject,
@@ -361,20 +468,46 @@ def _single(memory: FactMemory, subject: str, predicate: str) -> _CurrentValue:
         value.relation != EvidenceRelation.SUPPORTS for value in evidence
     ):
         raise ChemistryKnowledgeError("approved supporting evidence is required")
-    sources = tuple(memory.get_source_state(value.source_id) for value in evidence)
-    if any(value.status != SourceStatus.ACTIVE for value in sources):
-        raise ChemistryKnowledgeError("inactive source blocks chemistry knowledge")
-    derivations = tuple(
-        sorted(
-            {
-                value.record.license_metadata.get("derivation_hash")
-                for value in sources
-                if value.record.license_metadata.get("derivation_hash")
-            }
-        )
+    source_states = tuple(
+        memory.get_source_state(value.source_id) for value in evidence
     )
-    if len(derivations) != len({value.source_id for value in evidence}):
-        raise ChemistryKnowledgeError("production chemistry evidence lacks derivation")
+    if any(value.status != SourceStatus.ACTIVE for value in source_states):
+        raise ChemistryKnowledgeError(
+            "inactive derived source blocks chemistry knowledge"
+        )
+    if any(
+        value.record.source_kind != SourceKind.DETERMINISTIC_DERIVED_EXTRACT
+        for value in source_states
+    ):
+        raise ChemistryKnowledgeError("production claim must use a derived source")
+    try:
+        cache = resolution_cache if resolution_cache is not None else {}
+        for value in source_states:
+            if value.record.source_id not in cache:
+                cache[value.record.source_id] = resolve_source_derivation(
+                    value.record,
+                    manifest["source_chain"],
+                    memory,
+                    source_record_bindings=tuple(manifest["source_record_bindings"]),
+                )
+        resolutions = tuple(cache[value.record.source_id] for value in source_states)
+    except DerivationResolutionError as error:
+        raise ChemistryKnowledgeError(f"{error.code}: {error}") from error
+    field_hashes = []
+    for evidence_record, resolution in zip(evidence, resolutions, strict=True):
+        pointer = str(evidence_record.location.get("pointer", ""))
+        selected_fields = tuple(
+            item.evidence_hash
+            for item in resolution.derivation.field_level_mappings
+            if item.output_field_name == pointer
+            or item.output_field_name.startswith(pointer.rstrip("/") + "/")
+        )
+        if not selected_fields:
+            raise ChemistryKnowledgeError(
+                "claim evidence has no field mapping evidence"
+            )
+        field_hashes.extend(selected_fields)
+    upstream = _upstream_rows(resolutions)
     binding_body = {
         "claim_id": record.claim_id,
         "claim_record_hash": record.claim_record_hash,
@@ -384,13 +517,37 @@ def _single(memory: FactMemory, subject: str, predicate: str) -> _CurrentValue:
         "evidence_ids": tuple(value.evidence_id for value in evidence),
         "evidence_hashes": tuple(value.evidence_hash for value in evidence),
         "evidence_relations": tuple(value.relation.value for value in evidence),
-        "source_ids": tuple(value.record.source_id for value in sources),
-        "source_record_hashes": tuple(value.record.record_hash for value in sources),
-        "source_state_hashes": tuple(source_state_hash(value) for value in sources),
-        "source_status_event_hashes": tuple(
-            value.status_event_hash for value in sources
+        "source_ids": tuple(value.record.source_id for value in source_states),
+        "source_record_hashes": tuple(
+            value.record.record_hash for value in source_states
         ),
-        "derivation_hashes": derivations,
+        "source_state_hashes": tuple(
+            source_state_hash(value) for value in source_states
+        ),
+        "source_status_event_hashes": tuple(
+            value.status_event_hash for value in source_states
+        ),
+        "derived_exact_file_hashes": tuple(
+            value.derivation.derived_file_byte_sha256 for value in resolutions
+        ),
+        "derived_canonical_content_hashes": tuple(
+            value.derivation.derived_canonical_content_hash for value in resolutions
+        ),
+        "derivation_ids": tuple(
+            value.derivation.derivation_id for value in resolutions
+        ),
+        "derivation_hashes": tuple(
+            value.derivation.derivation_hash for value in resolutions
+        ),
+        "derivation_methods": tuple(
+            value.derivation.derivation_method.value for value in resolutions
+        ),
+        "upstream_source_ids": tuple(row[0] for row in upstream),
+        "upstream_source_record_hashes": tuple(row[1] for row in upstream),
+        "upstream_source_snapshot_hashes": tuple(row[2] for row in upstream),
+        "upstream_source_state_hashes": tuple(row[3] for row in upstream),
+        "upstream_status_event_hashes": tuple(row[4] for row in upstream),
+        "field_mapping_evidence_hashes": tuple(sorted(set(field_hashes))),
     }
     binding = KnowledgeBinding(**binding_body, binding_hash=content_hash(binding_body))
     return _CurrentValue(record.object_value, binding, record.recorded_at)
@@ -409,11 +566,80 @@ def claim_state_hash(state: Any) -> str:
     )
 
 
-def source_state_hash(state: Any) -> str:
-    return content_hash(
-        {
-            "source_record_hash": state.record.record_hash,
-            "status": state.status,
-            "status_event_hash": state.status_event_hash,
+def _verify_manifest_hash(manifest: dict[str, Any]) -> None:
+    body = dict(manifest)
+    digest = body.pop("domain_manifest_hash", None)
+    if content_hash(body) != digest:
+        raise ChemistryKnowledgeError("chemistry domain manifest hash mismatch")
+    if manifest.get("knowledge_snapshot_version") != (
+        CHEMISTRY_KNOWLEDGE_SNAPSHOT_VERSION
+    ):
+        raise ChemistryKnowledgeError("incompatible chemistry domain manifest")
+
+
+def _dependency_hash(snapshot: ChemistryKnowledgeSnapshotV3) -> str:
+    body = asdict(snapshot)
+    body.pop("snapshot_hash")
+    body.pop("fact_memory_snapshot_hash")
+    return content_hash(body)
+
+
+def _binding_from_dict(row: dict[str, Any]) -> KnowledgeBinding:
+    tuple_fields = {
+        "evidence_ids",
+        "evidence_hashes",
+        "evidence_relations",
+        "source_ids",
+        "source_record_hashes",
+        "source_state_hashes",
+        "source_status_event_hashes",
+        "derived_exact_file_hashes",
+        "derived_canonical_content_hashes",
+        "derivation_ids",
+        "derivation_hashes",
+        "derivation_methods",
+        "upstream_source_ids",
+        "upstream_source_record_hashes",
+        "upstream_source_snapshot_hashes",
+        "upstream_source_state_hashes",
+        "upstream_status_event_hashes",
+        "field_mapping_evidence_hashes",
+    }
+    return KnowledgeBinding(
+        **{
+            key: tuple(value) if key in tuple_fields else value
+            for key, value in row.items()
         }
     )
+
+
+def _upstream_rows(resolutions: tuple[Any, ...]) -> tuple[tuple[Any, ...], ...]:
+    rows: dict[str, tuple[Any, ...]] = {}
+    for resolution in resolutions:
+        for row in zip(
+            resolution.upstream_source_ids,
+            resolution.upstream_source_record_hashes,
+            resolution.upstream_source_snapshot_hashes,
+            resolution.upstream_source_state_hashes,
+            resolution.upstream_status_event_hashes,
+            strict=True,
+        ):
+            rows[row[0]] = row
+    return tuple(rows[key] for key in sorted(rows))
+
+
+def _collect(bindings: tuple[KnowledgeBinding, ...], field: str) -> tuple[str, ...]:
+    return tuple(sorted({str(getattr(item, field)) for item in bindings}))
+
+
+def _flatten(bindings: tuple[KnowledgeBinding, ...], field: str) -> tuple[str, ...]:
+    return tuple(
+        sorted({str(value) for item in bindings for value in getattr(item, field)})
+    )
+
+
+def _flatten_optional(
+    bindings: tuple[KnowledgeBinding, ...], field: str
+) -> tuple[str | None, ...]:
+    values = {value for item in bindings for value in getattr(item, field)}
+    return tuple(sorted(values, key=lambda value: "" if value is None else value))

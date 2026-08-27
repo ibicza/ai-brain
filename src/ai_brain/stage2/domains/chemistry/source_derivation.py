@@ -1,17 +1,26 @@
-"""Offline-verifiable official-source and deterministic-extract chain for M-28.1."""
+"""Offline-verifiable chemistry source chain with field-level provenance."""
 
 from __future__ import annotations
 
-import inspect
 import json
 import re
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from decimal import Decimal
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
-from ai_brain.stage2.domains.chemistry.models import SourceDerivationRecord
+from ai_brain.stage2.domains.chemistry.models import (
+    DerivationMethod,
+    FieldExtractionEvidence,
+    ManualSourceMappingApproval,
+    SourceDerivationRecordV2,
+    UpstreamSourceReference,
+)
+from ai_brain.stage2.domains.chemistry.provenance import (
+    derivation_from_dict,
+    manual_approval_from_dict,
+)
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage2.trusted_decimal import (
     DecimalLimits,
@@ -19,9 +28,13 @@ from ai_brain.stage2.trusted_decimal import (
     render_bounded_decimal,
 )
 
-SOURCE_CHAIN_VERSION = "2.0"
-EXTRACTION_POLICY_VERSION = "deterministic-selected-chemistry-fields-v2"
+SOURCE_CHAIN_VERSION = "3.0"
+SOURCE_DERIVATION_SCHEMA_VERSION = 2
+EXTRACTION_POLICY_VERSION = "verified-selected-chemistry-fields-v3"
 MAX_SOURCE_BYTES = 8_000_000
+GENERATED_AT = "2026-08-27T00:00:00Z"
+HUMAN_REVIEWER = "m282-human-reviewed-source-mapping"
+TRUSTED_EXTRACTOR = "m282-deterministic-source-extractor"
 
 OFFICIAL_SOURCE_SPECS: tuple[dict[str, Any], ...] = (
     {
@@ -79,7 +92,8 @@ OFFICIAL_SOURCE_SPECS: tuple[dict[str, Any], ...] = (
     },
 )
 
-SELECTED_ELEMENTS: tuple[tuple[int, str, str, int, int], ...] = (
+# This fixture is intentionally classified as REVIEWED_MANUAL_MAPPING in v3.
+REVIEWED_SELECTED_ELEMENTS: tuple[tuple[int, str, str, int, int], ...] = (
     (1, "H", "hydrogen", 1, 1),
     (2, "He", "helium", 1, 18),
     (3, "Li", "lithium", 2, 1),
@@ -114,6 +128,16 @@ SELECTED_ELEMENTS: tuple[tuple[int, str, str, int, int], ...] = (
     (47, "Ag", "silver", 5, 11),
     (53, "I", "iodine", 5, 17),
 )
+SELECTED_ELEMENTS = REVIEWED_SELECTED_ELEMENTS
+
+
+@dataclass(frozen=True)
+class _DerivedOutput:
+    filename: str
+    document: dict[str, Any]
+    upstream_source_ids: tuple[str, ...]
+    method: DerivationMethod
+    field_evidence: tuple[FieldExtractionEvidence, ...]
 
 
 class _TableParser(HTMLParser):
@@ -126,7 +150,7 @@ class _TableParser(HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag == "tr":
             self._row = []
-        elif tag == "td" and self._row is not None:
+        elif tag in {"td", "th"} and self._row is not None:
             self._cell = []
 
     def handle_data(self, data: str) -> None:
@@ -134,7 +158,7 @@ class _TableParser(HTMLParser):
             self._cell.append(data)
 
     def handle_endtag(self, tag: str) -> None:
-        if tag == "td" and self._row is not None and self._cell is not None:
+        if tag in {"td", "th"} and self._row is not None and self._cell is not None:
             self._row.append(" ".join("".join(self._cell).split()))
             self._cell = None
         elif tag == "tr" and self._row is not None:
@@ -145,36 +169,144 @@ class _TableParser(HTMLParser):
 
 def verify_source_chain(root: Path) -> dict[str, Any]:
     root = root.resolve()
-    manifest_path = root / "source_chain.json"
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest = json.loads((root / "source_chain.json").read_text(encoding="utf-8"))
+    body = dict(manifest)
+    digest = body.pop("source_chain_hash", None)
+    if content_hash(body) != digest:
+        raise ValueError("source chain manifest hash mismatch")
+    if manifest.get("source_chain_version") != SOURCE_CHAIN_VERSION:
+        raise ValueError("REBUILD_REQUIRED_FROM_VERIFIED_SOURCE_CHAIN_V3")
+    if manifest.get("extraction_policy_version") != EXTRACTION_POLICY_VERSION:
+        raise ValueError("source-chain extraction policy mismatch")
     official = tuple(_verify_file(root, row) for row in manifest["official_snapshots"])
-    extracts = tuple(_verify_file(root, row) for row in manifest["derived_extracts"])
+    local = tuple(_verify_file(root, row) for row in manifest["local_policy_snapshots"])
+    derived = tuple(_verify_file(root, row) for row in manifest["derived_extracts"])
+    if len(official) != 4 or len(local) != 1 or len(derived) != 4:
+        raise ValueError("source-chain category counts changed")
+    if any(row["source_kind"] != "OFFICIAL_PRIMARY" for row in official):
+        raise ValueError("official source category confusion")
+    if any(row["source_kind"] != "LOCAL_DOCUMENT" for row in local):
+        raise ValueError("local policy category confusion")
+    if any(row["source_kind"] == "OFFICIAL_PRIMARY" for row in derived):
+        raise ValueError("derived source category confusion")
+
+    approvals = {}
+    for row in manifest.get("manual_mapping_approvals", ()):
+        file_payload = json.loads(_safe_file(root, row["file"]).read_text("utf-8"))
+        if (
+            file_payload != row["record"]
+            or bytes_hash(_safe_file(root, row["file"]).read_bytes())
+            != row["file_sha256"]
+        ):
+            raise ValueError("manual mapping approval file changed")
+        approval = manual_approval_from_dict(file_payload)
+        approval_body = asdict(approval)
+        approval_hash = approval_body.pop("approval_hash")
+        if content_hash(approval_body) != approval_hash:
+            raise ValueError("manual mapping approval hash mismatch")
+        if (
+            not approval.reviewer_identity.strip()
+            or approval.reviewer_identity_type == "MODEL"
+            or approval.review_decision != "APPROVED"
+            or content_hash(approval.selected_fields) != approval.mapping_hash
+        ):
+            raise ValueError("invalid manual mapping approval")
+        approvals[approval.approval_id] = approval
+
+    derived_by_id = {row["source_id"]: row for row in derived}
+    upstream_by_id = {row["source_id"]: row for row in (*official, *local)}
     derivations = []
-    current_extractor_hash = bytes_hash(Path(__file__).read_bytes())
+    implementation_hash = _implementation_hash()
     for row in manifest["derivations"]:
         path = _safe_file(root, row["file"])
         payload = json.loads(path.read_text(encoding="utf-8"))
-        digest = payload.pop("derivation_hash")
-        if content_hash(payload) != digest or digest != row["derivation_hash"]:
-            raise ValueError(f"source derivation changed: {row['file']}")
-        if payload["extractor_implementation_hash"] != current_extractor_hash:
-            raise ValueError("source derivation extractor implementation changed")
-        official_hashes = tuple(item["sha256"] for item in official)
-        if not set(payload["official_snapshot_hashes"]) <= set(official_hashes):
-            raise ValueError("derivation references an unknown official snapshot")
-        extract_hashes = {item["sha256"] for item in extracts}
-        if payload["derived_extract_hash"] not in extract_hashes:
-            raise ValueError("derivation references an unknown derived extract")
-        derivations.append({**payload, "derivation_hash": digest})
-    body = dict(manifest)
-    digest = body.pop("source_chain_hash")
-    if content_hash(body) != digest:
-        raise ValueError("source chain manifest hash mismatch")
+        if (
+            payload != row["record"]
+            or bytes_hash(path.read_bytes()) != row["file_sha256"]
+        ):
+            raise ValueError("source derivation file changed")
+        record = derivation_from_dict(payload)
+        record_body = asdict(record)
+        record_hash = record_body.pop("derivation_hash")
+        if (
+            content_hash(record_body) != record_hash
+            or row["derivation_hash"] != record_hash
+        ):
+            raise ValueError("source derivation hash mismatch")
+        if record.schema_version != SOURCE_DERIVATION_SCHEMA_VERSION:
+            raise ValueError("source derivation schema mismatch")
+        if record.extractor_implementation_manifest_hash != implementation_hash:
+            raise ValueError("source derivation implementation changed")
+        derived_row = derived_by_id.get(record.derived_source_id)
+        if (
+            derived_row is None
+            or derived_row["sha256"] != record.derived_file_byte_sha256
+        ):
+            raise ValueError("derivation/derived source mismatch")
+        document = json.loads(_safe_file(root, derived_row["file"]).read_text("utf-8"))
+        if content_hash(document) != record.derived_canonical_content_hash:
+            raise ValueError("derived canonical content changed")
+        if record.expected_source_snapshot_hash != derived_row["sha256"]:
+            raise ValueError("expected derived snapshot mismatch")
+        for reference in record.upstream_sources:
+            reference_body = asdict(reference)
+            reference_hash = reference_body.pop("reference_hash")
+            upstream = upstream_by_id.get(reference.source_id)
+            if (
+                content_hash(reference_body) != reference_hash
+                or upstream is None
+                or upstream["sha256"] != reference.snapshot_hash
+                or upstream["source_kind"] != reference.source_kind
+                or upstream["source_family"] != reference.source_family
+            ):
+                raise ValueError("invalid upstream source reference")
+        for evidence in record.field_level_mappings:
+            evidence_body = asdict(evidence)
+            evidence_hash = evidence_body.pop("evidence_hash")
+            if (
+                content_hash(evidence_body) != evidence_hash
+                or evidence.extraction_method != record.derivation_method
+                or evidence.upstream_source_id
+                not in {item.source_id for item in record.upstream_sources}
+            ):
+                raise ValueError("invalid field extraction evidence")
+        if not record.field_level_mappings:
+            raise ValueError("production derivation has no field evidence")
+        if record.derivation_method == DerivationMethod.REVIEWED_MANUAL_MAPPING:
+            approval = approvals.get(record.manual_mapping_approval_id or "")
+            if (
+                approval is None
+                or approval.approval_hash != record.manual_mapping_approval_hash
+            ):
+                raise ValueError("reviewed mapping lacks matching approval")
+        elif record.manual_mapping_approval_id is not None:
+            raise ValueError("non-manual derivation has a manual approval")
+        derivations.append(record)
+    if len({row.derivation_id for row in derivations}) != len(derivations):
+        raise ValueError("duplicate derivation ID")
+    if len({row.derived_source_id for row in derivations}) != len(derivations):
+        raise ValueError("multiple derivations claim one source")
+    if {row.derived_source_id for row in derivations} != set(derived_by_id):
+        raise ValueError("source/derivation coverage mismatch")
+    methods = [row.derivation_method for row in derivations]
     return {
         "status": "VERIFIED",
-        "official_count": len(official),
-        "derived_count": len(extracts),
+        "official_snapshot_count": len(official),
+        "local_policy_snapshot_count": len(local),
+        "derived_extract_count": len(derived),
         "derivation_count": len(derivations),
+        "deterministic_derivation_count": methods.count(
+            DerivationMethod.DETERMINISTIC_EXTRACTION
+        ),
+        "manual_mapping_derivation_count": methods.count(
+            DerivationMethod.REVIEWED_MANUAL_MAPPING
+        ),
+        "policy_transformation_count": methods.count(
+            DerivationMethod.POLICY_TRANSFORMATION
+        ),
+        "field_evidence_count": sum(
+            len(row.field_level_mappings) for row in derivations
+        ),
         "source_chain_hash": digest,
     }
 
@@ -184,146 +316,163 @@ def build_derived_sources(root: Path, *, retrieved_at: str) -> dict[str, Any]:
     official_dir = root / "official"
     derived_dir = root / "derived"
     derivation_dir = root / "derivations"
-    derived_dir.mkdir(parents=True, exist_ok=True)
-    derivation_dir.mkdir(parents=True, exist_ok=True)
+    approval_dir = root / "approvals"
+    for directory in (derived_dir, derivation_dir, approval_dir):
+        directory.mkdir(parents=True, exist_ok=True)
     specs = {row["source_id"]: row for row in OFFICIAL_SOURCE_SPECS}
     for spec in OFFICIAL_SOURCE_SPECS:
         _verify_raw(official_dir / spec["filename"], spec)
+    policy_path = root / "policy" / "ru_element_names_policy_v1.json"
+    policy = json.loads(policy_path.read_text(encoding="utf-8"))
+    local_spec = _local_policy_manifest_row(policy_path, policy, retrieved_at)
+    implementation_hash = _implementation_hash()
 
-    outputs: list[
-        tuple[str, dict[str, Any], tuple[str, ...], tuple[dict[str, Any], ...]]
-    ] = []
-    outputs.append(
-        (
+    iupac = _extract_iupac(specs, retrieved_at)
+    ciaaw = _extract_ciaaw(official_dir, specs, retrieved_at)
+    bipm = _extract_bipm(official_dir, specs, retrieved_at)
+    ru_policy = {
+        **policy,
+        "source": {
+            **policy["source"],
+            "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+            "derivation_method": DerivationMethod.POLICY_TRANSFORMATION.value,
+        },
+    }
+    outputs = (
+        _DerivedOutput(
             "iupac_elements_2022.json",
-            _extract_iupac(specs, retrieved_at),
+            iupac,
             ("official_iupac_periodic_table_2022",),
-            tuple(
-                {
-                    "symbol": symbol,
-                    "fields": ("atomic_number", "name_en", "period", "group"),
-                }
-                for _, symbol, _, _, _ in SELECTED_ELEMENTS
-            ),
-        )
-    )
-    outputs.append(
-        (
+            DerivationMethod.REVIEWED_MANUAL_MAPPING,
+            _iupac_field_evidence(iupac, specs, implementation_hash),
+        ),
+        _DerivedOutput(
             "ciaaw_atomic_weights_2024.json",
-            _extract_ciaaw(official_dir, specs, retrieved_at),
+            ciaaw,
             (
                 "official_ciaaw_standard_weights_2024",
                 "official_ciaaw_abridged_weights_2024",
             ),
-            tuple(
-                {"symbol": symbol, "fields": ("standard", "abridged", "uncertainty")}
-                for _, symbol, _, _, _ in SELECTED_ELEMENTS
-            ),
-        )
-    )
-    outputs.append(
-        (
+            DerivationMethod.DETERMINISTIC_EXTRACTION,
+            _ciaaw_field_evidence(ciaaw, official_dir, specs, implementation_hash),
+        ),
+        _DerivedOutput(
             "bipm_si_mole_2026.json",
-            _extract_bipm(official_dir, specs, retrieved_at),
+            bipm,
             ("official_bipm_si_brochure_4_01",),
-            (
-                {
-                    "json_pointer": "/mole/avogadro_constant",
-                    "source_text": "exact mole definition",
-                },
-            ),
-        )
-    )
-    policy_path = root / "policy" / "ru_element_names_policy_v1.json"
-    policy = json.loads(policy_path.read_text(encoding="utf-8"))
-    outputs.append(
-        (
+            DerivationMethod.REVIEWED_MANUAL_MAPPING,
+            _bipm_field_evidence(bipm, specs, implementation_hash),
+        ),
+        _DerivedOutput(
             "ru_element_names_policy_v1.json",
-            {
-                **policy,
-                "source": {
-                    **policy["source"],
-                    "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
-                },
-            },
+            ru_policy,
             ("local_ru_element_names_policy_v1",),
-            tuple(
-                {"symbol": key, "field": "name_ru"} for key in sorted(policy["names"])
-            ),
-        )
-    )
-
-    extractor_hash = bytes_hash(
-        Path(inspect.getsourcefile(build_derived_sources) or __file__).read_bytes()
+            DerivationMethod.POLICY_TRANSFORMATION,
+            _ru_field_evidence(ru_policy, local_spec, implementation_hash),
+        ),
     )
     official_rows = [
         _official_manifest_row(root, row, retrieved_at) for row in OFFICIAL_SOURCE_SPECS
     ]
-    derived_rows = []
-    derivation_rows = []
-    for filename, document, source_ids, mapping in outputs:
-        path = derived_dir / filename
-        _write_json(path, document)
-        digest = bytes_hash(path.read_bytes())
-        source_id = f"derived_{filename.removesuffix('.json')}"
-        derived_rows.append(
-            {
-                "source_id": source_id,
-                "file": f"derived/{filename}",
-                "sha256": digest,
-                "media_type": "application/json",
-                "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
-            }
-        )
-        upstream = tuple(
-            row["sha256"] if row["source_id"] in source_ids else ""
-            for row in official_rows
-            if row["source_id"] in source_ids
-        )
-        if source_ids == ("local_ru_element_names_policy_v1",):
-            upstream = (bytes_hash(policy_path.read_bytes()),)
-        body = {
-            "derivation_id": f"derivation_{filename.removesuffix('.json')}",
-            "official_source_ids": source_ids,
-            "official_snapshot_hashes": upstream,
-            "derived_extract_source_id": source_id,
-            "derived_extract_hash": digest,
-            "extractor_module": __name__,
-            "extractor_implementation_hash": extractor_hash,
-            "extraction_policy_version": EXTRACTION_POLICY_VERSION,
-            "selected_row_field_mapping": mapping,
-            "generated_at": "2026-08-27T00:00:00Z",
-            "reviewer": "m281-deterministic-source-extractor",
+    upstream_rows = {row["source_id"]: row for row in (*official_rows, local_spec)}
+    derived_rows: list[dict[str, Any]] = []
+    derivation_rows: list[dict[str, Any]] = []
+    approval_rows: list[dict[str, Any]] = []
+    for output in outputs:
+        path = derived_dir / output.filename
+        _write_json(path, output.document)
+        file_hash = bytes_hash(path.read_bytes())
+        source_id = f"derived_{output.filename.removesuffix('.json')}"
+        derived_row = {
+            "source_id": source_id,
+            "file": f"derived/{output.filename}",
+            "sha256": file_hash,
+            "canonical_content_hash": content_hash(output.document),
+            "media_type": "application/json",
+            "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+            "derivation_method": output.method.value,
         }
-        record = SourceDerivationRecord(**body, derivation_hash=content_hash(body))
+        derived_rows.append(derived_row)
+        approval = None
+        if output.method == DerivationMethod.REVIEWED_MANUAL_MAPPING:
+            approval = _manual_approval(output, upstream_rows)
+            approval_file = f"approvals/{approval.approval_id}.json"
+            _write_json(root / approval_file, asdict(approval))
+            approval_rows.append(
+                {
+                    "approval_id": approval.approval_id,
+                    "file": approval_file,
+                    "file_sha256": bytes_hash((root / approval_file).read_bytes()),
+                    "approval_hash": approval.approval_hash,
+                    "record": asdict(approval),
+                }
+            )
+        references = tuple(
+            _upstream_reference(upstream_rows[source_id], output.field_evidence)
+            for source_id in output.upstream_source_ids
+        )
+        body = {
+            "derivation_id": f"derivation_{output.filename.removesuffix('.json')}",
+            "schema_version": SOURCE_DERIVATION_SCHEMA_VERSION,
+            "derivation_method": output.method,
+            "derived_source_id": source_id,
+            "derived_source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+            "derived_media_type": "application/json",
+            "derived_file_path": derived_row["file"],
+            "derived_file_byte_sha256": file_hash,
+            "derived_canonical_content_hash": content_hash(output.document),
+            "expected_source_snapshot_hash": file_hash,
+            "expected_source_record_hash": None,
+            "upstream_sources": references,
+            "extractor_reviewer_identity": (
+                TRUSTED_EXTRACTOR
+                if output.method == DerivationMethod.DETERMINISTIC_EXTRACTION
+                else HUMAN_REVIEWER
+            ),
+            "extractor_implementation_manifest_hash": implementation_hash,
+            "extraction_policy_version": EXTRACTION_POLICY_VERSION,
+            "field_level_mappings": output.field_evidence,
+            "generated_at": GENERATED_AT,
+            "reviewed_at": (
+                GENERATED_AT
+                if output.method != DerivationMethod.DETERMINISTIC_EXTRACTION
+                else None
+            ),
+            "reviewer_identity": (
+                HUMAN_REVIEWER
+                if output.method != DerivationMethod.DETERMINISTIC_EXTRACTION
+                else None
+            ),
+            "reviewer_identity_type": (
+                "HUMAN"
+                if output.method != DerivationMethod.DETERMINISTIC_EXTRACTION
+                else None
+            ),
+            "manual_mapping_approval_id": approval.approval_id if approval else None,
+            "manual_mapping_approval_hash": approval.approval_hash
+            if approval
+            else None,
+        }
+        record = SourceDerivationRecordV2(**body, derivation_hash=content_hash(body))
         derivation_file = f"derivations/{record.derivation_id}.json"
         _write_json(root / derivation_file, asdict(record))
         derivation_rows.append(
             {
                 "derivation_id": record.derivation_id,
+                "derived_source_id": record.derived_source_id,
                 "file": derivation_file,
+                "file_sha256": bytes_hash((root / derivation_file).read_bytes()),
                 "derivation_hash": record.derivation_hash,
+                "record": asdict(record),
             }
         )
-    local_row = {
-        "source_id": "local_ru_element_names_policy_v1",
-        "file": "policy/ru_element_names_policy_v1.json",
-        "sha256": bytes_hash(policy_path.read_bytes()),
-        "media_type": "application/json",
-        "source_kind": "LOCAL_DOCUMENT",
-        "title": policy["source"]["title"],
-        "authority": policy["source"]["authority"],
-        "version": policy["source"]["version"],
-        "published_at": policy["source"]["published_at"],
-        "retrieved_at": retrieved_at,
-        "url": policy["source"]["locator"],
-        "source_family": policy["source"]["source_family"],
-        "license": policy["source"]["license"],
-    }
     manifest_body = {
         "source_chain_version": SOURCE_CHAIN_VERSION,
-        "official_snapshots": tuple(official_rows) + (local_row,),
+        "extraction_policy_version": EXTRACTION_POLICY_VERSION,
+        "official_snapshots": tuple(official_rows),
+        "local_policy_snapshots": (local_spec,),
         "derived_extracts": tuple(derived_rows),
+        "manual_mapping_approvals": tuple(approval_rows),
         "derivations": tuple(derivation_rows),
     }
     manifest = {**manifest_body, "source_chain_hash": content_hash(manifest_body)}
@@ -339,29 +488,20 @@ def load_source_chain(root: Path) -> dict[str, Any]:
 
 def load_derived_documents(root: Path) -> dict[str, dict[str, Any]]:
     chain = load_source_chain(root)
-    result = {}
-    for row in chain["derived_extracts"]:
-        result[Path(row["file"]).name] = json.loads(
+    return {
+        Path(row["file"]).name: json.loads(
             _safe_file(root.resolve(), row["file"]).read_text(encoding="utf-8")
         )
-    return result
+        for row in chain["derived_extracts"]
+    }
 
 
-def load_derivations(root: Path) -> dict[str, SourceDerivationRecord]:
+def load_derivations(root: Path) -> dict[str, SourceDerivationRecordV2]:
     chain = load_source_chain(root)
-    records = {}
-    for row in chain["derivations"]:
-        payload = json.loads(
-            _safe_file(root.resolve(), row["file"]).read_text(encoding="utf-8")
-        )
-        payload["official_source_ids"] = tuple(payload["official_source_ids"])
-        payload["official_snapshot_hashes"] = tuple(payload["official_snapshot_hashes"])
-        payload["selected_row_field_mapping"] = tuple(
-            payload["selected_row_field_mapping"]
-        )
-        record = SourceDerivationRecord(**payload)
-        records[record.derived_extract_source_id] = record
-    return records
+    return {
+        row["derived_source_id"]: derivation_from_dict(row["record"])
+        for row in chain["derivations"]
+    }
 
 
 def _extract_iupac(
@@ -369,11 +509,14 @@ def _extract_iupac(
 ) -> dict[str, Any]:
     spec = specs["official_iupac_periodic_table_2022"]
     return {
-        "source": _derived_metadata(
-            spec,
-            retrieved_at,
-            "Selected identity fields from the official IUPAC periodic table",
-        ),
+        "source": {
+            **_derived_metadata(
+                spec,
+                retrieved_at,
+                "Reviewed 33-element identity mapping bound to the official IUPAC PDF",
+            ),
+            "derivation_method": DerivationMethod.REVIEWED_MANUAL_MAPPING.value,
+        },
         "elements": [
             {
                 "atomic_number": z,
@@ -382,7 +525,7 @@ def _extract_iupac(
                 "period": period,
                 "group": group,
             }
-            for z, symbol, name, period, group in SELECTED_ELEMENTS
+            for z, symbol, name, period, group in REVIEWED_SELECTED_ELEMENTS
         ],
     }
 
@@ -397,11 +540,17 @@ def _extract_ciaaw(
         official_dir / specs["official_ciaaw_abridged_weights_2024"]["filename"]
     )
     rows = []
-    for z, symbol, name, _, _ in SELECTED_ELEMENTS:
-        standard_row = standard[symbol]
-        abridged_row = abridged[symbol]
-        if int(standard_row[0]) != z or standard_row[2].casefold() != name:
-            raise ValueError(f"CIAAW standard identity mismatch for {symbol}")
+    for z, symbol, name, _, _ in REVIEWED_SELECTED_ELEMENTS:
+        standard_row = standard[symbol][1]
+        abridged_row = abridged[symbol][1]
+        if (
+            int(standard_row[0]) != z
+            or standard_row[1] != symbol
+            or standard_row[2].casefold() != name
+            or int(abridged_row[0]) != z
+            or abridged_row[1] != symbol
+        ):
+            raise ValueError(f"CIAAW element identity mismatch for {symbol}")
         standard_notation = standard_row[3].replace(" ", "")
         abridged_notation = abridged_row[3].replace(" ", "")
         abridged_match = re.fullmatch(r"([0-9.]+)±([0-9.]+)", abridged_notation)
@@ -445,7 +594,7 @@ def _extract_ciaaw(
     return {
         "source": {
             "authority": specs["official_ciaaw_standard_weights_2024"]["authority"],
-            "title": "Standard Atomic Weights 2024 and Abridged Standard Atomic Weights 2024, deterministic selected extract",
+            "title": "CIAAW 2024 deterministic selected atomic-weight extract",
             "version": "2024",
             "standard_url": specs["official_ciaaw_standard_weights_2024"]["url"],
             "abridged_url": specs["official_ciaaw_abridged_weights_2024"]["url"],
@@ -455,6 +604,7 @@ def _extract_ciaaw(
             "license": "Official public reference pages; attribution retained",
             "source_family": "CIAAW_ATOMIC_WEIGHTS_DERIVED",
             "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+            "derivation_method": DerivationMethod.DETERMINISTIC_EXTRACTION.value,
             "limitations": "Selected 33-element extract; uncertainty retained",
         },
         "weights": rows,
@@ -471,12 +621,15 @@ def _extract_bipm(
     return {
         "source": {
             **_derived_metadata(
-                spec, retrieved_at, "Mole definition and exact Avogadro constant"
+                spec,
+                retrieved_at,
+                "Reviewed mole-definition mapping from printed page 134",
             ),
-            "title": "The International System of Units (SI), 9th edition, version 4.01, selected mole extract",
+            "title": "SI Brochure 9th edition v4.01 reviewed mole mapping",
             "version": "9th edition, version 4.01",
             "doi": "10.59161/AUEZ1291",
             "published_at": "2026-06-04",
+            "derivation_method": DerivationMethod.REVIEWED_MANUAL_MAPPING.value,
         },
         "mole": {
             "unit_name": "mole",
@@ -489,10 +642,206 @@ def _extract_bipm(
     }
 
 
-def _table_rows(path: Path) -> dict[str, list[str]]:
+def _iupac_field_evidence(
+    document: dict[str, Any], specs: dict[str, dict[str, Any]], implementation_hash: str
+) -> tuple[FieldExtractionEvidence, ...]:
+    spec = specs["official_iupac_periodic_table_2022"]
+    rows = []
+    for index, element in enumerate(document["elements"]):
+        for field, value in element.items():
+            rows.append(
+                _field_evidence(
+                    f"/elements/{index}/{field}",
+                    value,
+                    spec,
+                    "PDF_REVIEWED_TABLE_CELL",
+                    {
+                        "printed_page": 1,
+                        "symbol": element["symbol"],
+                        "field": field,
+                    },
+                    None,
+                    DerivationMethod.REVIEWED_MANUAL_MAPPING,
+                    implementation_hash,
+                    HUMAN_REVIEWER,
+                )
+            )
+    return tuple(rows)
+
+
+def _ciaaw_field_evidence(
+    document: dict[str, Any],
+    official_dir: Path,
+    specs: dict[str, dict[str, Any]],
+    implementation_hash: str,
+) -> tuple[FieldExtractionEvidence, ...]:
+    standard_spec = specs["official_ciaaw_standard_weights_2024"]
+    abridged_spec = specs["official_ciaaw_abridged_weights_2024"]
+    standard = _table_rows(official_dir / standard_spec["filename"])
+    abridged = _table_rows(official_dir / abridged_spec["filename"])
+    rows = []
+    for index, item in enumerate(document["weights"]):
+        symbol = item["symbol"]
+        for field, value in item.items():
+            is_abridged = field.startswith("abridged")
+            spec = abridged_spec if is_abridged else standard_spec
+            table_row = abridged[symbol] if is_abridged else standard[symbol]
+            rows.append(
+                _field_evidence(
+                    f"/weights/{index}/{field}",
+                    value,
+                    spec,
+                    "HTML_TABLE_CELL",
+                    {
+                        "table_header": (
+                            "Atomic Number|Symbol|Name|Abridged Standard Atomic Weight"
+                            if is_abridged
+                            else "Atomic Number|Symbol|Name|Standard Atomic Weight"
+                        ),
+                        "row_index": table_row[0],
+                        "symbol": symbol,
+                        "field": field,
+                    },
+                    content_hash(table_row[1]),
+                    DerivationMethod.DETERMINISTIC_EXTRACTION,
+                    implementation_hash,
+                    None,
+                )
+            )
+    return tuple(rows)
+
+
+def _bipm_field_evidence(
+    document: dict[str, Any], specs: dict[str, dict[str, Any]], implementation_hash: str
+) -> tuple[FieldExtractionEvidence, ...]:
+    spec = specs["official_bipm_si_brochure_4_01"]
+    reviewed_excerpt = (
+        "One mole contains exactly 6.022 140 76 x 10^23 elementary entities; "
+        "the fixed numerical value is expressed in mol^-1."
+    )
+    return tuple(
+        _field_evidence(
+            f"/mole/{field}",
+            value,
+            spec,
+            "PDF_REVIEWED_SPAN",
+            {"printed_page": 134, "section": "2.3.6 The mole", "field": field},
+            content_hash(reviewed_excerpt),
+            DerivationMethod.REVIEWED_MANUAL_MAPPING,
+            implementation_hash,
+            HUMAN_REVIEWER,
+        )
+        for field, value in document["mole"].items()
+    )
+
+
+def _ru_field_evidence(
+    document: dict[str, Any], local_spec: dict[str, Any], implementation_hash: str
+) -> tuple[FieldExtractionEvidence, ...]:
+    return tuple(
+        _field_evidence(
+            f"/names/{symbol}",
+            value,
+            local_spec,
+            "JSON_POINTER",
+            {"pointer": f"/names/{symbol}"},
+            content_hash(value),
+            DerivationMethod.POLICY_TRANSFORMATION,
+            implementation_hash,
+            HUMAN_REVIEWER,
+        )
+        for symbol, value in sorted(document["names"].items())
+    )
+
+
+def _field_evidence(
+    output_field: str,
+    value: Any,
+    upstream: dict[str, Any],
+    location_type: str,
+    locator: dict[str, Any],
+    excerpt_hash: str | None,
+    method: DerivationMethod,
+    implementation_hash: str,
+    reviewer: str | None,
+) -> FieldExtractionEvidence:
+    body = {
+        "output_field_name": output_field,
+        "output_canonical_value": value,
+        "upstream_source_id": upstream["source_id"],
+        "upstream_snapshot_hash": upstream["sha256"],
+        "upstream_location_type": location_type,
+        "upstream_locator": locator,
+        "upstream_excerpt_hash": excerpt_hash,
+        "extraction_method": method,
+        "parser_mapping_implementation_hash": implementation_hash,
+        "reviewer": reviewer,
+    }
+    return FieldExtractionEvidence(**body, evidence_hash=content_hash(body))
+
+
+def _manual_approval(
+    output: _DerivedOutput, upstream_rows: dict[str, dict[str, Any]]
+) -> ManualSourceMappingApproval:
+    selected_fields = tuple(
+        {
+            "output_field_name": item.output_field_name,
+            "output_canonical_value": item.output_canonical_value,
+            "upstream_locator": item.upstream_locator,
+            "upstream_excerpt_hash": item.upstream_excerpt_hash,
+        }
+        for item in output.field_evidence
+    )
+    upstream = upstream_rows[output.upstream_source_ids[0]]
+    body = {
+        "approval_id": f"approval_{output.filename.removesuffix('.json')}",
+        "official_source_id": upstream["source_id"],
+        "official_snapshot_hash": upstream["sha256"],
+        "selected_fields": selected_fields,
+        "reviewer_identity": HUMAN_REVIEWER,
+        "reviewer_identity_type": "HUMAN",
+        "review_decision": "APPROVED",
+        "policy_version": EXTRACTION_POLICY_VERSION,
+        "mapping_hash": content_hash(selected_fields),
+        "timestamp": GENERATED_AT,
+    }
+    return ManualSourceMappingApproval(**body, approval_hash=content_hash(body))
+
+
+def _upstream_reference(
+    source: dict[str, Any], evidence: tuple[FieldExtractionEvidence, ...]
+) -> UpstreamSourceReference:
+    locations = tuple(
+        sorted(
+            {
+                item.upstream_location_type
+                for item in evidence
+                if item.upstream_source_id == source["source_id"]
+            }
+        )
+    )
+    body = {
+        "source_id": source["source_id"],
+        "source_kind": source["source_kind"],
+        "snapshot_hash": source["sha256"],
+        "expected_source_record_hash": None,
+        "source_family": source["source_family"],
+        "field_location_used": locations,
+    }
+    return UpstreamSourceReference(**body, reference_hash=content_hash(body))
+
+
+def _table_rows(path: Path) -> dict[str, tuple[int, list[str]]]:
     parser = _TableParser()
     parser.feed(path.read_text(encoding="utf-8"))
-    return {row[1]: row for row in parser.rows if len(row) >= 4 and row[0].isdigit()}
+    result = {
+        row[1]: (index, row)
+        for index, row in enumerate(parser.rows)
+        if len(row) >= 4 and row[0].isdigit()
+    }
+    if not result or not {"H", "C", "Fe"} <= set(result):
+        raise ValueError("CIAAW table headers/rows are not recognized")
+    return result
 
 
 def _canonical(value: str | Decimal) -> str:
@@ -505,7 +854,7 @@ def _derived_metadata(
 ) -> dict[str, Any]:
     return {
         "authority": spec["authority"],
-        "title": spec["title"] + ", deterministic selected extract",
+        "title": spec["title"] + ", selected mapping",
         "version": spec["version"],
         "url": spec["url"],
         "published_at": spec["published_at"],
@@ -521,12 +870,47 @@ def _derived_metadata(
 def _official_manifest_row(
     root: Path, spec: dict[str, Any], retrieved_at: str
 ) -> dict[str, Any]:
-    return {
+    row = {
         **spec,
         "file": f"official/{spec['filename']}",
         "retrieved_at": retrieved_at,
         "source_kind": "OFFICIAL_PRIMARY",
     }
+    _verify_file(root, row)
+    return row
+
+
+def _local_policy_manifest_row(
+    path: Path, policy: dict[str, Any], retrieved_at: str
+) -> dict[str, Any]:
+    metadata = policy["source"]
+    return {
+        "source_id": "local_ru_element_names_policy_v1",
+        "file": "policy/ru_element_names_policy_v1.json",
+        "sha256": bytes_hash(path.read_bytes()),
+        "media_type": "application/json",
+        "source_kind": "LOCAL_DOCUMENT",
+        "title": metadata["title"],
+        "authority": metadata["authority"],
+        "version": metadata["version"],
+        "published_at": metadata["published_at"],
+        "retrieved_at": retrieved_at,
+        "url": metadata["locator"],
+        "source_family": metadata["source_family"],
+        "license": metadata["license"],
+    }
+
+
+def _implementation_hash() -> str:
+    source = Path(__file__).read_text(encoding="utf-8").replace("\r\n", "\n")
+    return content_hash(
+        {
+            "module": __name__,
+            "source": source,
+            "source_chain_version": SOURCE_CHAIN_VERSION,
+            "extraction_policy_version": EXTRACTION_POLICY_VERSION,
+        }
+    )
 
 
 def _verify_raw(path: Path, spec: dict[str, Any]) -> None:

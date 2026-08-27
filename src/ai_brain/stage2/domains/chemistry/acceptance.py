@@ -27,9 +27,7 @@ from ai_brain.stage2.router.models import ResponseStage, RouteStatus, RouteTarge
 
 def run_acceptance(service: ChemistryDomainService) -> dict[str, Any]:
     parser = FormulaParser(set(service.manifest["supported_elements"]))
-    snapshot = build_knowledge_snapshot(
-        service.memory, service.manifest["domain_manifest_hash"]
-    )
+    snapshot = build_knowledge_snapshot(service.memory, service.manifest)
     formula_cases = _formula_acceptance(parser, snapshot)
     invalid_cases = _invalid_acceptance(parser)
     mass_cases = _mass_acceptance(parser, snapshot)

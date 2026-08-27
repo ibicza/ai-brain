@@ -51,7 +51,7 @@ def test_golden_formulas_and_molar_masses(chemistry_service):
     parser = FormulaParser(set(chemistry_service.manifest["supported_elements"]))
     snapshot = build_knowledge_snapshot(
         chemistry_service.memory,
-        chemistry_service.manifest["domain_manifest_hash"],
+        chemistry_service.manifest,
     )
     for row in GOLDEN["formulas"]:
         ast = parser.parse(row["formula"])
@@ -128,7 +128,7 @@ def test_at_least_100_invalid_formulas_fail_closed(chemistry_service):
 def test_mass_amount_500_case_acceptance(chemistry_service):
     parser = FormulaParser(set(chemistry_service.manifest["supported_elements"]))
     snapshot = build_knowledge_snapshot(
-        chemistry_service.memory, chemistry_service.manifest["domain_manifest_hash"]
+        chemistry_service.memory, chemistry_service.manifest
     )
     formulas = ("H2O", "CO2", "NaCl", "CaCO3", "H2SO4")
     checked = 0
@@ -166,7 +166,7 @@ def test_mass_amount_500_case_acceptance(chemistry_service):
 
 def test_entity_amount_200_case_acceptance(chemistry_service):
     snapshot = build_knowledge_snapshot(
-        chemistry_service.memory, chemistry_service.manifest["domain_manifest_hash"], ()
+        chemistry_service.memory, chemistry_service.manifest, ()
     )
     constant = Decimal(snapshot.avogadro_constant)
     checked = 0

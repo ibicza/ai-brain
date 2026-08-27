@@ -22,7 +22,9 @@ from ai_brain.stage2.domains.chemistry.version import (
     CHEMISTRY_DOMAIN_SCHEMA_VERSION,
     CHEMISTRY_DOMAIN_VERSION,
     CHEMISTRY_FORMULA_GRAMMAR_VERSION,
+    CHEMISTRY_KNOWLEDGE_SNAPSHOT_VERSION,
     CHEMISTRY_RENDERING_VERSION,
+    CHEMISTRY_RESULT_SCHEMA_VERSION,
     CHEMISTRY_SOURCE_POLICY_VERSION,
 )
 from ai_brain.stage2.facts.canonical import canonicalize, content_hash
@@ -35,20 +37,55 @@ def build_domain_manifest(
     tool_manifest_hashes: tuple[tuple[str, str], ...] = (),
 ) -> dict[str, Any]:
     symbols = _supported_symbols(memory)
+    chain = source_manifest(source_dir)
+    source_rows = (
+        *chain["official_snapshots"],
+        *chain["local_policy_snapshots"],
+        *chain["derived_extracts"],
+    )
+    source_record_bindings = tuple(
+        {
+            "source_id": row["source_id"],
+            "record_hash": memory.get_source_record(row["source_id"]).record_hash,
+            "snapshot_hash": memory.get_source_record(row["source_id"]).snapshot_hash,
+            "source_kind": memory.get_source_record(row["source_id"]).source_kind.value,
+            "source_family": memory.get_source_record(row["source_id"]).source_family,
+        }
+        for row in source_rows
+    )
     reproducible = {
         "domain_version": CHEMISTRY_DOMAIN_VERSION,
         "domain_schema_version": CHEMISTRY_DOMAIN_SCHEMA_VERSION,
         "source_policy_version": CHEMISTRY_SOURCE_POLICY_VERSION,
-        "source_chain": source_manifest(source_dir),
+        "source_chain": chain,
+        "source_chain_version": chain["source_chain_version"],
+        "source_chain_hash": chain["source_chain_hash"],
+        "source_record_bindings": source_record_bindings,
         "official_source_snapshot_hashes": tuple(
-            row["sha256"] for row in source_manifest(source_dir)["official_snapshots"]
+            row["sha256"] for row in chain["official_snapshots"]
+        ),
+        "local_policy_snapshot_hashes": tuple(
+            row["sha256"] for row in chain["local_policy_snapshots"]
         ),
         "derived_extract_hashes": tuple(
-            row["sha256"] for row in source_manifest(source_dir)["derived_extracts"]
+            row["sha256"] for row in chain["derived_extracts"]
         ),
         "source_derivation_hashes": tuple(
-            row["derivation_hash"] for row in source_manifest(source_dir)["derivations"]
+            row["derivation_hash"] for row in chain["derivations"]
         ),
+        "source_derivation_methods": tuple(
+            row["record"]["derivation_method"] for row in chain["derivations"]
+        ),
+        "field_extraction_evidence_hashes": tuple(
+            evidence["evidence_hash"]
+            for row in chain["derivations"]
+            for evidence in row["record"]["field_level_mappings"]
+        ),
+        "official_source_category": "AUTHORITY_PUBLISHED_SNAPSHOT",
+        "local_policy_category": "PROJECT_REVIEWED_LOCAL_POLICY",
+        "upstream_source_state_policy": "ALL_REQUIRED_UPSTREAM_SOURCES_ACTIVE_V3",
+        "knowledge_snapshot_version": CHEMISTRY_KNOWLEDGE_SNAPSHOT_VERSION,
+        "result_schema_version": CHEMISTRY_RESULT_SCHEMA_VERSION,
         "bipm_baseline": {
             "title": "The International System of Units (SI), 9th edition",
             "version": "4.01",
@@ -89,6 +126,12 @@ def build_domain_manifest(
         "rounding_policy": asdict(ChemistryRoundingSpec()),
         "tool_manifest_hashes": tool_manifest_hashes,
         "router_grammar_version": "1.0",
+        "provenance_limitations": (
+            "IUPAC selected identity fields are REVIEWED_MANUAL_MAPPING",
+            "BIPM selected mole fields are REVIEWED_MANUAL_MAPPING",
+            "CIAAW selected atomic-weight fields are DETERMINISTIC_EXTRACTION",
+            "RU names are a local POLICY_TRANSFORMATION, not IUPAC data",
+        ),
     }
     body = {
         **reproducible,
@@ -106,7 +149,7 @@ def verify_domain_manifest(
     if content_hash(body) != digest:
         raise ValueError("chemistry domain manifest hash mismatch")
     if body.get("domain_schema_version") != CHEMISTRY_DOMAIN_SCHEMA_VERSION:
-        raise ValueError("REBUILD_REQUIRED_FROM_FROZEN_SOURCES")
+        raise ValueError("REBUILD_REQUIRED_FROM_VERIFIED_SOURCE_CHAIN_V3")
     if body.get("domain_version") != CHEMISTRY_DOMAIN_VERSION:
         raise ValueError("incompatible chemistry domain pack")
     if body["fact_memory_snapshot_hash"] != memory.database.snapshot_hash():
@@ -115,6 +158,17 @@ def verify_domain_manifest(
     expected_sources = source_manifest(source_dir)
     if body["source_chain"] != expected_sources:
         raise ValueError("chemistry source snapshot changed")
+    if body.get("source_chain_hash") != expected_sources["source_chain_hash"]:
+        raise ValueError("chemistry source-chain binding changed")
+    for binding in body.get("source_record_bindings", ()):
+        record = memory.get_source_record(binding["source_id"])
+        if (
+            binding["record_hash"] != record.record_hash
+            or binding["snapshot_hash"] != record.snapshot_hash
+            or binding["source_kind"] != record.source_kind.value
+            or binding["source_family"] != record.source_family
+        ):
+            raise ValueError("chemistry FactMemory source binding changed")
     reproducible = {
         key: value
         for key, value in body.items()

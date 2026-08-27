@@ -86,21 +86,20 @@ def _execute_water(service: ChemistryDomainService):
     return result.output, proposal
 
 
-def test_v2_manifest_and_source_chain(m281_pack) -> None:
-    assert m281_pack.manifest["domain_version"] == CHEMISTRY_DOMAIN_VERSION == "1.1.0"
+def test_v3_manifest_and_source_chain(m281_pack) -> None:
+    assert m281_pack.manifest["domain_version"] == CHEMISTRY_DOMAIN_VERSION == "1.2.0"
     assert (
         m281_pack.manifest["domain_schema_version"]
         == CHEMISTRY_DOMAIN_SCHEMA_VERSION
-        == 2
+        == 3
     )
     verification = verify_source_chain(m281_pack.root / "sources")
-    assert verification == {
-        "status": "VERIFIED",
-        "official_count": 5,
-        "derived_count": 4,
-        "derivation_count": 4,
-        "source_chain_hash": m281_pack.manifest["source_chain"]["source_chain_hash"],
-    }
+    assert verification["status"] == "VERIFIED"
+    assert verification["official_snapshot_count"] == 4
+    assert verification["local_policy_snapshot_count"] == 1
+    assert verification["derived_extract_count"] == 4
+    assert verification["derivation_count"] == 4
+    assert verification["source_chain_hash"] == m281_pack.manifest["source_chain_hash"]
     assert m281_pack.manifest["bipm_baseline"]["version"] == "4.01"
     assert m281_pack.manifest["bipm_baseline"]["publication_date"] == "2026-06-04"
 
@@ -125,7 +124,7 @@ def test_independent_reference_agrees_for_golden_and_generated_formulas(
     parser = FormulaParser(set(m281_pack.manifest["supported_elements"]))
     snapshot = build_knowledge_snapshot(
         m281_pack.memory,
-        m281_pack.manifest["domain_manifest_hash"],
+        m281_pack.manifest,
         tuple(weights),
     )
     for formula, composition in cases:
@@ -153,9 +152,7 @@ def test_derived_sources_are_not_official_primary(m281_pack) -> None:
 
 
 def test_atomic_weight_v2_all_elements_and_uncertainty(m281_pack) -> None:
-    snapshot = build_knowledge_snapshot(
-        m281_pack.memory, m281_pack.manifest["domain_manifest_hash"]
-    )
+    snapshot = build_knowledge_snapshot(m281_pack.memory, m281_pack.manifest)
     assert len(snapshot.element_records) == 33
     assert all(row.abridged_uncertainty is not None for row in snapshot.element_records)
     intervals = [
@@ -175,17 +172,13 @@ def test_atomic_weight_v2_all_elements_and_uncertainty(m281_pack) -> None:
 
 
 def test_typed_atomic_weight_interval_and_single(m281_pack) -> None:
-    carbon = atomic_weight_answer(
-        m281_pack.memory, m281_pack.manifest["domain_manifest_hash"], "C"
-    )
+    carbon = atomic_weight_answer(m281_pack.memory, m281_pack.manifest, "C")
     assert carbon.standard_kind == AtomicWeightKind.INTERVAL
     assert (carbon.standard_interval_lower, carbon.standard_interval_upper) == (
         "12.0096",
         "12.0116",
     )
-    iron = atomic_weight_answer(
-        m281_pack.memory, m281_pack.manifest["domain_manifest_hash"], "Fe"
-    )
+    iron = atomic_weight_answer(m281_pack.memory, m281_pack.manifest, "Fe")
     assert iron.standard_nominal == "55.845"
     assert iron.standard_uncertainty == "0.002"
     assert iron.derivation_hashes
@@ -302,7 +295,7 @@ def test_entity_amount_semantics_300_cases(m281_pack) -> None:
     parser = FormulaParser(set(m281_pack.manifest["supported_elements"]))
     snapshot = build_knowledge_snapshot(
         m281_pack.memory,
-        m281_pack.manifest["domain_manifest_hash"],
+        m281_pack.manifest,
         ("H", "O", "Ca"),
     )
     constant = Decimal(snapshot.avogadro_constant)
@@ -396,9 +389,7 @@ def test_source_retraction_blocks_new_snapshot_and_replay(m281_pack, tmp_path) -
         == ChemistryReplayStatus.RETRACTED_SOURCE
     )
     with pytest.raises(ChemistryKnowledgeError):
-        build_knowledge_snapshot(
-            service.memory, service.manifest["domain_manifest_hash"], ("H",)
-        )
+        build_knowledge_snapshot(service.memory, service.manifest, ("H",))
 
 
 def test_claim_retraction_blocks_new_snapshot_and_replay(m281_pack, tmp_path) -> None:
@@ -421,9 +412,7 @@ def test_claim_retraction_blocks_new_snapshot_and_replay(m281_pack, tmp_path) ->
         == ChemistryReplayStatus.RETRACTED_ELEMENT_CLAIM
     )
     with pytest.raises(ChemistryKnowledgeError):
-        build_knowledge_snapshot(
-            service.memory, service.manifest["domain_manifest_hash"], ("H", "O")
-        )
+        build_knowledge_snapshot(service.memory, service.manifest, ("H", "O"))
 
 
 def test_contradicting_evidence_blocks_snapshot_and_replay(m281_pack, tmp_path) -> None:
@@ -460,16 +449,12 @@ def test_contradicting_evidence_blocks_snapshot_and_replay(m281_pack, tmp_path) 
         == ChemistryReplayStatus.CONTRADICTING_EVIDENCE
     )
     with pytest.raises(ChemistryKnowledgeError):
-        build_knowledge_snapshot(
-            service.memory, service.manifest["domain_manifest_hash"], ("H", "O")
-        )
+        build_knowledge_snapshot(service.memory, service.manifest, ("H", "O"))
 
 
 def test_superseded_claim_uses_reviewed_replacement(m281_pack, tmp_path) -> None:
     service = _copy_service(m281_pack, tmp_path / "supersession")
-    snapshot = build_knowledge_snapshot(
-        service.memory, service.manifest["domain_manifest_hash"], ("Fe",)
-    )
+    snapshot = build_knowledge_snapshot(service.memory, service.manifest, ("Fe",))
     old_claim = next(
         value
         for value in snapshot.claim_ids
@@ -507,9 +492,7 @@ def test_superseded_claim_uses_reviewed_replacement(m281_pack, tmp_path) -> None
         actor_identity_type=ActorIdentityType.HUMAN,
         reason="reviewed replacement",
     )
-    current = build_knowledge_snapshot(
-        service.memory, service.manifest["domain_manifest_hash"], ("Fe",)
-    )
+    current = build_knowledge_snapshot(service.memory, service.manifest, ("Fe",))
     assert current.element_records[0].abridged_value == "55.846"
     assert old_claim not in current.claim_ids
 
@@ -539,7 +522,7 @@ def test_standard_weight_controlled_query_is_not_no_fact(m281_pack) -> None:
 
 def test_snapshot_and_result_hashes_cover_v2_state(m281_pack) -> None:
     snapshot = build_knowledge_snapshot(
-        m281_pack.memory, m281_pack.manifest["domain_manifest_hash"], ("H", "O")
+        m281_pack.memory, m281_pack.manifest, ("H", "O")
     )
     assert snapshot.claim_state_hashes
     assert snapshot.source_state_hashes
@@ -557,5 +540,7 @@ def test_old_v1_pack_is_rebuild_required() -> None:
     old_root = Path("artifacts/domains/chemistry/m28")
     if not old_root.exists():
         pytest.skip("historical M-28 pack is not present")
-    with pytest.raises(ValueError, match="REBUILD_REQUIRED_FROM_FROZEN_SOURCES"):
+    with pytest.raises(
+        ValueError, match="REBUILD_REQUIRED_FROM_VERIFIED_SOURCE_CHAIN_V3"
+    ):
         ChemistryDomainService.open(old_root)

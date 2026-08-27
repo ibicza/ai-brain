@@ -1,0 +1,1664 @@
+{
+  "approval_hash": "0cbddba0906113dfeef8abc7b3dae4f95465be09fa347a7570e3f5b8e8f452e0",
+  "approval_id": "approval_iupac_elements_2022",
+  "mapping_hash": "678002b71061f6e6dfc2e0ec42a2054d9bbc77a53e5926afcd154ac3ee79c3ea",
+  "official_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+  "official_source_id": "official_iupac_periodic_table_2022",
+  "policy_version": "verified-selected-chemistry-fields-v3",
+  "review_decision": "APPROVED",
+  "reviewer_identity": "m282-human-reviewed-source-mapping",
+  "reviewer_identity_type": "HUMAN",
+  "selected_fields": [
+    {
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/0/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "H"
+      }
+    },
+    {
+      "output_canonical_value": "H",
+      "output_field_name": "/elements/0/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "H"
+      }
+    },
+    {
+      "output_canonical_value": "hydrogen",
+      "output_field_name": "/elements/0/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "H"
+      }
+    },
+    {
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/0/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "H"
+      }
+    },
+    {
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/0/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "H"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/1/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "He"
+      }
+    },
+    {
+      "output_canonical_value": "He",
+      "output_field_name": "/elements/1/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "He"
+      }
+    },
+    {
+      "output_canonical_value": "helium",
+      "output_field_name": "/elements/1/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "He"
+      }
+    },
+    {
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/1/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "He"
+      }
+    },
+    {
+      "output_canonical_value": 18,
+      "output_field_name": "/elements/1/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "He"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/2/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Li"
+      }
+    },
+    {
+      "output_canonical_value": "Li",
+      "output_field_name": "/elements/2/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Li"
+      }
+    },
+    {
+      "output_canonical_value": "lithium",
+      "output_field_name": "/elements/2/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Li"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/2/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Li"
+      }
+    },
+    {
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/2/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Li"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/3/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Be"
+      }
+    },
+    {
+      "output_canonical_value": "Be",
+      "output_field_name": "/elements/3/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Be"
+      }
+    },
+    {
+      "output_canonical_value": "beryllium",
+      "output_field_name": "/elements/3/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Be"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/3/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Be"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/3/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Be"
+      }
+    },
+    {
+      "output_canonical_value": 5,
+      "output_field_name": "/elements/4/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "B"
+      }
+    },
+    {
+      "output_canonical_value": "B",
+      "output_field_name": "/elements/4/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "B"
+      }
+    },
+    {
+      "output_canonical_value": "boron",
+      "output_field_name": "/elements/4/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "B"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/4/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "B"
+      }
+    },
+    {
+      "output_canonical_value": 13,
+      "output_field_name": "/elements/4/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "B"
+      }
+    },
+    {
+      "output_canonical_value": 6,
+      "output_field_name": "/elements/5/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "C"
+      }
+    },
+    {
+      "output_canonical_value": "C",
+      "output_field_name": "/elements/5/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "C"
+      }
+    },
+    {
+      "output_canonical_value": "carbon",
+      "output_field_name": "/elements/5/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "C"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/5/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "C"
+      }
+    },
+    {
+      "output_canonical_value": 14,
+      "output_field_name": "/elements/5/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "C"
+      }
+    },
+    {
+      "output_canonical_value": 7,
+      "output_field_name": "/elements/6/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "N"
+      }
+    },
+    {
+      "output_canonical_value": "N",
+      "output_field_name": "/elements/6/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "N"
+      }
+    },
+    {
+      "output_canonical_value": "nitrogen",
+      "output_field_name": "/elements/6/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "N"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/6/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "N"
+      }
+    },
+    {
+      "output_canonical_value": 15,
+      "output_field_name": "/elements/6/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "N"
+      }
+    },
+    {
+      "output_canonical_value": 8,
+      "output_field_name": "/elements/7/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "O"
+      }
+    },
+    {
+      "output_canonical_value": "O",
+      "output_field_name": "/elements/7/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "O"
+      }
+    },
+    {
+      "output_canonical_value": "oxygen",
+      "output_field_name": "/elements/7/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "O"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/7/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "O"
+      }
+    },
+    {
+      "output_canonical_value": 16,
+      "output_field_name": "/elements/7/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "O"
+      }
+    },
+    {
+      "output_canonical_value": 9,
+      "output_field_name": "/elements/8/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "F"
+      }
+    },
+    {
+      "output_canonical_value": "F",
+      "output_field_name": "/elements/8/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "F"
+      }
+    },
+    {
+      "output_canonical_value": "fluorine",
+      "output_field_name": "/elements/8/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "F"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/8/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "F"
+      }
+    },
+    {
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/8/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "F"
+      }
+    },
+    {
+      "output_canonical_value": 10,
+      "output_field_name": "/elements/9/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ne"
+      }
+    },
+    {
+      "output_canonical_value": "Ne",
+      "output_field_name": "/elements/9/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ne"
+      }
+    },
+    {
+      "output_canonical_value": "neon",
+      "output_field_name": "/elements/9/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ne"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/9/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ne"
+      }
+    },
+    {
+      "output_canonical_value": 18,
+      "output_field_name": "/elements/9/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ne"
+      }
+    },
+    {
+      "output_canonical_value": 11,
+      "output_field_name": "/elements/10/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Na"
+      }
+    },
+    {
+      "output_canonical_value": "Na",
+      "output_field_name": "/elements/10/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Na"
+      }
+    },
+    {
+      "output_canonical_value": "sodium",
+      "output_field_name": "/elements/10/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Na"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/10/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Na"
+      }
+    },
+    {
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/10/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Na"
+      }
+    },
+    {
+      "output_canonical_value": 12,
+      "output_field_name": "/elements/11/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Mg"
+      }
+    },
+    {
+      "output_canonical_value": "Mg",
+      "output_field_name": "/elements/11/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Mg"
+      }
+    },
+    {
+      "output_canonical_value": "magnesium",
+      "output_field_name": "/elements/11/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Mg"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/11/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Mg"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/11/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Mg"
+      }
+    },
+    {
+      "output_canonical_value": 13,
+      "output_field_name": "/elements/12/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Al"
+      }
+    },
+    {
+      "output_canonical_value": "Al",
+      "output_field_name": "/elements/12/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Al"
+      }
+    },
+    {
+      "output_canonical_value": "aluminium",
+      "output_field_name": "/elements/12/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Al"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/12/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Al"
+      }
+    },
+    {
+      "output_canonical_value": 13,
+      "output_field_name": "/elements/12/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Al"
+      }
+    },
+    {
+      "output_canonical_value": 14,
+      "output_field_name": "/elements/13/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Si"
+      }
+    },
+    {
+      "output_canonical_value": "Si",
+      "output_field_name": "/elements/13/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Si"
+      }
+    },
+    {
+      "output_canonical_value": "silicon",
+      "output_field_name": "/elements/13/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Si"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/13/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Si"
+      }
+    },
+    {
+      "output_canonical_value": 14,
+      "output_field_name": "/elements/13/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Si"
+      }
+    },
+    {
+      "output_canonical_value": 15,
+      "output_field_name": "/elements/14/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "P"
+      }
+    },
+    {
+      "output_canonical_value": "P",
+      "output_field_name": "/elements/14/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "P"
+      }
+    },
+    {
+      "output_canonical_value": "phosphorus",
+      "output_field_name": "/elements/14/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "P"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/14/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "P"
+      }
+    },
+    {
+      "output_canonical_value": 15,
+      "output_field_name": "/elements/14/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "P"
+      }
+    },
+    {
+      "output_canonical_value": 16,
+      "output_field_name": "/elements/15/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "S"
+      }
+    },
+    {
+      "output_canonical_value": "S",
+      "output_field_name": "/elements/15/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "S"
+      }
+    },
+    {
+      "output_canonical_value": "sulfur",
+      "output_field_name": "/elements/15/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "S"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/15/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "S"
+      }
+    },
+    {
+      "output_canonical_value": 16,
+      "output_field_name": "/elements/15/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "S"
+      }
+    },
+    {
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/16/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Cl"
+      }
+    },
+    {
+      "output_canonical_value": "Cl",
+      "output_field_name": "/elements/16/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Cl"
+      }
+    },
+    {
+      "output_canonical_value": "chlorine",
+      "output_field_name": "/elements/16/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Cl"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/16/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Cl"
+      }
+    },
+    {
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/16/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Cl"
+      }
+    },
+    {
+      "output_canonical_value": 18,
+      "output_field_name": "/elements/17/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ar"
+      }
+    },
+    {
+      "output_canonical_value": "Ar",
+      "output_field_name": "/elements/17/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ar"
+      }
+    },
+    {
+      "output_canonical_value": "argon",
+      "output_field_name": "/elements/17/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ar"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/17/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ar"
+      }
+    },
+    {
+      "output_canonical_value": 18,
+      "output_field_name": "/elements/17/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ar"
+      }
+    },
+    {
+      "output_canonical_value": 19,
+      "output_field_name": "/elements/18/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "K"
+      }
+    },
+    {
+      "output_canonical_value": "K",
+      "output_field_name": "/elements/18/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "K"
+      }
+    },
+    {
+      "output_canonical_value": "potassium",
+      "output_field_name": "/elements/18/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "K"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/18/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "K"
+      }
+    },
+    {
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/18/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "K"
+      }
+    },
+    {
+      "output_canonical_value": 20,
+      "output_field_name": "/elements/19/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ca"
+      }
+    },
+    {
+      "output_canonical_value": "Ca",
+      "output_field_name": "/elements/19/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ca"
+      }
+    },
+    {
+      "output_canonical_value": "calcium",
+      "output_field_name": "/elements/19/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ca"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/19/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ca"
+      }
+    },
+    {
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/19/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ca"
+      }
+    },
+    {
+      "output_canonical_value": 21,
+      "output_field_name": "/elements/20/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Sc"
+      }
+    },
+    {
+      "output_canonical_value": "Sc",
+      "output_field_name": "/elements/20/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Sc"
+      }
+    },
+    {
+      "output_canonical_value": "scandium",
+      "output_field_name": "/elements/20/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Sc"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/20/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Sc"
+      }
+    },
+    {
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/20/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Sc"
+      }
+    },
+    {
+      "output_canonical_value": 22,
+      "output_field_name": "/elements/21/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ti"
+      }
+    },
+    {
+      "output_canonical_value": "Ti",
+      "output_field_name": "/elements/21/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ti"
+      }
+    },
+    {
+      "output_canonical_value": "titanium",
+      "output_field_name": "/elements/21/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ti"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/21/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ti"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/21/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ti"
+      }
+    },
+    {
+      "output_canonical_value": 23,
+      "output_field_name": "/elements/22/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "V"
+      }
+    },
+    {
+      "output_canonical_value": "V",
+      "output_field_name": "/elements/22/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "V"
+      }
+    },
+    {
+      "output_canonical_value": "vanadium",
+      "output_field_name": "/elements/22/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "V"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/22/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "V"
+      }
+    },
+    {
+      "output_canonical_value": 5,
+      "output_field_name": "/elements/22/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "V"
+      }
+    },
+    {
+      "output_canonical_value": 24,
+      "output_field_name": "/elements/23/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Cr"
+      }
+    },
+    {
+      "output_canonical_value": "Cr",
+      "output_field_name": "/elements/23/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Cr"
+      }
+    },
+    {
+      "output_canonical_value": "chromium",
+      "output_field_name": "/elements/23/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Cr"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/23/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Cr"
+      }
+    },
+    {
+      "output_canonical_value": 6,
+      "output_field_name": "/elements/23/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Cr"
+      }
+    },
+    {
+      "output_canonical_value": 25,
+      "output_field_name": "/elements/24/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Mn"
+      }
+    },
+    {
+      "output_canonical_value": "Mn",
+      "output_field_name": "/elements/24/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Mn"
+      }
+    },
+    {
+      "output_canonical_value": "manganese",
+      "output_field_name": "/elements/24/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Mn"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/24/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Mn"
+      }
+    },
+    {
+      "output_canonical_value": 7,
+      "output_field_name": "/elements/24/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Mn"
+      }
+    },
+    {
+      "output_canonical_value": 26,
+      "output_field_name": "/elements/25/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Fe"
+      }
+    },
+    {
+      "output_canonical_value": "Fe",
+      "output_field_name": "/elements/25/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Fe"
+      }
+    },
+    {
+      "output_canonical_value": "iron",
+      "output_field_name": "/elements/25/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Fe"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/25/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Fe"
+      }
+    },
+    {
+      "output_canonical_value": 8,
+      "output_field_name": "/elements/25/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Fe"
+      }
+    },
+    {
+      "output_canonical_value": 27,
+      "output_field_name": "/elements/26/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Co"
+      }
+    },
+    {
+      "output_canonical_value": "Co",
+      "output_field_name": "/elements/26/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Co"
+      }
+    },
+    {
+      "output_canonical_value": "cobalt",
+      "output_field_name": "/elements/26/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Co"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/26/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Co"
+      }
+    },
+    {
+      "output_canonical_value": 9,
+      "output_field_name": "/elements/26/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Co"
+      }
+    },
+    {
+      "output_canonical_value": 28,
+      "output_field_name": "/elements/27/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ni"
+      }
+    },
+    {
+      "output_canonical_value": "Ni",
+      "output_field_name": "/elements/27/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ni"
+      }
+    },
+    {
+      "output_canonical_value": "nickel",
+      "output_field_name": "/elements/27/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ni"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/27/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ni"
+      }
+    },
+    {
+      "output_canonical_value": 10,
+      "output_field_name": "/elements/27/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ni"
+      }
+    },
+    {
+      "output_canonical_value": 29,
+      "output_field_name": "/elements/28/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Cu"
+      }
+    },
+    {
+      "output_canonical_value": "Cu",
+      "output_field_name": "/elements/28/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Cu"
+      }
+    },
+    {
+      "output_canonical_value": "copper",
+      "output_field_name": "/elements/28/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Cu"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/28/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Cu"
+      }
+    },
+    {
+      "output_canonical_value": 11,
+      "output_field_name": "/elements/28/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Cu"
+      }
+    },
+    {
+      "output_canonical_value": 30,
+      "output_field_name": "/elements/29/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Zn"
+      }
+    },
+    {
+      "output_canonical_value": "Zn",
+      "output_field_name": "/elements/29/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Zn"
+      }
+    },
+    {
+      "output_canonical_value": "zinc",
+      "output_field_name": "/elements/29/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Zn"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/29/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Zn"
+      }
+    },
+    {
+      "output_canonical_value": 12,
+      "output_field_name": "/elements/29/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Zn"
+      }
+    },
+    {
+      "output_canonical_value": 35,
+      "output_field_name": "/elements/30/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Br"
+      }
+    },
+    {
+      "output_canonical_value": "Br",
+      "output_field_name": "/elements/30/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Br"
+      }
+    },
+    {
+      "output_canonical_value": "bromine",
+      "output_field_name": "/elements/30/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Br"
+      }
+    },
+    {
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/30/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Br"
+      }
+    },
+    {
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/30/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Br"
+      }
+    },
+    {
+      "output_canonical_value": 47,
+      "output_field_name": "/elements/31/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ag"
+      }
+    },
+    {
+      "output_canonical_value": "Ag",
+      "output_field_name": "/elements/31/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ag"
+      }
+    },
+    {
+      "output_canonical_value": "silver",
+      "output_field_name": "/elements/31/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ag"
+      }
+    },
+    {
+      "output_canonical_value": 5,
+      "output_field_name": "/elements/31/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ag"
+      }
+    },
+    {
+      "output_canonical_value": 11,
+      "output_field_name": "/elements/31/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ag"
+      }
+    },
+    {
+      "output_canonical_value": 53,
+      "output_field_name": "/elements/32/atomic_number",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "I"
+      }
+    },
+    {
+      "output_canonical_value": "I",
+      "output_field_name": "/elements/32/symbol",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "I"
+      }
+    },
+    {
+      "output_canonical_value": "iodine",
+      "output_field_name": "/elements/32/name_en",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "I"
+      }
+    },
+    {
+      "output_canonical_value": 5,
+      "output_field_name": "/elements/32/period",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "I"
+      }
+    },
+    {
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/32/group",
+      "upstream_excerpt_hash": null,
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "I"
+      }
+    }
+  ],
+  "timestamp": "2026-08-27T00:00:00Z"
+}
