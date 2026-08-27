@@ -1,0 +1,262 @@
+date: 2026-08-27T18:33:50+00:00
+hostname: karina
+pwd: /home/ibicza/m282-exact-05ab4b9/repo
+git rev-parse HEAD: 05ab4b994e28e92c4457cbea560c219588ccb541
+git status --porcelain:
+python --version: Python 3.12.14
+uv --version: uv 0.12.5 (x86_64-unknown-linux-gnu)
+
+=== ruff format --check ===
+275 files already formatted
+
+=== ruff check ===
+All checks passed!
+
+=== full pytest including M25-M28.2 regressions ===
+........................................................................ [ 10%]
+........................................................................ [ 20%]
+........................................................................ [ 30%]
+........................................................................ [ 41%]
+........................................................................ [ 51%]
+........................................................................ [ 61%]
+........................................................................ [ 71%]
+........................................................................ [ 82%]
+........................................................................ [ 92%]
+.....................................................                    [100%]
+701 passed in 162.79s (0:02:42)
+
+=== official source reacquisition ===
+bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f
+
+=== source-chain v3 verification ===
+{
+  "derivation_count": 4,
+  "derived_extract_count": 4,
+  "deterministic_derivation_count": 1,
+  "field_evidence_count": 534,
+  "local_policy_snapshot_count": 1,
+  "manual_mapping_derivation_count": 2,
+  "official_snapshot_count": 4,
+  "policy_transformation_count": 1,
+  "source_chain_hash": "bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f",
+  "status": "VERIFIED"
+}
+
+=== Windows/Linux source-chain byte comparison ===
+{
+  "status": "PASS",
+  "file_count": 16,
+  "byte_identical": true,
+  "source_chain_hash": "bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f"
+}
+
+=== domain pack v3 rebuild ===
+ChemistryImportSummary(identity_element_count=33, computational_element_count=33, entity_count=34, predicate_count=16, source_count=9, evidence_count=100, claim_count=430, fact_memory_snapshot_hash='321143b0080776a28273221810e382a3f2c9395ff576b690cd72e8d8bbd78d5f')
+{
+  "status": "PASS",
+  "source_chain_hash": "bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f",
+  "reproducible_content_hash": "0e2fd50177635d1b60c3504bb25fcaccee11a0c158d2b02a59226c4ad0d0011f"
+}
+
+=== M-28.2 acceptance ===
+{
+  "status": "PASS",
+  "acceptance_case_count": 2662,
+  "source_attacks": {
+    "accepted_count": 0,
+    "borrowed_derivation_accepted": 0,
+    "case_count": 101,
+    "rejected_count": 101,
+    "typed_rejection_counts": {
+      "DERIVATION_CONTENT_MISMATCH": 21,
+      "DERIVATION_SOURCE_MISMATCH": 80
+    }
+  },
+  "upstream_state": {
+    "case_count": 30,
+    "inactive_upstream_source_used": 0,
+    "official_retraction_ignored": 0,
+    "rebuilt_clean_successor_chains": 5,
+    "unsafe_state_blocked_count": 30
+  },
+  "field_evidence": {
+    "field_evidence_count": 534,
+    "production_fields_without_evidence": 0
+  },
+  "category_honesty": {
+    "derived_extract_count": 4,
+    "derived_extract_marked_official": 0,
+    "local_policy_counted_official": 0,
+    "local_policy_snapshot_count": 1,
+    "official_snapshot_count": 4
+  },
+  "no_torch": true,
+  "trusted_runtime_network_required": false
+}
+
+=== 10k benchmark ===
+{
+  "status": "PASS",
+  "count": 10000,
+  "throughput": 318.625464987088,
+  "latency_ms": {
+    "p50": 3.1443995,
+    "p95": 6.108941,
+    "p99": 6.154307
+  },
+  "peak_python_memory_bytes": 9083410,
+  "provenance_matrix_ms": {
+    "derivation_resolution": {
+      "count": 100.0,
+      "p50_ms": 72.83760950000001,
+      "p95_ms": 74.505163,
+      "p99_ms": 118.070269,
+      "throughput_per_second": 13.621781526057148
+    },
+    "knowledge_snapshot_v3": {
+      "count": 25.0,
+      "p50_ms": 778.547343,
+      "p95_ms": 797.345071,
+      "p99_ms": 831.16409,
+      "throughput_per_second": 1.2785337291765215
+    },
+    "source_chain_v3_verification": {
+      "count": 10.0,
+      "p50_ms": 109.3499095,
+      "p95_ms": 118.656721,
+      "p99_ms": 118.656721,
+      "throughput_per_second": 9.075941847820298
+    },
+    "tool_proposal_creation": {
+      "count": 100.0,
+      "p50_ms": 80.44008249999999,
+      "p95_ms": 82.552317,
+      "p99_ms": 875.0084,
+      "throughput_per_second": 11.285609350851242
+    },
+    "upstream_state_resolution": {
+      "count": 1000.0,
+      "p50_ms": 6.4647695,
+      "p95_ms": 6.66723,
+      "p99_ms": 7.110253,
+      "throughput_per_second": 154.0091553832517
+    }
+  }
+}
+
+=== moved pack ===
+{
+  "domain_manifest_hash": "a0b5e6357ecee3fd09d09b7a0a3dde551916cd5ae24b53cd331e98e76f7ad6f8",
+  "fact_memory": {
+    "audit_event_count": 13001,
+    "blob_count": 9,
+    "status": "VALID"
+  },
+  "reproducible_content_hash": "0e2fd50177635d1b60c3504bb25fcaccee11a0c158d2b02a59226c4ad0d0011f",
+  "tool_registry_hash": "670a616657a98818df3e20ae6b1b808a5af5af81f3135e7846c73b42a8cf87b1"
+}
+
+=== backup / restore ===
+{
+  "created_at": "2026-08-27T18:40:24.449365Z",
+  "database_sha256": "f37a505aa35da4b0908f42cf2f8c452914c69b560855c085f8f570a49c4f9932",
+  "manifest_sha256": "714ac88d71ef86b2c06fa6f825527baed44f3b743a3124efb4680c1558d0d77c",
+  "memory_snapshot_hash": "a092ebdad91c132a751ecfd99d34bf452d54ed03cd695363aafc3c77a8fdfe18",
+  "schema_version": 4,
+  "source_blobs": [
+    {
+      "sha256": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+      "size": 3503078
+    },
+    {
+      "sha256": "48580f755f1eb61e95d418f2711802902bc8916185c314477860b42b5de4122f",
+      "size": 4901
+    },
+    {
+      "sha256": "4e87868d5fdb58580cd75e2bfcfa56ecb6387cd586c33ece88d07e263de51b9b",
+      "size": 924
+    },
+    {
+      "sha256": "8a16db8cb92f037ff317ed974307145434bde37d1b95b67ab908fa9ed5b968d3",
+      "size": 13875
+    },
+    {
+      "sha256": "b48282594b1fb01eee3cbc9d469ce5e3483b628157ea1b09ede33e3476895cf2",
+      "size": 21501
+    },
+    {
+      "sha256": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "size": 1178
+    },
+    {
+      "sha256": "e1a5d1e970cbab8420b6a13d65299efcf6d1b531b5b4c72ce8a30c27f57a1432",
+      "size": 1473
+    },
+    {
+      "sha256": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "size": 55608
+    },
+    {
+      "sha256": "f9e9554471749c55a624aec55151922470a7f4104c62811eb194fed9731b907d",
+      "size": 18489
+    }
+  ]
+}
+{
+  "status": "RESTORED",
+  "target": "/home/ibicza/m282-exact-05ab4b9/gate/restored_pack"
+}
+{
+  "domain_manifest_hash": "7f6cd6a0f6e2c46f23c76dcf06a90e78f79b03c749587012263414605a607129",
+  "fact_memory": {
+    "audit_event_count": 13002,
+    "blob_count": 9,
+    "status": "VALID"
+  },
+  "reproducible_content_hash": "0e2fd50177635d1b60c3504bb25fcaccee11a0c158d2b02a59226c4ad0d0011f",
+  "tool_registry_hash": "670a616657a98818df3e20ae6b1b808a5af5af81f3135e7846c73b42a8cf87b1"
+}
+
+=== no-torch / no-network trusted runtime ===
+NO_TORCH=PASS
+TRUSTED_RUNTIME_NETWORK_IMPORTS=0
+
+=== CLI smoke ===
+{
+  "ast_hash": "4ef4ad74afeceb4919eb89440239d1883aa146c240cfe2385336653656a6de1e",
+  "canonical_formula": "H2O",
+  "composition": [
+    {
+      "count": 2,
+      "symbol": "H"
+    },
+    {
+      "count": 1,
+      "symbol": "O"
+    }
+  ],
+  "grammar_version": "1.0",
+  "original_input_hash": "920c8bcb9ac73a9d14a5210d452dda7e8ad36dae8cd5aa766129ebf3d0df0401",
+  "terms": [
+    {
+      "multiplier": 2,
+      "symbol": "H"
+    },
+    {
+      "multiplier": 1,
+      "symbol": "O"
+    }
+  ]
+}
+Formula: H2O
+Result: 18.0150 g/mol
+Atomic-weight policy: CONVENTIONAL_CLASSROOM_VALUE_FROM_CIAAW_ABRIDGED_2024
+Sources: 668fa8c66c8220c1f589d13b175d395d72b9b67c7f420608742193ec3f672db5, ee4af7bf966ba339faaf83a91113ee614094b3805d675cc67e6de3367f985978
+Warning: CONVENTIONAL_CLASSROOM_VALUE
+Warning: NOT_AN_EXACT_NATURAL_CONSTANT
+Warning: DISPLAY_ROUNDING_ONLY
+
+=== final exact-H5 cleanup ===
+
+CLEAN_WORKTREE=PASS
+KARINA_EXACT_H5_GATE=PASS

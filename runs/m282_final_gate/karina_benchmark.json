@@ -1,0 +1,145 @@
+{
+  "device": "CPU",
+  "mixed_calculations": {
+    "calculation_count": 10000,
+    "calculations_per_second": 318.625464987088,
+    "device": "CPU",
+    "mixed_calculation_ms": {
+      "p50": 3.1443995,
+      "p95": 6.108941,
+      "p99": 6.154307
+    },
+    "peak_python_memory_bytes": 887017,
+    "performance_matrix_ms": {
+      "atomic_weight_answer": {
+        "p50": 315.0406145,
+        "p95": 320.685398,
+        "p99": 320.685398
+      },
+      "backup": {
+        "p50": 75.951631,
+        "p95": 75.951631,
+        "p99": 75.951631
+      },
+      "confirmed_response": {
+        "p50": 73.414684,
+        "p95": 79.594187,
+        "p99": 79.594187
+      },
+      "controlled_route": {
+        "p50": 38.022453,
+        "p95": 597.524864,
+        "p99": 855.703068
+      },
+      "conventional_molar_mass": {
+        "p50": 0.7080955,
+        "p95": 0.747324,
+        "p99": 0.762443
+      },
+      "domain_pack_load": {
+        "p50": 111.607522,
+        "p95": 111.677344,
+        "p99": 111.677344
+      },
+      "envelope_molar_mass": {
+        "p50": 0.724912,
+        "p95": 0.743828,
+        "p99": 0.762423
+      },
+      "exact_element_resolution": {
+        "p50": 3.365019,
+        "p95": 3.610074,
+        "p99": 3.737625
+      },
+      "fact_memory_verify": {
+        "p50": 377.223164,
+        "p95": 377.223164,
+        "p99": 377.223164
+      },
+      "formula_entities": {
+        "p50": 0.7107255,
+        "p95": 0.726495,
+        "p99": 0.756061
+      },
+      "formula_parse": {
+        "p50": 0.0215905,
+        "p95": 0.038713,
+        "p99": 0.060744
+      },
+      "knowledge_snapshot": {
+        "p50": 609.134062,
+        "p95": 609.639522,
+        "p99": 609.639522
+      },
+      "mass_amount": {
+        "p50": 1.388615,
+        "p95": 1.414949,
+        "p99": 1.449744
+      },
+      "replay": {
+        "p50": 116.260898,
+        "p95": 118.737032,
+        "p99": 124.301459
+      },
+      "restore": {
+        "p50": 324.091931,
+        "p95": 324.091931,
+        "p99": 324.091931
+      },
+      "significant_rendering": {
+        "p50": 0.005891,
+        "p95": 0.006132,
+        "p99": 0.008646
+      },
+      "source_chain_verification": {
+        "p50": 25.135139,
+        "p95": 25.441404,
+        "p99": 25.441404
+      },
+      "total_atoms": {
+        "p50": 0.7111915,
+        "p95": 0.728179,
+        "p99": 0.767652
+      }
+    }
+  },
+  "peak_python_memory_bytes": 9083410,
+  "provenance_matrix_ms": {
+    "derivation_resolution": {
+      "count": 100.0,
+      "p50_ms": 72.83760950000001,
+      "p95_ms": 74.505163,
+      "p99_ms": 118.070269,
+      "throughput_per_second": 13.621781526057148
+    },
+    "knowledge_snapshot_v3": {
+      "count": 25.0,
+      "p50_ms": 778.547343,
+      "p95_ms": 797.345071,
+      "p99_ms": 831.16409,
+      "throughput_per_second": 1.2785337291765215
+    },
+    "source_chain_v3_verification": {
+      "count": 10.0,
+      "p50_ms": 109.3499095,
+      "p95_ms": 118.656721,
+      "p99_ms": 118.656721,
+      "throughput_per_second": 9.075941847820298
+    },
+    "tool_proposal_creation": {
+      "count": 100.0,
+      "p50_ms": 80.44008249999999,
+      "p95_ms": 82.552317,
+      "p99_ms": 875.0084,
+      "throughput_per_second": 11.285609350851242
+    },
+    "upstream_state_resolution": {
+      "count": 1000.0,
+      "p50_ms": 6.4647695,
+      "p95_ms": 6.66723,
+      "p99_ms": 7.110253,
+      "throughput_per_second": 154.0091553832517
+    }
+  },
+  "status": "PASS"
+}

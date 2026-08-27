@@ -1,0 +1,12 @@
+{
+  "derivation_count": 4,
+  "derived_extract_count": 4,
+  "deterministic_derivation_count": 1,
+  "field_evidence_count": 534,
+  "local_policy_snapshot_count": 1,
+  "manual_mapping_derivation_count": 2,
+  "official_snapshot_count": 4,
+  "policy_transformation_count": 1,
+  "source_chain_hash": "bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f",
+  "status": "VERIFIED"
+}

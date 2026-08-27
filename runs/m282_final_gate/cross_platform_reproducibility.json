@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "h5": "05ab4b994e28e92c4457cbea560c219588ccb541",
+  "official_source_count": 4,
+  "official_hashes_verified": true,
+  "source_chain_file_count": 16,
+  "source_chain_files_byte_identical": true,
+  "local_source_chain_hash": "bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f",
+  "karina_source_chain_hash": "bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f",
+  "source_chain_hash_match": true,
+  "local_reproducible_content_hash": "0e2fd50177635d1b60c3504bb25fcaccee11a0c158d2b02a59226c4ad0d0011f",
+  "karina_reproducible_content_hash": "0e2fd50177635d1b60c3504bb25fcaccee11a0c158d2b02a59226c4ad0d0011f",
+  "reproducible_content_hash_match": true
+}

@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "h5": "05ab4b994e28e92c4457cbea560c219588ccb541",
+  "intended_e5_content": [
+    "docs reports",
+    "runs/m282_final_gate logs, receipts, verification, acceptance, benchmark, reproducibility evidence",
+    "runs/m282_chemistry_provenance_closure_report.md"
+  ],
+  "forbidden_paths": [
+    "src",
+    "tests",
+    "scripts",
+    "pyproject.toml",
+    "uv.lock",
+    "artifacts/domains/chemistry"
+  ],
+  "note": "Verified against the staged E5 diff before commit and again against H5..E5 after commit."
+}

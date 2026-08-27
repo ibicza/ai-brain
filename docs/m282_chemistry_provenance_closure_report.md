@@ -25,7 +25,16 @@
 
 ## Performance
 
-The 10,000-calculation CPU benchmark passed at 144.49 calculations/s; mixed p50/p95/p99 was 6.78/13.61/15.90 ms and peak Python memory was 8,681,154 bytes.
+The exact-H5 10,000-calculation CPU benchmark passed on both hosts. Windows reached 160.15 calculations/s with 5.92/12.07/16.85 ms p50/p95/p99. Karina reached 318.63 calculations/s with 3.14/6.11/6.15 ms.
+
+## Exact-SHA Gates
+
+- H5: `05ab4b994e28e92c4457cbea560c219588ccb541`
+- Local: 701 tests passed; full acceptance, source attacks, upstream transitions, rebuild, moved pack, backup/restore, CLI, no-torch, and no-network checks passed.
+- Karina: 701 tests passed; all four official sources were reacquired; 16 source-chain files were byte-identical to Windows; acceptance, benchmark, rebuild, moved pack, backup/restore, CLI, no-torch, and no-network checks passed.
+- Cross-platform source-chain hash: `bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f`.
+- Cross-platform domain reproducible hash: `0e2fd50177635d1b60c3504bb25fcaccee11a0c158d2b02a59226c4ad0d0011f`.
+- Both exact-H5 worktrees were clean after removal of query-generated SQLite audit side effects.
 
 ## Limitations
 
@@ -37,4 +46,4 @@ No moral, moderation, NSFW, refusal, political, ideology, opinion, or personalit
 
 Proceed to M-29 while retaining the reviewed-manual limitation as an explicit provenance property. A later source refresh may promote IUPAC/BIPM mappings only after a genuinely reliable deterministic official extraction path is available.
 
-Exact H5/E5 hashes, local/Karina pytest counts, reproducibility comparison, and evidence-only diff are appended after both exact-SHA gates.
+E5 is the evidence-only commit containing the gate logs and result JSON. Its staged diff was checked against `src`, `tests`, `scripts`, `pyproject.toml`, `uv.lock`, and `artifacts/domains/chemistry`; no forbidden path changed.

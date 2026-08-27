@@ -1,0 +1,133 @@
+{
+  "acceptance_case_count": 2662,
+  "borrowed_derivation_attacks": {
+    "accepted_count": 0,
+    "borrowed_derivation_accepted": 0,
+    "case_count": 101,
+    "rejected_count": 101,
+    "typed_rejection_counts": {
+      "DERIVATION_CONTENT_MISMATCH": 21,
+      "DERIVATION_SOURCE_MISMATCH": 80
+    }
+  },
+  "category_honesty": {
+    "derived_extract_count": 4,
+    "derived_extract_marked_official": 0,
+    "local_policy_counted_official": 0,
+    "local_policy_snapshot_count": 1,
+    "official_snapshot_count": 4
+  },
+  "dependency_minimization": {
+    "atomic_weight_depends_on_bipm": false,
+    "avogadro_conversion_depends_on_ciaaw": false,
+    "case_count": 8,
+    "molar_mass_depends_on_bipm": false,
+    "molar_mass_depends_on_ru_policy": false
+  },
+  "field_evidence": {
+    "field_evidence_count": 534,
+    "production_fields_without_evidence": 0
+  },
+  "no_moral_or_moderation_policy_added": true,
+  "prior_m281": {
+    "acceptance_case_count": 2475,
+    "atomic_weight": {
+      "case_count": 264,
+      "element_count": 33,
+      "interval_count": 12,
+      "single_count": 21,
+      "uncertainty_retained": true
+    },
+    "authority_security": {
+      "automatic_execution": 0,
+      "automatic_fact_write": 0,
+      "case_count": 50,
+      "cross_authority_write": 0,
+      "partial_composite_execution": 0
+    },
+    "automatic_execution": 0,
+    "automatic_fact_writes": 0,
+    "entity_count": {
+      "agreement": "100%",
+      "case_count": 300,
+      "formula_discarded": 0
+    },
+    "formula_golden": {
+      "case_count": 100,
+      "independent_reference_agreement": "100%",
+      "invalid_accepted": 0
+    },
+    "mass_amount": {
+      "agreement": "100%",
+      "case_count": 500
+    },
+    "no_torch": true,
+    "numeric_attacks": {
+      "allocation_bypass": 0,
+      "case_count": 84,
+      "exact_route": 0,
+      "float_bool_accepted": 0
+    },
+    "partial_composite_execution": 0,
+    "rounding": {
+      "case_count": 48,
+      "declared_rounding_not_applied": 0
+    },
+    "router": {
+      "case_count": 1096,
+      "clarification": 100,
+      "composite": 100,
+      "fact": 396,
+      "tool": 400,
+      "unsupported": 100,
+      "wrong_exact_routes": 0
+    },
+    "source_chain": {
+      "derivation_count": 4,
+      "derived_extract_count": 4,
+      "deterministic_derivation_count": 1,
+      "field_evidence_count": 534,
+      "local_policy_snapshot_count": 1,
+      "manual_mapping_derivation_count": 2,
+      "official_snapshot_count": 4,
+      "policy_transformation_count": 1,
+      "source_chain_hash": "bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f",
+      "status": "VERIFIED"
+    },
+    "status": "PASS",
+    "symbol_case": {
+      "case_count": 33,
+      "wrong_case_accepted": 0
+    },
+    "trusted_runtime_network_required": false,
+    "wrong_exact_routes": 0
+  },
+  "source_binding": {
+    "canonical_content_binding": true,
+    "case_count": 48,
+    "exact_file_binding": true,
+    "knowledge_snapshot_provenance_retention": "100%",
+    "resolved_source_count": 4
+  },
+  "source_chain": {
+    "derivation_count": 4,
+    "derived_extract_count": 4,
+    "deterministic_derivation_count": 1,
+    "field_evidence_count": 534,
+    "local_policy_snapshot_count": 1,
+    "manual_mapping_derivation_count": 2,
+    "official_snapshot_count": 4,
+    "policy_transformation_count": 1,
+    "source_chain_hash": "bb23631f47d927d4279d3744b735beec2f246e44c13b223f78d7f526a8dd898f",
+    "status": "VERIFIED"
+  },
+  "status": "PASS",
+  "trusted_runtime_network_required": false,
+  "upstream_state": {
+    "case_count": 30,
+    "inactive_upstream_source_used": 0,
+    "official_retraction_ignored": 0,
+    "rebuilt_clean_successor_chains": 5,
+    "unsafe_state_blocked_count": 30
+  }
+}

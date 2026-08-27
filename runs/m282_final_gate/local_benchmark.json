@@ -1,0 +1,145 @@
+{
+  "device": "CPU",
+  "mixed_calculations": {
+    "calculation_count": 10000,
+    "calculations_per_second": 160.15479434932053,
+    "device": "CPU",
+    "mixed_calculation_ms": {
+      "p50": 5.9222,
+      "p95": 12.0662,
+      "p99": 16.8549
+    },
+    "peak_python_memory_bytes": 839748,
+    "performance_matrix_ms": {
+      "atomic_weight_answer": {
+        "p50": 636.58825,
+        "p95": 658.96,
+        "p99": 658.96
+      },
+      "backup": {
+        "p50": 387.043,
+        "p95": 387.043,
+        "p99": 387.043
+      },
+      "confirmed_response": {
+        "p50": 173.8946,
+        "p95": 177.7122,
+        "p99": 177.7122
+      },
+      "controlled_route": {
+        "p50": 86.88910000000001,
+        "p95": 1197.521,
+        "p99": 1783.7644
+      },
+      "conventional_molar_mass": {
+        "p50": 1.4983,
+        "p95": 2.5084,
+        "p99": 2.8045
+      },
+      "domain_pack_load": {
+        "p50": 240.191,
+        "p95": 248.3779,
+        "p99": 248.3779
+      },
+      "envelope_molar_mass": {
+        "p50": 1.42965,
+        "p95": 2.4052,
+        "p99": 2.6863
+      },
+      "exact_element_resolution": {
+        "p50": 6.97955,
+        "p95": 7.8827,
+        "p99": 8.432
+      },
+      "fact_memory_verify": {
+        "p50": 795.371,
+        "p95": 795.371,
+        "p99": 795.371
+      },
+      "formula_entities": {
+        "p50": 1.35395,
+        "p95": 1.9697,
+        "p99": 2.3595
+      },
+      "formula_parse": {
+        "p50": 0.0497,
+        "p95": 0.0746,
+        "p99": 0.1143
+      },
+      "knowledge_snapshot": {
+        "p50": 1230.3626,
+        "p95": 1254.1196,
+        "p99": 1254.1196
+      },
+      "mass_amount": {
+        "p50": 2.67455,
+        "p95": 3.7389,
+        "p99": 4.6687
+      },
+      "replay": {
+        "p50": 238.92615,
+        "p95": 257.0291,
+        "p99": 263.1896
+      },
+      "restore": {
+        "p50": 1501.6931,
+        "p95": 1501.6931,
+        "p99": 1501.6931
+      },
+      "significant_rendering": {
+        "p50": 0.0114,
+        "p95": 0.0139,
+        "p99": 0.0241
+      },
+      "source_chain_verification": {
+        "p50": 63.1164,
+        "p95": 64.696,
+        "p99": 64.696
+      },
+      "total_atoms": {
+        "p50": 1.3405,
+        "p95": 1.7168,
+        "p99": 2.1668
+      }
+    }
+  },
+  "peak_python_memory_bytes": 8681702,
+  "provenance_matrix_ms": {
+    "derivation_resolution": {
+      "count": 100.0,
+      "p50_ms": 147.58255,
+      "p95_ms": 169.5933,
+      "p99_ms": 203.6426,
+      "throughput_per_second": 6.710233078601544
+    },
+    "knowledge_snapshot_v3": {
+      "count": 25.0,
+      "p50_ms": 1628.11,
+      "p95_ms": 1773.353,
+      "p99_ms": 1829.9444,
+      "throughput_per_second": 0.6094360841601857
+    },
+    "source_chain_v3_verification": {
+      "count": 10.0,
+      "p50_ms": 209.9004,
+      "p95_ms": 243.4535,
+      "p99_ms": 243.4535,
+      "throughput_per_second": 4.709420734767578
+    },
+    "tool_proposal_creation": {
+      "count": 100.0,
+      "p50_ms": 175.15105,
+      "p95_ms": 206.7418,
+      "p99_ms": 1786.4657,
+      "throughput_per_second": 5.186656674257593
+    },
+    "upstream_state_resolution": {
+      "count": 1000.0,
+      "p50_ms": 14.491299999999999,
+      "p95_ms": 15.9956,
+      "p99_ms": 18.039,
+      "throughput_per_second": 67.9697847391081
+    }
+  },
+  "status": "PASS"
+}
