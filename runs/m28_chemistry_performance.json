@@ -1,0 +1,20 @@
+{
+  "calculation_count": 10000,
+  "calculations_per_second": 4552.753644263036,
+  "controlled_route_ms": {
+    "p50": 73.02455,
+    "p95": 77.9825,
+    "p99": 258.3818
+  },
+  "device": "CPU",
+  "formula_parse_ms": {
+    "p50": 0.0459,
+    "p95": 0.0571,
+    "p99": 0.0759
+  },
+  "molar_mass_ms": {
+    "p50": 0.2131,
+    "p95": 0.2827,
+    "p99": 0.3798
+  }
+}

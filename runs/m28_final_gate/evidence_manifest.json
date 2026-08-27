@@ -1,0 +1,16 @@
+{
+  "implementation_commit_h3": "19c3bd2423eb99df489f03c35e3b3848e627cdbc",
+  "branch": "exp/stage2-chemistry-domain",
+  "reproducible_domain_content_hash": "ff37a1e3c3732e03a2382315a73db0925f6099f3c75faf525845715f3a835e7b",
+  "files": {
+    "karina_acceptance.json": "0604c453243994aca557e96e00abf94c2b7e2f92e82701601a239f4e335cad7c",
+    "karina_additional.log": "151018cbe08b36facfc6a9cb49802e7b771e9492678b666af3b6b8795bcc080a",
+    "karina_exact_sha.log": "3973a8b5958d66092cb0d663a71bc147fbfea7daf92de9818cead3221c6ac0bd",
+    "karina_full_performance.json": "3b84cf6611bac9d9132a329e151c35d5184753b54438066ec79b2b8a868a3a5d",
+    "karina_performance.json": "57d6ebd5439e0ecc4246acf33c91d055d6bedf2dc23a9664cbbe3083f46d5be3",
+    "local_exact_sha.log": "4958008adac06b5abaf3cf693739a991a1b2fcfacf0d1bc70d45c276da653ac5",
+    "local_full_performance.json": "c85c114a58bba8b6dd0ae65bf87a73a5c6004bf8fb334af211f3d2d78c30be17",
+    "../m28_chemistry_acceptance.json": "ef51669e7dd9ac3bf57981761d9bab93d69af5e0618ff5a1720e445702092ce2",
+    "../m28_chemistry_performance.json": "55e00f380e5372680c0f4ac0b5afcc767865a1d80e863be965eb8b55f8cc16c6"
+  }
+}

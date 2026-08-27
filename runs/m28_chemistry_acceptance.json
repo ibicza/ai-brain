@@ -1,0 +1,27 @@
+{
+  "acceptance_case_count": 1635,
+  "authority_security": {
+    "automatic_execution": 0,
+    "case_count": 5,
+    "cross_authority_write": 0,
+    "tampered_result_accepted": 0
+  },
+  "entity_amount_cases": 200,
+  "fact_memory": {
+    "audit_event_count": 3030,
+    "blob_count": 4,
+    "status": "VALID"
+  },
+  "formula_cases": 100,
+  "invalid_formula_cases": 130,
+  "mass_amount_cases": 500,
+  "reproducible_content_hash": "ff37a1e3c3732e03a2382315a73db0925f6099f3c75faf525845715f3a835e7b",
+  "router": {
+    "clarification": 100,
+    "composite": 100,
+    "fact": 200,
+    "tool": 200,
+    "unsupported": 100
+  },
+  "status": "PASS"
+}

@@ -18,4 +18,16 @@ Local M-28 acceptance: 1,635/1,635. Golden pack: 30/30. Invalid battery: 130/130
 
 The isolated source-update simulation preserved the historical oxygen value, exposed the overlapping update as a conflict, rejected a pending pre-update proposal, and replayed the old calculation as `STALE_FACT_MEMORY`.
 
-Exact-SHA local/Karina gates and evidence commit are recorded after implementation commit H3. M-29 should add educational explanations and exercises only over these verified structured bundles, without widening trusted chemistry scope.
+## Exact-SHA Gates
+
+- Branch: `exp/stage2-chemistry-domain`
+- H3: `19c3bd2423eb99df489f03c35e3b3848e627cdbc`
+- Local: format/lint PASS, `647 passed` in 590.88 s.
+- Karina: format/lint PASS, `647 passed` in 145.79 s.
+- Karina rebuild: 310 claims, 100 evidence records, 4 sources; reproducible hash exactly matched.
+- Karina acceptance: 1,635/1,635.
+- Karina 10,000 calculations: 9,568.49/s; molar mass p50/p95/p99 0.1058/0.1120/0.1355 ms.
+- Backup/restore, source-update simulation, result replay, no-torch/no-network, and final clean checkout: PASS.
+- Full local/Karina p50/p95/p99 matrix covers pack load, fact query, parser/composition, snapshot creation, conversions, routing, confirmed response, replay, verify, and backup/restore.
+
+M-29 should add educational explanations and exercises only over these verified structured bundles, without widening trusted chemistry scope.

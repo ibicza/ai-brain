@@ -1,0 +1,27 @@
+date: 2026-08-27T02:10:18+00:00
+hostname: karina
+pwd: /home/ibicza/m28-exact-19c3bd2/repo
+git rev-parse HEAD: 19c3bd2423eb99df489f03c35e3b3848e627cdbc
+git status --porcelain:
+python --version: Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building ai-brain @ file:///home/ibicza/m28-exact-19c3bd2/repo
+      Built ai-brain @ file:///home/ibicza/m28-exact-19c3bd2/repo
+Installed 46 packages in 130ms
+Python 3.12.14
+uv --version: uv 0.12.5 (x86_64-unknown-linux-gnu)
+COMMAND: uv run ruff format --check src tests scripts
+253 files already formatted
+COMMAND: uv run ruff check src tests scripts
+All checks passed!
+COMMAND: uv run pytest -q
+........................................................................ [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 33%]
+........................................................................ [ 44%]
+........................................................................ [ 55%]
+........................................................................ [ 66%]
+........................................................................ [ 77%]
+........................................................................ [ 89%]
+.......................................................................  [100%]
+647 passed in 145.79s (0:02:25)

@@ -1,0 +1,121 @@
+ADDITIONAL_START: 2026-08-27T02:13:34+00:00
+COMMAND: rebuild domain from frozen snapshots
+{
+  "claim_count": 310,
+  "computational_element_count": 33,
+  "entity_count": 34,
+  "evidence_count": 100,
+  "fact_memory_snapshot_hash": "b2daa820bd84a3c7808b472ae441e3348bff1283e0f56d03d6f7c07202234b65",
+  "identity_element_count": 33,
+  "predicate_count": 12,
+  "source_count": 4
+}
+COMMAND: compare reproducible content hash
+original ff37a1e3c3732e03a2382315a73db0925f6099f3c75faf525845715f3a835e7b
+rebuilt  ff37a1e3c3732e03a2382315a73db0925f6099f3c75faf525845715f3a835e7b
+COMMAND: M-28 acceptance on rebuilt pack
+{
+  "acceptance_case_count": 1635,
+  "authority_security": {
+    "automatic_execution": 0,
+    "case_count": 5,
+    "cross_authority_write": 0,
+    "tampered_result_accepted": 0
+  },
+  "entity_amount_cases": 200,
+  "fact_memory": {
+    "audit_event_count": 3030,
+    "blob_count": 4,
+    "status": "VALID"
+  },
+  "formula_cases": 100,
+  "invalid_formula_cases": 130,
+  "mass_amount_cases": 500,
+  "reproducible_content_hash": "ff37a1e3c3732e03a2382315a73db0925f6099f3c75faf525845715f3a835e7b",
+  "router": {
+    "clarification": 100,
+    "composite": 100,
+    "fact": 200,
+    "tool": 200,
+    "unsupported": 100
+  },
+  "status": "PASS"
+}
+COMMAND: 10000 chemistry calculations
+{
+  "calculation_count": 10000,
+  "calculations_per_second": 9568.485942003897,
+  "controlled_route_ms": {
+    "p50": 38.0523235,
+    "p95": 39.124458,
+    "p99": 142.618731
+  },
+  "device": "CPU",
+  "formula_parse_ms": {
+    "p50": 0.02128,
+    "p95": 0.038573,
+    "p99": 0.056426
+  },
+  "molar_mass_ms": {
+    "p50": 0.1058135,
+    "p95": 0.112,
+    "p99": 0.135465
+  }
+}
+COMMAND: backup/restore
+{
+  "created_at": "2026-08-27T02:14:30.631528Z",
+  "database_sha256": "7c72b1da13048978218e9b1a658d553e8ea854dac4b09748e79582e4bc0a310f",
+  "manifest_sha256": "ca2f445519dbf20d5de478dc214fd2a82cc73f80e7d25a9044cd3e9fbf17ee25",
+  "memory_snapshot_hash": "b2daa820bd84a3c7808b472ae441e3348bff1283e0f56d03d6f7c07202234b65",
+  "schema_version": 4,
+  "source_blobs": [
+    {
+      "sha256": "0c8050ca3eab90336b45df9315f26b9999d00a625a3ec73278227ed8a097ce11",
+      "size": 3656
+    },
+    {
+      "sha256": "663db42f47304976a0fc3fae8249fa934463c787e9884ca599afa1798d7e67b2",
+      "size": 698
+    },
+    {
+      "sha256": "918535718a5ef475154d678555b378b72c893cfd860976777eb7e83e454632c7",
+      "size": 1097
+    },
+    {
+      "sha256": "fa05e13ac609babae3d1b596ea3d821f7db9ddb52da549a5f7b8deecbf6a9336",
+      "size": 3031
+    }
+  ]
+}
+{
+  "status": "RESTORED",
+  "target": "/home/ibicza/m28-exact-19c3bd2/restored"
+}
+{
+  "domain_manifest_hash": "80be916d86f8b6bc634e32562c14ed6fa401f38cea405777a7c358a5d88bdd46",
+  "fact_memory": {
+    "audit_event_count": 3031,
+    "blob_count": 4,
+    "status": "VALID"
+  },
+  "reproducible_content_hash": "ff37a1e3c3732e03a2382315a73db0925f6099f3c75faf525845715f3a835e7b",
+  "tool_registry_hash": "34029a953accc5e8cf3b32a022d338f841f197bd9b11b2ab2287a0898a241f8b"
+}
+COMMAND: source update simulation
+{
+  "conflict_visible": true,
+  "current_claim_count": 2,
+  "current_query_status": "CONFLICT",
+  "historical_query_status": "EXACT_SINGLE",
+  "old_claim_retained": true,
+  "old_result_replay_status": "STALE_FACT_MEMORY",
+  "pending_proposal_rejected": true,
+  "source_update_snapshot_changed": true,
+  "status": "PASS"
+}
+COMMAND: no torch/network trusted import
+[]
+FINAL_HEAD: 19c3bd2423eb99df489f03c35e3b3848e627cdbc
+FINAL_STATUS:
+ADDITIONAL_PASS
