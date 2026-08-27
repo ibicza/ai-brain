@@ -7,11 +7,18 @@ from dataclasses import asdict
 from typing import Any
 from uuid import uuid4
 
+from ai_brain.rules.memory import (
+    RuleMemoryIntegrityError,
+    RuleMemoryIOError,
+    RuleMemoryRecoveryError,
+)
+from ai_brain.stage1.execution import BoundedExecutionError
 from ai_brain.stage1.specifications import specification_from_dict
 from ai_brain.stage2.facts.canonical import content_hash, utc_now
 from ai_brain.stage2.facts.models import ClaimStatus, FactQuery, QueryStatus
 from ai_brain.stage2.facts.values import FactValue
 from ai_brain.stage2.models import ConfirmationDecision as SkillConfirmationDecision
+from ai_brain.stage2.registry import SkillRegistryStaleError
 from ai_brain.stage2.router.clarification import make_clarification
 from ai_brain.stage2.router.decisions import (
     make_route_receipt,
@@ -46,6 +53,7 @@ from ai_brain.stage2.router.version import (
     TOOL_CALL_SCHEMA_VERSION,
     UNIFIED_RESPONSE_SCHEMA_VERSION,
 )
+from ai_brain.stage2.service import SkillDispatchError
 
 
 class UnifiedRouterError(RuntimeError):
@@ -604,7 +612,18 @@ class UnifiedRouterService:
         )
         try:
             dispatched = self.dispatch_skill(request, decision, **dispatch_kwargs)
-        except (ConfirmationRequiredError, UnifiedRouterError, ValueError) as error:
+        except (
+            ConfirmationRequiredError,
+            UnifiedRouterError,
+            SkillDispatchError,
+            SkillRegistryStaleError,
+            BoundedExecutionError,
+            RuleMemoryIntegrityError,
+            RuleMemoryRecoveryError,
+            RuleMemoryIOError,
+            TypeError,
+            ValueError,
+        ) as error:
             failure = self._failure_artifact(
                 request, decision, code="SKILL_EXECUTION_FAILED"
             )
@@ -642,6 +661,16 @@ class UnifiedRouterService:
             if response.legacy_status == "LEGACY_INCOMPLETE_DEPENDENCY_BINDING":
                 return self._replay_report(
                     ReplayStatus.INCOMPATIBLE_LEGACY_ARTIFACT,
+                    response.response_hash,
+                    None,
+                    current,
+                    (),
+                    ("unified_response_schema_version",),
+                    checked_at,
+                )
+            if response.schema_version != UNIFIED_RESPONSE_SCHEMA_VERSION:
+                return self._replay_report(
+                    ReplayStatus.INCOMPATIBLE_VERSION,
                     response.response_hash,
                     None,
                     current,
@@ -741,8 +770,14 @@ class UnifiedRouterService:
         decision = self._decisions.get(proposal.route_decision_hash)
         if request is None or decision is None:
             raise UnifiedRouterError("tool proposal context is unavailable")
-        validate_decision(decision, request, self.router.dependencies())
         descriptor = self.router.tool_registry.descriptor(proposal.tool_id)
+        try:
+            self.router.tool_registry.verify_current_implementation(
+                proposal.tool_id, proposal.tool_implementation_manifest_hash
+            )
+        except ToolImplementationStaleError as error:
+            raise UnifiedRouterError("tool implementation is stale") from error
+        validate_decision(decision, request, self.router.dependencies())
         validation = self.router.tool_registry.validate_and_canonicalize_arguments(
             proposal.tool_id, proposal.typed_arguments
         )
@@ -756,12 +791,6 @@ class UnifiedRouterService:
             or validation.argument_hash != proposal.argument_hash
         ):
             raise UnifiedRouterError("tool proposal dependency is stale or changed")
-        try:
-            self.router.tool_registry.verify_current_implementation(
-                proposal.tool_id, proposal.tool_implementation_manifest_hash
-            )
-        except ToolImplementationStaleError as error:
-            raise UnifiedRouterError("tool implementation is stale") from error
 
     @staticmethod
     def _clarification_kind(decision: RouteDecision) -> ClarificationKind:

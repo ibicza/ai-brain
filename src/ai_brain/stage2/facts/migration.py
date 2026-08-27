@@ -17,6 +17,7 @@ from ai_brain.stage2.facts.canonical import (
     bytes_hash,
     canonical_json,
     content_hash,
+    temporal_key,
     utc_now,
 )
 from ai_brain.stage2.facts.memory import FactMemory, _evidence_from_json
@@ -549,6 +550,19 @@ def _upgrade_conflict_policy_v4(root: Path) -> dict[str, int]:
             }
             kind = str(payload["resolution_kind"])
             safe = selected <= group_claims and remaining <= group_claims
+            recorded_at = str(payload["recorded_at"])
+            for link in links:
+                timing = connection.execute(
+                    """SELECT e.created_at, ce.attached_at
+                       FROM evidence e JOIN claim_evidence ce USING(evidence_id)
+                       WHERE e.evidence_id = ? AND ce.claim_id = ?""",
+                    (str(link["evidence_id"]), str(link["claim_id"])),
+                ).fetchone()
+                if timing is None or any(
+                    temporal_key(str(value)) > temporal_key(recorded_at)
+                    for value in timing
+                ):
+                    safe = False
             if kind == str(ConflictResolutionKind.MANUAL_RESOLUTION):
                 safe = (
                     safe

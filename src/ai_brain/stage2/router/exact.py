@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 
+from ai_brain.rules.memory import RuleMemory
 from ai_brain.stage1.specifications import specification_from_dict
 from ai_brain.stage1.version import RULE_MEMORY_SCHEMA_VERSION, STAGE1_VERSION
 from ai_brain.stage2.facts.canonical import content_hash
@@ -16,6 +17,7 @@ from ai_brain.stage2.facts.version import (
     FACT_MEMORY_SCHEMA_VERSION,
 )
 from ai_brain.stage2.models import EquivalenceScope, SearchStatus
+from ai_brain.stage2.registry import rule_memory_hash
 from ai_brain.stage2.router.controlled import (
     looks_composite,
     parse_fact,
@@ -61,6 +63,13 @@ class ExactUnifiedRouter:
 
     def dependencies(self) -> DependencySnapshot:
         registry = self.skill_router.registry if self.skill_router is not None else None
+        live_rule_memory_hash = None
+        self.rule_memory_recovery_source = None
+        if self.skill_router is not None:
+            memory = RuleMemory.load_with_backup(self.skill_router.memory_path)
+            registry.validate_against_rule_memory(memory)
+            live_rule_memory_hash = rule_memory_hash(memory)
+            self.rule_memory_recovery_source = memory.recovery_source
         body = {
             "fact_memory_hash": (
                 self.fact_memory.database.snapshot_hash()
@@ -70,9 +79,7 @@ class ExactUnifiedRouter:
             "skill_registry_hash": (
                 registry.manifest.registry_hash if registry else None
             ),
-            "rule_memory_hash": (
-                registry.manifest.rule_memory_hash if registry else None
-            ),
+            "rule_memory_hash": live_rule_memory_hash,
             "tool_registry_hash": self.tool_registry.registry_hash,
             "tool_implementation_manifest_hashes": self.tool_registry.current_manifest_hashes(),
             "stage1_version": STAGE1_VERSION,

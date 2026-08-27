@@ -1,0 +1,164 @@
+{
+  "atomic_weight_policy": "CONVENTIONAL_CLASSROOM_VALUE_FROM_CIAAW_ABRIDGED_2024",
+  "calculation_policy_version": "1.0",
+  "domain_manifest_hash": "9264b10c4cb0be5874c38b68deac4396174fa1037d11cac5759fb09033fef470",
+  "domain_schema_version": 1,
+  "domain_version": "1.0.0",
+  "fact_memory_snapshot_hash": "1155f7b62bc764eb959cf3861e254ac584882aace83c5ec2faa636191debdd24",
+  "formula_grammar_version": "1.0",
+  "formula_limits": {
+    "max_canonical_output_chars": 512,
+    "max_distinct_elements": 32,
+    "max_element_terms": 128,
+    "max_group_count": 64,
+    "max_input_chars": 256,
+    "max_nesting_depth": 4,
+    "max_subscript": 1000000,
+    "max_total_atoms": 10000000
+  },
+  "rendering_version": "1.0",
+  "reproducible_content_hash": "ff37a1e3c3732e03a2382315a73db0925f6099f3c75faf525845715f3a835e7b",
+  "rounding_policy": "DECIMAL_EXACT_INTERNAL_RENDER_6_SIGNIFICANT",
+  "router_grammar_version": "1.0",
+  "source_policy_version": "1.0",
+  "source_snapshots": [
+    {
+      "authority": "International Union of Pure and Applied Chemistry (IUPAC)",
+      "file": "iupac_elements_2022.json",
+      "language": "en",
+      "license": "Metadata and minimal factual extract; consult IUPAC for source terms",
+      "limitations": "M-28 selected-element identity extract, not the complete IUPAC table",
+      "published_at": "2022-05-04",
+      "retrieved_at": "2026-08-27",
+      "semantic_hash": "fa05e13ac609babae3d1b596ea3d821f7db9ddb52da549a5f7b8deecbf6a9336",
+      "sha256": "3eaeabfcc336c0744da5472c81432e452852fcbb69fa1071a7f59b55aee796f4",
+      "size": 3569,
+      "source_family": "IUPAC_PERIODIC_TABLE",
+      "title": "Periodic Table of Elements, selected identity extract",
+      "url": "https://iupac.org/what-we-do/periodic-table-of-elements/",
+      "version": "4 May 2022"
+    },
+    {
+      "abridged_url": "https://ciaaw.org/abridged-atomic-weights.htm",
+      "authority": "IUPAC Commission on Isotopic Abundances and Atomic Weights (CIAAW)",
+      "file": "ciaaw_atomic_weights_2024.json",
+      "language": "en",
+      "license": "Minimal factual extract with attribution; consult CIAAW for source terms",
+      "limitations": "Conventional classroom values are abridged and are not exact constants",
+      "published_at": "2024-10-23",
+      "retrieved_at": "2026-08-27",
+      "semantic_hash": "0c8050ca3eab90336b45df9315f26b9999d00a625a3ec73278227ed8a097ce11",
+      "sha256": "b4e71b1e13bdd3236263fb85a27977c104e5f7a0f322b98b81b4eb1424f56dcc",
+      "size": 3907,
+      "source_family": "CIAAW_ATOMIC_WEIGHTS",
+      "standard_url": "https://ciaaw.org/atomic-weights.htm",
+      "title": "Standard Atomic Weights 2024 and Abridged Standard Atomic Weights 2024, selected extract",
+      "version": "2024"
+    },
+    {
+      "authority": "Bureau International des Poids et Mesures (BIPM)",
+      "doi": "10.59161/AUEZ1291",
+      "file": "bipm_si_mole_2026.json",
+      "language": "en",
+      "license": "CC BY 4.0",
+      "limitations": "Minimal structured extract of the mole definition",
+      "published_at": "2026-01-01",
+      "retrieved_at": "2026-08-27",
+      "semantic_hash": "663db42f47304976a0fc3fae8249fa934463c787e9884ca599afa1798d7e67b2",
+      "sha256": "c24ca479f770e756681809075857c603fb15016542a5aa4047aa7ff2b52c081c",
+      "size": 819,
+      "source_family": "BIPM_SI_BROCHURE",
+      "title": "The International System of Units (SI), 9th edition, version 3.02",
+      "url": "https://www.bipm.org/documents/20126/41483022/SI-Brochure-9.pdf",
+      "version": "9th edition (2019), updated 2026, version 3.02"
+    },
+    {
+      "authority": "ai-brain M-28 reviewed educational translation policy",
+      "file": "ru_element_names_policy_v1.json",
+      "language": "ru",
+      "license": "Project policy data",
+      "limitations": "Policy aliases only; symbols, names_en and atomic numbers remain IUPAC source facts",
+      "locator": "local-policy:m28-ru-element-names-v1",
+      "published_at": "2026-08-27",
+      "retrieved_at": "2026-08-27",
+      "semantic_hash": "918535718a5ef475154d678555b378b72c893cfd860976777eb7e83e454632c7",
+      "sha256": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "size": 1178,
+      "source_family": "M28_RU_TRANSLATION_POLICY",
+      "title": "Russian names for the M-28 selected IUPAC element identities",
+      "version": "1.0"
+    }
+  ],
+  "supported_elements": [
+    "Ag",
+    "Al",
+    "Ar",
+    "B",
+    "Be",
+    "Br",
+    "C",
+    "Ca",
+    "Cl",
+    "Co",
+    "Cr",
+    "Cu",
+    "F",
+    "Fe",
+    "H",
+    "He",
+    "I",
+    "K",
+    "Li",
+    "Mg",
+    "Mn",
+    "N",
+    "Na",
+    "Ne",
+    "Ni",
+    "O",
+    "P",
+    "S",
+    "Sc",
+    "Si",
+    "Ti",
+    "V",
+    "Zn"
+  ],
+  "tool_manifest_hashes": [
+    [
+      "chemistry_entity_amount",
+      "8767fc818abdfb65137a4c4aadc4da7568e3f96419ed1878c51071b205832d71"
+    ],
+    [
+      "chemistry_formula_composition",
+      "339e92592bb32debc15f45b17e7f10238b4c700e1c715727776ebd3258e03543"
+    ],
+    [
+      "chemistry_mass_amount",
+      "5cf7d552871cf18d1fbe31546600dde145b76ad755c0070038ce811f2db597be"
+    ],
+    [
+      "chemistry_molar_mass",
+      "f5be9c30e94ea4a291f6812948efb09a7fee1386c9996d01af5d9b4c434e34d4"
+    ]
+  ],
+  "unit_policy": {
+    "amount": [
+      "mol",
+      "mmol"
+    ],
+    "entities": [
+      "atoms",
+      "molecules",
+      "formula_units"
+    ],
+    "mass": [
+      "g",
+      "kg"
+    ],
+    "molar_mass": [
+      "g/mol",
+      "kg/mol"
+    ]
+  }
+}

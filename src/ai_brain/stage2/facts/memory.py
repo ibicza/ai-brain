@@ -1669,6 +1669,7 @@ class FactMemory:
                 raise ValueError(
                     "dismissal must retain and select every conflict claim"
                 )
+            recorded_at = self._now()
             links = self._resolution_evidence_links(
                 connection,
                 group,
@@ -1676,6 +1677,7 @@ class FactMemory:
                 remaining,
                 tuple(sorted(set(evidence_ids))),
                 tuple(evidence_links or ()),
+                recorded_at,
             )
             self.database.append_audit(
                 connection,
@@ -1703,7 +1705,7 @@ class FactMemory:
                 evidence_links=links,
                 selected_claim_ids=selected,
                 remaining_claim_ids=remaining,
-                recorded_at=self._now(),
+                recorded_at=recorded_at,
             )
             self.database.append_audit(
                 connection,
@@ -1783,6 +1785,7 @@ class FactMemory:
         remaining: tuple[str, ...],
         evidence_ids: tuple[str, ...],
         supplied: tuple[ResolutionEvidenceLink, ...],
+        recorded_at: str,
     ) -> tuple[ResolutionEvidenceLink, ...]:
         group_claims = set(group.claim_ids)
         retained = set(remaining)
@@ -1858,8 +1861,9 @@ class FactMemory:
                     "resolution evidence claim is outside the group"
                 )
             row = connection.execute(
-                """SELECT relation FROM claim_evidence
-                   WHERE claim_id = ? AND evidence_id = ?""",
+                """SELECT ce.relation, ce.attached_at, e.created_at
+                   FROM claim_evidence ce JOIN evidence e USING(evidence_id)
+                   WHERE ce.claim_id = ? AND ce.evidence_id = ?""",
                 (link.claim_id, link.evidence_id),
             ).fetchone()
             if row is None:
@@ -1867,6 +1871,12 @@ class FactMemory:
                     "resolution evidence is not attached to its claim"
                 )
             relation = EvidenceRelation(row[0])
+            if temporal_key(row[1]) > temporal_key(recorded_at) or temporal_key(
+                row[2]
+            ) > temporal_key(recorded_at):
+                raise FactApprovalError(
+                    "resolution evidence must exist and be attached before resolution"
+                )
             valid = (
                 (
                     link.role == ResolutionEvidenceRole.SUPPORTS_REMAINING
@@ -2071,7 +2081,7 @@ class FactMemory:
                     raise FactMemoryIntegrityError(
                         "resolution evidence partition binding changed"
                     )
-            for evidence_id, _, _, _ in payload_links:
+            for evidence_id, claim_id, _, _ in payload_links:
                 evidence_row = connection.execute(
                     "SELECT created_at FROM evidence WHERE evidence_id = ?",
                     (evidence_id,),
@@ -2081,6 +2091,17 @@ class FactMemory:
                 ):
                     raise FactMemoryIntegrityError(
                         "resolution evidence postdates the resolution"
+                    )
+                attachment_row = connection.execute(
+                    """SELECT attached_at FROM claim_evidence
+                       WHERE claim_id = ? AND evidence_id = ?""",
+                    (claim_id, evidence_id),
+                ).fetchone()
+                if attachment_row is None or temporal_key(
+                    attachment_row[0]
+                ) > temporal_key(event.recorded_at):
+                    raise FactMemoryIntegrityError(
+                        "resolution evidence attachment postdates the resolution"
                     )
 
     def verify(self) -> dict[str, Any]:

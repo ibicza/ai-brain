@@ -19,6 +19,7 @@ ai-brain-stage1 = "ai_brain.stage1.cli:main"
 ai-brain-stage2 = "ai_brain.stage2.cli:main"
 ai-brain-facts = "ai_brain.stage2.facts.cli:main"
 ai-brain-router = "ai_brain.stage2.router.cli:main"
+ai-brain-chemistry = "ai_brain.stage2.domains.chemistry.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]

@@ -45,6 +45,8 @@ _MANIFEST_DEPENDENCIES = {
             "_render_decimal",
         ),
         "constants": (
+            "_DECIMAL_RE.pattern",
+            "_DECIMAL_RE.flags",
             "DECIMAL_TOOL_LIMITS",
             "MAX_OPERANDS",
             "MAX_DECIMAL_DIGITS",
@@ -98,10 +100,7 @@ def build_tool_implementation_manifest(
         for name in policy["helpers"]
     )
     constant_hashes = tuple(
-        (
-            name,
-            content_hash(constant_overrides.get(name, getattr(tool_module, name))),
-        )
+        (name, content_hash(_manifest_constant(name, constant_overrides)))
         for name in policy["constants"]
     )
     body = {
@@ -119,6 +118,16 @@ def build_tool_implementation_manifest(
         "implementation_policy_version": TOOL_IMPLEMENTATION_POLICY_VERSION,
     }
     return ToolImplementationManifest(**body, manifest_hash=content_hash(body))
+
+
+def _manifest_constant(name: str, overrides: dict[str, Any]) -> Any:
+    if name in overrides:
+        return overrides[name]
+    if name == "_DECIMAL_RE.pattern":
+        return tool_module._DECIMAL_RE.pattern
+    if name == "_DECIMAL_RE.flags":
+        return tool_module._DECIMAL_RE.flags
+    return getattr(tool_module, name)
 
 
 class ToolRegistry:

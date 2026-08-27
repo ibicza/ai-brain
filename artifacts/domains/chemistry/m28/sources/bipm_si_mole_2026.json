@@ -1,0 +1,23 @@
+{
+  "source": {
+    "authority": "Bureau International des Poids et Mesures (BIPM)",
+    "title": "The International System of Units (SI), 9th edition, version 3.02",
+    "version": "9th edition (2019), updated 2026, version 3.02",
+    "url": "https://www.bipm.org/documents/20126/41483022/SI-Brochure-9.pdf",
+    "doi": "10.59161/AUEZ1291",
+    "published_at": "2026-01-01",
+    "retrieved_at": "2026-08-27",
+    "language": "en",
+    "license": "CC BY 4.0",
+    "source_family": "BIPM_SI_BROCHURE",
+    "limitations": "Minimal structured extract of the mole definition"
+  },
+  "mole": {
+    "unit_name": "mole",
+    "unit_symbol": "mol",
+    "avogadro_constant": "6.02214076E+23",
+    "avogadro_unit": "mol^-1",
+    "exact": true,
+    "entity_scope": ["atoms", "molecules", "formula_units", "generic_entities"]
+  }
+}
