@@ -2,9 +2,12 @@
 
 ## Decision
 
-Provisional Outcome A: the bounded chemistry domain is trusted pending the exact
-H4 local and Karina gates. Source chain, current-state knowledge, numeric safety,
-educational semantics, routing, replay, and pre-commit acceptance pass.
+Outcome A: the bounded chemistry domain is trusted. Source chain, current-state
+knowledge, numeric safety, educational semantics, routing, replay, exact-H4
+local/Karina gates, and evidence-only diff all pass.
+
+Implementation H4:
+`6344bd2860ccc354196a41ab99895b4d59042859`.
 
 ## Delivered
 
@@ -26,5 +29,6 @@ simulations, and mixed performance measurement.
 
 ## Next Step
 
-After exact-SHA evidence passes, proceed to M-29 educational explanation and
-exercise layers without broadening the trusted chemistry core implicitly.
+Proceed to M-29 educational explanation and exercise layers without broadening
+the trusted chemistry core implicitly. New knowledge still enters only through
+reviewed source/derivation and current-state FactMemory contracts.

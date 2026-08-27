@@ -1,0 +1,15 @@
+{
+  "acceptance_cases": 2475,
+  "hostname": "karina",
+  "status": "PASS",
+  "official_reacquisition": "PASS",
+  "source_chain_hash": "ea5ae3c9c9c7283e26e22a2dfb2ef17047d4249d3117b525601296ab6edce87f",
+  "reproducible_content_hash": "58f2f25dd61ffc85b87f6f2fa2e6343286cc0af1056c31d1fb73f984ab4fc2c7",
+  "pytest_passed": 691,
+  "implementation_sha": "6344bd2860ccc354196a41ab99895b4d59042859",
+  "source_update_scenarios": 6,
+  "runtime_network_required": false,
+  "no_torch": true,
+  "cross_platform_byte_identical": true,
+  "tracked_worktree_clean": true
+}

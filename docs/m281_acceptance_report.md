@@ -15,4 +15,12 @@ Pre-commit acceptance passed 2,475 cases:
 | Authority/security | 50 | zero automatic execution/write/partial composite |
 
 Source chain is verified, runtime network is not required, and torch is not
-loaded. Exact-SHA local and Karina evidence is recorded only after H4.
+loaded.
+
+## Exact-SHA Gates
+
+Implementation H4 `6344bd2860ccc354196a41ab99895b4d59042859` passed
+`691` tests locally and `691` tests on Karina. Both hosts passed all 2,475
+acceptance cases and the six-scenario source/current-state matrix. Karina also
+reacquired all four official network snapshots and reproduced all derived files,
+derivation records, and `source_chain.json` byte-for-byte.

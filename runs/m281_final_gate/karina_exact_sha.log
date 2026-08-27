@@ -1,0 +1,337 @@
+date: 2026-08-27T13:55:00+00:00
+hostname: karina
+pwd: /home/ibicza/m281-exact-6344bd2/repo
+git rev-parse HEAD: 6344bd2860ccc354196a41ab99895b4d59042859
+git status --porcelain:
+python --version: Python 3.12.14
+uv --version: uv 0.12.5 (x86_64-unknown-linux-gnu)
+
+=== ruff format check ===
+267 files already formatted
+
+=== ruff check ===
+All checks passed!
+
+=== full pytest including M25-M28.1 regressions ===
+........................................................................ [ 10%]
+........................................................................ [ 20%]
+........................................................................ [ 31%]
+........................................................................ [ 41%]
+........................................................................ [ 52%]
+........................................................................ [ 62%]
+........................................................................ [ 72%]
+........................................................................ [ 83%]
+........................................................................ [ 93%]
+...........................................                              [100%]
+691 passed in 156.77s (0:02:36)
+
+=== official source reacquisition ===
+
+=== Linux deterministic derived extraction ===
+ea5ae3c9c9c7283e26e22a2dfb2ef17047d4249d3117b525601296ab6edce87f
+{
+  "derivation_count": 4,
+  "derived_count": 4,
+  "official_count": 5,
+  "source_chain_hash": "ea5ae3c9c9c7283e26e22a2dfb2ef17047d4249d3117b525601296ab6edce87f",
+  "status": "VERIFIED"
+}
+
+=== cross-platform byte comparison ===
+{\ status\:\PASS\,\source_chain_hash\:a5ae3c9c9c7283e26e22a2dfb2ef17047d4249d3117b525601296ab6edce87f\,\official_count\:4,\derived_count\:4,\derivation_count\:4,yte_identical\:true}
+
+=== corrected source rebuild evidence ===
+{
+  "derivation_count": 4,
+  "derived_count": 4,
+  "byte_identical": true,
+  "status": "PASS",
+  "official_manifest_count": 5,
+  "source_chain_hash": "ea5ae3c9c9c7283e26e22a2dfb2ef17047d4249d3117b525601296ab6edce87f",
+  "official_download_count": 4
+}
+
+=== moved bundled domain pack verify ===
+{
+  "domain_manifest_hash": "1e7839225565ae19c6a6e46d4c7c648db4430510330dd1ce80fa3926f7ba0049",
+  "fact_memory": {
+    "audit_event_count": 3599,
+    "blob_count": 9,
+    "status": "VALID"
+  },
+  "reproducible_content_hash": "58f2f25dd61ffc85b87f6f2fa2e6343286cc0af1056c31d1fb73f984ab4fc2c7",
+  "tool_registry_hash": "c3f93fdaf9bb65a5dfa229be55f8d7cf0b7d8850a20d531d7107a764aa343898"
+}
+
+=== domain v2 reproducible rebuild ===
+{
+  "claim_count": 430,
+  "computational_element_count": 33,
+  "entity_count": 34,
+  "evidence_count": 100,
+  "fact_memory_snapshot_hash": "65da10d13d5e453b3d9cb2b38fa8290cf19af7b547021595a124daf01151c6fe",
+  "identity_element_count": 33,
+  "predicate_count": 16,
+  "source_count": 9
+}
+{\ status\:\PASS\,eproducible_content_hash\:8f2f25dd61ffc85b87f6f2fa2e6343286cc0af1056c31d1fb73f984ab4fc2c7\}
+
+=== M-28.1 acceptance ===
+{
+  "acceptance_case_count": 2475,
+  "atomic_weight": {
+    "case_count": 264,
+    "element_count": 33,
+    "interval_count": 12,
+    "single_count": 21,
+    "uncertainty_retained": true
+  },
+  "authority_security": {
+    "automatic_execution": 0,
+    "automatic_fact_write": 0,
+    "case_count": 50,
+    "cross_authority_write": 0,
+    "partial_composite_execution": 0
+  },
+  "automatic_execution": 0,
+  "automatic_fact_writes": 0,
+  "entity_count": {
+    "agreement": "100%",
+    "case_count": 300,
+    "formula_discarded": 0
+  },
+  "formula_golden": {
+    "case_count": 100,
+    "independent_reference_agreement": "100%",
+    "invalid_accepted": 0
+  },
+  "mass_amount": {
+    "agreement": "100%",
+    "case_count": 500
+  },
+  "no_torch": true,
+  "numeric_attacks": {
+    "allocation_bypass": 0,
+    "case_count": 84,
+    "exact_route": 0,
+    "float_bool_accepted": 0
+  },
+  "partial_composite_execution": 0,
+  "rounding": {
+    "case_count": 48,
+    "declared_rounding_not_applied": 0
+  },
+  "router": {
+    "case_count": 1096,
+    "clarification": 100,
+    "composite": 100,
+    "fact": 396,
+    "tool": 400,
+    "unsupported": 100,
+    "wrong_exact_routes": 0
+  },
+  "source_chain": {
+    "derivation_count": 4,
+    "derived_count": 4,
+    "official_count": 5,
+    "source_chain_hash": "ea5ae3c9c9c7283e26e22a2dfb2ef17047d4249d3117b525601296ab6edce87f",
+    "status": "VERIFIED"
+  },
+  "status": "PASS",
+  "symbol_case": {
+    "case_count": 33,
+    "wrong_case_accepted": 0
+  },
+  "trusted_runtime_network_required": false,
+  "wrong_exact_routes": 0
+}
+
+=== source update and retraction matrix ===
+{
+  "automatic_conflict_resolution_count": 0,
+  "destructive_overwrite_count": 0,
+  "scenario_count": 6,
+  "scenarios": {
+    "claim_retraction": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "RETRACTED_ELEMENT_CLAIM",
+      "pending_proposal_rejected": true,
+      "status": "PASS"
+    },
+    "claim_supersession": {
+      "current_calculation_available": true,
+      "current_snapshot_hash": "18747f46061cb2f121c41ed4cad06bb20b39a64ef8edbb015e5f2f6f13e6b7ae",
+      "historical_result_retained": true,
+      "old_claim_retained": true,
+      "old_result_replay_status": "SUPERSEDED_ELEMENT_CLAIM",
+      "pending_proposal_rejected": true,
+      "replacement_claim_id": "claim_f58fe5c930ad4cbaa613028222d885dc",
+      "status": "PASS"
+    },
+    "conflicting_atomic_weight": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "CONTRADICTING_EVIDENCE",
+      "pending_proposal_rejected": true,
+      "status": "PASS"
+    },
+    "derivation_extractor_change": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "STALE_DERIVATION_CHAIN",
+      "pending_proposal_rejected": true,
+      "rebuild_required": true,
+      "status": "PASS"
+    },
+    "official_source_version_update": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "STALE_DOMAIN_MANIFEST",
+      "pending_proposal_rejected": true,
+      "rebuild_required": true,
+      "status": "PASS"
+    },
+    "source_retraction": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "RETRACTED_SOURCE",
+      "pending_proposal_rejected": true,
+      "status": "PASS"
+    }
+  },
+  "status": "PASS"
+}
+
+=== CLI smokes ===
+{\status\:\PASS\,utomatic_execution\:0}
+
+=== FactMemory backup and restore ===
+{
+  "status": "RESTORED",
+  "target": "/tmp/m281-6344bd2-restore"
+}
+
+=== 10,000 mixed calculation performance matrix ===
+{
+  "calculation_count": 10000,
+  "calculations_per_second": 503.043044151476,
+  "device": "CPU",
+  "mixed_calculation_ms": {
+    "p50": 1.98981,
+    "p95": 3.811704,
+    "p99": 3.861827
+  },
+  "peak_python_memory_bytes": 912402,
+  "performance_matrix_ms": {
+    "atomic_weight_answer": {
+      "p50": 36.452745,
+      "p95": 36.585445,
+      "p99": 36.585445
+    },
+    "backup": {
+      "p50": 32.792637,
+      "p95": 32.792637,
+      "p99": 32.792637
+    },
+    "confirmed_response": {
+      "p50": 23.450259,
+      "p95": 27.526029,
+      "p99": 27.526029
+    },
+    "controlled_route": {
+      "p50": 12.465610999999999,
+      "p95": 78.269902,
+      "p99": 112.438474
+    },
+    "conventional_molar_mass": {
+      "p50": 0.47911499999999996,
+      "p95": 0.492887,
+      "p99": 0.520538
+    },
+    "domain_pack_load": {
+      "p50": 8.707194,
+      "p95": 8.725497,
+      "p99": 8.725497
+    },
+    "envelope_molar_mass": {
+      "p50": 0.495867,
+      "p95": 0.510439,
+      "p99": 0.543542
+    },
+    "exact_element_resolution": {
+      "p50": 0.522041,
+      "p95": 0.538161,
+      "p99": 0.552398
+    },
+    "fact_memory_verify": {
+      "p50": 176.899675,
+      "p95": 176.899675,
+      "p99": 176.899675
+    },
+    "formula_entities": {
+      "p50": 0.472027,
+      "p95": 0.485242,
+      "p99": 0.512172
+    },
+    "formula_parse": {
+      "p50": 0.021505999999999997,
+      "p95": 0.026029,
+      "p99": 0.038893
+    },
+    "knowledge_snapshot": {
+      "p50": 67.482428,
+      "p95": 67.588899,
+      "p99": 67.588899
+    },
+    "mass_amount": {
+      "p50": 0.929637,
+      "p95": 0.948363,
+      "p99": 0.983699
+    },
+    "replay": {
+      "p50": 11.6585295,
+      "p95": 11.754721,
+      "p99": 11.882019
+    },
+    "restore": {
+      "p50": 166.469193,
+      "p95": 166.469193,
+      "p99": 166.469193
+    },
+    "significant_rendering": {
+      "p50": 0.0057955,
+      "p95": 0.005981,
+      "p99": 0.008145
+    },
+    "source_chain_verification": {
+      "p50": 2.478358,
+      "p95": 2.67687,
+      "p99": 2.67687
+    },
+    "total_atoms": {
+      "p50": 0.471661,
+      "p95": 0.485102,
+      "p99": 0.522562
+    }
+  }
+}
+
+=== final H4 artifact and tracked-worktree check ===
+
+=== canonical Karina gate summary ===
+{
+  "acceptance_cases": 2475,
+  "hostname": "karina",
+  "status": "PASS",
+  "official_reacquisition": "PASS",
+  "source_chain_hash": "ea5ae3c9c9c7283e26e22a2dfb2ef17047d4249d3117b525601296ab6edce87f",
+  "reproducible_content_hash": "58f2f25dd61ffc85b87f6f2fa2e6343286cc0af1056c31d1fb73f984ab4fc2c7",
+  "pytest_passed": 691,
+  "implementation_sha": "6344bd2860ccc354196a41ab99895b4d59042859",
+  "source_update_scenarios": 6,
+  "runtime_network_required": false,
+  "no_torch": true,
+  "cross_platform_byte_identical": true,
+  "tracked_worktree_clean": true
+}

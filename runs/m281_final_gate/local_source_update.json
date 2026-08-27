@@ -1,0 +1,55 @@
+{
+  "automatic_conflict_resolution_count": 0,
+  "destructive_overwrite_count": 0,
+  "scenario_count": 6,
+  "scenarios": {
+    "claim_retraction": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "RETRACTED_ELEMENT_CLAIM",
+      "pending_proposal_rejected": true,
+      "status": "PASS"
+    },
+    "claim_supersession": {
+      "current_calculation_available": true,
+      "current_snapshot_hash": "ae80f97ad6d1447036d9eec401fe69f74be8d2afd7b10de37aa3f7fb441dc780",
+      "historical_result_retained": true,
+      "old_claim_retained": true,
+      "old_result_replay_status": "SUPERSEDED_ELEMENT_CLAIM",
+      "pending_proposal_rejected": true,
+      "replacement_claim_id": "claim_0d7999fc7aa44a92b79d8de79cc40f95",
+      "status": "PASS"
+    },
+    "conflicting_atomic_weight": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "CONTRADICTING_EVIDENCE",
+      "pending_proposal_rejected": true,
+      "status": "PASS"
+    },
+    "derivation_extractor_change": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "STALE_DERIVATION_CHAIN",
+      "pending_proposal_rejected": true,
+      "rebuild_required": true,
+      "status": "PASS"
+    },
+    "official_source_version_update": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "STALE_DOMAIN_MANIFEST",
+      "pending_proposal_rejected": true,
+      "rebuild_required": true,
+      "status": "PASS"
+    },
+    "source_retraction": {
+      "current_calculation_available": false,
+      "historical_result_retained": true,
+      "old_result_replay_status": "RETRACTED_SOURCE",
+      "pending_proposal_rejected": true,
+      "status": "PASS"
+    }
+  },
+  "status": "PASS"
+}
