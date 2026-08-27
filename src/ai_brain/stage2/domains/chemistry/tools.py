@@ -12,7 +12,10 @@ from ai_brain.stage2.domains.chemistry.calculations import (
     molar_mass,
 )
 from ai_brain.stage2.domains.chemistry.formula_parser import FormulaParser
-from ai_brain.stage2.domains.chemistry.models import ChemistryKnowledgeSnapshot
+from ai_brain.stage2.domains.chemistry.models import (
+    ChemistryKnowledgeSnapshot,
+    ChemistryRoundingSpec,
+)
 
 
 def chemistry_formula_composition(
@@ -35,6 +38,9 @@ def chemistry_molar_mass(
             arguments["formula"],
             mode=arguments["mode"],
             unit=arguments["unit"],
+            rounding=ChemistryRoundingSpec(
+                significant_digits=arguments["significant_digits"]
+            ),
         )
     )
 
@@ -52,6 +58,9 @@ def chemistry_mass_amount(
             arguments["value"],
             arguments["source_unit"],
             arguments["target_unit"],
+            rounding=ChemistryRoundingSpec(
+                significant_digits=arguments["significant_digits"]
+            ),
         )
     )
 
@@ -63,10 +72,17 @@ def chemistry_entity_amount(
 ) -> dict[str, Any]:
     return asdict(
         entity_amount(
+            parser,
             snapshot,
             arguments["value"],
             arguments["source_unit"],
             arguments["target_unit"],
-            arguments["entity_type"],
+            arguments["basis"],
+            formula=arguments["formula"],
+            target_element=arguments["target_element"],
+            requested_display_label=arguments["requested_display_label"],
+            rounding=ChemistryRoundingSpec(
+                significant_digits=arguments["significant_digits"]
+            ),
         )
     )

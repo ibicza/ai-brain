@@ -42,8 +42,8 @@ def chemistry_service(tmp_path_factory) -> ChemistryDomainService:
     service, summary = build_domain(tmp_path_factory.mktemp("m28") / "domain")
     assert summary.identity_element_count == 33
     assert summary.computational_element_count == 33
-    assert summary.claim_count == 310
-    assert len(tuple((service.root / "sources").glob("*.json"))) == 4
+    assert summary.claim_count == 430
+    assert len(tuple((service.root / "sources" / "derived").glob("*.json"))) == 4
     return service
 
 
@@ -58,11 +58,12 @@ def test_golden_formulas_and_molar_masses(chemistry_service):
         assert {entry.symbol: entry.count for entry in ast.composition} == row[
             "composition"
         ]
-        assert molar_mass(parser, snapshot, row["formula"]).result == {
-            "mode": "conventional",
-            "value": decimal_text(Decimal(row["molar_mass"])),
-            "unit": "g/mol",
-        }
+        result = molar_mass(parser, snapshot, row["formula"]).result
+        expected = decimal_text(Decimal(row["molar_mass"]))
+        assert result["mode"] == "CONVENTIONAL_CLASSROOM"
+        assert result["value"] == expected
+        assert result["exact_internal_value"] == expected
+        assert result["unit"] == "g/mol"
 
 
 def test_formula_roundtrip_metamorphic_and_limits(chemistry_service):
@@ -253,13 +254,14 @@ def test_interval_mode_never_uses_midpoint(chemistry_service):
     output = chemistry_service.registry.execute(
         "chemistry_molar_mass", validation.canonical_arguments
     )
-    assert output["result"] == {
-        "mode": "interval",
-        "lower": "18.01471",
-        "upper": "18.01599",
-        "unit": "g/mol",
-    }
-    assert "value" not in output["result"]
+    result = output["result"]
+    assert result["mode"] == "NATURAL_VARIABILITY_ENVELOPE"
+    assert result["lower"] == "18.01471"
+    assert result["upper"] == "18.01599"
+    assert result["exact_internal_lower"] == "18.01471"
+    assert result["exact_internal_upper"] == "18.01599"
+    assert result["unit"] == "g/mol"
+    assert "value" not in result
 
 
 def test_trusted_chemistry_import_does_not_load_torch_or_network_clients():

@@ -17,6 +17,14 @@ from decimal import (
 )
 from typing import Any
 
+from ai_brain.stage2.trusted_decimal import (
+    DecimalLimits,
+    TrustedDecimalError,
+    estimated_fixed_length,
+    parse_bounded_decimal,
+    render_bounded_decimal,
+)
+
 
 @dataclass(frozen=True)
 class DecimalToolLimits:
@@ -153,35 +161,15 @@ def date_difference(arguments: dict[str, Any]) -> dict[str, Any]:
 
 
 def _decimal(value: Any, limits: DecimalToolLimits = DECIMAL_TOOL_LIMITS) -> Decimal:
-    if isinstance(value, (bool, float)):
-        raise ToolInputError("decimal operands must not be bool or float")
-    if isinstance(value, int):
-        if value.bit_length() > limits.max_raw_operand_chars * 4:
-            raise ToolInputError(
-                "integer operand exceeds resource limit",
-                code="TOOL_RESOURCE_LIMIT_REJECTED",
-            )
-        text = str(value)
-    elif isinstance(value, str):
-        text = value
-    elif isinstance(value, Decimal):
-        _validate_decimal_tuple(value, limits)
-        return value
-    else:
-        raise ToolInputError("unsupported decimal operand type")
-    if not text or len(text) > limits.max_raw_operand_chars:
-        raise ToolInputError(
-            "decimal operand raw length exceeds limit",
-            code="TOOL_RESOURCE_LIMIT_REJECTED",
-        )
-    if _DECIMAL_RE.fullmatch(text) is None:
-        raise ToolInputError("invalid canonical decimal operand")
     try:
-        result = Decimal(text)
-    except InvalidOperation as error:
-        raise ToolInputError("invalid decimal operand") from error
-    _validate_decimal_tuple(result, limits)
-    return result
+        return parse_bounded_decimal(value, _shared_limits(limits))
+    except TrustedDecimalError as error:
+        raise ToolInputError(
+            str(error),
+            code="TOOL_RESOURCE_LIMIT_REJECTED"
+            if error.resource_limit
+            else "TOOL_ARGUMENT_INVALID",
+        ) from error
 
 
 def _validate_decimal_tuple(
@@ -219,34 +207,32 @@ def _validate_decimal_tuple(
 
 
 def _estimated_fixed_length(value: Decimal) -> int:
-    item = value.as_tuple()
-    digits = max(1, len(item.digits))
-    exponent = int(item.exponent)
-    sign = int(bool(item.sign))
-    if exponent >= 0:
-        return sign + digits + exponent
-    point = digits + exponent
-    if point > 0:
-        return sign + digits + 1
-    return sign + 2 + (-point) + digits
+    return estimated_fixed_length(value)
 
 
 def _render_decimal(
     value: Decimal, limits: DecimalToolLimits = DECIMAL_TOOL_LIMITS
 ) -> str:
-    _validate_decimal_tuple(value, limits)
-    if len(value.as_tuple().digits) > limits.max_result_digits:
+    try:
+        return render_bounded_decimal(value, _shared_limits(limits))
+    except TrustedDecimalError as error:
         raise ToolInputError(
-            "decimal result exceeds digit limit", code="TOOL_RESOURCE_LIMIT_REJECTED"
-        )
-    rendered = format(value, "f")
-    if "." in rendered:
-        rendered = rendered.rstrip("0").rstrip(".")
-    if rendered in {"", "-0"}:
-        rendered = "0"
-    if len(rendered) > limits.max_rendered_chars:
-        raise ToolInputError(
-            "decimal rendered result exceeds limit",
-            code="TOOL_RESOURCE_LIMIT_REJECTED",
-        )
-    return rendered
+            str(error),
+            code="TOOL_RESOURCE_LIMIT_REJECTED"
+            if error.resource_limit
+            else "TOOL_ARGUMENT_INVALID",
+        ) from error
+
+
+def _shared_limits(limits: DecimalToolLimits) -> DecimalLimits:
+    return DecimalLimits(
+        max_raw_chars=limits.max_raw_operand_chars,
+        max_coefficient_digits=limits.max_coefficient_digits,
+        max_absolute_exponent=limits.max_absolute_exponent,
+        max_scale=limits.max_scale,
+        max_adjusted_exponent=limits.max_adjusted_exponent,
+        max_rendered_chars=limits.max_rendered_chars,
+        max_result_digits=limits.max_result_digits,
+        context_precision=limits.context_precision,
+        max_integer_bits=limits.max_raw_operand_chars * 4,
+    )

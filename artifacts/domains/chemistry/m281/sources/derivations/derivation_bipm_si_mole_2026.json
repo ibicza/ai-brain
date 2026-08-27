@@ -1,0 +1,23 @@
+{
+  "derivation_hash": "2404b354d9a43d730aa4e95d17eb128f7a70fd726f179b4759fcbd8929557cc1",
+  "derivation_id": "derivation_bipm_si_mole_2026",
+  "derived_extract_hash": "4bba50fd7013ff5f7667091d3a21b3945345243f5846aa7151678cd196c8b605",
+  "derived_extract_source_id": "derived_bipm_si_mole_2026",
+  "extraction_policy_version": "deterministic-selected-chemistry-fields-v2",
+  "extractor_implementation_hash": "e1a4684ee5271e343ddf96ab022189f04c5f8b92b2fdac3947111b7870236759",
+  "extractor_module": "ai_brain.stage2.domains.chemistry.source_derivation",
+  "generated_at": "2026-08-27T00:00:00Z",
+  "official_snapshot_hashes": [
+    "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a"
+  ],
+  "official_source_ids": [
+    "official_bipm_si_brochure_4_01"
+  ],
+  "reviewer": "m281-deterministic-source-extractor",
+  "selected_row_field_mapping": [
+    {
+      "json_pointer": "/mole/avogadro_constant",
+      "source_text": "exact mole definition"
+    }
+  ]
+}

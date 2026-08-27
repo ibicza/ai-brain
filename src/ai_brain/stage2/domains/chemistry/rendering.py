@@ -22,11 +22,14 @@ def render_tool_output(output: dict[str, Any], language: str = "en") -> str:
             lines.append(f"- {symbol}: {count}")
     elif "value" in result:
         label = "Результат" if language == "ru" else "Result"
-        lines.append(f"{label}: {result['value']} {result['unit']}")
+        lines.append(
+            f"{label}: {result.get('rendered_value', result['value'])} {result['unit']}"
+        )
     else:
         label = "Интервал" if language == "ru" else "Interval"
         lines.append(
-            f"{label}: [{result['lower']}, {result['upper']}] {result['unit']}"
+            f"{label}: [{result.get('rendered_lower', result['lower'])}, "
+            f"{result.get('rendered_upper', result['upper'])}] {result['unit']}"
         )
     policy_label = (
         "Политика атомных масс" if language == "ru" else "Atomic-weight policy"

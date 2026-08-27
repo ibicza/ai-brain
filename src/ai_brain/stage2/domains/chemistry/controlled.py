@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+from ai_brain.stage2.domains.chemistry.resolver import resolve_chemistry_element
 from ai_brain.stage2.facts.memory import FactMemory
 
 
@@ -35,7 +36,7 @@ _PREDICATES = {
         "period": "period",
         "group": "group",
         "conventional atomic weight": "conventional_atomic_weight",
-        "standard atomic weight": "standard_atomic_weight",
+        "standard atomic weight": "atomic_weight_standard_notation",
     },
     "ru": {
         "символ": "element_symbol",
@@ -45,7 +46,7 @@ _PREDICATES = {
         "период": "period",
         "группа": "group",
         "условная атомная масса": "conventional_atomic_weight",
-        "стандартная атомная масса": "standard_atomic_weight",
+        "стандартная атомная масса": "atomic_weight_standard_notation",
     },
 }
 
@@ -85,11 +86,27 @@ _RU_MOLES_TO_MASS = re.compile(
     re.IGNORECASE,
 )
 _EN_ENTITIES = re.compile(
-    r"^How many (?P<entity>atoms|molecules|formula units) are in (?P<value>\d+(?:\.\d+)?) (?P<source>mol|mmol)(?: of \S+)?\?$",
+    r"^How many (?P<entity>total atoms|atoms|molecules|formula units|formula entities) are in (?P<value>\d+(?:\.\d+)?) (?P<source>mol|mmol) of (?P<formula>\S+)\?$",
     re.IGNORECASE,
 )
 _RU_ENTITIES = re.compile(
-    r"^Сколько (?P<entity>атомов|молекул|формульных единиц) содержится в (?P<value>\d+(?:[.,]\d+)?) (?P<source>моль|ммоль)(?: \S+)?\?$",
+    r"^Сколько (?P<entity>всего атомов|атомов|молекул|формульных единиц) содержится в (?P<value>\d+(?:[.,]\d+)?) (?P<source>моль|ммоль) (?P<formula>\S+)\?$",
+    re.IGNORECASE,
+)
+_EN_ELEMENT_ATOMS = re.compile(
+    r"^How many (?P<target_element>[A-Za-z]+) atoms are in (?P<value>\d+(?:\.\d+)?) (?P<source>mol|mmol) of (?P<formula>\S+)\?$",
+    re.IGNORECASE,
+)
+_RU_ELEMENT_ATOMS = re.compile(
+    r"^Сколько атомов (?P<target_element>\S+) содержится в (?P<value>\d+(?:[.,]\d+)?) (?P<source>моль|ммоль) (?P<formula>\S+)\?$",
+    re.IGNORECASE,
+)
+_EN_ENTITIES_TO_AMOUNT = re.compile(
+    r"^How many (?P<target>mol|mmol) are (?P<value>\d+) (?P<entity>formula entities|total atoms) of (?P<formula>\S+)\?$",
+    re.IGNORECASE,
+)
+_RU_ENTITIES_TO_AMOUNT = re.compile(
+    r"^Сколько (?P<target>моль|ммоль) составляют (?P<value>\d+) (?P<entity>формульных единиц|атомов) (?P<formula>\S+)\?$",
     re.IGNORECASE,
 )
 
@@ -106,11 +123,36 @@ def parse_chemistry(text: str, language: str, memory: FactMemory) -> ChemistryPa
             {},
             evidence={"policy": "no_fact_write_from_calculation"},
         )
+    for pattern, tool_id, defaults in _tool_patterns(language):
+        match = pattern.fullmatch(stripped)
+        if match:
+            arguments = {
+                **defaults,
+                **{
+                    key: value
+                    for key, value in match.groupdict().items()
+                    if value is not None
+                },
+            }
+            try:
+                arguments = _normalize_arguments(arguments, language, tool_id, memory)
+            except (KeyError, ValueError):
+                return ChemistryParse(
+                    ChemistryParseKind.CLARIFICATION,
+                    {},
+                    ("element",),
+                    {"matched": tool_id},
+                )
+            return ChemistryParse(
+                ChemistryParseKind.TOOL,
+                {"tool_id": tool_id, "arguments": arguments},
+                evidence={"matched": tool_id},
+            )
     fact_match = (_RU_FACT if language == "ru" else _EN_FACT).fullmatch(stripped)
     if fact_match:
         predicate = _PREDICATES[language].get(fact_match["predicate"].casefold())
         entity = fact_match["entity"].rstrip(".")
-        resolution = memory.resolve_entity(entity, language)
+        resolution = resolve_chemistry_element(memory, entity, language)
         if predicate is None:
             return ChemistryParse(
                 ChemistryParseKind.CLARIFICATION,
@@ -135,23 +177,6 @@ def parse_chemistry(text: str, language: str, memory: FactMemory) -> ChemistryPa
             },
             evidence={"matched": "chemistry_fact"},
         )
-    for pattern, tool_id, defaults in _tool_patterns(language):
-        match = pattern.fullmatch(stripped)
-        if match:
-            arguments = {
-                **defaults,
-                **{
-                    key: value
-                    for key, value in match.groupdict().items()
-                    if value is not None
-                },
-            }
-            arguments = _normalize_arguments(arguments, language, tool_id)
-            return ChemistryParse(
-                ChemistryParseKind.TOOL,
-                {"tool_id": tool_id, "arguments": arguments},
-                evidence={"matched": tool_id},
-            )
     if _looks_incomplete(lower, language):
         return ChemistryParse(
             ChemistryParseKind.CLARIFICATION,
@@ -178,6 +203,12 @@ def _tool_patterns(language: str):
             (_RU_MASS_TO_MOLES, "chemistry_mass_amount", {}),
             (_RU_MOLES_TO_MASS, "chemistry_mass_amount", {}),
             (_RU_ENTITIES, "chemistry_entity_amount", {"target_unit": "entities"}),
+            (_RU_ELEMENT_ATOMS, "chemistry_entity_amount", {"target_unit": "entities"}),
+            (
+                _RU_ENTITIES_TO_AMOUNT,
+                "chemistry_entity_amount",
+                {"source_unit": "entities"},
+            ),
         )
     return (
         (_EN_MOLAR, "chemistry_molar_mass", {"mode": "conventional", "unit": "g/mol"}),
@@ -185,38 +216,86 @@ def _tool_patterns(language: str):
         (_EN_MASS_TO_MOLES, "chemistry_mass_amount", {}),
         (_EN_MOLES_TO_MASS, "chemistry_mass_amount", {}),
         (_EN_ENTITIES, "chemistry_entity_amount", {"target_unit": "entities"}),
+        (_EN_ELEMENT_ATOMS, "chemistry_entity_amount", {"target_unit": "entities"}),
+        (
+            _EN_ENTITIES_TO_AMOUNT,
+            "chemistry_entity_amount",
+            {"source_unit": "entities"},
+        ),
     )
 
 
 def _normalize_arguments(
-    arguments: dict[str, str], language: str, tool_id: str
-) -> dict[str, str]:
+    arguments: dict[str, str],
+    language: str,
+    tool_id: str,
+    memory: FactMemory,
+) -> dict[str, Any]:
     normalized = dict(arguments)
     if "value" in normalized:
         normalized["value"] = normalized["value"].replace(",", ".")
     unit_map = {"г": "g", "кг": "kg", "моль": "mol", "ммоль": "mmol"}
     for key in ("source", "target"):
         if key in normalized:
-            normalized[f"{key}_unit"] = unit_map.get(
-                normalized.pop(key).casefold(), normalized.get(key, "").casefold()
-            )
+            raw_unit = normalized.pop(key).casefold()
+            normalized[f"{key}_unit"] = unit_map.get(raw_unit, raw_unit)
     if tool_id == "chemistry_entity_amount":
-        entities = {
-            "atoms": "atoms",
-            "molecules": "molecules",
-            "formula units": "formula_units",
-            "атомов": "atoms",
-            "молекул": "molecules",
-            "формульных единиц": "formula_units",
+        bases = {
+            "atoms": "TOTAL_ATOMS_IN_FORMULA",
+            "total atoms": "TOTAL_ATOMS_IN_FORMULA",
+            "всего атомов": "TOTAL_ATOMS_IN_FORMULA",
+            "атомов": "TOTAL_ATOMS_IN_FORMULA",
+            "molecules": "FORMULA_ENTITIES",
+            "formula units": "FORMULA_ENTITIES",
+            "formula entities": "FORMULA_ENTITIES",
+            "молекул": "FORMULA_ENTITIES",
+            "формульных единиц": "FORMULA_ENTITIES",
         }
-        normalized["entity_type"] = entities[normalized.pop("entity").casefold()]
+        entity = normalized.pop("entity", None)
+        if "target_element" in normalized:
+            resolution = resolve_chemistry_element(
+                memory, normalized["target_element"], language
+            )
+            if len(resolution.entity_ids) != 1:
+                raise ValueError("unknown target element")
+            record = memory.get_entity(resolution.entity_ids[0])
+            normalized["target_element"] = record.external_identifiers["symbol"]
+            normalized["basis"] = "ATOMS_OF_ELEMENT_IN_FORMULA"
+            normalized["requested_display_label"] = "atoms"
+        else:
+            assert entity is not None
+            normalized["basis"] = bases[entity.casefold()]
+            normalized["requested_display_label"] = entity.casefold()
+            normalized["target_element"] = None
+        normalized["significant_digits"] = 6
+    elif tool_id in {"chemistry_molar_mass", "chemistry_mass_amount"}:
+        normalized["significant_digits"] = 6
     return normalized
 
 
 def _looks_incomplete(lower: str, language: str) -> bool:
     markers = (
-        ("molar mass", "composition", "how many mol", "what is the mass")
+        (
+            "molar mass",
+            "composition",
+            "how many mol",
+            "what is the mass",
+            "how many total atoms",
+            "how many atoms",
+            "how many molecules",
+            "how many formula units",
+            "how many formula entities",
+        )
         if language == "en"
-        else ("молярн", "состав", "сколько моль", "какова масса")
+        else (
+            "молярн",
+            "состав",
+            "сколько моль",
+            "какова масса",
+            "сколько всего атомов",
+            "сколько атомов",
+            "сколько молекул",
+            "сколько формульных единиц",
+        )
     )
     return any(marker in lower for marker in markers)

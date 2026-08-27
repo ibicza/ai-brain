@@ -7,7 +7,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ai_brain.stage2.domains.chemistry.sources import SOURCE_FILES, load_frozen_sources
+from ai_brain.stage2.domains.chemistry.sources import (
+    SOURCE_FILES,
+    default_source_dir,
+    load_derivations,
+    load_frozen_sources,
+    source_manifest,
+)
 from ai_brain.stage2.facts.memory import FactMemory
 from ai_brain.stage2.facts.models import (
     ActorIdentityType,
@@ -21,7 +27,7 @@ from ai_brain.stage2.facts.models import (
 )
 from ai_brain.stage2.facts.values import FactValue, FactValueKind
 
-IMPORT_IDENTITY = "m28-curated-chemistry-import"
+IMPORT_IDENTITY = "m281-curated-chemistry-import"
 
 
 @dataclass(frozen=True)
@@ -41,9 +47,12 @@ def build_chemistry_fact_memory(
 ) -> tuple[FactMemory, ChemistryImportSummary]:
     if root.exists() and any(root.iterdir()):
         raise FileExistsError("chemistry FactMemory target must be empty")
-    documents = load_frozen_sources(source_dir)
+    source_root = (source_dir or default_source_dir()).resolve()
+    documents = load_frozen_sources(source_root)
+    derivations = load_derivations(source_root)
+    chain = source_manifest(source_root)
     memory = FactMemory.initialize(root)
-    source_records = _add_sources(memory, documents)
+    source_records = _add_sources(memory, documents, source_root, chain, derivations)
     _add_predicates(memory)
     elements = documents["iupac_elements_2022.json"]["elements"]
     names = documents["ru_element_names_policy_v1.json"]["names"]
@@ -58,8 +67,8 @@ def build_chemistry_fact_memory(
             entity_type="chemical_element",
             canonical_label_ru=names[symbol],
             canonical_label_en=element["name_en"],
-            aliases_ru=(symbol,),
-            aliases_en=(symbol,),
+            aliases_ru=(),
+            aliases_en=(),
             external_identifiers={
                 "atomic_number": str(element["atomic_number"]),
                 "symbol": symbol,
@@ -135,23 +144,44 @@ def build_chemistry_fact_memory(
             ("atomic_weight_kind", FactValue.create("ENUM", weight["standard_kind"])),
             (
                 "conventional_atomic_weight",
-                FactValue.create("DECIMAL", weight["conventional"]),
+                FactValue.create("DECIMAL", weight["abridged_value"]),
+            ),
+            (
+                "conventional_atomic_weight_uncertainty",
+                FactValue.create("DECIMAL", weight["abridged_uncertainty"]),
+            ),
+            (
+                "atomic_weight_standard_notation",
+                FactValue.create("STRING", weight["standard_source_notation"]),
+            ),
+            (
+                "atomic_weight_abridged_notation",
+                FactValue.create("STRING", weight["abridged_source_notation"]),
             ),
         ]
-        if "value" in weight:
-            weight_values.append(
-                ("standard_atomic_weight", FactValue.create("DECIMAL", weight["value"]))
+        if weight["standard_kind"] == "SINGLE":
+            weight_values.extend(
+                (
+                    (
+                        "standard_atomic_weight",
+                        FactValue.create("DECIMAL", weight["standard_nominal"]),
+                    ),
+                    (
+                        "standard_atomic_weight_uncertainty",
+                        FactValue.create("DECIMAL", weight["standard_uncertainty"]),
+                    ),
+                )
             )
         else:
             weight_values.extend(
                 (
                     (
                         "standard_atomic_weight_lower",
-                        FactValue.create("DECIMAL", weight["lower"]),
+                        FactValue.create("DECIMAL", weight["standard_interval_lower"]),
                     ),
                     (
                         "standard_atomic_weight_upper",
-                        FactValue.create("DECIMAL", weight["upper"]),
+                        FactValue.create("DECIMAL", weight["standard_interval_upper"]),
                     ),
                 )
             )
@@ -197,8 +227,8 @@ def build_chemistry_fact_memory(
         identity_element_count=len(elements),
         computational_element_count=len(weights),
         entity_count=len(elements) + 1,
-        predicate_count=12,
-        source_count=len(source_records),
+        predicate_count=16,
+        source_count=len(chain["official_snapshots"]) + len(source_records),
         evidence_count=evidence_count,
         claim_count=claim_count,
         fact_memory_snapshot_hash=memory.database.snapshot_hash(),
@@ -207,19 +237,43 @@ def build_chemistry_fact_memory(
 
 
 def _add_sources(
-    memory: FactMemory, documents: dict[str, dict[str, Any]]
+    memory: FactMemory,
+    documents: dict[str, dict[str, Any]],
+    source_root: Path,
+    chain: dict[str, Any],
+    derivations: dict[str, Any],
 ) -> dict[str, Any]:
-    records = {}
+    records: dict[str, Any] = {}
+    for row in chain["official_snapshots"]:
+        path = (source_root / row["file"]).resolve()
+        memory.add_source(
+            content=path.read_bytes(),
+            source_kind=SourceKind(row["source_kind"]),
+            title=row["title"],
+            author=row["authority"],
+            publisher=row["authority"],
+            locator=row["url"],
+            published_at=row["published_at"],
+            retrieved_at=row["retrieved_at"],
+            language="ru" if row["source_id"].startswith("local_ru") else "en",
+            source_family=row["source_family"],
+            trust_tier="AUTHORITATIVE_PRIMARY"
+            if row["source_kind"] == "OFFICIAL_PRIMARY"
+            else "REVIEWED_DOMAIN_POLICY",
+            license_metadata={"license": row["license"], "sha256": row["sha256"]},
+            original_filename=Path(row["file"]).name,
+            media_type=row["media_type"],
+            source_id=row["source_id"],
+        )
+    derived_rows = {Path(row["file"]).name: row for row in chain["derived_extracts"]}
     for name in SOURCE_FILES:
-        document = dict(documents[name])
-        document.pop("_integrity")
+        document = documents[name]
         metadata = document["source"]
-        official = name != "ru_element_names_policy_v1.json"
+        derived_row = derived_rows[name]
+        derivation = derivations[derived_row["source_id"]]
         records[name] = memory.add_source(
             content=document,
-            source_kind=SourceKind.OFFICIAL_PRIMARY
-            if official
-            else SourceKind.LOCAL_DOCUMENT,
+            source_kind=SourceKind.DETERMINISTIC_DERIVED_EXTRACT,
             title=metadata["title"],
             author=metadata["authority"],
             publisher=metadata["authority"],
@@ -230,16 +284,20 @@ def _add_sources(
             retrieved_at=metadata["retrieved_at"],
             language=metadata["language"],
             source_family=metadata["source_family"],
-            trust_tier="AUTHORITATIVE_PRIMARY"
-            if official
+            trust_tier="VERIFIED_DERIVED_PRIMARY"
+            if name != "ru_element_names_policy_v1.json"
             else "REVIEWED_DOMAIN_POLICY",
             license_metadata={
                 "license": metadata.get("license", "unknown"),
                 "limitations": metadata.get("limitations", ""),
+                "derived_file_sha256": derived_row["sha256"],
+                "derivation_hash": derivation.derivation_hash,
+                "upstream_source_ids": derivation.official_source_ids,
+                "upstream_snapshot_hashes": derivation.official_snapshot_hashes,
             },
             original_filename=name,
             media_type="application/json",
-            source_id=f"source_{name.removesuffix('.json')}",
+            source_id=derived_row["source_id"],
         )
     return records
 
@@ -310,6 +368,34 @@ def _add_predicates(memory: FactMemory) -> None:
             "conventional classroom atomic weight",
             "chemical_element",
             "DECIMAL",
+        ),
+        (
+            "conventional_atomic_weight_uncertainty",
+            "неопределённость учебной атомной массы",
+            "abridged atomic-weight uncertainty",
+            "chemical_element",
+            "DECIMAL",
+        ),
+        (
+            "standard_atomic_weight_uncertainty",
+            "неопределённость стандартной атомной массы",
+            "standard atomic-weight uncertainty",
+            "chemical_element",
+            "DECIMAL",
+        ),
+        (
+            "atomic_weight_standard_notation",
+            "исходная запись стандартной атомной массы",
+            "standard atomic-weight source notation",
+            "chemical_element",
+            "STRING",
+        ),
+        (
+            "atomic_weight_abridged_notation",
+            "исходная запись сокращённой атомной массы",
+            "abridged atomic-weight source notation",
+            "chemical_element",
+            "STRING",
         ),
         (
             "avogadro_constant",

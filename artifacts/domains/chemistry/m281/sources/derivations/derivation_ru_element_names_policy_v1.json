@@ -1,0 +1,151 @@
+{
+  "derivation_hash": "74e65379ac82eea167d4defb7406ca30a47bab3088fb4c639f3444f67b866a5d",
+  "derivation_id": "derivation_ru_element_names_policy_v1",
+  "derived_extract_hash": "f7137ce29752f1cf24fcfce1d3c93d2c5bcbda070da13a8bf50808be3ca17d01",
+  "derived_extract_source_id": "derived_ru_element_names_policy_v1",
+  "extraction_policy_version": "deterministic-selected-chemistry-fields-v2",
+  "extractor_implementation_hash": "e1a4684ee5271e343ddf96ab022189f04c5f8b92b2fdac3947111b7870236759",
+  "extractor_module": "ai_brain.stage2.domains.chemistry.source_derivation",
+  "generated_at": "2026-08-27T00:00:00Z",
+  "official_snapshot_hashes": [
+    "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0"
+  ],
+  "official_source_ids": [
+    "local_ru_element_names_policy_v1"
+  ],
+  "reviewer": "m281-deterministic-source-extractor",
+  "selected_row_field_mapping": [
+    {
+      "field": "name_ru",
+      "symbol": "Ag"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Al"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Ar"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "B"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Be"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Br"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "C"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Ca"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Cl"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Co"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Cr"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Cu"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "F"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Fe"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "H"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "He"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "I"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "K"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Li"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Mg"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Mn"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "N"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Na"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Ne"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Ni"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "O"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "P"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "S"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Sc"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Si"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Ti"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "V"
+    },
+    {
+      "field": "name_ru",
+      "symbol": "Zn"
+    }
+  ]
+}

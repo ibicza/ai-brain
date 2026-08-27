@@ -10,21 +10,24 @@ from pathlib import Path
 from typing import Any
 
 from ai_brain.stage2.domains.chemistry.formula_parser import FormulaParser
+from ai_brain.stage2.domains.chemistry.knowledge_snapshot import atomic_weight_answer
 from ai_brain.stage2.domains.chemistry.manifest import (
     build_domain_manifest,
     write_domain_manifest,
 )
 from ai_brain.stage2.domains.chemistry.rendering import render_tool_output
 from ai_brain.stage2.domains.chemistry.replay import replay_chemistry_result
+from ai_brain.stage2.domains.chemistry.resolver import resolve_chemistry_element
 from ai_brain.stage2.domains.chemistry.service import (
     ChemistryDomainService,
     build_domain,
 )
+from ai_brain.stage2.domains.chemistry.sources import verify_source_chain
 from ai_brain.stage2.domains.chemistry.tool_registry import chemistry_tool_manifests
 from ai_brain.stage2.facts.memory import FactMemory
 from ai_brain.stage2.facts.persistence import FactDatabase
 
-DEFAULT_ROOT = Path("artifacts/domains/chemistry/m28")
+DEFAULT_ROOT = Path("artifacts/domains/chemistry/m281")
 
 
 def main() -> None:
@@ -33,9 +36,16 @@ def main() -> None:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("build-domain")
     sub.add_parser("verify")
+    sub.add_parser("verify-source-chain")
     sub.add_parser("list-elements")
     show = sub.add_parser("show-element")
     show.add_argument("--symbol", required=True)
+    weight = sub.add_parser("atomic-weight")
+    weight.add_argument("--element", required=True)
+    weight.add_argument("--language", choices=("ru", "en"), default="en")
+    weight.add_argument(
+        "--requested", choices=("STANDARD", "ABRIDGED", "ALL"), default="ALL"
+    )
     parse = sub.add_parser("parse-formula")
     parse.add_argument("--formula", required=True)
     _tool_parser(
@@ -47,11 +57,17 @@ def main() -> None:
     _tool_parser(sub, "mass-to-moles", ("formula", "value", "unit"), {})
     _tool_parser(sub, "moles-to-mass", ("formula", "value", "unit"), {})
     entities = _tool_parser(sub, "moles-to-entities", ("value",), {})
+    entities.add_argument("--formula", required=True)
     entities.add_argument(
-        "--entity-type",
-        choices=("atoms", "molecules", "formula_units"),
-        default="molecules",
+        "--basis",
+        choices=(
+            "FORMULA_ENTITIES",
+            "TOTAL_ATOMS_IN_FORMULA",
+            "ATOMS_OF_ELEMENT_IN_FORMULA",
+        ),
+        default="FORMULA_ENTITIES",
     )
+    entities.add_argument("--target-element")
     route = sub.add_parser("route-text")
     route.add_argument("--language", choices=("ru", "en"), required=True)
     route.add_argument("--text", required=True)
@@ -87,9 +103,14 @@ def main() -> None:
     service = ChemistryDomainService.open(args.root)
     if args.command == "verify":
         _print(service.verify())
+    elif args.command == "verify-source-chain":
+        _print(verify_source_chain(args.root / "sources"))
     elif args.command == "list-elements":
         _print({"elements": service.manifest["supported_elements"]})
     elif args.command == "show-element":
+        resolution = resolve_chemistry_element(service.memory, args.symbol, "en")
+        if len(resolution.entity_ids) != 1:
+            raise ValueError("unknown or case-invalid chemistry element")
         answers = {}
         for predicate in (
             "element_name_en",
@@ -98,11 +119,25 @@ def main() -> None:
             "conventional_atomic_weight",
         ):
             query = service.memory.make_query(
-                subject=args.symbol, predicate_id=predicate, include_evidence=True
+                subject=resolution.entity_ids[0],
+                predicate_id=predicate,
+                include_evidence=True,
             )
             answer = service.memory.query(query)
             answers[predicate] = asdict(answer)
         _print(answers)
+    elif args.command == "atomic-weight":
+        _print(
+            asdict(
+                atomic_weight_answer(
+                    service.memory,
+                    service.manifest["domain_manifest_hash"],
+                    args.element,
+                    language=args.language,
+                    requested=args.requested,
+                )
+            )
+        )
     elif args.command == "parse-formula":
         ast = FormulaParser(set(service.manifest["supported_elements"])).parse(
             args.formula
@@ -154,6 +189,8 @@ def _tool_parser(sub, name: str, fields: tuple[str, ...], defaults: dict[str, st
         )
     item.add_argument("--confirm", action="store_true")
     item.add_argument("--language", choices=("ru", "en"), default="en")
+    if name != "moles-to-entities":
+        item.add_argument("--significant-digits", type=int, default=6)
     return item
 
 
@@ -163,6 +200,7 @@ def _arguments(args) -> tuple[str, dict[str, Any]]:
             "formula": args.formula,
             "mode": args.mode,
             "unit": args.unit,
+            "significant_digits": args.significant_digits,
         }
     if args.command == "mass-to-moles":
         return "chemistry_mass_amount", {
@@ -170,6 +208,7 @@ def _arguments(args) -> tuple[str, dict[str, Any]]:
             "value": args.value,
             "source_unit": args.unit,
             "target_unit": "mol",
+            "significant_digits": args.significant_digits,
         }
     if args.command == "moles-to-mass":
         return "chemistry_mass_amount", {
@@ -177,12 +216,17 @@ def _arguments(args) -> tuple[str, dict[str, Any]]:
             "value": args.value,
             "source_unit": "mol",
             "target_unit": args.unit,
+            "significant_digits": args.significant_digits,
         }
     return "chemistry_entity_amount", {
         "value": args.value,
         "source_unit": "mol",
         "target_unit": "entities",
-        "entity_type": args.entity_type,
+        "basis": args.basis,
+        "formula": args.formula,
+        "target_element": args.target_element,
+        "requested_display_label": None,
+        "significant_digits": 6,
     }
 
 

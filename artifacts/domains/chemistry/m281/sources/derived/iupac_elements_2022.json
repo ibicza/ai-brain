@@ -1,0 +1,248 @@
+{
+  "elements": [
+    {
+      "atomic_number": 1,
+      "group": 1,
+      "name_en": "hydrogen",
+      "period": 1,
+      "symbol": "H"
+    },
+    {
+      "atomic_number": 2,
+      "group": 18,
+      "name_en": "helium",
+      "period": 1,
+      "symbol": "He"
+    },
+    {
+      "atomic_number": 3,
+      "group": 1,
+      "name_en": "lithium",
+      "period": 2,
+      "symbol": "Li"
+    },
+    {
+      "atomic_number": 4,
+      "group": 2,
+      "name_en": "beryllium",
+      "period": 2,
+      "symbol": "Be"
+    },
+    {
+      "atomic_number": 5,
+      "group": 13,
+      "name_en": "boron",
+      "period": 2,
+      "symbol": "B"
+    },
+    {
+      "atomic_number": 6,
+      "group": 14,
+      "name_en": "carbon",
+      "period": 2,
+      "symbol": "C"
+    },
+    {
+      "atomic_number": 7,
+      "group": 15,
+      "name_en": "nitrogen",
+      "period": 2,
+      "symbol": "N"
+    },
+    {
+      "atomic_number": 8,
+      "group": 16,
+      "name_en": "oxygen",
+      "period": 2,
+      "symbol": "O"
+    },
+    {
+      "atomic_number": 9,
+      "group": 17,
+      "name_en": "fluorine",
+      "period": 2,
+      "symbol": "F"
+    },
+    {
+      "atomic_number": 10,
+      "group": 18,
+      "name_en": "neon",
+      "period": 2,
+      "symbol": "Ne"
+    },
+    {
+      "atomic_number": 11,
+      "group": 1,
+      "name_en": "sodium",
+      "period": 3,
+      "symbol": "Na"
+    },
+    {
+      "atomic_number": 12,
+      "group": 2,
+      "name_en": "magnesium",
+      "period": 3,
+      "symbol": "Mg"
+    },
+    {
+      "atomic_number": 13,
+      "group": 13,
+      "name_en": "aluminium",
+      "period": 3,
+      "symbol": "Al"
+    },
+    {
+      "atomic_number": 14,
+      "group": 14,
+      "name_en": "silicon",
+      "period": 3,
+      "symbol": "Si"
+    },
+    {
+      "atomic_number": 15,
+      "group": 15,
+      "name_en": "phosphorus",
+      "period": 3,
+      "symbol": "P"
+    },
+    {
+      "atomic_number": 16,
+      "group": 16,
+      "name_en": "sulfur",
+      "period": 3,
+      "symbol": "S"
+    },
+    {
+      "atomic_number": 17,
+      "group": 17,
+      "name_en": "chlorine",
+      "period": 3,
+      "symbol": "Cl"
+    },
+    {
+      "atomic_number": 18,
+      "group": 18,
+      "name_en": "argon",
+      "period": 3,
+      "symbol": "Ar"
+    },
+    {
+      "atomic_number": 19,
+      "group": 1,
+      "name_en": "potassium",
+      "period": 4,
+      "symbol": "K"
+    },
+    {
+      "atomic_number": 20,
+      "group": 2,
+      "name_en": "calcium",
+      "period": 4,
+      "symbol": "Ca"
+    },
+    {
+      "atomic_number": 21,
+      "group": 3,
+      "name_en": "scandium",
+      "period": 4,
+      "symbol": "Sc"
+    },
+    {
+      "atomic_number": 22,
+      "group": 4,
+      "name_en": "titanium",
+      "period": 4,
+      "symbol": "Ti"
+    },
+    {
+      "atomic_number": 23,
+      "group": 5,
+      "name_en": "vanadium",
+      "period": 4,
+      "symbol": "V"
+    },
+    {
+      "atomic_number": 24,
+      "group": 6,
+      "name_en": "chromium",
+      "period": 4,
+      "symbol": "Cr"
+    },
+    {
+      "atomic_number": 25,
+      "group": 7,
+      "name_en": "manganese",
+      "period": 4,
+      "symbol": "Mn"
+    },
+    {
+      "atomic_number": 26,
+      "group": 8,
+      "name_en": "iron",
+      "period": 4,
+      "symbol": "Fe"
+    },
+    {
+      "atomic_number": 27,
+      "group": 9,
+      "name_en": "cobalt",
+      "period": 4,
+      "symbol": "Co"
+    },
+    {
+      "atomic_number": 28,
+      "group": 10,
+      "name_en": "nickel",
+      "period": 4,
+      "symbol": "Ni"
+    },
+    {
+      "atomic_number": 29,
+      "group": 11,
+      "name_en": "copper",
+      "period": 4,
+      "symbol": "Cu"
+    },
+    {
+      "atomic_number": 30,
+      "group": 12,
+      "name_en": "zinc",
+      "period": 4,
+      "symbol": "Zn"
+    },
+    {
+      "atomic_number": 35,
+      "group": 17,
+      "name_en": "bromine",
+      "period": 4,
+      "symbol": "Br"
+    },
+    {
+      "atomic_number": 47,
+      "group": 11,
+      "name_en": "silver",
+      "period": 5,
+      "symbol": "Ag"
+    },
+    {
+      "atomic_number": 53,
+      "group": 17,
+      "name_en": "iodine",
+      "period": 5,
+      "symbol": "I"
+    }
+  ],
+  "source": {
+    "authority": "International Union of Pure and Applied Chemistry (IUPAC)",
+    "language": "en",
+    "license": "IUPAC states that the periodic table is yours to use; attribution retained",
+    "limitations": "Selected identity fields from the official IUPAC periodic table",
+    "published_at": "2022-05-04",
+    "retrieved_at": "2026-08-27",
+    "source_family": "IUPAC_PERIODIC_TABLE_DERIVED",
+    "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+    "title": "IUPAC Periodic Table of the Elements, deterministic selected extract",
+    "url": "https://iupac.org/wp-content/uploads/2022/07/IUPAC_Periodic_Table-04May22_CRA.pdf",
+    "version": "4 May 2022"
+  }
+}

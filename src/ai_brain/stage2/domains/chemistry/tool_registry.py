@@ -8,11 +8,14 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from ai_brain.stage2 import trusted_decimal
 from ai_brain.stage2.domains.chemistry import (
     calculations,
     formula_parser,
     knowledge_snapshot,
     models,
+    resolver,
+    source_derivation,
     tools,
     version,
 )
@@ -50,13 +53,23 @@ TOOL_IDS = (
     "chemistry_mass_amount",
     "chemistry_entity_amount",
 )
-CHEMISTRY_TOOL_INPUT_POLICY = "bounded-chemistry-arguments-v1"
-CHEMISTRY_TOOL_NUMERIC_POLICY = "decimal-80-digit-no-float-v1"
-CHEMISTRY_TOOL_OUTPUT_POLICY = "hashed-chemistry-result-bundle-v1"
+CHEMISTRY_TOOL_INPUT_POLICY = version.CHEMISTRY_TOOL_INPUT_POLICY
+CHEMISTRY_TOOL_NUMERIC_POLICY = "shared-bounded-decimal-v2"
+CHEMISTRY_TOOL_OUTPUT_POLICY = "hashed-chemistry-result-bundle-v2"
 
 
 def chemistry_tool_manifests() -> dict[str, ToolImplementationManifest]:
-    modules = (calculations, formula_parser, knowledge_snapshot, models, tools, version)
+    modules = (
+        calculations,
+        formula_parser,
+        knowledge_snapshot,
+        models,
+        resolver,
+        source_derivation,
+        tools,
+        trusted_decimal,
+        version,
+    )
     helper_hashes = tuple(
         sorted(
             [
@@ -89,6 +102,11 @@ def chemistry_tool_manifests() -> dict[str, ToolImplementationManifest]:
                     content_hash(version.CHEMISTRY_DOMAIN_VERSION),
                 ),
                 ("formula_limits", content_hash(models.FormulaLimits())),
+                (
+                    "chemistry_quantity_limits",
+                    content_hash(models.ChemistryQuantityLimits()),
+                ),
+                ("rounding_spec", content_hash(models.ChemistryRoundingSpec())),
             ),
             "input_normalization_policy": CHEMISTRY_TOOL_INPUT_POLICY,
             "numeric_context_policy": CHEMISTRY_TOOL_NUMERIC_POLICY,
@@ -106,12 +124,10 @@ class ChemistryToolRegistry(ToolRegistry):
     def __init__(self, memory: FactMemory, domain_manifest_hash: str) -> None:
         self.memory = memory
         self.domain_manifest_hash = domain_manifest_hash
-        with self.memory.database.connect() as connection:
-            rows = connection.execute(
-                """SELECT json_extract(payload_json, '$.object_value.value')
-                   FROM claims WHERE predicate_id = 'element_symbol'"""
-            ).fetchall()
-        self.supported_symbols = frozenset(row[0] for row in rows)
+        self.supported_symbols = frozenset(
+            item.external_identifiers["symbol"]
+            for item in self.memory.list_entities(entity_type="chemical_element")
+        )
         self._snapshot_cache: dict[tuple[str, tuple[str, ...]], Any] = {}
         self.manifests = chemistry_tool_manifests()
         self._implementations = {
@@ -271,16 +287,34 @@ class ChemistryToolRegistry(ToolRegistry):
                 ).canonical_formula
             }
         elif tool_id == "chemistry_molar_mass":
-            _exact_keys(raw, {"formula", "mode", "unit"})
+            _allowed_keys(
+                raw,
+                {"formula", "mode", "unit"},
+                {"significant_digits"},
+            )
             canonical = {
                 "formula": parser.parse(
                     _text(raw["formula"], "formula")
                 ).canonical_formula,
-                "mode": _choice(raw["mode"], {"conventional", "interval"}, "mode"),
+                "mode": _choice(
+                    raw["mode"],
+                    {
+                        "conventional",
+                        "interval",
+                        "CONVENTIONAL_CLASSROOM",
+                        "NATURAL_VARIABILITY_ENVELOPE",
+                    },
+                    "mode",
+                ),
                 "unit": _choice(raw["unit"], {"g/mol", "kg/mol"}, "unit"),
+                "significant_digits": _significant_digits(raw),
             }
         elif tool_id == "chemistry_mass_amount":
-            _exact_keys(raw, {"formula", "value", "source_unit", "target_unit"})
+            _allowed_keys(
+                raw,
+                {"formula", "value", "source_unit", "target_unit"},
+                {"significant_digits"},
+            )
             source = _choice(
                 raw["source_unit"], {"g", "kg", "mol", "mmol"}, "source_unit"
             )
@@ -298,9 +332,25 @@ class ChemistryToolRegistry(ToolRegistry):
                 "value": canonical_decimal(raw["value"]),
                 "source_unit": source,
                 "target_unit": target,
+                "significant_digits": _significant_digits(raw),
             }
         else:
-            _exact_keys(raw, {"value", "source_unit", "target_unit", "entity_type"})
+            old_contract = set(raw) == {
+                "value",
+                "source_unit",
+                "target_unit",
+                "entity_type",
+            }
+            if not old_contract:
+                _allowed_keys(
+                    raw,
+                    {"value", "source_unit", "target_unit", "basis", "formula"},
+                    {
+                        "target_element",
+                        "requested_display_label",
+                        "significant_digits",
+                    },
+                )
             source = _choice(
                 raw["source_unit"], {"mol", "mmol", "entities"}, "source_unit"
             )
@@ -311,15 +361,37 @@ class ChemistryToolRegistry(ToolRegistry):
                 raise ToolInputError(
                     "entity conversion must cross entity/amount dimensions"
                 )
+            basis = (
+                "FORMULA_ENTITIES"
+                if old_contract
+                else _choice(
+                    raw["basis"],
+                    {
+                        "FORMULA_ENTITIES",
+                        "TOTAL_ATOMS_IN_FORMULA",
+                        "ATOMS_OF_ELEMENT_IN_FORMULA",
+                    },
+                    "basis",
+                )
+            )
+            formula = None if old_contract else _text(raw["formula"], "formula")
+            if formula is not None:
+                formula = parser.parse(formula).canonical_formula
             canonical = {
                 "value": canonical_decimal(raw["value"], integer=source == "entities"),
                 "source_unit": source,
                 "target_unit": target,
-                "entity_type": _choice(
-                    raw["entity_type"],
-                    {"atoms", "molecules", "formula_units"},
-                    "entity_type",
+                "basis": basis,
+                "formula": formula,
+                "target_element": None
+                if old_contract or raw.get("target_element") is None
+                else _choice(
+                    raw["target_element"], set(self.supported_symbols), "target_element"
                 ),
+                "requested_display_label": raw["entity_type"]
+                if old_contract
+                else _optional_text(raw.get("requested_display_label")),
+                "significant_digits": _significant_digits(raw),
             }
         return {**canonical, "knowledge_snapshot": snapshot_to_dict(snapshot)}
 
@@ -358,9 +430,31 @@ def _exact_keys(arguments: dict[str, Any], expected: set[str]) -> None:
         raise ToolInputError(f"chemistry arguments require exactly {sorted(expected)}")
 
 
+def _allowed_keys(
+    arguments: dict[str, Any], required: set[str], optional: set[str]
+) -> None:
+    if not required <= set(arguments) or not set(arguments) <= required | optional:
+        raise ToolInputError(
+            f"chemistry arguments require {sorted(required)} and optional {sorted(optional)}"
+        )
+
+
 def _text(value: Any, name: str) -> str:
     if not isinstance(value, str) or not value:
         raise ToolInputError(f"{name} must be non-empty text")
+    return value
+
+
+def _optional_text(value: Any) -> str | None:
+    if value is None:
+        return None
+    return _text(value, "requested_display_label")
+
+
+def _significant_digits(arguments: dict[str, Any]) -> int:
+    value = arguments.get("significant_digits", 6)
+    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 12:
+        raise ToolInputError("significant_digits must be an integer in 1..12")
     return value
 
 

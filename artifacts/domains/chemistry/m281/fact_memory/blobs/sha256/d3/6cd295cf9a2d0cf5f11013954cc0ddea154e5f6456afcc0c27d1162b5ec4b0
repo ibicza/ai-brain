@@ -1,0 +1,17 @@
+{
+  "source": {
+    "authority": "ai-brain M-28 reviewed educational translation policy",
+    "title": "Russian names for the M-28 selected IUPAC element identities",
+    "version": "1.0",
+    "locator": "local-policy:m28-ru-element-names-v1",
+    "published_at": "2026-08-27",
+    "retrieved_at": "2026-08-27",
+    "language": "ru",
+    "license": "Project policy data",
+    "source_family": "M28_RU_TRANSLATION_POLICY",
+    "limitations": "Policy aliases only; symbols, names_en and atomic numbers remain IUPAC source facts"
+  },
+  "names": {
+    "H":"водород","He":"гелий","Li":"литий","Be":"бериллий","B":"бор","C":"углерод","N":"азот","O":"кислород","F":"фтор","Ne":"неон","Na":"натрий","Mg":"магний","Al":"алюминий","Si":"кремний","P":"фосфор","S":"сера","Cl":"хлор","Ar":"аргон","K":"калий","Ca":"кальций","Sc":"скандий","Ti":"титан","V":"ванадий","Cr":"хром","Mn":"марганец","Fe":"железо","Co":"кобальт","Ni":"никель","Cu":"медь","Zn":"цинк","Br":"бром","Ag":"серебро","I":"йод"
+  }
+}

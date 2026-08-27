@@ -259,6 +259,25 @@ class FactMemory:
             )
         return EntityResolution(EntityResolutionStatus.UNKNOWN_ENTITY, (), normalized)
 
+    def get_entity(self, entity_id: str) -> EntityRecord:
+        with self.database.connect() as connection:
+            return self._entity(connection, entity_id)
+
+    def list_entities(
+        self, *, entity_type: str | None = None
+    ) -> tuple[EntityRecord, ...]:
+        with self.database.connect() as connection:
+            sql = "SELECT entity_id FROM entities WHERE status = 'ACTIVE'"
+            parameters: tuple[str, ...] = ()
+            if entity_type is not None:
+                sql += " AND entity_type = ?"
+                parameters = (entity_type,)
+            sql += " ORDER BY entity_id"
+            return tuple(
+                self._entity(connection, row[0])
+                for row in connection.execute(sql, parameters)
+            )
+
     def add_predicate(
         self,
         *,
@@ -545,6 +564,10 @@ class FactMemory:
         ):
             raise FactApprovalError("approved evidence lacks an independent reviewer")
         return evidence
+
+    def get_evidence_record(self, evidence_id: str) -> EvidenceRecord:
+        with self.database.connect() as connection:
+            return self._evidence(connection, evidence_id)
 
     def receive_proposal(
         self,
@@ -1075,6 +1098,24 @@ class FactMemory:
                 claim_id,
             )
 
+    def attach_reviewed_evidence_to_claim(
+        self,
+        claim_id: str,
+        evidence_id: str,
+        *,
+        actor: str,
+        actor_identity_type: ActorIdentityType | str,
+    ) -> None:
+        self._trusted_actor(
+            actor,
+            actor_identity_type,
+            purpose="claim evidence attachment",
+        )
+        self.verify_evidence(evidence_id)
+        with self.database.write() as connection:
+            self._claim_row(connection, claim_id)
+            self._attach_claim_evidence(connection, claim_id, (evidence_id,))
+
     def retract_source(
         self,
         source_id: str,
@@ -1548,6 +1589,9 @@ class FactMemory:
                 known_at=point,
                 status_event_hash=event_hash,
             )
+
+    def get_source_state(self, source_id: str) -> SourceState:
+        return self.get_source_state_at(source_id, self._now())
 
     def get_source_at(self, source_id: str, known_at: str) -> SourceRecord:
         state = self.get_source_state_at(source_id, known_at)

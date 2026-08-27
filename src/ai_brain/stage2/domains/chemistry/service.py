@@ -19,10 +19,14 @@ from ai_brain.stage2.domains.chemistry.manifest import (
 )
 from ai_brain.stage2.domains.chemistry.persistence import ChemistryResultStore
 from ai_brain.stage2.domains.chemistry.router import ChemistryUnifiedRouter
-from ai_brain.stage2.domains.chemistry.sources import SOURCE_FILES, default_source_dir
+from ai_brain.stage2.domains.chemistry.sources import default_source_dir
 from ai_brain.stage2.domains.chemistry.tool_registry import (
     ChemistryToolRegistry,
     chemistry_tool_manifests,
+)
+from ai_brain.stage2.domains.chemistry.version import (
+    CHEMISTRY_DOMAIN_SCHEMA_VERSION,
+    CHEMISTRY_DOMAIN_VERSION,
 )
 from ai_brain.stage2.facts.memory import FactMemory
 from ai_brain.stage2.router.models import (
@@ -52,9 +56,14 @@ class ChemistryDomainService:
         cls, root: Path, *, source_dir: Path | None = None
     ) -> ChemistryDomainService:
         resolved = root.resolve()
-        memory = FactMemory.open(resolved / "fact_memory")
+        bundled_sources = (source_dir or (resolved / "sources")).resolve()
         manifest = load_domain_manifest(resolved / "domain_manifest.json")
-        verify_domain_manifest(manifest, memory, source_dir)
+        if manifest.get("domain_schema_version") != CHEMISTRY_DOMAIN_SCHEMA_VERSION:
+            raise ValueError("REBUILD_REQUIRED_FROM_FROZEN_SOURCES")
+        if manifest.get("domain_version") != CHEMISTRY_DOMAIN_VERSION:
+            raise ValueError("incompatible chemistry domain pack")
+        memory = FactMemory.open(resolved / "fact_memory")
+        verify_domain_manifest(manifest, memory, bundled_sources)
         current = tuple(
             (key, value.manifest_hash)
             for key, value in sorted(chemistry_tool_manifests().items())
@@ -117,7 +126,7 @@ class ChemistryDomainService:
         return result, response
 
     def verify(self) -> dict[str, Any]:
-        verify_domain_manifest(self.manifest, self.memory)
+        verify_domain_manifest(self.manifest, self.memory, self.root / "sources")
         self.registry.verify()
         return {
             "fact_memory": self.memory.verify(),
@@ -135,12 +144,9 @@ def build_domain(
     input_sources = (source_dir or default_source_dir()).resolve()
     pack_sources = (resolved / "sources").resolve()
     if input_sources != pack_sources:
-        pack_sources.mkdir(parents=True, exist_ok=True)
-        for name in SOURCE_FILES:
-            source = (input_sources / name).resolve()
-            if input_sources not in source.parents or not source.is_file():
-                raise ValueError(f"missing or unsafe chemistry source extract: {name}")
-            shutil.copy2(source, pack_sources / name)
+        if pack_sources.exists():
+            raise FileExistsError("chemistry bundled source target must be absent")
+        shutil.copytree(input_sources, pack_sources)
     memory, summary = build_chemistry_fact_memory(
         resolved / "fact_memory", pack_sources
     )

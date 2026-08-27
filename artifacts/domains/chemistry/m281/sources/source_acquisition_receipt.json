@@ -1,0 +1,34 @@
+[
+  {
+    "final_url": "https://iupac.org/wp-content/uploads/2022/07/IUPAC_Periodic_Table-04May22_CRA.pdf",
+    "requested_url": "https://iupac.org/wp-content/uploads/2022/07/IUPAC_Periodic_Table-04May22_CRA.pdf",
+    "retrieved_at": "2026-08-27T10:34:18.074561Z",
+    "sha256": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+    "size": 55608,
+    "source_id": "official_iupac_periodic_table_2022"
+  },
+  {
+    "final_url": "https://www.ciaaw.org/atomic-weights.htm",
+    "requested_url": "https://www.ciaaw.org/atomic-weights.htm",
+    "retrieved_at": "2026-08-27T10:34:18.769355Z",
+    "sha256": "b48282594b1fb01eee3cbc9d469ce5e3483b628157ea1b09ede33e3476895cf2",
+    "size": 21501,
+    "source_id": "official_ciaaw_standard_weights_2024"
+  },
+  {
+    "final_url": "https://www.ciaaw.org/abridged-atomic-weights.htm",
+    "requested_url": "https://www.ciaaw.org/abridged-atomic-weights.htm",
+    "retrieved_at": "2026-08-27T10:34:19.457400Z",
+    "sha256": "f9e9554471749c55a624aec55151922470a7f4104c62811eb194fed9731b907d",
+    "size": 18489,
+    "source_id": "official_ciaaw_abridged_weights_2024"
+  },
+  {
+    "final_url": "https://www.bipm.org/documents/d/guest/si-brochure-9-pdf",
+    "requested_url": "https://www.bipm.org/documents/d/guest/si-brochure-9-pdf",
+    "retrieved_at": "2026-08-27T10:34:25.547884Z",
+    "sha256": "1122cf38e25b23d780a30607c68f7350b2b6d1f9970a89947aaa87a45ecbb20a",
+    "size": 3503078,
+    "source_id": "official_bipm_si_brochure_4_01"
+  }
+]

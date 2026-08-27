@@ -31,7 +31,7 @@ class ChemistryUnifiedRouter(ExactUnifiedRouter):
                 exact_match=True,
                 candidates=(RouteTarget.FACT_QUERY,),
                 parser_evidence={
-                    "parser": "chemistry_controlled_v1",
+                    "parser": "chemistry_controlled_v2",
                     "payload": parsed.payload,
                     **(parsed.evidence or {}),
                 },
@@ -53,7 +53,7 @@ class ChemistryUnifiedRouter(ExactUnifiedRouter):
                     exact_match=False,
                     candidates=(),
                     parser_evidence={
-                        "parser": "chemistry_controlled_v1",
+                        "parser": "chemistry_controlled_v2",
                         "issues": validation.issues,
                     },
                     ambiguity_fields=(),
@@ -76,7 +76,7 @@ class ChemistryUnifiedRouter(ExactUnifiedRouter):
                 exact_match=True,
                 candidates=(RouteTarget.TOOL_REQUEST,),
                 parser_evidence={
-                    "parser": "chemistry_controlled_v1",
+                    "parser": "chemistry_controlled_v2",
                     "payload": payload,
                     **(parsed.evidence or {}),
                 },
@@ -93,7 +93,7 @@ class ChemistryUnifiedRouter(ExactUnifiedRouter):
                 exact_match=False,
                 candidates=(RouteTarget.TOOL_REQUEST,),
                 parser_evidence={
-                    "parser": "chemistry_controlled_v1",
+                    "parser": "chemistry_controlled_v2",
                     "ambiguity": "MISSING_TOOL_ARGUMENT",
                 },
                 ambiguity_fields=parsed.missing_fields,
@@ -109,7 +109,7 @@ class ChemistryUnifiedRouter(ExactUnifiedRouter):
                 exact_match=False,
                 candidates=(),
                 parser_evidence={
-                    "parser": "chemistry_controlled_v1",
+                    "parser": "chemistry_controlled_v2",
                     **(parsed.evidence or {}),
                 },
                 ambiguity_fields=("multi_intent",),
@@ -124,7 +124,7 @@ class ChemistryUnifiedRouter(ExactUnifiedRouter):
             exact_match=False,
             candidates=(),
             parser_evidence={
-                "parser": "chemistry_controlled_v1",
+                "parser": "chemistry_controlled_v2",
                 **(parsed.evidence or {}),
             },
             ambiguity_fields=(),

@@ -1,0 +1,316 @@
+{
+  "derivation_hash": "935739ffbe051b6a8840a22942356dffc68e52eff4d04c2fe0d398091371ae83",
+  "derivation_id": "derivation_iupac_elements_2022",
+  "derived_extract_hash": "e567a2c734142834a1f9f84583f66e50e3c4907b39cdb7996213179be1dafe7c",
+  "derived_extract_source_id": "derived_iupac_elements_2022",
+  "extraction_policy_version": "deterministic-selected-chemistry-fields-v2",
+  "extractor_implementation_hash": "e1a4684ee5271e343ddf96ab022189f04c5f8b92b2fdac3947111b7870236759",
+  "extractor_module": "ai_brain.stage2.domains.chemistry.source_derivation",
+  "generated_at": "2026-08-27T00:00:00Z",
+  "official_snapshot_hashes": [
+    "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3"
+  ],
+  "official_source_ids": [
+    "official_iupac_periodic_table_2022"
+  ],
+  "reviewer": "m281-deterministic-source-extractor",
+  "selected_row_field_mapping": [
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "H"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "He"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Li"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Be"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "B"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "C"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "N"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "O"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "F"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Ne"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Na"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Mg"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Al"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Si"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "P"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "S"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Cl"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Ar"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "K"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Ca"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Sc"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Ti"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "V"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Cr"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Mn"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Fe"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Co"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Ni"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Cu"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Zn"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Br"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "Ag"
+    },
+    {
+      "fields": [
+        "atomic_number",
+        "name_en",
+        "period",
+        "group"
+      ],
+      "symbol": "I"
+    }
+  ]
+}

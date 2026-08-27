@@ -1,0 +1,285 @@
+{
+  "derivation_hash": "d63b7f72c56765b1dba2e6f561fbbd6d89dd5dd596f92b0cf4038520f13c4ee8",
+  "derivation_id": "derivation_ciaaw_atomic_weights_2024",
+  "derived_extract_hash": "fe7cb4746b0b8d121732978e5a89ca217b1d5da22b39596de4aaed311562bacc",
+  "derived_extract_source_id": "derived_ciaaw_atomic_weights_2024",
+  "extraction_policy_version": "deterministic-selected-chemistry-fields-v2",
+  "extractor_implementation_hash": "e1a4684ee5271e343ddf96ab022189f04c5f8b92b2fdac3947111b7870236759",
+  "extractor_module": "ai_brain.stage2.domains.chemistry.source_derivation",
+  "generated_at": "2026-08-27T00:00:00Z",
+  "official_snapshot_hashes": [
+    "b48282594b1fb01eee3cbc9d469ce5e3483b628157ea1b09ede33e3476895cf2",
+    "f9e9554471749c55a624aec55151922470a7f4104c62811eb194fed9731b907d"
+  ],
+  "official_source_ids": [
+    "official_ciaaw_standard_weights_2024",
+    "official_ciaaw_abridged_weights_2024"
+  ],
+  "reviewer": "m281-deterministic-source-extractor",
+  "selected_row_field_mapping": [
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "H"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "He"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Li"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Be"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "B"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "C"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "N"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "O"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "F"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Ne"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Na"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Mg"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Al"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Si"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "P"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "S"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Cl"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Ar"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "K"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Ca"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Sc"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Ti"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "V"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Cr"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Mn"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Fe"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Co"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Ni"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Cu"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Zn"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Br"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "Ag"
+    },
+    {
+      "fields": [
+        "standard",
+        "abridged",
+        "uncertainty"
+      ],
+      "symbol": "I"
+    }
+  ]
+}

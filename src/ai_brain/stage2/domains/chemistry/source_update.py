@@ -123,14 +123,14 @@ def run_source_update_simulation(
         pending_rejected = True
     current = memory.query(
         memory.make_query(
-            subject="O",
+            subject="element.O",
             predicate_id="conventional_atomic_weight",
             include_conflicts=True,
         )
     )
     historical = memory.query(
         memory.make_query(
-            subject="O",
+            subject="element.O",
             predicate_id="conventional_atomic_weight",
             known_at=old_result.executed_at,
             include_conflicts=True,
