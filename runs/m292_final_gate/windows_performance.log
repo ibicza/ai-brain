@@ -1,0 +1,8 @@
+command=uv run python scripts/m292_educational_benchmark.py --store runs/m292_final_gate/windows_benchmark_store --output runs/m292_final_gate/windows_performance.json --samples 100 --include-offline-compile
+started_at=2026-08-28T20:55:58.1154389+03:00
+sha=0a7522cfe104f23981fc971ddde00c993f0f2812
+status_before=
+{"output":"W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\runs\\m292_final_gate\\windows_performance.json","status":"PASS"}
+finished_at=2026-08-28T21:00:49.2344312+03:00
+exit_code=0
+status_after=

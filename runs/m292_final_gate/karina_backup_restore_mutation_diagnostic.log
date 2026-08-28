@@ -1,0 +1,20 @@
+command=ssh karina exact-H8 CLI backup and restore with authority verification
+local_started_at=2026-08-28T21:19:15.6805366+03:00
+expected_sha=0a7522cfe104f23981fc971ddde00c993f0f2812
+hostname=karina
+sha=0a7522cfe104f23981fc971ddde00c993f0f2812
+status_before_begin
+status_before_end
+started_at=2026-08-28T18:19:41+00:00
+backup_result_begin
+{"backup":{"created_at":"2026-08-28T18:19:51.347914Z","database_file":"educational_sessions.sqlite3","database_sha256":"0ffc19f5bfd884453049daa31a057da838bb5d9ad95cf41e1aa7549f9f21691e","schema_version":3},"verification":{"catalog":{"catalog_hash":"23747602972c6f9d7108c4460c542eddf07ea2ad4ed56ba860b95c3aab254e79","distinct_semantic_keys":2000,"entry_count":2000,"status":"VERIFIED"},"domain":{"domain_manifest_hash":"3e9fc8331f76ec3b51a27fd87f4e003ee7025a4beb731247c5805f626509aeee","fact_memory":{"audit_event_count":3599,"blob_count":9,"status":"VALID"},"reproducible_content_hash":"4388e3c6b108e46af489dee071f8baa57aea0434d3459f899b1c576e0e6613e6","tool_registry_hash":"3f3958707090d50f76882eeb0964b44ee7af35868e4bddbad04d07f437a4c884"},"educational_store_authority":{"session_count":4,"status":"AUTHORITY_VERIFIED","structural":{"artifact_count":30,"event_count":10,"schema_version":3,"session_count":4,"status":"STRUCTURALLY_VERIFIED"}},"educational_store_structural":{"artifact_count":30,"event_count":10,"schema_version":3,"session_count":4,"status":"STRUCTURALLY_VERIFIED"},"runtime_network":false,"status":"AUTHORITY_VERIFIED","trusted_imports_torch":false}}
+backup_result_end
+restore_result_begin
+{"catalog":{"catalog_hash":"23747602972c6f9d7108c4460c542eddf07ea2ad4ed56ba860b95c3aab254e79","distinct_semantic_keys":2000,"entry_count":2000,"status":"VERIFIED"},"domain":{"domain_manifest_hash":"3e9fc8331f76ec3b51a27fd87f4e003ee7025a4beb731247c5805f626509aeee","fact_memory":{"audit_event_count":3599,"blob_count":9,"status":"VALID"},"reproducible_content_hash":"4388e3c6b108e46af489dee071f8baa57aea0434d3459f899b1c576e0e6613e6","tool_registry_hash":"3f3958707090d50f76882eeb0964b44ee7af35868e4bddbad04d07f437a4c884"},"educational_store_authority":{"session_count":4,"status":"AUTHORITY_VERIFIED","structural":{"artifact_count":30,"event_count":10,"schema_version":3,"session_count":4,"status":"STRUCTURALLY_VERIFIED"}},"educational_store_structural":{"artifact_count":30,"event_count":10,"schema_version":3,"session_count":4,"status":"STRUCTURALLY_VERIFIED"},"runtime_network":false,"status":"AUTHORITY_VERIFIED","trusted_imports_torch":false}
+restore_result_end
+finished_at=2026-08-28T18:20:01+00:00
+backup_database_sha256=0ffc19f5bfd884453049daa31a057da838bb5d9ad95cf41e1aa7549f9f21691e
+status_after_begin
+ M artifacts/domains/chemistry/m29/fact_memory/fact_memory.sqlite3
+status_after_end
+ssh_exit_code=1

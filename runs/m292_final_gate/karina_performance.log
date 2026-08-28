@@ -1,0 +1,15 @@
+command=ssh karina exact-H8 m292 benchmark --samples 100 --include-offline-compile
+local_started_at=2026-08-28T21:16:50.2032091+03:00
+expected_sha=0a7522cfe104f23981fc971ddde00c993f0f2812
+hostname=karina
+sha=0a7522cfe104f23981fc971ddde00c993f0f2812
+status_before_begin
+status_before_end
+started_at=2026-08-28T18:17:15+00:00
+{"output":"/tmp/m292-h8-0a7522c-performance.json","status":"PASS"}
+finished_at=2026-08-28T18:18:12+00:00
+exit_code=0
+f85596e132daf307c3e0bd5aab84a7d239adda9c840de0e2e301b090010f9581  /tmp/m292-h8-0a7522c-performance.json
+status_after_begin
+status_after_end
+ssh_exit_code=0

@@ -1,0 +1,56 @@
+checked_at=2026-08-28T21:27:17.3671426+03:00
+base=0a7522cfe104f23981fc971ddde00c993f0f2812
+head=0a7522cfe104f23981fc971ddde00c993f0f2812
+head_parent=19a95d3c4d82494f7b9d56c1032ca3ebc9b5edd0
+cached_path_count=22
+cached_paths_begin
+runs/m292_final_gate/evidence_manifest.json
+runs/m292_final_gate/karina_acceptance.json
+runs/m292_final_gate/karina_acceptance.log
+runs/m292_final_gate/karina_backup_restore.log
+runs/m292_final_gate/karina_backup_restore_mutation_diagnostic.log
+runs/m292_final_gate/karina_catalog_rebuild.log
+runs/m292_final_gate/karina_exact_sha.log
+runs/m292_final_gate/karina_full_suite.log
+runs/m292_final_gate/karina_performance.json
+runs/m292_final_gate/karina_performance.log
+runs/m292_final_gate/karina_prior_regressions.log
+runs/m292_final_gate/m292_final_report.md
+runs/m292_final_gate/windows_acceptance.json
+runs/m292_final_gate/windows_acceptance.log
+runs/m292_final_gate/windows_backup_restore.log
+runs/m292_final_gate/windows_catalog_rebuild.log
+runs/m292_final_gate/windows_exact_sha.log
+runs/m292_final_gate/windows_full_suite.log
+runs/m292_final_gate/windows_performance.json
+runs/m292_final_gate/windows_performance.log
+runs/m292_final_gate/windows_prior_regressions.log
+runs/m292_final_gate/windows_prior_regressions_259_diagnostic.log
+cached_paths_end
+invalid_path_count=0
+forbidden_diff_exit=0
+catalog_fixture_diff_exit=0
+tracked_worktree_status_begin
+A  runs/m292_final_gate/evidence_manifest.json
+A  runs/m292_final_gate/karina_acceptance.json
+A  runs/m292_final_gate/karina_acceptance.log
+A  runs/m292_final_gate/karina_backup_restore.log
+A  runs/m292_final_gate/karina_backup_restore_mutation_diagnostic.log
+A  runs/m292_final_gate/karina_catalog_rebuild.log
+A  runs/m292_final_gate/karina_exact_sha.log
+A  runs/m292_final_gate/karina_full_suite.log
+A  runs/m292_final_gate/karina_performance.json
+A  runs/m292_final_gate/karina_performance.log
+A  runs/m292_final_gate/karina_prior_regressions.log
+A  runs/m292_final_gate/m292_final_report.md
+A  runs/m292_final_gate/windows_acceptance.json
+A  runs/m292_final_gate/windows_acceptance.log
+A  runs/m292_final_gate/windows_backup_restore.log
+A  runs/m292_final_gate/windows_catalog_rebuild.log
+A  runs/m292_final_gate/windows_exact_sha.log
+A  runs/m292_final_gate/windows_full_suite.log
+A  runs/m292_final_gate/windows_performance.json
+A  runs/m292_final_gate/windows_performance.log
+A  runs/m292_final_gate/windows_prior_regressions.log
+A  runs/m292_final_gate/windows_prior_regressions_259_diagnostic.log
+tracked_worktree_status_end

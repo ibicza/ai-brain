@@ -1,0 +1,9 @@
+command=uv run pytest -q tests/test_m25_skill_registry.py tests/test_m26_factual_memory.py tests/test_m261_factual_integrity.py tests/test_m27_unified_router.py tests/test_m271_router_hardening.py tests/test_m28_chemistry.py tests/test_m28_preflight_hardening.py tests/test_m281_chemistry_integrity.py tests/test_m282_chemistry_provenance.py tests/test_m29_educational_layer.py started_at=2026-08-28T20:28:27.6698167+03:00 sha=0a7522cfe104f23981fc971ddde00c993f0f2812 status_before=
+........................................................................ [ 27%]
+........................................................................ [ 55%]
+........................................................................ [ 83%]
+...........................................                              [100%]
+259 passed in 722.59s (0:12:02)
+finished_at=2026-08-28T20:40:31.6054556+03:00
+exit_code=0
+status_after=

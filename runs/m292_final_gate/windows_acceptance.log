@@ -1,0 +1,8 @@
+command=uv run python scripts/m292_educational_acceptance.py --store runs/m292_final_gate/windows_acceptance_store --output runs/m292_final_gate/windows_acceptance.json
+started_at=2026-08-28T20:54:39.4834315+03:00
+sha=0a7522cfe104f23981fc971ddde00c993f0f2812
+status_before=
+{"output":"W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\runs\\m292_final_gate\\windows_acceptance.json","status":"PASS"}
+finished_at=2026-08-28T20:55:33.5856274+03:00
+exit_code=0
+status_after=

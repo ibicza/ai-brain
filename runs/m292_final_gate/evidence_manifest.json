@@ -1,0 +1,82 @@
+{
+  "acceptance": {
+    "karina_sha256": "6c562f5c5ca7e1128e1a7ba088457ebd30721d7cd5c77f6721fd93a566ae91c7",
+    "status": "PASS",
+    "windows_sha256": "6c562f5c5ca7e1128e1a7ba088457ebd30721d7cd5c77f6721fd93a566ae91c7"
+  },
+  "branch": "exp/stage2-educational-hardening",
+  "catalog": {
+    "byte_identical_rebuild": true,
+    "bytes": 53413674,
+    "catalog_hash": "23747602972c6f9d7108c4460c542eddf07ea2ad4ed56ba860b95c3aab254e79",
+    "entry_count": 2000,
+    "file_sha256": "fa4a109ee7039933d3f0d8cb53e9cc853766a7d682b85b46fc7bc5825cedc7a1",
+    "karina_independent_compile_seconds": 23.533216,
+    "windows_independent_compile_seconds": 137.859618
+  },
+  "commands": {
+    "acceptance": "python scripts/m292_educational_acceptance.py --store <disposable> --output <outside-tracked-pack>",
+    "catalog": "python scripts/m292_compile_catalog.py --output <independent-output> --audit <independent-audit>",
+    "full_suite": "python -m pytest -q",
+    "performance": "python scripts/m292_educational_benchmark.py --store <disposable> --output <output> --samples 100 --include-offline-compile",
+    "prior_regressions": "python -m pytest -q <exact-274-test-selection>"
+  },
+  "diagnostics_excluded_from_gates": [
+    "windows_prior_regressions_259_diagnostic.log",
+    "karina_backup_restore_mutation_diagnostic.log"
+  ],
+  "environment": {
+    "karina": {
+      "checkout": "/home/ibicza/m292-exact-0a7522c/repo",
+      "host": "karina",
+      "pytest": "9.1.1",
+      "python": "3.12.14",
+      "source_binding": "PYTHONPATH=/home/ibicza/m292-exact-0a7522c/repo/src"
+    },
+    "windows": {
+      "host": "IBICZA",
+      "python": "3.12.13",
+      "uv": "0.12.3"
+    }
+  },
+  "files": {
+    "evidence_only_check.log": {"bytes": 2522, "sha256": "e4e68fdbaf026dcd3b58debeca1827af5cfd2f7ceb7d398bcb1b16a58724b66e"},
+    "karina_acceptance.json": {"bytes": 103183, "sha256": "6c562f5c5ca7e1128e1a7ba088457ebd30721d7cd5c77f6721fd93a566ae91c7"},
+    "karina_acceptance.log": {"bytes": 620, "sha256": "f856ad00bb07ec8997752990fcd50b631b0db794d4df250fcaff5eb3bbb4ec3b"},
+    "karina_backup_restore_mutation_diagnostic.log": {"bytes": 2761, "sha256": "24796a57e41ebfdd12823b6c71fe5072bfb78386da1faf50682dec11b5761f95"},
+    "karina_backup_restore.log": {"bytes": 2697, "sha256": "801c0d1d8f060dabb95dec0c3aba3b97d678e1f6544ee06506dd70418b7d5f1c"},
+    "karina_catalog_rebuild.log": {"bytes": 1341, "sha256": "727f9ec609a4b3e6b32351177a48ebc69897faaf7e00a5442a90dcd2f4821932"},
+    "karina_exact_sha.log": {"bytes": 2290, "sha256": "f82c6bca6772762da47bb42825d59bcaca977529fb2c224343bed6d7b14ce004"},
+    "karina_full_suite.log": {"bytes": 1409, "sha256": "cde0f2a5cc4a939fd133d8e8d6b62fd3e3a863b51bf068117bbe08402df4ad4a"},
+    "karina_performance.json": {"bytes": 3668, "sha256": "f85596e132daf307c3e0bd5aab84a7d239adda9c840de0e2e301b090010f9581"},
+    "karina_performance.log": {"bytes": 597, "sha256": "0edcc7ebbbf2193036df1d23123fd7a023796118a6f29c6da733d464720da477"},
+    "karina_prior_regressions.log": {"bytes": 806, "sha256": "c30bb29b1dc02f9b718af1b2aa7214087226db55e533e62a95e629078b115bfc"},
+    "m292_final_report.md": {"bytes": 10940, "sha256": "be44dd0eea3ddddcf68eec3c342b54f6cb4176fa5ea4741f261c3b611d4db9a5"},
+    "windows_acceptance.json": {"bytes": 103183, "sha256": "6c562f5c5ca7e1128e1a7ba088457ebd30721d7cd5c77f6721fd93a566ae91c7"},
+    "windows_acceptance.log": {"bytes": 474, "sha256": "7a514003dc2a3ee014da628cd389fab6d99d1ff3f84ab237b7ad0cf2fb77d0cc"},
+    "windows_backup_restore.log": {"bytes": 2402, "sha256": "2716d86a59f97412de934688063da9298a385b44c6f0c5c4a9c1820234c0a238"},
+    "windows_catalog_rebuild.log": {"bytes": 1287, "sha256": "033aaffa41191fdb90d9b63e3fd393b18da2a18cb866fc5f2705482b8235c726"},
+    "windows_exact_sha.log": {"bytes": 633, "sha256": "10f8d1b81f9c811b6434c565ce7668c6d111ba9b78dccdca766d8fd230ad0ccb"},
+    "windows_full_suite.log": {"bytes": 1195, "sha256": "af9fc43e05e9c36cdf1a7be5acd615baa727310f1fa3c32614be5ba9468e0bdf"},
+    "windows_performance.json": {"bytes": 3675, "sha256": "f1e33c2c523b814e74ee772ddf052b0b58945124d0554a7e0b0ba2c12663d039"},
+    "windows_performance.log": {"bytes": 514, "sha256": "038062a8b6a618ce687dc8861f949859d8d395583de9f56f50be6a4ccd094769"},
+    "windows_prior_regressions_259_diagnostic.log": {"bytes": 907, "sha256": "63f92aa71775e3b570055c8431dedf059ab9a19a0a59b700af720fca17979efa"},
+    "windows_prior_regressions.log": {"bytes": 971, "sha256": "f3c77d20f75df1fd4c85632149b47a3c2d8396f2033262b1b8015ed9ed8ea692"}
+  },
+  "hash_scope": "SHA-256 and byte counts cover canonical Git blob bytes after LF normalization",
+  "h8": "0a7522cfe104f23981fc971ddde00c993f0f2812",
+  "h8_tree": "25c664bf7c24f462027730ff657eca5627794cb2",
+  "parent_chain": [
+    "0a7522cfe104f23981fc971ddde00c993f0f2812",
+    "19a95d3c4d82494f7b9d56c1032ca3ebc9b5edd0",
+    "bebc4d0d150646ac65142cd2e5dad2e049587a88"
+  ],
+  "result": "PASS",
+  "schema_version": 1,
+  "tests": {
+    "karina_full": {"passed": 750, "seconds": 216.48},
+    "karina_prior": {"passed": 274, "seconds": 161.19},
+    "windows_full": {"passed": 750, "seconds": 898.43},
+    "windows_prior": {"passed": 274, "seconds": 759.83}
+  }
+}

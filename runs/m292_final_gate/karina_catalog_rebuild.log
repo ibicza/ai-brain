@@ -1,0 +1,18 @@
+command=ssh karina exact-H8 m292_compile_catalog.py independent output outside repository
+local_started_at=2026-08-28T21:18:20.8753267+03:00
+expected_sha=0a7522cfe104f23981fc971ddde00c993f0f2812
+hostname=karina
+sha=0a7522cfe104f23981fc971ddde00c993f0f2812
+status_before_begin
+status_before_end
+started_at=2026-08-28T18:18:46+00:00
+{"catalog_hash":"23747602972c6f9d7108c4460c542eddf07ea2ad4ed56ba860b95c3aab254e79","compilation_receipt_count":2000,"distinct_graphs":2000,"distinct_semantic_keys":2000,"elapsed_seconds":"23.533216","entry_count":2000,"receipt_bound_tool_execution_count":1900,"split_manifest_hashes":["22136c2c1547f29e007c453d9f241bab025a279339e3df54b67b0a3467fa9864","603fb4207d97612ecdb01d0edeb8d94addc1eb6717dd329131565f65af02ce81","17f3f47147dd679da6bc1b12ea40b782649fe2cdc0c94a1cb6f3c87f8dc741bd","783c36fe47b53b8005103f67d7bdddd17606be981c4aa4d4f3919b11a0257bc1","ac4edf24234ce164ca13306f7418b433feda072cdf68d64877d9b63502c4c88a","27be499c5f9f7bac91692088236e2a13f075d1900f5e53cb04dc4407922f8707","d03da510834c9137c9c261c377386fcedce74a74d3ba30a7166e2da991ecd89d"],"status":"COMPILED"}
+finished_at=2026-08-28T18:19:10+00:00
+exit_code=0
+catalog_sha256=fa4a109ee7039933d3f0d8cb53e9cc853766a7d682b85b46fc7bc5825cedc7a1
+catalog_bytes=53413674
+cr_bytes=0
+final_byte_hex=0a
+status_after_begin
+status_after_end
+ssh_exit_code=0

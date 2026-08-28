@@ -1,0 +1,50 @@
+recorded_at=2026-08-28T18:22:21+00:00
+hostname=karina
+exact_expected=0a7522cfe104f23981fc971ddde00c993f0f2812
+exact_head=0a7522cfe104f23981fc971ddde00c993f0f2812
+exact_parent=19a95d3c4d82494f7b9d56c1032ca3ebc9b5edd0
+exact_tree=25c664bf7c24f462027730ff657eca5627794cb2
+exact_status_begin
+exact_status_end
+tracked_pack_sha=44112c8ff4b158aeeb181bf8f65436b4bc31b4bce8dabcf250c674d84fc20609
+tracked_pack_git_object_sha=44112c8ff4b158aeeb181bf8f65436b4bc31b4bce8dabcf250c674d84fc20609
+catalog_sha256=fa4a109ee7039933d3f0d8cb53e9cc853766a7d682b85b46fc7bc5825cedc7a1
+catalog_bytes=53413674
+main_head=0a231f4267bd501cc45159e7070d94262b4de87a
+main_status_begin
+ M pyproject.toml
+?? docs/m192_concrete_to_abstract_numeracy_report.md
+?? docs/m192a_cardinality_formation_report.md
+?? docs/m192b_clean_cardinality_sanity_report.md
+?? docs/m192c_count_state_representation_report.md
+?? docs/m201_compositional_dsl_variable_binding_report.md
+?? docs/m201a_fair_compositional_retest_report.md
+?? docs/m20_external_state_rule_executor_report.md
+?? docs/m21_architecture_research_notes.md
+?? docs/m21_hybrid_neural_compiler_interpreter_report.md
+?? docs/m221_m22_neurality_oracle_audit.md
+?? docs/m221_oracle_free_rule_acquisition_report.md
+?? docs/m22_m21_compiler_failure_audit.md
+?? docs/m22_verified_rule_acquisition_report.md
+?? scripts/linux/
+?? scripts/m192_concrete_numeracy.py
+?? scripts/m192a_cardinality_lab.py
+?? scripts/m192b_clean_cardinality_sanity.py
+?? scripts/m192c_count_state_representation.py
+?? scripts/m201_compositional_dsl_variable_binding.py
+?? scripts/m201a_fair_compositional_retest.py
+?? scripts/m20_external_state_rule_executor.py
+?? scripts/m21_hybrid_neural_compiler_interpreter.py
+?? scripts/m221_oracle_free_rule_acquisition.py
+?? scripts/m22_verified_rule_acquisition.py
+?? tests/test_m192_concrete_numeracy.py
+?? tests/test_m192a_cardinality_lab.py
+?? tests/test_m192b_clean_cardinality_sanity.py
+?? tests/test_m192c_count_state_representation.py
+?? tests/test_m201_compositional_dsl_variable_binding.py
+?? tests/test_m201a_fair_compositional_retest.py
+?? tests/test_m20_external_state_rule_executor.py
+?? tests/test_m21_hybrid_neural_compiler_interpreter.py
+?? tests/test_m221_oracle_free_rule_acquisition.py
+?? tests/test_m22_verified_rule_acquisition.py
+main_status_end
