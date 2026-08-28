@@ -7,6 +7,7 @@ from typing import Any
 
 from ai_brain.stage2.education.models import (
     EducationalDerivationGraph,
+    EducationalDimension,
     EducationalGraphEdge,
     EducationalGraphNode,
     GraphEdgeKind,
@@ -26,7 +27,7 @@ def make_node(
     exact_inputs: tuple[str, ...] = (),
     exact_output: Any = None,
     unit: str | None = None,
-    dimension: str | None = None,
+    dimension: EducationalDimension | str | None = None,
     display_output: str | None = None,
     policy_version: str = "1.0",
     claim_ids: tuple[str, ...] = (),
@@ -35,6 +36,9 @@ def make_node(
     derivation_hashes: tuple[str, ...] = (),
     metadata: dict[str, Any] | None = None,
 ) -> EducationalGraphNode:
+    typed_dimension = (
+        None if dimension is None else EducationalDimension(str(dimension))
+    )
     body = {
         "node_id": node_id,
         "kind": kind,
@@ -44,7 +48,7 @@ def make_node(
         "exact_inputs": exact_inputs,
         "exact_output": exact_output,
         "unit": unit,
-        "dimension": dimension,
+        "dimension": typed_dimension,
         "display_output": display_output,
         "policy_version": policy_version,
         "claim_ids": claim_ids,
@@ -68,6 +72,8 @@ def make_edge(
 
 
 def make_graph(**values: Any) -> EducationalDerivationGraph:
+    if "source_result_artifact" not in values:
+        raise ValueError("graph v2 requires the complete source result artifact")
     body = {**values, "schema_version": DERIVATION_GRAPH_SCHEMA_VERSION}
     digest = content_hash(body)
     return EducationalDerivationGraph(

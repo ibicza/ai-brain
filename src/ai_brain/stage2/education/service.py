@@ -1,7 +1,8 @@
-"""Trusted orchestration for exact educational graphs, exercises, and sessions."""
+"""Trusted runtime orchestration over a verified precompiled catalog."""
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -13,12 +14,22 @@ from ai_brain.stage2.domains.chemistry.education.graph_adapter import (
 )
 from ai_brain.stage2.domains.chemistry.service import ChemistryDomainService
 from ai_brain.stage2.education.answer_parser import parse_student_answer
-from ai_brain.stage2.education.exercise_generation import generate_exercise
-from ai_brain.stage2.education.explanations import render_explanation
+from ai_brain.stage2.education.catalog import EducationalCatalogV2
+from ai_brain.stage2.education.exercise_generation import (
+    instantiate_variant,
+    present_exercise,
+    verify_exercise_instance,
+    verify_presented_exercise,
+)
+from ai_brain.stage2.education.explanations import (
+    build_explanation_plan,
+    render_explanation,
+)
 from ai_brain.stage2.education.grading import grade_answer
 from ai_brain.stage2.education.hints import build_hint_plan, render_hint
 from ai_brain.stage2.education.models import (
     EducationalRouteKind,
+    EducationalRouteReceipt,
     ExerciseFamily,
     ExplanationMode,
     GradingStatus,
@@ -26,14 +37,33 @@ from ai_brain.stage2.education.models import (
 )
 from ai_brain.stage2.education.persistence import EducationalSessionStore
 from ai_brain.stage2.education.replay import replay_educational_session
-from ai_brain.stage2.education.serialization import (
-    grading_from_dict,
-    graph_from_dict,
-    instance_from_dict,
-    spec_from_dict,
-)
 from ai_brain.stage2.education.sessions import apply_event, make_event, start_session
 from ai_brain.stage2.facts.canonical import content_hash, utc_now
+
+DEFAULT_CATALOG_PATH = Path("artifacts/education/m291/catalog_v2.json")
+
+
+class EducationalExecutionMonitor:
+    """Instance-local spy over the unchanged chemistry registry contract."""
+
+    def __init__(self, registry) -> None:
+        self.count = 0
+        self.events: list[dict[str, str]] = []
+        original = registry.execute
+
+        def monitored(tool_id, arguments, **kwargs):
+            result = original(tool_id, arguments, **kwargs)
+            self.count += 1
+            self.events.append(
+                {
+                    "tool_id": tool_id,
+                    "argument_hash": content_hash(arguments),
+                    "result_hash": result["result_hash"],
+                }
+            )
+            return result
+
+        registry.execute = monitored
 
 
 class EducationalService:
@@ -41,16 +71,27 @@ class EducationalService:
         self,
         chemistry: ChemistryDomainService,
         store: EducationalSessionStore,
+        catalog: EducationalCatalogV2,
     ) -> None:
         self.chemistry = chemistry
         self.adapter = ChemistryEducationAdapter(chemistry)
         self.store = store
+        self.catalog = catalog
+        self.execution_monitor = EducationalExecutionMonitor(chemistry.registry)
 
     @classmethod
-    def open(cls, chemistry_root: Path, store_root: Path) -> EducationalService:
+    def open(
+        cls,
+        chemistry_root: Path,
+        store_root: Path,
+        *,
+        catalog_path: Path = DEFAULT_CATALOG_PATH,
+    ) -> EducationalService:
+        chemistry = ChemistryDomainService.open(chemistry_root)
         return cls(
-            ChemistryDomainService.open(chemistry_root),
+            chemistry,
             EducationalSessionStore.open_or_initialize(store_root),
+            EducationalCatalogV2.load(catalog_path, chemistry),
         )
 
     def explain_tool(
@@ -61,9 +102,46 @@ class EducationalService:
         language: str,
         mode: ExplanationMode = ExplanationMode.FULL,
     ):
-        result, graph = self.adapter.tool_graph(tool_id, arguments)
+        """Load a precompiled explanation or return a normal PREPARED proposal."""
+        before = self.execution_monitor.count
+        entry = self.catalog.find_tool(tool_id, arguments)
+        if entry is not None:
+            explanation = render_explanation(entry.graph, language=language, mode=mode)
+            if self.execution_monitor.count != before:
+                raise RuntimeError("precompiled explanation executed a chemistry tool")
+            return entry.graph.source_result_artifact, entry.graph, explanation
+        prepared = self.chemistry.prepare_tool(tool_id, arguments)
+        if self.execution_monitor.count != before:
+            raise RuntimeError("unconfirmed explanation executed a chemistry tool")
+        return prepared
+
+    def confirm_explanation(
+        self,
+        prepared,
+        proposal,
+        *,
+        identity: str,
+        language: str,
+        mode: ExplanationMode = ExplanationMode.FULL,
+    ):
+        before = self.execution_monitor.count
+        result, completed = self.chemistry.confirm_and_execute(
+            prepared, proposal, identity=identity
+        )
+        if result is None:
+            raise ValueError("confirmed chemistry explanation did not execute")
+        if self.execution_monitor.count != before + 1:
+            raise RuntimeError("confirmed explanation execution count is not one")
+        graph = self.adapter.graph_from_completed_result(
+            proposal.tool_id,
+            proposal.typed_arguments,
+            result.output,
+            request_hash=result.request_hash,
+            route_decision_hash=result.route_decision_hash,
+            created_at=result.executed_at,
+        )
         explanation = render_explanation(graph, language=language, mode=mode)
-        return result, graph, explanation
+        return result.output, graph, explanation, completed
 
     def handle_controlled(
         self,
@@ -106,7 +184,8 @@ class EducationalService:
             result = self.show_solution(session_id)
         else:
             result = None
-        return route, result
+        receipt = self._route_receipt(text, route, session_id, result)
+        return route, receipt, result
 
     def create_exercise(
         self,
@@ -118,26 +197,54 @@ class EducationalService:
         session_id: str | None = None,
         created_at: str | None = None,
     ):
-        spec, instance, graph = generate_exercise(
-            self.adapter,
-            family,
+        before = self.execution_monitor.count
+        entry = self.catalog.select(family, seed=seed, difficulty=difficulty)
+        instance = instantiate_variant(
+            entry.internal_instance,
+            entry.exercise_spec,
+            entry.graph,
             seed=seed,
             language=language,
-            difficulty=difficulty,
         )
-        self.store.save_artifact("exercise_spec", spec.spec_hash, spec)
-        self.store.save_artifact("exercise_instance", instance.instance_hash, instance)
-        self.store.save_artifact("derivation_graph", graph.graph_hash, graph)
+        verify_exercise_instance(instance, entry.exercise_spec, entry.graph)
+        self.store.save_artifact(
+            "exercise_spec", entry.exercise_spec.spec_hash, entry.exercise_spec
+        )
+        self.store.save_artifact(
+            "exercise_instance_internal", instance.instance_hash, instance
+        )
+        self.store.save_artifact(
+            "source_result",
+            entry.graph.source_result_hash,
+            entry.graph.source_result_artifact,
+        )
+        self.store.save_artifact(
+            "compilation_receipt",
+            entry.compilation_receipt.receipt_hash,
+            entry.compilation_receipt,
+        )
+        self.store.save_artifact(
+            "derivation_graph", entry.graph.graph_hash, entry.graph
+        )
         timestamp = created_at or utc_now()
-        identity = (
-            session_id
-            or f"education.session.{content_hash({'exercise': instance.instance_hash, 'created_at': timestamp})[:24]}"
+        identity = session_id or (
+            "education.session."
+            + content_hash(
+                {"exercise": instance.instance_hash, "created_at": timestamp}
+            )[:24]
         )
         session, event = start_session(
             instance, session_id=identity, created_at=timestamp
         )
+        presented = present_exercise(instance, entry.exercise_spec, session_id=identity)
+        verify_presented_exercise(presented)
+        self.store.save_artifact(
+            "presented_exercise", presented.presentation_hash, presented
+        )
         self.store.create_session(session, event)
-        return spec, instance, graph, session
+        if self.execution_monitor.count != before:
+            raise RuntimeError("exercise presentation executed a chemistry tool")
+        return presented, session
 
     def submit_answer(
         self,
@@ -160,10 +267,7 @@ class EducationalService:
             session_id,
             sequence=len(self.store.events(session_id)) + 1,
             event_type="ANSWER_SUBMITTED",
-            payload={
-                "student_answer_hash": answer.answer_hash,
-                "submitted_answer": raw_answer,
-            },
+            payload={"student_answer_hash": answer.answer_hash},
             previous_event_hash=session.last_event_hash,
             created_at=timestamp,
         )
@@ -205,14 +309,14 @@ class EducationalService:
         selected = level or HintLevel(min(5, len(session.hint_hashes) + 1))
         diagnoses = ()
         if session.grading_result_hashes:
-            grade = grading_from_dict(
-                self.store.get_artifact(
-                    session.grading_result_hashes[-1], expected_kind="grading_result"
-                )
+            grade = self.store.get_artifact(
+                session.grading_result_hashes[-1], expected_kind="grading_result"
             )
             diagnoses = grade.error_diagnoses
+        plan = build_hint_plan(instance.instance_id, graph)
+        self.store.save_artifact("hint_plan", plan.plan_hash, plan)
         hint = render_hint(
-            build_hint_plan(instance.instance_id, graph),
+            plan,
             graph,
             selected,
             language=session.language,
@@ -233,12 +337,18 @@ class EducationalService:
 
     def show_solution(self, session_id: str, *, created_at: str | None = None):
         session, _, _, graph = self._load(session_id)
+        plan = build_explanation_plan(
+            graph,
+            language=session.language,
+            mode=ExplanationMode.SOLUTION_AFTER_ATTEMPT,
+        )
         explanation = render_explanation(
             graph,
             language=session.language,
             mode=ExplanationMode.SOLUTION_AFTER_ATTEMPT,
             attempt_made=bool(session.attempt_hashes),
         )
+        self.store.save_artifact("explanation_plan", plan.plan_hash, plan)
         self.store.save_artifact(
             "explanation", explanation.explanation_hash, explanation
         )
@@ -258,31 +368,81 @@ class EducationalService:
         return replay_educational_session(self.store, self.adapter, session_id)
 
     def verify(self):
-        domain = self.chemistry.verify()
-        sessions = self.store.verify()
         return {
             "status": "VERIFIED",
-            "domain": domain,
-            "educational_store": sessions,
+            "domain": self.chemistry.verify(),
+            "catalog": self.catalog.verify(self.chemistry),
+            "educational_store": self.store.verify(),
             "trusted_imports_torch": False,
             "runtime_network": False,
         }
 
     def _load(self, session_id: str):
         session = self.store.get_session(session_id)
-        instance = instance_from_dict(
-            self.store.get_artifact(
-                session.exercise_hash, expected_kind="exercise_instance"
-            )
+        instance = self.store.get_artifact(
+            session.exercise_hash, expected_kind="exercise_instance_internal"
         )
-        spec = spec_from_dict(
-            self.store.get_artifact(
-                instance.exercise_spec_hash, expected_kind="exercise_spec"
-            )
+        spec = self.store.get_artifact(
+            instance.exercise_spec_hash, expected_kind="exercise_spec"
         )
-        graph = graph_from_dict(
-            self.store.get_artifact(
-                session.graph_hash, expected_kind="derivation_graph"
-            )
+        graph = self.store.get_artifact(
+            session.graph_hash, expected_kind="derivation_graph"
         )
+        verify_exercise_instance(instance, spec, graph)
+        self.adapter.verify_graph(graph)
         return session, spec, instance, graph
+
+    def _route_receipt(self, text, route, session_id, result):
+        presented_hash = None
+        prepared_hash = None
+        if route.kind == EducationalRouteKind.GENERATE_EXERCISE and result:
+            presented_hash = result[0].presentation_hash
+            session_id = result[1].session_id
+        if route.kind == EducationalRouteKind.EXPLAIN and result:
+            candidate = result[1]
+            prepared_hash = getattr(candidate, "response_hash", None)
+        body = {
+            "original_request_hash": content_hash(text),
+            "controlled_parser_version": "educational_controlled_v2",
+            "route_kind": route.kind,
+            "session_id": session_id,
+            "presented_exercise_hash": presented_hash,
+            "prepared_response_hash": prepared_hash,
+            "requested_action": route.kind.value,
+            "dependency_snapshot": (
+                self.catalog.manifest.catalog_hash,
+                self.chemistry.manifest["domain_manifest_hash"],
+            ),
+            "created_at": utc_now(),
+        }
+        receipt = EducationalRouteReceipt(**body, receipt_hash=content_hash(body))
+        verify_educational_route_receipt(receipt)
+        return receipt
+
+
+def verify_educational_route_receipt(receipt: EducationalRouteReceipt) -> None:
+    body = asdict(receipt)
+    digest = body.pop("receipt_hash")
+    if content_hash(body) != digest:
+        raise ValueError("educational route receipt hash mismatch")
+    if (
+        receipt.controlled_parser_version != "educational_controlled_v2"
+        or receipt.requested_action != receipt.route_kind.value
+        or len(receipt.dependency_snapshot) != 2
+    ):
+        raise ValueError("educational route receipt semantic mismatch")
+    if receipt.route_kind == EducationalRouteKind.GENERATE_EXERCISE:
+        if not receipt.session_id or not receipt.presented_exercise_hash:
+            raise ValueError("exercise route receipt lacks its public binding")
+    elif receipt.presented_exercise_hash is not None:
+        raise ValueError("non-exercise route receipt has a presentation binding")
+    if (
+        receipt.route_kind
+        in {
+            EducationalRouteKind.CHECK_ANSWER,
+            EducationalRouteKind.HINT,
+            EducationalRouteKind.SHOW_SOLUTION,
+        }
+        and not receipt.session_id
+    ):
+        raise ValueError("session route receipt lacks its session binding")

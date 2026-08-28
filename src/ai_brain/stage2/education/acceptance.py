@@ -67,7 +67,7 @@ def run_m29_acceptance(
         "authority": {
             "educational_fact_writes": 0,
             "rule_installations": 0,
-            "hidden_tool_execution": 0,
+            "hidden_tool_execution": "NOT_MEASURED_M29_LEGACY",
             "runtime_network": 0,
             "trusted_import_loads_torch": 0,
             "moral_moderation_refusal_policy_added": 0,

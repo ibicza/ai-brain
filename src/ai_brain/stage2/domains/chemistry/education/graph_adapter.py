@@ -20,7 +20,7 @@ from ai_brain.stage2.education.models import (
     GraphEdgeKind,
     GraphNodeKind,
 )
-from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 
 EDUCATIONAL_TOOL_IDS = frozenset(
     {
@@ -45,24 +45,41 @@ class ChemistryEducationAdapter:
         created_at: str | None = None,
         request_hash: str | None = None,
     ) -> tuple[dict[str, Any], EducationalDerivationGraph]:
+        raise PermissionError(
+            "runtime educational code cannot execute chemistry tools; use a "
+            "precompiled catalog or a completed confirmed result"
+        )
+
+    def graph_from_completed_result(
+        self,
+        tool_id: str,
+        arguments: dict[str, Any],
+        result: dict[str, Any],
+        *,
+        created_at: str | None = None,
+        request_hash: str | None = None,
+        route_decision_hash: str | None = None,
+    ) -> EducationalDerivationGraph:
+        """Build a graph from an already-authorized immutable result."""
         if tool_id not in EDUCATIONAL_TOOL_IDS:
             raise ValueError("educational adapter only permits chemistry exact tools")
         manifest_hash = self.service.registry.descriptor(
             tool_id
         ).implementation_manifest_hash
-        result = self.service.registry.execute(
-            tool_id,
-            arguments,
-            expected_manifest_hash=manifest_hash,
-        )
+        if result.get("tool_implementation_manifest_hash") not in {
+            None,
+            manifest_hash,
+        }:
+            raise ValueError("completed chemistry result uses another tool build")
         graph = build_result_graph(
             result,
             tool_implementation_hash=manifest_hash,
             request_hash=request_hash,
+            route_decision_hash=route_decision_hash,
             created_at=created_at,
         )
         self.verify_graph(graph, result)
-        return result, graph
+        return graph
 
     def fact_graph(
         self,
@@ -147,6 +164,9 @@ class ChemistryEducationAdapter:
                 "predicate_id": predicate_id,
             }
             answer["answer_hash"] = content_hash(answer)
+        answer["answer_hash"] = content_hash(
+            {key: value for key, value in answer.items() if key != "answer_hash"}
+        )
         graph = build_fact_graph(
             answer,
             domain_version=self.service.manifest["domain_version"],
@@ -248,7 +268,12 @@ class ChemistryEducationAdapter:
             GraphNodeKind.FINAL_RESULT,
             "paired fact answer",
             operation="IDENTITY",
-            input_node_ids=("answer", "given"),
+            input_node_ids=("answer",),
+            exact_inputs=(
+                canonical_json(expected.exact_output)
+                if isinstance(expected.exact_output, dict)
+                else str(expected.exact_output),
+            ),
             exact_output=expected.exact_output,
             unit=expected.unit,
             dimension=expected.dimension,
@@ -278,6 +303,12 @@ class ChemistryEducationAdapter:
             domain_version=self.service.manifest["domain_version"],
             source_result_type="ChemistryPairedFactAnswer",
             source_result_hash=source_result_hash,
+            source_result_artifact={
+                "given": given_answer,
+                "answer": answer,
+                "given_result_hash": given_graph.source_result_hash,
+                "answer_result_hash": answer_graph.source_result_hash,
+            },
             request_hash=content_hash(
                 {
                     "symbol": symbol,

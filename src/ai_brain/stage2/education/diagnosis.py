@@ -31,7 +31,7 @@ def diagnose_answer(
         return (
             _make(
                 item.diagnosis,
-                DiagnosisConfidence.EXACT_MATCH,
+                DiagnosisConfidence.PARTIAL_MATCH,
                 value=item.answer,
                 node_ids=item.matching_node_ids,
             ),

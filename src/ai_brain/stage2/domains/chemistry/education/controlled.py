@@ -22,7 +22,7 @@ def parse_educational_request(text: str, language: str) -> EducationalRoute:
                 "language": language,
                 "payload": payload,
                 "parser_evidence": {
-                    "parser": "educational_controlled_v1",
+                    "parser": "educational_controlled_v2",
                     "pattern": kind.value,
                 },
             }
@@ -31,7 +31,7 @@ def parse_educational_request(text: str, language: str) -> EducationalRoute:
         "kind": EducationalRouteKind.UNSUPPORTED,
         "language": language,
         "payload": {},
-        "parser_evidence": {"parser": "educational_controlled_v1"},
+        "parser_evidence": {"parser": "educational_controlled_v2"},
     }
     return EducationalRoute(**body, route_hash=content_hash(body))
 

@@ -5,11 +5,19 @@ from __future__ import annotations
 from decimal import Decimal, localcontext
 from typing import Any
 
+from ai_brain.stage2.domains.chemistry.models import ChemistryRoundingSpec
 from ai_brain.stage2.education.graph import make_edge, make_graph, make_node
-from ai_brain.stage2.education.graph_validation import verify_derivation_graph
-from ai_brain.stage2.education.models import GraphEdgeKind, GraphNodeKind
+from ai_brain.stage2.education.graph_validation import (
+    canonical_exact,
+    verify_derivation_graph,
+)
+from ai_brain.stage2.education.models import (
+    EducationalDimension,
+    GraphEdgeKind,
+    GraphNodeKind,
+)
 from ai_brain.stage2.education.version import DERIVATION_GRAPH_SCHEMA_VERSION
-from ai_brain.stage2.facts.canonical import content_hash, utc_now
+from ai_brain.stage2.facts.canonical import canonical_json, content_hash, utc_now
 
 
 def build_result_graph(
@@ -39,6 +47,7 @@ def build_result_graph(
         domain_version=result["domain_version"],
         source_result_type=f"ChemistryResultBundle:{operation}",
         source_result_hash=result["result_hash"],
+        source_result_artifact=result,
         request_hash=request_hash
         or content_hash(
             {
@@ -111,7 +120,7 @@ def build_fact_graph(
         "fact result",
         operation="IDENTITY",
         input_node_ids=(fact.node_id,),
-        exact_inputs=(str(value),),
+        exact_inputs=(_bound(value, _dimension(unit)),),
         exact_output=value,
         unit=unit,
         dimension=_dimension(unit),
@@ -134,6 +143,7 @@ def build_fact_graph(
         domain_version=domain_version,
         source_result_type="ChemistryFactAnswer",
         source_result_hash=answer_hash,
+        source_result_artifact=answer,
         request_hash=request_hash,
         route_decision_hash=None,
         fact_memory_snapshot_hash=answer["fact_memory_snapshot_hash"],
@@ -171,6 +181,7 @@ def _formula_graph(result: dict[str, Any]):
         GraphNodeKind.GIVEN_VALUE,
         "chemical formula",
         exact_output=formula,
+        dimension="FORMULA",
         metadata={"value_type": "formula"},
     )
     parsed = make_node(
@@ -181,6 +192,7 @@ def _formula_graph(result: dict[str, Any]):
         input_node_ids=("n1",),
         exact_inputs=(formula,),
         exact_output=formula,
+        dimension="FORMULA",
         metadata={
             "formula_ast_hash": result["formula_ast_hash"],
             "composition": composition,
@@ -195,6 +207,7 @@ def _formula_graph(result: dict[str, Any]):
         input_node_ids=("n2",),
         exact_inputs=(formula,),
         exact_output=composition,
+        dimension="COMPOSITION",
         metadata={"total_atom_count": result["result"]["total_atom_count"]},
     )
     final = make_node(
@@ -203,7 +216,9 @@ def _formula_graph(result: dict[str, Any]):
         "formula composition result",
         operation="IDENTITY",
         input_node_ids=("n3",),
+        exact_inputs=(canonical_json(composition),),
         exact_output=composition,
+        dimension="COMPOSITION",
         display_output=", ".join(f"{k}:{v}" for k, v in composition.items()),
     )
     return (
@@ -218,12 +233,15 @@ def _formula_graph(result: dict[str, Any]):
 
 
 def _molar_mass_graph(result: dict[str, Any]):
+    if "exact_internal_lower" in result["result"]:
+        return _interval_molar_mass_graph(result)
     nodes = [
         make_node(
             "n1",
             GraphNodeKind.GIVEN_VALUE,
             "chemical formula",
             exact_output=result["formula"],
+            dimension="FORMULA",
             metadata={"value_type": "formula"},
         ),
         make_node(
@@ -234,6 +252,7 @@ def _molar_mass_graph(result: dict[str, Any]):
             input_node_ids=("n1",),
             exact_inputs=(result["formula"],),
             exact_output=result["formula"],
+            dimension="FORMULA",
             metadata={
                 "formula_ast_hash": result["formula_ast_hash"],
                 "composition": {
@@ -272,6 +291,7 @@ def _molar_mass_graph(result: dict[str, Any]):
                     GraphNodeKind.STOICHIOMETRIC_COUNT,
                     f"count {step['symbol']}",
                     input_node_ids=("n2",),
+                    exact_inputs=(result["formula"],),
                     exact_output=step["count"],
                     dimension="COUNT",
                     metadata={"symbol": step["symbol"]},
@@ -282,7 +302,10 @@ def _molar_mass_graph(result: dict[str, Any]):
                     f"contribution {step['symbol']}",
                     operation="MULTIPLY",
                     input_node_ids=(fact_id, count_id),
-                    exact_inputs=(str(weight), str(step["count"])),
+                    exact_inputs=(
+                        _bound(weight, "MOLAR_MASS"),
+                        _bound(step["count"], "COUNT"),
+                    ),
                     exact_output=contribution,
                     unit="g/mol",
                     dimension="MOLAR_MASS",
@@ -313,7 +336,10 @@ def _molar_mass_graph(result: dict[str, Any]):
             operation="ADD",
             input_node_ids=tuple(contribution_ids),
             exact_inputs=tuple(
-                str(next(node.exact_output for node in nodes if node.node_id == item))
+                _bound(
+                    next(node.exact_output for node in nodes if node.node_id == item),
+                    "MOLAR_MASS",
+                )
                 for item in contribution_ids
             ),
             exact_output=total_before_unit,
@@ -336,7 +362,7 @@ def _molar_mass_graph(result: dict[str, Any]):
                 "g/mol to kg/mol",
                 operation="MULTIPLY",
                 input_node_ids=(current_id,),
-                exact_inputs=(total_before_unit,),
+                exact_inputs=(_bound(total_before_unit, "MOLAR_MASS"),),
                 exact_output=raw_total,
                 unit=unit,
                 dimension="MOLAR_MASS",
@@ -356,13 +382,13 @@ def _molar_mass_graph(result: dict[str, Any]):
             "display rounding",
             operation="ROUND_DISPLAY",
             input_node_ids=(current_id,),
-            exact_inputs=(raw_total,),
+            exact_inputs=(_bound(raw_total, "MOLAR_MASS"),),
             exact_output=raw_total,
             unit=unit,
             dimension="MOLAR_MASS",
             display_output=result["result"]["rendered_value"],
             policy_version=result["rounding_policy"],
-            metadata={"significant_digits": result["result"]["significant_digits"]},
+            metadata=_rounding_metadata(result),
         )
     )
     edges.append(make_edge(current_id, round_id, GraphEdgeKind.ROUNDS_FOR_DISPLAY))
@@ -375,11 +401,219 @@ def _molar_mass_graph(result: dict[str, Any]):
             "molar mass",
             operation="IDENTITY",
             input_node_ids=(round_id,),
-            exact_inputs=(raw_total,),
+            exact_inputs=(_bound(raw_total, "MOLAR_MASS"),),
             exact_output=raw_total,
             unit=unit,
             dimension="MOLAR_MASS",
             display_output=result["result"]["rendered_value"],
+        )
+    )
+    edges.append(make_edge(round_id, final_id, GraphEdgeKind.SUPPORTS_RESULT))
+    return tuple(nodes), tuple(edges), final_id
+
+
+def _interval_molar_mass_graph(result: dict[str, Any]):
+    formula = result["formula"]
+    nodes = [
+        make_node(
+            "n1",
+            GraphNodeKind.GIVEN_VALUE,
+            "chemical formula",
+            exact_output=formula,
+            dimension="FORMULA",
+            metadata={"value_type": "formula"},
+        ),
+        make_node(
+            "n2",
+            GraphNodeKind.FORMULA_PARSE,
+            "parsed formula",
+            operation="PARSE",
+            input_node_ids=("n1",),
+            exact_inputs=(formula,),
+            exact_output=formula,
+            dimension="FORMULA",
+            metadata={
+                "formula_ast_hash": result["formula_ast_hash"],
+                "composition": {
+                    row["symbol"]: row["count"] for row in result["calculation_steps"]
+                },
+                "grammar_version": result["formula_grammar_version"],
+            },
+        ),
+    ]
+    edges = [make_edge("n1", "n2", GraphEdgeKind.DEPENDS_ON)]
+    contribution_ids = []
+    for index, step in enumerate(result["calculation_steps"], start=1):
+        base = 3 + (index - 1) * 3
+        fact_id, count_id, multiply_id = f"n{base}", f"n{base + 1}", f"n{base + 2}"
+        interval = {"lower": step["exact_lower"], "upper": step["exact_upper"]}
+        contribution = {
+            "lower": str(Decimal(step["exact_lower"]) * int(step["count"])),
+            "upper": str(Decimal(step["exact_upper"]) * int(step["count"])),
+        }
+        nodes.extend(
+            (
+                make_node(
+                    fact_id,
+                    GraphNodeKind.ATOMIC_WEIGHT_LOOKUP,
+                    f"atomic-weight interval {step['symbol']}",
+                    exact_output=interval,
+                    unit="g/mol",
+                    dimension="INTERVAL_MOLAR_MASS",
+                    claim_ids=tuple(result["claim_ids"]),
+                    evidence_hashes=tuple(result["evidence_hashes"]),
+                    source_hashes=tuple(result["source_hashes"]),
+                    derivation_hashes=tuple(result["derivation_hashes"]),
+                    metadata={"symbol": step["symbol"], "interval": True},
+                ),
+                make_node(
+                    count_id,
+                    GraphNodeKind.STOICHIOMETRIC_COUNT,
+                    f"count {step['symbol']}",
+                    input_node_ids=("n2",),
+                    exact_inputs=(formula,),
+                    exact_output=step["count"],
+                    dimension="COUNT",
+                    metadata={"symbol": step["symbol"]},
+                ),
+                make_node(
+                    multiply_id,
+                    GraphNodeKind.MULTIPLY,
+                    f"interval contribution {step['symbol']}",
+                    operation="MULTIPLY",
+                    input_node_ids=(fact_id, count_id),
+                    exact_inputs=(
+                        _bound(interval, "INTERVAL_MOLAR_MASS"),
+                        _bound(step["count"], "COUNT"),
+                    ),
+                    exact_output=contribution,
+                    unit="g/mol",
+                    dimension="INTERVAL_MOLAR_MASS",
+                    metadata={"symbol": step["symbol"]},
+                ),
+            )
+        )
+        edges.extend(
+            (
+                make_edge("n2", count_id, GraphEdgeKind.USES_FORMULA_TERM),
+                make_edge(fact_id, multiply_id, GraphEdgeKind.USES_FACT),
+                make_edge(count_id, multiply_id, GraphEdgeKind.CONTRIBUTES_TO),
+            )
+        )
+        contribution_ids.append(multiply_id)
+    next_id = 3 + len(result["calculation_steps"]) * 3
+    total_output = {
+        "lower": str(
+            sum(
+                (
+                    Decimal(
+                        next(
+                            n.exact_output["lower"] for n in nodes if n.node_id == item
+                        )
+                    )
+                    for item in contribution_ids
+                ),
+                Decimal(0),
+            )
+        ),
+        "upper": str(
+            sum(
+                (
+                    Decimal(
+                        next(
+                            n.exact_output["upper"] for n in nodes if n.node_id == item
+                        )
+                    )
+                    for item in contribution_ids
+                ),
+                Decimal(0),
+            )
+        ),
+    }
+    total_id = f"n{next_id}"
+    nodes.append(
+        make_node(
+            total_id,
+            GraphNodeKind.ADD,
+            "sum interval contributions",
+            operation="ADD",
+            input_node_ids=tuple(contribution_ids),
+            exact_inputs=tuple(
+                _bound(
+                    next(n.exact_output for n in nodes if n.node_id == item),
+                    "INTERVAL_MOLAR_MASS",
+                )
+                for item in contribution_ids
+            ),
+            exact_output=total_output,
+            unit="g/mol",
+            dimension="INTERVAL_MOLAR_MASS",
+        )
+    )
+    edges.extend(
+        make_edge(item, total_id, GraphEdgeKind.CONTRIBUTES_TO)
+        for item in contribution_ids
+    )
+    current = total_id
+    unit = result["result"]["unit"]
+    exact = {
+        "lower": result["result"]["exact_internal_lower"],
+        "upper": result["result"]["exact_internal_upper"],
+    }
+    if unit == "kg/mol":
+        next_id += 1
+        normalized = f"n{next_id}"
+        nodes.append(
+            make_node(
+                normalized,
+                GraphNodeKind.UNIT_NORMALIZATION,
+                "g/mol to kg/mol interval",
+                operation="MULTIPLY",
+                input_node_ids=(current,),
+                exact_inputs=(_bound(total_output, "INTERVAL_MOLAR_MASS"),),
+                exact_output=exact,
+                unit=unit,
+                dimension="INTERVAL_MOLAR_MASS",
+                metadata={"factor": "0.001", "source_unit": "g/mol"},
+            )
+        )
+        edges.append(make_edge(current, normalized, GraphEdgeKind.NORMALIZES_UNIT))
+        current = normalized
+    next_id += 1
+    round_id = f"n{next_id}"
+    display = (
+        f"[{result['result']['rendered_lower']}, {result['result']['rendered_upper']}]"
+    )
+    nodes.append(
+        make_node(
+            round_id,
+            GraphNodeKind.ROUND_DISPLAY,
+            "interval display rounding",
+            operation="ROUND_DISPLAY",
+            input_node_ids=(current,),
+            exact_inputs=(_bound(exact, "INTERVAL_MOLAR_MASS"),),
+            exact_output=exact,
+            unit=unit,
+            dimension="INTERVAL_MOLAR_MASS",
+            display_output=display,
+            policy_version=result["rounding_policy"],
+            metadata=_rounding_metadata(result),
+        )
+    )
+    edges.append(make_edge(current, round_id, GraphEdgeKind.ROUNDS_FOR_DISPLAY))
+    final_id = f"n{next_id + 1}"
+    nodes.append(
+        make_node(
+            final_id,
+            GraphNodeKind.FINAL_RESULT,
+            "interval molar mass",
+            operation="IDENTITY",
+            input_node_ids=(round_id,),
+            exact_inputs=(_bound(exact, "INTERVAL_MOLAR_MASS"),),
+            exact_output=exact,
+            unit=unit,
+            dimension="INTERVAL_MOLAR_MASS",
+            display_output=display,
         )
     )
     edges.append(make_edge(round_id, final_id, GraphEdgeKind.SUPPORTS_RESULT))
@@ -425,7 +659,7 @@ def _mass_amount_graph(result: dict[str, Any]):
                 "normalize input unit",
                 operation="MULTIPLY",
                 input_node_ids=("n1",),
-                exact_inputs=(value,),
+                exact_inputs=(_bound(value, _dimension(source_unit)),),
                 exact_output=base_value,
                 unit=base_unit,
                 dimension=_dimension(base_unit),
@@ -452,7 +686,10 @@ def _mass_amount_graph(result: dict[str, Any]):
             "mass amount relation",
             operation="DIVIDE" if mass_to_amount else "MULTIPLY",
             input_node_ids=(current, "n2"),
-            exact_inputs=(base_value, mm),
+            exact_inputs=(
+                _bound(base_value, _dimension(base_unit)),
+                _bound(mm, "MOLAR_MASS"),
+            ),
             exact_output=str(relation_value),
             unit="mol" if mass_to_amount else "g",
             dimension="AMOUNT" if mass_to_amount else "MASS",
@@ -466,10 +703,10 @@ def _mass_amount_graph(result: dict[str, Any]):
     )
     current = relation_id
     output_factor = _from_base_factor(target_unit)
+    exact_result = result["result"]["exact_internal_value"]
     next_number = int(relation_id[1:]) + 1
     if output_factor != "1":
         normalized_id = f"n{next_number}"
-        exact = Decimal(str(relation_value)) * Decimal(output_factor)
         nodes.append(
             make_node(
                 normalized_id,
@@ -477,8 +714,13 @@ def _mass_amount_graph(result: dict[str, Any]):
                 "normalize output unit",
                 operation="MULTIPLY",
                 input_node_ids=(current,),
-                exact_inputs=(str(relation_value),),
-                exact_output=str(exact),
+                exact_inputs=(
+                    _bound(
+                        relation_value,
+                        "AMOUNT" if mass_to_amount else "MASS",
+                    ),
+                ),
+                exact_output=exact_result,
                 unit=target_unit,
                 dimension=_dimension(target_unit),
                 metadata={"factor": output_factor, "source_unit": nodes[-1].unit},
@@ -488,7 +730,6 @@ def _mass_amount_graph(result: dict[str, Any]):
         current = normalized_id
         next_number += 1
     round_id = f"n{next_number}"
-    exact_result = result["result"]["exact_internal_value"]
     nodes.append(
         make_node(
             round_id,
@@ -496,12 +737,13 @@ def _mass_amount_graph(result: dict[str, Any]):
             "display rounding",
             operation="ROUND_DISPLAY",
             input_node_ids=(current,),
-            exact_inputs=(exact_result,),
+            exact_inputs=(_bound(exact_result, _dimension(target_unit)),),
             exact_output=exact_result,
             unit=target_unit,
             dimension=_dimension(target_unit),
             display_output=result["result"]["rendered_value"],
             policy_version=result["rounding_policy"],
+            metadata=_rounding_metadata(result),
         )
     )
     edges.append(make_edge(current, round_id, GraphEdgeKind.ROUNDS_FOR_DISPLAY))
@@ -513,6 +755,7 @@ def _mass_amount_graph(result: dict[str, Any]):
             "converted quantity",
             operation="IDENTITY",
             input_node_ids=(round_id,),
+            exact_inputs=(_bound(exact_result, _dimension(target_unit)),),
             exact_output=exact_result,
             unit=target_unit,
             dimension=_dimension(target_unit),
@@ -572,7 +815,7 @@ def _entity_amount_graph(result: dict[str, Any]):
                 "normalize amount",
                 operation="MULTIPLY",
                 input_node_ids=("n1",),
-                exact_inputs=(value,),
+                exact_inputs=(_bound(value, _dimension(source_unit)),),
                 exact_output=base_value,
                 unit=base_unit,
                 dimension=_dimension(base_unit),
@@ -599,7 +842,11 @@ def _entity_amount_graph(result: dict[str, Any]):
             "amount entity relation",
             operation=("MULTIPLY" if direction == "MOLES_TO_ENTITIES" else "DIVIDE"),
             input_node_ids=inputs,
-            exact_inputs=(base_value, constant, multiplier),
+            exact_inputs=(
+                _bound(base_value, _dimension(base_unit)),
+                _bound(constant, "INVERSE_AMOUNT"),
+                _bound(multiplier, "COUNT"),
+            ),
             exact_output=str(relation_value),
             unit="entities" if direction == "MOLES_TO_ENTITIES" else "mol",
             dimension=(
@@ -618,6 +865,7 @@ def _entity_amount_graph(result: dict[str, Any]):
     current = relation_id
     next_number += 1
     output_factor = _from_base_factor(target_unit)
+    exact_result = result["result"]["exact_internal_value"]
     if output_factor != "1":
         normalized_id = f"n{next_number}"
         relation_value = next(
@@ -630,8 +878,15 @@ def _entity_amount_graph(result: dict[str, Any]):
                 "normalize target amount",
                 operation="MULTIPLY",
                 input_node_ids=(current,),
-                exact_inputs=(str(relation_value),),
-                exact_output=str(Decimal(str(relation_value)) * Decimal(output_factor)),
+                exact_inputs=(
+                    _bound(
+                        relation_value,
+                        "ENTITY_COUNT"
+                        if direction == "MOLES_TO_ENTITIES"
+                        else "AMOUNT",
+                    ),
+                ),
+                exact_output=exact_result,
                 unit=target_unit,
                 dimension=_dimension(target_unit),
                 metadata={"factor": output_factor, "source_unit": "mol"},
@@ -640,7 +895,6 @@ def _entity_amount_graph(result: dict[str, Any]):
         edges.append(make_edge(current, normalized_id, GraphEdgeKind.NORMALIZES_UNIT))
         current = normalized_id
         next_number += 1
-    exact_result = result["result"]["exact_internal_value"]
     round_id = f"n{next_number}"
     nodes.append(
         make_node(
@@ -649,12 +903,13 @@ def _entity_amount_graph(result: dict[str, Any]):
             "display rounding",
             operation="ROUND_DISPLAY",
             input_node_ids=(current,),
-            exact_inputs=(exact_result,),
+            exact_inputs=(_bound(exact_result, _dimension(target_unit)),),
             exact_output=exact_result,
             unit=target_unit,
             dimension=_dimension(target_unit),
             display_output=result["result"]["rendered_value"],
             policy_version=result["rounding_policy"],
+            metadata=_rounding_metadata(result),
         )
     )
     edges.append(make_edge(current, round_id, GraphEdgeKind.ROUNDS_FOR_DISPLAY))
@@ -666,6 +921,7 @@ def _entity_amount_graph(result: dict[str, Any]):
             "entity amount result",
             operation="IDENTITY",
             input_node_ids=(round_id,),
+            exact_inputs=(_bound(exact_result, _dimension(target_unit)),),
             exact_output=exact_result,
             unit=target_unit,
             dimension=_dimension(target_unit),
@@ -748,4 +1004,26 @@ def _dimension(unit: str | None) -> str | None:
         "kg/mol": "MOLAR_MASS",
         "mol^-1": "INVERSE_AMOUNT",
         "entities": "ENTITY_COUNT",
+        "u": "ATOMIC_WEIGHT",
     }.get(unit, "UNKNOWN")
+
+
+def _rounding_metadata(result: dict[str, Any]) -> dict[str, Any]:
+    spec = ChemistryRoundingSpec(
+        significant_digits=int(result["result"]["significant_digits"]),
+        rounding_mode=str(result["result"]["rounding_mode"]),
+    )
+    return {
+        "significant_digits": spec.significant_digits,
+        "rounding_mode": spec.rounding_mode,
+        "trailing_zero_policy": spec.trailing_zero_policy,
+        "scientific_notation_policy": {
+            "absolute_adjusted_threshold": spec.scientific_notation_threshold
+        },
+        "rounding_spec_hash": content_hash(spec),
+    }
+
+
+def _bound(value: Any, dimension: str | None) -> str:
+    typed = None if dimension is None else EducationalDimension(dimension)
+    return canonical_exact(value, typed)

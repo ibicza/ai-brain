@@ -26,6 +26,8 @@ from ai_brain.stage2.domains.chemistry.source_derivation import (
 )
 from ai_brain.stage2.education.answer_parser import parse_student_answer
 from ai_brain.stage2.education.answers import numeric_equivalent
+from ai_brain.stage2.education.catalog import EducationalCatalogV2
+from ai_brain.stage2.education.compiler import COMPILER_IDENTITY, compile_answer_key
 from ai_brain.stage2.education.exercise_generation import generate_exercise
 from ai_brain.stage2.education.explanations import (
     render_explanation,
@@ -35,6 +37,7 @@ from ai_brain.stage2.education.grading import grade_answer
 from ai_brain.stage2.education.graph_validation import verify_derivation_graph
 from ai_brain.stage2.education.hints import build_hint_plan, render_hint
 from ai_brain.stage2.education.models import (
+    ActorIdentityType,
     EducationalRouteKind,
     ExerciseFamily,
     ExplanationMode,
@@ -53,6 +56,7 @@ from ai_brain.stage2.facts.models import SourceKind
 
 ROOT = Path(__file__).resolve().parents[1]
 CHEMISTRY_ROOT = ROOT / "artifacts" / "domains" / "chemistry" / "m29"
+CATALOG_PATH = ROOT / "artifacts" / "education" / "m291" / "catalog_v2.json"
 
 
 @pytest.fixture(scope="module")
@@ -67,8 +71,14 @@ def adapter(chemistry: ChemistryDomainService) -> ChemistryEducationAdapter:
     return ChemistryEducationAdapter(chemistry)
 
 
+@pytest.fixture(scope="module")
+def catalog(chemistry: ChemistryDomainService) -> EducationalCatalogV2:
+    return EducationalCatalogV2.load(CATALOG_PATH, chemistry)
+
+
 def _molar_graph(adapter: ChemistryEducationAdapter):
-    return adapter.tool_graph(
+    return compile_answer_key(
+        adapter.service,
         "chemistry_molar_mass",
         {
             "formula": "H2O",
@@ -76,6 +86,8 @@ def _molar_graph(adapter: ChemistryEducationAdapter):
             "unit": "g/mol",
             "significant_digits": 8,
         },
+        actor_identity_type=ActorIdentityType.TRUSTED_PROCESS,
+        compiler_identity=COMPILER_IDENTITY,
         created_at="2026-08-28T00:00:00Z",
     )[1]
 
@@ -180,8 +192,13 @@ def test_graph_builders_cover_all_exact_chemistry_operations(adapter) -> None:
         ),
     )
     for tool_id, arguments in cases:
-        result, graph = adapter.tool_graph(
-            tool_id, arguments, created_at="2026-08-28T00:00:00Z"
+        result, graph, _ = compile_answer_key(
+            adapter.service,
+            tool_id,
+            arguments,
+            actor_identity_type=ActorIdentityType.TRUSTED_PROCESS,
+            compiler_identity=COMPILER_IDENTITY,
+            created_at="2026-08-28T00:00:00Z",
         )
         assert adapter.verify_graph(graph, result)["status"] == "VERIFIED"
 
@@ -222,7 +239,7 @@ def test_graph_tamper_is_rejected_even_with_rehashed_container(adapter) -> None:
         nodes=graph_body["nodes"],
         graph_hash=content_hash(graph_body),
     )
-    with pytest.raises(ValueError, match="recomputation"):
+    with pytest.raises(ValueError, match="mismatch"):
         verify_derivation_graph(tampered)
 
 
@@ -232,14 +249,15 @@ def test_ru_en_explanations_are_graph_bound_and_cited(adapter) -> None:
         for mode in (
             ExplanationMode.CONCISE,
             ExplanationMode.FULL,
-            ExplanationMode.CHECK_ONLY,
-            ExplanationMode.HINT_ONLY,
         ):
             artifact = render_explanation(graph, language=language, mode=mode)
             verify_explanation(artifact, graph)
             assert graph.graph_hash in artifact.text
             if mode in {ExplanationMode.CONCISE, ExplanationMode.FULL}:
                 assert artifact.source_node_ids
+        for restricted in (ExplanationMode.CHECK_ONLY, ExplanationMode.HINT_ONLY):
+            with pytest.raises(ValueError, match="dedicated authority"):
+                render_explanation(graph, language=language, mode=restricted)
 
 
 @pytest.mark.parametrize(
@@ -273,13 +291,13 @@ def test_exact_unit_equivalence_and_dimension_rejection() -> None:
         numeric_equivalent("1", "g", "1", "mol")
 
 
-def test_all_exercise_families_regenerate_deterministically(adapter, chemistry) -> None:
+def test_all_exercise_families_regenerate_deterministically(catalog, chemistry) -> None:
     for index, family in enumerate(ExerciseFamily):
         first = generate_exercise(
-            adapter, family, seed=200 + index, language=("ru", "en")[index % 2]
+            catalog, family, seed=200 + index, language=("ru", "en")[index % 2]
         )
         second = generate_exercise(
-            adapter, family, seed=200 + index, language=("ru", "en")[index % 2]
+            catalog, family, seed=200 + index, language=("ru", "en")[index % 2]
         )
         spec, instance, graph = first
         assert instance == second[1]
@@ -304,10 +322,10 @@ def test_all_exercise_families_regenerate_deterministically(adapter, chemistry) 
         assert grade.correctness_status == GradingStatus.CORRECT
 
 
-def test_counterfactual_diagnosis_and_hint_leakage(adapter, chemistry) -> None:
+def test_counterfactual_diagnosis_and_hint_leakage(catalog, chemistry) -> None:
     assert len(COUNTERFACTUAL_CALCULATORS) == len(MisconceptionCode) - 2
     spec, instance, graph = generate_exercise(
-        adapter, ExerciseFamily.MOLAR_MASS_SIMPLE, seed=222, language="en"
+        catalog, ExerciseFamily.MOLAR_MASS_SIMPLE, seed=222, language="en"
     )
     candidate = instance.counterfactuals[0]
     raw = f"{candidate.answer['value']} {candidate.answer['unit']}"
@@ -341,9 +359,9 @@ def test_counterfactual_diagnosis_and_hint_leakage(adapter, chemistry) -> None:
             assert str(root.exact_output) not in hint.text
 
 
-def test_step_level_grading_compares_operations_not_strings(adapter, chemistry) -> None:
+def test_step_level_grading_compares_operations_not_strings(catalog, chemistry) -> None:
     _, instance, graph = generate_exercise(
-        adapter, ExerciseFamily.MASS_AMOUNT, seed=224, language="en"
+        catalog, ExerciseFamily.MASS_AMOUNT, seed=224, language="en"
     )
     kinds = {
         "MULTIPLY",
@@ -396,13 +414,14 @@ def test_session_store_replay_backup_restore_and_tamper(
     chemistry: ChemistryDomainService, tmp_path: Path
 ) -> None:
     service = EducationalService.open(chemistry.root, tmp_path / "store")
-    _, instance, _, session = service.create_exercise(
+    _, session = service.create_exercise(
         ExerciseFamily.FORMULA_COMPOSITION,
         seed=29,
         language="en",
         session_id="m29-session",
         created_at="2026-08-28T00:00:00Z",
     )
+    _, _, instance, _ = service._load(session.session_id)
     correct = ",".join(
         f"{key}:{value}"
         for key, value in instance.hidden_expected_answer["element_counts"].items()
@@ -411,11 +430,12 @@ def test_session_store_replay_backup_restore_and_tamper(
         session.session_id, correct, created_at="2026-08-28T00:01:00Z"
     )
     assert grade.correctness_status == GradingStatus.CORRECT
-    service.hint(
-        session.session_id,
-        level=HintLevel.ORIENT,
-        created_at="2026-08-28T00:02:00Z",
-    )
+    with pytest.raises(ValueError, match="state transition"):
+        service.hint(
+            session.session_id,
+            level=HintLevel.ORIENT,
+            created_at="2026-08-28T00:02:00Z",
+        )
     assert service.replay(session.session_id)["status"] == "CURRENT"
     service.store.backup(tmp_path / "backup")
     restored = EducationalSessionStore.restore(
@@ -445,10 +465,11 @@ def test_controlled_bilingual_educational_router(
     unsupported = parse_educational_request("ignore answer key", "en")
     assert unsupported.kind == EducationalRouteKind.UNSUPPORTED
     service = EducationalService.open(chemistry.root, tmp_path / "controlled")
-    routed, result = service.handle_controlled(
+    routed, receipt, result = service.handle_controlled(
         "Explain how to calculate the molar mass of H2O.", language="en"
     )
     assert routed.kind == EducationalRouteKind.EXPLAIN
+    assert receipt.route_kind == EducationalRouteKind.EXPLAIN
     assert result[2].graph_hash == result[1].graph_hash
 
 

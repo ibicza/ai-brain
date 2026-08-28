@@ -1,80 +1,81 @@
-"""Deterministic chemistry exercise generation through exact trusted tools."""
+"""Runtime instantiation of precompiled, semantically distinct exercises."""
 
 from __future__ import annotations
 
-import random
 from dataclasses import asdict, replace
 from datetime import UTC, datetime, timedelta
-from decimal import localcontext
+from typing import Any
 
-from ai_brain.stage2.domains.chemistry.education.exercise_catalog import (
-    GROUPED_FORMULAS,
-    INTERVAL_ELEMENTS,
-    SIMPLE_FORMULAS,
-    chemistry_exercise_specs,
-)
-from ai_brain.stage2.domains.chemistry.education.graph_adapter import (
-    ChemistryEducationAdapter,
-)
 from ai_brain.stage2.domains.chemistry.education.misconception_catalog import (
     chemistry_counterfactuals,
 )
 from ai_brain.stage2.education.answers import convert_exact
 from ai_brain.stage2.education.exercises import verify_exercise_spec
 from ai_brain.stage2.education.models import (
+    EducationalCompilationReceipt,
     EducationalDerivationGraph,
     ExerciseFamily,
     ExerciseInstance,
     ExerciseSpec,
     ExerciseSplitAxis,
-    StudentAnswerKind,
+    PresentedExercise,
+    SemanticExerciseKey,
 )
 from ai_brain.stage2.education.version import (
     EXERCISE_GENERATOR_VERSION,
     EXERCISE_SCHEMA_VERSION,
 )
 from ai_brain.stage2.facts.canonical import content_hash
-from ai_brain.stage2.trusted_decimal import (
-    parse_bounded_decimal,
-    render_bounded_decimal,
-)
+from ai_brain.stage2.trusted_decimal import render_bounded_decimal
 
 
 def generate_exercise(
-    adapter: ChemistryEducationAdapter,
+    catalog,
     family: ExerciseFamily,
     *,
     seed: int,
     language: str,
     difficulty: int | None = None,
 ) -> tuple[ExerciseSpec, ExerciseInstance, EducationalDerivationGraph]:
-    if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
-        raise ValueError("exercise seed must be a nonnegative integer")
-    if language not in {"ru", "en"}:
-        raise ValueError("exercise language must be ru or en")
-    specs = tuple(
-        spec
-        for spec in chemistry_exercise_specs(adapter.service.manifest["domain_version"])
-        if spec.family == family
-        and (difficulty is None or spec.difficulty_tier == difficulty)
+    """Select only from a verified v2 catalog; this function never runs a tool."""
+    if not hasattr(catalog, "select"):
+        raise ValueError("REBUILD_REQUIRED_FROM_EDUCATIONAL_V2")
+    entry = catalog.select(family, seed=seed, difficulty=difficulty)
+    instance = instantiate_variant(
+        entry.internal_instance,
+        entry.exercise_spec,
+        entry.graph,
+        seed=seed,
+        language=language,
     )
-    if not specs:
-        raise ValueError("no exercise spec matches the requested family/difficulty")
-    rng = random.Random(seed)
-    spec = specs[seed % len(specs)]
+    return entry.exercise_spec, instance, entry.graph
+
+
+def make_internal_instance(
+    spec: ExerciseSpec,
+    graph: EducationalDerivationGraph,
+    receipt: EducationalCompilationReceipt,
+    *,
+    seed: int,
+    language: str,
+    question_text: str,
+    structured_givens: dict[str, Any],
+    expected_answer: dict[str, Any],
+    split_axis: ExerciseSplitAxis,
+    split_manifest_hash: str,
+) -> tuple[SemanticExerciseKey, ExerciseInstance]:
     verify_exercise_spec(spec)
-    question, givens, expected, graph = _materialize(adapter, spec, rng, language, seed)
-    split_axes = tuple(ExerciseSplitAxis)
+    semantic = make_semantic_key(spec.family, structured_givens, expected_answer, graph)
     body = {
         "instance_id": "",
         "exercise_spec_hash": spec.spec_hash,
         "deterministic_seed": seed,
         "language": language,
-        "question_text": question,
-        "structured_givens": givens,
+        "question_text": question_text,
+        "structured_givens": structured_givens,
         "hidden_answer_graph_hash": graph.graph_hash,
-        "hidden_expected_answer": expected,
-        "accepted_equivalent_forms": _equivalent_forms(expected),
+        "hidden_expected_answer": expected_answer,
+        "accepted_equivalent_forms": _equivalent_forms(expected_answer),
         "provenance_dependencies": tuple(
             sorted(
                 {
@@ -82,23 +83,139 @@ def generate_exercise(
                     graph.fact_memory_snapshot_hash,
                     graph.knowledge_snapshot_hash,
                     graph.source_chain_hash,
+                    receipt.receipt_hash,
                     *graph.claim_ids,
                     *graph.evidence_hashes,
                     *graph.source_hashes,
                 }
             )
         ),
-        "difficulty_metadata": _difficulty(graph, question),
-        "split_axis": split_axes[seed % len(split_axes)],
+        "difficulty_metadata": _difficulty(graph, question_text),
+        "split_axis": split_axis,
         "counterfactuals": chemistry_counterfactuals(graph),
         "generated_at": _deterministic_time(seed),
         "schema_version": EXERCISE_SCHEMA_VERSION,
+        "semantic_key_hash": semantic.semantic_key_hash,
+        "compilation_receipt_hash": receipt.receipt_hash,
+        "split_manifest_hash": split_manifest_hash,
     }
-    identity_body = {**body, "instance_id": None}
-    body["instance_id"] = f"education.exercise.{content_hash(identity_body)[:24]}"
+    identity = {**body, "instance_id": None}
+    body["instance_id"] = f"education.exercise.{content_hash(identity)[:24]}"
     instance = ExerciseInstance(**body, instance_hash=content_hash(body))
     verify_exercise_instance(instance, spec, graph)
-    return spec, instance, graph
+    return semantic, instance
+
+
+def make_semantic_key(
+    family: ExerciseFamily,
+    givens: dict[str, Any],
+    expected: dict[str, Any],
+    graph: EducationalDerivationGraph,
+) -> SemanticExerciseKey:
+    numeric = tuple(
+        sorted(
+            (key, str(value))
+            for key, value in givens.items()
+            if key in {"value", "mass", "amount"}
+        )
+    )
+    body = {
+        "exercise_family": family,
+        "subject": str(
+            givens.get("formula", givens.get("subject", givens.get("symbol", "")))
+        ),
+        "predicate": givens.get("predicate"),
+        "numeric_givens": numeric,
+        "source_unit": givens.get("source_unit"),
+        "target_unit": givens.get("target_unit"),
+        "entity_basis": givens.get("basis"),
+        "requested_precision": givens.get("significant_digits"),
+        "answer_semantics_hash": content_hash(expected),
+        "answer_graph_hash": graph.graph_hash,
+    }
+    return SemanticExerciseKey(**body, semantic_key_hash=content_hash(body))
+
+
+def instantiate_variant(
+    instance: ExerciseInstance,
+    spec: ExerciseSpec,
+    graph: EducationalDerivationGraph,
+    *,
+    seed: int,
+    language: str,
+) -> ExerciseInstance:
+    verify_exercise_instance(instance, spec, graph)
+    if language not in {"ru", "en"}:
+        raise ValueError("exercise language must be ru or en")
+    variant = (seed // 2_000) % 3
+    question = render_question(
+        spec.family, instance.structured_givens, language=language, variant=variant
+    )
+    provisional = replace(
+        instance,
+        instance_id="",
+        deterministic_seed=seed,
+        language=language,
+        question_text=question,
+        difficulty_metadata=_difficulty(graph, question),
+        generated_at=_deterministic_time(seed),
+        instance_hash="",
+    )
+    identity = asdict(provisional)
+    identity["instance_id"] = None
+    identity.pop("instance_hash")
+    instance_id = f"education.exercise.{content_hash(identity)[:24]}"
+    body = asdict(replace(provisional, instance_id=instance_id))
+    body.pop("instance_hash")
+    result = replace(
+        provisional, instance_id=instance_id, instance_hash=content_hash(body)
+    )
+    verify_exercise_instance(result, spec, graph)
+    return result
+
+
+def derive_exercise_variant(
+    instance: ExerciseInstance,
+    spec: ExerciseSpec,
+    graph: EducationalDerivationGraph,
+    *,
+    seed: int,
+) -> ExerciseInstance:
+    """Compatibility wrapper that changes a genuine presentation template."""
+    return instantiate_variant(
+        instance, spec, graph, seed=seed, language=instance.language
+    )
+
+
+def present_exercise(
+    instance: ExerciseInstance, spec: ExerciseSpec, *, session_id: str
+) -> PresentedExercise:
+    body = {
+        "session_id": session_id,
+        "exercise_id": instance.instance_id,
+        "language": instance.language,
+        "question_text": instance.question_text,
+        "structured_public_givens": dict(instance.structured_givens),
+        "difficulty_metadata": dict(instance.difficulty_metadata),
+        "learning_objectives": tuple(spec.learning_objectives),
+        "accepted_answer_format": spec.accepted_answer_type.value,
+        "schema_version": EXERCISE_SCHEMA_VERSION,
+    }
+    return PresentedExercise(**body, presentation_hash=content_hash(body))
+
+
+def verify_presented_exercise(presented: PresentedExercise) -> None:
+    body = asdict(presented)
+    digest = body.pop("presentation_hash")
+    if (
+        content_hash(body) != digest
+        or presented.schema_version != EXERCISE_SCHEMA_VERSION
+    ):
+        raise ValueError("invalid presented exercise")
+    serialized = str(asdict(presented)).casefold()
+    forbidden = ("graph_hash", "counterfactual", "split_axis", "receipt_hash")
+    if any(item in serialized for item in forbidden):
+        raise ValueError("presented exercise leaks a private field")
 
 
 def verify_exercise_instance(
@@ -114,273 +231,91 @@ def verify_exercise_instance(
     if (
         instance.exercise_spec_hash != spec.spec_hash
         or instance.hidden_answer_graph_hash != graph.graph_hash
+        or instance.semantic_key_hash
+        != make_semantic_key(
+            spec.family,
+            instance.structured_givens,
+            instance.hidden_expected_answer,
+            graph,
+        ).semantic_key_hash
     ):
         raise ValueError("exercise dependencies do not match")
     if instance.schema_version != EXERCISE_SCHEMA_VERSION:
         raise ValueError("incompatible exercise instance schema")
-    forbidden = (
-        instance.hidden_answer_graph_hash,
-        instance.split_axis.value,
-        "expected misconception",
-    )
+    if not instance.provenance_dependencies or not instance.compilation_receipt_hash:
+        raise ValueError("exercise lacks provenance/compilation dependencies")
+    for counterfactual in instance.counterfactuals:
+        counterfactual_body = asdict(counterfactual)
+        counterfactual_digest = counterfactual_body.pop("counterfactual_hash")
+        if content_hash(counterfactual_body) != counterfactual_digest:
+            raise ValueError("exercise counterfactual hash mismatch")
+    # Split manifests are catalog-level dependencies and deliberately separate.
+    if len(instance.split_manifest_hash) != 64:
+        raise ValueError("exercise lacks a valid split manifest")
+    forbidden = (instance.hidden_answer_graph_hash, instance.split_axis.value)
     if any(value in instance.question_text for value in forbidden):
         raise ValueError("exercise question leaks hidden metadata")
-    if not instance.provenance_dependencies:
-        raise ValueError("exercise lacks provenance dependencies")
 
 
-def derive_exercise_variant(
-    instance: ExerciseInstance,
-    spec: ExerciseSpec,
-    graph: EducationalDerivationGraph,
+def render_question(
+    family: ExerciseFamily,
+    givens: dict[str, Any],
     *,
-    seed: int,
-) -> ExerciseInstance:
-    """Create a new deterministic envelope over an already verified exact key."""
-    verify_exercise_instance(instance, spec, graph)
-    axes = tuple(ExerciseSplitAxis)
-    provisional = replace(
-        instance,
-        instance_id="",
-        deterministic_seed=seed,
-        split_axis=axes[seed % len(axes)],
-        generated_at=_deterministic_time(seed),
-        instance_hash="",
+    language: str,
+    variant: int = 0,
+) -> str:
+    formula = str(givens.get("formula", ""))
+    prefix = (
+        ("Задача", "Упражнение", "Проверка")[variant]
+        if language == "ru"
+        else (
+            "Problem",
+            "Exercise",
+            "Practice",
+        )[variant]
     )
-    identity = asdict(provisional)
-    identity["instance_id"] = None
-    instance_id = f"education.exercise.{content_hash(identity)[:24]}"
-    body = asdict(replace(provisional, instance_id=instance_id))
-    body.pop("instance_hash")
-    variant = replace(
-        provisional,
-        instance_id=instance_id,
-        instance_hash=content_hash(body),
-    )
-    verify_exercise_instance(variant, spec, graph)
-    return variant
-
-
-def _materialize(adapter, spec, rng, language, seed):
-    family = spec.family
-    created_at = _deterministic_time(seed)
-    if family == ExerciseFamily.FACT_RETRIEVAL:
-        symbols = (
-            INTERVAL_ELEMENTS
-            if spec.accepted_answer_type == StudentAnswerKind.ATOMIC_WEIGHT_INTERVAL
-            else tuple(adapter.service.manifest["supported_elements"])
-        )
-        symbol = symbols[rng.randrange(len(symbols))]
-        predicates = tuple(spec.parameter_constraints["predicates"])
-        predicate = predicates[seed % len(predicates)]
-        given_predicate = (
-            "element_name_ru"
-            if predicate == "element_symbol" and language == "ru"
-            else "element_name_en"
-            if predicate == "element_symbol"
-            else "element_symbol"
-        )
-        _, _, graph = adapter.paired_fact_graph(
-            symbol,
-            given_predicate,
-            predicate,
-            language=language,
-            created_at=created_at,
-        )
-        root = next(
-            node for node in graph.nodes if node.node_id == graph.root_result_node_id
-        )
-        if spec.accepted_answer_type == StudentAnswerKind.NUMERIC_WITH_UNIT:
-            expected = {"value": str(root.exact_output), "unit": "u"}
-        elif spec.accepted_answer_type == StudentAnswerKind.ATOMIC_WEIGHT_INTERVAL:
-            expected = dict(root.exact_output)
-        else:
-            expected = {"text": str(root.exact_output)}
-        given = next(
-            node
-            for node in graph.nodes
-            if node.metadata.get("role") == "question_given"
-        )
-        question = _fact_question(language, given.exact_output, predicate)
-        return (
-            question,
-            {"given_value": given.exact_output, "given_predicate": given_predicate},
-            expected,
-            graph,
-        )
-    if family in {
-        ExerciseFamily.FORMULA_COMPOSITION,
-        ExerciseFamily.MOLAR_MASS_SIMPLE,
-    }:
-        formulas = SIMPLE_FORMULAS
-    elif family == ExerciseFamily.MOLAR_MASS_GROUPED:
-        formulas = GROUPED_FORMULAS
-    else:
-        formulas = SIMPLE_FORMULAS + GROUPED_FORMULAS
-    formula = formulas[rng.randrange(len(formulas))]
     if family == ExerciseFamily.FORMULA_COMPOSITION:
-        result, graph = adapter.tool_graph(
-            "chemistry_formula_composition",
-            {"formula": formula},
-            created_at=created_at,
-        )
-        expected = {
-            "element_counts": dict(sorted(result["result"]["element_counts"].items()))
-        }
-        question = (
-            f"Укажите число атомов каждого элемента в формуле {formula}."
+        body = (
+            f"Для формальной химической формулы {formula} укажите число атомов каждого элемента."
             if language == "ru"
-            else f"Give the atom count of each element in {formula}."
+            else f"Given the formal chemical formula {formula}, give each element's atom count."
         )
-        return question, {"formula": formula}, expected, graph
-    if family in {
+    elif family in {
         ExerciseFamily.MOLAR_MASS_SIMPLE,
         ExerciseFamily.MOLAR_MASS_GROUPED,
     }:
-        unit = ("g/mol", "kg/mol")[seed % 2]
-        result, graph = adapter.tool_graph(
-            "chemistry_molar_mass",
-            {
-                "formula": formula,
-                "mode": "conventional",
-                "unit": unit,
-                "significant_digits": 8,
-            },
-            created_at=created_at,
-        )
-        expected = _numeric_expected(result)
-        question = (
-            f"Вычислите молярную массу {formula} в {unit}."
+        unit = givens["target_unit"]
+        body = (
+            f"Вычислите молярную массу формулы {formula} в {unit}."
             if language == "ru"
-            else f"Calculate the molar mass of {formula} in {unit}."
+            else f"Calculate the molar mass of formula {formula} in {unit}."
         )
-        return question, {"formula": formula, "target_unit": unit}, expected, graph
-    if family == ExerciseFamily.MASS_AMOUNT:
-        value = str(2 + rng.randrange(97))
-        source_unit, target_unit = (
-            ("g", "mol"),
-            ("kg", "mmol"),
-            ("mol", "g"),
-            ("mmol", "kg"),
-        )[seed % 4]
-        result, graph = adapter.tool_graph(
-            "chemistry_mass_amount",
-            {
-                "formula": formula,
-                "value": value,
-                "source_unit": source_unit,
-                "target_unit": target_unit,
-                "significant_digits": 8,
-            },
-            created_at=created_at,
-        )
-        expected = _numeric_expected(result)
-        question = (
-            f"Для {formula} преобразуйте {value} {source_unit} в {target_unit}."
+    elif family == ExerciseFamily.MASS_AMOUNT:
+        body = (
+            f"Для формулы {formula} преобразуйте {givens['value']} {givens['source_unit']} в {givens['target_unit']}."
             if language == "ru"
-            else f"For {formula}, convert {value} {source_unit} to {target_unit}."
+            else f"For formula {formula}, convert {givens['value']} {givens['source_unit']} to {givens['target_unit']}."
         )
-        givens = {
-            "formula": formula,
-            "value": value,
-            "source_unit": source_unit,
-            "target_unit": target_unit,
-        }
-        return question, givens, expected, graph
-    value = str(1 + rng.randrange(20))
-    source_unit, target_unit = (("mol", "entities"), ("mmol", "entities"))[seed % 2]
-    basis = ("FORMULA_ENTITIES", "TOTAL_ATOMS_IN_FORMULA")[seed % 2]
-    result, graph = adapter.tool_graph(
-        "chemistry_entity_amount",
-        {
-            "formula": formula,
-            "value": value,
-            "source_unit": source_unit,
-            "target_unit": target_unit,
-            "basis": basis,
-            "target_element": None,
-            "requested_display_label": None,
-            "significant_digits": 8,
-        },
-        created_at=created_at,
-    )
-    expected = _numeric_expected(result)
-    subject = (
-        "всех атомов"
-        if language == "ru" and basis == "TOTAL_ATOMS_IN_FORMULA"
-        else "формульных единиц"
-        if language == "ru"
-        else "all atoms"
-        if basis == "TOTAL_ATOMS_IN_FORMULA"
-        else "formula entities"
-    )
-    question = (
-        f"Сколько {subject} содержится в {value} {source_unit} {formula}?"
-        if language == "ru"
-        else f"How many {subject} are in {value} {source_unit} of {formula}?"
-    )
-    givens = {
-        "formula": formula,
-        "value": value,
-        "source_unit": source_unit,
-        "target_unit": target_unit,
-        "basis": basis,
-    }
-    return question, givens, expected, graph
-
-
-def _numeric_expected(result):
-    value = result["result"]["exact_internal_value"]
-    rendered = result["result"]["rendered_value"]
-    with localcontext() as context:
-        context.prec = 256
-        tolerance = abs(parse_bounded_decimal(value) - parse_bounded_decimal(rendered))
-    return {
-        "value": value,
-        "unit": result["result"]["unit"],
-        "absolute_tolerance": render_bounded_decimal(tolerance),
-    }
-
-
-def _fact_question(language, given_value, predicate):
-    if predicate == "element_symbol":
-        return (
-            f"Запишите символ элемента {given_value}."
+    elif family == ExerciseFamily.AMOUNT_ENTITIES:
+        body = (
+            f"Для формулы {formula} преобразуйте {givens['value']} {givens['source_unit']} в число частиц ({givens['basis']})."
             if language == "ru"
-            else f"Give the symbol of {given_value}."
+            else f"For formula {formula}, convert {givens['value']} {givens['source_unit']} to entities ({givens['basis']})."
         )
-    labels = {
-        "ru": {
-            "atomic_number": "атомный номер",
-            "element_name_en": "английское название",
-            "element_name_ru": "русское название",
-            "conventional_atomic_weight": "условную атомную массу",
-            "standard_atomic_weight": "интервал стандартной атомной массы",
-        },
-        "en": {
-            "atomic_number": "atomic number",
-            "element_name_en": "English name",
-            "element_name_ru": "Russian name",
-            "conventional_atomic_weight": "conventional atomic weight",
-            "standard_atomic_weight": "standard atomic-weight interval",
-        },
-    }
-    return (
-        f"Укажите {labels['ru'][predicate]} элемента {given_value}."
-        if language == "ru"
-        else f"Give the {labels['en'][predicate]} of element {given_value}."
-    )
+    else:
+        body = str(
+            givens["question_body_ru" if language == "ru" else "question_body_en"]
+        )
+    return f"{prefix}: {body}"
 
 
 def _difficulty(graph, question):
     formula_nodes = [node for node in graph.nodes if node.kind.value == "FORMULA_PARSE"]
     formula = str(formula_nodes[0].exact_output) if formula_nodes else ""
     return {
-        "distinct_elements": (
-            len(formula_nodes[0].metadata.get("composition", {}))
-            if formula_nodes
-            else 0
-        ),
+        "distinct_elements": len(formula_nodes[0].metadata.get("composition", {}))
+        if formula_nodes
+        else 0,
         "parentheses_depth": 1 if "(" in formula else 0,
         "arithmetic_steps": sum(node.operation is not None for node in graph.nodes),
         "requires_unit_conversion": any(
@@ -393,22 +328,14 @@ def _difficulty(graph, question):
 
 def _equivalent_forms(expected):
     unit = expected.get("unit")
-    if unit == "g":
+    if unit in {"g", "mol"}:
+        target = "kg" if unit == "g" else "mmol"
         return (
             {
                 "value": render_bounded_decimal(
-                    convert_exact(expected["value"], "g", "kg")
+                    convert_exact(expected["value"], unit, target)
                 ),
-                "unit": "kg",
-            },
-        )
-    if unit == "mol":
-        return (
-            {
-                "value": render_bounded_decimal(
-                    convert_exact(expected["value"], "mol", "mmol")
-                ),
-                "unit": "mmol",
+                "unit": target,
             },
         )
     return ()

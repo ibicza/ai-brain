@@ -18,13 +18,15 @@ from ai_brain.stage2.education.service import EducationalService
 from ai_brain.stage2.facts.canonical import canonical_json
 
 DEFAULT_CHEMISTRY_ROOT = Path("artifacts/domains/chemistry/m29")
-DEFAULT_STORE_ROOT = Path("artifacts/education/m29")
+DEFAULT_STORE_ROOT = Path("artifacts/education/m291/sessions")
+DEFAULT_CATALOG = Path("artifacts/education/m291/catalog_v2.json")
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ai-brain-tutor")
     parser.add_argument("--chemistry-root", type=Path, default=DEFAULT_CHEMISTRY_ROOT)
     parser.add_argument("--store", type=Path, default=DEFAULT_STORE_ROOT)
+    parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     commands = parser.add_subparsers(dest="command", required=True)
 
     explain = commands.add_parser("explain")
@@ -67,6 +69,10 @@ def build_parser() -> argparse.ArgumentParser:
     restore = commands.add_parser("restore")
     restore.add_argument("--backup", type=Path, required=True)
     restore.add_argument("--target", type=Path, required=True)
+    compile_catalog = commands.add_parser("compile-catalog")
+    compile_catalog.add_argument("--output", type=Path, default=DEFAULT_CATALOG)
+    compile_catalog.add_argument("--audit", type=Path, required=True)
+    compile_catalog.add_argument("--entry-count", type=int, default=2_000)
     return parser
 
 
@@ -76,25 +82,60 @@ def main(argv: list[str] | None = None) -> None:
         restored = EducationalSessionStore.restore(args.backup, args.target)
         _print(restored.verify())
         return
-    service = EducationalService.open(args.chemistry_root, args.store)
+    if args.command == "compile-catalog":
+        import shutil
+        import tempfile
+
+        from ai_brain.stage2.domains.chemistry.service import ChemistryDomainService
+        from ai_brain.stage2.education.catalog_compiler import compile_catalog_v2
+
+        with tempfile.TemporaryDirectory(prefix="m291-cli-compile-") as directory:
+            chemistry_copy = Path(directory) / "chemistry"
+            shutil.copytree(args.chemistry_root.resolve(), chemistry_copy)
+            chemistry = ChemistryDomainService.open(chemistry_copy)
+            _print(
+                compile_catalog_v2(
+                    chemistry,
+                    args.output,
+                    entry_count=args.entry_count,
+                    audit_path=args.audit,
+                )
+            )
+        return
+    service = EducationalService.open(
+        args.chemistry_root, args.store, catalog_path=args.catalog
+    )
     if args.command == "explain":
         request = _read_request(args.request)
-        result, graph, explanation = service.explain_tool(
+        outcome = service.explain_tool(
             request["tool_id"],
             request["arguments"],
             language=args.language,
             mode=ExplanationMode(args.mode),
         )
-        _print(
-            {
-                "text": explanation.text,
-                "explanation_hash": explanation.explanation_hash,
-                "graph_hash": graph.graph_hash,
-                "source_result_hash": result["result_hash"],
-            }
-        )
+        if hasattr(outcome[1], "response_stage"):
+            decision, prepared, proposal = outcome
+            _print(
+                {
+                    "status": prepared.response_stage,
+                    "route_decision_hash": decision.route_decision_hash,
+                    "prepared_response_hash": prepared.response_hash,
+                    "proposal_hash": proposal.proposal_hash,
+                    "confirmation_required": True,
+                }
+            )
+        else:
+            _, graph, explanation = outcome
+            _print(
+                {
+                    "text": explanation.text,
+                    "explanation_hash": explanation.explanation_hash,
+                    "graph_hash": graph.graph_hash,
+                    "source_result_hash": graph.source_result_hash,
+                }
+            )
     elif args.command == "generate-exercise":
-        _, instance, _, session = service.create_exercise(
+        presented, session = service.create_exercise(
             ExerciseFamily(args.family.upper()),
             seed=args.seed,
             language=args.language,
@@ -104,10 +145,11 @@ def main(argv: list[str] | None = None) -> None:
         _print(
             {
                 "session_id": session.session_id,
-                "exercise_id": instance.instance_id,
-                "question": instance.question_text,
-                "language": instance.language,
-                "difficulty": instance.difficulty_metadata,
+                "exercise_id": presented.exercise_id,
+                "question": presented.question_text,
+                "language": presented.language,
+                "difficulty": presented.difficulty_metadata,
+                "presentation_hash": presented.presentation_hash,
             }
         )
     elif args.command == "submit-answer":

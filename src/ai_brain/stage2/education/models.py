@@ -26,6 +26,41 @@ class GraphNodeKind(StrEnum):
     WARNING = "WARNING"
 
 
+class EducationalDimension(StrEnum):
+    DIMENSIONLESS = "DIMENSIONLESS"
+    COUNT = "COUNT"
+    MASS = "MASS"
+    AMOUNT = "AMOUNT"
+    INVERSE_AMOUNT = "INVERSE_AMOUNT"
+    MOLAR_MASS = "MOLAR_MASS"
+    ENTITY_COUNT = "ENTITY_COUNT"
+    ATOMIC_WEIGHT = "ATOMIC_WEIGHT"
+    FORMULA = "FORMULA"
+    COMPOSITION = "COMPOSITION"
+    INTERVAL_MOLAR_MASS = "INTERVAL_MOLAR_MASS"
+
+
+class ActorIdentityType(StrEnum):
+    TRUSTED_PROCESS = "TRUSTED_PROCESS"
+    MODEL = "MODEL"
+    USER = "USER"
+
+
+class ExplanationSegmentKind(StrEnum):
+    HEADING = "HEADING"
+    GIVEN = "GIVEN"
+    FACT = "FACT"
+    FORMULA = "FORMULA"
+    OPERATION = "OPERATION"
+    SUBSTITUTION = "SUBSTITUTION"
+    INTERMEDIATE_RESULT = "INTERMEDIATE_RESULT"
+    ROUNDING = "ROUNDING"
+    FINAL_RESULT = "FINAL_RESULT"
+    WARNING = "WARNING"
+    SOURCE_CITATION = "SOURCE_CITATION"
+    GRAPH_REFERENCE = "GRAPH_REFERENCE"
+
+
 class GraphEdgeKind(StrEnum):
     DEPENDS_ON = "DEPENDS_ON"
     USES_FACT = "USES_FACT"
@@ -150,13 +185,20 @@ class EducationalReplayStatus(StrEnum):
     CURRENT = "CURRENT"
     STALE_DOMAIN = "STALE_DOMAIN"
     STALE_FACT_MEMORY = "STALE_FACT_MEMORY"
+    STALE_CLAIM = "STALE_CLAIM"
+    STALE_EVIDENCE = "STALE_EVIDENCE"
+    STALE_SOURCE = "STALE_SOURCE"
+    STALE_UPSTREAM_SOURCE = "STALE_UPSTREAM_SOURCE"
     STALE_SOURCE_CHAIN = "STALE_SOURCE_CHAIN"
     STALE_TOOL = "STALE_TOOL"
     STALE_EXERCISE_SPEC = "STALE_EXERCISE_SPEC"
+    STALE_COMPILATION_RECEIPT = "STALE_COMPILATION_RECEIPT"
     STALE_ANSWER_KEY = "STALE_ANSWER_KEY"
     STALE_GRADING_POLICY = "STALE_GRADING_POLICY"
     STALE_HINT_POLICY = "STALE_HINT_POLICY"
     INVALID_GRAPH = "INVALID_GRAPH"
+    INVALID_SOURCE_RESULT = "INVALID_SOURCE_RESULT"
+    INVALID_ARTIFACT = "INVALID_ARTIFACT"
     INVALID_SESSION = "INVALID_SESSION"
 
 
@@ -179,7 +221,7 @@ class EducationalGraphNode:
     exact_inputs: tuple[str, ...]
     exact_output: Any
     unit: str | None
-    dimension: str | None
+    dimension: EducationalDimension | None
     display_output: str | None
     policy_version: str
     claim_ids: tuple[str, ...]
@@ -225,6 +267,7 @@ class EducationalDerivationGraph:
     created_at: str
     schema_version: int
     graph_hash: str
+    source_result_artifact: dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -239,6 +282,26 @@ class ExplanationArtifact:
     source_node_ids: tuple[str, ...]
     rendering_version: str
     explanation_hash: str
+    plan_hash: str
+
+
+@dataclass(frozen=True)
+class ExplanationSegment:
+    kind: ExplanationSegmentKind
+    node_ids: tuple[str, ...]
+    permitted_fields: tuple[str, ...]
+    segment_hash: str
+
+
+@dataclass(frozen=True)
+class ExplanationPlan:
+    graph_hash: str
+    source_result_hash: str
+    language: str
+    mode: ExplanationMode
+    segments: tuple[ExplanationSegment, ...]
+    rendering_version: str
+    plan_hash: str
 
 
 @dataclass(frozen=True)
@@ -287,6 +350,81 @@ class ExerciseInstance:
     generated_at: str
     schema_version: int
     instance_hash: str
+    semantic_key_hash: str
+    compilation_receipt_hash: str
+    split_manifest_hash: str
+
+
+@dataclass(frozen=True)
+class PresentedExercise:
+    session_id: str
+    exercise_id: str
+    language: str
+    question_text: str
+    structured_public_givens: dict[str, Any]
+    difficulty_metadata: dict[str, Any]
+    learning_objectives: tuple[str, ...]
+    accepted_answer_format: str
+    schema_version: int
+    presentation_hash: str
+
+
+@dataclass(frozen=True)
+class SemanticExerciseKey:
+    exercise_family: ExerciseFamily
+    subject: str
+    predicate: str | None
+    numeric_givens: tuple[tuple[str, str], ...]
+    source_unit: str | None
+    target_unit: str | None
+    entity_basis: str | None
+    requested_precision: int | None
+    answer_semantics_hash: str
+    answer_graph_hash: str
+    semantic_key_hash: str
+
+
+@dataclass(frozen=True)
+class EducationalCompilationReceipt:
+    compilation_id: str
+    compiler_identity: str
+    actor_identity_type: ActorIdentityType
+    compilation_policy_version: str
+    chemistry_domain_manifest_hash: str
+    fact_memory_snapshot_hash: str
+    source_chain_hash: str
+    tool_id: str
+    canonical_arguments: dict[str, Any]
+    tool_implementation_manifest_hash: str
+    knowledge_snapshot_hash: str
+    exact_result_hash: str
+    educational_graph_hash: str
+    exercise_spec_hash: str | None
+    generated_at: str
+    receipt_hash: str
+
+
+@dataclass(frozen=True)
+class EducationalCatalogEntryV2:
+    semantic_key: SemanticExerciseKey
+    exercise_spec: ExerciseSpec
+    internal_instance: ExerciseInstance
+    graph: EducationalDerivationGraph
+    compilation_receipt: EducationalCompilationReceipt
+    entry_hash: str
+
+
+@dataclass(frozen=True)
+class EducationalCatalogManifestV2:
+    chemistry_domain_manifest_hash: str
+    fact_memory_snapshot_hash: str
+    source_chain_hash: str
+    tool_manifest_hashes: tuple[tuple[str, str], ...]
+    generator_version: str
+    entry_hashes: tuple[str, ...]
+    split_manifest_hashes: tuple[str, ...]
+    schema_version: int
+    catalog_hash: str
 
 
 @dataclass(frozen=True)
@@ -394,3 +532,17 @@ class EducationalRoute:
     payload: dict[str, Any]
     parser_evidence: dict[str, Any]
     route_hash: str
+
+
+@dataclass(frozen=True)
+class EducationalRouteReceipt:
+    original_request_hash: str
+    controlled_parser_version: str
+    route_kind: EducationalRouteKind
+    session_id: str | None
+    presented_exercise_hash: str | None
+    prepared_response_hash: str | None
+    requested_action: str
+    dependency_snapshot: tuple[str, ...]
+    created_at: str
+    receipt_hash: str

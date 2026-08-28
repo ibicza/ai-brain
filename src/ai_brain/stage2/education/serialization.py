@@ -5,10 +5,13 @@ from __future__ import annotations
 from typing import Any, TypeVar
 
 from ai_brain.stage2.education.models import (
+    ActorIdentityType,
     AnswerParseStatus,
     CounterfactualAnswer,
     DiagnosisConfidence,
+    EducationalCompilationReceipt,
     EducationalDerivationGraph,
+    EducationalDimension,
     EducationalGraphEdge,
     EducationalGraphNode,
     ErrorDiagnosis,
@@ -16,13 +19,20 @@ from ai_brain.stage2.education.models import (
     ExerciseInstance,
     ExerciseSpec,
     ExerciseSplitAxis,
+    ExplanationArtifact,
+    ExplanationMode,
+    ExplanationPlan,
+    ExplanationSegment,
+    ExplanationSegmentKind,
     GradingResult,
     GradingStatus,
     GraphEdgeKind,
     GraphNodeKind,
     HintArtifact,
     HintLevel,
+    HintPlan,
     MisconceptionCode,
+    PresentedExercise,
     StudentAnswer,
     StudentAnswerKind,
     TutorEvent,
@@ -43,6 +53,9 @@ def graph_from_dict(row: dict[str, Any]) -> EducationalDerivationGraph:
                     **{
                         **node,
                         "kind": GraphNodeKind(node["kind"]),
+                        "dimension": EducationalDimension(node["dimension"])
+                        if node["dimension"] is not None
+                        else None,
                         "input_node_ids": tuple(node["input_node_ids"]),
                         "exact_inputs": tuple(node["exact_inputs"]),
                         "claim_ids": tuple(node["claim_ids"]),
@@ -104,6 +117,59 @@ def instance_from_dict(row: dict[str, Any]) -> ExerciseInstance:
     )
 
 
+def presented_from_dict(row: dict[str, Any]) -> PresentedExercise:
+    _exact(row, set(PresentedExercise.__dataclass_fields__))
+    return PresentedExercise(
+        **{**row, "learning_objectives": tuple(row["learning_objectives"])}
+    )
+
+
+def compilation_receipt_from_dict(
+    row: dict[str, Any],
+) -> EducationalCompilationReceipt:
+    _exact(row, set(EducationalCompilationReceipt.__dataclass_fields__))
+    return EducationalCompilationReceipt(
+        **{
+            **row,
+            "actor_identity_type": ActorIdentityType(row["actor_identity_type"]),
+        }
+    )
+
+
+def explanation_plan_from_dict(row: dict[str, Any]) -> ExplanationPlan:
+    _exact(row, set(ExplanationPlan.__dataclass_fields__))
+    return ExplanationPlan(
+        **{
+            **row,
+            "mode": ExplanationMode(row["mode"]),
+            "segments": tuple(
+                ExplanationSegment(
+                    **{
+                        **item,
+                        "kind": ExplanationSegmentKind(item["kind"]),
+                        "node_ids": tuple(item["node_ids"]),
+                        "permitted_fields": tuple(item["permitted_fields"]),
+                    }
+                )
+                for item in row["segments"]
+            ),
+        }
+    )
+
+
+def explanation_from_dict(row: dict[str, Any]) -> ExplanationArtifact:
+    _exact(row, set(ExplanationArtifact.__dataclass_fields__))
+    return ExplanationArtifact(
+        **{
+            **row,
+            "mode": ExplanationMode(row["mode"]),
+            "numeric_node_ids": tuple(row["numeric_node_ids"]),
+            "formula_node_ids": tuple(row["formula_node_ids"]),
+            "source_node_ids": tuple(row["source_node_ids"]),
+        }
+    )
+
+
 def student_answer_from_dict(row: dict[str, Any]) -> StudentAnswer:
     _exact(row, set(StudentAnswer.__dataclass_fields__))
     return StudentAnswer(
@@ -156,6 +222,11 @@ def hint_from_dict(row: dict[str, Any]) -> HintArtifact:
             ),
         }
     )
+
+
+def hint_plan_from_dict(row: dict[str, Any]) -> HintPlan:
+    _exact(row, set(HintPlan.__dataclass_fields__))
+    return HintPlan(**{**row, "node_order": tuple(row["node_order"])})
 
 
 def event_from_dict(row: dict[str, Any]) -> TutorEvent:

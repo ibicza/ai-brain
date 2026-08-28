@@ -1,4 +1,4 @@
-"""Deterministic bilingual explanations rendered only from verified graph nodes."""
+"""Structured deterministic bilingual explanations derived from verified graphs."""
 
 from __future__ import annotations
 
@@ -9,10 +9,52 @@ from ai_brain.stage2.education.models import (
     EducationalDerivationGraph,
     ExplanationArtifact,
     ExplanationMode,
+    ExplanationPlan,
+    ExplanationSegment,
+    ExplanationSegmentKind,
+    GradingResult,
     GraphNodeKind,
 )
 from ai_brain.stage2.education.version import EDUCATIONAL_RENDERING_VERSION
 from ai_brain.stage2.facts.canonical import content_hash
+
+
+def build_explanation_plan(
+    graph: EducationalDerivationGraph,
+    *,
+    language: str,
+    mode: ExplanationMode,
+) -> ExplanationPlan:
+    if language not in {"ru", "en"}:
+        raise ValueError("explanation language must be ru or en")
+    if mode in {ExplanationMode.CHECK_ONLY, ExplanationMode.HINT_ONLY}:
+        raise ValueError(f"{mode.value} requires its dedicated authority artifact")
+    verify_derivation_graph(graph)
+    nodes = _selected_nodes(graph, mode)
+    segments = [_segment(ExplanationSegmentKind.HEADING)]
+    for node in nodes:
+        segments.append(_segment(_segment_kind(node.kind), node.node_id))
+    segments.extend(
+        _segment(ExplanationSegmentKind.SOURCE_CITATION, node.node_id)
+        for node in graph.nodes
+        if node.kind == GraphNodeKind.SOURCE_REFERENCE
+    )
+    segments.append(
+        _segment(
+            ExplanationSegmentKind.GRAPH_REFERENCE,
+            graph.root_result_node_id,
+            permitted_fields=("graph_hash", "source_result_hash"),
+        )
+    )
+    body = {
+        "graph_hash": graph.graph_hash,
+        "source_result_hash": graph.source_result_hash,
+        "language": language,
+        "mode": mode,
+        "segments": tuple(segments),
+        "rendering_version": EDUCATIONAL_RENDERING_VERSION,
+    }
+    return ExplanationPlan(**body, plan_hash=content_hash(body))
 
 
 def render_explanation(
@@ -22,127 +64,266 @@ def render_explanation(
     mode: ExplanationMode = ExplanationMode.FULL,
     attempt_made: bool = False,
 ) -> ExplanationArtifact:
-    if language not in {"ru", "en"}:
-        raise ValueError("explanation language must be ru or en")
-    verify_derivation_graph(graph)
     if mode == ExplanationMode.SOLUTION_AFTER_ATTEMPT and not attempt_made:
         raise ValueError("solution-after-attempt requires a submitted attempt")
-    selected = _selected_nodes(graph, mode)
-    lines = [_heading(language, mode)]
-    for node in selected:
-        lines.append(_render_node(node, language))
-    all_source_nodes = tuple(
-        node for node in graph.nodes if node.kind == GraphNodeKind.SOURCE_REFERENCE
-    )
-    source_nodes = (
-        ()
-        if mode in {ExplanationMode.CHECK_ONLY, ExplanationMode.HINT_ONLY}
-        else all_source_nodes
-    )
-    if source_nodes:
-        label = "Источники" if language == "ru" else "Sources"
+    plan = build_explanation_plan(graph, language=language, mode=mode)
+    return render_explanation_plan(plan, graph)
+
+
+def render_check_explanation(
+    graph: EducationalDerivationGraph,
+    grading: GradingResult,
+    *,
+    language: str,
+) -> ExplanationArtifact:
+    """Render CHECK_ONLY exclusively from a grading result, never the graph root."""
+    verify_derivation_graph(graph)
+    if grading.answer_graph_hash != graph.graph_hash:
+        raise ValueError("grading result is bound to another answer graph")
+    labels = {
+        "ru": ("Проверка ответа", "Статус", "Баллы", "Первая ошибка", "Диагноз"),
+        "en": ("Answer check", "Status", "Score", "First error", "Diagnosis"),
+    }
+    if language not in labels:
+        raise ValueError("explanation language must be ru or en")
+    heading, status, score, first, diagnosis = labels[language]
+    lines = [
+        heading,
+        f"{status}: {grading.correctness_status.value}",
+        f"{score}: {grading.score}/{grading.maximum_score}",
+    ]
+    if grading.first_incorrect_node:
+        lines.append(f"{first}: {grading.first_incorrect_node}")
+    if grading.error_diagnoses:
         lines.append(
-            f"{label}: "
-            + ", ".join(
-                f"[{node.node_id}] {node.exact_output}" for node in source_nodes
-            )
+            f"{diagnosis}: "
+            + ", ".join(item.code.value for item in grading.error_diagnoses)
         )
-    lines.append(("Граф" if language == "ru" else "Graph") + f": {graph.graph_hash}")
-    lines.append(
-        ("Результат" if language == "ru" else "Result")
-        + f": {graph.source_result_hash}"
+    # CHECK_ONLY plans intentionally contain no value-bearing graph segment.
+    segments = (
+        _segment(ExplanationSegmentKind.HEADING),
+        _segment(
+            ExplanationSegmentKind.GRAPH_REFERENCE,
+            permitted_fields=("grading_result_hash",),
+        ),
     )
-    text = "\n".join(lines)
-    numeric = tuple(
-        node.node_id for node in selected if _has_numeric_output(node.exact_output)
-    )
-    formulas = tuple(
-        node.node_id
-        for node in selected
-        if node.kind == GraphNodeKind.FORMULA_PARSE
-        or (
-            node.kind == GraphNodeKind.GIVEN_VALUE
-            and node.metadata.get("value_type") == "formula"
-        )
-    )
+    plan_body = {
+        "graph_hash": graph.graph_hash,
+        "source_result_hash": graph.source_result_hash,
+        "language": language,
+        "mode": ExplanationMode.CHECK_ONLY,
+        "segments": segments,
+        "rendering_version": EDUCATIONAL_RENDERING_VERSION,
+    }
+    plan = ExplanationPlan(**plan_body, plan_hash=content_hash(plan_body))
     body = {
         "graph_hash": graph.graph_hash,
         "source_result_hash": graph.source_result_hash,
         "language": language,
-        "mode": mode,
+        "mode": ExplanationMode.CHECK_ONLY,
+        "text": "\n".join(lines),
+        "numeric_node_ids": (),
+        "formula_node_ids": (),
+        "source_node_ids": (),
+        "rendering_version": EDUCATIONAL_RENDERING_VERSION,
+        "plan_hash": plan.plan_hash,
+    }
+    return ExplanationArtifact(**body, explanation_hash=content_hash(body))
+
+
+def render_explanation_plan(
+    plan: ExplanationPlan, graph: EducationalDerivationGraph
+) -> ExplanationArtifact:
+    verify_explanation_plan(plan, graph)
+    text = _render_plan_text(plan, graph)
+    nodes = {node.node_id: node for node in graph.nodes}
+    selected_ids = tuple(
+        node_id for segment in plan.segments for node_id in segment.node_ids
+    )
+    numeric = tuple(
+        node_id
+        for node_id in selected_ids
+        if node_id in nodes and _has_numeric_output(nodes[node_id].exact_output)
+    )
+    formulas = tuple(
+        node_id
+        for node_id in selected_ids
+        if node_id in nodes
+        and (
+            nodes[node_id].kind == GraphNodeKind.FORMULA_PARSE
+            or nodes[node_id].metadata.get("value_type") == "formula"
+        )
+    )
+    sources = tuple(
+        node_id
+        for node_id in selected_ids
+        if node_id in nodes and nodes[node_id].kind == GraphNodeKind.SOURCE_REFERENCE
+    )
+    body = {
+        "graph_hash": graph.graph_hash,
+        "source_result_hash": graph.source_result_hash,
+        "language": plan.language,
+        "mode": plan.mode,
         "text": text,
         "numeric_node_ids": numeric,
         "formula_node_ids": formulas,
-        "source_node_ids": tuple(node.node_id for node in source_nodes),
+        "source_node_ids": sources,
         "rendering_version": EDUCATIONAL_RENDERING_VERSION,
+        "plan_hash": plan.plan_hash,
     }
     artifact = ExplanationArtifact(**body, explanation_hash=content_hash(body))
-    verify_explanation(artifact, graph)
+    verify_explanation(artifact, graph, plan=plan)
     return artifact
 
 
+def verify_explanation_plan(
+    plan: ExplanationPlan, graph: EducationalDerivationGraph
+) -> None:
+    body = asdict(plan)
+    digest = body.pop("plan_hash")
+    if content_hash(body) != digest:
+        raise ValueError("explanation plan hash mismatch")
+    if (
+        plan.graph_hash != graph.graph_hash
+        or plan.source_result_hash != graph.source_result_hash
+        or plan.rendering_version != EDUCATIONAL_RENDERING_VERSION
+    ):
+        raise ValueError("explanation plan dependency mismatch")
+    nodes = {node.node_id: node for node in graph.nodes}
+    seen_graph_reference = False
+    ordered = {node.node_id: index for index, node in enumerate(graph.nodes)}
+    previous_index = -1
+    for segment in plan.segments:
+        _verify_segment_hash(segment)
+        if any(node_id not in nodes for node_id in segment.node_ids):
+            raise ValueError("explanation plan references an unknown node")
+        if segment.kind == ExplanationSegmentKind.GRAPH_REFERENCE:
+            seen_graph_reference = True
+        for node_id in segment.node_ids:
+            node = nodes[node_id]
+            if not _compatible(segment.kind, node.kind):
+                raise ValueError("explanation segment/node type mismatch")
+            index = ordered[node_id]
+            if node.kind not in {GraphNodeKind.SOURCE_REFERENCE, GraphNodeKind.WARNING}:
+                if index < previous_index:
+                    raise ValueError("explanation plan violates graph order")
+                previous_index = index
+    if not seen_graph_reference:
+        raise ValueError("explanation plan lacks its graph reference")
+
+
 def verify_explanation(
-    artifact: ExplanationArtifact, graph: EducationalDerivationGraph
+    artifact: ExplanationArtifact,
+    graph: EducationalDerivationGraph,
+    *,
+    plan: ExplanationPlan | None = None,
 ) -> None:
     body = asdict(artifact)
     digest = body.pop("explanation_hash")
     if content_hash(body) != digest:
         raise ValueError("explanation hash mismatch")
-    if (
-        artifact.graph_hash != graph.graph_hash
-        or artifact.source_result_hash != graph.source_result_hash
-    ):
-        raise ValueError("explanation is bound to another graph")
-    nodes = {node.node_id: node for node in graph.nodes}
-    referenced = set(
-        artifact.numeric_node_ids + artifact.formula_node_ids + artifact.source_node_ids
-    )
-    if not referenced <= set(nodes):
-        raise ValueError("explanation references an unknown node")
-    for node_id in artifact.numeric_node_ids:
+    if artifact.mode in {ExplanationMode.CHECK_ONLY, ExplanationMode.HINT_ONLY}:
+        if plan is not None:
+            raise ValueError("dedicated explanation modes cannot use a graph plan")
         if (
-            str(nodes[node_id].exact_output) not in artifact.text
-            and str(nodes[node_id].display_output or "") not in artifact.text
+            artifact.numeric_node_ids
+            or artifact.formula_node_ids
+            or artifact.source_node_ids
         ):
-            raise ValueError("explanation numeric mapping is missing")
-    for node_id in artifact.formula_node_ids:
-        if str(nodes[node_id].exact_output) not in artifact.text:
-            raise ValueError("explanation formula mapping is missing")
-    for node_id in artifact.source_node_ids:
-        if str(nodes[node_id].exact_output) not in artifact.text:
-            raise ValueError("explanation citation is missing")
-    root = nodes[graph.root_result_node_id]
-    if artifact.mode not in {ExplanationMode.CHECK_ONLY, ExplanationMode.HINT_ONLY}:
-        rendered = root.display_output or str(root.exact_output)
-        if rendered not in artifact.text:
-            raise ValueError("explanation final result is missing")
-
-
-def _selected_nodes(graph: EducationalDerivationGraph, mode: ExplanationMode):
-    nodes = tuple(
-        node for node in graph.nodes if node.kind != GraphNodeKind.SOURCE_REFERENCE
+            raise ValueError("dedicated explanation mode leaks graph values")
+        return
+    expected_plan = plan or build_explanation_plan(
+        graph, language=artifact.language, mode=artifact.mode
     )
-    root = next(node for node in nodes if node.node_id == graph.root_result_node_id)
-    if mode == ExplanationMode.CONCISE:
-        important = {
-            GraphNodeKind.GIVEN_VALUE,
-            GraphNodeKind.FORMULA_PARSE,
-            GraphNodeKind.MOLE_RELATION,
-            GraphNodeKind.AVOGADRO_RELATION,
-            GraphNodeKind.FINAL_RESULT,
-            GraphNodeKind.WARNING,
-        }
-        return tuple(node for node in nodes if node.kind in important)
-    if mode == ExplanationMode.CHECK_ONLY:
-        return (root,)
-    if mode == ExplanationMode.HINT_ONLY:
-        return tuple(
-            node
-            for node in nodes
-            if node.kind
-            not in {GraphNodeKind.FINAL_RESULT, GraphNodeKind.ROUND_DISPLAY}
-        )[:1]
-    return nodes
+    verify_explanation_plan(expected_plan, graph)
+    if artifact.plan_hash != expected_plan.plan_hash:
+        raise ValueError("explanation references another plan")
+    if artifact.text != _render_plan_text(expected_plan, graph):
+        raise ValueError("trusted explanation contains unsupported content")
+    nodes = {node.node_id: node for node in graph.nodes}
+    selected_ids = tuple(
+        node_id for segment in expected_plan.segments for node_id in segment.node_ids
+    )
+    expected_numeric = tuple(
+        node_id
+        for node_id in selected_ids
+        if node_id in nodes and _has_numeric_output(nodes[node_id].exact_output)
+    )
+    expected_formulas = tuple(
+        node_id
+        for node_id in selected_ids
+        if node_id in nodes
+        and (
+            nodes[node_id].kind == GraphNodeKind.FORMULA_PARSE
+            or nodes[node_id].metadata.get("value_type") == "formula"
+        )
+    )
+    expected_sources = tuple(
+        node_id
+        for node_id in selected_ids
+        if node_id in nodes and nodes[node_id].kind == GraphNodeKind.SOURCE_REFERENCE
+    )
+    if (
+        artifact.numeric_node_ids != expected_numeric
+        or artifact.formula_node_ids != expected_formulas
+        or artifact.source_node_ids != expected_sources
+    ):
+        raise ValueError("trusted explanation mappings are not reproducible")
+
+
+def _segment(
+    kind: ExplanationSegmentKind,
+    *node_ids: str,
+    permitted_fields: tuple[str, ...] = (
+        "label",
+        "operation",
+        "exact_inputs",
+        "exact_output",
+        "unit",
+        "display_output",
+    ),
+) -> ExplanationSegment:
+    body = {
+        "kind": kind,
+        "node_ids": tuple(node_ids),
+        "permitted_fields": permitted_fields,
+    }
+    return ExplanationSegment(**body, segment_hash=content_hash(body))
+
+
+def _verify_segment_hash(segment: ExplanationSegment) -> None:
+    body = asdict(segment)
+    digest = body.pop("segment_hash")
+    if content_hash(body) != digest:
+        raise ValueError("explanation segment hash mismatch")
+
+
+def _render_plan_text(plan: ExplanationPlan, graph: EducationalDerivationGraph) -> str:
+    nodes = {node.node_id: node for node in graph.nodes}
+    lines = []
+    for segment in plan.segments:
+        if segment.kind == ExplanationSegmentKind.HEADING:
+            prefix = (
+                "Проверенное объяснение"
+                if plan.language == "ru"
+                else "Verified explanation"
+            )
+            lines.append(f"{prefix}: {plan.mode.value}")
+        elif segment.kind == ExplanationSegmentKind.GRAPH_REFERENCE:
+            graph_label = "Граф" if plan.language == "ru" else "Graph"
+            result_label = "Результат" if plan.language == "ru" else "Result"
+            lines.extend(
+                (
+                    f"{graph_label}: {graph.graph_hash}",
+                    f"{result_label}: {graph.source_result_hash}",
+                )
+            )
+        else:
+            lines.extend(
+                _render_node(nodes[node_id], plan.language)
+                for node_id in segment.node_ids
+            )
+    return "\n".join(lines)
 
 
 def _render_node(node, language: str) -> str:
@@ -153,6 +334,49 @@ def _render_node(node, language: str) -> str:
         inputs = ", ".join(node.exact_inputs)
         return f"[{node.node_id}] {label}: {node.operation}({inputs}) = {output}{unit}."
     return f"[{node.node_id}] {label}: {output}{unit}."
+
+
+def _selected_nodes(graph: EducationalDerivationGraph, mode: ExplanationMode):
+    nodes = tuple(
+        node for node in graph.nodes if node.kind != GraphNodeKind.SOURCE_REFERENCE
+    )
+    if mode == ExplanationMode.CONCISE:
+        important = {
+            GraphNodeKind.GIVEN_VALUE,
+            GraphNodeKind.FORMULA_PARSE,
+            GraphNodeKind.MOLE_RELATION,
+            GraphNodeKind.AVOGADRO_RELATION,
+            GraphNodeKind.FINAL_RESULT,
+            GraphNodeKind.WARNING,
+        }
+        return tuple(node for node in nodes if node.kind in important)
+    return nodes
+
+
+def _segment_kind(kind: GraphNodeKind) -> ExplanationSegmentKind:
+    mapping = {
+        GraphNodeKind.GIVEN_VALUE: ExplanationSegmentKind.GIVEN,
+        GraphNodeKind.FACT_LOOKUP: ExplanationSegmentKind.FACT,
+        GraphNodeKind.ATOMIC_WEIGHT_LOOKUP: ExplanationSegmentKind.FACT,
+        GraphNodeKind.FORMULA_PARSE: ExplanationSegmentKind.FORMULA,
+        GraphNodeKind.FORMULA_COMPOSITION: ExplanationSegmentKind.INTERMEDIATE_RESULT,
+        GraphNodeKind.ROUND_DISPLAY: ExplanationSegmentKind.ROUNDING,
+        GraphNodeKind.FINAL_RESULT: ExplanationSegmentKind.FINAL_RESULT,
+        GraphNodeKind.WARNING: ExplanationSegmentKind.WARNING,
+    }
+    return mapping.get(kind, ExplanationSegmentKind.OPERATION)
+
+
+def _compatible(segment: ExplanationSegmentKind, node: GraphNodeKind) -> bool:
+    if segment in {
+        ExplanationSegmentKind.GRAPH_REFERENCE,
+        ExplanationSegmentKind.HEADING,
+    }:
+        return True
+    return _segment_kind(node) == segment or (
+        segment == ExplanationSegmentKind.SOURCE_CITATION
+        and node == GraphNodeKind.SOURCE_REFERENCE
+    )
 
 
 def _value_text(value) -> str:
@@ -175,11 +399,6 @@ def _has_numeric_output(value) -> bool:
     )
 
 
-def _heading(language: str, mode: ExplanationMode) -> str:
-    prefix = "Проверенное объяснение" if language == "ru" else "Verified explanation"
-    return f"{prefix}: {mode.value}"
-
-
 _NODE_LABELS = {
     "ru": {
         GraphNodeKind.GIVEN_VALUE: "Дано",
@@ -196,6 +415,7 @@ _NODE_LABELS = {
         GraphNodeKind.ROUND_DISPLAY: "Округление для отображения",
         GraphNodeKind.FINAL_RESULT: "Ответ",
         GraphNodeKind.WARNING: "Предупреждение",
+        GraphNodeKind.SOURCE_REFERENCE: "Источник",
     },
     "en": {
         GraphNodeKind.GIVEN_VALUE: "Given",
@@ -212,5 +432,6 @@ _NODE_LABELS = {
         GraphNodeKind.ROUND_DISPLAY: "Display rounding",
         GraphNodeKind.FINAL_RESULT: "Answer",
         GraphNodeKind.WARNING: "Warning",
+        GraphNodeKind.SOURCE_REFERENCE: "Source",
     },
 }

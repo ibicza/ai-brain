@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from ai_brain.stage2.education.explanations import render_explanation
 from ai_brain.stage2.education.graph_validation import verify_derivation_graph
+from ai_brain.stage2.education.hint_validation import verify_hint_no_answer_leakage
 from ai_brain.stage2.education.models import (
     EducationalDerivationGraph,
     ErrorDiagnosis,
@@ -12,9 +13,25 @@ from ai_brain.stage2.education.models import (
     HintArtifact,
     HintLevel,
     HintPlan,
+    MisconceptionCode,
 )
 from ai_brain.stage2.education.version import HINT_POLICY_VERSION
 from ai_brain.stage2.facts.canonical import content_hash
+
+GENERIC_ONLY = "GENERIC_ONLY"
+TARGETED_HINT_STRATEGIES = {
+    code: (
+        GENERIC_ONLY
+        if code
+        in {
+            MisconceptionCode.UNCLASSIFIED_ERROR,
+            MisconceptionCode.AMBIGUOUS_DIAGNOSIS,
+            MisconceptionCode.ARITHMETIC_ERROR,
+        }
+        else f"TARGET_{code.value}"
+    )
+    for code in MisconceptionCode
+}
 
 
 def build_hint_plan(exercise_id: str, graph: EducationalDerivationGraph) -> HintPlan:
@@ -48,6 +65,9 @@ def render_hint(
         node for node in graph.nodes if node.node_id == graph.root_result_node_id
     )
     diagnosis_codes = tuple(item.code for item in diagnoses)
+    targeted_codes = tuple(
+        item.code for item in diagnoses if item.confidence.value == "EXACT_MATCH"
+    )
     if level == HintLevel.FULL_SOLUTION:
         text = render_explanation(
             graph, language=language, mode=ExplanationMode.FULL
@@ -55,11 +75,9 @@ def render_hint(
         revealed = plan.node_order
         final_revealed = True
     else:
-        text, revealed = _bounded_hint(graph, level, language, diagnosis_codes)
+        text, revealed = _bounded_hint(graph, level, language, targeted_codes)
         final_revealed = False
-        forbidden = {str(root.exact_output), str(root.display_output or "")}
-        if any(value and value in text for value in forbidden):
-            raise ValueError("early hint leaks the final answer")
+        verify_hint_no_answer_leakage(text, root)
     body = {
         "exercise_id": plan.exercise_id,
         "graph_hash": graph.graph_hash,
@@ -95,13 +113,14 @@ def _bounded_hint(graph, level, language, diagnosis_codes):
             else "Identify the quantity type and the required chemistry relation."
         ), ()
     if level == HintLevel.NEXT_STEP:
+        operation = target.operation or target.kind.value
         return (
-            "Следующий шаг" if language == "ru" else "Next step"
-        ) + f": {target.kind.value}.", ()
+            "Следующий проверенный шаг" if language == "ru" else "Next verified step"
+        ) + f": {operation} — {target.label}.", ()
     if level == HintLevel.SUBSTITUTION:
         return (
-            "Используй входы узлов" if language == "ru" else "Use inputs from nodes"
-        ) + ": " + ", ".join(target.input_node_ids) + ".", tuple(target.input_node_ids)
+            "Подставь значения" if language == "ru" else "Substitute the values"
+        ) + ": " + ", ".join(target.exact_inputs) + ".", tuple(target.input_node_ids)
     safe = next(
         (
             node
@@ -147,5 +166,15 @@ def _targeted_text(language, codes):
             "Для фиксированной массы проверь, как молярная масса входит в n = m/M."
             if language == "ru"
             else "For fixed mass, check how molar mass appears in n = m/M."
+        )
+    targeted = next(
+        (code for code in codes if TARGETED_HINT_STRATEGIES[code] != GENERIC_ONLY),
+        None,
+    )
+    if targeted is not None:
+        return (
+            f"Проверь шаг, связанный с категорией {targeted.value}."
+            if language == "ru"
+            else f"Recheck the step associated with {targeted.value}."
         )
     return ""

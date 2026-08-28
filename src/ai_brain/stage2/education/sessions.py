@@ -25,6 +25,38 @@ EVENT_TYPES = frozenset(
     }
 )
 
+ALLOWED_EVENT_STATES = {
+    "ANSWER_SUBMITTED": frozenset(
+        {
+            TutorSessionStatus.PRESENTED,
+            TutorSessionStatus.ATTEMPTED,
+            TutorSessionStatus.HINTED,
+        }
+    ),
+    "ANSWER_GRADED": frozenset({TutorSessionStatus.ATTEMPTED}),
+    "HINT_ISSUED": frozenset(
+        {
+            TutorSessionStatus.PRESENTED,
+            TutorSessionStatus.ATTEMPTED,
+            TutorSessionStatus.HINTED,
+        }
+    ),
+    "SOLUTION_REVEALED": frozenset(
+        {
+            TutorSessionStatus.ATTEMPTED,
+            TutorSessionStatus.HINTED,
+            TutorSessionStatus.SOLVED,
+        }
+    ),
+    "SESSION_ABANDONED": frozenset(
+        {
+            TutorSessionStatus.PRESENTED,
+            TutorSessionStatus.ATTEMPTED,
+            TutorSessionStatus.HINTED,
+        }
+    ),
+}
+
 
 def start_session(
     instance: ExerciseInstance,
@@ -89,11 +121,15 @@ def make_event(
 
 def apply_event(session: TutorSession, event: TutorEvent) -> TutorSession:
     verify_session_hash(session)
+    verify_event_hash(event)
     if (
         event.session_id != session.session_id
         or event.previous_event_hash != session.last_event_hash
     ):
         raise ValueError("tutor event chain mismatch")
+    allowed = ALLOWED_EVENT_STATES.get(event.event_type)
+    if allowed is None or session.status not in allowed:
+        raise ValueError("invalid tutor session state transition")
     attempts = session.attempt_hashes
     grades = session.grading_result_hashes
     hints = session.hint_hashes
@@ -102,6 +138,8 @@ def apply_event(session: TutorSession, event: TutorEvent) -> TutorSession:
         attempts = (*attempts, _required_hash(event.payload, "student_answer_hash"))
         status = TutorSessionStatus.ATTEMPTED
     elif event.event_type == "ANSWER_GRADED":
+        if len(grades) >= len(attempts):
+            raise ValueError("duplicate or unordered answer grade")
         grades = (*grades, _required_hash(event.payload, "grading_result_hash"))
         if event.payload.get("solved") is True:
             status = TutorSessionStatus.SOLVED
@@ -134,6 +172,15 @@ def verify_session_hash(session: TutorSession) -> None:
         raise ValueError("tutor session hash mismatch")
     if session.schema_version != TUTOR_SESSION_SCHEMA_VERSION:
         raise ValueError("incompatible tutor session schema")
+
+
+def verify_event_hash(event: TutorEvent) -> None:
+    body = asdict(event)
+    digest = body.pop("event_hash")
+    if content_hash(body) != digest:
+        raise ValueError("tutor event hash mismatch")
+    if event.event_type not in EVENT_TYPES or event.sequence < 1:
+        raise ValueError("invalid tutor event")
 
 
 def _required_hash(payload: dict[str, Any], key: str) -> str:

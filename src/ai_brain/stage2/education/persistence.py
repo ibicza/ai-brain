@@ -10,8 +10,13 @@ from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
 
+from ai_brain.stage2.education.artifact_registry import reconstruct_and_validate
 from ai_brain.stage2.education.serialization import event_from_dict, session_from_dict
-from ai_brain.stage2.education.sessions import verify_session_hash
+from ai_brain.stage2.education.sessions import (
+    apply_event,
+    verify_event_hash,
+    verify_session_hash,
+)
 from ai_brain.stage2.education.version import SESSION_STORE_SCHEMA_VERSION
 from ai_brain.stage2.facts.canonical import (
     bytes_hash,
@@ -97,7 +102,8 @@ class EducationalSessionStore:
     def save_artifact(self, kind: str, artifact_hash: str, value: Any) -> None:
         if not kind or not _is_hash(artifact_hash):
             raise ValueError("invalid educational artifact identity")
-        payload = canonical_json(asdict(value) if is_dataclass(value) else value)
+        typed = reconstruct_and_validate(kind, artifact_hash, value)
+        payload = canonical_json(asdict(typed) if is_dataclass(typed) else typed)
         digest = bytes_hash(payload.encode("utf-8"))
         with self._connection() as connection:
             existing = connection.execute(
@@ -115,7 +121,7 @@ class EducationalSessionStore:
                 (artifact_hash, kind, payload, digest, utc_now()),
             )
 
-    def get_artifact(self, artifact_hash: str, *, expected_kind: str) -> dict[str, Any]:
+    def get_artifact(self, artifact_hash: str, *, expected_kind: str) -> Any:
         with self._connection() as connection:
             row = connection.execute(
                 "SELECT artifact_kind,payload,payload_hash FROM artifacts WHERE artifact_hash=?",
@@ -132,9 +138,25 @@ class EducationalSessionStore:
             raise EducationalStoreIntegrityError(
                 "educational artifact payload is not an object"
             )
-        return value
+        try:
+            return reconstruct_and_validate(expected_kind, artifact_hash, value)
+        except (TypeError, ValueError) as error:
+            raise EducationalStoreIntegrityError(str(error)) from error
 
     def create_session(self, session: Any, presented_event: Any) -> None:
+        verify_session_hash(session)
+        verify_event_hash(presented_event)
+        if (
+            presented_event.event_type != "SESSION_PRESENTED"
+            or presented_event.sequence != 1
+            or presented_event.previous_event_hash is not None
+            or presented_event.event_hash != session.last_event_hash
+        ):
+            raise EducationalStoreIntegrityError("invalid session presentation event")
+        self.get_artifact(
+            session.exercise_hash, expected_kind="exercise_instance_internal"
+        )
+        self.get_artifact(session.graph_hash, expected_kind="derivation_graph")
         session_payload = canonical_json(asdict(session))
         event_payload = canonical_json(asdict(presented_event))
         with self._connection() as connection:
@@ -164,6 +186,12 @@ class EducationalSessionStore:
             )
 
     def append_event(self, old_session: Any, new_session: Any, event: Any) -> None:
+        verify_session_hash(old_session)
+        verify_session_hash(new_session)
+        verify_event_hash(event)
+        if apply_event(old_session, event) != new_session:
+            raise EducationalStoreIntegrityError("event/session transition mismatch")
+        self._verify_event_artifacts(old_session, event)
         with self._connection() as connection:
             row = connection.execute(
                 "SELECT session_hash FROM sessions WHERE session_id=?",
@@ -230,19 +258,29 @@ class EducationalSessionStore:
         with self._connection() as connection:
             integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
             artifacts = connection.execute(
-                "SELECT artifact_hash,payload,payload_hash FROM artifacts"
+                "SELECT artifact_hash,artifact_kind,payload,payload_hash FROM artifacts"
             ).fetchall()
             sessions = connection.execute("SELECT session_id FROM sessions").fetchall()
         if integrity != "ok":
             raise EducationalStoreIntegrityError("SQLite integrity check failed")
-        for _, payload, digest in artifacts:
+        artifact_index: dict[tuple[str, str], Any] = {}
+        for artifact_hash, kind, payload, digest in artifacts:
             if bytes_hash(payload.encode("utf-8")) != digest:
                 raise EducationalStoreIntegrityError("artifact checksum mismatch")
+            try:
+                typed = reconstruct_and_validate(
+                    kind, artifact_hash, json.loads(payload)
+                )
+            except (TypeError, ValueError) as error:
+                raise EducationalStoreIntegrityError(str(error)) from error
+            artifact_index[(artifact_hash, kind)] = typed
+        self._verify_cross_artifact_relations(artifact_index)
         event_count = 0
         for (session_id,) in sessions:
             session = self.get_session(session_id)
             events = self.events(session_id)
             previous = None
+            rebuilt = None
             for sequence, event in enumerate(events, start=1):
                 body = asdict(event)
                 digest = body.pop("event_hash")
@@ -253,8 +291,40 @@ class EducationalSessionStore:
                 ):
                     raise EducationalStoreIntegrityError("tutor event chain is invalid")
                 previous = event.event_hash
+                if sequence == 1:
+                    if (
+                        event.event_type != "SESSION_PRESENTED"
+                        or event.payload.get("exercise_id") != session.exercise_id
+                        or event.payload.get("exercise_hash") != session.exercise_hash
+                    ):
+                        raise EducationalStoreIntegrityError(
+                            "session does not start with presentation"
+                        )
+                    rebuilt = session_from_dict(
+                        {
+                            **asdict(session),
+                            "attempt_hashes": [],
+                            "grading_result_hashes": [],
+                            "hint_hashes": [],
+                            "status": "PRESENTED",
+                            "updated_at": event.created_at,
+                            "last_event_hash": event.event_hash,
+                            "session_hash": "",
+                        }
+                    )
+                    body = asdict(rebuilt)
+                    body.pop("session_hash")
+                    rebuilt = session_from_dict(
+                        {**body, "session_hash": content_hash(body)}
+                    )
+                else:
+                    assert rebuilt is not None
+                    self._verify_event_artifacts(rebuilt, event)
+                    rebuilt = apply_event(rebuilt, event)
             if not events or previous != session.last_event_hash:
                 raise EducationalStoreIntegrityError("session/event head mismatch")
+            if rebuilt != session:
+                raise EducationalStoreIntegrityError("event/session replay mismatch")
             event_count += len(events)
         return {
             "status": "VERIFIED",
@@ -263,6 +333,138 @@ class EducationalSessionStore:
             "event_count": event_count,
             "schema_version": SESSION_STORE_SCHEMA_VERSION,
         }
+
+    def _verify_event_artifacts(self, session: Any, event: Any) -> None:
+        if event.event_type == "ANSWER_SUBMITTED":
+            self.get_artifact(
+                event.payload.get("student_answer_hash", ""),
+                expected_kind="student_answer",
+            )
+        elif event.event_type == "ANSWER_GRADED":
+            grade = self.get_artifact(
+                event.payload.get("grading_result_hash", ""),
+                expected_kind="grading_result",
+            )
+            if grade.exercise_id != session.exercise_id or not session.attempt_hashes:
+                raise EducationalStoreIntegrityError(
+                    "grading event references another attempt/exercise"
+                )
+            if grade.student_answer_hash != session.attempt_hashes[-1]:
+                raise EducationalStoreIntegrityError(
+                    "grading event references another student answer"
+                )
+        elif event.event_type == "HINT_ISSUED":
+            hint = self.get_artifact(
+                event.payload.get("hint_hash", ""), expected_kind="hint"
+            )
+            if (
+                hint.exercise_id != session.exercise_id
+                or hint.graph_hash != session.graph_hash
+            ):
+                raise EducationalStoreIntegrityError(
+                    "hint event references another exercise/graph"
+                )
+        elif event.event_type == "SOLUTION_REVEALED":
+            explanation = self.get_artifact(
+                event.payload.get("explanation_hash", ""),
+                expected_kind="explanation",
+            )
+            if explanation.graph_hash != session.graph_hash:
+                raise EducationalStoreIntegrityError(
+                    "solution event references another graph"
+                )
+
+    def _verify_cross_artifact_relations(
+        self, artifacts: dict[tuple[str, str], Any]
+    ) -> None:
+        from ai_brain.stage2.education.exercise_generation import (
+            verify_exercise_instance,
+            verify_presented_exercise,
+        )
+        from ai_brain.stage2.education.explanations import (
+            verify_explanation,
+            verify_explanation_plan,
+        )
+
+        internal_instances = {
+            value.instance_id: value
+            for (digest, kind), value in artifacts.items()
+            if kind == "exercise_instance_internal"
+        }
+        graphs = {
+            digest: value
+            for (digest, kind), value in artifacts.items()
+            if kind == "derivation_graph"
+        }
+        for instance in internal_instances.values():
+            try:
+                spec = artifacts[(instance.exercise_spec_hash, "exercise_spec")]
+                graph = graphs[instance.hidden_answer_graph_hash]
+                receipt = artifacts[
+                    (instance.compilation_receipt_hash, "compilation_receipt")
+                ]
+                source = artifacts[(graph.source_result_hash, "source_result")]
+            except KeyError as error:
+                raise EducationalStoreIntegrityError(
+                    "orphaned internal exercise artifact reference"
+                ) from error
+            verify_exercise_instance(instance, spec, graph)
+            if (
+                receipt.educational_graph_hash != graph.graph_hash
+                or receipt.exact_result_hash != graph.source_result_hash
+                or canonical_json(source)
+                != canonical_json(graph.source_result_artifact)
+            ):
+                raise EducationalStoreIntegrityError(
+                    "exercise compilation/source relation mismatch"
+                )
+        for (_, kind), value in artifacts.items():
+            if kind == "presented_exercise":
+                verify_presented_exercise(value)
+                if value.exercise_id not in internal_instances:
+                    raise EducationalStoreIntegrityError(
+                        "presented exercise references no internal exercise"
+                    )
+            elif kind == "explanation_plan":
+                try:
+                    verify_explanation_plan(value, graphs[value.graph_hash])
+                except KeyError as error:
+                    raise EducationalStoreIntegrityError(
+                        "explanation plan references a missing graph"
+                    ) from error
+            elif kind == "explanation":
+                graph = graphs.get(value.graph_hash)
+                if graph is None:
+                    raise EducationalStoreIntegrityError(
+                        "explanation references a missing graph"
+                    )
+                if value.mode.value not in {"CHECK_ONLY", "HINT_ONLY"}:
+                    plan = artifacts.get((value.plan_hash, "explanation_plan"))
+                    if plan is None:
+                        raise EducationalStoreIntegrityError(
+                            "explanation references a missing plan"
+                        )
+                    verify_explanation(value, graph, plan=plan)
+            elif kind == "grading_result":
+                instance = internal_instances.get(value.exercise_id)
+                if (
+                    instance is None
+                    or value.exercise_hash != instance.instance_hash
+                    or (value.student_answer_hash, "student_answer") not in artifacts
+                    or value.answer_graph_hash != instance.hidden_answer_graph_hash
+                ):
+                    raise EducationalStoreIntegrityError(
+                        "grading result cross-artifact relation mismatch"
+                    )
+            elif kind == "hint":
+                instance = internal_instances.get(value.exercise_id)
+                if (
+                    instance is None
+                    or value.graph_hash != instance.hidden_answer_graph_hash
+                ):
+                    raise EducationalStoreIntegrityError(
+                        "hint cross-artifact relation mismatch"
+                    )
 
     def backup(self, target: Path) -> dict[str, Any]:
         resolved = target.resolve()

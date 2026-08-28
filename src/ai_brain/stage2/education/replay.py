@@ -1,25 +1,23 @@
-"""Current-dependency and event-chain replay for educational sessions."""
+"""Live factual/calculation replay for persisted educational sessions."""
 
 from __future__ import annotations
 
 from ai_brain.stage2.domains.chemistry.education.graph_adapter import (
     ChemistryEducationAdapter,
 )
+from ai_brain.stage2.domains.chemistry.models import ChemistryReplayStatus
+from ai_brain.stage2.domains.chemistry.replay import replay_chemistry_result
+from ai_brain.stage2.education.compilation_receipts import verify_compilation_receipt
 from ai_brain.stage2.education.exercise_generation import verify_exercise_instance
-from ai_brain.stage2.education.exercises import verify_exercise_spec
-from ai_brain.stage2.education.models import (
-    EducationalReplayStatus,
-    TutorSessionStatus,
-)
-from ai_brain.stage2.education.serialization import (
-    graph_from_dict,
-    instance_from_dict,
-    spec_from_dict,
-)
-from ai_brain.stage2.education.sessions import apply_event, start_session
+from ai_brain.stage2.education.models import EducationalReplayStatus
 from ai_brain.stage2.education.version import (
     GRADING_SCHEMA_VERSION,
     HINT_POLICY_VERSION,
+)
+from ai_brain.stage2.facts.models import (
+    ClaimStatus,
+    EvidenceConflictState,
+    SourceStatus,
 )
 
 
@@ -28,18 +26,17 @@ def replay_educational_session(
 ):
     try:
         stored = store.get_session(session_id)
-        instance = instance_from_dict(
-            store.get_artifact(stored.exercise_hash, expected_kind="exercise_instance")
+        instance = store.get_artifact(
+            stored.exercise_hash, expected_kind="exercise_instance_internal"
         )
-        spec = spec_from_dict(
-            store.get_artifact(
-                instance.exercise_spec_hash, expected_kind="exercise_spec"
-            )
+        spec = store.get_artifact(
+            instance.exercise_spec_hash, expected_kind="exercise_spec"
         )
-        graph = graph_from_dict(
-            store.get_artifact(stored.graph_hash, expected_kind="derivation_graph")
+        graph = store.get_artifact(stored.graph_hash, expected_kind="derivation_graph")
+        receipt = store.get_artifact(
+            instance.compilation_receipt_hash,
+            expected_kind="compilation_receipt",
         )
-        verify_exercise_spec(spec)
         verify_exercise_instance(instance, spec, graph)
     except (KeyError, TypeError, ValueError):
         return _status(EducationalReplayStatus.INVALID_SESSION, session_id)
@@ -50,14 +47,15 @@ def replay_educational_session(
         return _status(EducationalReplayStatus.STALE_FACT_MEMORY, session_id)
     if graph.source_chain_hash != manifest["source_chain_hash"]:
         return _status(EducationalReplayStatus.STALE_SOURCE_CHAIN, session_id)
-    if graph.tool_implementation_hash is not None:
-        current = {
-            value for _, value in adapter.service.registry.current_manifest_hashes()
-        }
-        if graph.tool_implementation_hash not in current:
-            return _status(EducationalReplayStatus.STALE_TOOL, session_id)
-    if instance.exercise_spec_hash != spec.spec_hash:
-        return _status(EducationalReplayStatus.STALE_EXERCISE_SPEC, session_id)
+    try:
+        verify_compilation_receipt(
+            receipt, adapter.service, graph_hash=graph.graph_hash
+        )
+    except ValueError:
+        return _status(EducationalReplayStatus.STALE_COMPILATION_RECEIPT, session_id)
+    source_status = _replay_source(graph, adapter)
+    if source_status is not EducationalReplayStatus.CURRENT:
+        return _status(source_status, session_id)
     try:
         adapter.verify_graph(graph)
     except ValueError:
@@ -70,32 +68,92 @@ def replay_educational_session(
         return _status(EducationalReplayStatus.STALE_ANSWER_KEY, session_id)
     if "element_counts" in expected and root.exact_output != expected["element_counts"]:
         return _status(EducationalReplayStatus.STALE_ANSWER_KEY, session_id)
-    if GRADING_SCHEMA_VERSION != 1:
+    if {"lower", "upper"} <= expected.keys() and root.exact_output != {
+        "lower": expected["lower"],
+        "upper": expected["upper"],
+    }:
+        return _status(EducationalReplayStatus.STALE_ANSWER_KEY, session_id)
+    if GRADING_SCHEMA_VERSION != 2:
         return _status(EducationalReplayStatus.STALE_GRADING_POLICY, session_id)
-    if HINT_POLICY_VERSION != "1.0":
+    if HINT_POLICY_VERSION != "2.0":
         return _status(EducationalReplayStatus.STALE_HINT_POLICY, session_id)
     events = store.events(session_id)
-    if not events:
-        return _status(EducationalReplayStatus.INVALID_SESSION, session_id)
-    rebuilt, presented = start_session(
-        instance, session_id=session_id, created_at=events[0].created_at
-    )
-    if presented != events[0]:
+    if not events or events[0].event_type != "SESSION_PRESENTED":
         return _status(EducationalReplayStatus.INVALID_SESSION, session_id)
     try:
-        for event in events[1:]:
-            rebuilt = apply_event(rebuilt, event)
+        # Store verification independently rebuilds from the presentation event.
+        store.verify()
     except ValueError:
-        return _status(EducationalReplayStatus.INVALID_SESSION, session_id)
-    if rebuilt != stored:
         return _status(EducationalReplayStatus.INVALID_SESSION, session_id)
     return {
         **_status(EducationalReplayStatus.CURRENT, session_id),
         "event_count": len(events),
-        "session_status": TutorSessionStatus(stored.status).value,
+        "session_status": stored.status.value,
         "graph_hash": graph.graph_hash,
         "exercise_hash": instance.instance_hash,
+        "live_source_replay": "CURRENT",
     }
+
+
+def _replay_source(graph, adapter) -> EducationalReplayStatus:
+    if graph.source_result_type.startswith("ChemistryResultBundle:"):
+        status = replay_chemistry_result(
+            graph.source_result_artifact,
+            adapter.service.memory,
+            adapter.service.manifest,
+        )
+        return _CHEMISTRY_STATUS_MAP.get(
+            status, EducationalReplayStatus.INVALID_SOURCE_RESULT
+        )
+    try:
+        evidence_hashes = set()
+        source_hashes = set()
+        for claim_id in graph.claim_ids:
+            state = adapter.service.memory.get_claim_state(claim_id)
+            if state.status in {ClaimStatus.RETRACTED, ClaimStatus.SUPERSEDED}:
+                return EducationalReplayStatus.STALE_CLAIM
+            if (
+                state.status not in {ClaimStatus.SUPPORTED, ClaimStatus.CORROBORATED}
+                or state.evidence_conflict_state == EvidenceConflictState.CONTESTED
+                or state.contradicting_evidence_ids
+            ):
+                return EducationalReplayStatus.STALE_CLAIM
+            for evidence_id in state.supporting_evidence_ids:
+                evidence = adapter.service.memory.verify_evidence(evidence_id)
+                evidence_hashes.add(evidence.evidence_hash)
+                source = adapter.service.memory.get_source_state(evidence.source_id)
+                if source.status != SourceStatus.ACTIVE:
+                    return EducationalReplayStatus.STALE_SOURCE
+                source_hashes.add(source.record.record_hash)
+        if not set(graph.evidence_hashes) <= evidence_hashes:
+            return EducationalReplayStatus.STALE_EVIDENCE
+        if not set(graph.source_hashes) <= source_hashes:
+            return EducationalReplayStatus.STALE_SOURCE
+    except (KeyError, TypeError, ValueError):
+        return EducationalReplayStatus.INVALID_SOURCE_RESULT
+    return EducationalReplayStatus.CURRENT
+
+
+_CHEMISTRY_STATUS_MAP = {
+    ChemistryReplayStatus.CURRENT: EducationalReplayStatus.CURRENT,
+    ChemistryReplayStatus.STALE_FACT_MEMORY: EducationalReplayStatus.STALE_FACT_MEMORY,
+    ChemistryReplayStatus.STALE_ELEMENT_CLAIM: EducationalReplayStatus.STALE_CLAIM,
+    ChemistryReplayStatus.RETRACTED_ELEMENT_CLAIM: EducationalReplayStatus.STALE_CLAIM,
+    ChemistryReplayStatus.SUPERSEDED_ELEMENT_CLAIM: EducationalReplayStatus.STALE_CLAIM,
+    ChemistryReplayStatus.CONFLICTING_ATOMIC_WEIGHT: EducationalReplayStatus.STALE_CLAIM,
+    ChemistryReplayStatus.CONTRADICTING_EVIDENCE: EducationalReplayStatus.STALE_EVIDENCE,
+    ChemistryReplayStatus.STALE_EVIDENCE: EducationalReplayStatus.STALE_EVIDENCE,
+    ChemistryReplayStatus.STALE_SOURCE: EducationalReplayStatus.STALE_SOURCE,
+    ChemistryReplayStatus.RETRACTED_SOURCE: EducationalReplayStatus.STALE_SOURCE,
+    ChemistryReplayStatus.RETRACTED_UPSTREAM_SOURCE: EducationalReplayStatus.STALE_UPSTREAM_SOURCE,
+    ChemistryReplayStatus.UNAVAILABLE_UPSTREAM_SOURCE: EducationalReplayStatus.STALE_UPSTREAM_SOURCE,
+    ChemistryReplayStatus.STALE_UPSTREAM_SOURCE: EducationalReplayStatus.STALE_UPSTREAM_SOURCE,
+    ChemistryReplayStatus.STALE_SOURCE_CHAIN: EducationalReplayStatus.STALE_SOURCE_CHAIN,
+    ChemistryReplayStatus.STALE_TOOL_IMPLEMENTATION: EducationalReplayStatus.STALE_TOOL,
+    ChemistryReplayStatus.STALE_ROUNDING_POLICY: EducationalReplayStatus.STALE_TOOL,
+    ChemistryReplayStatus.STALE_DOMAIN_MANIFEST: EducationalReplayStatus.STALE_DOMAIN,
+    ChemistryReplayStatus.INVALID_RESULT: EducationalReplayStatus.INVALID_SOURCE_RESULT,
+}
 
 
 def _status(status: EducationalReplayStatus, session_id: str):
