@@ -1,0 +1,60 @@
+date
+2026-08-28T15:12:41.2935229+03:00
+hostname
+ibicza
+pwd
+W:\toolbox_IDEA\programs\IdeaProjects\ai-brain
+git rev-parse HEAD
+bebc4d0d150646ac65142cd2e5dad2e049587a88
+git status --porcelain
+
+python --version
+Python 3.12.13
+uv --version
+uv 0.12.3 (507230998 2026-08-07 x86_64-pc-windows-msvc)
+=== RUFF FORMAT ===
+318 files already formatted
+=== RUFF CHECK ===
+All checks passed!
+=== FULL PYTEST ===
+........................................................................ [  9%]
+........................................................................ [ 19%]
+........................................................................ [ 29%]
+........................................................................ [ 38%]
+........................................................................ [ 48%]
+........................................................................ [ 58%]
+........................................................................ [ 68%]
+........................................................................ [ 77%]
+........................................................................ [ 87%]
+........................................................................ [ 97%]
+...................                                                      [100%]
+739 passed in 1255.38s (0:20:55)
+=== PRIOR TRUSTED REGRESSIONS M25-M29 ===
+........................................................................ [ 26%]
+........................................................................ [ 52%]
+........................................................................ [ 78%]
+..........................................................               [100%]
+274 passed in 1017.44s (0:16:57)
+=== OFFLINE CATALOG COMPILATION ===
+{"catalog_hash":"d89d7fa31475430b68c6be44cb7c57a86cf6a5a68fecd2ab8258ecb3d23c1f83","compilation_receipt_count":2000,"distinct_graphs":2000,"distinct_semantic_keys":2000,"elapsed_seconds":"184.038459","entry_count":2000,"receipt_bound_tool_execution_count":1900,"split_manifest_hashes":["6be60fdf8b1fd871ca1520f174794a8ac4e5bfe7acc61fafaacb649581cf79eb","1cb057558daa66cd2487115173c74ebe2377d39664ca7ce755e9b5c5f9a51c15","51c55bd114e987087d55a3f61c4a3708fd96cf86031850139e1f6bc86815dbaa","336c811cd04609138764fd8271fb567652e94b7b0108433d3412d742c3dd9721","639933f31ce203f6c0d9e91943f22bf2da8657381fb9666634c7cf26f6231956","765d6d35a305f950eaf0e02a7b1b6a40f25964f013f50a113053536741eed1c1","af78aaf66daa7a8f293ab01dca327657118fd9dd5e86043756da97090f57a51f","497cd8063bcd2faf27942332d240af38087a6c2d5c4bd21b941659f3dd245ec3"],"status":"COMPILED"}
+=== CATALOG BYTE IDENTITY ===
+trusted_catalog_sha256=6166b887f2ab434a5e68b90799c3f0b349e2c28dc78d2ad318392f35cda15cef
+rebuilt_catalog_sha256=6166b887f2ab434a5e68b90799c3f0b349e2c28dc78d2ad318392f35cda15cef
+audit_event_count=2000
+=== M291 ACCEPTANCE AND 10K PERFORMANCE ===
+{"output":"W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\runs\\m291_final_gate\\local_acceptance.json","performance_output":"W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\runs\\m291_final_gate\\local_performance.json","status":"PASS"}
+=== TUTOR CLI PRESENTATION ===
+{"difficulty":{"arithmetic_steps":6,"distinct_elements":2,"generator_version":"2.0","parentheses_depth":0,"question_length":58,"requires_unit_conversion":false},"exercise_id":"education.exercise.0d1dcb2567924d63e4903fea","language":"en","presentation_hash":"4bc6c5d1e9d2942913825c1087124f7c9d706767072d2f166af0b92a68862944","question":"Problem: Calculate the molar mass of formula CH4 in g/mol.","session_id":"local-exact-cli"}
+=== TUTOR CLI VERIFY ===
+{"catalog":{"catalog_hash":"d89d7fa31475430b68c6be44cb7c57a86cf6a5a68fecd2ab8258ecb3d23c1f83","distinct_semantic_keys":2000,"entry_count":2000,"status":"VERIFIED"},"domain":{"domain_manifest_hash":"3e9fc8331f76ec3b51a27fd87f4e003ee7025a4beb731247c5805f626509aeee","fact_memory":{"audit_event_count":3617,"blob_count":9,"status":"VALID"},"reproducible_content_hash":"4388e3c6b108e46af489dee071f8baa57aea0434d3459f899b1c576e0e6613e6","tool_registry_hash":"3f3958707090d50f76882eeb0964b44ee7af35868e4bddbad04d07f437a4c884"},"educational_store":{"artifact_count":6,"event_count":1,"schema_version":2,"session_count":1,"status":"VERIFIED"},"runtime_network":false,"status":"VERIFIED","trusted_imports_torch":false}
+=== TUTOR CLI BACKUP ===
+{"created_at":"2026-08-28T12:56:32.205688Z","database_file":"educational_sessions.sqlite3","database_sha256":"26547a5cbf6a507aa68f465bf0d26a52501b51a3165780606446d0c5f564625f","schema_version":2}
+=== TUTOR CLI RESTORE MOVED STORE ===
+{"artifact_count":6,"event_count":1,"schema_version":2,"session_count":1,"status":"VERIFIED"}
+=== FINAL HASH AND CLEANNESS ===
+catalog_sha256=6166b887f2ab434a5e68b90799c3f0b349e2c28dc78d2ad318392f35cda15cef
+fixture_sha256=b1453c5d280c10618b00237cc546ec0e52d4697c1e0f904c5d02b8581ab6f522
+head=bebc4d0d150646ac65142cd2e5dad2e049587a88
+status_begin
+status_end
+LOCAL_EXACT_H7_GATE=PASS

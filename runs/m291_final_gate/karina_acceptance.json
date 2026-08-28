@@ -1,0 +1,257 @@
+{
+  "artifacts": {
+    "full_store_verification": "VERIFIED",
+    "invalid_artifacts_accepted": 0,
+    "semantic_rejection_cases": 3
+  },
+  "authority": {
+    "confirmed_new_explanation_executions": 1,
+    "exercise_presentation_executions": 0,
+    "offline_compilation_receipt_count": 2000,
+    "offline_compilation_without_receipt": 0,
+    "precompiled_explanation_executions": 0,
+    "runtime_hidden_execution": 0,
+    "unconfirmed_new_explanation_executions": 0,
+    "unconfirmed_response_stage": "PREPARED"
+  },
+  "content_policy_added": false,
+  "controlled_routes": {
+    "tamper_cases": 2,
+    "tampered_receipts_accepted": 0
+  },
+  "diagnosis": {
+    "ambiguous_diagnosis_count": 15,
+    "confusion_matrix": {
+      "ELEMENT_COUNT_WRONG": {
+        "ELEMENT_COUNT_WRONG": 60
+      },
+      "FORMULA_ENTITY_ATOM_MULTIPLIER_MISSING": {
+        "FORMULA_ENTITY_ATOM_MULTIPLIER_MISSING": 3,
+        "TARGET_ELEMENT_MULTIPLIER_WRONG": 3
+      },
+      "GRAM_KILOGRAM_CONVERSION_ERROR": {
+        "GRAM_KILOGRAM_CONVERSION_ERROR": 60,
+        "MOL_MMOL_CONVERSION_ERROR": 60
+      },
+      "GROUP_MULTIPLIER_IGNORED": {
+        "ELEMENT_COUNT_WRONG": 60
+      },
+      "INTERVAL_COLLAPSED_TO_MIDPOINT": {
+        "INTERVAL_COLLAPSED_TO_MIDPOINT": 53
+      },
+      "MULTIPLY_INSTEAD_OF_DIVIDE": {
+        "MULTIPLY_INSTEAD_OF_DIVIDE": 1
+      },
+      "SUBSCRIPT_IGNORED": {
+        "SUBSCRIPT_IGNORED": 45
+      },
+      "TARGET_ELEMENT_MULTIPLIER_WRONG": {
+        "FORMULA_ENTITY_ATOM_MULTIPLIER_MISSING": 3
+      },
+      "UNIT_MISSING": {
+        "UNIT_MISSING": 60
+      },
+      "UNIT_WRONG_DIMENSION": {
+        "UNIT_WRONG_DIMENSION": 60
+      }
+    },
+    "exact_diagnosis_count": 342,
+    "fixture_count": 1200,
+    "grading_status_mismatch_count": 0,
+    "independently_tested_targeted_hints": 120,
+    "macro_precision": 0.8421052631578947,
+    "macro_recall": 0.2736842105263158,
+    "per_category": {
+      "ARITHMETIC_ERROR": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "ATOMIC_WEIGHT_WRONG": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "AVOGADRO_FACTOR_EXTRA": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "AVOGADRO_FACTOR_MISSING": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "ELEMENT_COUNT_WRONG": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "support": 60
+      },
+      "FORMULA_ENTITY_ATOM_MULTIPLIER_MISSING": {
+        "precision": 0.5,
+        "recall": 0.05,
+        "support": 60
+      },
+      "GRAM_KILOGRAM_CONVERSION_ERROR": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "support": 120
+      },
+      "GROUP_MULTIPLIER_IGNORED": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "INTERVAL_COLLAPSED_TO_MIDPOINT": {
+        "precision": 1.0,
+        "recall": 0.8833333333333333,
+        "support": 60
+      },
+      "MOLAR_MASS_SUM_WRONG": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "MOLAR_MASS_TERM_WRONG": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "MOL_MMOL_CONVERSION_ERROR": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "MULTIPLY_INSTEAD_OF_DIVIDE": {
+        "precision": 1.0,
+        "recall": 0.016666666666666666,
+        "support": 60
+      },
+      "ROUNDING_OUTSIDE_POLICY": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "SUBSCRIPT_IGNORED": {
+        "precision": 1.0,
+        "recall": 0.75,
+        "support": 60
+      },
+      "TARGET_ELEMENT_MULTIPLIER_WRONG": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "UNCLASSIFIED_ERROR": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "support": 60
+      },
+      "UNIT_MISSING": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 60
+      },
+      "UNIT_WRONG_DIMENSION": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 60
+      }
+    },
+    "unclassified_count": 732,
+    "wrong_confident_diagnosis": 0,
+    "wrong_targeted_hints": 0
+  },
+  "exercises": {
+    "distinct_graph_value_combinations": 2000,
+    "distinct_question_strings": 3932,
+    "distinct_semantic_keys": 2000,
+    "fake_holdout_intersections": 0,
+    "maximum_variants_per_semantic_key": 3,
+    "presented_instance_count": 5000
+  },
+  "explanation": {
+    "accepted_by_mutation_category": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0
+    },
+    "accepted_unsupported_additions": 0,
+    "check_only_expected_answer_leaks": 0,
+    "mutation_case_count": 1000
+  },
+  "graph": {
+    "accepted_by_category": {
+      "arity": 0,
+      "dimension": 0,
+      "exact_inputs": 0,
+      "interval": 0,
+      "node_value": 0,
+      "provenance": 0,
+      "rounding": 0,
+      "source_result": 0,
+      "unit": 0
+    },
+    "accepted_tampered_graphs": 0,
+    "cases_by_category": {
+      "arity": 222,
+      "dimension": 222,
+      "exact_inputs": 223,
+      "interval": 222,
+      "node_value": 223,
+      "provenance": 222,
+      "rounding": 222,
+      "source_result": 222,
+      "unit": 222
+    },
+    "interval_graph_cases": 9,
+    "invalid_interval_graphs_accepted": 0,
+    "mutation_case_count": 2000
+  },
+  "hints": {
+    "early_equivalent_answer_leaks": 0,
+    "independently_tested_targeted_hints": 120,
+    "strong_equivalence_cases": 100,
+    "wrong_targeted_hints": 0
+  },
+  "optional_neural_surface": "DISABLED_NOT_EVALUATED",
+  "public_boundary": {
+    "counterfactual_leaks": 0,
+    "hidden_answer_leaks": 0,
+    "hidden_graph_leaks": 0,
+    "serialization_api_cases": 1000,
+    "split_label_leaks": 0
+  },
+  "replay": {
+    "baseline_status": "CURRENT",
+    "cases_by_category": {
+      "claim": 16,
+      "domain": 17,
+      "fact_memory": 17,
+      "source": 16,
+      "source_chain": 17,
+      "tool": 17
+    },
+    "live_mutation_cases": 100,
+    "stale_reported_current": 0,
+    "wrong_stale_reason": 0
+  },
+  "sessions": {
+    "invalid_transitions_accepted": 0,
+    "transition_cases": 30,
+    "valid_transitions_rejected": 0
+  },
+  "status": "PASS",
+  "trusted_import_boundary": {
+    "network_imports": 0,
+    "scanned_python_files": 37,
+    "torch_imports": 0
+  }
+}

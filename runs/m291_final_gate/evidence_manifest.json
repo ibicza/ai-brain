@@ -1,0 +1,20 @@
+{
+  "branch": "exp/stage2-educational-integrity",
+  "catalog_semantic_hash": "d89d7fa31475430b68c6be44cb7c57a86cf6a5a68fecd2ab8258ecb3d23c1f83",
+  "catalog_sha256": "6166b887f2ab434a5e68b90799c3f0b349e2c28dc78d2ad318392f35cda15cef",
+  "evidence": {
+    "karina_acceptance.json": "37cefdd9406296acac8c4360100b774998e14cebe3c92c823b44ad4c4afe3b33",
+    "karina_compilation.json": "bc37079eedb93418532a4b8bb997c0ca100f8a5e4929468ce765126f780f4a55",
+    "karina_exact_sha.log": "010fa38ae8aec95894181be84fd91a529e4ef6643b1052b2afa25f7df8044d7b",
+    "karina_performance.json": "3ad74dc8763e1ab44c3ed27287deba597a543efd6270e6b6e0eaf904d9e9afe7",
+    "local_acceptance.json": "37cefdd9406296acac8c4360100b774998e14cebe3c92c823b44ad4c4afe3b33",
+    "local_compilation.json": "c0cd530db8327cbc6d554c093c1787c7a975229fca57f4622ff066792216a5cc",
+    "local_exact_sha.log": "2a4cc5750d13f072ae81128caf1286c684096ad4bc7e32105d75094e74197969",
+    "local_performance.json": "68c447367e957cc031dd88d4e2cd57d45714ad68e60e818b72fb172e4f3bfd5c"
+  },
+  "fixture_sha256": "b1453c5d280c10618b00237cc546ec0e52d4697c1e0f904c5d02b8581ab6f522",
+  "h7": "bebc4d0d150646ac65142cd2e5dad2e049587a88",
+  "karina_gate": "PASS",
+  "local_gate": "PASS",
+  "status": "PASS"
+}

@@ -1,0 +1,35 @@
+{
+  "elapsed_seconds": 55.33384830000068,
+  "interaction_count": 10000,
+  "interactions_per_second": 180.7212096614628,
+  "offline_compilation_included": false,
+  "precompiled_catalog_entry_count": 2000,
+  "precompiled_catalog_load_seconds": 14.172973500000808,
+  "runtime_chemistry_executions": 0,
+  "stage_counts": {
+    "explanation_plan": 1100,
+    "grading": 1100,
+    "graph_verification": 1100,
+    "hint_generation": 1100,
+    "independent_diagnosis": 1100,
+    "live_educational_replay": 100,
+    "presented_exercise": 1100,
+    "semantic_store_verification": 100,
+    "session_transition": 1000,
+    "student_answer_parsing": 1100,
+    "trusted_text_regeneration": 1100
+  },
+  "stage_seconds": {
+    "explanation_plan": 2.5734015999696567,
+    "grading": 1.1161613000258512,
+    "graph_verification": 2.2463263000681764,
+    "hint_generation": 1.9639121999753115,
+    "independent_diagnosis": 1.1260432000817673,
+    "live_educational_replay": 38.69239920000837,
+    "presented_exercise": 1.2391349999743397,
+    "semantic_store_verification": 2.5408039999674656,
+    "session_transition": 0.16204870001092786,
+    "student_answer_parsing": 0.10549730002821889,
+    "trusted_text_regeneration": 3.5469248999797856
+  }
+}
