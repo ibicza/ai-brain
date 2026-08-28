@@ -22,8 +22,10 @@ from ai_brain.stage2.facts.models import ActorIdentityType, SourceStatus
 
 
 @pytest.fixture(scope="session")
-def m282_pack() -> ChemistryDomainService:
-    return ChemistryDomainService.open(Path("artifacts/domains/chemistry/m282"))
+def m282_pack(tmp_path_factory) -> ChemistryDomainService:
+    target = tmp_path_factory.mktemp("m282-current") / "domain"
+    shutil.copytree(Path("artifacts/domains/chemistry/m29"), target)
+    return ChemistryDomainService.open(target)
 
 
 def _copy_service(
@@ -214,7 +216,5 @@ def test_ru_policy_retraction_only_blocks_ru_name(m282_pack, tmp_path) -> None:
 
 
 def test_v2_pack_is_explicitly_rejected() -> None:
-    with pytest.raises(
-        ValueError, match="REBUILD_REQUIRED_FROM_VERIFIED_SOURCE_CHAIN_V3"
-    ):
+    with pytest.raises(ValueError, match="REBUILD_REQUIRED_FROM_SOURCE_KIND_V4"):
         ChemistryDomainService.open(Path("artifacts/domains/chemistry/m281"))

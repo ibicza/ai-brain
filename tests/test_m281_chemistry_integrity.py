@@ -86,12 +86,12 @@ def _execute_water(service: ChemistryDomainService):
     return result.output, proposal
 
 
-def test_v3_manifest_and_source_chain(m281_pack) -> None:
-    assert m281_pack.manifest["domain_version"] == CHEMISTRY_DOMAIN_VERSION == "1.2.0"
+def test_v4_manifest_and_source_chain(m281_pack) -> None:
+    assert m281_pack.manifest["domain_version"] == CHEMISTRY_DOMAIN_VERSION == "1.3.0"
     assert (
         m281_pack.manifest["domain_schema_version"]
         == CHEMISTRY_DOMAIN_SCHEMA_VERSION
-        == 3
+        == 4
     )
     verification = verify_source_chain(m281_pack.root / "sources")
     assert verification["status"] == "VERIFIED"
@@ -144,7 +144,7 @@ def test_derived_sources_are_not_official_primary(m281_pack) -> None:
     chain = m281_pack.manifest["source_chain"]
     for row in chain["derived_extracts"]:
         state = m281_pack.memory.get_source_state(row["source_id"])
-        assert state.record.source_kind == SourceKind.DETERMINISTIC_DERIVED_EXTRACT
+        assert state.record.source_kind == SourceKind.DERIVED_EXTRACT
         assert (
             state.record.license_metadata["derivation_hash"]
             in m281_pack.manifest["source_derivation_hashes"]
@@ -540,7 +540,5 @@ def test_old_v1_pack_is_rebuild_required() -> None:
     old_root = Path("artifacts/domains/chemistry/m28")
     if not old_root.exists():
         pytest.skip("historical M-28 pack is not present")
-    with pytest.raises(
-        ValueError, match="REBUILD_REQUIRED_FROM_VERIFIED_SOURCE_CHAIN_V3"
-    ):
+    with pytest.raises(ValueError, match="REBUILD_REQUIRED_FROM_SOURCE_KIND_V4"):
         ChemistryDomainService.open(old_root)

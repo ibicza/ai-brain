@@ -388,6 +388,9 @@ def _entity_amount_v2(
         snapshot,
         (
             {
+                "exact_input": _result_text(quantity),
+                "source_unit": source_unit,
+                "target_unit": target_unit,
                 "avogadro_constant": snapshot.avogadro_constant,
                 "constant_exact": True,
                 "basis": selected_basis.value,

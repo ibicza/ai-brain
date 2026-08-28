@@ -262,7 +262,7 @@ def _reviewed_replacement(service: ChemistryDomainService, old_claim_id: str) ->
     ).record
     source = service.memory.add_source(
         content={"symbol": "O", "abridged_value": "16.000"},
-        source_kind=SourceKind.DETERMINISTIC_DERIVED_EXTRACT,
+        source_kind=SourceKind.DERIVED_EXTRACT,
         title="Reviewed deterministic successor extract",
         author="M-28.1 acceptance",
         publisher="M-28.1 acceptance",

@@ -21,7 +21,7 @@ SOURCE_FILES = (
 
 
 def default_source_dir() -> Path:
-    return Path("artifacts/domains/chemistry/m282/sources")
+    return Path("artifacts/domains/chemistry/m29/sources")
 
 
 def load_frozen_sources(source_dir: Path | None = None) -> dict[str, dict[str, Any]]:

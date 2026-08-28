@@ -1,0 +1,32 @@
+"""Version contracts for the trusted educational layer."""
+
+from ai_brain.stage2.domains.chemistry.version import (
+    CHEMISTRY_CALCULATION_POLICY_VERSION,
+    CHEMISTRY_DOMAIN_VERSION,
+    CHEMISTRY_FORMULA_GRAMMAR_VERSION,
+    CHEMISTRY_RESULT_SCHEMA_VERSION,
+)
+from ai_brain.stage2.facts.version import FACT_MEMORY_SCHEMA_VERSION
+from ai_brain.stage2.router.version import UNIFIED_ROUTER_SCHEMA_VERSION
+
+EDUCATIONAL_LAYER_VERSION = "1.0.0"
+EDUCATIONAL_SCHEMA_VERSION = 1
+DERIVATION_GRAPH_SCHEMA_VERSION = 1
+EXERCISE_SCHEMA_VERSION = 1
+GRADING_SCHEMA_VERSION = 1
+HINT_POLICY_VERSION = "1.0"
+EDUCATIONAL_RENDERING_VERSION = "1.0"
+TUTOR_SESSION_SCHEMA_VERSION = 1
+EDUCATIONAL_REPLAY_SCHEMA_VERSION = 1
+EXERCISE_GENERATOR_VERSION = "1.0"
+SESSION_STORE_SCHEMA_VERSION = 1
+
+COMPATIBILITY = {
+    "chemistry_domain_version": CHEMISTRY_DOMAIN_VERSION,
+    "chemistry_result_schema_version": CHEMISTRY_RESULT_SCHEMA_VERSION,
+    "formula_grammar_version": CHEMISTRY_FORMULA_GRAMMAR_VERSION,
+    "calculation_policy_version": CHEMISTRY_CALCULATION_POLICY_VERSION,
+    "fact_memory_schema_version": FACT_MEMORY_SCHEMA_VERSION,
+    "unified_router_schema_version": UNIFIED_ROUTER_SCHEMA_VERSION,
+    "source_chain_version": "4.0",
+}

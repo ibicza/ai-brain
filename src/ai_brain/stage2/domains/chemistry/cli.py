@@ -27,12 +27,13 @@ from ai_brain.stage2.domains.chemistry.tool_registry import chemistry_tool_manif
 from ai_brain.stage2.facts.memory import FactMemory
 from ai_brain.stage2.facts.persistence import FactDatabase
 
-DEFAULT_ROOT = Path("artifacts/domains/chemistry/m282")
+DEFAULT_ROOT = Path("artifacts/domains/chemistry/m29")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="ai-brain-chemistry")
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
+    parser.add_argument("--source-dir", type=Path)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("build-domain")
     sub.add_parser("verify")
@@ -82,7 +83,7 @@ def main() -> None:
     restore.add_argument("--target", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "build-domain":
-        _, summary = build_domain(args.root)
+        _, summary = build_domain(args.root, source_dir=args.source_dir)
         _print(asdict(summary))
         return
     if args.command == "restore":

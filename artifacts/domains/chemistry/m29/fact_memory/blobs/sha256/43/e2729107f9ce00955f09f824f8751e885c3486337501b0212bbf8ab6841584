@@ -1,0 +1,30 @@
+{
+  "mole": {
+    "avogadro_constant": "6.02214076E+23",
+    "avogadro_unit": "mol^-1",
+    "entity_scope": [
+      "atoms",
+      "molecules",
+      "formula_units",
+      "generic_entities"
+    ],
+    "exact": true,
+    "unit_name": "mole",
+    "unit_symbol": "mol"
+  },
+  "source": {
+    "authority": "Bureau International des Poids et Mesures (BIPM)",
+    "derivation_method": "REVIEWED_MANUAL_MAPPING",
+    "doi": "10.59161/AUEZ1291",
+    "language": "en",
+    "license": "CC BY 4.0",
+    "limitations": "Reviewed mole-definition mapping from printed page 134",
+    "published_at": "2026-06-04",
+    "retrieved_at": "2026-08-27",
+    "source_family": "BIPM_SI_BROCHURE_DERIVED",
+    "source_kind": "DERIVED_EXTRACT",
+    "title": "SI Brochure 9th edition v4.01 reviewed mole mapping",
+    "url": "https://www.bipm.org/documents/d/guest/si-brochure-9-pdf",
+    "version": "9th edition, version 4.01"
+  }
+}

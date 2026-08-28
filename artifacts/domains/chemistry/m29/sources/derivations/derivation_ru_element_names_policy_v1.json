@@ -1,0 +1,533 @@
+{
+  "derivation_hash": "962decfaa72bf4127d8d8daf70d876554e7bc67955945c121f0042bf6a837770",
+  "derivation_id": "derivation_ru_element_names_policy_v1",
+  "derivation_method": "POLICY_TRANSFORMATION",
+  "derived_canonical_content_hash": "7025bbc57c8ad04f7132d36a31b0ad32cccd7356006fc656b6fa475eb84db686",
+  "derived_file_byte_sha256": "e1898edda16f41d89a8cad9883d338dd661155d9c99d0b5437fbc9f4b7383670",
+  "derived_file_path": "derived/ru_element_names_policy_v1.json",
+  "derived_media_type": "application/json",
+  "derived_source_id": "derived_ru_element_names_policy_v1",
+  "derived_source_kind": "DERIVED_EXTRACT",
+  "expected_source_record_hash": null,
+  "expected_source_snapshot_hash": "e1898edda16f41d89a8cad9883d338dd661155d9c99d0b5437fbc9f4b7383670",
+  "extraction_policy_version": "verified-selected-chemistry-fields-v4",
+  "extractor_implementation_manifest_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+  "extractor_reviewer_identity": "m282-human-reviewed-source-mapping",
+  "field_level_mappings": [
+    {
+      "evidence_hash": "65e51719776f3603f6ac2622d0854185d5f7f788221ef0b0810ec7a8327367d5",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "серебро",
+      "output_field_name": "/names/Ag",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "047beb39beb6bebfb85f1ab97c852bc4f5521151abd9430c6ab4b71ec2a25f33",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Ag"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "dd371541e4cc2a11189d59f5e442c11f6a5297c1abe6c6225ee132f4d53bcf94",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "алюминий",
+      "output_field_name": "/names/Al",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "faebac95f141a218a5df6394710b3b5a0fa668671446feae5033d9a08713acb6",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Al"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "2c324113b23f11aae439110288271a21649697bac39f082c2c1adf0929ee490c",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "аргон",
+      "output_field_name": "/names/Ar",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "6f9a91c4c8289f858b9977ea4ddf67ffd2f878ea5faa38039f9e723c08938ca0",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Ar"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "a8826fdefc701ed1dd7f3163b0ff9690eb76f0c122d2770287310fa909fb6592",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "бор",
+      "output_field_name": "/names/B",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "d0ada30bb3f6457c713c4f4ce38b18152e35235f41b310d527f3a9637d700b38",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/B"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "a9936d466d553bfa5455280881daf5c2ebd1ceca76b612300d5b8e7d87669739",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "бериллий",
+      "output_field_name": "/names/Be",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "d3cf4666a6f4827667941eb4c2ede3963dc342f288dd1718ea488489c5a51e78",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Be"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "bbe5bfc1c8e6a1caf9e04a248347a935d64c863b793ccad48e78bf51178816a8",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "бром",
+      "output_field_name": "/names/Br",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "95bf3f5cced6bbb4cea30ea52c6f4ebec36fea57e96a59b35c12768f5fa71993",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Br"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "55470283d8a5e8792069b014fc6e89999cdb41bcb272e5ae8625f75360c22251",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "углерод",
+      "output_field_name": "/names/C",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "9a289a27fc2cb44db7101aefabc3a62d9231d998bf77a2b977d0421dc652b841",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/C"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "270d1d4c3f376ff6160cfa24886100ecb996e74c5bdee2adfde05c231858c33f",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "кальций",
+      "output_field_name": "/names/Ca",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "ef5465197b4e08001a4cdf9015added55ed6a781db53f1bad02037f66e1adae2",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Ca"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "79871d860ce309f7c9ec7edd7417eacaeb28630cf7b5f87bed9693a891bf1d3f",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "хлор",
+      "output_field_name": "/names/Cl",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "f9fe6f9183a6b0a67485b15d4cde2d84aae669102f73073ae5dc0f141f45fdb6",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Cl"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "7a6c5c306af36a12b31ba8c87c7d10ce41f943b5174d0b0fdffcc3cd14e09701",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "кобальт",
+      "output_field_name": "/names/Co",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "8df8e266f96229ff3574aac7f0dabfacb50715211bf5fc4e8e892c2d45db7ce8",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Co"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "6ab970152446cc2e29d6290b452c9c86bc1d9022f38daead977b012d58b4ba07",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "хром",
+      "output_field_name": "/names/Cr",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "f629160e8cb442140cd28ff7793be5ee700e2a997a97de81dde24d1ee2f35218",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Cr"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "43ab00e0a9dec1183d93e30b67fc96e0e9233b743adefc7f7c5de38f8122b06d",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "медь",
+      "output_field_name": "/names/Cu",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "297dfce22406240eb54ba2fc0c6076e6ab507048eb90b9ae2d09baae2e47d6d2",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Cu"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "6d6649ca034c2331111076deadf9b909cafdc166dee7b3c87a306b0768dd83b2",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "фтор",
+      "output_field_name": "/names/F",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "a2e6f2aab95769dfc485f6c909cc3fa75b0c625446e03f1bf2ffb56c0c67c372",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/F"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "a3b3239c823076c1fbad20fde3f1ea425ceba5f3669c24755cf87e75ac761308",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "железо",
+      "output_field_name": "/names/Fe",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "af326cb7e6120bd841de4380537c99799fc1ade7951543b964b2c75a640a8f3d",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Fe"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "2730a672a8d78609163aa86231d88ac2d348d282d3e4d9626b58593642d46db8",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "водород",
+      "output_field_name": "/names/H",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "0bc7698ec033e7a4f7df16bdfba1d4bcd7973c65fa3f4360d0deefd7b34ab14d",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/H"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "50763b6da3d5b436f275f174e6289f914f2885ecc4d1be61a6f4c418b31adc90",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "гелий",
+      "output_field_name": "/names/He",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "b8047c2d831ed12c38a6b8d33cf88db079111714ad48a621152d730277487f67",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/He"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "b10d78da98c38a2b6369964c9b3ae4d09a15b29d88206ba7c6d1507fca6ba1fd",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "йод",
+      "output_field_name": "/names/I",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "4ce0bb70537b353dad345bb4abb308ed02f629d51cd75f7967da0461690b6abd",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/I"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "c07942424b40b196a849f778ce1c8ce0510edc2c9ebf99a534d18e4bdb34fe93",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "калий",
+      "output_field_name": "/names/K",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "488222b005d21ff50cea9b3ba494bfd75caf208cbe0c0932f83cb2064a5c85d6",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/K"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "536d918ea9d5e4de8d90ff87206f84220328e5c100dc84afbd9c9640a04377f3",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "литий",
+      "output_field_name": "/names/Li",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "54b0e0f6c54a0616b3019695e1a88d2b4083d14421e2fb2e8adf6fb740b2de90",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Li"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "7a4a51bd33c89ff420f0be54e5d275990618b7236d77eee7bd4c441a28b67c0f",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "магний",
+      "output_field_name": "/names/Mg",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "d3668d599c515264c14aee36e8f194197283bc2086db80bc29aea06f10d09151",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Mg"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "93e90b0d720aebedf6c788258f7f10c06d1f44a1c3c4ebd44283a928d6a70048",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "марганец",
+      "output_field_name": "/names/Mn",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "9de991896f148898a63aab185afbc78e913131f878aaf2c81a23a93aa20aab2a",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Mn"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "325d01935ac6b7710a3db96b3802fc329d71d82f90bbdce8adf78b62f12be4d7",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "азот",
+      "output_field_name": "/names/N",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "a21402fde1c071c66d883bde42d30bcda2bc3d4bdd664b72b61675c2ea6d7450",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/N"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "df7d1bce6c1dcb2bb0e62c558073f8aa8c191a271acdd121990e9e7fd2623e01",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "натрий",
+      "output_field_name": "/names/Na",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "d22b51925219c86e5c8803aa77419cee95306722a6aee74858b911f1aa55b697",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Na"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "c05ac71595015777318f4943206a1f0f09f3971412cd61b6ddabe124878ad42d",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "неон",
+      "output_field_name": "/names/Ne",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "78f78c70fd18aa7796ac941ce862a0f38f2d41620c4b76f192853b20fe80c60e",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Ne"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "1ff4f0b4cba6289c204d2eb140669d542079a1d0821f4d958105601ce71cb473",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "никель",
+      "output_field_name": "/names/Ni",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "a7993b8f9092e828118ba2f8aa5b72f1d2eeb1829cc0d586b2305ee3691fc99a",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Ni"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "a6d3ac73415bf4906d06b6783bc364c4e2b24c35ee39d36042f82ce9cc50271e",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "кислород",
+      "output_field_name": "/names/O",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "6c0b2449c9f2f33641cf19c02a81036ee1df11f2a1047541c4b2250b4caa427a",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/O"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "a78a428c45e84f818e5f9b3b33f21e8fcf0c0efe11ff247148322ae1c7a9bb1e",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "фосфор",
+      "output_field_name": "/names/P",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "aa3003193a1af6b939d926b118e3ead50f78a5c72ac176f9384c047fa8736a54",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/P"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "234683d485b25a62fe6627cec1740312cbffcdcfa30424c2eaddf602e8d5d4f9",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "сера",
+      "output_field_name": "/names/S",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "a4a3699edf96c9f1e02833fb33e7dae6ede51a436ae3ed6fb56532b32777f01a",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/S"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "5a489ae581366f9892b07f4253c33e42f67aedef605ab76a79b7623de21d043c",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "скандий",
+      "output_field_name": "/names/Sc",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "5043b3cb2e7bfcc3e2200079d5990c57440fcce929fc85ccda680f7ad665b535",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Sc"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "b7a5a8b366ebe7b7e743614efba8c8ed14d1af22f39bc61d599a4b52ec9b6152",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "кремний",
+      "output_field_name": "/names/Si",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "69ea65b619811202af5e236aaff978a12d28302d49a18c1da8fa332ed5e7227c",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Si"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "04a7c5b635414204f860225676674aa7098e19def42a8bf17724ca07941da459",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "титан",
+      "output_field_name": "/names/Ti",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "9fc90b9f977bd2aabe86abeae11d48c171c4e812534f5c9e82f510e0c8537b90",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Ti"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "6fd83005ba109cba6f17474bfeaea8af2495a89a0a58dbf493ee0870023ab660",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "ванадий",
+      "output_field_name": "/names/V",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "ca038fed1ff2d731b357c735490f28afb9feeb1e90d5a687b13356bdd68cef4f",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/V"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    },
+    {
+      "evidence_hash": "e9dc2655d836667da48d136baff8fd2fcdac6102dfc96575a772cb117a5a2c77",
+      "extraction_method": "POLICY_TRANSFORMATION",
+      "output_canonical_value": "цинк",
+      "output_field_name": "/names/Zn",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": "bd54c6ba8b219f355ca97b41ab23475420793815455c8db298d32c7ec30c61ac",
+      "upstream_location_type": "JSON_POINTER",
+      "upstream_locator": {
+        "pointer": "/names/Zn"
+      },
+      "upstream_snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "upstream_source_id": "local_ru_element_names_policy_v1"
+    }
+  ],
+  "generated_at": "2026-08-27T00:00:00Z",
+  "manual_mapping_approval_hash": null,
+  "manual_mapping_approval_id": null,
+  "reviewed_at": "2026-08-27T00:00:00Z",
+  "reviewer_identity": "m282-human-reviewed-source-mapping",
+  "reviewer_identity_type": "HUMAN",
+  "schema_version": 2,
+  "upstream_sources": [
+    {
+      "expected_source_record_hash": null,
+      "field_location_used": [
+        "JSON_POINTER"
+      ],
+      "reference_hash": "57f28d3e29d33fee66282bde818532f3709b90acfd397034c79476e966ddd8cd",
+      "snapshot_hash": "d36cd295cf9a2d0cf5f11013954cc0ddea154e5f6456afcc0c27d1162b5ec4b0",
+      "source_family": "M28_RU_TRANSLATION_POLICY",
+      "source_id": "local_ru_element_names_policy_v1",
+      "source_kind": "LOCAL_DOCUMENT"
+    }
+  ]
+}

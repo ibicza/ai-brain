@@ -280,7 +280,7 @@ def _add_sources(
         derived_path = (source_root / derived_row["file"]).resolve()
         records[name] = memory.add_source(
             content=derived_path.read_bytes(),
-            source_kind=SourceKind.DETERMINISTIC_DERIVED_EXTRACT,
+            source_kind=SourceKind.DERIVED_EXTRACT,
             title=metadata["title"],
             author=metadata["authority"],
             publisher=metadata["authority"],

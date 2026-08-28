@@ -1,0 +1,2843 @@
+{
+  "derivation_hash": "afe41f9c37710aa6d1de0eb9583cfc3cb9c1f7df5688518912c9659ea4391886",
+  "derivation_id": "derivation_iupac_elements_2022",
+  "derivation_method": "REVIEWED_MANUAL_MAPPING",
+  "derived_canonical_content_hash": "5b215dd9ee534d087bdd68304e959fc162810e5391eb5357a6e8592b56253f16",
+  "derived_file_byte_sha256": "2c3993df12d70f142bec90994b8c85732279fa3820f388a05165b004ea3ef618",
+  "derived_file_path": "derived/iupac_elements_2022.json",
+  "derived_media_type": "application/json",
+  "derived_source_id": "derived_iupac_elements_2022",
+  "derived_source_kind": "DERIVED_EXTRACT",
+  "expected_source_record_hash": null,
+  "expected_source_snapshot_hash": "2c3993df12d70f142bec90994b8c85732279fa3820f388a05165b004ea3ef618",
+  "extraction_policy_version": "verified-selected-chemistry-fields-v4",
+  "extractor_implementation_manifest_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+  "extractor_reviewer_identity": "m282-human-reviewed-source-mapping",
+  "field_level_mappings": [
+    {
+      "evidence_hash": "b00c9f3059862415c0579f34d35b27a3832b0939836f07088b4dbddff75df1e0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/0/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "H"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "8ef89d3fe5001d9c561ca05773aa936040ec8017e73005029636c48a0fc8ada2",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "H",
+      "output_field_name": "/elements/0/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "H"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "717b8b5a5a48088d8bc5f8ac1920ea693794c6c8b7d83f5508a27776e6ca1b88",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "hydrogen",
+      "output_field_name": "/elements/0/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "H"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "4b2e2dad6cb3acf691b4087da562a2018f52de658528ff6f3f2f314f88d07071",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/0/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "H"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d06d820fd9090a4810b2038cbb9c80f245257ad4ee4354e188c33024cfbdac75",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/0/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "H"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "88e27d76438ac95a95922893893821d0ab292f579254a59f2a43eb6b1be25e0f",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/1/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "He"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "b220eea6253182b1f0d114445c9055e1c56f85d1368c7fd49e7666c80a06c7e8",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "He",
+      "output_field_name": "/elements/1/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "He"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "c9cc277631e2891171eea527a0f4f01504917e173b9872eaaba3906d0f768bb9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "helium",
+      "output_field_name": "/elements/1/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "He"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "813cc17782562a1d3ea35f4818f176b0611e924c0d7777a6368bfb773b3bb85a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/1/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "He"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "219bda4d893e627c48d8e4f4dee86d85fe0c8705673b960e28978404d19d6115",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 18,
+      "output_field_name": "/elements/1/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "He"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "13f2bef5a2fab80bb5543d3acfc0e3eed1745424360ad70537c358cd64ac5224",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/2/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Li"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "2897a7f70d7b5b90da4f7cbfcef64b32b3344afc897e4d1bdb6526ee8412f2a0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Li",
+      "output_field_name": "/elements/2/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Li"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "75e7d3d0c275dddfbbe9e885cf9eb85f01b31f04075243b39d5a94c927543574",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "lithium",
+      "output_field_name": "/elements/2/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Li"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "635adf05e0ca664f5cb2fffa098431e8f1c1868704247074b8ec59dd18c2a017",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/2/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Li"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "2b67b24460fe2e985f5d7629e877b94db778168e895f01e278eedf6abebc8a32",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/2/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Li"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "188ffc17acd6c2ccb36c6887c9b86cb852268f56d70d0dd926e787f472edfc72",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/3/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Be"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "0bb873dfe5a9964fe4a8a5980763988037d10a5cf814f274c6e7157f5268e72b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Be",
+      "output_field_name": "/elements/3/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Be"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "c317da1caf086c2ee3887de791a37c8d78702435fe1618e8171efde6eb03adb7",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "beryllium",
+      "output_field_name": "/elements/3/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Be"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "30e86a6e8d09b43b93b968bd6dfdb89a5a7e4cff52e01701c7007d0a03ecec1d",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/3/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Be"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d8a7530038ec3eae3c498eea216934c5e91bdacf79436c9a86ccab00d029b118",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/3/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Be"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "db4253b6bf9204c29dc9f0423cc5796486a50ff14e9effbf7c0b32e8525e832f",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 5,
+      "output_field_name": "/elements/4/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "B"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d224c513be06dc26461fa058bc5372ee93b51b1d95c127ab86343beb8c4ed5a9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "B",
+      "output_field_name": "/elements/4/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "B"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "9f28e7b86edd17f3832a13be8f06b81b53f352d5ea61fe96e0a44abd40bba86b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "boron",
+      "output_field_name": "/elements/4/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "B"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "7a12de690d8b45cb531b9a67daae02fea24034f4d2ae1efe3c42afb5ba3b4a53",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/4/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "B"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "66dcd51eb111f598f790f98b2cfcb02c103be0e61e30e23eee83b988c5b5dd1b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 13,
+      "output_field_name": "/elements/4/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "B"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d8b19fcfbd6807a069340d28411311130a676d9099ee19a49b5965ba8333b348",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 6,
+      "output_field_name": "/elements/5/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "C"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d2b38c6ced2ce1f2a6c20a99c584d9af5181db9508fbfb3b552a7e20ecb6a44a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "C",
+      "output_field_name": "/elements/5/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "C"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "842c64038548e5e09049c1c396296ccf56c8417ba72f6098651e3af87a30743a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "carbon",
+      "output_field_name": "/elements/5/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "C"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "7c8ee49d0e435dd9a8de8d438e0c0f022ca7fb33680a397aadf95b735213eea0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/5/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "C"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "ddf893f78c4ff5562dd8726989029981c1b2522899e84afe91f37b70a718872d",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 14,
+      "output_field_name": "/elements/5/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "C"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "b3541955bca4fbd3460c6eef1abd1152ad1a6a19ec058e705b849b0fb1a9431c",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 7,
+      "output_field_name": "/elements/6/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "N"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "06bed6f26aae1d10402f20dc478be3488fcc4fc7d484bca0727ee81f891d6487",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "N",
+      "output_field_name": "/elements/6/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "N"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "45d922f04821ec29a5ec85e389145b231a3740ef97da63d18d843263b34fb626",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "nitrogen",
+      "output_field_name": "/elements/6/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "N"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d25068b0a121704e11da22f133db30c21e2c37017ed20481402ae936850a3c37",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/6/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "N"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "0cb0055bf3bd28c975420b53142e1062d8dad14c12864d5cbe0c2c50a3da2246",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 15,
+      "output_field_name": "/elements/6/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "N"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "5ea05fbe9157687ffb537a211f99da0e9830cc267e36b0c53f7ed74f66f3f706",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 8,
+      "output_field_name": "/elements/7/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "O"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d846fbc29e8b554c42b1ae9fd560000268b6b936d8f174995b979527dbd69d1c",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "O",
+      "output_field_name": "/elements/7/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "O"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "9bc0a2301e06ff08fb5030de2437a212e4cd6802fe53a53563e2136593ccd6ab",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "oxygen",
+      "output_field_name": "/elements/7/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "O"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "56557032b3388d5c178e558aca404e033cdc646711964c5d6c889afede7e0eaa",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/7/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "O"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "88dab9873cd7de0d5bd8fe309c8406aba90b2d4824d342e359a525b6bf95c034",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 16,
+      "output_field_name": "/elements/7/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "O"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "3b55d983226e77b7622043e94ce85fd4ec5cedbe6a6a3738a447ff32d5e8e5b9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 9,
+      "output_field_name": "/elements/8/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "F"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "1c60d7da47e9abaacde96caf6ed21074379a51f81095b1d8ceaee4bca8e3a1e0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "F",
+      "output_field_name": "/elements/8/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "F"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "634e7b7ae144f6ff0bc77c7180b46572e0871344d5cb73b61a940fbe348f79be",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "fluorine",
+      "output_field_name": "/elements/8/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "F"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "65cec08809ed4caffede76ebd6ed6de6cbba9f98bce0168e7aa43de1df1c41d9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/8/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "F"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "19e3f4be8ce631dfc90d1779b79f9187df0035d290df802fc3756553fac7edb8",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/8/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "F"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "3b97ebf0123ddb1d82df34dd16a501c8639490602f435cff89216fb554be7be4",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 10,
+      "output_field_name": "/elements/9/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ne"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "2d9f383d41f7ca85c9fe81497bf4391a7c0e081d11e7e171805df8e04af1dd54",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Ne",
+      "output_field_name": "/elements/9/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ne"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "4acffd5d9b34b7bf1e9401f6a75e5d5071d2c3d1b1c2577b710710652b38b2ef",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "neon",
+      "output_field_name": "/elements/9/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ne"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "84f4a3736828b99c618fa3cf558ac18105ff8f0cca59e575912b99906041ad3a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/9/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ne"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "6a75bc07451d65006b33c994804bd540a706ae072bde32000e6059df6fe3881c",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 18,
+      "output_field_name": "/elements/9/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ne"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "987570760750c3431c5a9ad0a87be410334eae17c72afd95d50e88f2757bcec5",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 11,
+      "output_field_name": "/elements/10/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Na"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "c158bf74f9657bcea7dbed87eb38b750b38e0957565bcf6975681761fe135b4e",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Na",
+      "output_field_name": "/elements/10/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Na"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "2bc60b93e0da1c8011c108dc9fe976894ff84954041f3dee97526d3ed7282fcb",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "sodium",
+      "output_field_name": "/elements/10/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Na"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "4719003cdb5290beeb9260b1ea18e8d6344ca6e3b10774e618c54ddaaebd5800",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/10/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Na"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "779463975880c865a880c9853a085d844b9a1038e05da1d1292b23188d56d169",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/10/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Na"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "a157f467063b1f666eb92f4892e92c9aecb6e274e449161b2341a164a42526d9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 12,
+      "output_field_name": "/elements/11/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Mg"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "262de5079398865de9c09eaa55974f978d3f34a0185451b8c306b55230bfa09d",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Mg",
+      "output_field_name": "/elements/11/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Mg"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "1a90009b67dc51eef9bb5db746f4675d12dbd94f4dd9ed95d0d0b8f49ce41af3",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "magnesium",
+      "output_field_name": "/elements/11/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Mg"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "902bfb4cb1341233c509bd9c3deaeffc563aa69ba264cf0f03c96a0e628de678",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/11/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Mg"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "a92863021cb8e6c30d3cafe63ac34ca8d239bd9584ec9f9a0ea20b19db31b187",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/11/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Mg"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "e654797a6664b8f80b9565c2d39d3ab93f16c969a6bbcd5d1fd119e069336936",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 13,
+      "output_field_name": "/elements/12/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Al"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "0f2390c441ae4c6fa58d980995d14fbb771574bb125886d906de2c0d27592dd0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Al",
+      "output_field_name": "/elements/12/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Al"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "1a82ca6e6a449b6756fcf96e95448a8f6593225e41c61c27094978d2e1b2c8c9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "aluminium",
+      "output_field_name": "/elements/12/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Al"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "2a795994322ae0150fb566961bdbc7dbe16b997cbf9cdfe9217a25d18b5749de",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/12/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Al"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "5fc9c72329eaf59641bbf16ef7878b1c12099a677ccc83d58ba837f1a541e4af",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 13,
+      "output_field_name": "/elements/12/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Al"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "640bfe788d36a09169c3dba53e5e058302e2a24be0128ef51f638a6735a7c9d9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 14,
+      "output_field_name": "/elements/13/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Si"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "f19e10738ca790892148f7b29839757dbb967a211ae6ef0ab2503c8d8becd69d",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Si",
+      "output_field_name": "/elements/13/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Si"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "67de227e5527f66663c4b171f2b657cd88ed56b55e50e205f3c7dbaf5bdb06f0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "silicon",
+      "output_field_name": "/elements/13/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Si"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "e69c7f0980d7e1306c52dd91eff1984a998d065f9b03e1d7c08b6dbf215ccae6",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/13/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Si"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "9af0108d56b078991f9237c2ca74e93a152960b9b4a7fb1ace931ef10a4a7fa3",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 14,
+      "output_field_name": "/elements/13/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Si"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "37605d99cac7f81954b8777aa9d30def27ef2ffc6ef77f237ff65d7d612d73c7",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 15,
+      "output_field_name": "/elements/14/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "P"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "4c96700b88057f2667dce01d4a7ef6836d3ef28748a39b02cdd31071b6c6429f",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "P",
+      "output_field_name": "/elements/14/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "P"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "6d30c6326f851d086ca36ef1bbc45507a85bc5491a5975afe498ec4e74d13937",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "phosphorus",
+      "output_field_name": "/elements/14/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "P"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "f070533b95d19ebb708bc09557e7bb45ff474f90dcfd6186e0777faf9e2fd11f",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/14/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "P"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "3823953bc4bb1eda9b57abb4449edafbb05c6204dfbfd35b4c84b0cc8976ccc5",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 15,
+      "output_field_name": "/elements/14/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "P"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "924c02f9f409324509ff3f85c79585c43c1ac05e0e7519a76706972e027cb5ba",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 16,
+      "output_field_name": "/elements/15/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "S"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "93a040fa3746fab5fb58ba596c73c7f53cff0dd6300874543b16bf6d82aac920",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "S",
+      "output_field_name": "/elements/15/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "S"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d313ebba0e2ee9dc221caaea7e0aee9c072886f7803e93a4e3533b61a0edb073",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "sulfur",
+      "output_field_name": "/elements/15/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "S"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "156ed5292d696b3b753964c5d1d0e3cb022746092aa19d47933fe41fe6bf7fd9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/15/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "S"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "c23a14e6dcbb6793558f61042b226442456881d721c973683c2cd6cd74771656",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 16,
+      "output_field_name": "/elements/15/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "S"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "bb44ea9474e7bfe8abb3c1809b993ad94c1029916e7fce2cb57341afc6f6aafb",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/16/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Cl"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "ab251509678757acc3aec3384aa6b784407381bc9abffae924e188dfe62bd222",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Cl",
+      "output_field_name": "/elements/16/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Cl"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "af22e6515178d5aff8fa2f6c9f64acc3b26b11503a1a265f6a2b141c9a173136",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "chlorine",
+      "output_field_name": "/elements/16/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Cl"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "a311becff401099fe834202134a602a417fe61bd0bf3eb288efecbfc24e6b64d",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/16/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Cl"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "7fa90412dc44986f8c8a67e728b6e1e380e57343b846e568ff5af7aaf8565140",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/16/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Cl"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "47793a7ce72fb78018bc70d2313f55fcf776c01feab8b6b33a384971d2360225",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 18,
+      "output_field_name": "/elements/17/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ar"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "6cb610d48e93a181f1738c59052cbdd3946e08615dfa3b94a1c319c70a9f0af0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Ar",
+      "output_field_name": "/elements/17/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ar"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "264872c083e5e9e51d77ecedaf7961fd0a1d0dccc6812e2d1ec319eb819f9d61",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "argon",
+      "output_field_name": "/elements/17/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ar"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "c00a0c3a065a08dc53c3620c8383b42064cec7dbdd94e68f993b2bfb6f1e077c",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/17/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ar"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "da2f9166c956aca5535993b184939bbf0e329fa2b380d61fc45b11d3ee74340b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 18,
+      "output_field_name": "/elements/17/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ar"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "be52fafffcf91c49eb38e83a67d7ce7eaa72411debd13c7949a27cd97774114a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 19,
+      "output_field_name": "/elements/18/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "K"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "835f4ed70e9c2930c54905595f9cf8fcc20ac051fb73f075875af2691281b3ff",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "K",
+      "output_field_name": "/elements/18/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "K"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "e0c8cd68e0a865a600d90964c2a2b38a17d9e41d25fda2ec9e60c71d625adcfe",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "potassium",
+      "output_field_name": "/elements/18/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "K"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "87725838b01e1443c97a5d38c87449e540b25c1df39d9b06f5381bf9194d358f",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/18/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "K"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "304e4cae65d5589ef871148e0e493b5992b25ac6a52abc4669eafd05a91968ef",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 1,
+      "output_field_name": "/elements/18/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "K"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "03da545f3b0398d57ff206baabccd94adc469a1b258ae27a7f61b3eefa42a3fc",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 20,
+      "output_field_name": "/elements/19/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ca"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "fe543f45d9f3c78de06d718b28d68929a91b37563a95c25510e9c2e653e663f1",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Ca",
+      "output_field_name": "/elements/19/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ca"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "505244aac19131361dc5b2ce0835d04db1e61ca9d68e82b272c81491d264dc06",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "calcium",
+      "output_field_name": "/elements/19/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ca"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "22186070caba18047aa685620f944720217b2ac772d3d47ee8177189f320e934",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/19/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ca"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "25ee4572619c0b91c56ae1e1809908c84a0468591cbe6d1b5bf322dc78b3f1b0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 2,
+      "output_field_name": "/elements/19/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ca"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "47c4b8367e2262319b8eab57e4a51e353529e6b6b83935ea8d4c1b77746f41ed",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 21,
+      "output_field_name": "/elements/20/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Sc"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "df1a92d70f60f3b0a4815c2c6bd6fe1691525fdc50ce968c5baf212688201b1b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Sc",
+      "output_field_name": "/elements/20/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Sc"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "a661ef6616edb7dfe7cbb38b6d6fcfd16793101306914e5b9f2ce17df55abd74",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "scandium",
+      "output_field_name": "/elements/20/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Sc"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "d04b02a8a69d02060508c2942f07324fcffa3d80048f284409c5cb4cae9e63f8",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/20/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Sc"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "c0cc7099762abf420db3f9fd768ed2a3e2b583868fe8bd292b7465e403b2d169",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 3,
+      "output_field_name": "/elements/20/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Sc"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "19a1cd603f39d4d637864fcf0bef4d7e1c4c1caf46981b377e8a2bf14ccbcf0f",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 22,
+      "output_field_name": "/elements/21/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ti"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "bad1576a1e6e0751c314025014adb66eec87842bc7c47adae88e1eb5ffbb7866",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Ti",
+      "output_field_name": "/elements/21/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ti"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "b84275fac1ec43aa990fe3d3710695617e8a72b71b24e14b2a9f24078b7748c2",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "titanium",
+      "output_field_name": "/elements/21/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ti"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "9175887e2dad455f6b531e7d2a05bf665a0afe2335a8c2575c055d4b0c127d69",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/21/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ti"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "84279400ee2517de956d9e15affe9504224e3fd3bc8e674cb7195759f54907b9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/21/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ti"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "da7163eabbc2424e592b6e623a978feab0815a5d8925fb76133310861789fb70",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 23,
+      "output_field_name": "/elements/22/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "V"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "6c5334ec29ad3f65a3273444781d199aba4e328a3d35e7c3ead0c8655ddd14c9",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "V",
+      "output_field_name": "/elements/22/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "V"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "4e5249a5ccaf4c22b1f7812aba0d4d29f733971d5f952d15927491d35737ad33",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "vanadium",
+      "output_field_name": "/elements/22/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "V"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "eac08ec9a95f08c4ce246088c19a76e06b98086c809b092c350f9645d3a821f4",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/22/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "V"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "9aabbb0d9a7eecec787e932e2589bf5abc14af74cb21915c40cbb427206f6a96",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 5,
+      "output_field_name": "/elements/22/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "V"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "b76072c04e22bd4cef7f7d10c0cba49a86b91b2d31842616fbfb19ea41d955d0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 24,
+      "output_field_name": "/elements/23/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Cr"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "597c2869db43f235a47900fad628a2a22ebb268fcdf2825f022e2bf86e8ab2bf",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Cr",
+      "output_field_name": "/elements/23/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Cr"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "5f2291ad200e3e3523dbb940569942f0cad523b8f85bc6d870acf5ca8a10f865",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "chromium",
+      "output_field_name": "/elements/23/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Cr"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "31f81e34d89ea5d48181cd495cd603d488cc68eb20af6326c4dbd3846ae589f8",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/23/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Cr"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "fbb0195a9fc48a08f2ce9d8f729c08fccc2342f5b5ba14f4632063e3cd52db9b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 6,
+      "output_field_name": "/elements/23/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Cr"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "6ee56d0a96fd1f8b62cd0b6bb7ac95034955c50d88949a88c795fbaabe1fa259",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 25,
+      "output_field_name": "/elements/24/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Mn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "147f01f4628404c16c629fe1cbfbabe8974e3fde771f1497889b736f76d6af5b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Mn",
+      "output_field_name": "/elements/24/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Mn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "f91fd2fb39f16197df8a08419a9b98ea2c76160606296e2a6dfe2e70f981c989",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "manganese",
+      "output_field_name": "/elements/24/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Mn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "cf3824a8943ee027a02af6588b8342a695eb59c4f7169efacb99af8a8d8095b7",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/24/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Mn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "ad16606173a2bdab971ee582fa53adf1a0711e7220abb90702fc96030c2f9cac",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 7,
+      "output_field_name": "/elements/24/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Mn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "fe252823257a55781e5c644ee24eaccd8afb4cd8c24fe5b64bdc3d978d778fbf",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 26,
+      "output_field_name": "/elements/25/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Fe"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "33ec61f531862fdef3d085c34a4a03a77ee529d922bf0e398bcdcd4a04df7427",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Fe",
+      "output_field_name": "/elements/25/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Fe"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "6ddce4fbfbe5c4abc49b9eb20ca794b4023061b7ac9b53eb1de4c081fe470358",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "iron",
+      "output_field_name": "/elements/25/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Fe"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "26e85a554b964e66a51f0581efbe10840dd91d9cd65ae3dd3e6823c6fb161030",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/25/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Fe"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "10eecbad03ae9f65a48396e9ecda7be04936ba6950ea4f22c16a0f6e2ea78984",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 8,
+      "output_field_name": "/elements/25/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Fe"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "ee0aac25a092f6843e347cd800d4b397546a1bde58e78d193a0bb2b8656058f8",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 27,
+      "output_field_name": "/elements/26/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Co"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "3f834ea08ee75b65fb299d2411920c318b746e021cd34a598211e2f401601770",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Co",
+      "output_field_name": "/elements/26/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Co"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "7d19bda841709f7e58b61ce165bf74ee83d58dfcba9977ed4788690616a1710f",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "cobalt",
+      "output_field_name": "/elements/26/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Co"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "2d4cecd9d761b863b2d06028ea3d1b50a27cf922d164c93efee66d83a957cdfb",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/26/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Co"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "86883b2e805ae9492b4a8e7cbb32b33690647c01a3ef7ba4eaf53c1d5c7bf420",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 9,
+      "output_field_name": "/elements/26/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Co"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "8be597090e0a1e1fdbf3d2365c49523d183ecadef7832d3f5c21c39a602d9190",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 28,
+      "output_field_name": "/elements/27/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ni"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "e057ec3d5666e1fca2495dab52c61e347abe36c749f8e1e16335b35c21f37ab0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Ni",
+      "output_field_name": "/elements/27/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ni"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "f5203ec843a8881409086c73dec9f47bbb2644a801b0d176339702857c3ff44e",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "nickel",
+      "output_field_name": "/elements/27/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ni"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "0a6877744c0dfe24c727071a7416876d99a3c767862e5c54125874edfc2ee798",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/27/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ni"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "7dc2c590c901a320e47f95604ef3ff5c072e6421159630d839c49780dc39cf9b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 10,
+      "output_field_name": "/elements/27/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ni"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "285c58e6a99002290347c6e5ab57067f56c7b414837981da83af9e6ed75433b2",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 29,
+      "output_field_name": "/elements/28/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Cu"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "243980604a5770e6ac5045f7593e4d562fc50f92b6592beb9059d30ba8c30919",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Cu",
+      "output_field_name": "/elements/28/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Cu"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "ed8ad81ca45f4db0f40da9c24272985469253e1d7a73838b9564d8e006546336",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "copper",
+      "output_field_name": "/elements/28/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Cu"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "68963f5ab73f6e10f167cd8a632e099271f439b5e6ad5cc7916b4fd05d403b93",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/28/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Cu"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "7ce6f87d3d5b15dbf3e324916114dc2e6775d02ae1e9b61ce3c07e27b6d9e0eb",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 11,
+      "output_field_name": "/elements/28/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Cu"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "849a39454392f7c3c2ff03a3b042efa639a59c2baf6ab3295142744797ec3708",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 30,
+      "output_field_name": "/elements/29/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Zn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "222613fb781ac4b4ba6c894af978ca6080c6cc2fd028098b2bbb0fb9ffb602cc",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Zn",
+      "output_field_name": "/elements/29/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Zn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "52c7bce886e9f243b61f6ae46d4f63aefa595f4918813624a3df25aebeb8e26a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "zinc",
+      "output_field_name": "/elements/29/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Zn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "cee8ecaa69ec4c0bc79c04c543adc397e01850b25abbf663493f16a45a946536",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/29/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Zn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "18a82c42517f52375459cdc9d8b25e68a4e1dee514f82e8d6ed339e81197d142",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 12,
+      "output_field_name": "/elements/29/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Zn"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "45e9fa127c6bffd99cb57cfb653a3075beae85f737f940414612e1e221865310",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 35,
+      "output_field_name": "/elements/30/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Br"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "16f2314eb84fb8ac7d42ff9bffad40b5902da70d93d2a0edb103494c6a55c132",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Br",
+      "output_field_name": "/elements/30/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Br"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "5242f3fbf5e18cf280c4603856a9d1f6ede6591c5725b8d81e3eadba7a905787",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "bromine",
+      "output_field_name": "/elements/30/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Br"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "fd7be9dfe96a3ed472080cf19bdf5835a92e7ab98498d843938de99767cf5513",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 4,
+      "output_field_name": "/elements/30/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Br"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "fff65a33143cf30a97217d57150040672da9c622e5e39e33e20fc05dccad9b45",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/30/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Br"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "a88ea1c5c62f50a677a8e0eed28b3fcdfee58c492a084d49720941e1cc29163a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 47,
+      "output_field_name": "/elements/31/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "Ag"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "ac12a240bd6f02bc55b1c8558790e1370ea80a8afe947f10a99c72418c4c4fc0",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "Ag",
+      "output_field_name": "/elements/31/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "Ag"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "27616b271a37113978dff6eb19345f36406228e78d13d7f5ac0c0a6732e4f7ea",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "silver",
+      "output_field_name": "/elements/31/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "Ag"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "86f4d0597e9e837917b122f81b6d7d8cb2d48d29afa5da1dd7f98b3a8a4d76ac",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 5,
+      "output_field_name": "/elements/31/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "Ag"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "53ad885c79ddc34956dd8ea8be636be1862514eb4260c2330841d2124d630690",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 11,
+      "output_field_name": "/elements/31/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "Ag"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "87e9f42b10a531a05005969681c3b882e2eb86fd2b5a72a2404ec1eb51f4e05a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 53,
+      "output_field_name": "/elements/32/atomic_number",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "atomic_number",
+        "printed_page": 1,
+        "symbol": "I"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "70f1ca36c5ff6e45d79b243bfcbe0261c73adc1c001d8aef500994946740c328",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "I",
+      "output_field_name": "/elements/32/symbol",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "symbol",
+        "printed_page": 1,
+        "symbol": "I"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "a4ebfa70a416d2dc7dc2011fd3bd60906ca37d62f706802eef5e7ae8c77c122b",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": "iodine",
+      "output_field_name": "/elements/32/name_en",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "name_en",
+        "printed_page": 1,
+        "symbol": "I"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "a2a2b05951bcdf8fa00cdfa9abea9d29455f3936adcf2a41e3f8b65975bb04a6",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 5,
+      "output_field_name": "/elements/32/period",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "period",
+        "printed_page": 1,
+        "symbol": "I"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    },
+    {
+      "evidence_hash": "43433dbfba8bfa975ad8622bef7658e71a0835454047b99f6724da1d949b6e1a",
+      "extraction_method": "REVIEWED_MANUAL_MAPPING",
+      "output_canonical_value": 17,
+      "output_field_name": "/elements/32/group",
+      "parser_mapping_implementation_hash": "5657feec7a2f917e03250a956e6b0dad98961a411d14b4af430ea5ffc8074057",
+      "reviewer": "m282-human-reviewed-source-mapping",
+      "upstream_excerpt_hash": null,
+      "upstream_location_type": "PDF_REVIEWED_TABLE_CELL",
+      "upstream_locator": {
+        "field": "group",
+        "printed_page": 1,
+        "symbol": "I"
+      },
+      "upstream_snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "upstream_source_id": "official_iupac_periodic_table_2022"
+    }
+  ],
+  "generated_at": "2026-08-27T00:00:00Z",
+  "manual_mapping_approval_hash": "2ef9d803d32c08da3785792036576b2395490b0468df56fa64a4ad8d476c23fd",
+  "manual_mapping_approval_id": "approval_iupac_elements_2022",
+  "reviewed_at": "2026-08-27T00:00:00Z",
+  "reviewer_identity": "m282-human-reviewed-source-mapping",
+  "reviewer_identity_type": "HUMAN",
+  "schema_version": 2,
+  "upstream_sources": [
+    {
+      "expected_source_record_hash": null,
+      "field_location_used": [
+        "PDF_REVIEWED_TABLE_CELL"
+      ],
+      "reference_hash": "a62eb52e509d7d9837b48df25a887ea42ac04d652167967376a07a7f731f08cd",
+      "snapshot_hash": "ef6ca2f6d46554f96e30ad3a60693d6630fe45ad81ce83cb14e508c6cbb7d3b3",
+      "source_family": "IUPAC_PERIODIC_TABLE",
+      "source_id": "official_iupac_periodic_table_2022",
+      "source_kind": "OFFICIAL_PRIMARY"
+    }
+  ]
+}

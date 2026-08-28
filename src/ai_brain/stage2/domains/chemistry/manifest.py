@@ -70,6 +70,8 @@ def build_domain_manifest(
         "derived_extract_hashes": tuple(
             row["sha256"] for row in chain["derived_extracts"]
         ),
+        "derived_source_kind": "DERIVED_EXTRACT",
+        "source_kind_compatibility_policy": "REBUILD_REQUIRED_FROM_SOURCE_KIND_V4",
         "source_derivation_hashes": tuple(
             row["derivation_hash"] for row in chain["derivations"]
         ),
@@ -149,7 +151,7 @@ def verify_domain_manifest(
     if content_hash(body) != digest:
         raise ValueError("chemistry domain manifest hash mismatch")
     if body.get("domain_schema_version") != CHEMISTRY_DOMAIN_SCHEMA_VERSION:
-        raise ValueError("REBUILD_REQUIRED_FROM_VERIFIED_SOURCE_CHAIN_V3")
+        raise ValueError("REBUILD_REQUIRED_FROM_SOURCE_KIND_V4")
     if body.get("domain_version") != CHEMISTRY_DOMAIN_VERSION:
         raise ValueError("incompatible chemistry domain pack")
     if body["fact_memory_snapshot_hash"] != memory.database.snapshot_hash():

@@ -476,7 +476,7 @@ def _single(
             "inactive derived source blocks chemistry knowledge"
         )
     if any(
-        value.record.source_kind != SourceKind.DETERMINISTIC_DERIVED_EXTRACT
+        value.record.source_kind != SourceKind.DERIVED_EXTRACT
         for value in source_states
     ):
         raise ChemistryKnowledgeError("production claim must use a derived source")

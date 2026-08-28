@@ -21,16 +21,16 @@ from ai_brain.stage2.domains.chemistry.provenance import (
     derivation_from_dict,
     manual_approval_from_dict,
 )
-from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
+from ai_brain.stage2.facts.canonical import bytes_hash, canonicalize, content_hash
 from ai_brain.stage2.trusted_decimal import (
     DecimalLimits,
     parse_bounded_decimal,
     render_bounded_decimal,
 )
 
-SOURCE_CHAIN_VERSION = "3.0"
+SOURCE_CHAIN_VERSION = "4.0"
 SOURCE_DERIVATION_SCHEMA_VERSION = 2
-EXTRACTION_POLICY_VERSION = "verified-selected-chemistry-fields-v3"
+EXTRACTION_POLICY_VERSION = "verified-selected-chemistry-fields-v4"
 MAX_SOURCE_BYTES = 8_000_000
 GENERATED_AT = "2026-08-27T00:00:00Z"
 HUMAN_REVIEWER = "m282-human-reviewed-source-mapping"
@@ -175,7 +175,7 @@ def verify_source_chain(root: Path) -> dict[str, Any]:
     if content_hash(body) != digest:
         raise ValueError("source chain manifest hash mismatch")
     if manifest.get("source_chain_version") != SOURCE_CHAIN_VERSION:
-        raise ValueError("REBUILD_REQUIRED_FROM_VERIFIED_SOURCE_CHAIN_V3")
+        raise ValueError("REBUILD_REQUIRED_FROM_SOURCE_KIND_V4")
     if manifest.get("extraction_policy_version") != EXTRACTION_POLICY_VERSION:
         raise ValueError("source-chain extraction policy mismatch")
     official = tuple(_verify_file(root, row) for row in manifest["official_snapshots"])
@@ -187,7 +187,7 @@ def verify_source_chain(root: Path) -> dict[str, Any]:
         raise ValueError("official source category confusion")
     if any(row["source_kind"] != "LOCAL_DOCUMENT" for row in local):
         raise ValueError("local policy category confusion")
-    if any(row["source_kind"] == "OFFICIAL_PRIMARY" for row in derived):
+    if any(row["source_kind"] != "DERIVED_EXTRACT" for row in derived):
         raise ValueError("derived source category confusion")
 
     approvals = {}
@@ -260,6 +260,7 @@ def verify_source_chain(root: Path) -> dict[str, Any]:
                 or upstream["source_family"] != reference.source_family
             ):
                 raise ValueError("invalid upstream source reference")
+        evidence_pointers: set[str] = set()
         for evidence in record.field_level_mappings:
             evidence_body = asdict(evidence)
             evidence_hash = evidence_body.pop("evidence_hash")
@@ -270,8 +271,30 @@ def verify_source_chain(root: Path) -> dict[str, Any]:
                 not in {item.source_id for item in record.upstream_sources}
             ):
                 raise ValueError("invalid field extraction evidence")
+            if evidence.output_field_name in evidence_pointers:
+                raise ValueError("duplicate field extraction pointer")
+            evidence_pointers.add(evidence.output_field_name)
+            actual = _resolve_json_pointer(document, evidence.output_field_name)
+            if type(actual) is not type(evidence.output_canonical_value):
+                raise ValueError("field extraction value type mismatch")
+            if canonicalize(actual) != canonicalize(evidence.output_canonical_value):
+                raise ValueError("field extraction value mismatch")
         if not record.field_level_mappings:
             raise ValueError("production derivation has no field evidence")
+        production_pointers = _production_leaf_pointers(document)
+        uncovered = {
+            pointer
+            for pointer in production_pointers
+            if not any(
+                pointer == evidence_pointer
+                or pointer.startswith(f"{evidence_pointer}/")
+                for evidence_pointer in evidence_pointers
+            )
+        }
+        if uncovered:
+            raise ValueError("production derived field lacks extraction evidence")
+        if record.derived_source_kind != "DERIVED_EXTRACT":
+            raise ValueError("non-neutral derived source kind")
         if record.derivation_method == DerivationMethod.REVIEWED_MANUAL_MAPPING:
             approval = approvals.get(record.manual_mapping_approval_id or "")
             if (
@@ -279,6 +302,24 @@ def verify_source_chain(root: Path) -> dict[str, Any]:
                 or approval.approval_hash != record.manual_mapping_approval_hash
             ):
                 raise ValueError("reviewed mapping lacks matching approval")
+            approved = {
+                item["output_field_name"]: item for item in approval.selected_fields
+            }
+            if len(approved) != len(approval.selected_fields):
+                raise ValueError("manual approval has duplicate selected fields")
+            if set(approved) != evidence_pointers:
+                raise ValueError("manual approval field coverage mismatch")
+            for evidence in record.field_level_mappings:
+                item = approved[evidence.output_field_name]
+                actual = _resolve_json_pointer(document, evidence.output_field_name)
+                if (
+                    type(actual) is not type(item["output_canonical_value"])
+                    or canonicalize(actual)
+                    != canonicalize(item["output_canonical_value"])
+                    or item["upstream_locator"] != evidence.upstream_locator
+                    or item["upstream_excerpt_hash"] != evidence.upstream_excerpt_hash
+                ):
+                    raise ValueError("manual approval value or locator mismatch")
         elif record.manual_mapping_approval_id is not None:
             raise ValueError("non-manual derivation has a manual approval")
         derivations.append(record)
@@ -307,6 +348,11 @@ def verify_source_chain(root: Path) -> dict[str, Any]:
         "field_evidence_count": sum(
             len(row.field_level_mappings) for row in derivations
         ),
+        "verified_field_value_count": sum(
+            len(row.field_level_mappings) for row in derivations
+        ),
+        "field_value_mismatch_count": 0,
+        "production_field_without_evidence_count": 0,
         "source_chain_hash": digest,
     }
 
@@ -334,7 +380,7 @@ def build_derived_sources(root: Path, *, retrieved_at: str) -> dict[str, Any]:
         **policy,
         "source": {
             **policy["source"],
-            "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+            "source_kind": "DERIVED_EXTRACT",
             "derivation_method": DerivationMethod.POLICY_TRANSFORMATION.value,
         },
     }
@@ -389,7 +435,7 @@ def build_derived_sources(root: Path, *, retrieved_at: str) -> dict[str, Any]:
             "sha256": file_hash,
             "canonical_content_hash": content_hash(output.document),
             "media_type": "application/json",
-            "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+            "source_kind": "DERIVED_EXTRACT",
             "derivation_method": output.method.value,
         }
         derived_rows.append(derived_row)
@@ -416,7 +462,7 @@ def build_derived_sources(root: Path, *, retrieved_at: str) -> dict[str, Any]:
             "schema_version": SOURCE_DERIVATION_SCHEMA_VERSION,
             "derivation_method": output.method,
             "derived_source_id": source_id,
-            "derived_source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+            "derived_source_kind": "DERIVED_EXTRACT",
             "derived_media_type": "application/json",
             "derived_file_path": derived_row["file"],
             "derived_file_byte_sha256": file_hash,
@@ -603,7 +649,7 @@ def _extract_ciaaw(
             "language": "en",
             "license": "Official public reference pages; attribution retained",
             "source_family": "CIAAW_ATOMIC_WEIGHTS_DERIVED",
-            "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+            "source_kind": "DERIVED_EXTRACT",
             "derivation_method": DerivationMethod.DETERMINISTIC_EXTRACTION.value,
             "limitations": "Selected 33-element extract; uncertainty retained",
         },
@@ -862,7 +908,7 @@ def _derived_metadata(
         "language": "en",
         "license": spec["license"],
         "source_family": spec["source_family"] + "_DERIVED",
-        "source_kind": "DETERMINISTIC_DERIVED_EXTRACT",
+        "source_kind": "DERIVED_EXTRACT",
         "limitations": limitations,
     }
 
@@ -925,6 +971,52 @@ def _verify_file(root: Path, row: dict[str, Any]) -> dict[str, Any]:
     if bytes_hash(path.read_bytes()) != row["sha256"]:
         raise ValueError(f"source snapshot changed: {row['file']}")
     return row
+
+
+def _resolve_json_pointer(document: Any, pointer: str) -> Any:
+    if pointer == "":
+        return document
+    if not pointer.startswith("/"):
+        raise ValueError("field extraction pointer must be an absolute JSON Pointer")
+    current = document
+    for raw_part in pointer[1:].split("/"):
+        if re.search(r"~(?![01])", raw_part):
+            raise ValueError("field extraction pointer has invalid escaping")
+        part = raw_part.replace("~1", "/").replace("~0", "~")
+        if isinstance(current, dict):
+            if part not in current:
+                raise ValueError("field extraction pointer is missing")
+            current = current[part]
+        elif isinstance(current, list):
+            if not part.isdigit() or (len(part) > 1 and part.startswith("0")):
+                raise ValueError("field extraction array pointer is invalid")
+            index = int(part)
+            if index >= len(current):
+                raise ValueError("field extraction pointer is missing")
+            current = current[index]
+        else:
+            raise TypeError("field extraction pointer traverses a scalar")
+    return current
+
+
+def _production_leaf_pointers(document: dict[str, Any]) -> set[str]:
+    pointers: set[str] = set()
+
+    def visit(value: Any, pointer: str) -> None:
+        if pointer == "/source" or pointer.startswith("/source/"):
+            return
+        if isinstance(value, dict):
+            for key, child in value.items():
+                escaped = key.replace("~", "~0").replace("/", "~1")
+                visit(child, f"{pointer}/{escaped}")
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                visit(child, f"{pointer}/{index}")
+        else:
+            pointers.add(pointer)
+
+    visit(document, "")
+    return pointers
 
 
 def _safe_file(root: Path, relative: str) -> Path:
