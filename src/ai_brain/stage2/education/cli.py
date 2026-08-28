@@ -13,13 +13,12 @@ from ai_brain.stage2.education.models import (
     ExplanationMode,
     HintLevel,
 )
-from ai_brain.stage2.education.persistence import EducationalSessionStore
 from ai_brain.stage2.education.service import EducationalService
 from ai_brain.stage2.facts.canonical import canonical_json
 
 DEFAULT_CHEMISTRY_ROOT = Path("artifacts/domains/chemistry/m29")
-DEFAULT_STORE_ROOT = Path("artifacts/education/m291/sessions")
-DEFAULT_CATALOG = Path("artifacts/education/m291/catalog_v2.json")
+DEFAULT_STORE_ROOT = Path("artifacts/education/m292/sessions")
+DEFAULT_CATALOG = Path("artifacts/education/m292/catalog_v3.json")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -79,8 +78,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> None:
     args = build_parser().parse_args(argv)
     if args.command == "restore":
-        restored = EducationalSessionStore.restore(args.backup, args.target)
-        _print(restored.verify())
+        _, verification = EducationalService.restore(
+            args.chemistry_root,
+            args.backup,
+            args.target,
+            catalog_path=args.catalog,
+        )
+        _print(verification)
         return
     if args.command == "compile-catalog":
         import shutil
@@ -89,7 +93,7 @@ def main(argv: list[str] | None = None) -> None:
         from ai_brain.stage2.domains.chemistry.service import ChemistryDomainService
         from ai_brain.stage2.education.catalog_compiler import compile_catalog_v2
 
-        with tempfile.TemporaryDirectory(prefix="m291-cli-compile-") as directory:
+        with tempfile.TemporaryDirectory(prefix="m292-cli-compile-") as directory:
             chemistry_copy = Path(directory) / "chemistry"
             shutil.copytree(args.chemistry_root.resolve(), chemistry_copy)
             chemistry = ChemistryDomainService.open(chemistry_copy)
@@ -113,86 +117,34 @@ def main(argv: list[str] | None = None) -> None:
             language=args.language,
             mode=ExplanationMode(args.mode),
         )
-        if hasattr(outcome[1], "response_stage"):
-            decision, prepared, proposal = outcome
-            _print(
-                {
-                    "status": prepared.response_stage,
-                    "route_decision_hash": decision.route_decision_hash,
-                    "prepared_response_hash": prepared.response_hash,
-                    "proposal_hash": proposal.proposal_hash,
-                    "confirmation_required": True,
-                }
-            )
-        else:
-            _, graph, explanation = outcome
-            _print(
-                {
-                    "text": explanation.text,
-                    "explanation_hash": explanation.explanation_hash,
-                    "graph_hash": graph.graph_hash,
-                    "source_result_hash": graph.source_result_hash,
-                }
-            )
+        _print(outcome)
     elif args.command == "generate-exercise":
-        presented, session = service.create_exercise(
+        exercise = service.create_exercise(
             ExerciseFamily(args.family.upper()),
             seed=args.seed,
             language=args.language,
             difficulty=args.difficulty,
             session_id=args.session,
         )
-        _print(
-            {
-                "session_id": session.session_id,
-                "exercise_id": presented.exercise_id,
-                "question": presented.question_text,
-                "language": presented.language,
-                "difficulty": presented.difficulty_metadata,
-                "presentation_hash": presented.presentation_hash,
-            }
-        )
+        _print(exercise)
     elif args.command == "submit-answer":
-        answer, grade, session = service.submit_answer(
+        result = service.submit_answer(
             args.session, args.answer, confirmed=args.confirmed
         )
-        _print(
-            {
-                "parse_status": answer.parse_status,
-                "status": grade.correctness_status,
-                "score": grade.score,
-                "diagnoses": tuple(item.code for item in grade.error_diagnoses),
-                "session_status": session.status,
-                "grading_result_hash": grade.result_hash,
-            }
-        )
+        _print(result)
     elif args.command == "hint":
-        hint, session = service.hint(
+        result = service.hint(
             args.session, level=HintLevel(args.level) if args.level else None
         )
-        _print(
-            {
-                "level": hint.level,
-                "text": hint.text,
-                "hint_hash": hint.hint_hash,
-                "session_status": session.status,
-            }
-        )
+        _print(result)
     elif args.command == "show-solution":
-        explanation, session = service.show_solution(args.session)
-        _print(
-            {
-                "text": explanation.text,
-                "explanation_hash": explanation.explanation_hash,
-                "session_status": session.status,
-            }
-        )
+        _print(service.show_solution(args.session))
     elif args.command == "replay":
         _print(service.replay(args.session))
     elif args.command == "verify":
         _print(service.verify())
     elif args.command == "backup":
-        _print(service.store.backup(args.output))
+        _print(service.backup(args.output))
 
 
 def _read_request(path: Path) -> dict[str, Any]:

@@ -63,11 +63,22 @@ def render_explanation(
     language: str,
     mode: ExplanationMode = ExplanationMode.FULL,
     attempt_made: bool = False,
+    session_id: str | None = None,
+    session_state_hash: str | None = None,
 ) -> ExplanationArtifact:
     if mode == ExplanationMode.SOLUTION_AFTER_ATTEMPT and not attempt_made:
         raise ValueError("solution-after-attempt requires a submitted attempt")
+    if mode == ExplanationMode.SOLUTION_AFTER_ATTEMPT and (
+        not session_id or not session_state_hash
+    ):
+        raise ValueError("solution-after-attempt requires exact session authority")
     plan = build_explanation_plan(graph, language=language, mode=mode)
-    return render_explanation_plan(plan, graph)
+    return render_explanation_plan(
+        plan,
+        graph,
+        session_id=session_id,
+        session_state_hash=session_state_hash,
+    )
 
 
 def render_check_explanation(
@@ -127,12 +138,19 @@ def render_check_explanation(
         "source_node_ids": (),
         "rendering_version": EDUCATIONAL_RENDERING_VERSION,
         "plan_hash": plan.plan_hash,
+        "grading_result_hash": grading.result_hash,
+        "session_id": None,
+        "session_state_hash": None,
     }
     return ExplanationArtifact(**body, explanation_hash=content_hash(body))
 
 
 def render_explanation_plan(
-    plan: ExplanationPlan, graph: EducationalDerivationGraph
+    plan: ExplanationPlan,
+    graph: EducationalDerivationGraph,
+    *,
+    session_id: str | None = None,
+    session_state_hash: str | None = None,
 ) -> ExplanationArtifact:
     verify_explanation_plan(plan, graph)
     text = _render_plan_text(plan, graph)
@@ -170,9 +188,18 @@ def render_explanation_plan(
         "source_node_ids": sources,
         "rendering_version": EDUCATIONAL_RENDERING_VERSION,
         "plan_hash": plan.plan_hash,
+        "grading_result_hash": None,
+        "session_id": session_id,
+        "session_state_hash": session_state_hash,
     }
     artifact = ExplanationArtifact(**body, explanation_hash=content_hash(body))
-    verify_explanation(artifact, graph, plan=plan)
+    verify_explanation(
+        artifact,
+        graph,
+        plan=plan,
+        session_id=session_id,
+        session_state_hash=session_state_hash,
+    )
     return artifact
 
 
@@ -217,12 +244,15 @@ def verify_explanation(
     graph: EducationalDerivationGraph,
     *,
     plan: ExplanationPlan | None = None,
+    grading: GradingResult | None = None,
+    session_id: str | None = None,
+    session_state_hash: str | None = None,
 ) -> None:
     body = asdict(artifact)
     digest = body.pop("explanation_hash")
     if content_hash(body) != digest:
         raise ValueError("explanation hash mismatch")
-    if artifact.mode in {ExplanationMode.CHECK_ONLY, ExplanationMode.HINT_ONLY}:
+    if artifact.mode == ExplanationMode.CHECK_ONLY:
         if plan is not None:
             raise ValueError("dedicated explanation modes cannot use a graph plan")
         if (
@@ -231,7 +261,27 @@ def verify_explanation(
             or artifact.source_node_ids
         ):
             raise ValueError("dedicated explanation mode leaks graph values")
+        if grading is None or artifact.grading_result_hash != grading.result_hash:
+            raise ValueError("CHECK_ONLY explanation lacks exact grading authority")
+        if artifact != render_check_explanation(
+            graph, grading, language=artifact.language
+        ):
+            raise ValueError("CHECK_ONLY explanation is not reproducible")
         return
+    if artifact.mode == ExplanationMode.HINT_ONLY:
+        raise ValueError("HINT_ONLY is not a persisted explanation authority")
+    if artifact.grading_result_hash is not None:
+        raise ValueError("ordinary explanation has an unexpected grading binding")
+    if artifact.mode == ExplanationMode.SOLUTION_AFTER_ATTEMPT:
+        if (
+            not session_id
+            or not session_state_hash
+            or artifact.session_id != session_id
+            or artifact.session_state_hash != session_state_hash
+        ):
+            raise ValueError("solution explanation lacks exact session authority")
+    elif artifact.session_id is not None or artifact.session_state_hash is not None:
+        raise ValueError("ordinary explanation has an unexpected session binding")
     expected_plan = plan or build_explanation_plan(
         graph, language=artifact.language, mode=artifact.mode
     )

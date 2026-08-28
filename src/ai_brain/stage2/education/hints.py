@@ -9,6 +9,7 @@ from ai_brain.stage2.education.models import (
     EducationalDerivationGraph,
     ErrorDiagnosis,
     ExplanationMode,
+    GradingResult,
     GraphNodeKind,
     HintArtifact,
     HintLevel,
@@ -34,7 +35,12 @@ TARGETED_HINT_STRATEGIES = {
 }
 
 
-def build_hint_plan(exercise_id: str, graph: EducationalDerivationGraph) -> HintPlan:
+def build_hint_plan(
+    exercise_id: str,
+    graph: EducationalDerivationGraph,
+    *,
+    grading: GradingResult | None = None,
+) -> HintPlan:
     verify_derivation_graph(graph)
     node_order = tuple(
         node.node_id
@@ -46,6 +52,12 @@ def build_hint_plan(exercise_id: str, graph: EducationalDerivationGraph) -> Hint
         "graph_hash": graph.graph_hash,
         "node_order": node_order,
         "policy_version": HINT_POLICY_VERSION,
+        "grading_result_hash": grading.result_hash if grading else None,
+        "diagnosis_hashes": tuple(
+            diagnosis.diagnosis_hash for diagnosis in grading.error_diagnoses
+        )
+        if grading
+        else (),
     }
     return HintPlan(**body, plan_hash=content_hash(body))
 
@@ -56,14 +68,26 @@ def render_hint(
     level: HintLevel,
     *,
     language: str,
-    diagnoses: tuple[ErrorDiagnosis, ...] = (),
+    grading: GradingResult | None = None,
 ) -> HintArtifact:
     if language not in {"ru", "en"} or plan.graph_hash != graph.graph_hash:
         raise ValueError("hint request is incompatible with its graph")
     verify_derivation_graph(graph)
+    expected_grading_hash = grading.result_hash if grading else None
+    expected_diagnosis_hashes = (
+        tuple(item.diagnosis_hash for item in grading.error_diagnoses)
+        if grading
+        else ()
+    )
+    if (
+        plan.grading_result_hash != expected_grading_hash
+        or plan.diagnosis_hashes != expected_diagnosis_hashes
+    ):
+        raise ValueError("hint plan lacks exact grading authority")
     root = next(
         node for node in graph.nodes if node.node_id == graph.root_result_node_id
     )
+    diagnoses: tuple[ErrorDiagnosis, ...] = grading.error_diagnoses if grading else ()
     diagnosis_codes = tuple(item.code for item in diagnoses)
     targeted_codes = tuple(
         item.code for item in diagnoses if item.confidence.value == "EXACT_MATCH"
@@ -88,6 +112,9 @@ def render_hint(
         "diagnosis_codes": diagnosis_codes,
         "final_answer_revealed": final_revealed,
         "policy_version": HINT_POLICY_VERSION,
+        "plan_hash": plan.plan_hash,
+        "grading_result_hash": expected_grading_hash,
+        "diagnosis_hashes": expected_diagnosis_hashes,
     }
     return HintArtifact(**body, hint_hash=content_hash(body))
 

@@ -95,10 +95,9 @@ class ExerciseSplitAxis(StrEnum):
     ELEMENT_COMBINATION_HOLDOUT = "ELEMENT_COMBINATION_HOLDOUT"
     NUMERIC_RANGE_HOLDOUT = "NUMERIC_RANGE_HOLDOUT"
     UNIT_DIRECTION_HOLDOUT = "UNIT_DIRECTION_HOLDOUT"
-    TEMPLATE_HOLDOUT = "TEMPLATE_HOLDOUT"
-    RU_EN_CROSS_LANGUAGE = "RU_EN_CROSS_LANGUAGE"
-    MULTI_STEP_COMPOSITION = "MULTI_STEP_COMPOSITION"
-    MISCONCEPTION_HOLDOUT = "MISCONCEPTION_HOLDOUT"
+    TEMPLATE_KEY_PARTITION = "TEMPLATE_KEY_PARTITION"
+    LANGUAGE_ASSIGNMENT_PARTITION = "LANGUAGE_ASSIGNMENT_PARTITION"
+    MULTI_STEP_COMPOSITION_HOLDOUT = "MULTI_STEP_COMPOSITION_HOLDOUT"
 
 
 class StudentAnswerKind(StrEnum):
@@ -283,6 +282,9 @@ class ExplanationArtifact:
     rendering_version: str
     explanation_hash: str
     plan_hash: str
+    grading_result_hash: str | None
+    session_id: str | None
+    session_state_hash: str | None
 
 
 @dataclass(frozen=True)
@@ -345,14 +347,13 @@ class ExerciseInstance:
     accepted_equivalent_forms: tuple[dict[str, Any], ...]
     provenance_dependencies: tuple[str, ...]
     difficulty_metadata: dict[str, Any]
-    split_axis: ExerciseSplitAxis
+    split_memberships: tuple[tuple[str, str, str], ...]
     counterfactuals: tuple[CounterfactualAnswer, ...]
     generated_at: str
     schema_version: int
     instance_hash: str
     semantic_key_hash: str
     compilation_receipt_hash: str
-    split_manifest_hash: str
 
 
 @dataclass(frozen=True)
@@ -477,6 +478,8 @@ class HintPlan:
     graph_hash: str
     node_order: tuple[str, ...]
     policy_version: str
+    grading_result_hash: str | None
+    diagnosis_hashes: tuple[str, ...]
     plan_hash: str
 
 
@@ -491,6 +494,9 @@ class HintArtifact:
     diagnosis_codes: tuple[MisconceptionCode, ...]
     final_answer_revealed: bool
     policy_version: str
+    plan_hash: str
+    grading_result_hash: str | None
+    diagnosis_hashes: tuple[str, ...]
     hint_hash: str
 
 
@@ -523,6 +529,64 @@ class TutorSession:
     last_event_hash: str | None
     schema_version: int
     session_hash: str
+
+
+@dataclass(frozen=True)
+class PublicTutorSessionHandle:
+    session_id: str
+    status: str
+
+
+@dataclass(frozen=True)
+class PublicExercise:
+    session: PublicTutorSessionHandle
+    exercise_id: str
+    language: str
+    question: str
+    structured_givens: dict[str, Any]
+    difficulty: dict[str, Any]
+    learning_objectives: tuple[str, ...]
+    accepted_answer_format: str
+
+
+@dataclass(frozen=True)
+class PublicExplanation:
+    status: str
+    language: str
+    mode: str
+    text: str | None
+    confirmation_required: bool
+
+
+@dataclass(frozen=True)
+class PublicSubmissionResult:
+    parse_status: str
+    status: str
+    score: str
+    maximum_score: str
+    diagnoses: tuple[str, ...]
+    feedback: str
+    session: PublicTutorSessionHandle
+
+
+@dataclass(frozen=True)
+class PublicHint:
+    level: int
+    text: str
+    session: PublicTutorSessionHandle
+
+
+@dataclass(frozen=True)
+class PublicSolution:
+    text: str
+    session: PublicTutorSessionHandle
+
+
+@dataclass(frozen=True)
+class PublicReplayStatus:
+    session_id: str
+    status: str
+    session_status: str | None
 
 
 @dataclass(frozen=True)

@@ -117,7 +117,7 @@ def _authority(service):
     )
     precompiled = service.execution_monitor.count - before
     before = service.execution_monitor.count
-    _, prepared, proposal = service.explain_tool(
+    _, prepared, proposal = service._explain_tool_internal(
         "chemistry_molar_mass",
         {
             "formula": "O2",
@@ -129,7 +129,7 @@ def _authority(service):
     )
     unconfirmed = service.execution_monitor.count - before
     before = service.execution_monitor.count
-    service.confirm_explanation(
+    service._confirm_explanation_internal(
         prepared,
         proposal,
         identity="m291-acceptance-user",
@@ -162,6 +162,7 @@ def _graph_mutations(entries):
         "interval",
         "source_result",
         "provenance",
+        "operation",
     )
     accepted = {category: 0 for category in categories}
     cases = {category: 0 for category in categories}
@@ -238,8 +239,16 @@ def _graph_mutations(entries):
             artifact = deepcopy(graph.source_result_artifact)
             artifact["m291_tamper"] = True
             tampered = _rehash_graph(graph, source_result_artifact=artifact)
-        else:
+        elif category == "provenance":
             tampered = _rehash_graph(graph, source_hashes=("0" * 64,))
+        else:
+            operation_node = next(
+                node for node in graph.nodes if node.operation is not None
+            )
+            replacement = "ADD" if operation_node.operation != "ADD" else "MULTIPLY"
+            tampered = _graph_with_node(
+                graph, _rehash_node(operation_node, operation=replacement)
+            )
         try:
             verify_derivation_graph(tampered)
             accepted[category] += 1
@@ -428,7 +437,7 @@ def _live_replay(service, entries):
     stale_current = 0
     wrong_status = 0
     session_id = "m291-authority-presentation"
-    baseline = service.replay(session_id)
+    baseline = service._replay_internal(session_id)
     if baseline["status"] != "CURRENT":
         raise ValueError("live replay baseline is not current")
     categories = (
@@ -480,7 +489,7 @@ def _live_replay(service, entries):
 
             memory.get_source_state = stale_source
         try:
-            result = service.replay(session_id)
+            result = service._replay_internal(session_id)
         finally:
             if category == "domain":
                 manifest["domain_version"] = original
@@ -567,11 +576,11 @@ def _artifact_semantics(service, entry):
 
 
 def _route_receipts(service):
-    _, receipt, result = service.handle_controlled(
+    _, receipt, result = service._handle_controlled_internal(
         "Give me a molar-mass exercise.", language="en", seed=292
     )
     verify_educational_route_receipt(receipt)
-    if receipt.session_id != result[1].session_id:
+    if receipt.session_id != result.session.session_id:
         raise ValueError("controlled route receipt lost its generated session")
     accepted = 0
     for changes in (

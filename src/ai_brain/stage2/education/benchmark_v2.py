@@ -160,20 +160,24 @@ def run_m291_runtime_benchmark(service, *, interaction_count: int = 10_000) -> d
             )
             key = "independent_diagnosis"
         elif stage == 7:
-            plan = build_hint_plan(sample.internal_instance.instance_id, sample.graph)
+            plan = build_hint_plan(
+                sample.internal_instance.instance_id,
+                sample.graph,
+                grading=wrong_grade,
+            )
             render_hint(
                 plan,
                 sample.graph,
                 HintLevel.ORIENT,
                 language=("ru", "en")[index % 2],
-                diagnoses=wrong_grade.error_diagnoses,
+                grading=wrong_grade,
             )
             key = "hint_generation"
         elif stage == 8:
             service.store.verify()
             key = "semantic_store_verification"
         elif stage == 9:
-            service.replay(replay_session_id)
+            service._replay_internal(replay_session_id)
             key = "live_educational_replay"
         else:
             apply_event(transition_session, transition_event)

@@ -14,6 +14,7 @@ from ai_brain.stage2.education.models import (
     EducationalGraphNode,
     GraphNodeKind,
 )
+from ai_brain.stage2.education.operation_contract import verify_canonical_operation
 from ai_brain.stage2.education.version import DERIVATION_GRAPH_SCHEMA_VERSION
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage2.trusted_decimal import render_bounded_decimal
@@ -140,6 +141,7 @@ def _verify_node(
 ) -> None:
     with localcontext() as context:
         context.prec = 120
+        verify_canonical_operation(node.kind, node.operation)
         if node.dimension is not None and not isinstance(
             node.dimension, EducationalDimension
         ):

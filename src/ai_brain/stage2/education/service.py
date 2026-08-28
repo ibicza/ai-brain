@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -14,15 +15,25 @@ from ai_brain.stage2.domains.chemistry.education.graph_adapter import (
 )
 from ai_brain.stage2.domains.chemistry.service import ChemistryDomainService
 from ai_brain.stage2.education.answer_parser import parse_student_answer
+from ai_brain.stage2.education.artifact_authority import (
+    EducationalArtifactAuthorityVerifier,
+)
 from ai_brain.stage2.education.catalog import EducationalCatalogV2
+from ai_brain.stage2.education.currentness import (
+    evaluate_dependency_currentness,
+    evaluate_entry_currentness,
+    require_current,
+)
 from ai_brain.stage2.education.exercise_generation import (
     instantiate_variant,
     present_exercise,
+    public_exercise,
     verify_exercise_instance,
     verify_presented_exercise,
 )
 from ai_brain.stage2.education.explanations import (
     build_explanation_plan,
+    render_check_explanation,
     render_explanation,
 )
 from ai_brain.stage2.education.grading import grade_answer
@@ -31,16 +42,23 @@ from ai_brain.stage2.education.models import (
     EducationalRouteKind,
     EducationalRouteReceipt,
     ExerciseFamily,
+    ExplanationArtifact,
     ExplanationMode,
     GradingStatus,
     HintLevel,
+    PublicExplanation,
+    PublicHint,
+    PublicReplayStatus,
+    PublicSolution,
+    PublicSubmissionResult,
+    PublicTutorSessionHandle,
 )
 from ai_brain.stage2.education.persistence import EducationalSessionStore
 from ai_brain.stage2.education.replay import replay_educational_session
 from ai_brain.stage2.education.sessions import apply_event, make_event, start_session
 from ai_brain.stage2.facts.canonical import content_hash, utc_now
 
-DEFAULT_CATALOG_PATH = Path("artifacts/education/m291/catalog_v2.json")
+DEFAULT_CATALOG_PATH = Path("artifacts/education/m292/catalog_v3.json")
 
 
 class EducationalExecutionMonitor:
@@ -102,10 +120,38 @@ class EducationalService:
         language: str,
         mode: ExplanationMode = ExplanationMode.FULL,
     ):
-        """Load a precompiled explanation or return a normal PREPARED proposal."""
+        outcome = self._explain_tool_internal(
+            tool_id, arguments, language=language, mode=mode
+        )
+        if isinstance(outcome, tuple) and isinstance(outcome[2], ExplanationArtifact):
+            return PublicExplanation(
+                status="CURRENT",
+                language=language,
+                mode=mode.value,
+                text=_learner_text(outcome[2].text),
+                confirmation_required=False,
+            )
+        return PublicExplanation(
+            status="PREPARED",
+            language=language,
+            mode=mode.value,
+            text=None,
+            confirmation_required=True,
+        )
+
+    def _explain_tool_internal(
+        self,
+        tool_id: str,
+        arguments: dict[str, Any],
+        *,
+        language: str,
+        mode: ExplanationMode = ExplanationMode.FULL,
+    ):
+        """Load an authority artifact or prepare an explicitly confirmed execution."""
         before = self.execution_monitor.count
         entry = self.catalog.find_tool(tool_id, arguments)
         if entry is not None:
+            require_current(evaluate_entry_currentness(self.chemistry, entry))
             explanation = render_explanation(entry.graph, language=language, mode=mode)
             if self.execution_monitor.count != before:
                 raise RuntimeError("precompiled explanation executed a chemistry tool")
@@ -116,6 +162,30 @@ class EducationalService:
         return prepared
 
     def confirm_explanation(
+        self,
+        prepared,
+        proposal,
+        *,
+        identity: str,
+        language: str,
+        mode: ExplanationMode = ExplanationMode.FULL,
+    ):
+        outcome = self._confirm_explanation_internal(
+            prepared,
+            proposal,
+            identity=identity,
+            language=language,
+            mode=mode,
+        )
+        return PublicExplanation(
+            status="CURRENT",
+            language=language,
+            mode=mode.value,
+            text=_learner_text(outcome[2].text),
+            confirmation_required=False,
+        )
+
+    def _confirm_explanation_internal(
         self,
         prepared,
         proposal,
@@ -144,6 +214,21 @@ class EducationalService:
         return result.output, graph, explanation, completed
 
     def handle_controlled(
+        self,
+        text: str,
+        *,
+        language: str,
+        session_id: str | None = None,
+        seed: int = 0,
+    ):
+        return self._handle_controlled_internal(
+            text,
+            language=language,
+            session_id=session_id,
+            seed=seed,
+        )[2]
+
+    def _handle_controlled_internal(
         self,
         text: str,
         *,
@@ -197,8 +282,29 @@ class EducationalService:
         session_id: str | None = None,
         created_at: str | None = None,
     ):
+        presented, session = self._create_exercise_internal(
+            family,
+            seed=seed,
+            language=language,
+            difficulty=difficulty,
+            session_id=session_id,
+            created_at=created_at,
+        )
+        return public_exercise(presented, session_status=session.status.value)
+
+    def _create_exercise_internal(
+        self,
+        family: ExerciseFamily,
+        *,
+        seed: int,
+        language: str,
+        difficulty: int | None = None,
+        session_id: str | None = None,
+        created_at: str | None = None,
+    ):
         before = self.execution_monitor.count
         entry = self.catalog.select(family, seed=seed, difficulty=difficulty)
+        require_current(evaluate_entry_currentness(self.chemistry, entry))
         instance = instantiate_variant(
             entry.internal_instance,
             entry.exercise_spec,
@@ -254,6 +360,32 @@ class EducationalService:
         confirmed: bool = False,
         created_at: str | None = None,
     ):
+        _, grade, check, current = self._submit_answer_internal(
+            session_id,
+            raw_answer,
+            confirmed=confirmed,
+            created_at=created_at,
+        )
+        return PublicSubmissionResult(
+            parse_status=grade.parse_status.value,
+            status=grade.correctness_status.value,
+            score=grade.score,
+            maximum_score=grade.maximum_score,
+            diagnoses=tuple(item.code.value for item in grade.error_diagnoses),
+            feedback=_learner_text(check.text),
+            session=PublicTutorSessionHandle(
+                session_id=current.session_id, status=current.status.value
+            ),
+        )
+
+    def _submit_answer_internal(
+        self,
+        session_id: str,
+        raw_answer: Any,
+        *,
+        confirmed: bool = False,
+        created_at: str | None = None,
+    ):
         session, spec, instance, graph = self._load(session_id)
         timestamp = created_at or utc_now()
         answer = parse_student_answer(
@@ -281,6 +413,10 @@ class EducationalService:
             created_at=timestamp,
         )
         self.store.save_artifact("grading_result", grade.result_hash, grade)
+        check = render_check_explanation(
+            graph, grade, language=session.language
+        )
+        self.store.save_artifact("explanation", check.explanation_hash, check)
         solved = grade.correctness_status in {
             GradingStatus.CORRECT,
             GradingStatus.CORRECT_EQUIVALENT_UNIT,
@@ -290,13 +426,17 @@ class EducationalService:
             session_id,
             sequence=len(self.store.events(session_id)) + 1,
             event_type="ANSWER_GRADED",
-            payload={"grading_result_hash": grade.result_hash, "solved": solved},
+            payload={
+                "grading_result_hash": grade.result_hash,
+                "check_explanation_hash": check.explanation_hash,
+                "solved": solved,
+            },
             previous_event_hash=attempted.last_event_hash,
             created_at=timestamp,
         )
         current = apply_event(attempted, graded)
         self.store.append_event(attempted, current, graded)
-        return answer, grade, current
+        return answer, grade, check, current
 
     def hint(
         self,
@@ -305,22 +445,39 @@ class EducationalService:
         level: HintLevel | None = None,
         created_at: str | None = None,
     ):
+        artifact, current = self._hint_internal(
+            session_id, level=level, created_at=created_at
+        )
+        return PublicHint(
+            level=int(artifact.level),
+            text=_learner_text(artifact.text),
+            session=PublicTutorSessionHandle(
+                session_id=current.session_id, status=current.status.value
+            ),
+        )
+
+    def _hint_internal(
+        self,
+        session_id: str,
+        *,
+        level: HintLevel | None = None,
+        created_at: str | None = None,
+    ):
         session, _, instance, graph = self._load(session_id)
         selected = level or HintLevel(min(5, len(session.hint_hashes) + 1))
-        diagnoses = ()
+        grading = None
         if session.grading_result_hashes:
-            grade = self.store.get_artifact(
+            grading = self.store.get_artifact(
                 session.grading_result_hashes[-1], expected_kind="grading_result"
             )
-            diagnoses = grade.error_diagnoses
-        plan = build_hint_plan(instance.instance_id, graph)
+        plan = build_hint_plan(instance.instance_id, graph, grading=grading)
         self.store.save_artifact("hint_plan", plan.plan_hash, plan)
         hint = render_hint(
             plan,
             graph,
             selected,
             language=session.language,
-            diagnoses=diagnoses,
+            grading=grading,
         )
         self.store.save_artifact("hint", hint.hint_hash, hint)
         event = make_event(
@@ -336,6 +493,19 @@ class EducationalService:
         return hint, current
 
     def show_solution(self, session_id: str, *, created_at: str | None = None):
+        artifact, current = self._show_solution_internal(
+            session_id, created_at=created_at
+        )
+        return PublicSolution(
+            text=_learner_text(artifact.text),
+            session=PublicTutorSessionHandle(
+                session_id=current.session_id, status=current.status.value
+            ),
+        )
+
+    def _show_solution_internal(
+        self, session_id: str, *, created_at: str | None = None
+    ):
         session, _, _, graph = self._load(session_id)
         plan = build_explanation_plan(
             graph,
@@ -347,6 +517,8 @@ class EducationalService:
             language=session.language,
             mode=ExplanationMode.SOLUTION_AFTER_ATTEMPT,
             attempt_made=bool(session.attempt_hashes),
+            session_id=session.session_id,
+            session_state_hash=session.session_hash,
         )
         self.store.save_artifact("explanation_plan", plan.plan_hash, plan)
         self.store.save_artifact(
@@ -365,17 +537,47 @@ class EducationalService:
         return explanation, current
 
     def replay(self, session_id: str):
+        status = self._replay_internal(session_id)
+        return PublicReplayStatus(
+            session_id=session_id,
+            status=status["status"],
+            session_status=status.get("session_status"),
+        )
+
+    def _replay_internal(self, session_id: str):
         return replay_educational_session(self.store, self.adapter, session_id)
 
     def verify(self):
+        authority = EducationalArtifactAuthorityVerifier(self).verify()
         return {
-            "status": "VERIFIED",
+            "status": "AUTHORITY_VERIFIED",
             "domain": self.chemistry.verify(),
             "catalog": self.catalog.verify(self.chemistry),
-            "educational_store": self.store.verify(),
+            "educational_store_structural": authority["structural"],
+            "educational_store_authority": authority,
             "trusted_imports_torch": False,
             "runtime_network": False,
         }
+
+    def backup(self, target: Path) -> dict[str, Any]:
+        verification = self.verify()
+        return {
+            "verification": verification,
+            "backup": self.store.backup(target),
+        }
+
+    @classmethod
+    def restore(
+        cls,
+        chemistry_root: Path,
+        backup: Path,
+        target: Path,
+        *,
+        catalog_path: Path = DEFAULT_CATALOG_PATH,
+    ) -> tuple[EducationalService, dict[str, Any]]:
+        EducationalSessionStore.restore(backup, target)
+        service = cls.open(chemistry_root, target, catalog_path=catalog_path)
+        return service, service.verify()
 
     def _load(self, session_id: str):
         session = self.store.get_session(session_id)
@@ -388,6 +590,15 @@ class EducationalService:
         graph = self.store.get_artifact(
             session.graph_hash, expected_kind="derivation_graph"
         )
+        receipt = self.store.get_artifact(
+            instance.compilation_receipt_hash,
+            expected_kind="compilation_receipt",
+        )
+        require_current(
+            evaluate_dependency_currentness(
+                self.chemistry, graph, receipt, instance, spec
+            )
+        )
         verify_exercise_instance(instance, spec, graph)
         self.adapter.verify_graph(graph)
         return session, spec, instance, graph
@@ -396,11 +607,14 @@ class EducationalService:
         presented_hash = None
         prepared_hash = None
         if route.kind == EducationalRouteKind.GENERATE_EXERCISE and result:
-            presented_hash = result[0].presentation_hash
-            session_id = result[1].session_id
-        if route.kind == EducationalRouteKind.EXPLAIN and result:
-            candidate = result[1]
-            prepared_hash = getattr(candidate, "response_hash", None)
+            session_id = result.session.session_id
+            matches = tuple(
+                item
+                for item in self.store.artifacts("presented_exercise")
+                if item.session_id == session_id
+            )
+            if len(matches) == 1:
+                presented_hash = matches[0].presentation_hash
         body = {
             "original_request_hash": content_hash(text),
             "controlled_parser_version": "educational_controlled_v2",
@@ -446,3 +660,14 @@ def verify_educational_route_receipt(receipt: EducationalRouteReceipt) -> None:
         and not receipt.session_id
     ):
         raise ValueError("session route receipt lacks its session binding")
+
+
+def _learner_text(text: str) -> str:
+    lines = []
+    for line in text.splitlines():
+        if line.startswith(("Graph:", "Result:", "Граф:", "Результат:")):
+            continue
+        line = re.sub(r"^\[[^]]+\]\s*", "", line)
+        line = re.sub(r"\b[0-9a-f]{64}\b", "[verified]", line)
+        lines.append(line)
+    return "\n".join(lines)

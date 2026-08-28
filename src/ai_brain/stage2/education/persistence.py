@@ -254,6 +254,31 @@ class EducationalSessionStore:
             ).fetchall()
         return tuple(event_from_dict(json.loads(row[0])) for row in rows)
 
+    def session_ids(self) -> tuple[str, ...]:
+        with self._connection() as connection:
+            rows = connection.execute(
+                "SELECT session_id FROM sessions ORDER BY session_id"
+            ).fetchall()
+        return tuple(row[0] for row in rows)
+
+    def artifacts(self, kind: str) -> tuple[Any, ...]:
+        with self._connection() as connection:
+            rows = connection.execute(
+                "SELECT artifact_hash,payload,payload_hash FROM artifacts "
+                "WHERE artifact_kind=? ORDER BY artifact_hash",
+                (kind,),
+            ).fetchall()
+        values = []
+        for artifact_hash, payload, payload_hash in rows:
+            if bytes_hash(payload.encode("utf-8")) != payload_hash:
+                raise EducationalStoreIntegrityError(
+                    "educational artifact checksum mismatch"
+                )
+            values.append(
+                reconstruct_and_validate(kind, artifact_hash, json.loads(payload))
+            )
+        return tuple(values)
+
     def verify(self) -> dict[str, Any]:
         with self._connection() as connection:
             integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
@@ -327,7 +352,7 @@ class EducationalSessionStore:
                 raise EducationalStoreIntegrityError("event/session replay mismatch")
             event_count += len(events)
         return {
-            "status": "VERIFIED",
+            "status": "STRUCTURALLY_VERIFIED",
             "artifact_count": len(artifacts),
             "session_count": len(sessions),
             "event_count": event_count,
@@ -352,6 +377,14 @@ class EducationalSessionStore:
             if grade.student_answer_hash != session.attempt_hashes[-1]:
                 raise EducationalStoreIntegrityError(
                     "grading event references another student answer"
+                )
+            check = self.get_artifact(
+                event.payload.get("check_explanation_hash", ""),
+                expected_kind="explanation",
+            )
+            if check.grading_result_hash != grade.result_hash:
+                raise EducationalStoreIntegrityError(
+                    "grading event references another check explanation"
                 )
         elif event.event_type == "HINT_ISSUED":
             hint = self.get_artifact(
@@ -380,11 +413,13 @@ class EducationalSessionStore:
         from ai_brain.stage2.education.exercise_generation import (
             verify_exercise_instance,
             verify_presented_exercise,
+            verify_presented_exercise_binding,
         )
         from ai_brain.stage2.education.explanations import (
             verify_explanation,
             verify_explanation_plan,
         )
+        from ai_brain.stage2.education.hints import render_hint
 
         internal_instances = {
             value.instance_id: value
@@ -421,10 +456,20 @@ class EducationalSessionStore:
         for (_, kind), value in artifacts.items():
             if kind == "presented_exercise":
                 verify_presented_exercise(value)
-                if value.exercise_id not in internal_instances:
+                instance = internal_instances.get(value.exercise_id)
+                if instance is None:
                     raise EducationalStoreIntegrityError(
                         "presented exercise references no internal exercise"
                     )
+                try:
+                    spec = artifacts[(instance.exercise_spec_hash, "exercise_spec")]
+                    verify_presented_exercise_binding(
+                        value, instance, spec, session_id=value.session_id
+                    )
+                except (KeyError, ValueError) as error:
+                    raise EducationalStoreIntegrityError(
+                        "presented exercise semantic binding mismatch"
+                    ) from error
             elif kind == "explanation_plan":
                 try:
                     verify_explanation_plan(value, graphs[value.graph_hash])
@@ -438,13 +483,28 @@ class EducationalSessionStore:
                     raise EducationalStoreIntegrityError(
                         "explanation references a missing graph"
                     )
-                if value.mode.value not in {"CHECK_ONLY", "HINT_ONLY"}:
+                if value.mode.value == "CHECK_ONLY":
+                    grading = artifacts.get(
+                        (value.grading_result_hash, "grading_result")
+                    )
+                    if grading is None:
+                        raise EducationalStoreIntegrityError(
+                            "CHECK_ONLY explanation references a missing grade"
+                        )
+                    verify_explanation(value, graph, grading=grading)
+                elif value.mode.value != "HINT_ONLY":
                     plan = artifacts.get((value.plan_hash, "explanation_plan"))
                     if plan is None:
                         raise EducationalStoreIntegrityError(
                             "explanation references a missing plan"
                         )
-                    verify_explanation(value, graph, plan=plan)
+                    verify_explanation(
+                        value,
+                        graph,
+                        plan=plan,
+                        session_id=value.session_id,
+                        session_state_hash=value.session_state_hash,
+                    )
             elif kind == "grading_result":
                 instance = internal_instances.get(value.exercise_id)
                 if (
@@ -464,6 +524,22 @@ class EducationalSessionStore:
                 ):
                     raise EducationalStoreIntegrityError(
                         "hint cross-artifact relation mismatch"
+                    )
+                plan = artifacts.get((value.plan_hash, "hint_plan"))
+                grading = (
+                    artifacts.get((value.grading_result_hash, "grading_result"))
+                    if value.grading_result_hash
+                    else None
+                )
+                if plan is None or render_hint(
+                    plan,
+                    graphs[value.graph_hash],
+                    value.level,
+                    language=value.language,
+                    grading=grading,
+                ) != value:
+                    raise EducationalStoreIntegrityError(
+                        "hint semantic binding mismatch"
                     )
 
     def backup(self, target: Path) -> dict[str, Any]:

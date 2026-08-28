@@ -1,4 +1,4 @@
-"""Build reviewed-style student-error fixtures without production counterfactuals."""
+"""Build synthetic cross-implementation fixtures without production counterfactuals."""
 
 from __future__ import annotations
 
@@ -48,15 +48,15 @@ def main() -> None:
     parser.add_argument(
         "--catalog",
         type=Path,
-        default=ROOT / "artifacts" / "education" / "m291" / "catalog_v2.json",
+        default=ROOT / "artifacts" / "education" / "m292" / "catalog_v3.json",
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "tests" / "fixtures" / "m291_independent_student_errors.jsonl",
+        default=ROOT / "tests" / "fixtures" / "m292_synthetic_student_errors.jsonl",
     )
     args = parser.parse_args()
-    with tempfile.TemporaryDirectory(prefix="m291-fixtures-") as directory:
+    with tempfile.TemporaryDirectory(prefix="m292-fixtures-") as directory:
         chemistry_copy = Path(directory) / "chemistry"
         shutil.copytree(args.chemistry_root.resolve(), chemistry_copy)
         chemistry = ChemistryDomainService.open(chemistry_copy)
@@ -91,7 +91,7 @@ def _fixtures(catalog):
                 )
             )
             body = {
-                "fixture_id": f"m291-independent-{category_index:02d}-{offset:03d}",
+                "fixture_id": f"m292-synthetic-{category_index:02d}-{offset:03d}",
                 "public_exercise": {
                     "exercise_id": entry.internal_instance.instance_id,
                     "language": "en",
@@ -117,7 +117,10 @@ def _fixtures(catalog):
                     "Independently constructed concrete error pattern for "
                     + category.value
                 ),
-                "fixture_reviewer": "m291-independent-fixture-review",
+                "fixture_generator": "m292-independent-fixture-generator",
+                "construction_method": "DETERMINISTIC_CROSS_IMPLEMENTATION_RULES",
+                "human_review_status": "NOT_REVIEWED",
+                "fixture_schema_version": 2,
             }
             fixtures.append({**body, "fixture_hash": content_hash(body)})
     return fixtures

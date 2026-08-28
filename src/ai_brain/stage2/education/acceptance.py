@@ -138,7 +138,8 @@ def _exercise_acceptance(pool, count):
         identities.add(instance.instance_id)
         families[spec.family.value] += 1
         languages[instance.language] += 1
-        split_axes[instance.split_axis.value] += 1
+        for axis, _, _ in instance.split_memberships:
+            split_axes[axis] += 1
         if formula := instance.structured_givens.get("formula"):
             formulas.add(formula)
         source_unit = instance.structured_givens.get("source_unit")

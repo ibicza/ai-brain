@@ -13,6 +13,7 @@ from ai_brain.stage2.education.models import (
     GraphEdgeKind,
     GraphNodeKind,
 )
+from ai_brain.stage2.education.operation_contract import verify_canonical_operation
 from ai_brain.stage2.education.version import DERIVATION_GRAPH_SCHEMA_VERSION
 from ai_brain.stage2.facts.canonical import content_hash
 
@@ -36,6 +37,7 @@ def make_node(
     derivation_hashes: tuple[str, ...] = (),
     metadata: dict[str, Any] | None = None,
 ) -> EducationalGraphNode:
+    verify_canonical_operation(kind, operation)
     typed_dimension = (
         None if dimension is None else EducationalDimension(str(dimension))
     )

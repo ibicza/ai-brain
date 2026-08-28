@@ -29,6 +29,7 @@ PUBLIC_EXERCISE_FIELDS = {
     "structured_public_givens",
     "difficulty_metadata",
 }
+FIXTURE_SCHEMA_VERSION = 2
 
 
 def evaluate_independent_fixtures(catalog, fixture_path: Path) -> dict:
@@ -44,14 +45,24 @@ def evaluate_independent_fixtures(catalog, fixture_path: Path) -> dict:
     tested_hints = 0
     wrong_targeted_hints = 0
     count = 0
+    fixture_ids = []
     for line in fixture_path.read_text(encoding="utf-8").splitlines():
         fixture = json.loads(line)
         body = dict(fixture)
         digest = body.pop("fixture_hash")
         if content_hash(body) != digest:
             raise ValueError("independent diagnosis fixture hash mismatch")
+        if (
+            fixture.get("fixture_schema_version") != FIXTURE_SCHEMA_VERSION
+            or fixture.get("human_review_status") != "NOT_REVIEWED"
+            or not fixture.get("fixture_generator")
+            or not fixture.get("construction_method")
+            or "fixture_reviewer" in fixture
+        ):
+            raise ValueError("independent fixture provenance is misleading")
         if set(fixture["public_exercise"]) != PUBLIC_EXERCISE_FIELDS:
             raise ValueError("independent fixture public exercise leaks private data")
+        fixture_ids.append(fixture["fixture_id"])
         entry = entries[fixture["internal_fixture_binding"]]
         submitted = fixture["submitted_answer"]
         answer_body = {
@@ -109,11 +120,15 @@ def evaluate_independent_fixtures(catalog, fixture_path: Path) -> dict:
             unclassified += 1
         if grade.error_diagnoses:
             render_hint(
-                build_hint_plan(entry.internal_instance.instance_id, entry.graph),
+                build_hint_plan(
+                    entry.internal_instance.instance_id,
+                    entry.graph,
+                    grading=grade,
+                ),
                 entry.graph,
                 HintLevel.ORIENT,
                 language="en",
-                diagnoses=grade.error_diagnoses,
+                grading=grade,
             )
             if any(
                 item.confidence == DiagnosisConfidence.EXACT_MATCH
@@ -130,34 +145,51 @@ def evaluate_independent_fixtures(catalog, fixture_path: Path) -> dict:
                 wrong_targeted_hints += 1
         count += 1
     categories = sorted(category_totals)
-    precisions = []
+    predicted_precisions = []
     recalls = []
     per_category = {}
     for category in categories:
-        precision = (
-            category_correct[category] / category_predictions[category]
-            if category_predictions[category]
-            else 1.0
-        )
+        predictions = category_predictions[category]
+        precision = category_correct[category] / predictions if predictions else None
         recall = category_correct[category] / category_totals[category]
-        precisions.append(precision)
+        if precision is not None:
+            predicted_precisions.append(precision)
         recalls.append(recall)
         per_category[category] = {
             "precision": precision,
             "recall": recall,
             "support": category_totals[category],
+            "prediction_count": predictions,
+            "correct_prediction_count": category_correct[category],
         }
+    total_predictions = sum(category_predictions.values())
+    total_correct = sum(category_correct.values())
+    fixture_manifest = _fixture_manifest(tuple(fixture_ids))
+    macro_precision = (
+        sum(predicted_precisions) / len(predicted_precisions)
+        if predicted_precisions
+        else None
+    )
     return {
+        "evaluation_kind": "SYNTHETIC_CROSS_IMPLEMENTATION",
+        "metric_formula_version": "m292-honest-abstention-v1",
         "fixture_count": count,
-        "exact_diagnosis_count": sum(
-            category_correct[category] for category in categories
-        ),
+        "fixture_schema_version": FIXTURE_SCHEMA_VERSION,
+        "fixture_universe_hash": fixture_manifest["universe_hash"],
+        "diagnosis_fixture_manifest": fixture_manifest,
+        "exact_diagnosis_count": total_correct,
         "ambiguous_diagnosis_count": ambiguous,
         "unclassified_count": unclassified,
         "wrong_confident_diagnosis": wrong_confident,
         "grading_status_mismatch_count": grading_mismatch,
-        "macro_precision": sum(precisions) / len(precisions),
+        "micro_precision": total_correct / total_predictions
+        if total_predictions
+        else None,
+        "macro_precision": macro_precision,
+        "macro_precision_predicted_categories": macro_precision,
         "macro_recall": sum(recalls) / len(recalls),
+        "diagnosis_coverage": (count - unclassified) / count if count else 0.0,
+        "abstention_rate": unclassified / count if count else 0.0,
         "per_category": per_category,
         "confusion_matrix": {
             key: dict(sorted(value.items())) for key, value in sorted(confusion.items())
@@ -165,3 +197,27 @@ def evaluate_independent_fixtures(catalog, fixture_path: Path) -> dict:
         "independently_tested_targeted_hints": tested_hints,
         "wrong_targeted_hints": wrong_targeted_hints,
     }
+
+
+def _fixture_manifest(fixture_ids: tuple[str, ...]) -> dict:
+    if len(fixture_ids) != len(set(fixture_ids)):
+        raise ValueError("duplicate independent fixture id")
+    universe = tuple(sorted(fixture_ids))
+    development = tuple(
+        value for value in universe if int(content_hash(value)[:8], 16) % 5 != 0
+    )
+    final = tuple(value for value in universe if value not in set(development))
+    intersection = len(set(development) & set(final))
+    body = {
+        "axis": "SYNTHETIC_DIAGNOSIS_FIXTURE_PARTITION",
+        "axis_kind": "SYNTHETIC_EVALUATION_PARTITION",
+        "universe_kind": "fixture_id",
+        "universe_hash": content_hash(universe),
+        "universe_count": len(universe),
+        "development": development,
+        "final_validation": final,
+        "intersection_count": intersection,
+    }
+    if not development or not final or intersection:
+        raise ValueError("invalid independent fixture partition")
+    return {**body, "manifest_hash": content_hash(body)}

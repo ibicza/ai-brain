@@ -17,8 +17,9 @@ from ai_brain.stage2.education.models import (
     ExerciseFamily,
     ExerciseInstance,
     ExerciseSpec,
-    ExerciseSplitAxis,
     PresentedExercise,
+    PublicExercise,
+    PublicTutorSessionHandle,
     SemanticExerciseKey,
 )
 from ai_brain.stage2.education.version import (
@@ -61,8 +62,7 @@ def make_internal_instance(
     question_text: str,
     structured_givens: dict[str, Any],
     expected_answer: dict[str, Any],
-    split_axis: ExerciseSplitAxis,
-    split_manifest_hash: str,
+    split_memberships: tuple[tuple[str, str, str], ...],
 ) -> tuple[SemanticExerciseKey, ExerciseInstance]:
     verify_exercise_spec(spec)
     semantic = make_semantic_key(spec.family, structured_givens, expected_answer, graph)
@@ -91,13 +91,12 @@ def make_internal_instance(
             )
         ),
         "difficulty_metadata": _difficulty(graph, question_text),
-        "split_axis": split_axis,
+        "split_memberships": split_memberships,
         "counterfactuals": chemistry_counterfactuals(graph),
         "generated_at": _deterministic_time(seed),
         "schema_version": EXERCISE_SCHEMA_VERSION,
         "semantic_key_hash": semantic.semantic_key_hash,
         "compilation_receipt_hash": receipt.receipt_hash,
-        "split_manifest_hash": split_manifest_hash,
     }
     identity = {**body, "instance_id": None}
     body["instance_id"] = f"education.exercise.{content_hash(identity)[:24]}"
@@ -218,6 +217,37 @@ def verify_presented_exercise(presented: PresentedExercise) -> None:
         raise ValueError("presented exercise leaks a private field")
 
 
+def verify_presented_exercise_binding(
+    presented: PresentedExercise,
+    instance: ExerciseInstance,
+    spec: ExerciseSpec,
+    *,
+    session_id: str,
+) -> None:
+    verify_presented_exercise(presented)
+    expected = present_exercise(instance, spec, session_id=session_id)
+    if presented != expected:
+        raise ValueError("presented exercise semantic binding mismatch")
+
+
+def public_exercise(
+    presented: PresentedExercise, *, session_status: str
+) -> PublicExercise:
+    verify_presented_exercise(presented)
+    return PublicExercise(
+        session=PublicTutorSessionHandle(
+            session_id=presented.session_id, status=session_status
+        ),
+        exercise_id=presented.exercise_id,
+        language=presented.language,
+        question=presented.question_text,
+        structured_givens=dict(presented.structured_public_givens),
+        difficulty=dict(presented.difficulty_metadata),
+        learning_objectives=tuple(presented.learning_objectives),
+        accepted_answer_format=presented.accepted_answer_format,
+    )
+
+
 def verify_exercise_instance(
     instance: ExerciseInstance,
     spec: ExerciseSpec,
@@ -249,10 +279,18 @@ def verify_exercise_instance(
         counterfactual_digest = counterfactual_body.pop("counterfactual_hash")
         if content_hash(counterfactual_body) != counterfactual_digest:
             raise ValueError("exercise counterfactual hash mismatch")
-    # Split manifests are catalog-level dependencies and deliberately separate.
-    if len(instance.split_manifest_hash) != 64:
-        raise ValueError("exercise lacks a valid split manifest")
-    forbidden = (instance.hidden_answer_graph_hash, instance.split_axis.value)
+    if not instance.split_memberships:
+        raise ValueError("exercise lacks split memberships")
+    axes = set()
+    for axis, partition, manifest_hash in instance.split_memberships:
+        if (
+            axis in axes
+            or partition not in {"development", "final_validation"}
+            or len(manifest_hash) != 64
+        ):
+            raise ValueError("invalid exercise split membership")
+        axes.add(axis)
+    forbidden = (instance.hidden_answer_graph_hash, *axes)
     if any(value in instance.question_text for value in forbidden):
         raise ValueError("exercise question leaks hidden metadata")
 

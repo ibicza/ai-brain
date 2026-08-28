@@ -20,6 +20,8 @@ def verify_compilation_receipt(
     service: ChemistryDomainService,
     *,
     graph_hash: str | None = None,
+    graph=None,
+    spec=None,
 ) -> None:
     body = asdict(receipt)
     digest = body.pop("receipt_hash")
@@ -47,3 +49,27 @@ def verify_compilation_receipt(
         raise ValueError("stale educational compilation tool")
     if graph_hash is not None and receipt.educational_graph_hash != graph_hash:
         raise ValueError("compilation receipt references another graph")
+    if graph is not None:
+        expected_request_hash = content_hash(
+            receipt.canonical_arguments
+            if receipt.tool_id == "chemistry_fact_lookup"
+            else {
+                "tool_id": receipt.tool_id,
+                "arguments": receipt.canonical_arguments,
+            }
+        )
+        if (
+            receipt.educational_graph_hash != graph.graph_hash
+            or receipt.exact_result_hash != graph.source_result_hash
+            or receipt.knowledge_snapshot_hash != graph.knowledge_snapshot_hash
+            or receipt.tool_implementation_manifest_hash
+            != (
+                content_hash("chemistry_fact_lookup_v1")
+                if receipt.tool_id == "chemistry_fact_lookup"
+                else graph.tool_implementation_hash
+            )
+            or graph.request_hash != expected_request_hash
+        ):
+            raise ValueError("compilation receipt semantic dependency mismatch")
+    if spec is not None and receipt.exercise_spec_hash != spec.spec_hash:
+        raise ValueError("compilation receipt references another exercise spec")

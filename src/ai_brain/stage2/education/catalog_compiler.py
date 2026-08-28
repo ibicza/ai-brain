@@ -66,13 +66,18 @@ def compile_catalog_v2(
     if len({item.semantic_key_hash for item in semantic_keys}) != entry_count:
         raise ValueError("catalog compiler produced duplicate semantic keys")
     split_manifests = _split_manifests(records, semantic_keys)
-    split_by_axis = {
-        ExerciseSplitAxis(item["axis"]): item["manifest_hash"]
-        for item in split_manifests
-    }
     entries = []
     for index, (row, semantic) in enumerate(zip(records, semantic_keys, strict=True)):
-        axis = _primary_axis(row)
+        memberships = tuple(
+            (
+                item["axis"],
+                "final_validation"
+                if semantic.semantic_key_hash in set(item["final_validation"])
+                else "development",
+                item["manifest_hash"],
+            )
+            for item in split_manifests
+        )
         _, instance = make_internal_instance(
             row["spec"],
             row["graph"],
@@ -84,8 +89,7 @@ def compile_catalog_v2(
             ),
             structured_givens=row["givens"],
             expected_answer=row["expected"],
-            split_axis=axis,
-            split_manifest_hash=split_by_axis[axis],
+            split_memberships=memberships,
         )
         body = {
             "semantic_key": semantic,
@@ -361,22 +365,6 @@ def _expected(result):
     }
 
 
-def _primary_axis(row) -> ExerciseSplitAxis:
-    givens = row["givens"]
-    formula = givens.get("formula")
-    if formula in SPLIT_BUCKETS["final"]:
-        return ExerciseSplitAxis.FORMULA_STRUCTURE_HOLDOUT
-    if givens.get("source_unit") in {"kg", "entities"}:
-        return ExerciseSplitAxis.UNIT_DIRECTION_HOLDOUT
-    if "value" in givens and Decimal(str(givens["value"])) >= 70:
-        return ExerciseSplitAxis.NUMERIC_RANGE_HOLDOUT
-    if formula and "(" in formula:
-        return ExerciseSplitAxis.MULTI_STEP_COMPOSITION
-    if row["spec"].family == ExerciseFamily.FACT_RETRIEVAL:
-        return ExerciseSplitAxis.ELEMENT_COMBINATION_HOLDOUT
-    return ExerciseSplitAxis.TEMPLATE_HOLDOUT
-
-
 def _split_manifests(records, semantic_keys):
     implemented = tuple(ExerciseSplitAxis)
     manifests = []
@@ -386,13 +374,35 @@ def _split_manifests(records, semantic_keys):
         for row, semantic in zip(records, semantic_keys, strict=True):
             target = final if _is_final(axis, row) else development
             target.append(semantic.semantic_key_hash)
+        universe = tuple(sorted(item.semantic_key_hash for item in semantic_keys))
+        intersection = len(set(development) & set(final))
+        axis_kind = (
+            "DETERMINISTIC_PARTITION"
+            if axis
+            in {
+                ExerciseSplitAxis.TEMPLATE_KEY_PARTITION,
+                ExerciseSplitAxis.LANGUAGE_ASSIGNMENT_PARTITION,
+            }
+            else "TRUE_CONTENT_HOLDOUT"
+        )
         body = {
             "axis": axis.value,
+            "axis_kind": axis_kind,
             "status": "TESTED",
             "development": tuple(development),
             "final_validation": tuple(final),
-            "intersection_count": 0,
+            "intersection_count": intersection,
+            "universe_kind": "semantic_key_hash",
+            "universe_hash": content_hash(universe),
+            "universe_count": len(universe),
         }
+        if (
+            not development
+            or not final
+            or intersection
+            or set(development) | set(final) != set(universe)
+        ):
+            raise ValueError(f"invalid educational split universe: {axis.value}")
         manifests.append({**body, "manifest_hash": content_hash(body)})
     return tuple(manifests)
 
@@ -411,16 +421,16 @@ def _is_final(axis: ExerciseSplitAxis, row) -> bool:
             ("kg", "mmol"),
             ("entities", "mmol"),
         }
-    if axis == ExerciseSplitAxis.TEMPLATE_HOLDOUT:
+    if axis == ExerciseSplitAxis.TEMPLATE_KEY_PARTITION:
         return semantic_bucket(row) == 2
-    if axis == ExerciseSplitAxis.RU_EN_CROSS_LANGUAGE:
+    if axis == ExerciseSplitAxis.LANGUAGE_ASSIGNMENT_PARTITION:
         return semantic_bucket(row) % 2 == 1
-    if axis == ExerciseSplitAxis.MULTI_STEP_COMPOSITION:
+    if axis == ExerciseSplitAxis.MULTI_STEP_COMPOSITION_HOLDOUT:
         return "(" in formula or row["spec"].family in {
             ExerciseFamily.MASS_AMOUNT,
             ExerciseFamily.AMOUNT_ENTITIES,
         }
-    return row["spec"].family == ExerciseFamily.FACT_RETRIEVAL
+    raise ValueError(f"unknown educational split axis: {axis.value}")
 
 
 def semantic_bucket(row) -> int:

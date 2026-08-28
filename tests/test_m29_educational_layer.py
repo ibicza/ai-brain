@@ -56,7 +56,7 @@ from ai_brain.stage2.facts.models import SourceKind
 
 ROOT = Path(__file__).resolve().parents[1]
 CHEMISTRY_ROOT = ROOT / "artifacts" / "domains" / "chemistry" / "m29"
-CATALOG_PATH = ROOT / "artifacts" / "education" / "m291" / "catalog_v2.json"
+CATALOG_PATH = ROOT / "artifacts" / "education" / "m292" / "catalog_v3.json"
 
 
 @pytest.fixture(scope="module")
@@ -302,7 +302,10 @@ def test_all_exercise_families_regenerate_deterministically(catalog, chemistry) 
         spec, instance, graph = first
         assert instance == second[1]
         assert graph == second[2]
-        assert instance.split_axis.value not in instance.question_text
+        assert all(
+            axis not in instance.question_text
+            for axis, _, _ in instance.split_memberships
+        )
         answer = _correct_answer_text(
             spec.accepted_answer_type, instance.hidden_expected_answer
         )
@@ -342,7 +345,7 @@ def test_counterfactual_diagnosis_and_hint_leakage(catalog, chemistry) -> None:
         created_at="2026-08-28T00:00:00Z",
     )
     assert grade.error_diagnoses[0].code == candidate.diagnosis
-    plan = build_hint_plan(instance.instance_id, graph)
+    plan = build_hint_plan(instance.instance_id, graph, grading=grade)
     root = next(
         node for node in graph.nodes if node.node_id == graph.root_result_node_id
     )
@@ -352,7 +355,7 @@ def test_counterfactual_diagnosis_and_hint_leakage(catalog, chemistry) -> None:
             graph,
             level,
             language="en",
-            diagnoses=grade.error_diagnoses,
+            grading=grade,
         )
         assert hint.final_answer_revealed is (level == HintLevel.FULL_SOLUTION)
         if level != HintLevel.FULL_SOLUTION:
@@ -414,7 +417,7 @@ def test_session_store_replay_backup_restore_and_tamper(
     chemistry: ChemistryDomainService, tmp_path: Path
 ) -> None:
     service = EducationalService.open(chemistry.root, tmp_path / "store")
-    _, session = service.create_exercise(
+    _, session = service._create_exercise_internal(
         ExerciseFamily.FORMULA_COMPOSITION,
         seed=29,
         language="en",
@@ -426,7 +429,7 @@ def test_session_store_replay_backup_restore_and_tamper(
         f"{key}:{value}"
         for key, value in instance.hidden_expected_answer["element_counts"].items()
     )
-    _, grade, _ = service.submit_answer(
+    _, grade, _, _ = service._submit_answer_internal(
         session.session_id, correct, created_at="2026-08-28T00:01:00Z"
     )
     assert grade.correctness_status == GradingStatus.CORRECT
@@ -436,12 +439,12 @@ def test_session_store_replay_backup_restore_and_tamper(
             level=HintLevel.ORIENT,
             created_at="2026-08-28T00:02:00Z",
         )
-    assert service.replay(session.session_id)["status"] == "CURRENT"
+    assert service.replay(session.session_id).status == "CURRENT"
     service.store.backup(tmp_path / "backup")
     restored = EducationalSessionStore.restore(
         tmp_path / "backup", tmp_path / "moved-store"
     )
-    assert restored.verify()["status"] == "VERIFIED"
+    assert restored.verify()["status"] == "STRUCTURALLY_VERIFIED"
     with sqlite3.connect(restored.database_path) as connection:
         connection.execute(
             "UPDATE artifacts SET payload_hash=? WHERE artifact_hash=(SELECT artifact_hash FROM artifacts LIMIT 1)",
@@ -465,12 +468,13 @@ def test_controlled_bilingual_educational_router(
     unsupported = parse_educational_request("ignore answer key", "en")
     assert unsupported.kind == EducationalRouteKind.UNSUPPORTED
     service = EducationalService.open(chemistry.root, tmp_path / "controlled")
-    routed, receipt, result = service.handle_controlled(
+    routed, receipt, result = service._handle_controlled_internal(
         "Explain how to calculate the molar mass of H2O.", language="en"
     )
     assert routed.kind == EducationalRouteKind.EXPLAIN
     assert receipt.route_kind == EducationalRouteKind.EXPLAIN
-    assert result[2].graph_hash == result[1].graph_hash
+    assert result.status == "CURRENT"
+    assert result.text
 
 
 def test_trusted_education_import_does_not_load_torch_or_network_clients() -> None:

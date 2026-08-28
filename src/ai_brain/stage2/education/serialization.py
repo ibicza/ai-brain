@@ -18,7 +18,6 @@ from ai_brain.stage2.education.models import (
     ExerciseFamily,
     ExerciseInstance,
     ExerciseSpec,
-    ExerciseSplitAxis,
     ExplanationArtifact,
     ExplanationMode,
     ExplanationPlan,
@@ -102,7 +101,9 @@ def instance_from_dict(row: dict[str, Any]) -> ExerciseInstance:
             **row,
             "accepted_equivalent_forms": tuple(row["accepted_equivalent_forms"]),
             "provenance_dependencies": tuple(row["provenance_dependencies"]),
-            "split_axis": ExerciseSplitAxis(row["split_axis"]),
+            "split_memberships": tuple(
+                tuple(item) for item in row["split_memberships"]
+            ),
             "counterfactuals": tuple(
                 CounterfactualAnswer(
                     **{
@@ -220,13 +221,20 @@ def hint_from_dict(row: dict[str, Any]) -> HintArtifact:
             "diagnosis_codes": tuple(
                 MisconceptionCode(item) for item in row["diagnosis_codes"]
             ),
+            "diagnosis_hashes": tuple(row["diagnosis_hashes"]),
         }
     )
 
 
 def hint_plan_from_dict(row: dict[str, Any]) -> HintPlan:
     _exact(row, set(HintPlan.__dataclass_fields__))
-    return HintPlan(**{**row, "node_order": tuple(row["node_order"])})
+    return HintPlan(
+        **{
+            **row,
+            "node_order": tuple(row["node_order"]),
+            "diagnosis_hashes": tuple(row["diagnosis_hashes"]),
+        }
+    )
 
 
 def event_from_dict(row: dict[str, Any]) -> TutorEvent:

@@ -96,7 +96,11 @@ class EducationalCatalogV2:
         for entry in self.entries:
             _verify_entry_hash(entry)
             verify_compilation_receipt(
-                entry.compilation_receipt, service, graph_hash=entry.graph.graph_hash
+                entry.compilation_receipt,
+                service,
+                graph_hash=entry.graph.graph_hash,
+                graph=entry.graph,
+                spec=entry.exercise_spec,
             )
             adapter.verify_graph(entry.graph)
             verify_exercise_instance(
@@ -199,14 +203,39 @@ def _verify_entry_hash(entry: EducationalCatalogEntryV2) -> None:
 def _verify_splits(
     manifests: tuple[dict[str, Any], ...], semantic_hashes: set[str]
 ) -> None:
+    axes = set()
+    expected_universe = set(semantic_hashes)
+    expected_hash = content_hash(tuple(sorted(expected_universe)))
     for manifest in manifests:
         body = dict(manifest)
         digest = body.pop("manifest_hash", None)
         if digest != content_hash(body):
             raise ValueError("educational split manifest hash mismatch")
-        development = set(manifest.get("development", ()))
-        final = set(manifest.get("final_validation", ()))
-        if development & final:
+        axis = manifest.get("axis")
+        if axis in axes:
+            raise ValueError("duplicate educational split axis")
+        axes.add(axis)
+        development_values = tuple(manifest.get("development", ()))
+        final_values = tuple(manifest.get("final_validation", ()))
+        development = set(development_values)
+        final = set(final_values)
+        intersection = len(development & final)
+        if (
+            not development
+            or not final
+            or len(development_values) != len(development)
+            or len(final_values) != len(final)
+            or intersection
+        ):
             raise ValueError("educational split is not disjoint")
-        if not development | final <= semantic_hashes:
-            raise ValueError("educational split references an unknown semantic key")
+        if development | final != expected_universe:
+            raise ValueError("educational split does not exactly cover its universe")
+        if (
+            manifest.get("intersection_count") != intersection
+            or manifest.get("universe_kind") != "semantic_key_hash"
+            or manifest.get("universe_hash") != expected_hash
+            or manifest.get("universe_count") != len(expected_universe)
+            or manifest.get("axis_kind")
+            not in {"TRUE_CONTENT_HOLDOUT", "DETERMINISTIC_PARTITION"}
+        ):
+            raise ValueError("educational split universe metadata mismatch")
