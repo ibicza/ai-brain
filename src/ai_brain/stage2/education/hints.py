@@ -167,10 +167,34 @@ def _bounded_hint(graph, level, language, diagnosis_codes):
             if language == "ru"
             else "Review the original verified fact."
         ), ()
+    human_step = _human_step_label(safe.kind, language)
     return (
         ("Промежуточный результат" if language == "ru" else "Intermediate result")
-        + f" [{safe.node_id}]: {safe.exact_output}{' ' + safe.unit if safe.unit else ''}.",
+        + f" — {human_step}: {safe.exact_output}{' ' + safe.unit if safe.unit else ''}.",
         (safe.node_id,),
+    )
+
+
+def _human_step_label(kind: GraphNodeKind, language: str) -> str:
+    labels = {
+        "ru": {
+            GraphNodeKind.ADD: "шаг сложения вкладов",
+            GraphNodeKind.UNIT_NORMALIZATION: "перевод единиц",
+            GraphNodeKind.MOLE_RELATION: "связь массы и количества вещества",
+            GraphNodeKind.AVOGADRO_RELATION: "связь с постоянной Авогадро",
+        },
+        "en": {
+            GraphNodeKind.ADD: "the contribution-summing step",
+            GraphNodeKind.UNIT_NORMALIZATION: "the unit-conversion step",
+            GraphNodeKind.MOLE_RELATION: "the mass-to-amount relation",
+            GraphNodeKind.AVOGADRO_RELATION: "the Avogadro relation",
+        },
+    }
+    return labels[language].get(
+        kind,
+        "первый вычислительный шаг"
+        if language == "ru"
+        else "the first calculation step",
     )
 
 

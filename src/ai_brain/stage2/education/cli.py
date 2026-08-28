@@ -17,15 +17,18 @@ from ai_brain.stage2.education.service import EducationalService
 from ai_brain.stage2.facts.canonical import canonical_json
 
 DEFAULT_CHEMISTRY_ROOT = Path("artifacts/domains/chemistry/m29")
-DEFAULT_STORE_ROOT = Path("artifacts/education/m292/sessions")
-DEFAULT_CATALOG = Path("artifacts/education/m292/catalog_v3.json")
+DEFAULT_STORE_ROOT = Path("artifacts/education/m30/sessions")
+DEFAULT_CATALOG = Path("artifacts/education/m30/catalog_v4.json")
 
 
 def build_parser() -> argparse.ArgumentParser:
+    from ai_brain.stage2.conversation.cli import add_chat_arguments, add_chat_commands
+
     parser = argparse.ArgumentParser(prog="ai-brain-tutor")
     parser.add_argument("--chemistry-root", type=Path, default=DEFAULT_CHEMISTRY_ROOT)
     parser.add_argument("--store", type=Path, default=DEFAULT_STORE_ROOT)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    add_chat_arguments(parser)
     commands = parser.add_subparsers(dest="command", required=True)
 
     explain = commands.add_parser("explain")
@@ -72,6 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     compile_catalog.add_argument("--output", type=Path, default=DEFAULT_CATALOG)
     compile_catalog.add_argument("--audit", type=Path, required=True)
     compile_catalog.add_argument("--entry-count", type=int, default=2_000)
+    add_chat_commands(commands)
     return parser
 
 
@@ -109,7 +113,11 @@ def main(argv: list[str] | None = None) -> None:
     service = EducationalService.open(
         args.chemistry_root, args.store, catalog_path=args.catalog
     )
-    if args.command == "explain":
+    if args.command.startswith("chat-"):
+        from ai_brain.stage2.conversation.cli import dispatch_chat
+
+        _print(dispatch_chat(args, service))
+    elif args.command == "explain":
         request = _read_request(args.request)
         outcome = service.explain_tool(
             request["tool_id"],

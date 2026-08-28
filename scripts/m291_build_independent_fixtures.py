@@ -48,7 +48,7 @@ def main() -> None:
     parser.add_argument(
         "--catalog",
         type=Path,
-        default=ROOT / "artifacts" / "education" / "m292" / "catalog_v3.json",
+        default=ROOT / "artifacts" / "education" / "m30" / "catalog_v4.json",
     )
     parser.add_argument(
         "--output",

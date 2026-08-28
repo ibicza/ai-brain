@@ -12,6 +12,7 @@ from ai_brain.stage2.domains.chemistry.knowledge_snapshot import (
 )
 from ai_brain.stage2.domains.chemistry.resolver import resolve_chemistry_element
 from ai_brain.stage2.domains.chemistry.service import ChemistryDomainService
+from ai_brain.stage2.education.fact_replay import make_fact_replay_descriptor
 from ai_brain.stage2.education.graph import make_edge, make_graph, make_node
 from ai_brain.stage2.education.graph_builder import build_fact_graph, build_result_graph
 from ai_brain.stage2.education.graph_validation import verify_derivation_graph
@@ -88,6 +89,7 @@ class ChemistryEducationAdapter:
         *,
         language: str,
         created_at: str | None = None,
+        role: str = "answer_key",
     ) -> tuple[dict[str, Any], EducationalDerivationGraph]:
         resolution = resolve_chemistry_element(self.service.memory, symbol, language)
         if len(resolution.entity_ids) != 1:
@@ -138,10 +140,16 @@ class ChemistryEducationAdapter:
                 for predicate in binding_predicates
             )
             answer["claim_ids"] = tuple(binding.claim_id for binding in bindings)
+            request_mode = (
+                "STANDARD_INTERVAL" if len(binding_predicates) == 2 else request
+            )
         else:
-            validate_fact_provenance(
+            binding = validate_fact_provenance(
                 self.service.memory, self.service.manifest, subject, predicate_id
             )
+            bindings = (binding,)
+            binding_predicates = (predicate_id,)
+            request_mode = None
             query = self.service.memory.make_query(
                 subject=subject, predicate_id=predicate_id, include_evidence=True
             )
@@ -164,6 +172,19 @@ class ChemistryEducationAdapter:
                 "predicate_id": predicate_id,
             }
             answer["answer_hash"] = content_hash(answer)
+        descriptor = make_fact_replay_descriptor(
+            self.service.memory,
+            self.service.manifest,
+            subject_entity_id=subject,
+            requested_predicate=predicate_id,
+            binding_predicates=binding_predicates,
+            language=language,
+            request_mode=request_mode,
+            role=role,
+            current_value=value,
+            bindings=bindings,
+        )
+        answer["fact_replay_descriptor"] = asdict(descriptor)
         answer["answer_hash"] = content_hash(
             {key: value for key, value in answer.items() if key != "answer_hash"}
         )
@@ -224,10 +245,18 @@ class ChemistryEducationAdapter:
         created_at: str,
     ) -> tuple[Any, Any, EducationalDerivationGraph]:
         given_answer, given_graph = self.fact_graph(
-            symbol, given_predicate, language=language, created_at=created_at
+            symbol,
+            given_predicate,
+            language=language,
+            created_at=created_at,
+            role="question_given",
         )
         answer, answer_graph = self.fact_graph(
-            symbol, answer_predicate, language=language, created_at=created_at
+            symbol,
+            answer_predicate,
+            language=language,
+            created_at=created_at,
+            role="answer_key",
         )
         given_source = next(
             node for node in given_graph.nodes if node.kind == GraphNodeKind.FACT_LOOKUP

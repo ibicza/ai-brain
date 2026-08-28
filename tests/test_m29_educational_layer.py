@@ -56,7 +56,7 @@ from ai_brain.stage2.facts.models import SourceKind
 
 ROOT = Path(__file__).resolve().parents[1]
 CHEMISTRY_ROOT = ROOT / "artifacts" / "domains" / "chemistry" / "m29"
-CATALOG_PATH = ROOT / "artifacts" / "education" / "m292" / "catalog_v3.json"
+CATALOG_PATH = ROOT / "artifacts" / "education" / "m30" / "catalog_v4.json"
 
 
 @pytest.fixture(scope="module")

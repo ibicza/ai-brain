@@ -97,6 +97,12 @@ def make_internal_instance(
         "schema_version": EXERCISE_SCHEMA_VERSION,
         "semantic_key_hash": semantic.semantic_key_hash,
         "compilation_receipt_hash": receipt.receipt_hash,
+        "catalog_entry_hash": content_hash(
+            {
+                "state": "UNBOUND_OFFLINE_COMPILATION",
+                "semantic": semantic.semantic_key_hash,
+            }
+        ),
     }
     identity = {**body, "instance_id": None}
     body["instance_id"] = f"education.exercise.{content_hash(identity)[:24]}"
@@ -272,7 +278,11 @@ def verify_exercise_instance(
         raise ValueError("exercise dependencies do not match")
     if instance.schema_version != EXERCISE_SCHEMA_VERSION:
         raise ValueError("incompatible exercise instance schema")
-    if not instance.provenance_dependencies or not instance.compilation_receipt_hash:
+    if (
+        not instance.provenance_dependencies
+        or not instance.compilation_receipt_hash
+        or len(instance.catalog_entry_hash) != 64
+    ):
         raise ValueError("exercise lacks provenance/compilation dependencies")
     for counterfactual in instance.counterfactuals:
         counterfactual_body = asdict(counterfactual)

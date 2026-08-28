@@ -40,7 +40,7 @@ from ai_brain.stage2.facts.models import ClaimStatus, SourceStatus
 
 ROOT = Path(__file__).resolve().parents[1]
 CHEMISTRY_ROOT = ROOT / "artifacts" / "domains" / "chemistry" / "m29"
-CATALOG_PATH = ROOT / "artifacts" / "education" / "m292" / "catalog_v3.json"
+CATALOG_PATH = ROOT / "artifacts" / "education" / "m30" / "catalog_v4.json"
 FIXTURES = ROOT / "tests" / "fixtures" / "m292_synthetic_student_errors.jsonl"
 
 
@@ -187,9 +187,7 @@ def test_split_manifests_declare_exact_truthful_universes(catalog) -> None:
         assert len(final) == len(set(final))
         assert not set(development) & set(final)
         assert set(development) | set(final) == semantic
-        assert manifest["intersection_count"] == len(
-            set(development) & set(final)
-        )
+        assert manifest["intersection_count"] == len(set(development) & set(final))
         assert manifest["universe_kind"] == "semantic_key_hash"
         assert manifest["universe_count"] == len(semantic)
         assert manifest["universe_hash"] == content_hash(tuple(sorted(semantic)))
@@ -248,9 +246,7 @@ def test_complete_session_closure_is_authority_verified(
     assert verified["educational_store_structural"]["status"] == (
         "STRUCTURALLY_VERIFIED"
     )
-    assert verified["educational_store_authority"]["status"] == (
-        "AUTHORITY_VERIFIED"
-    )
+    assert verified["educational_store_authority"]["status"] == ("AUTHORITY_VERIFIED")
 
 
 def test_fact_memory_staleness_blocks_every_trust_bearing_action(
@@ -336,7 +332,9 @@ def test_public_serialization_boundary_has_one_thousand_clean_probes(catalog) ->
         assert not forbidden_names & set(_nested_keys(row))
         assert entry.graph.graph_hash not in encoded
         assert entry.compilation_receipt.receipt_hash not in encoded
-        assert json.dumps(instance.hidden_expected_answer, sort_keys=True) not in encoded
+        assert (
+            json.dumps(instance.hidden_expected_answer, sort_keys=True) not in encoded
+        )
 
 
 def test_rehashed_grading_closure_passes_structure_but_fails_authority(

@@ -48,7 +48,7 @@ from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 
 ROOT = Path(__file__).resolve().parents[1]
 CHEMISTRY_ROOT = ROOT / "artifacts" / "domains" / "chemistry" / "m29"
-CATALOG_PATH = ROOT / "artifacts" / "education" / "m292" / "catalog_v3.json"
+CATALOG_PATH = ROOT / "artifacts" / "education" / "m30" / "catalog_v4.json"
 FIXTURES = ROOT / "tests" / "fixtures" / "m292_synthetic_student_errors.jsonl"
 
 
@@ -64,8 +64,8 @@ def catalog(chemistry) -> EducationalCatalogV2:
     return EducationalCatalogV2.load(CATALOG_PATH, chemistry)
 
 
-def test_v3_versions_are_explicit() -> None:
-    assert EDUCATIONAL_LAYER_VERSION == "1.2.0"
+def test_v4_versions_are_explicit() -> None:
+    assert EDUCATIONAL_LAYER_VERSION == "1.3.0"
     assert {
         EDUCATIONAL_SCHEMA_VERSION,
         DERIVATION_GRAPH_SCHEMA_VERSION,
@@ -73,8 +73,8 @@ def test_v3_versions_are_explicit() -> None:
         GRADING_SCHEMA_VERSION,
         TUTOR_SESSION_SCHEMA_VERSION,
         SESSION_STORE_SCHEMA_VERSION,
-    } == {3}
-    assert HINT_POLICY_VERSION == "3.0"
+    } == {4}
+    assert HINT_POLICY_VERSION == "4.0"
 
 
 def test_runtime_import_boundary_has_one_direct_executor() -> None:

@@ -8,6 +8,10 @@ from ai_brain.stage2.domains.chemistry.models import ChemistryReplayStatus
 from ai_brain.stage2.domains.chemistry.replay import replay_chemistry_result
 from ai_brain.stage2.education.compilation_receipts import verify_compilation_receipt
 from ai_brain.stage2.education.exercise_generation import verify_exercise_instance
+from ai_brain.stage2.education.fact_replay import (
+    descriptor_from_dict,
+    replay_fact_descriptor,
+)
 from ai_brain.stage2.education.models import EducationalReplayStatus, GraphNodeKind
 from ai_brain.stage2.education.version import (
     GRADING_SCHEMA_VERSION,
@@ -101,9 +105,9 @@ def evaluate_dependency_currentness(service, graph, receipt, instance, spec):
         return _result(EducationalReplayStatus.INVALID_GRAPH)
     if not _answer_key_matches(instance, graph):
         return _result(EducationalReplayStatus.STALE_ANSWER_KEY)
-    if GRADING_SCHEMA_VERSION != 3:
+    if GRADING_SCHEMA_VERSION != 4:
         return _result(EducationalReplayStatus.STALE_GRADING_POLICY)
-    if HINT_POLICY_VERSION != "3.0":
+    if HINT_POLICY_VERSION != "4.0":
         return _result(EducationalReplayStatus.STALE_HINT_POLICY)
     return _result(EducationalReplayStatus.CURRENT)
 
@@ -123,6 +127,11 @@ def replay_source_currentness(graph, service) -> EducationalReplayStatus:
         return CHEMISTRY_STATUS_MAP.get(
             status, EducationalReplayStatus.INVALID_SOURCE_RESULT
         )
+    if graph.source_result_type in {
+        "ChemistryFactAnswer",
+        "ChemistryPairedFactAnswer",
+    }:
+        return _replay_fact_graph(graph, service)
     try:
         evidence_hashes = set()
         source_hashes = set()
@@ -161,11 +170,51 @@ def replay_source_currentness(graph, service) -> EducationalReplayStatus:
     return EducationalReplayStatus.CURRENT
 
 
+def _replay_fact_graph(graph, service) -> EducationalReplayStatus:
+    try:
+        if graph.source_result_type == "ChemistryFactAnswer":
+            artifacts = (graph.source_result_artifact,)
+        else:
+            artifacts = (
+                graph.source_result_artifact["given"],
+                graph.source_result_artifact["answer"],
+            )
+        descriptors = tuple(
+            descriptor_from_dict(item["fact_replay_descriptor"]) for item in artifacts
+        )
+    except (KeyError, TypeError, ValueError):
+        return EducationalReplayStatus.INVALID_SOURCE_RESULT
+    for descriptor in descriptors:
+        status = replay_fact_descriptor(descriptor, service.memory, service.manifest)
+        if status is not EducationalReplayStatus.CURRENT:
+            return status
+    lookups = tuple(
+        node for node in graph.nodes if node.kind is GraphNodeKind.FACT_LOOKUP
+    )
+    if len(lookups) != len(descriptors):
+        return EducationalReplayStatus.STALE_FACT_VALUE
+    by_role = {item.role: item for item in descriptors}
+    for node in lookups:
+        role = node.metadata.get("role", "answer_key")
+        descriptor = by_role.get(role)
+        if descriptor is None or node.exact_output != descriptor.current_value:
+            return EducationalReplayStatus.STALE_FACT_VALUE
+    root = next(
+        (node for node in graph.nodes if node.node_id == graph.root_result_node_id),
+        None,
+    )
+    answer = by_role.get("answer_key")
+    if root is None or answer is None or root.exact_output != answer.current_value:
+        return EducationalReplayStatus.STALE_FACT_VALUE
+    return EducationalReplayStatus.CURRENT
+
+
 def _answer_key_matches(instance, graph) -> bool:
     if instance.hidden_answer_graph_hash != graph.graph_hash:
         return False
     root = next(
-        (node for node in graph.nodes if node.node_id == graph.root_result_node_id), None
+        (node for node in graph.nodes if node.node_id == graph.root_result_node_id),
+        None,
     )
     if root is None or root.kind is not GraphNodeKind.FINAL_RESULT:
         return False

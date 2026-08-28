@@ -86,6 +86,7 @@ def start_session(
         "hint_hashes": (),
         "status": TutorSessionStatus.PRESENTED,
         "graph_hash": instance.hidden_answer_graph_hash,
+        "catalog_entry_hash": instance.catalog_entry_hash,
         "domain_dependencies": instance.provenance_dependencies,
         "created_at": timestamp,
         "updated_at": timestamp,

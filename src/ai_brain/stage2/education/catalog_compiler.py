@@ -17,6 +17,7 @@ from ai_brain.stage2.domains.chemistry.education.exercise_catalog import (
     chemistry_exercise_specs,
 )
 from ai_brain.stage2.domains.chemistry.service import ChemistryDomainService
+from ai_brain.stage2.education.catalog_anchor import bind_instance_to_catalog
 from ai_brain.stage2.education.compiler import (
     COMPILER_IDENTITY,
     compile_answer_key,
@@ -36,7 +37,7 @@ from ai_brain.stage2.education.models import (
     StudentAnswerKind,
 )
 from ai_brain.stage2.education.version import (
-    EDUCATIONAL_SCHEMA_VERSION,
+    EDUCATIONAL_CATALOG_SCHEMA_VERSION,
     EXERCISE_GENERATOR_VERSION,
 )
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
@@ -91,6 +92,9 @@ def compile_catalog_v2(
             expected_answer=row["expected"],
             split_memberships=memberships,
         )
+        instance = bind_instance_to_catalog(
+            semantic, row["spec"], instance, row["graph"], row["receipt"]
+        )
         body = {
             "semantic_key": semantic,
             "exercise_spec": row["spec"],
@@ -98,7 +102,9 @@ def compile_catalog_v2(
             "graph": row["graph"],
             "compilation_receipt": row["receipt"],
         }
-        entries.append(EducationalCatalogEntryV2(**body, entry_hash=content_hash(body)))
+        entries.append(
+            EducationalCatalogEntryV2(**body, entry_hash=instance.catalog_entry_hash)
+        )
     manifest_body = {
         "chemistry_domain_manifest_hash": service.manifest["domain_manifest_hash"],
         "fact_memory_snapshot_hash": service.manifest["fact_memory_snapshot_hash"],
@@ -109,7 +115,7 @@ def compile_catalog_v2(
         "split_manifest_hashes": tuple(
             item["manifest_hash"] for item in split_manifests
         ),
-        "schema_version": EDUCATIONAL_SCHEMA_VERSION,
+        "schema_version": EDUCATIONAL_CATALOG_SCHEMA_VERSION,
     }
     manifest = EducationalCatalogManifestV2(
         **manifest_body, catalog_hash=content_hash(manifest_body)

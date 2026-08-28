@@ -237,6 +237,16 @@ def verify_explanation_plan(
                 previous_index = index
     if not seen_graph_reference:
         raise ValueError("explanation plan lacks its graph reference")
+    if plan.mode in {
+        ExplanationMode.CONCISE,
+        ExplanationMode.FULL,
+        ExplanationMode.SOLUTION_AFTER_ATTEMPT,
+    }:
+        canonical = build_explanation_plan(
+            graph, language=plan.language, mode=plan.mode
+        )
+        if plan != canonical:
+            raise ValueError("explanation plan is not the exact canonical plan")
 
 
 def verify_explanation(

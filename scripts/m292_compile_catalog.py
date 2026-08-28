@@ -1,4 +1,4 @@
-"""Compile the M-29.2 v3 educational catalog under offline authority."""
+"""Compile the M-30 v4 educational catalog under offline authority."""
 
 from __future__ import annotations
 
@@ -22,12 +22,12 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("artifacts/education/m292/catalog_v3.json"),
+        default=Path("artifacts/education/m30/catalog_v4.json"),
     )
     parser.add_argument(
         "--audit",
         type=Path,
-        default=Path("runs/m292_compilation/audit.jsonl"),
+        default=Path("runs/m30_compilation/audit.jsonl"),
     )
     parser.add_argument("--entry-count", type=int, default=2_000)
     args = parser.parse_args()

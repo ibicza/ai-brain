@@ -23,7 +23,7 @@ def main() -> None:
     parser.add_argument(
         "--catalog",
         type=Path,
-        default=Path("artifacts/education/m292/catalog_v3.json"),
+        default=Path("artifacts/education/m30/catalog_v4.json"),
     )
     parser.add_argument("--store", type=Path, required=True)
     parser.add_argument(

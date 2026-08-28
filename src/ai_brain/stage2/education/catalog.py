@@ -11,8 +11,13 @@ from ai_brain.stage2.domains.chemistry.education.graph_adapter import (
     ChemistryEducationAdapter,
 )
 from ai_brain.stage2.domains.chemistry.service import ChemistryDomainService
-from ai_brain.stage2.education.compilation_receipts import verify_compilation_receipt
+from ai_brain.stage2.education.catalog_anchor import verify_catalog_entry_anchor
+from ai_brain.stage2.education.compilation_receipts import (
+    verify_compilation_receipt,
+    verify_compilation_receipt_structure,
+)
 from ai_brain.stage2.education.exercise_generation import verify_exercise_instance
+from ai_brain.stage2.education.graph_validation import verify_derivation_graph
 from ai_brain.stage2.education.models import (
     EducationalCatalogEntryV2,
     EducationalCatalogManifestV2,
@@ -26,7 +31,7 @@ from ai_brain.stage2.education.serialization import (
     spec_from_dict,
 )
 from ai_brain.stage2.education.version import (
-    EDUCATIONAL_SCHEMA_VERSION,
+    EDUCATIONAL_CATALOG_SCHEMA_VERSION,
     EXERCISE_GENERATOR_VERSION,
     INCOMPATIBLE_V1_CATALOG,
 )
@@ -43,9 +48,24 @@ class EducationalCatalogV2:
         self.manifest = manifest
         self.entries = entries
         self.split_manifests = split_manifests
+        self._entries_by_hash = {entry.entry_hash: entry for entry in entries}
+        if len(self._entries_by_hash) != len(entries):
+            raise ValueError("educational catalog contains duplicate entry anchors")
 
     @classmethod
     def load(cls, path: Path, service: ChemistryDomainService) -> EducationalCatalogV2:
+        result = cls._read(path)
+        result.verify(service)
+        return result
+
+    @classmethod
+    def load_historical(cls, path: Path) -> EducationalCatalogV2:
+        result = cls._read(path)
+        result.verify_history()
+        return result
+
+    @classmethod
+    def _read(cls, path: Path) -> EducationalCatalogV2:
         resolved = path.resolve()
         if not resolved.is_file():
             raise FileNotFoundError(INCOMPATIBLE_V1_CATALOG)
@@ -60,18 +80,11 @@ class EducationalCatalogV2:
             raise ValueError(INCOMPATIBLE_V1_CATALOG)
         manifest = _manifest_from_dict(payload["catalog_manifest"])
         entries = tuple(_entry_from_dict(item) for item in payload["entries"])
-        result = cls(manifest, entries, tuple(payload["split_manifests"]))
-        result.verify(service)
-        return result
+        return cls(manifest, entries, tuple(payload["split_manifests"]))
 
     def verify(self, service: ChemistryDomainService) -> dict[str, Any]:
-        body = asdict(self.manifest)
-        digest = body.pop("catalog_hash")
-        if content_hash(body) != digest:
-            raise ValueError("educational catalog manifest hash mismatch")
+        historical = self.verify_history()
         manifest = service.manifest
-        if self.manifest.schema_version != EDUCATIONAL_SCHEMA_VERSION:
-            raise ValueError(INCOMPATIBLE_V1_CATALOG)
         if (
             self.manifest.chemistry_domain_manifest_hash
             != manifest["domain_manifest_hash"]
@@ -84,17 +97,8 @@ class EducationalCatalogV2:
         current_tools = tuple(service.registry.current_manifest_hashes())
         if self.manifest.tool_manifest_hashes != current_tools:
             raise ValueError("precompiled educational catalog tool set is stale")
-        if self.manifest.entry_hashes != tuple(
-            entry.entry_hash for entry in self.entries
-        ):
-            raise ValueError("educational catalog entry manifest mismatch")
-        split_hashes = tuple(item.get("manifest_hash") for item in self.split_manifests)
-        if self.manifest.split_manifest_hashes != split_hashes:
-            raise ValueError("educational split manifest mismatch")
         adapter = ChemistryEducationAdapter(service)
-        semantic_hashes = set()
         for entry in self.entries:
-            _verify_entry_hash(entry)
             verify_compilation_receipt(
                 entry.compilation_receipt,
                 service,
@@ -103,6 +107,29 @@ class EducationalCatalogV2:
                 spec=entry.exercise_spec,
             )
             adapter.verify_graph(entry.graph)
+        return {**historical, "status": "VERIFIED"}
+
+    def verify_history(self) -> dict[str, Any]:
+        body = asdict(self.manifest)
+        digest = body.pop("catalog_hash")
+        if content_hash(body) != digest:
+            raise ValueError("educational catalog manifest hash mismatch")
+        if self.manifest.schema_version != EDUCATIONAL_CATALOG_SCHEMA_VERSION:
+            raise ValueError(INCOMPATIBLE_V1_CATALOG)
+        if self.manifest.entry_hashes != tuple(
+            entry.entry_hash for entry in self.entries
+        ):
+            raise ValueError("educational catalog entry manifest mismatch")
+        split_hashes = tuple(item.get("manifest_hash") for item in self.split_manifests)
+        if self.manifest.split_manifest_hashes != split_hashes:
+            raise ValueError("educational split manifest mismatch")
+        semantic_hashes = set()
+        for entry in self.entries:
+            _verify_entry_hash(entry)
+            verify_compilation_receipt_structure(entry.compilation_receipt)
+            verify_derivation_graph(
+                entry.graph, expected_source_result=entry.graph.source_result_artifact
+            )
             verify_exercise_instance(
                 entry.internal_instance, entry.exercise_spec, entry.graph
             )
@@ -114,7 +141,7 @@ class EducationalCatalogV2:
             semantic_hashes.add(entry.semantic_key.semantic_key_hash)
         _verify_splits(self.split_manifests, semantic_hashes)
         return {
-            "status": "VERIFIED",
+            "status": "HISTORY_VERIFIED",
             "entry_count": len(self.entries),
             "distinct_semantic_keys": len(semantic_hashes),
             "catalog_hash": self.manifest.catalog_hash,
@@ -140,6 +167,12 @@ class EducationalCatalogV2:
         if not matches:
             raise ValueError("no precompiled exercise matches the request")
         return matches[seed % len(matches)]
+
+    def by_entry_hash(self, entry_hash: str) -> EducationalCatalogEntryV2:
+        entry = self._entries_by_hash.get(entry_hash)
+        if entry is None:
+            raise KeyError("unknown trusted educational catalog entry")
+        return entry
 
     def find_tool(
         self, tool_id: str, arguments: dict[str, Any]
@@ -194,10 +227,7 @@ def _entry_from_dict(row: dict[str, Any]) -> EducationalCatalogEntryV2:
 
 
 def _verify_entry_hash(entry: EducationalCatalogEntryV2) -> None:
-    body = asdict(entry)
-    digest = body.pop("entry_hash")
-    if content_hash(body) != digest:
-        raise ValueError("educational catalog entry hash mismatch")
+    verify_catalog_entry_anchor(entry)
 
 
 def _verify_splits(

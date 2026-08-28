@@ -188,7 +188,9 @@ class EducationalReplayStatus(StrEnum):
     STALE_EVIDENCE = "STALE_EVIDENCE"
     STALE_SOURCE = "STALE_SOURCE"
     STALE_UPSTREAM_SOURCE = "STALE_UPSTREAM_SOURCE"
+    STALE_DERIVATION = "STALE_DERIVATION"
     STALE_SOURCE_CHAIN = "STALE_SOURCE_CHAIN"
+    STALE_FACT_VALUE = "STALE_FACT_VALUE"
     STALE_TOOL = "STALE_TOOL"
     STALE_EXERCISE_SPEC = "STALE_EXERCISE_SPEC"
     STALE_COMPILATION_RECEIPT = "STALE_COMPILATION_RECEIPT"
@@ -199,6 +201,13 @@ class EducationalReplayStatus(StrEnum):
     INVALID_SOURCE_RESULT = "INVALID_SOURCE_RESULT"
     INVALID_ARTIFACT = "INVALID_ARTIFACT"
     INVALID_SESSION = "INVALID_SESSION"
+
+
+class EducationalHistoryStatus(StrEnum):
+    HISTORY_VALID = "HISTORY_VALID"
+    CURRENT = "CURRENT"
+    STALE_WITH_HISTORY_VALID = "STALE_WITH_HISTORY_VALID"
+    INVALID_HISTORY = "INVALID_HISTORY"
 
 
 class EducationalRouteKind(StrEnum):
@@ -267,6 +276,43 @@ class EducationalDerivationGraph:
     schema_version: int
     graph_hash: str
     source_result_artifact: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class FactReplayClaimBinding:
+    predicate_id: str
+    current_value: dict[str, Any]
+    claim_id: str
+    claim_record_hash: str
+    claim_state_hash: str
+    evidence_ids: tuple[str, ...]
+    evidence_hashes: tuple[str, ...]
+    source_ids: tuple[str, ...]
+    source_record_hashes: tuple[str, ...]
+    source_state_hashes: tuple[str, ...]
+    derivation_ids: tuple[str, ...]
+    derivation_hashes: tuple[str, ...]
+    upstream_source_ids: tuple[str, ...]
+    upstream_source_record_hashes: tuple[str, ...]
+    upstream_source_snapshot_hashes: tuple[str, ...]
+    upstream_source_state_hashes: tuple[str, ...]
+    binding_hash: str
+
+
+@dataclass(frozen=True)
+class FactReplayDescriptor:
+    subject_entity_id: str
+    requested_predicate: str
+    request_mode: str | None
+    language: str
+    role: str
+    bindings: tuple[FactReplayClaimBinding, ...]
+    source_chain_version: str
+    source_chain_hash: str
+    fact_memory_snapshot_hash: str
+    current_value: Any
+    answer_hash: str
+    descriptor_hash: str
 
 
 @dataclass(frozen=True)
@@ -354,6 +400,7 @@ class ExerciseInstance:
     instance_hash: str
     semantic_key_hash: str
     compilation_receipt_hash: str
+    catalog_entry_hash: str
 
 
 @dataclass(frozen=True)
@@ -523,6 +570,7 @@ class TutorSession:
     hint_hashes: tuple[str, ...]
     status: TutorSessionStatus
     graph_hash: str
+    catalog_entry_hash: str
     domain_dependencies: tuple[str, ...]
     created_at: str
     updated_at: str
@@ -587,6 +635,28 @@ class PublicReplayStatus:
     session_id: str
     status: str
     session_status: str | None
+
+
+@dataclass(frozen=True)
+class PublicPendingActionHandle:
+    pending_id: str
+    action_kind: str
+    summary: str
+    expires_at: str
+    confirmation_required: bool
+
+
+@dataclass(frozen=True)
+class PublicPreparedAction:
+    status: str
+    language: str
+    pending: PublicPendingActionHandle
+
+
+@dataclass(frozen=True)
+class PublicCancellationResult:
+    pending_id: str
+    status: str
 
 
 @dataclass(frozen=True)

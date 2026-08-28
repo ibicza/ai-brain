@@ -27,7 +27,7 @@ def main() -> None:
     parser.add_argument(
         "--catalog",
         type=Path,
-        default=Path("artifacts/education/m292/catalog_v3.json"),
+        default=Path("artifacts/education/m30/catalog_v4.json"),
     )
     parser.add_argument("--store", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -56,7 +56,7 @@ def main() -> None:
             started = perf_counter()
             compilation = compile_catalog_v2(
                 chemistry,
-                root / "catalog_v3.json",
+                root / "catalog_v4.json",
                 entry_count=2_000,
                 audit_path=root / "audit.jsonl",
             )

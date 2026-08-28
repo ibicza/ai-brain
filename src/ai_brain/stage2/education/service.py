@@ -19,6 +19,7 @@ from ai_brain.stage2.education.artifact_authority import (
     EducationalArtifactAuthorityVerifier,
 )
 from ai_brain.stage2.education.catalog import EducationalCatalogV2
+from ai_brain.stage2.education.catalog_anchor import verify_instance_catalog_anchor
 from ai_brain.stage2.education.currentness import (
     evaluate_dependency_currentness,
     evaluate_entry_currentness,
@@ -58,7 +59,7 @@ from ai_brain.stage2.education.replay import replay_educational_session
 from ai_brain.stage2.education.sessions import apply_event, make_event, start_session
 from ai_brain.stage2.facts.canonical import content_hash, utc_now
 
-DEFAULT_CATALOG_PATH = Path("artifacts/education/m292/catalog_v3.json")
+DEFAULT_CATALOG_PATH = Path("artifacts/education/m30/catalog_v4.json")
 
 
 class EducationalExecutionMonitor:
@@ -106,11 +107,14 @@ class EducationalService:
         catalog_path: Path = DEFAULT_CATALOG_PATH,
     ) -> EducationalService:
         chemistry = ChemistryDomainService.open(chemistry_root)
-        return cls(
-            chemistry,
-            EducationalSessionStore.open_or_initialize(store_root),
-            EducationalCatalogV2.load(catalog_path, chemistry),
-        )
+        store = EducationalSessionStore.open_or_initialize(store_root)
+        try:
+            catalog = EducationalCatalogV2.load(catalog_path, chemistry)
+        except ValueError:
+            if not store.session_ids():
+                raise
+            catalog = EducationalCatalogV2.load_historical(catalog_path)
+        return cls(chemistry, store, catalog)
 
     def explain_tool(
         self,
@@ -312,6 +316,7 @@ class EducationalService:
             seed=seed,
             language=language,
         )
+        verify_instance_catalog_anchor(instance, entry)
         verify_exercise_instance(instance, entry.exercise_spec, entry.graph)
         self.store.save_artifact(
             "exercise_spec", entry.exercise_spec.spec_hash, entry.exercise_spec
@@ -413,9 +418,7 @@ class EducationalService:
             created_at=timestamp,
         )
         self.store.save_artifact("grading_result", grade.result_hash, grade)
-        check = render_check_explanation(
-            graph, grade, language=session.language
-        )
+        check = render_check_explanation(graph, grade, language=session.language)
         self.store.save_artifact("explanation", check.explanation_hash, check)
         solved = grade.correctness_status in {
             GradingStatus.CORRECT,
@@ -560,7 +563,11 @@ class EducationalService:
         }
 
     def backup(self, target: Path) -> dict[str, Any]:
-        verification = self.verify()
+        authority = EducationalArtifactAuthorityVerifier(self).verify()
+        verification = {
+            "status": "HISTORY_VERIFIED",
+            "educational_store_authority": authority,
+        }
         return {
             "verification": verification,
             "backup": self.store.backup(target),
@@ -577,10 +584,20 @@ class EducationalService:
     ) -> tuple[EducationalService, dict[str, Any]]:
         EducationalSessionStore.restore(backup, target)
         service = cls.open(chemistry_root, target, catalog_path=catalog_path)
-        return service, service.verify()
+        authority = EducationalArtifactAuthorityVerifier(service).verify()
+        if authority["current_authority_status"] == "CURRENT":
+            verification = service.verify()
+        else:
+            verification = {
+                "status": "HISTORY_VERIFIED",
+                "catalog": service.catalog.verify_history(),
+                "educational_store_authority": authority,
+            }
+        return service, verification
 
     def _load(self, session_id: str):
         session = self.store.get_session(session_id)
+        entry = self.catalog.by_entry_hash(session.catalog_entry_hash)
         instance = self.store.get_artifact(
             session.exercise_hash, expected_kind="exercise_instance_internal"
         )
@@ -594,6 +611,13 @@ class EducationalService:
             instance.compilation_receipt_hash,
             expected_kind="compilation_receipt",
         )
+        verify_instance_catalog_anchor(instance, entry)
+        if (
+            entry.exercise_spec.spec_hash != spec.spec_hash
+            or entry.graph.graph_hash != graph.graph_hash
+            or entry.compilation_receipt.receipt_hash != receipt.receipt_hash
+        ):
+            raise ValueError("session closure is not rooted in one catalog entry")
         require_current(
             evaluate_dependency_currentness(
                 self.chemistry, graph, receipt, instance, spec
@@ -667,7 +691,17 @@ def _learner_text(text: str) -> str:
     for line in text.splitlines():
         if line.startswith(("Graph:", "Result:", "Граф:", "Результат:")):
             continue
+        line = re.sub(
+            r"(First error|Первая ошибка):\s*(?:\[)?(?:n\d+|[a-z][a-z0-9_.:-]{0,63})(?:\])?(?=\s*(?:$|[.;]))",
+            lambda match: (
+                "First error: the first incorrect calculation step"
+                if match.group(1) == "First error"
+                else "Первая ошибка: первый неверный вычислительный шаг"
+            ),
+            line,
+        )
         line = re.sub(r"^\[[^]]+\]\s*", "", line)
+        line = re.sub(r"\[(?:n\d+|final|answer|given)\]", "", line)
         line = re.sub(r"\b[0-9a-f]{64}\b", "[verified]", line)
         lines.append(line)
     return "\n".join(lines)

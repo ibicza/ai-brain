@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from ai_brain.stage2.education.catalog_anchor import verify_instance_catalog_anchor
+from ai_brain.stage2.education.compilation_receipts import (
+    verify_compilation_receipt_structure,
+)
 from ai_brain.stage2.education.currentness import (
     evaluate_dependency_currentness,
-    require_current,
 )
 from ai_brain.stage2.education.exercise_generation import (
     verify_exercise_instance,
@@ -15,8 +18,14 @@ from ai_brain.stage2.education.explanations import (
     render_explanation_plan,
 )
 from ai_brain.stage2.education.grading import grade_answer
+from ai_brain.stage2.education.graph_validation import verify_derivation_graph
 from ai_brain.stage2.education.hints import build_hint_plan, render_hint
-from ai_brain.stage2.education.models import ExplanationMode, GradingStatus
+from ai_brain.stage2.education.models import (
+    EducationalHistoryStatus,
+    EducationalReplayStatus,
+    ExplanationMode,
+    GradingStatus,
+)
 from ai_brain.stage2.education.sessions import apply_event, start_session
 
 
@@ -42,8 +51,9 @@ class EducationalArtifactAuthorityVerifier:
                 "explanation",
             )
         }
+        currentness = []
         for session_id in self.store.session_ids():
-            self._verify_session(session_id)
+            currentness.append(self._verify_session(session_id))
             self._collect_session_references(session_id, referenced)
             verified += 1
         identity_fields = {
@@ -61,6 +71,19 @@ class EducationalArtifactAuthorityVerifier:
                 raise ValueError(f"orphaned or unreferenced authority artifact: {kind}")
         return {
             "status": "AUTHORITY_VERIFIED",
+            "history_status": EducationalHistoryStatus.HISTORY_VALID.value,
+            "current_authority_status": (
+                EducationalHistoryStatus.CURRENT.value
+                if all(item is EducationalReplayStatus.CURRENT for item in currentness)
+                else EducationalHistoryStatus.STALE_WITH_HISTORY_VALID.value
+            ),
+            "current_session_count": sum(
+                item is EducationalReplayStatus.CURRENT for item in currentness
+            ),
+            "stale_session_count": sum(
+                item is not EducationalReplayStatus.CURRENT for item in currentness
+            ),
+            "session_currentness": tuple(item.value for item in currentness),
             "session_count": verified,
             "structural": structural,
         }
@@ -74,16 +97,10 @@ class EducationalArtifactAuthorityVerifier:
         referenced["presented_exercise"].add(presented[0].presentation_hash)
         for event in self.store.events(session_id):
             if event.event_type == "ANSWER_SUBMITTED":
-                referenced["student_answer"].add(
-                    event.payload["student_answer_hash"]
-                )
+                referenced["student_answer"].add(event.payload["student_answer_hash"])
             elif event.event_type == "ANSWER_GRADED":
-                referenced["grading_result"].add(
-                    event.payload["grading_result_hash"]
-                )
-                referenced["explanation"].add(
-                    event.payload["check_explanation_hash"]
-                )
+                referenced["grading_result"].add(event.payload["grading_result_hash"])
+                referenced["explanation"].add(event.payload["check_explanation_hash"])
             elif event.event_type == "HINT_ISSUED":
                 hint_hash = event.payload["hint_hash"]
                 referenced["hint"].add(hint_hash)
@@ -97,7 +114,7 @@ class EducationalArtifactAuthorityVerifier:
                 )
                 referenced["explanation_plan"].add(explanation.plan_hash)
 
-    def _verify_session(self, session_id: str) -> None:
+    def _verify_session(self, session_id: str) -> EducationalReplayStatus:
         stored = self.store.get_session(session_id)
         instance = self.store.get_artifact(
             stored.exercise_hash, expected_kind="exercise_instance_internal"
@@ -116,13 +133,20 @@ class EducationalArtifactAuthorityVerifier:
         )
         if source != graph.source_result_artifact:
             raise ValueError("source result is not the graph authority")
-        require_current(
-            evaluate_dependency_currentness(
-                self.service.chemistry, graph, receipt, instance, spec
-            )
+        entry = self.service.catalog.by_entry_hash(stored.catalog_entry_hash)
+        if (
+            entry.exercise_spec != spec
+            or entry.graph != graph
+            or entry.compilation_receipt != receipt
+        ):
+            raise ValueError("session authority differs from its catalog anchor")
+        verify_instance_catalog_anchor(instance, entry)
+        verify_compilation_receipt_structure(receipt)
+        verify_derivation_graph(graph, expected_source_result=source)
+        currentness = evaluate_dependency_currentness(
+            self.service.chemistry, graph, receipt, instance, spec
         )
         verify_exercise_instance(instance, spec, graph)
-        self.service.adapter.verify_graph(graph)
 
         presented = tuple(
             item
@@ -158,6 +182,7 @@ class EducationalArtifactAuthorityVerifier:
             state = apply_event(state, event)
         if state != stored:
             raise ValueError("authority replay does not reproduce tutor session")
+        return currentness.status
 
     def _verify_grade(self, event, state, instance, graph) -> None:
         if not state.attempt_hashes:
@@ -187,15 +212,11 @@ class EducationalArtifactAuthorityVerifier:
         check = self.store.get_artifact(
             event.payload["check_explanation_hash"], expected_kind="explanation"
         )
-        if check != render_check_explanation(
-            graph, grade, language=state.language
-        ):
+        if check != render_check_explanation(graph, grade, language=state.language):
             raise ValueError("check explanation is not grading-derived")
 
     def _verify_hint(self, event, state, instance, graph) -> None:
-        hint = self.store.get_artifact(
-            event.payload["hint_hash"], expected_kind="hint"
-        )
+        hint = self.store.get_artifact(event.payload["hint_hash"], expected_kind="hint")
         grading = (
             self.store.get_artifact(
                 state.grading_result_hashes[-1], expected_kind="grading_result"
@@ -204,9 +225,7 @@ class EducationalArtifactAuthorityVerifier:
             else None
         )
         plan = self.store.get_artifact(hint.plan_hash, expected_kind="hint_plan")
-        expected_plan = build_hint_plan(
-            instance.instance_id, graph, grading=grading
-        )
+        expected_plan = build_hint_plan(instance.instance_id, graph, grading=grading)
         if plan != expected_plan:
             raise ValueError("hint plan is not grading-derived")
         expected = render_hint(

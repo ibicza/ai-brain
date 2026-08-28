@@ -178,9 +178,7 @@ def _artifact_semantics(service) -> dict:
         session_id=session_id,
         created_at="2026-08-28T03:00:00Z",
     )
-    service.submit_answer(
-        session_id, "0 g/mol", created_at="2026-08-28T03:01:00Z"
-    )
+    service.submit_answer(session_id, "0 g/mol", created_at="2026-08-28T03:01:00Z")
     service.hint(
         session_id,
         level=HintLevel.ORIENT,
@@ -274,9 +272,7 @@ def _artifact_semantics(service) -> dict:
         attempt_id=grade.attempt_id,
         created_at=grade.created_at,
     )
-    rejected(
-        lambda: _require_equal(forged_grade, expected_grade, "forged grading")
-    )
+    rejected(lambda: _require_equal(forged_grade, expected_grade, "forged grading"))
     forged_plan = _rehash(
         plan,
         "plan_hash",
@@ -311,9 +307,7 @@ def _artifact_semantics(service) -> dict:
     full = render_explanation(graph, language="en", mode=ExplanationMode.FULL)
     forged_full = _rehash(full, "explanation_hash", text=full.text + " forged")
     rejected(lambda: verify_explanation(forged_full, graph))
-    forged_solution = _rehash(
-        solution, "explanation_hash", session_state_hash="0" * 64
-    )
+    forged_solution = _rehash(solution, "explanation_hash", session_state_hash="0" * 64)
     rejected(
         lambda: verify_explanation(
             forged_solution,
@@ -323,7 +317,9 @@ def _artifact_semantics(service) -> dict:
         )
     )
     events = service.store.events(session_id)
-    state, _ = start_session(instance, session_id=session_id, created_at=events[0].created_at)
+    state, _ = start_session(
+        instance, session_id=session_id, created_at=events[0].created_at
+    )
     for event in events[1:]:
         state = apply_event(state, event)
     forged_session = _rehash(state, "session_hash", status="ABANDONED")

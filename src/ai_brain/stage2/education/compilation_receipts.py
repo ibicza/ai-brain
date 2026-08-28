@@ -12,7 +12,7 @@ from ai_brain.stage2.education.models import (
 from ai_brain.stage2.education.version import EDUCATIONAL_COMPILATION_POLICY_VERSION
 from ai_brain.stage2.facts.canonical import content_hash
 
-COMPILER_IDENTITY = "m291-verified-answer-key-compiler"
+COMPILER_IDENTITY = "m30-catalog-anchored-answer-key-compiler"
 
 
 def verify_compilation_receipt(
@@ -23,16 +23,7 @@ def verify_compilation_receipt(
     graph=None,
     spec=None,
 ) -> None:
-    body = asdict(receipt)
-    digest = body.pop("receipt_hash")
-    if content_hash(body) != digest:
-        raise ValueError("educational compilation receipt hash mismatch")
-    if (
-        receipt.actor_identity_type is not ActorIdentityType.TRUSTED_PROCESS
-        or receipt.compiler_identity != COMPILER_IDENTITY
-        or receipt.compilation_policy_version != EDUCATIONAL_COMPILATION_POLICY_VERSION
-    ):
-        raise ValueError("invalid educational compilation authority")
+    verify_compilation_receipt_structure(receipt)
     manifest = service.manifest
     if receipt.chemistry_domain_manifest_hash != manifest["domain_manifest_hash"]:
         raise ValueError("stale educational compilation domain")
@@ -73,3 +64,18 @@ def verify_compilation_receipt(
             raise ValueError("compilation receipt semantic dependency mismatch")
     if spec is not None and receipt.exercise_spec_hash != spec.spec_hash:
         raise ValueError("compilation receipt references another exercise spec")
+
+
+def verify_compilation_receipt_structure(
+    receipt: EducationalCompilationReceipt,
+) -> None:
+    body = asdict(receipt)
+    digest = body.pop("receipt_hash")
+    if content_hash(body) != digest:
+        raise ValueError("educational compilation receipt hash mismatch")
+    if (
+        receipt.actor_identity_type is not ActorIdentityType.TRUSTED_PROCESS
+        or receipt.compiler_identity != COMPILER_IDENTITY
+        or receipt.compilation_policy_version != EDUCATIONAL_COMPILATION_POLICY_VERSION
+    ):
+        raise ValueError("invalid educational compilation authority")

@@ -30,7 +30,9 @@ def verify_canonical_operation(kind: GraphNodeKind, operation: str | None) -> No
     except KeyError as error:
         raise ValueError("graph node kind lacks an operation contract") from error
     if operation not in allowed:
-        expected = ", ".join("None" if item is None else item for item in sorted(allowed, key=str))
+        expected = ", ".join(
+            "None" if item is None else item for item in sorted(allowed, key=str)
+        )
         raise ValueError(
             f"incompatible educational kind/operation: {kind.value} permits {expected}"
         )

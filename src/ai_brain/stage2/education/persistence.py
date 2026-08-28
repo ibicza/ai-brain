@@ -99,6 +99,52 @@ class EducationalSessionStore:
         path = root.resolve() / "educational_sessions.sqlite3"
         return cls.open(root) if path.exists() else cls.initialize(root)
 
+    @staticmethod
+    def export_legacy_v3(root: Path, output: Path) -> dict[str, Any]:
+        """Archive a v3 store byte-faithfully without manufacturing v4 authority."""
+        database = root.resolve() / "educational_sessions.sqlite3"
+        if not database.is_file():
+            raise FileNotFoundError("legacy educational session database is missing")
+        with sqlite3.connect(database) as connection:
+            schema = connection.execute(
+                "SELECT value FROM metadata WHERE key='schema_version'"
+            ).fetchone()
+            if schema is None or schema[0] != "3":
+                raise EducationalStoreIntegrityError(
+                    "only schema-v3 archival export is supported"
+                )
+            if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+                raise EducationalStoreIntegrityError(
+                    "legacy SQLite integrity check failed"
+                )
+            payload = {
+                "archive_kind": "EDUCATIONAL_SESSION_STORE_V3_NO_V4_AUTHORITY",
+                "schema_version": 3,
+                "database_hash": bytes_hash(database.read_bytes()),
+                "metadata": connection.execute(
+                    "SELECT key,value FROM metadata ORDER BY key"
+                ).fetchall(),
+                "artifacts": connection.execute(
+                    "SELECT artifact_hash,artifact_kind,payload,payload_hash,created_at FROM artifacts ORDER BY artifact_hash"
+                ).fetchall(),
+                "sessions": connection.execute(
+                    "SELECT session_id,payload,session_hash,updated_at FROM sessions ORDER BY session_id"
+                ).fetchall(),
+                "events": connection.execute(
+                    "SELECT session_id,sequence,event_id,event_hash,previous_event_hash,payload FROM events ORDER BY session_id,sequence"
+                ).fetchall(),
+            }
+        output.parent.mkdir(parents=True, exist_ok=True)
+        serialized = canonical_json(payload) + "\n"
+        with output.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(serialized)
+        return {
+            "status": "ARCHIVED_V3",
+            "archive_hash": bytes_hash(serialized.encode("utf-8")),
+            "session_count": len(payload["sessions"]),
+            "event_count": len(payload["events"]),
+        }
+
     def save_artifact(self, kind: str, artifact_hash: str, value: Any) -> None:
         if not kind or not _is_hash(artifact_hash):
             raise ValueError("invalid educational artifact identity")
@@ -531,13 +577,17 @@ class EducationalSessionStore:
                     if value.grading_result_hash
                     else None
                 )
-                if plan is None or render_hint(
-                    plan,
-                    graphs[value.graph_hash],
-                    value.level,
-                    language=value.language,
-                    grading=grading,
-                ) != value:
+                if (
+                    plan is None
+                    or render_hint(
+                        plan,
+                        graphs[value.graph_hash],
+                        value.level,
+                        language=value.language,
+                        grading=grading,
+                    )
+                    != value
+                ):
                     raise EducationalStoreIntegrityError(
                         "hint semantic binding mismatch"
                     )

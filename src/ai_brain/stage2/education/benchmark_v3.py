@@ -121,9 +121,7 @@ def run_m292_stage_benchmark(service, *, samples: int = 1_000) -> dict:
         "targeted_hint": lambda index: (
             current_session_closure(),
             render_hint(
-                build_hint_plan(
-                    instance.instance_id, entry.graph, grading=grading
-                ),
+                build_hint_plan(instance.instance_id, entry.graph, grading=grading),
                 entry.graph,
                 HintLevel.ORIENT,
                 language=("ru", "en")[index % 2],
@@ -145,9 +143,7 @@ def run_m292_stage_benchmark(service, *, samples: int = 1_000) -> dict:
         result = service._replay_internal(replay_id)
         if result["status"] != "CURRENT":
             raise ValueError("benchmark replay is not current")
-    results["replay_currentness"] = _metric(
-        replay_samples, perf_counter() - started
-    )
+    results["replay_currentness"] = _metric(replay_samples, perf_counter() - started)
     started = perf_counter()
     verification = service.verify()
     results["full_service_verify"] = _metric(1, perf_counter() - started)
