@@ -1,0 +1,43 @@
+date: 2026-08-28T05:18:49.3432086+03:00
+hostname: ibicza
+pwd: W:\toolbox_IDEA\programs\IdeaProjects\ai-brain
+git rev-parse HEAD: f82dabfd5380a9e7a7a64f8ac9ffde0e47fdbf4e
+git status --porcelain:
+python --version: Python 3.12.13
+uv --version: uv 0.12.3 (507230998 2026-08-07 x86_64-pc-windows-msvc)
+COMMAND: uv run ruff format --check src tests scripts
+305 files already formatted
+COMMAND: uv run ruff check src tests scripts
+All checks passed!
+COMMAND: uv run pytest -q
+........................................................................ [  9%]
+........................................................................ [ 19%]
+........................................................................ [ 29%]
+........................................................................ [ 39%]
+........................................................................ [ 49%]
+........................................................................ [ 59%]
+........................................................................ [ 69%]
+........................................................................ [ 79%]
+........................................................................ [ 89%]
+........................................................................ [ 99%]
+......                                                                   [100%]
+726 passed in 822.10s (0:13:42)
+COMMAND: prior trusted regressions M-25 through M-28.2
+........................................................................ [ 28%]
+........................................................................ [ 57%]
+........................................................................ [ 86%]
+.................................                                        [100%]
+249 passed in 684.16s (0:11:24)
+COMMAND: full M-29 acceptance and 10,000 interaction benchmark
+{"acceptance":{"acceptance_hash":"754be39d2679ceddd77a105e5ae813e25080b944d56d8c3ac5f349728d770e2e","authority":{"educational_fact_writes":0,"hidden_tool_execution":0,"moral_moderation_refusal_policy_added":0,"rule_installations":0,"runtime_network":0,"trusted_import_loads_torch":0},"diagnosis":{"ambiguous_diagnosis_count":812,"case_count":3000,"counterfactual_calculator_codes":["ARITHMETIC_ERROR","ATOMIC_WEIGHT_POLICY_MISMATCH","ATOMIC_WEIGHT_WRONG","AVOGADRO_FACTOR_EXTRA","AVOGADRO_FACTOR_MISSING","DIVIDE_INSTEAD_OF_MULTIPLY","ELEMENT_COUNT_WRONG","FORMULA_ENTITY_ATOM_MULTIPLIER_MISSING","FORMULA_PARSE_ERROR","GRAM_KILOGRAM_CONVERSION_ERROR","GROUP_MULTIPLIER_IGNORED","INTERVAL_COLLAPSED_TO_MIDPOINT","MOLAR_MASS_SUM_WRONG","MOLAR_MASS_TERM_WRONG","MOL_MMOL_CONVERSION_ERROR","MULTIPLY_INSTEAD_OF_DIVIDE","ROUNDING_OUTSIDE_POLICY","ROUNDING_TOO_EARLY","SUBSCRIPT_IGNORED","TARGET_ELEMENT_MULTIPLIER_WRONG","UNIT_MISSING","UNIT_WRONG_DIMENSION","UNKNOWN_ELEMENT_SYMBOL","WRONG_SYMBOL_CASE"],"counterfactual_calculator_count":24,"exact_diagnosis_count":2188,"exact_diagnosis_precision":"1.0000","per_category_exact":{"AVOGADRO_FACTOR_EXTRA":202,"AVOGADRO_FACTOR_MISSING":202,"DIVIDE_INSTEAD_OF_MULTIPLY":303,"FORMULA_ENTITY_ATOM_MULTIPLIER_MISSING":202,"GRAM_KILOGRAM_CONVERSION_ERROR":101,"GROUP_MULTIPLIER_IGNORED":190,"MOLAR_MASS_SUM_WRONG":406,"MOL_MMOL_CONVERSION_ERROR":101,"MULTIPLY_INSTEAD_OF_DIVIDE":101,"SUBSCRIPT_IGNORED":380},"unclassified_count":0,"wrong_confident_diagnosis":0,"wrong_diagnosis_count":0},"exact_pool_size":96,"exercises":{"answer_leakage":0,"case_count":5000,"deterministic_regeneration":"1.0000","families":{"AMOUNT_ENTITIES":833,"FACT_RETRIEVAL":834,"FORMULA_COMPOSITION":834,"MASS_AMOUNT":833,"MOLAR_MASS_GROUPED":833,"MOLAR_MASS_SIMPLE":833},"formula_count":24,"invalid_answer_keys":0,"languages":{"en":2500,"ru":2500},"split_axes":{"ELEMENT_COMBINATION_HOLDOUT":625,"FORMULA_STRUCTURE_HOLDOUT":625,"MISCONCEPTION_HOLDOUT":625,"MULTI_STEP_COMPOSITION":625,"NUMERIC_RANGE_HOLDOUT":625,"RU_EN_CROSS_LANGUAGE":625,"TEMPLATE_HOLDOUT":625,"UNIT_DIRECTION_HOLDOUT":625},"unique_instance_ids":5000,"unit_direction_count":3,"unsafe_knowledge_sources":0,"unsupported_formulas":0},"explanations":{"by_source_result_type":{"ChemistryPairedFactAnswer":217,"ChemistryResultBundle:entity_amount":216,"ChemistryResultBundle:formula_composition":217,"ChemistryResultBundle:mass_amount":216,"ChemistryResultBundle:molar_mass":434},"case_count":1300,"citation_retention":"1.0000","graph_validity":"1.0000","rendered_numeric_correctness":"1.0000","unit_correctness":"1.0000","unsupported_claims":0},"grading":{"agreement_count":10000,"by_status":{"CORRECT":6500,"CORRECT_EQUIVALENT_UNIT":333,"INCORRECT":1334,"INVALID_ANSWER":1833},"case_count":10000,"case_kinds":{"0":1000,"1":1000,"2":1000,"3":1000,"4":1000,"5":1000,"6":1000,"7":1000,"8":1000,"9":1000},"invalid_inputs_accepted":0,"trusted_grading_agreement":"1.0000","wrong_dimensions_accepted":0},"hints":{"deterministic_regeneration":"1.0000","early_answer_leakage":0,"graph_validity":"1.0000","hint_artifact_count":10000,"sequence_count":2000,"unsupported_values":0,"wrong_diagnosis_targeted_hints":0},"status":"PASS"},"catalog_hash":"80469d6d651af107e95f1b09c7837e51d0c9f598dac9a3020e0c11b4cacfc848","generated_at":"2026-08-28T02:47:59.814142Z","mode":"full","performance":{"benchmark_hash":"ebd5db05ad91ffff5c54d68e76fb2db33e921faccb2e82f9cd13eca569e74b69","device":"CPU-only deterministic trusted path","elapsed_seconds":"42.691497","interaction_count":10000,"operations":{"answer_parsing":{"count":1000,"p50_ms":"0.173400","p95_ms":"0.233400","p99_ms":"0.308200"},"concise_render":{"count":1000,"p50_ms":"3.794900","p95_ms":"9.583700","p99_ms":"10.747400"},"counterfactual_diagnosis":{"count":1000,"p50_ms":"4.557200","p95_ms":"7.602600","p99_ms":"8.140300"},"educational_replay":{"count":1000,"p50_ms":"3.958000","p95_ms":"9.841800","p99_ms":"10.818900"},"exercise_generation":{"count":1000,"p50_ms":"2.466650","p95_ms":"3.257800","p99_ms":"3.549300"},"full_render":{"count":1000,"p50_ms":"4.283450","p95_ms":"7.457200","p99_ms":"8.300700"},"grading":{"count":1000,"p50_ms":"3.707300","p95_ms":"9.600500","p99_ms":"11.010000"},"graph_verification":{"count":1000,"p50_ms":"3.908150","p95_ms":"6.982600","p99_ms":"8.064200"},"hint_generation":{"count":1000,"p50_ms":"3.592800","p95_ms":"9.315600","p99_ms":"10.491400"},"session_transition":{"count":1000,"p50_ms":"0.823100","p95_ms":"1.092400","p99_ms":"1.330100"}},"peak_python_memory_bytes":3409033,"status":"PASS","throughput_per_second":"234.239"},"preflight":{"derivation_count":4,"derived_extract_count":4,"deterministic_derivation_count":1,"field_evidence_count":534,"field_value_mismatch_count":0,"local_policy_snapshot_count":1,"manual_mapping_derivation_count":2,"official_snapshot_count":4,"policy_transformation_count":1,"production_field_without_evidence_count":0,"source_chain_hash":"890ec5249a36567e61b415e7446c607added0960307a10006beb6a02e21bcfed","status":"VERIFIED","verified_field_value_count":534},"report_hash":"1ed03fe76938826fcf9ffd83c1eb556832eb1cb615af0335605b26b565f101f3","status":"PASS"}
+COMMAND: ai-brain-tutor CLI smoke
+{"difficulty":{"arithmetic_steps":3,"distinct_elements":2,"generator_version":"1.0","parentheses_depth":0,"question_length":43,"requires_unit_conversion":false},"exercise_id":"education.exercise.4b3afc17d7092b72f1ded99a","language":"en","question":"Give the atom count of each element in SO2.","session_id":"local-h6-smoke"}
+{"domain":{"domain_manifest_hash":"3e9fc8331f76ec3b51a27fd87f4e003ee7025a4beb731247c5805f626509aeee","fact_memory":{"audit_event_count":4969,"blob_count":9,"status":"VALID"},"reproducible_content_hash":"4388e3c6b108e46af489dee071f8baa57aea0434d3459f899b1c576e0e6613e6","tool_registry_hash":"3f3958707090d50f76882eeb0964b44ee7af35868e4bddbad04d07f437a4c884"},"educational_store":{"artifact_count":3,"event_count":1,"schema_version":1,"session_count":1,"status":"VERIFIED"},"runtime_network":false,"status":"VERIFIED","trusted_imports_torch":false}
+FINAL EXACT-SHA CHECKS
+git rev-parse HEAD: f82dabfd5380a9e7a7a64f8ac9ffde0e47fdbf4e
+git status --porcelain:
+RESULT: CLEAN
+acceptance_json_sha256: fbd28dda034dee5ec3e71cf6cbffb8dde1b253f9ac4db13ef1bb0c758a609097
+performance_json_sha256: e86b264de183661d6f92e29310343df7250190dc658109af9e2aa663cd70b063
+fixture_sqlite_sha256: 44112c8ff4b158aeeb181bf8f65436b4bc31b4bce8dabcf250c674d84fc20609
+LOCAL_EXACT_H6_GATE: PASS

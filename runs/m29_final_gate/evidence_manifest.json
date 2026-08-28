@@ -1,0 +1,13 @@
+{
+  "branch": "exp/stage2-educational-explanations",
+  "h6": "f82dabfd5380a9e7a7a64f8ac9ffde0e47fdbf4e",
+  "status": "PASS",
+  "files": {
+    "karina_acceptance.json": "288f48258701dc3c27d8cbf5266db34cd19abae4af6c6e5a42306de5fee333e7",
+    "karina_exact_sha.log": "ec47e038ab99ff2710e69040a2f13651c0b52a57b3b93081d8ffdaedea93154c",
+    "karina_performance.json": "d7a66c8c1578df8dbe96ae8ebd73070b82ca1726f5d1dbafb786ce83415c61c4",
+    "local_acceptance.json": "fbd28dda034dee5ec3e71cf6cbffb8dde1b253f9ac4db13ef1bb0c758a609097",
+    "local_exact_sha.log": "241efac435b39597d4cce1e2f63b5f0b9ee5fa18c773cba2df45668e232b2050",
+    "local_performance.json": "e86b264de183661d6f92e29310343df7250190dc658109af9e2aa663cd70b063"
+  }
+}

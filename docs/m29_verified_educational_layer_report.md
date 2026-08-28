@@ -20,10 +20,17 @@ Outcome A: the verified tutoring layer works locally. Derivation graphs, determi
 - Diagnosis: 3,000; precision 1.0000, wrong confident 0, ambiguity retained.
 - Hints: 2,000 sequences; early leakage 0.
 - Session store: checksummed append-only replay and moved backup/restore verified.
-- Local performance: 229.523 interactions/s; peak 3,406,937 bytes.
+- Exact-H6 local tests: 726 full / 249 named prior regressions; clean tree.
+- Exact-H6 Karina tests: 726 full / 249 named prior regressions; clean tree.
+- Local performance: 234.239 interactions/s; peak 3,409,033 bytes.
+- Karina performance: 393.406 interactions/s; peak 3,406,507 bytes.
 - Optional neural surface: disabled.
 - Trusted torch/network use: zero.
 
 ## Release State
 
-Implementation is ready for the exact-SHA H6/E6 gates. No moral/moderation/refusal policy was added. The recommended M-30 scope is a bounded conversational tutor plus observable progress memory over these verified artifacts.
+Implementation commit H6 is `f82dabfd5380a9e7a7a64f8ac9ffde0e47fdbf4e`.
+Local and Karina exact-SHA gates passed, including backup/restore and moved-store
+verification. No moral/moderation/refusal policy was added. The recommended M-30
+scope is a bounded conversational tutor plus observable progress memory over these
+verified artifacts.
