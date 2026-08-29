@@ -1,0 +1,26 @@
+{
+  "files": {
+    "docs/m33_cross_domain_blackbox_report.md": "d0759d38ebe329f9c759cbaec4f217c095d66089b1b1fabf3f9d8ea2425da07b",
+    "docs/m33_graph_impact_map.md": "3f02fbeb3ae2ff153f95cdb9b5a742917a390f0fffaad9f5d551c5b55bcf374c",
+    "docs/m33_limitations.md": "89781d980a8f0cc0529decf086ddfc4dad36af9e1195499673050639b3913034",
+    "docs/m33_performance_report.md": "bb391dc09e0155418cefaec532d707989688e59deaf5fa564e29a074138086a5",
+    "runs/m33_cross_domain_blackbox_report.md": "218b19b668995dcc3484d7f043b091afc102f1fe94e843d1266c844b913187da",
+    "runs/m33_final_gate/acceptance.json": "eb8e1d3e1e5dbbb1865c3a57be093784e5d8f4aa238bcba651314cf993801819",
+    "runs/m33_final_gate/backup_restore_report.json": "ba322bdb5c389ec00f0ef3ed2ce8a508a0c0f3b37c0383417f802fa90cf5c94e",
+    "runs/m33_final_gate/compiler_freeze.json": "6500c8a3299b6c79449a67656651f7957d3be30789f30a3e0531da7ed4b1d970",
+    "runs/m33_final_gate/evaluation_metrics.json": "54e32275f39c857e076163e92688cbd6c4b75fcdeac998d86ffe5e12ef0cf170",
+    "runs/m33_final_gate/field_evidence_report.json": "e5288314639755859c12d5337fc6d2c66cad8172ddd58c5f07a34a1e8712d9e8",
+    "runs/m33_final_gate/graph_report.json": "0cc52d9b8c67bcd920dec6a1b4440407f6dbb7957312c9a49a34a0f89064438c",
+    "runs/m33_final_gate/karina_exact_h12.log": "318b938256534abf2088b04921efabb082c81fc3b54dfe83b61e09fae66146e7",
+    "runs/m33_final_gate/karina_heldout_results.json": "e66af9ac63daad3cb2ecb5fcd0d7132f56497c24483395968ae42f68553dac5d",
+    "runs/m33_final_gate/no_network_no_torch_report.json": "07ef20fd454e2f4889761ad8fb7388956fb436f2d91143c03a0da33484174dbb",
+    "runs/m33_final_gate/reproducibility.json": "373909c25787e6bc85bde37481574734bb2361b1878c684e06f209dfac7e96a5",
+    "runs/m33_final_gate/security_results.json": "d3c109dd1856a9146105e9a1fd63fd9e9b33be02217f1709232bdfaf3057ef20",
+    "runs/m33_final_gate/windows_exact_h12.log": "9ad01edfdfe36a64e41c3b8483cbdd697f8e405c9452ed6cac7e8276b5f04e7d",
+    "runs/m33_final_gate/windows_heldout_results.json": "12b709b4d565972d8ab9685b178a866c70a1cb995ebf7179a9d735a0dcfde6a3",
+    "runs/m33_final_gate/windows_heldout_results_isolated.json": "0c0e7052c4f96afe0cf536b191fe5c563ffc719876c9041cf85130a70260fb95"
+  },
+  "f12": "ad3e35a36fcaafa267f3181b248c8269cb70287f",
+  "h12": "0608b8a0200cd930bff45eeb7950c953e246ede7",
+  "schema_version": 1
+}

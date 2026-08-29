@@ -1,0 +1,30 @@
+{
+  "deterministic_authority": {
+    "capability_registry_hash": "8fc5998ea06c650f420d1759cd46751edecf05de745e0f74276b595cd5eeb774",
+    "installed_registry_hash_karina": "fa2a09f3e1f827ac01016fef36a7f478a1f80b3e5989aa7625abcbfde2075c5d",
+    "installed_registry_hash_windows": "fa2a09f3e1f827ac01016fef36a7f478a1f80b3e5989aa7625abcbfde2075c5d",
+    "provider_registry_hash": "357cf51082b59b483d723ca3682477248fdd471f6d07526bb7dbf93b681f7358"
+  },
+  "frozen_build": {
+    "karina": "ValueError: approved proposals contain a conflicting semantic identity",
+    "windows": "ValueError: approved proposals contain a conflicting semantic identity"
+  },
+  "heldout": {
+    "karina_correct": 500,
+    "karina_report_hash": "f785f602cfce008d6925b8b8b575becf6393777a61742dc20102fb81e2c46697",
+    "same_semantic_statuses": true,
+    "windows_correct": 500,
+    "windows_report_hash": "322488d66c2ba331103d9e4a3d9e956f411be7876b577f05e0bdd33383d7f08c"
+  },
+  "pack_rebuild": {
+    "byte_identical_comparison_available": false,
+    "reason": "The frozen ordinary compiler failed before producing a final four-bundle build on both platforms. Safe-withheld H12 packs were verified but not represented as a successful frozen black-box rebuild."
+  },
+  "source_receipts": {
+    "karina_mismatches": 0,
+    "manifest_hash": "28c08bfd5d33aa8185b52d8de0fe06f622dd6d34792d7ba763c277ca7efc7ab1",
+    "receipt_count": 25,
+    "windows_mismatches": 0
+  },
+  "status": "REPRODUCED_FAILURE_AND_SAFE_RUNTIME"
+}

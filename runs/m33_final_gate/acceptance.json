@@ -1,0 +1,61 @@
+{
+  "branch": "exp/stage3-cross-domain-blackbox",
+  "e11": "b55b61148d12386d6f2132b136b11f8dca859a7e",
+  "f12": "ad3e35a36fcaafa267f3181b248c8269cb70287f",
+  "h11": "af508a130b6e496f907254593387b13e4a73d2ce",
+  "h12": "0608b8a0200cd930bff45eeb7950c953e246ede7",
+  "outcome": "C",
+  "roadmap_sha256": "8d79042b74a7b474a7f6a94c41028ca80fd54b0e8d7f0c1879857fd77f4e8384",
+  "status": "SAFE_FAILURE_DO_NOT_PROCEED",
+  "gates": {
+    "karina": {
+      "frozen_build": "EXPECTED_BLACKBOX_FAILURE_CONFLICTING_SEMANTIC_IDENTITY",
+      "full_suite_passed": 834,
+      "pytest_seconds": "296.67",
+      "ruff": "PASS",
+      "source_receipts_verified": 25,
+      "status": "PASS_EXCEPT_REQUIRED_REBUILD",
+      "tmux_session": "m33-cross-domain-blackbox"
+    },
+    "windows": {
+      "freeze_diff": "PASS",
+      "full_suite_passed": 834,
+      "pytest_seconds": "1197.16",
+      "registry": "VERIFIED",
+      "ruff": "PASS",
+      "source_receipts_verified": 25,
+      "status": "PASS"
+    }
+  },
+  "heldout": {
+    "abstention": "1.000000",
+    "correct": 500,
+    "coverage": "0.000000",
+    "near_duplicate_clusters": 0,
+    "semantic_keys": 500,
+    "trusted": 0,
+    "wrong_trusted": 0
+  },
+  "prior_refs": {
+    "gpt": "0a231f4267bd501cc45159e7070d94262b4de87a",
+    "stage1-acquisition-v1": "232eee967be24d1415ff1eb4b463a46dbf0d2843",
+    "stage1-v1.0.0": "7ee8fc3e057fa285ca8cf35d1e0b7b373cc04be6",
+    "stage1-v1.0.1": "236276a1a72e1143c7d76c17d7e33ae2e6e1ed37"
+  },
+  "scale": {
+    "documents": 25,
+    "duplicate_segment_count": 5818,
+    "duplicate_segment_rate": "0.473047",
+    "segments": 12299,
+    "words": 94283
+  },
+  "trust": {
+    "content_policy_added": false,
+    "field_evidence_complete": false,
+    "frozen_core_unchanged": true,
+    "runtime_network_calls": 0,
+    "torch_loaded": false,
+    "wrong_automatically_trusted_proposals": 832,
+    "wrong_installed_or_heldout_trusted": 0
+  }
+}

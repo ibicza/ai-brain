@@ -1,0 +1,28 @@
+M-33 exact-H12 Windows gate
+HEAD 0608b8a0200cd930bff45eeb7950c953e246ede7
+OS Microsoft Windows NT 10.0.26200.0
+Python 3.12.13
+
+uv run ruff check src scripts tests
+All checks passed!
+RUFF_EXIT:0
+
+uv run pytest -q
+834 passed in 1197.16s (0:19:57)
+PYTEST_EXIT:0
+
+uv run python scripts/m33_verify_freeze.py --f12 ad3e35a36fcaafa267f3181b248c8269cb70287f --h12 0608b8a0200cd930bff45eeb7950c953e246ede7
+status=PASS
+h12_frozen_changes=[]
+report_hash=c769c82379581b96bbcaa28762017bb1a0fa3db020359eab4c7a1cd7be482c0c
+FREEZE_EXIT:0
+
+source receipt verification
+status=PASS receipts=25 mismatches=[]
+SOURCES_EXIT:0
+
+installed registry verification with exact provider/capability authority
+status=VERIFIED installed_count=4 registry_hash=fa2a09f3e1f827ac01016fef36a7f478a1f80b3e5989aa7625abcbfde2075c5d audit_event_count=4
+REGISTRY_EXIT:0
+
+working tree before E12 evidence: clean

@@ -1,0 +1,27 @@
+{
+  "baseline": {
+    "edges": 58898,
+    "files": 453,
+    "nodes": 6023,
+    "persistent_edges": 84726,
+    "persistent_files": 583,
+    "persistent_nodes": 9091
+  },
+  "f12": {
+    "edges": 60787,
+    "files": 467,
+    "nodes": 6171,
+    "persistent_edges": 86590,
+    "persistent_files": 597,
+    "persistent_nodes": 9238
+  },
+  "h12": {
+    "edges": 60787,
+    "files": 467,
+    "nodes": 6171,
+    "persistent_edges": 86590,
+    "persistent_files": 597,
+    "persistent_nodes": 9238
+  },
+  "status": "PASS_UNCHANGED_FROM_F12"
+}

@@ -58,3 +58,18 @@ After staging all F12 paths, that rebuild parsed 467 tracked files and produced
 6,171 syntax nodes with 60,787 edges. Persistent post-processing reported 597
 files, 9,238 indexed nodes, and 86,590 edges. This is the graph state immediately
 before the F12 gate; the graph cache remains uncommitted.
+
+## Exact F12 and H12 boundaries
+
+F12 is `ad3e35a36fcaafa267f3181b248c8269cb70287f`. H12 is
+`0608b8a0200cd930bff45eeb7950c953e246ede7`. The automated freeze verifier
+reported `PASS`: H12 changed zero frozen paths under `src`, `schemas`, `scripts`,
+`tests`, `pyproject.toml`, or `uv.lock`. Its report hash is
+`c769c82379581b96bbcaa28762017bb1a0fa3db020359eab4c7a1cd7be482c0c`.
+
+The exact-H12 full rebuild again parsed 467 tracked files, 6,171 syntax nodes,
+and 60,787 edges. Persistent post-processing again reported 597 files, 9,238
+indexed nodes, and 86,590 edges. Thus H12 source, golden, pack, installation,
+and report data did not alter the code graph. The generated graph cache remains
+local and uncommitted; the E12 evidence commit records this state without
+committing the cache.
