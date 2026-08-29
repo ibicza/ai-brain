@@ -1,0 +1,272 @@
+Motion Equations for Constant Acceleration in One Dimension – College Physics
+Skip to content
+Kinematics
+Learning Objectives
+Calculate displacement of an object that is not accelerating, given initial position and velocity.
+Calculate final velocity of an accelerating object, given initial velocity, acceleration, and time.
+Calculate displacement and final position of an accelerating object, given initial position, initial velocity, time, and acceleration.
+Kinematic equations can help us describe and predict the motion of moving objects such as these kayaks racing in Newbury, England. (credit: Barry Skeates, Flickr)
+We might know that the greater the acceleration of, say, a car moving away from a stop sign, the greater the displacement in a given time. But we have not developed a specific equation that relates acceleration and displacement. In this section, we develop some convenient equations for kinematic relationships, starting from the definitions of displacement, velocity, and acceleration already covered.
+Notation: t, x, v, a
+First, let us make some simplifications in notation. Taking the initial time to be zero, as if time is measured with a stopwatch, is a great simplification. Since elapsed time is [latex]\Delta t={t}_{f}-{t}_{0}[/latex], taking [latex]{t}_{0}=0[/latex] means that [latex]\Delta t={t}_{f}[/latex], the final time on the stopwatch. When initial time is taken to be zero, we use the subscript 0 to denote initial values of position and velocity. That is, [latex]{x}_{0}[/latex] is the initial position and [latex]{v}_{0}[/latex] is the initial velocity. We put no subscripts on the final values. That is, [latex]t[/latex] is the final time, [latex]x[/latex] is the final position, and [latex]v[/latex] is the final velocity. This gives a simpler expression for elapsed time—now, [latex]\Delta t=t[/latex]. It also simplifies the expression for displacement, which is now [latex]\Delta x=x-{x}_{0}[/latex]. Also, it simplifies the expression for change in velocity, which is now [latex]\Delta v=v-{v}_{0}[/latex]. To summarize, using the simplified notation, with the initial time taken to be zero,
+[latex]\begin{array}{lll}\Delta t& =& t\\ \Delta x& =& x-{x}_{0}\\ \Delta v& =& v-{v}_{0}\end{array}}[/latex]
+where the subscript 0 denotes an initial value and the absence of a subscript denotes a final value in whatever motion is under consideration.
+We now make the important assumption that acceleration is constant. This assumption allows us to avoid using calculus to find instantaneous acceleration. Since acceleration is constant, the average and instantaneous accelerations are equal. That is,
+[latex]\stackrel{-}{a}=a=\text{constant},[/latex]
+so we use the symbol [latex]a[/latex] for acceleration at all times. Assuming acceleration to be constant does not seriously limit the situations we can study nor degrade the accuracy of our treatment. For one thing, acceleration is constant in a great number of situations. Furthermore, in many other situations we can accurately describe motion by assuming a constant acceleration equal to the average acceleration for that motion. Finally, in motions where acceleration changes drastically, such as a car accelerating to top speed and then braking to a stop, the motion can be considered in separate parts, each of which has its own constant acceleration.
+Solving for Displacement ([latex]\Delta x[/latex]) and Final Position ([latex]x[/latex]) from Average Velocity when Acceleration ([latex]a[/latex]) is Constant
+To get our first two new equations, we start with the definition of average velocity:
+[latex]\stackrel{-}{v}=\frac{\Delta x}{\Delta t}\text{.}[/latex]
+Substituting the simplified notation for [latex]\Delta x[/latex] and [latex]\Delta t[/latex] yields
+[latex]\stackrel{-}{v}=\frac{x-{x}_{0}}{t}\text{.}[/latex]
+Solving for [latex]x[/latex] yields
+[latex]x={x}_{0}+\stackrel{-}{v}t\text{,}[/latex]
+where the average velocity is
+[latex]\stackrel{-}{v}=\frac{{v}_{0}+v}{2}\phantom{\rule{0.25em}{0ex}}\left(\text{constant}\phantom{\rule{0.25em}{0ex}}a\right)\text{.}[/latex]
+The equation [latex]\stackrel{-}{v}=\frac{{v}_{0}+v}{2}[/latex] reflects the fact that, when acceleration is constant, [latex]v[/latex] is just the simple average of the initial and final velocities. For example, if you steadily increase your velocity (that is, with constant acceleration) from 30 to 60 km/h, then your average velocity during this steady increase is 45 km/h. Using the equation [latex]\stackrel{-}{v}=\frac{{v}_{0}+v}{2}[/latex] to check this, we see that
+[latex]\stackrel{-}{v}=\frac{{v}_{0}+v}{2}=\frac{\text{30 km/h}+\text{60 km/h}}{2}=\text{45 km/h,}[/latex]
+which seems logical.
+Calculating Displacement: How Far does the Jogger Run?
+A jogger runs down a straight stretch of road with an average velocity of 4.00 m/s for 2.00 min. What is his final position, taking his initial position to be zero?
+Strategy
+Draw a sketch.
+The final position [latex]x[/latex] is given by the equation
+[latex]x={x}_{0}+\stackrel{-}{v}t.[/latex]
+To find [latex]x[/latex], we identify the values of [latex]{x}_{0}[/latex], [latex]\stackrel{-}{v}[/latex], and [latex]t[/latex] from the statement of the problem and substitute them into the equation.
+Solution
+1. Identify the knowns. [latex]\stackrel{-}{v}=4\text{.}\text{00 m/s}[/latex], [latex]\Delta t=2\text{.}\text{00 min}[/latex], and [latex]{x}_{0}=\text{0 m}[/latex].
+2. Enter the known values into the equation.
+[latex]x={x}_{0}+\stackrel{-}{v}t=0+\left(4\text{.}\text{00 m/s}\right)\left(\text{120 s}\right)=\text{480 m}[/latex]
+Discussion
+Velocity and final displacement are both positive, which means they are in the same direction.
+The equation [latex]x={x}_{0}+\stackrel{-}{v}t[/latex] gives insight into the relationship between displacement, average velocity, and time. It shows, for example, that displacement is a linear function of average velocity. (By linear function, we mean that displacement depends on [latex]\stackrel{-}{v}[/latex] rather than on [latex]\stackrel{-}{v}[/latex] raised to some other power, such as [latex]{\stackrel{-}{v}}^{2}[/latex]. When graphed, linear functions look like straight lines with a constant slope.) On a car trip, for example, we will get twice as far in a given time if we average 90 km/h than if we average 45 km/h.
+There is a linear relationship between displacement and average velocity. For a given time [latex]t[/latex], an object moving twice as fast as another object will move twice as far as the other object.
+Solving for Final Velocity
+We can derive another useful equation by manipulating the definition of acceleration.
+[latex]a=\frac{\Delta v}{\Delta t}[/latex]
+Substituting the simplified notation for [latex]\Delta v[/latex] and [latex]\Delta t[/latex] gives us
+[latex]a=\frac{v-{v}_{0}}{t}\text{}\phantom{\rule{0.25em}{0ex}}\left(\text{constant}\phantom{\rule{0.25em}{0ex}}a\right)\text{.}[/latex]
+Solving for [latex]v[/latex] yields
+[latex]v={v}_{0}+\text{at}\text{}\phantom{\rule{0.25em}{0ex}}\left(\text{constant}\phantom{\rule{0.25em}{0ex}}a\right)\text{.}[/latex]
+Calculating Final Velocity: An Airplane Slowing Down after Landing
+An airplane lands with an initial velocity of 70.0 m/s and then decelerates at [latex]1\text{.}{\text{50 m/s}}^{2}[/latex] for 40.0 s. What is its final velocity?
+Strategy
+Draw a sketch. We draw the acceleration vector in the direction opposite the velocity vector because the plane is decelerating.
+Solution
+1. Identify the knowns. [latex]{v}_{0}=\text{70}\text{.}\text{0 m/s}[/latex], [latex]a=-1\text{.}{\text{50 m/s}}^{2}[/latex], [latex]t=\text{40}\text{.}0\phantom{\rule{0.25em}{0ex}}\text{s}[/latex].
+2. Identify the unknown. In this case, it is final velocity, [latex]{v}_{f}[/latex].
+3. Determine which equation to use. We can calculate the final velocity using the equation [latex]v={v}_{0}+\text{at}[/latex].
+4. Plug in the known values and solve.
+[latex]v={v}_{0}+\text{at}=\text{70}\text{.}\text{0 m/s}+\left(-1\text{.}{\text{50 m/s}}^{2}\right)\left(\text{40}\text{.}\text{0 s}\right)=\text{10}\text{.}\text{0 m/s}[/latex]
+Discussion
+The final velocity is much less than the initial velocity, as desired when slowing down, but still positive. With jet engines, reverse thrust could be maintained long enough to stop the plane and start moving it backward. That would be indicated by a negative final velocity, which is not the case here.
+The airplane lands with an initial velocity of 70.0 m/s and slows to a final velocity of 10.0 m/s before heading for the terminal. Note that the acceleration is negative because its direction is opposite to its velocity, which is positive.
+In addition to being useful in problem solving, the equation [latex]v={v}_{0}+\text{at}[/latex] gives us insight into the relationships among velocity, acceleration, and time. From it we can see, for example, that
+final velocity depends on how large the acceleration is and how long it lasts
+if the acceleration is zero, then the final velocity equals the initial velocity [latex]\left(v={v}_{0}\right)[/latex], as expected (i.e., velocity is constant)
+if [latex]a[/latex] is negative, then the final velocity is less than the initial velocity
+(All of these observations fit our intuition, and it is always useful to examine basic equations in light of our intuition and experiences to check that they do indeed describe nature accurately.)
+Making Connections: Real-World Connection
+The Space Shuttle Endeavor blasts off from the Kennedy Space Center in February 2010. (credit: Matthew Simantov, Flickr)
+An intercontinental ballistic missile (ICBM) has a larger average acceleration than the Space Shuttle and achieves a greater velocity in the first minute or two of flight (actual ICBM burn times are classified—short-burn-time missiles are more difficult for an enemy to destroy). But the Space Shuttle obtains a greater final velocity, so that it can orbit the earth rather than come directly back down as an ICBM does. The Space Shuttle does this by accelerating for a longer time.
+Solving for Final Position When Velocity is Not Constant ([latex]a\ne 0[/latex])
+We can combine the equations above to find a third equation that allows us to calculate the final position of an object experiencing constant acceleration. We start with
+[latex]v={v}_{0}+\text{at}.[/latex]
+Adding [latex]{v}_{0}[/latex] to each side of this equation and dividing by 2 gives
+[latex]\frac{{v}_{0}+v}{2}={v}_{0}+\frac{1}{2}\text{at}\text{.}[/latex]
+Since [latex]\frac{{v}_{0}+v}{2}=\stackrel{-}{v}[/latex] for constant acceleration, then
+[latex]\stackrel{-}{v}={v}_{0}+\frac{1}{2}\text{at}\text{.}[/latex]
+Now we substitute this expression for [latex]\stackrel{-}{v}[/latex] into the equation for displacement, [latex]x={x}_{0}+\stackrel{-}{v}t[/latex], yielding
+[latex]x={x}_{0}+{v}_{0}t+\frac{1}{2}{\text{at}}^{2}\phantom{\rule{0.25em}{0ex}}\left(\text{constant}\phantom{\rule{0.25em}{0ex}}a\right)\text{.}[/latex]
+Calculating Displacement of an Accelerating Object: Dragsters
+Dragsters can achieve average accelerations of [latex]\text{26}\text{.}{\text{0 m/s}}^{2}[/latex]. Suppose such a dragster accelerates from rest at this rate for 5.56 s. How far does it travel in this time?
+U.S. Army Top Fuel pilot Tony “The Sarge” Schumacher begins a race with a controlled burnout. (credit: Lt. Col. William Thurmond. Photo Courtesy of U.S. Army.)
+Strategy
+Draw a sketch.
+We are asked to find displacement, which is [latex]x[/latex] if we take [latex]{x}_{0}[/latex] to be zero. (Think about it like the starting line of a race. It can be anywhere, but we call it 0 and measure all other positions relative to it.) We can use the equation [latex]x={x}_{0}+{v}_{0}t+\frac{1}{2}{\text{at}}^{2}[/latex]once we identify [latex]{v}_{0}[/latex], [latex]a[/latex], and [latex]t[/latex] from the statement of the problem.
+Solution
+1. Identify the knowns. Starting from rest means that [latex]{v}_{0}=0[/latex], [latex]a[/latex] is given as [latex]\text{26}\text{.}0\phantom{\rule{0.25em}{0ex}}{\text{m/s}}^{2}[/latex] and [latex]t[/latex] is given as 5.56 s.
+2. Plug the known values into the equation to solve for the unknown [latex]x[/latex]:
+[latex]x={x}_{0}+{v}_{0}t+\frac{1}{2}{\text{at}}^{2}\text{.}[/latex]
+Since the initial position and velocity are both zero, this simplifies to
+[latex]x=\frac{1}{2}{\text{at}}^{2}\text{.}[/latex]
+Substituting the identified values of [latex]a[/latex] and [latex]t[/latex] gives
+[latex]x=\frac{1}{2}\left(\text{26}\text{.}{\text{0 m/s}}^{2}\right){\left(5\text{.}\text{56 s}\right)}^{2},[/latex]
+yielding
+[latex]x=\text{402 m.}[/latex]
+Discussion
+If we convert 402 m to miles, we find that the distance covered is very close to one quarter of a mile, the standard distance for drag racing. So the answer is reasonable. This is an impressive displacement in only 5.56 s, but top-notch dragsters can do a quarter mile in even less time than this.
+What else can we learn by examining the equation [latex]x={x}_{0}+{v}_{0}t+\frac{1}{2}{\text{at}}^{2}?[/latex] We see that:
+displacement depends on the square of the elapsed time when acceleration is not zero. In [link], the dragster covers only one fourth of the total distance in the first half of the elapsed time
+if acceleration is zero, then the initial velocity equals average velocity ([latex]{v}_{0}=\stackrel{-}{v}[/latex]) and [latex]x={x}_{0}+{v}_{0}t+\frac{1}{2}{\text{at}}^{2}[/latex] becomes [latex]x={x}_{0}+{v}_{0}t[/latex]
+Solving for Final Velocity when Velocity Is Not Constant ([latex]a\ne 0[/latex])
+A fourth useful equation can be obtained from another algebraic manipulation of previous equations.
+If we solve [latex]v={v}_{0}+\text{at}[/latex] for [latex]t[/latex], we get
+[latex]t=\frac{v-{v}_{0}}{a}\text{.}[/latex]
+Substituting this and [latex]\stackrel{-}{v}=\frac{{v}_{0}+v}{2}[/latex] into [latex]x={x}_{0}+\stackrel{-}{v}t[/latex], we get
+[latex]{v}^{2}={v}_{0}^{2}+2a\left(x-{x}_{0}\right)\text{}\phantom{\rule{0.25em}{0ex}}\left(\text{constant}\phantom{\rule{.25 em}{0ex}}a\right)\text{.}[/latex]
+Calculating Final Velocity: Dragsters
+Calculate the final velocity of the dragster in [link] without using information about time.
+Strategy
+Draw a sketch.
+The equation [latex]{v}^{2}={v}_{0}^{2}+2a\left(x-{x}_{0}\right)[/latex] is ideally suited to this task because it relates velocities, acceleration, and displacement, and no time information is required.
+Solution
+1. Identify the known values. We know that [latex]{v}_{0}=0[/latex], since the dragster starts from rest. Then we note that [latex]x-{x}_{0}=\text{402 m}[/latex] (this was the answer in [link]). Finally, the average acceleration was given to be [latex]a=\text{26}\text{.}{\text{0 m/s}}^{2}[/latex].
+2. Plug the knowns into the equation [latex]{v}^{2}={v}_{0}^{2}+2a\left(x-{x}_{0}\right)[/latex] and solve for [latex]v.[/latex]
+[latex]{v}^{2}=0+2\left(\text{26}\text{.}{\text{0 m/s}}^{2}\right)\left(\text{402 m}\right).[/latex]
+Thus
+[latex]{v}^{2}=2\text{.}\text{09}×{\text{10}}^{4}\phantom{\rule{0.25em}{0ex}}{\text{m}}^{2}{\text{/s}}^{2}.[/latex]
+To get [latex]v[/latex], we take the square root:
+[latex]v=\sqrt{2\text{.}\text{09}×{\text{10}}^{4}\phantom{\rule{0.25em}{0ex}}{\text{m}}^{2}{\text{/s}}^{2}}=\text{145 m/s}.[/latex]
+Discussion
+145 m/s is about 522 km/h or about 324 mi/h, but even this breakneck speed is short of the record for the quarter mile. Also, note that a square root has two values; we took the positive value to indicate a velocity in the same direction as the acceleration.
+An examination of the equation [latex]{v}^{2}={v}_{0}^{2}+2a\left(x-{x}_{0}\right)[/latex] can produce further insights into the general relationships among physical quantities:
+The final velocity depends on how large the acceleration is and the distance over which it acts
+For a fixed deceleration, a car that is going twice as fast doesn’t simply stop in twice the distance—it takes much further to stop. (This is why we have reduced speed zones near schools.)
+Putting Equations Together
+In the following examples, we further explore one-dimensional motion, but in situations requiring slightly more algebraic manipulation. The examples also give insight into problem-solving techniques. The box below provides easy reference to the equations needed.
+Summary of Kinematic Equations (constant [latex]a[/latex])
+[latex]x={x}_{0}+\stackrel{-}{v}t[/latex]
+[latex]\stackrel{-}{v}=\frac{{v}_{0}+v}{2}[/latex]
+[latex]v={v}_{0}+\text{at}[/latex]
+[latex]x={x}_{0}+{v}_{0}t+\frac{1}{2}{\text{at}}^{2}[/latex]
+[latex]{v}^{2}={v}_{0}^{2}+2a\left(x-{x}_{0}\right)[/latex]
+Calculating Displacement: How Far Does a Car Go When Coming to a Halt?
+On dry concrete, a car can decelerate at a rate of [latex]7\text{.}{\text{00 m/s}}^{2}[/latex], whereas on wet concrete it can decelerate at only [latex]5\text{.}{\text{00 m/s}}^{2}[/latex]. Find the distances necessary to stop a car moving at 30.0 m/s (about 110 km/h) (a) on dry concrete and (b) on wet concrete. (c) Repeat both calculations, finding the displacement from the point where the driver sees a traffic light turn red, taking into account his reaction time of 0.500 s to get his foot on the brake.
+Strategy
+Draw a sketch.
+In order to determine which equations are best to use, we need to list all of the known values and identify exactly what we need to solve for. We shall do this explicitly in the next several examples, using tables to set them off.
+Solution for (a)
+1. Identify the knowns and what we want to solve for. We know that [latex]{v}_{0}=\text{30}\text{.}\text{0 m/s}[/latex]; [latex]v=\text{0}[/latex]; [latex]a=-7\text{.}\text{00}\phantom{\rule{0.25em}{0ex}}{\text{m/s}}^{2}[/latex] ([latex]a[/latex] is negative because it is in a direction opposite to velocity). We take [latex]{x}_{0}[/latex] to be 0. We are looking for displacement [latex]\Delta x[/latex], or [latex]x-{x}_{0}[/latex].
+2. Identify the equation that will help up solve the problem. The best equation to use is
+[latex]{v}^{2}={v}_{0}^{2}+2a\left(x-{x}_{0}\right).[/latex]
+This equation is best because it includes only one unknown, [latex]x[/latex]. We know the values of all the other variables in this equation. (There are other equations that would allow us to solve for [latex]x[/latex], but they require us to know the stopping time, [latex]t[/latex], which we do not know. We could use them but it would entail additional calculations.)
+3. Rearrange the equation to solve for [latex]x[/latex].
+[latex]x-{x}_{0}=\frac{{v}^{2}-{v}_{0}^{2}}{2a}[/latex]
+4. Enter known values.
+[latex]x-0=\frac{{0}^{2}-{\left(\text{30}\text{.}\text{0 m/s}\right)}^{2}}{2\left(-7\text{.}{\text{00 m/s}}^{2}\right)}[/latex]
+Thus,
+[latex]x=\text{64}\text{.}\text{3 m on dry concrete}\text{.}[/latex]
+Solution for (b)
+This part can be solved in exactly the same manner as Part A. The only difference is that the deceleration is [latex]–5\text{.}{\text{00 m/s}}^{2}[/latex]. The result is
+[latex]{x}_{\text{wet}}=\text{90}\text{.}\text{0 m on wet concrete}\text{.}[/latex]
+Solution for (c)
+Once the driver reacts, the stopping distance is the same as it is in Parts A and B for dry and wet concrete. So to answer this question, we need to calculate how far the car travels during the reaction time, and then add that to the stopping time. It is reasonable to assume that the velocity remains constant during the driver’s reaction time.
+1. Identify the knowns and what we want to solve for. We know that [latex]\stackrel{-}{v}=\text{30.0 m/s}[/latex];
+[latex]{t}_{\text{reaction}}=0.500\phantom{\rule{0.15em}{0ex}}\text{s}[/latex];
+[latex]{a}_{\text{reaction}}=0[/latex]. We take
+[latex]{x}_{0-\text{reaction}}[/latex] to be 0. We are looking for
+[latex]{x}_{\text{reaction}}[/latex].
+2. Identify the best equation to use.
+[latex]x={x}_{0}+\stackrel{-}{v}t[/latex] works well because the only unknown value is [latex]x[/latex], which is what we want to solve for.
+3. Plug in the knowns to solve the equation.
+[latex]x=0+\left(\text{30}\text{.}\text{0 m/s}\right)\left(0\text{.}\text{500 s}\right)=\text{15}\text{.}\text{0 m}.[/latex]
+This means the car travels 15.0 m while the driver reacts, making the total displacements in the two cases of dry and wet concrete 15.0 m greater than if he reacted instantly.
+4. Add the displacement during the reaction time to the displacement when braking.
+[latex]{x}_{\text{braking}}+{x}_{\text{reaction}}={x}_{\text{total}}[/latex]
+64.3 m + 15.0 m = 79.3 m when dry
+90.0 m + 15.0 m = 105 m when wet
+The distance necessary to stop a car varies greatly, depending on road conditions and driver reaction time. Shown here are the braking distances for dry and wet pavement, as calculated in this example, for a car initially traveling at 30.0 m/s. Also shown are the total distances traveled from the point where the driver first sees a light turn red, assuming a 0.500 s reaction time.
+Discussion
+The displacements found in this example seem reasonable for stopping a fast-moving car. It should take longer to stop a car on wet rather than dry pavement. It is interesting that reaction time adds significantly to the displacements. But more important is the general approach to solving problems. We identify the knowns and the quantities to be determined and then find an appropriate equation. There is often more than one way to solve a problem. The various parts of this example can in fact be solved by other methods, but the solutions presented above are the shortest.
+Calculating Time: A Car Merges into Traffic
+Suppose a car merges into freeway traffic on a 200-m-long ramp. If its initial velocity is 10.0 m/s and it accelerates at [latex]2\text{.}{\text{00 m/s}}^{2}[/latex], how long does it take to travel the 200 m up the ramp? (Such information might be useful to a traffic engineer.)
+Strategy
+Draw a sketch.
+We are asked to solve for the time [latex]t[/latex]. As before, we identify the known quantities in order to choose a convenient physical relationship (that is, an equation with one unknown, [latex]t[/latex]).
+Solution
+1. Identify the knowns and what we want to solve for. We know that [latex]{v}_{0}=\text{10 m/s}[/latex]; [latex]a=2\text{.}{\text{00 m/s}}^{2}[/latex]; and [latex]x=\text{200 m}[/latex].
+2. We need to solve for [latex]t[/latex]. Choose the best equation. [latex]x={x}_{0}+{v}_{0}t+\frac{1}{2}{\text{at}}^{2}[/latex] works best because the only unknown in the equation is the variable [latex]t[/latex] for which we need to solve.
+3. We will need to rearrange the equation to solve for [latex]t[/latex]. In this case, it will be easier to plug in the knowns first.
+[latex]\text{200 m}=\text{0 m}+\left(\text{10}\text{.}\text{0 m/s}\right)t+\frac{1}{2}\left(2\text{.}{\text{00 m/s}}^{2}\right)\phantom{\rule{0.15em}{0ex}}{t}^{2}[/latex]
+4. Simplify the equation. The units of meters (m) cancel because they are in each term. We can get the units of seconds (s) to cancel by taking [latex]t=t\phantom{\rule{0.25em}{0ex}}\text{s}[/latex], where [latex]t[/latex] is the magnitude of time and s is the unit. Doing so leaves
+[latex]\text{200}=\text{10}t+{t}^{2}\text{.}[/latex]
+5. Use the quadratic formula to solve for [latex]t[/latex].
+(a) Rearrange the equation to get 0 on one side of the equation.
+[latex]{t}^{2}+\text{10}t-\text{200}=0[/latex]
+This is a quadratic equation of the form
+[latex]{\text{at}}^{2}+\text{bt}+c=0,[/latex]
+where the constants are [latex]a=1\text{.}\text{00,}\phantom{\rule{0.25em}{0ex}}b=\text{10}\text{.}\text{0,}\phantom{\rule{0.25em}{0ex}}\text{and}\phantom{\rule{0.25em}{0ex}}c=-\text{200}[/latex].
+(b) Its solutions are given by the quadratic formula:
+[latex]t=\frac{-b±\sqrt{{b}^{2}-4\text{ac}}}{2a}\text{.}[/latex]
+This yields two solutions for [latex]t[/latex], which are
+[latex]t=\text{10}\text{.}0\phantom{\rule{0.25em}{0ex}}\text{and}-\text{20}\text{.}0.[/latex]
+In this case, then, the time is [latex]t=t[/latex] in seconds, or
+[latex]t=\text{10}\text{.}0\phantom{\rule{0.25em}{0ex}}\text{s}\phantom{\rule{0.25em}{0ex}}\text{and}-\text{20}\text{.}0\phantom{\rule{0.25em}{0ex}}\text{s}.[/latex]
+A negative value for time is unreasonable, since it would mean that the event happened 20 s before the motion began. We can discard that solution. Thus,
+[latex]t=\text{10}\text{.}0\phantom{\rule{0.25em}{0ex}}\text{s}.[/latex]
+Discussion
+Whenever an equation contains an unknown squared, there will be two solutions. In some problems both solutions are meaningful, but in others, such as the above, only one solution is reasonable. The 10.0 s answer seems reasonable for a typical freeway on-ramp.
+With the basics of kinematics established, we can go on to many other interesting examples and applications. In the process of developing kinematics, we have also glimpsed a general approach to problem solving that produces both correct answers and insights into physical relationships. Problem-Solving Basics discusses problem-solving basics and outlines an approach that will help you succeed in this invaluable task.
+Making Connections: Take-Home Experiment—Breaking News
+We have been using SI units of meters per second squared to describe some examples of acceleration or deceleration of cars, runners, and trains. To achieve a better feel for these numbers, one can measure the braking deceleration of a car doing a slow (and safe) stop. Recall that, for average acceleration, [latex]\stackrel{-}{a}=\Delta v/\Delta t[/latex]. While traveling in a car, slowly apply the brakes as you come up to a stop sign. Have a passenger note the initial speed in miles per hour and the time taken (in seconds) to stop. From this, calculate the deceleration in miles per hour per second. Convert this to meters per second squared and compare with other decelerations mentioned in this chapter. Calculate the distance traveled in braking.
+Check Your Understanding
+A manned rocket accelerates at a rate of [latex]{\text{20 m/s}}^{2}[/latex] during launch. How long does it take the rocket to reach a velocity of 400 m/s?
+To answer this, choose an equation that allows you to solve for time [latex]t[/latex], given only [latex]a[/latex], [latex]{v}_{0}[/latex], and [latex]v[/latex].
+[latex]v\phantom{\rule{0.15em}{0ex}}=\phantom{\rule{0.15em}{0ex}}{v}_{0}+\text{at}[/latex]
+Rearrange to solve for [latex]t[/latex].
+[latex]t=\frac{v-v{}_{0}\text{}}{a}=\frac{\text{400 m/s}-\text{0 m/s}}{{\text{20 m/s}}^{2}}=\text{20 s}[/latex]
+Section Summary
+To simplify calculations we take acceleration to be constant, so that [latex]\stackrel{-}{a}=a[/latex] at all times.
+We also take initial time to be zero.
+Initial position and velocity are given a subscript 0; final values have no subscript. Thus,
+[latex]\begin{array}{lll}\Delta t& =& t\\ \Delta x& =& x-{x}_{0}\\ \Delta v& =& v-{v}_{0}\end{array}}[/latex]
+The following kinematic equations for motion with constant [latex]a[/latex] are useful:
+[latex]x={x}_{0}+\stackrel{-}{v}t[/latex]
+[latex]\stackrel{-}{v}=\frac{{v}_{0}+v}{2}[/latex]
+[latex]v={v}_{0}+\text{at}[/latex]
+[latex]x={x}_{0}+{v}_{0}t+\frac{1}{2}{\text{at}}^{2}[/latex]
+[latex]{v}^{2}={v}_{0}^{2}+2a\left(x-{x}_{0}\right)[/latex]
+In vertical motion, [latex]y[/latex] is substituted for [latex]x[/latex].
+Problems & Exercises
+An Olympic-class sprinter starts a race with an acceleration of [latex]4\text{.}{\text{50 m/s}}^{2}[/latex]. (a) What is her speed 2.40 s later? (b) Sketch a graph of her position vs. time for this period.
+(a) [latex]\text{10}\text{.}8\phantom{\rule{0.25em}{0ex}}\text{m/s}[/latex]
+(b)
+A well-thrown ball is caught in a well-padded mitt. If the deceleration of the ball is [latex]2\text{.}\text{10}×{\text{10}}^{4}\phantom{\rule{0.25em}{0ex}}{\text{m/s}}^{2}[/latex], and 1.85 ms [latex]\left(\text{1 ms}={\text{10}}^{-3}\phantom{\rule{0.25em}{0ex}}\text{s}\right)[/latex] elapses from the time the ball first touches the mitt until it stops, what was the initial velocity of the ball?
+38.9 m/s (about 87 miles per hour)
+A bullet in a gun is accelerated from the firing chamber to the end of the barrel at an average rate of [latex]6\text{.20}×{\text{10}}^{5}\phantom{\rule{0.25em}{0ex}}{\text{m/s}}^{2}[/latex] for [latex]8\text{.}\text{10}×{\text{10}}^{-4}\phantom{\rule{0.25em}{0ex}}\text{s}[/latex]. What is its muzzle velocity (that is, its final velocity)?
+(a) A light-rail commuter train accelerates at a rate of [latex]1\text{.}{\text{35 m/s}}^{2}[/latex]. How long does it take to reach its top speed of 80.0 km/h, starting from rest? (b) The same train ordinarily decelerates at a rate of [latex]1\text{.}{\text{65 m/s}}^{2}[/latex]. How long does it take to come to a stop from its top speed? (c) In emergencies the train can decelerate more rapidly, coming to rest from 80.0 km/h in 8.30 s. What is its emergency deceleration in [latex]{\text{m/s}}^{2}[/latex]?
+(a) [latex]\text{16}\text{.}\text{5 s}[/latex]
+(b) [latex]\text{13}\text{.}\text{5 s}[/latex]
+(c) [latex]-2\text{.}{\text{68 m/s}}^{2}[/latex]
+While entering a freeway, a car accelerates from rest at a rate of [latex]2\text{.}{\text{40 m/s}}^{2}[/latex] for 12.0 s. (a) Draw a sketch of the situation. (b) List the knowns in this problem. (c) How far does the car travel in those 12.0 s? To solve this part, first identify the unknown, and then discuss how you chose the appropriate equation to solve for it. After choosing the equation, show your steps in solving for the unknown, check your units, and discuss whether the answer is reasonable. (d) What is the car’s final velocity? Solve for this unknown in the same manner as in part (c), showing all steps explicitly.
+At the end of a race, a runner decelerates from a velocity of 9.00 m/s at a rate of [latex]2\text{.}{\text{00 m/s}}^{2}[/latex]. (a) How far does she travel in the next 5.00 s? (b) What is her final velocity? (c) Evaluate the result. Does it make sense?
+(a) [latex]\text{20}\text{.}\text{0 m}[/latex]
+(b) [latex]-1\text{.}\text{00 m/s}[/latex]
+(c) This result does not really make sense. If the runner starts at 9.00 m/s and decelerates at [latex]2\text{.}{\text{00 m/s}}^{2}[/latex], then she will have stopped after 4.50 s. If she continues to decelerate, she will be running backwards.
+Professional Application:
+Blood is accelerated from rest to 30.0 cm/s in a distance of 1.80 cm by the left ventricle of the heart. (a) Make a sketch of the situation. (b) List the knowns in this problem. (c) How long does the acceleration take? To solve this part, first identify the unknown, and then discuss how you chose the appropriate equation to solve for it. After choosing the equation, show your steps in solving for the unknown, checking your units. (d) Is the answer reasonable when compared with the time for a heartbeat?
+In a slap shot, a hockey player accelerates the puck from a velocity of 8.00 m/s to 40.0 m/s in the same direction. If this shot takes [latex]3\text{.}\text{33}×{\text{10}}^{-2}\phantom{\rule{0.25em}{0ex}}\text{s}[/latex], calculate the distance over which the puck accelerates.
+[latex]0\text{.}\text{799 m}[/latex]
+A powerful motorcycle can accelerate from rest to 26.8 m/s (100 km/h) in only 3.90 s. (a) What is its average acceleration? (b) How far does it travel in that time?
+Freight trains can produce only relatively small accelerations and decelerations. (a) What is the final velocity of a freight train that accelerates at a rate of [latex]0\text{.}{\text{0500 m/s}}^{2}[/latex] for 8.00 min, starting with an initial velocity of 4.00 m/s? (b) If the train can slow down at a rate of [latex]0\text{.}{\text{550 m/s}}^{2}[/latex], how long will it take to come to a stop from this velocity? (c) How far will it travel in each case?
+(a) [latex]\text{28}\text{.}\text{0 m/s}[/latex]
+(b) [latex]\text{50}\text{.}\text{9 s}[/latex]
+(c) 7.68 km to accelerate and 713 m to decelerate
+A fireworks shell is accelerated from rest to a velocity of 65.0 m/s over a distance of 0.250 m. (a) How long did the acceleration last? (b) Calculate the acceleration.
+A swan on a lake gets airborne by flapping its wings and running on top of the water. (a) If the swan must reach a velocity of 6.00 m/s to take off and it accelerates from rest at an average rate of [latex]0\text{.}{\text{350 m/s}}^{2}[/latex], how far will it travel before becoming airborne? (b) How long does this take?
+(a) [latex]51\text{.}4\phantom{\rule{0.25em}{0ex}}\text{m}[/latex]
+(b) [latex]\text{17}\text{.}\text{1 s}[/latex]
+Professional Application:
+A woodpecker’s brain is specially protected from large decelerations by tendon-like attachments inside the skull. While pecking on a tree, the woodpecker’s head comes to a stop from an initial velocity of 0.600 m/s in a distance of only 2.00 mm. (a) Find the acceleration in [latex]{\text{m/s}}^{2}[/latex] and in multiples of [latex]g\phantom{\rule{0.25em}{0ex}}\left(g=9\text{.}\text{80}\phantom{\rule{0.25em}{0ex}}{\text{m/s}}^{2}\right)[/latex]. (b) Calculate the stopping time. (c) The tendons cradling the brain stretch, making its stopping distance 4.50 mm (greater than the head and, hence, less deceleration of the brain). What is the brain’s deceleration, expressed in multiples of [latex]g[/latex]?
+An unwary football player collides with a padded goalpost while running at a velocity of 7.50 m/s and comes to a full stop after compressing the padding and his body 0.350 m. (a) What is his deceleration? (b) How long does the collision last?
+(a) [latex]-\text{80}\text{.}4\phantom{\rule{0.25em}{0ex}}{\text{m/s}}^{2}[/latex]
+(b) [latex]9\text{.}\text{33}×{\text{10}}^{-2}\phantom{\rule{0.25em}{0ex}}\text{s}[/latex]
+In World War II, there were several reported cases of airmen who jumped from their flaming airplanes with no parachute to escape certain death. Some fell about 20,000 feet (6000 m), and some of them survived, with few life-threatening injuries. For these lucky pilots, the tree branches and snow drifts on the ground allowed their deceleration to be relatively small. If we assume that a pilot’s speed upon impact was 123 mph (54 m/s), then what was his deceleration? Assume that the trees and snow stopped him over a distance of 3.0 m.
+Consider a grey squirrel falling out of a tree to the ground. (a) If we ignore air resistance in this case (only for the sake of this problem), determine a squirrel’s velocity just before hitting the ground, assuming it fell from a height of 3.0 m. (b) If the squirrel stops in a distance of 2.0 cm through bending its limbs, compare its deceleration with that of the airman in the previous problem.
+(a) [latex]7\text{.}\text{7 m/s}[/latex]
+(b) [latex]-\text{15}×{\text{10}}^{2}\phantom{\rule{0.25em}{0ex}}{\text{m/s}}^{2}[/latex]. This is about 3 times the deceleration of the pilots, who were falling from thousands of meters high!
+An express train passes through a station. It enters with an initial velocity of 22.0 m/s and decelerates at a rate of [latex]0\text{.}{\text{150 m/s}}^{2}[/latex] as it goes through. The station is 210 m long. (a) How long is the nose of the train in the station? (b) How fast is it going when the nose leaves the station? (c) If the train is 130 m long, when does the end of the train leave the station? (d) What is the velocity of the end of the train as it leaves?
+Dragsters can actually reach a top speed of 145 m/s in only 4.45 s—considerably less time than given in [link] and [link]. (a) Calculate the average acceleration for such a dragster. (b) Find the final velocity of this dragster starting from rest and accelerating at the rate found in (a) for 402 m (a quarter mile) without using any information on time. (c) Why is the final velocity greater than that used to find the average acceleration? Hint: Consider whether the assumption of constant acceleration is valid for a dragster. If not, discuss whether the acceleration would be greater at the beginning or end of the run and what effect that would have on the final velocity.
+(a) [latex]\text{32}\text{.}{\text{6 m/s}}^{2}[/latex]
+(b) [latex]\text{162 m/s}[/latex]
+(c) [latex]v>{v}_{\text{max}}[/latex], because the assumption of constant acceleration is not valid for a dragster. A dragster changes gears, and would have a greater acceleration in first gear than second gear than third gear, etc. The acceleration would be greatest at the beginning, so it would not be accelerating at [latex]\text{32}\text{.}{\text{6 m/s}}^{2}[/latex] during the last few meters, but substantially less, and the final velocity would be less than 162 m/s.
+A bicycle racer sprints at the end of a race to clinch a victory. The racer has an initial velocity of 11.5 m/s and accelerates at the rate of [latex]0\text{.}{\text{500 m/s}}^{2}[/latex] for 7.00 s. (a) What is his final velocity? (b) The racer continues at this velocity to the finish line. If he was 300 m from the finish line when he started to accelerate, how much time did he save? (c) One other racer was 5.00 m ahead when the winner started to accelerate, but he was unable to accelerate, and traveled at 11.8 m/s until the finish line. How far ahead of him (in meters and in seconds) did the winner finish?
+In 1967, New Zealander Burt Munro set the world record for an Indian motorcycle, on the Bonneville Salt Flats in Utah, with a maximum speed of 183.58 mi/h. The one-way course was 5.00 mi long. Acceleration rates are often described by the time it takes to reach 60.0 mi/h from rest. If this time was 4.00 s, and Burt accelerated at this rate until he reached his maximum speed, how long did it take Burt to complete the course?
+104 s
+(a) A world record was set for the men’s 100-m dash in the 2008 Olympic Games in Beijing by Usain Bolt of Jamaica. Bolt “coasted” across the finish line with a time of 9.69 s. If we assume that Bolt accelerated for 3.00 s to reach his maximum speed, and maintained that speed for the rest of the race, calculate his maximum speed and his acceleration. (b) During the same Olympics, Bolt also set the world record in the 200-m dash with a time of 19.30 s. Using the same assumptions as for the 100-m dash, what was his maximum speed for this race?
+(a) [latex]v=\text{12}\text{.}\text{2 m/s}[/latex]; [latex]a=4\text{.}{\text{07 m/s}}^{2}[/latex]
+(b) [latex]v=\text{11}\text{.}\text{2 m/s}[/latex]
+License
+Motion Equations for Constant Acceleration in One Dimension Copyright © 2012 by OpenStaxCollege is licensed under a Creative Commons Attribution 4.0 International License, except where otherwise noted.
+Share This Book
