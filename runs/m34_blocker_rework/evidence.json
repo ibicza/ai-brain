@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "branch": "exp/stage3-m34-blocker-rework",
+  "safe_base_e11": "b55b61148d12386d6f2132b136b11f8dca859a7e",
+  "h11": "af508a130b6e496f907254593387b13e4a73d2ce",
+  "implementation_sha": "1367404ca08a60bfb3ee341abe30be65ab38746c",
+  "m33_merged": false,
+  "development_sources_only": true,
+  "windows": {
+    "ruff_format": "PASS: 442 files already formatted",
+    "ruff_check": "PASS",
+    "targeted": "26 passed in 48.75s",
+    "full": "822 passed in 1047.20s",
+    "clean_before_evidence": true
+  },
+  "karina": {
+    "checkout": "detached exact implementation SHA",
+    "ruff_format": "PASS: 442 files already formatted",
+    "ruff_check": "PASS",
+    "targeted": "26 passed in 16.37s",
+    "full": "822 passed in 270.10s",
+    "clean_after_run": true
+  },
+  "cross_platform": {
+    "full_json_equal": true,
+    "acceptance_sha256": "a4b7f206f243a730b49f146423e44f5cc7da2fc234f4857cabac1149d1183c82",
+    "source_receipt_manifest_hash": "46428bf978ba6a16b1f2cead349b3acf38532940ef86c764149b4834769d99ab",
+    "identity_fingerprint": "b37e4577be2af12f21a528fdfae42aab2a0347fd33c59b7dc18f7186d57d7f7b",
+    "trust_fingerprint": "64d77acb3914d1d6677f967e1c6a83f72821f7868932e7c14944e2c09170c498",
+    "precompiler_report_hash": "1802f49837ebf943870c99b6ac55fec947ee8b30e8302b96046cc77d81e3022b"
+  },
+  "acceptance": {
+    "input_exact_duplicates": 4,
+    "input_duplicate_rate": "0.444444",
+    "post_deduplication_exact_duplicates": 0,
+    "post_deduplication_rate": "0.000000",
+    "duplicate_derived_trusted_proposals": 0,
+    "java_trusted": 1,
+    "java_withheld": 3,
+    "java_rejected": 0,
+    "java_negative_scenario_false_trust": 0,
+    "field_evidence_count": 9,
+    "field_evidence_required": 10,
+    "field_evidence_ratio": "0.900000",
+    "incomplete_evidence_trusted": 0,
+    "safe_abstention_rate": "1.000000",
+    "precompiler_conflict_status": "FAIL_EXPECTED",
+    "pack_built_after_conflict": false,
+    "runtime_network": false,
+    "torch_loaded": false
+  },
+  "decision": "M-34_MAY_PROCEED_TO_NEW_UNTOUCHED_FROZEN_EVALUATION"
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "implementation_sha": "1367404ca08a60bfb3ee341abe30be65ab38746c",
+  "files": {
+    "docs/m34_blocker_rework_report.md": "c81859c00042f9e343cccbf3b5b1793f9ff5d76f7b360b2f81bc40f3533c0495",
+    "runs/m34_blocker_rework/evidence.json": "780ce48ce565e391b88be8f0066d65617fcd4351a1a072ed11c2f522057ae50b",
+    "runs/m34_blocker_rework/karina_acceptance.json": "a4b7f206f243a730b49f146423e44f5cc7da2fc234f4857cabac1149d1183c82",
+    "runs/m34_blocker_rework/windows_acceptance.json": "a4b7f206f243a730b49f146423e44f5cc7da2fc234f4857cabac1149d1183c82"
+  }
+}
