@@ -1,19 +1,15 @@
 # M-32 performance report
 
-Precommit Windows CPU-only sample, three iterations, Python peak memory measured with `tracemalloc`:
+Exact-H11 CPU-only samples use three iterations and Python peak memory measured with `tracemalloc`.
 
-| Operation | p50 ms | p95 ms | p99 ms | ops/s | peak bytes |
-|---|---:|---:|---:|---:|---:|
-| source load | 5.055 | 5.294 | 5.294 | 200.860 | 58,385 |
-| segmentation | 71.203 | 72.823 | 72.823 | 13.956 | 236,437 |
-| proposal generation | 30.245 | 31.431 | 31.431 | 32.725 | 101,746 |
-| IR type checking | 20.633 | 20.729 | 20.729 | 48.794 | 46,966 |
-| equation checking | 0.265 | 0.346 | 0.346 | 3,485.130 | 4,019 |
-| conflict detection | 71.522 | 74.791 | 74.791 | 13.828 | 6,464 |
-| review application | 0.310 | 0.422 | 0.422 | 2,919.140 | 3,172 |
-| pack compilation | 251.577 | 253.111 | 253.111 | 3.989 | 1,239,437 |
-| provider closure | 374.341 | 383.285 | 383.285 | 2.655 | 75,047 |
-| installed currentness | 4,876.651 | 4,911.419 | 4,911.419 | 0.205 | 3,001,001 |
-| held-out runtime solution | 0.270 | 0.322 | 0.322 | 3,541.913 | 3,648 |
+| Operation | Windows p50/p95/p99 ms | Karina p50/p95/p99 ms | Windows/Karina peak bytes |
+|---|---:|---:|---:|
+| source load | 4.783/12.449/12.449 | 1.651/1.752/1.752 | 58,385/53,880 |
+| segmentation | 72.247/73.277/73.277 | 32.123/32.652/32.652 | 236,437/232,173 |
+| proposal generation | 30.628/30.772/30.772 | 19.179/19.208/19.208 | 101,746/101,621 |
+| pack compilation | 254.437/257.245/257.245 | 124.307/128.125/128.125 | 1,237,905/1,237,545 |
+| provider closure | 385.087/394.020/394.020 | 127.086/127.532/127.532 | 75,159/70,738 |
+| installed currentness | 4,945.423/4,960.382/4,960.382 | 1,916.857/1,923.255/1,923.255 | 3,000,088/3,001,881 |
+| held-out runtime solution | 0.264/0.354/0.354 | 0.158/0.215/0.215 | 3,648/3,648 |
 
-Compilation and runtime query time are reported separately. Exact-H11 Windows and Karina samples supersede this preliminary table in evidence.
+Compilation and runtime query time are reported separately. Both measurements report `runtime_network=false`, `trusted_cpu_only=true`, and status `PASS`; complete throughput and operation rows are in the evidence JSON files.

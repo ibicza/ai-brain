@@ -98,6 +98,4 @@ code-review-graph query tests_for <compile_provisional_pack qualified name>
 code-review-graph impact --base 89c14ffcd0107717cc094453e0c86c56f9990212 --depth 2 --max-results 5
 ```
 
-The graph cache records the checked-out commit as E10 because H11 does not yet
-exist; staged working-tree nodes are nevertheless indexed. Exact-H11 graph
-verification is repeated in both release gates.
+Exact H11 `af508a130b6e496f907254593387b13e4a73d2ce` was rebuilt in both release gates. Windows persistent status reports 583 files, 9,091 nodes, and 84,726 edges. A fresh Karina index reports 452 files, 6,021 nodes, and 57,657 edges after the same parser build reported 453 files, 6,023 nodes, and 58,898 edges. The difference is confined to platform/local persistent-index inputs; source inspection and tests remain the final authority. Both depth-2 impact queries report 95 total impacted nodes.

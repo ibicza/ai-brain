@@ -1,0 +1,46 @@
+{
+  "branch": "exp/stage3-source-to-knowledge-compiler",
+  "e10": "89c14ffcd0107717cc094453e0c86c56f9990212",
+  "h10": "f7d6b024109094c1136950f36488edfdfd6e9e83",
+  "h11": "af508a130b6e496f907254593387b13e4a73d2ce",
+  "outcome": "B",
+  "prior_refs": {
+    "gpt": "0a231f4267bd501cc45159e7070d94262b4de87a",
+    "stage1-acquisition-v1": "232eee967be24d1415ff1eb4b463a46dbf0d2843",
+    "stage1-v1.0.0": "7ee8fc3e057fa285ca8cf35d1e0b7b373cc04be6",
+    "stage1-v1.0.1": "236276a1a72e1143c7d76c17d7e33ae2e6e1ed37"
+  },
+  "roadmap_sha256": "8d79042b74a7b474a7f6a94c41028ca80fd54b0e8d7f0c1879857fd77f4e8384",
+  "gates": {
+    "karina": {
+      "acceptance_tests_passed": 5,
+      "full_suite_passed": 811,
+      "full_suite_skipped": 1,
+      "status": "PASS"
+    },
+    "windows": {
+      "full_suite_passed": 812,
+      "status": "PASS"
+    }
+  },
+  "scale": {
+    "ambiguity_conflict_cases": 1000,
+    "heldout_tasks": 500,
+    "ir_mutations": 2000,
+    "pack_install_mutations": 1000,
+    "provider_capability_mutations": 2000,
+    "proposals": 636,
+    "source_bundles": 4,
+    "source_segments": 643
+  },
+  "trust": {
+    "approved_field_provenance": "1.000000",
+    "content_policy_added": false,
+    "runtime_network": false,
+    "source_location_dereference": "1.000000",
+    "trusted_cpu_only": true,
+    "wrong_automatically_verified": 0
+  },
+  "remaining_limitation": "The legacy M-30 monolithic turn path is not wired to TutorSagaCoordinator; the generic facade is chemistry-free but in-memory.",
+  "status": "PASS_WITH_DECLARED_LIMITATION"
+}

@@ -1,0 +1,15 @@
+{
+  "files": {
+    "acceptance.json": "0410a19b98ff05489a6992ee5aadd49a54b3cc3fdd7d9dd895736ba1b8048b06",
+    "evaluation_metrics.json": "ff7200e3508cf6ed478c47c39a33a08c0be82a20d7ac178629532cd456afb49a",
+    "graph_report.json": "3325ff2011f2cc1cab853d044e97ba8c81d4e315ddd39b13214f788fa15147a2",
+    "karina_exact_sha.log": "985dc28aeff7db2c17c3730979810c0b83eb847f5158f552e0239c18fc1b7588",
+    "karina_graph_status.log": "bdb8136cc557696b59054a46b72ab0c963c0aec179fb76263fe01bba142e19fa",
+    "karina_performance.json": "897b70a568c6ec1fd4980239c6ad714786ab8f94aba2f14558b7de2605feeb27",
+    "local_exact_sha.log": "7eba18924d13d56cffbfdc1f8fe363ca1ffe787eaf069a9d43336a30cd3cfa89",
+    "reproducibility.json": "4a4685783ac7771f97242c15ced411ae934a9e365ac66895ee1be8f8bb10a017",
+    "windows_performance.json": "7b042c854afe37b1b9c8d8c27c16318f35935195b4fd756e7b51a367e78843d7"
+  },
+  "h11": "af508a130b6e496f907254593387b13e4a73d2ce",
+  "schema_version": 1
+}

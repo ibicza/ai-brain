@@ -1,0 +1,40 @@
+{
+  "after": {
+    "karina_fresh_persistent": {
+      "edges": 57657,
+      "files": 452,
+      "nodes": 6021
+    },
+    "parser": {
+      "edges": 58898,
+      "files": 453,
+      "nodes": 6023
+    },
+    "windows_persistent": {
+      "edges": 84726,
+      "files": 583,
+      "nodes": 9091
+    }
+  },
+  "before": {
+    "parser": {
+      "edges": 55633,
+      "files": 421,
+      "nodes": 5676
+    },
+    "persistent": {
+      "edges": 81518,
+      "files": 551,
+      "nodes": 8745
+    }
+  },
+  "impact": {
+    "affected_flows": 42,
+    "changed_files": 266,
+    "changed_functions_classes": 383,
+    "depth_2_total_impacted": 95,
+    "risk_score": "0.85"
+  },
+  "note": "The fresh Linux persistent index excludes Windows-only and prior local indexed files; parser build counts match on both systems. Source and tests were used as final authority.",
+  "status": "PASS"
+}
