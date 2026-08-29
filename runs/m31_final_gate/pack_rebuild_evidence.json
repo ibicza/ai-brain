@@ -1,0 +1,11 @@
+{
+  "chemistry_pack_hash": "9141046a5cfa227d2f7c9e7e736d8bc6255e1a75755a91d2aa4ba5fe666cdf4f",
+  "generated_file_count": 30,
+  "h10": "f7d6b024109094c1136950f36488edfdfd6e9e83",
+  "karina_byte_aggregate_after": "fea95e0be3ec6385e9e15ce3519b11b69747291c891578d3b4413a680a23109c",
+  "karina_byte_aggregate_before": "fea95e0be3ec6385e9e15ce3519b11b69747291c891578d3b4413a680a23109c",
+  "local_installed_registry_after": "4a184287cd7f06f0b14a125d81995a940ef78997a46e5618add4e55a19f34a2f",
+  "local_installed_registry_before": "4a184287cd7f06f0b14a125d81995a940ef78997a46e5618add4e55a19f34a2f",
+  "status": "PASS",
+  "trusted_m29_m30_diff_files": 0
+}

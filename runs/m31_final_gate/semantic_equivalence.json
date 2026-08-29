@@ -1,0 +1,12 @@
+{
+  "catalog_entries_compared": 2000,
+  "catalog_entries_equivalent": 2000,
+  "chemistry_pack_hash": "9141046a5cfa227d2f7c9e7e736d8bc6255e1a75755a91d2aa4ba5fe666cdf4f",
+  "generic_runtime_chemistry_references": 0,
+  "h10": "f7d6b024109094c1136950f36488edfdfd6e9e83",
+  "karina_regression": {"passed": 795, "skipped": 1},
+  "local_regression": {"passed": 796, "skipped": 0},
+  "m30_trusted_artifact_diff_files": 0,
+  "semantic_key_and_entry_authority": "preserved by unchanged M30 catalog plus complete generic family/concept candidate equivalence",
+  "status": "PASS"
+}

@@ -1,0 +1,19 @@
+{
+  "evidence_commit_message": "M-31 exact-SHA universal knowledge evidence",
+  "files": {
+    "docs/m31_acceptance_report.md": "1166e0eb8ac5451474c3412bc4f10fcf63c9a76588d22ca93338e268120a3e57",
+    "docs/m31_graph_impact_map.md": "e0572e7a4404f231d55cd1a03db1e6448b069ef3567aec19852885df9736c3ea",
+    "docs/m31_performance_report.md": "8d5c913bf2cee022e40345d8dceece47df2d36f5537d47ad80ec829c6ced5519",
+    "docs/m31_universal_knowledge_platform_report.md": "91f4b6927b0600927f1a8a86d6a6fed02f0b100a441e649b0dfc66b78035840b",
+    "runs/m31_final_gate/graph_report.json": "875f810c2dab9be053a56db305fc9a0aa287b5c896af251d77985aee6ded16f8",
+    "runs/m31_final_gate/karina_acceptance.json": "3ec72b40bcf0adcc24c1d15435003ab37bc54c24ba8980a54b5da4c17e0d33b8",
+    "runs/m31_final_gate/karina_exact_sha.log": "72020ad0d694927fd1002f399cbc85af0b907f623f4b714171bd8afc3ecc9e73",
+    "runs/m31_final_gate/local_acceptance.json": "45fbf62a76b87d79d74f234d06d36eb76f41dc7576f52b62585f1f79e0c5feb5",
+    "runs/m31_final_gate/local_exact_sha.log": "4ef02171f4092d70e9cc0d023a1959f1b7ff313e15928bd013a895445e345aae",
+    "runs/m31_final_gate/pack_rebuild_evidence.json": "4cd69e0343670839fa8ea754d8bcfb1808044c22c9c46bf32516849992a8d315",
+    "runs/m31_final_gate/semantic_equivalence.json": "839673a15859f0099545e1b81de567da2679041d5755cd9f5c660b02649de026",
+    "runs/m31_universal_knowledge_platform_report.md": "3f72063d320035a8298f749651bdc80ae95f34e8be864bb1745910c4d7419a71"
+  },
+  "h10": "f7d6b024109094c1136950f36488edfdfd6e9e83",
+  "schema_version": 1
+}

@@ -26,3 +26,10 @@ The graph reports four direct runtime consumers, including production
 `EducationalService` and the data-only multi-pack test. Source inspection and
 the complete test suite remain authoritative where static graph extraction is
 ambiguous.
+
+The disposable Karina exact-H10 rebuild reports 5,675 nodes, 54,449 edges, and
+420 indexed files, with 421 parser inputs and 5,676 full-build nodes. The local
+persistent Windows index reports larger totals because it retains path-history
+identities across prior builds. Both values are preserved in
+`runs/m31_final_gate/graph_report.json`; the Karina value is the clean-checkout
+exact-H10 snapshot.

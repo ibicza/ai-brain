@@ -16,3 +16,9 @@ p50/p95/p99 of 1153.0925/1197.3061/1203.9654 ms over 25 isolated conversations.
 
 Karina exact-H10 CPU metrics are recorded verbatim in the evidence-only run data;
 local values are a CPU baseline, not a cross-machine performance promise.
+
+Karina p50/p95/p99 were 0.071604/0.075572/0.076955 ms for IR validation,
+0.004058/0.004208/0.004979 ms for capability lookup,
+0.002194/0.002294/0.002454 ms for exercise-family resolution, and
+361.799941/363.213878/364.375842 ms for the 25 complete conversation paths.
+All suites were CPU-only.

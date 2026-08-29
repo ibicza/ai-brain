@@ -1,0 +1,125 @@
+**********************
+PowerShell transcript start
+Start time: 20260829110901
+Username: IBICZA\artio
+RunAs User: IBICZA\artio
+Configuration Name: 
+Machine: IBICZA (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Users\artio\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$ErrorActionPreference='Stop'; New-Item -ItemType Directory -Force -Path runs/m31_final_gate | Out-Null; Start-Transcript -Path runs/m31_final_gate/local_exact_sha.log -Force; try { Get-Date -Format o; hostname; (Get-Location).Path; git rev-parse HEAD; git status --porcelain; python --version; uv --version; uv run ruff format --check src tests scripts; if ($LASTEXITCODE -ne 0) { throw 'ruff format failed' }; uv run ruff check src tests scripts; if ($LASTEXITCODE -ne 0) { throw 'ruff check failed' }; uv run pytest -q; if ($LASTEXITCODE -ne 0) { throw 'pytest failed' }; uv run python scripts/m31_acceptance.py --output runs/m31_final_gate/local_acceptance.json; if ($LASTEXITCODE -ne 0) { throw 'acceptance failed' }; uv run ai-brain-domains verify-pack artifacts/domains/chemistry/generic-v1; if ($LASTEXITCODE -ne 0) { throw 'domain CLI failed' }; uv run ai-brain-capabilities verify --registry artifacts/stage3/capabilities/registry_v1.json; if ($LASTEXITCODE -ne 0) { throw 'capability CLI failed' }; $before=(Get-FileHash artifacts/stage3/installed-domains/installed_domains.sqlite3 -Algorithm SHA256).Hash; uv run python scripts/m31_build_domain_packs.py; if ($LASTEXITCODE -ne 0) { throw 'pack rebuild failed' }; $after=(Get-FileHash artifacts/stage3/installed-domains/installed_domains.sqlite3 -Algorithm SHA256).Hash; "installed_registry_before=$before"; "installed_registry_after=$after"; if ($before -ne $after) { throw 'pack rebuild byte mismatch' }; $env:UV_OFFLINE='1'; uvx --from code-review-graph code-review-graph status; if ($LASTEXITCODE -ne 0) { throw 'graph status failed' }; git diff --exit-code f7d6b024109094c1136950f36488edfdfd6e9e83 -- artifacts/domains/chemistry/m29 artifacts/education/m30; if ($LASTEXITCODE -ne 0) { throw 'trusted artifacts changed' }; git status --porcelain; if (git status --porcelain) { throw 'worktree not clean' }; 'LOCAL_EXACT_SHA_GATE=PASS' } finally { Stop-Transcript }
+Process ID: 26260
+PSVersion: 7.6.4
+PSEdition: Core
+GitCommitId: 7.6.4
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is runs/m31_final_gate/local_exact_sha.log
+2026-08-29T11:09:01.6673888+03:00
+ibicza
+W:\toolbox_IDEA\programs\IdeaProjects\ai-brain
+f7d6b024109094c1136950f36488edfdfd6e9e83
+
+Python
+Python uv 0.12.3 (507230998 2026-08-07 x86_64-pc-windows-msvc)
+404 files already formatted
+All checks passed!
+........................................................................ [  9%]
+........................................................................ [ 18%]
+........................................................................ [ 27%]
+........................................................................ [ 36%]
+........................................................................ [ 45%]
+........................................................................ [ 54%]
+........................................................................ [ 63%]
+........................................................................ [ 72%]
+........................................................................ [ 81%]
+........................................................................ [ 90%]
+........................................................................ [ 99%]
+....                                                                     [100%]
+796 passed in 1356.50s (0:22:36)
+d88acbc7890fc50f1","status":"VERIFIED"},"runtime_network":false,"status":"PASS",
+"unsupported_capability_status":"NEEDS_NEW_CAPABILITY"}
+
+
+**********************
+PowerShell transcript end
+End time: 20260829113335
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260829113351
+Username: IBICZA\artio
+RunAs User: IBICZA\artio
+Configuration Name: 
+Machine: IBICZA (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Users\artio\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$ErrorActionPreference='Stop'; Start-Transcript -Path runs/m31_final_gate/local_exact_sha.log -Append; try { 'LOCAL_EXACT_SHA_POSTCHECK_RETRY'; Get-Date -Format o; git rev-parse HEAD; git status --porcelain; uv run ai-brain-capabilities --registry artifacts/stage3/capabilities/registry_v1.json verify; if ($LASTEXITCODE -ne 0) { throw 'capability CLI failed' }; $before=(Get-FileHash artifacts/stage3/installed-domains/installed_domains.sqlite3 -Algorithm SHA256).Hash; uv run python scripts/m31_build_domain_packs.py; if ($LASTEXITCODE -ne 0) { throw 'pack rebuild failed' }; $after=(Get-FileHash artifacts/stage3/installed-domains/installed_domains.sqlite3 -Algorithm SHA256).Hash; "installed_registry_before=$before"; "installed_registry_after=$after"; if ($before -ne $after) { throw 'pack rebuild byte mismatch' }; $env:UV_OFFLINE='1'; uvx --from code-review-graph code-review-graph status; if ($LASTEXITCODE -ne 0) { throw 'graph status failed' }; git diff --exit-code f7d6b024109094c1136950f36488edfdfd6e9e83 -- artifacts/domains/chemistry/m29 artifacts/education/m30; if ($LASTEXITCODE -ne 0) { throw 'trusted artifacts changed' }; git diff --exit-code; if ($LASTEXITCODE -ne 0) { throw 'worktree content changed' }; git status --porcelain; if (git status --porcelain) { throw 'worktree not clean' }; 'LOCAL_EXACT_SHA_GATE=PASS' } finally { Stop-Transcript }
+Process ID: 13684
+PSVersion: 7.6.4
+PSEdition: Core
+GitCommitId: 7.6.4
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is runs/m31_final_gate/local_exact_sha.log
+LOCAL_EXACT_SHA_POSTCHECK_RETRY
+2026-08-29T11:33:51.4214540+03:00
+f7d6b024109094c1136950f36488edfdfd6e9e83
+
+{"descriptor_count":10,"imports_torch":false,"registry_hash":"14a4e8480330d5d35e
+beae44f8eb1da08772511b04d04b6b48ba0e9510f45c59","runtime_network":false,"status"
+:"VERIFIED"}
+{"packs":3,"status":"BUILT"}
+installed_registry_before=4A184287CD7F06F0B14A125D81995A940EF78997A46E5618ADD4E55A19F34A2F
+installed_registry_after=4A184287CD7F06F0B14A125D81995A940EF78997A46E5618ADD4E55A19F34A2F
+Nodes: 8745
+Edges: 81518
+Files: 551
+Languages: bash, powershell, python
+Last updated: 2026-08-29T11:07:25
+Built on branch: exp/stage3-universal-knowledge-ir
+Built at commit: e44c07336447
+
+
+
+LOCAL_EXACT_SHA_GATE=PASS
+**********************
+PowerShell transcript end
+End time: 20260829113353
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260829114220
+Username: IBICZA\artio
+RunAs User: IBICZA\artio
+Configuration Name: 
+Machine: IBICZA (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Users\artio\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+Start-Transcript -Path runs/m31_final_gate/local_exact_sha.log -Append; 'LOCAL_RUNTIME_VERSION_CONFIRMATION'; python --version; uv run python --version; Stop-Transcript
+Process ID: 33728
+PSVersion: 7.6.4
+PSEdition: Core
+GitCommitId: 7.6.4
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is runs/m31_final_gate/local_exact_sha.log
+LOCAL_RUNTIME_VERSION_CONFIRMATION
+
+
+**********************
+PowerShell transcript end
+End time: 20260829114221
+**********************

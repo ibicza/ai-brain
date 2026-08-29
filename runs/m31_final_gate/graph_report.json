@@ -1,0 +1,30 @@
+{
+  "base": {
+    "commit": "e44c073364476d662a0df55d918177aa569d4c54",
+    "edges": 79588,
+    "files": 504,
+    "nodes": 8522
+  },
+  "final_karina_clean_checkout": {
+    "commit": "f7d6b024109094c1136950f36488edfdfd6e9e83",
+    "edges": 54449,
+    "files": 420,
+    "nodes": 5675
+  },
+  "final_local_staged_index": {
+    "edges": 81518,
+    "files": 551,
+    "nodes": 8745
+  },
+  "note": "Local persistent graph totals include retained Windows-path index history; the disposable Karina rebuild is the clean exact-H10 snapshot. Full-build parser totals were 421 files and 5676 nodes on both final rebuilds.",
+  "queries": [
+    "search GenericDomainRuntime",
+    "search CapabilityRegistry",
+    "search KnowledgeRecord",
+    "callers_of GenericDomainRuntime qualified name",
+    "tests_for GenericDomainRuntime qualified name",
+    "callers_of CapabilityRegistry qualified name",
+    "detect-changes --base e44c073364476d662a0df55d918177aa569d4c54 --brief"
+  ],
+  "status": "PASS"
+}
