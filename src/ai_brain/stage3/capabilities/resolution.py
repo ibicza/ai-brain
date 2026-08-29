@@ -27,6 +27,8 @@ def resolve_capability(
     requesting_pack_hash: str,
     provider_registry: ProviderRegistry | None = None,
     provider_hashes: dict[str, str] | None = None,
+    required_input_schema_hash: str | None = None,
+    required_output_schema_hash: str | None = None,
     resolved_at: str | None = None,
 ) -> CapabilityResolution:
     """Resolve a complete DAG. A descriptor-derived hash map is never authority."""
@@ -37,6 +39,16 @@ def resolve_capability(
         registry.verify(provider_registry)
         descriptor = registry.descriptor(requirement.capability_id)
         if not matches_version(descriptor.version, requirement.version_range):
+            return CapabilityResolution(
+                ResolutionStatus.NEEDS_NEW_CAPABILITY, None, None
+            )
+        if (
+            required_input_schema_hash is not None
+            and descriptor.input_schema_hash != required_input_schema_hash
+        ) or (
+            required_output_schema_hash is not None
+            and descriptor.output_schema_hash != required_output_schema_hash
+        ):
             return CapabilityResolution(
                 ResolutionStatus.NEEDS_NEW_CAPABILITY, None, None
             )

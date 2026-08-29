@@ -371,10 +371,14 @@ def _math_expression(value: str, types: dict[str, ValueTypeRef]) -> Expression:
 
 def _api(payload: str, method: ExtractionMethod) -> ExtractedCandidate:
     parts = _parts(payload, minimum=1)
-    signature = parts[0]
+    signature = parts[0].strip()
     fields = _fields(" | ".join(parts[1:])) if len(parts) > 1 else {}
     match = re.fullmatch(
-        r"(?:(?:public|protected|private)\s+)?(?:<([^>]+)>\s+)?([\w.<>?]+)\s+([\w.]+)\(([^)]*)\)(?:\s+throws\s+(.+))?",
+        r"(?:(?:public|protected|private|static|final|abstract|default|"
+        r"synchronized|native|strictfp)\s+)*"
+        r"(?:<([^>]+)>\s+)?"
+        r"([\w.$<>?\[\], ]+)\s+([\w.$]+)\(([^)]*)\)"
+        r"(?:\s+throws\s+([^;{]+))?\s*[;{]?",
         signature,
     )
     if not match:
@@ -382,11 +386,14 @@ def _api(payload: str, method: ExtractionMethod) -> ExtractedCandidate:
     generic, returns, qualified_name, parameters, exceptions = match.groups()
     receiver, _, method_name = qualified_name.rpartition(".")
     parsed_parameters = []
-    for parameter in filter(None, (item.strip() for item in parameters.split(","))):
-        pieces = parameter.split()
-        if len(pieces) != 2:
+    for parameter in _split_api_parameters(parameters):
+        pieces = parameter.rsplit(None, 1)
+        if len(pieces) != 2 or not re.fullmatch(r"[A-Za-z_$][\w$]*", pieces[1]):
             raise ValueError("API parameter lacks exact type and name")
-        parsed_parameters.append((pieces[1], pieces[0]))
+        parameter_type = re.sub(r"\bfinal\s+", "", pieces[0]).strip()
+        if not parameter_type:
+            raise ValueError("API parameter lacks exact type and name")
+        parsed_parameters.append((pieces[1], parameter_type))
     ambiguity = tuple(
         exact
         for key, exact in (
@@ -423,6 +430,27 @@ def _api(payload: str, method: ExtractionMethod) -> ExtractedCandidate:
     return ExtractedCandidate(
         content, EpistemicCharacter.NORMATIVE, ambiguity_fields=ambiguity, status=status
     )
+
+
+def _split_api_parameters(value: str) -> tuple[str, ...]:
+    """Split a Java-like parameter list without splitting generic arguments."""
+    result = []
+    start = 0
+    depth = 0
+    for index, character in enumerate(value):
+        if character in "<[":
+            depth += 1
+        elif character in ">]":
+            depth = max(0, depth - 1)
+        elif character == "," and depth == 0:
+            item = value[start:index].strip()
+            if item:
+                result.append(item)
+            start = index + 1
+    final = value[start:].strip()
+    if final:
+        result.append(final)
+    return tuple(result)
 
 
 def _pattern(text: str, kind: KnowledgeKind) -> ExtractedCandidate:

@@ -82,7 +82,12 @@ class TutorOperationJournal:
         if not value.database_path.exists():
             with value._connection() as c:
                 c.executescript(
-                    """CREATE TABLE operations(operation_id TEXT PRIMARY KEY,idempotency_key TEXT UNIQUE NOT NULL,payload TEXT NOT NULL,payload_hash TEXT NOT NULL,status TEXT NOT NULL); CREATE TABLE audit(sequence INTEGER PRIMARY KEY AUTOINCREMENT,operation_id TEXT NOT NULL,status TEXT NOT NULL,receipt_hash TEXT NOT NULL,created_at TEXT NOT NULL);"""
+                    """CREATE TABLE operations(operation_id TEXT PRIMARY KEY,idempotency_key TEXT UNIQUE NOT NULL,payload TEXT NOT NULL,payload_hash TEXT NOT NULL,status TEXT NOT NULL); CREATE TABLE audit(sequence INTEGER PRIMARY KEY AUTOINCREMENT,operation_id TEXT NOT NULL,status TEXT NOT NULL,receipt_hash TEXT NOT NULL,created_at TEXT NOT NULL); CREATE TABLE stage_receipts(receipt_hash TEXT PRIMARY KEY,operation_id TEXT NOT NULL,stage TEXT NOT NULL,store_id TEXT NOT NULL,payload TEXT NOT NULL,payload_hash TEXT NOT NULL,UNIQUE(operation_id,stage));"""
+                )
+        else:
+            with value._connection() as c:
+                c.execute(
+                    """CREATE TABLE IF NOT EXISTS stage_receipts(receipt_hash TEXT PRIMARY KEY,operation_id TEXT NOT NULL,stage TEXT NOT NULL,store_id TEXT NOT NULL,payload TEXT NOT NULL,payload_hash TEXT NOT NULL,UNIQUE(operation_id,stage))"""
                 )
         value.verify()
         return value
@@ -186,6 +191,56 @@ class TutorOperationJournal:
             ).fetchall()
         return tuple(_load(x[0]) for x in rows)
 
+    def record_stage_receipt(self, value: StoreStageReceipt) -> None:
+        body = asdict(value)
+        digest = body.pop("receipt_hash")
+        if content_hash(body) != digest:
+            raise ValueError("store stage receipt hash mismatch")
+        payload = canonical_json(asdict(value))
+        with self._connection() as c:
+            row = c.execute(
+                "SELECT payload,payload_hash FROM stage_receipts WHERE operation_id=? AND stage=?",
+                (value.operation_id, value.stage.value),
+            ).fetchone()
+            expected = (payload, bytes_hash(payload.encode("utf-8")))
+            if row is not None:
+                if row != expected:
+                    raise ValueError("immutable store stage receipt collision")
+                return
+            c.execute(
+                "INSERT INTO stage_receipts VALUES(?,?,?,?,?,?)",
+                (
+                    value.receipt_hash,
+                    value.operation_id,
+                    value.stage.value,
+                    value.store_id,
+                    payload,
+                    expected[1],
+                ),
+            )
+
+    def stage_receipt(
+        self, operation_id: str, stage: TutorOperationStatus
+    ) -> StoreStageReceipt | None:
+        with self._connection() as c:
+            row = c.execute(
+                "SELECT payload,payload_hash FROM stage_receipts WHERE operation_id=? AND stage=?",
+                (operation_id, stage.value),
+            ).fetchone()
+        if row is None:
+            return None
+        if bytes_hash(row[0].encode("utf-8")) != row[1]:
+            raise ValueError("store stage receipt checksum mismatch")
+        payload = json.loads(row[0])
+        payload["stage"] = TutorOperationStatus(payload["stage"])
+        payload["committed_record_hashes"] = tuple(payload["committed_record_hashes"])
+        value = StoreStageReceipt(**payload)
+        body = asdict(value)
+        digest = body.pop("receipt_hash")
+        if content_hash(body) != digest:
+            raise ValueError("stored stage receipt hash mismatch")
+        return value
+
     def recover(
         self,
         operation_id: str,
@@ -202,10 +257,23 @@ class TutorOperationJournal:
         ]
         stage = completed[-1] if completed else TutorOperationStatus.PREPARED
         working = current
+        if completed:
+            provisional = replace(
+                current,
+                status=stage,
+                updated_at=utc_now(),
+                operation_hash="",
+            )
+            body = asdict(provisional)
+            body.pop("operation_hash")
+            working = replace(provisional, operation_hash=content_hash(body))
+            self._replace(current, working)
         while stage is not TutorOperationStatus.COMPLETED:
             next_stage = _NEXT[stage]
             receipt = verified_receipts.get(next_stage)
             if not receipt:
+                if next_stage is TutorOperationStatus.COMPLETED:
+                    break
                 raise ValueError("recovery lacks a verified stage receipt")
             provisional = replace(
                 working,
@@ -231,18 +299,42 @@ class TutorOperationJournal:
             rows = c.execute(
                 "SELECT payload,payload_hash,status FROM operations"
             ).fetchall()
+            receipt_rows = c.execute(
+                "SELECT operation_id,stage,payload,payload_hash FROM stage_receipts"
+            ).fetchall()
         for payload, digest, status in rows:
             if bytes_hash(payload.encode()) != digest:
                 raise ValueError("operation journal checksum mismatch")
             value = _load(payload)
             if value.status.value != status:
                 raise ValueError("operation journal status index mismatch")
+            for stage, receipt_hash in value.step_receipts:
+                if stage in {
+                    item.value
+                    for item in _NEXT.values()
+                    if item is not TutorOperationStatus.COMPLETED
+                } and (
+                    value.intent == "GENERIC_CONTROLLED_TURN"
+                    or any(item[0] == value.operation_id for item in receipt_rows)
+                ):
+                    receipt = self.stage_receipt(
+                        value.operation_id, TutorOperationStatus(stage)
+                    )
+                    if receipt is None or receipt.receipt_hash != receipt_hash:
+                        raise ValueError("operation journal stage receipt is missing")
+        for operation_id, stage, payload, digest in receipt_rows:
+            if bytes_hash(payload.encode("utf-8")) != digest:
+                raise ValueError("stage receipt payload checksum mismatch")
+            receipt = self.stage_receipt(operation_id, TutorOperationStatus(stage))
+            if receipt is None:
+                raise ValueError("stage receipt cannot be loaded")
         return {
             "status": "VERIFIED",
             "operation_count": len(rows),
             "recovery_required": sum(
                 x[2] == TutorOperationStatus.RECOVERY_REQUIRED.value for x in rows
             ),
+            "stage_receipt_count": len(receipt_rows),
         }
 
     def _terminal(self, old, status, receipt_hash):
@@ -374,7 +466,7 @@ class TutorSagaCoordinator:
             hashes = tuple(inspect(operation.operation_id))
         if not hashes or len(set(hashes)) != len(hashes):
             raise ValueError("store commit lacks unique operation-bound records")
-        stamp = committed_at or utc_now()
+        stamp = committed_at or operation.created_at
         body = {
             "operation_id": operation.operation_id,
             "stage": stage,
@@ -383,6 +475,7 @@ class TutorSagaCoordinator:
             "committed_at": stamp,
         }
         receipt = StoreStageReceipt(**body, receipt_hash=content_hash(body))
+        self.journal.record_stage_receipt(receipt)
         self.journal.inject(f"after_{stage.value.casefold()}_store_write", operation)
         self.journal.inject(
             f"before_{stage.value.casefold()}_journal_advance", operation
@@ -425,14 +518,22 @@ class TutorSagaCoordinator:
                 hashes = tuple(inspect(operation.operation_id))
             if not hashes or len(set(hashes)) != len(hashes):
                 raise ValueError("recovery store inspection is irreconcilable")
-            body = {
-                "operation_id": operation.operation_id,
-                "stage": stage,
-                "store_id": store_id,
-                "committed_record_hashes": hashes,
-                "committed_at": operation.updated_at,
-            }
-            receipt = StoreStageReceipt(**body, receipt_hash=content_hash(body))
+            receipt = self.journal.stage_receipt(operation.operation_id, stage)
+            if receipt is None:
+                body = {
+                    "operation_id": operation.operation_id,
+                    "stage": stage,
+                    "store_id": store_id,
+                    "committed_record_hashes": hashes,
+                    "committed_at": operation.created_at,
+                }
+                receipt = StoreStageReceipt(**body, receipt_hash=content_hash(body))
+                self.journal.record_stage_receipt(receipt)
+            elif (
+                receipt.store_id != store_id
+                or receipt.committed_record_hashes != hashes
+            ):
+                raise ValueError("recovery stage receipt differs from store inspection")
             verified[stage] = receipt.receipt_hash
             self.journal.inject(
                 f"after_{stage.value.casefold()}_store_write", operation

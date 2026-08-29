@@ -16,7 +16,13 @@ from ai_brain.stage3.acquisition.models import (
 from ai_brain.stage3.acquisition.sources import verify_bundle
 from ai_brain.stage3.acquisition.version import MAX_CODE_BLOCK_BYTES, MAX_SEGMENTS
 
-_API = re.compile(r"(?:@api\s+|\b(?:public|protected|private)\s+).+\([^)]*\)")
+_API = re.compile(
+    r"(?:@api\s+|"
+    r"^(?:(?:public|protected|private|static|final|abstract|default|"
+    r"synchronized|native|strictfp)\s+)*"
+    r"(?:<[^>]+>\s+)?[\w.$<>?\[\], ]+\s+[\w.$]+\([^)]*\)"
+    r"(?:\s+throws\s+[^;{]+)?\s*[;{]\s*$)"
+)
 _EQUATION = re.compile(r"(?:@equation\s+|\b[A-Za-z][A-Za-z0-9_]*\s*=\s*[^=])")
 
 

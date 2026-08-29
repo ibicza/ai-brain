@@ -12,6 +12,7 @@ from ai_brain.stage2.facts.canonical import canonical_json
 from ai_brain.stage3.acquisition.clarifications import generate_clarifications
 from ai_brain.stage3.acquisition.compiler import compile_provisional_pack
 from ai_brain.stage3.acquisition.evaluation import evaluate_proposals
+from ai_brain.stage3.acquisition.evidence import build_field_evidence
 from ai_brain.stage3.acquisition.models import ProposalApproval, ReviewDecision
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
 from ai_brain.stage3.acquisition.proposals import propose_knowledge
@@ -51,6 +52,10 @@ def build_parser() -> argparse.ArgumentParser:
     propose = commands.add_parser("propose")
     propose.add_argument("--bundle", required=True)
     propose.add_argument("--segments", required=True)
+    evidence = commands.add_parser("build-field-evidence")
+    evidence.add_argument("--bundle", required=True)
+    evidence.add_argument("--segments", required=True)
+    evidence.add_argument("--proposals", required=True)
     show = commands.add_parser("show-proposals")
     show.add_argument("--proposals", required=True)
     clarify = commands.add_parser("clarify")
@@ -68,6 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
     verify.add_argument("--bundle", required=True)
     verify.add_argument("--segments", required=True)
     verify.add_argument("--proposals", required=True)
+    verify.add_argument("--field-evidence")
     compile_pack = commands.add_parser("compile-pack")
     compile_pack.add_argument("--bundle", required=True)
     compile_pack.add_argument("--segments", required=True)
@@ -75,10 +81,12 @@ def build_parser() -> argparse.ArgumentParser:
     compile_pack.add_argument("--approvals", type=Path, required=True)
     compile_pack.add_argument("--domain-id", required=True)
     compile_pack.add_argument("--output", type=Path, required=True)
+    compile_pack.add_argument("--field-evidence")
     evaluate = commands.add_parser("evaluate")
     evaluate.add_argument("--proposals", required=True)
     evaluate.add_argument("--segments", required=True)
     evaluate.add_argument("--golden", type=Path, required=True)
+    evaluate.add_argument("--field-evidence")
     install = commands.add_parser("install")
     install.add_argument("--pack", type=Path, required=True)
     install.add_argument("--approval", type=Path, required=True)
@@ -120,7 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "propose":
         bundle = store.load_bundle(args.bundle)
         segments = store.load_segments(args.segments)
-        proposals = propose_knowledge(bundle, segments)
+        proposals = propose_knowledge(bundle, segments, explicit_trust_stages=True)
         digest = store.save_proposals(args.segments, proposals)
         result = {
             "status": "PROPOSED",
@@ -139,6 +147,21 @@ def main(argv: list[str] | None = None) -> int:
                 }
                 for item in proposals
             ],
+        }
+    elif args.command == "build-field-evidence":
+        bundle = store.load_bundle(args.bundle)
+        segments = store.load_segments(args.segments)
+        values = build_field_evidence(
+            bundle,
+            segments,
+            store.load_proposals(args.proposals),
+            store,
+        )
+        digest = store.save_field_evidence(args.proposals, values)
+        result = {
+            "status": "FIELD_EVIDENCE_BUILT",
+            "field_evidence_count": len(values),
+            "field_evidence_set": digest,
         }
     elif args.command == "clarify":
         questions = generate_clarifications(store.load_proposals(args.proposals))
@@ -168,13 +191,27 @@ def main(argv: list[str] | None = None) -> int:
         bundle = store.load_bundle(args.bundle)
         segments = store.load_segments(args.segments)
         proposals = verify_proposals(
-            bundle, segments, store.load_proposals(args.proposals), store
+            bundle,
+            segments,
+            store.load_proposals(args.proposals),
+            store,
+            field_evidence=(
+                store.load_field_evidence(args.field_evidence)
+                if args.field_evidence
+                else None
+            ),
         )
         digest = store.save_proposals(args.segments, proposals)
         result = {
             "status": "VERIFIED",
             "proposal_set": digest,
-            "verified_count": sum(
+            "source_entailed_count": sum(
+                item.status.value == "SOURCE_ENTAILED" for item in proposals
+            ),
+            "structure_verified_count": sum(
+                item.status.value == "STRUCTURE_VERIFIED" for item in proposals
+            ),
+            "legacy_verified_count": sum(
                 item.status.value == "VERIFIED" for item in proposals
             ),
         }
@@ -193,6 +230,11 @@ def main(argv: list[str] | None = None) -> int:
             approvals,
             args.output,
             domain_id=args.domain_id,
+            field_evidence=(
+                store.load_field_evidence(args.field_evidence)
+                if args.field_evidence
+                else None
+            ),
         )
         result = {
             "status": "PROVISIONAL",
@@ -205,6 +247,11 @@ def main(argv: list[str] | None = None) -> int:
             store.load_proposals(args.proposals),
             golden,
             store.load_segments(args.segments),
+            field_evidence=(
+                store.load_field_evidence(args.field_evidence)
+                if args.field_evidence
+                else ()
+            ),
         )
     elif args.command == "replay":
         result = replay_acquisition(

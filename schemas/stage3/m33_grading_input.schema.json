@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,"properties":{"answer":{"type":"string"},"answer_key_hash":{"pattern":"^[0-9a-f]{64}$","type":"string"},"answer_type":{"enum":["TEXT","RATIONAL","TYPED_QUANTITY"]},"exercise_id":{"type":"string"}},"required":["exercise_id","answer","answer_type","answer_key_hash"],"type":"object"}

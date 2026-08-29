@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,"properties":{"knowledge_kind":{"type":["string","null"]},"operation":{"enum":["RECORD_BY_ID","DEFINITION","SOURCE_ATTRIBUTION","INTERPRETATIONS","EXCEPTIONS"]},"record_id":{"type":["string","null"]},"term":{"type":["string","null"]}},"required":["operation"],"type":"object"}

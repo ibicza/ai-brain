@@ -46,6 +46,12 @@ class ExtractionMethod(StrEnum):
 
 class ProposalStatus(StrEnum):
     PROPOSED = "PROPOSED"
+    PARSED = "PARSED"
+    STRUCTURE_VERIFIED = "STRUCTURE_VERIFIED"
+    SOURCE_ENTAILED = "SOURCE_ENTAILED"
+    CROSS_SOURCE_CORROBORATED = "CROSS_SOURCE_CORROBORATED"
+    # Read-only compatibility state for M-32 acquisition objects. New trusted
+    # acquisition paths never emit VERIFIED.
     VERIFIED = "VERIFIED"
     REVIEW_REQUIRED = "REVIEW_REQUIRED"
     CONFLICT = "CONFLICT"
@@ -161,6 +167,29 @@ class KnowledgeProposal:
     compiler_version: str
     schema_version: int
     proposal_hash: str
+
+
+@dataclass(frozen=True)
+class FieldSourceEvidence:
+    proposal_id: str
+    field_path: str
+    document_id: str
+    byte_start: int
+    byte_end: int
+    line_start: int
+    line_end: int
+    heading_path: tuple[str, ...]
+    table_row: int | None
+    table_cell: int | None
+    page: int | None
+    document_bytes_hash: str
+    source_bytes_hash: str
+    raw_text: str
+    normalized_value: str
+    transformation_id: str
+    transformation_hash: str
+    extraction_method: ExtractionMethod
+    evidence_hash: str
 
 
 @dataclass(frozen=True)

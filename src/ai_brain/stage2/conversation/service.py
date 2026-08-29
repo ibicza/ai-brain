@@ -12,14 +12,17 @@ from ai_brain.stage2.conversation.models import (
     ConversationIntent,
     ConversationState,
     ConversationTurn,
+    PendingAction,
     PendingActionStatus,
     PublicConversationResponse,
+    PublicPendingAction,
     Speaker,
     TutorConversation,
 )
 from ai_brain.stage2.conversation.operations import (
     TutorOperationJournal,
     TutorOperationStatus,
+    TutorSagaCoordinator,
 )
 from ai_brain.stage2.conversation.pending_actions import (
     authorize_pending,
@@ -44,8 +47,14 @@ from ai_brain.stage2.education.models import (
     ExerciseFamily,
     ExplanationMode,
     GradingStatus,
+    PublicExercise,
+    PublicHint,
+    PublicSolution,
+    PublicSubmissionResult,
+    PublicTutorSessionHandle,
 )
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash, utc_now
+from ai_brain.stage2.generic_ledger import GenericPersistentLedger
 from ai_brain.stage2.progress.events import make_progress_event
 from ai_brain.stage2.progress.models import ProgressEventKind
 from ai_brain.stage2.progress.persistence import LearnerProgressStore
@@ -80,6 +89,19 @@ class ConversationalTutorService:
         self.progress = progress
         self.operations = operations or TutorOperationJournal.open_or_initialize(
             conversations.root / "operations"
+        )
+        self.saga = TutorSagaCoordinator(self.operations)
+        self._education_stage_ledger = GenericPersistentLedger(
+            education.store, "legacy_saga_stage_records"
+        )
+        self._legacy_outcomes = GenericPersistentLedger(
+            education.store, "legacy_saga_outcome_records"
+        )
+        self._progress_stage_ledger = GenericPersistentLedger(
+            progress, "legacy_saga_stage_records"
+        )
+        self._conversation_stage_ledger = GenericPersistentLedger(
+            conversations, "legacy_saga_stage_records"
         )
         self.progress.authority_check = self._verify_progress_authority
         self.conversations.semantic_authority = self
@@ -136,6 +158,15 @@ class ConversationalTutorService:
         self, conversation_id: str, text: str, *, created_at: str | None = None
     ) -> PublicConversationResponse:
         conversation = self.conversations.get(conversation_id)
+        pending_recovery = tuple(
+            item
+            for item in self.operations.pending_recovery()
+            if item.conversation_id == conversation_id
+        )
+        if len(pending_recovery) > 1:
+            raise ValueError("multiple legacy tutor operations require recovery")
+        if pending_recovery:
+            return self._recover_turn(pending_recovery[0], text, created_at)
         parsed = parse_intent(text, conversation.language)
         if (
             parsed.intent is ConversationIntent.CLARIFY
@@ -202,44 +233,85 @@ class ConversationalTutorService:
             )
             new, response = outcome[:2]
             pending_action = outcome[2] if len(outcome) == 3 else None
-            operation = self.operations.advance(
+            self._legacy_outcomes.put(
+                f"outcome.{operation.operation_id}",
+                operation.operation_id,
+                "LEGACY_TURN_OUTCOME",
+                {
+                    "old": conversation,
+                    "new": new,
+                    "parsed_intent": parsed.intent.value,
+                    "original_text": text,
+                    "response": response,
+                    "pending_action": pending_action,
+                },
+            )
+            education_hashes = self._education_operation_hashes(operation.operation_id)
+            operation, _ = self.saga.apply_store_stage(
                 operation,
                 TutorOperationStatus.EDUCATION_APPLIED,
-                content_hash({"state": new.state, "response": response.response_kind}),
-                updated_at=created_at,
+                store_id="EducationalSessionStore",
+                write=lambda operation_id: self._education_stage_ledger.put(
+                    f"education.{operation_id}",
+                    operation_id,
+                    "LEGACY_EDUCATION_STAGE",
+                    {"committed_event_hashes": education_hashes},
+                ),
+                inspect=self._education_stage_ledger.inspect_operation,
+                committed_at=created_at,
             )
-            operation = self.operations.advance(
+            progress_hashes = tuple(
+                item.event_hash
+                for item in self.progress.events(conversation.learner_id)
+                if item.operation_id == operation.operation_id
+            )
+            operation, _ = self.saga.apply_store_stage(
                 operation,
                 TutorOperationStatus.PROGRESS_APPLIED,
-                content_hash(
-                    tuple(
-                        item.event_hash
-                        for item in self.progress.events(conversation.learner_id)
-                    )
+                store_id="LearnerProgressStore",
+                write=lambda operation_id: self._progress_stage_ledger.put(
+                    f"progress.{operation_id}",
+                    operation_id,
+                    "LEGACY_PROGRESS_STAGE",
+                    {"committed_event_hashes": progress_hashes},
                 ),
-                updated_at=created_at,
+                inspect=self._progress_stage_ledger.inspect_operation,
+                committed_at=created_at,
             )
-            result = self._record(
-                conversation,
-                new,
-                parsed.intent,
-                text,
-                response,
-                created_at=created_at,
-                pending_action=pending_action,
-                operation_id=operation.operation_id,
-            )
-            operation = self.operations.advance(
+            published = {}
+
+            def write_conversation(operation_id):
+                result = self._record(
+                    conversation,
+                    new,
+                    parsed.intent,
+                    text,
+                    response,
+                    created_at=created_at,
+                    pending_action=pending_action,
+                    operation_id=operation_id,
+                )
+                published["result"] = result
+                self._conversation_stage_ledger.put(
+                    f"conversation.{operation_id}",
+                    operation_id,
+                    "LEGACY_CONVERSATION_STAGE",
+                    {"public_response_hash": response_hash(result)},
+                )
+
+            operation, _ = self.saga.apply_store_stage(
                 operation,
                 TutorOperationStatus.CONVERSATION_COMMITTED,
-                response_hash(result),
-                updated_at=created_at,
+                store_id="ConversationStore",
+                write=write_conversation,
+                inspect=self._conversation_stage_ledger.inspect_operation,
+                committed_at=created_at,
             )
-            self.operations.advance(
-                operation,
-                TutorOperationStatus.COMPLETED,
-                response_hash(result),
-                updated_at=created_at,
+            result = published.get("result")
+            if result is None:
+                raise ValueError("legacy conversation stage did not publish a response")
+            _, result = self.saga.publish(
+                operation, response_hash(result), lambda: result
             )
             return result
         except Exception as error:
@@ -248,7 +320,10 @@ class ConversationalTutorService:
                 {"type": type(error).__name__, "message": str(error)}
             )
             if current.status is TutorOperationStatus.PREPARED:
-                self.operations.failed(current, failure)
+                if self._legacy_outcomes.inspect_operation(operation.operation_id):
+                    self.operations.recovery_required(current, failure)
+                else:
+                    self.operations.failed(current, failure)
             elif current.status not in {
                 TutorOperationStatus.COMPLETED,
                 TutorOperationStatus.FAILED,
@@ -256,6 +331,107 @@ class ConversationalTutorService:
             }:
                 self.operations.recovery_required(current, failure)
             raise
+
+    def _education_operation_hashes(self, operation_id: str) -> tuple[str, ...]:
+        return tuple(
+            event.event_hash
+            for session_id in self.education.store.session_ids()
+            for event in self.education.store.events(session_id)
+            if event.operation_id == operation_id
+        )
+
+    def _recover_turn(self, operation, retry_text, created_at):
+        _, kind, payload, _ = self._legacy_outcomes.get(
+            f"outcome.{operation.operation_id}"
+        )
+        if kind != "LEGACY_TURN_OUTCOME" or payload["original_text"] != retry_text:
+            raise ValueError("legacy recovery input does not match prepared authority")
+        old = _conversation_from_row(payload["old"])
+        new = _conversation_from_row(payload["new"])
+        response = _public_response_from_row(payload["response"])
+        pending_action = (
+            _pending_action_from_row(payload["pending_action"])
+            if payload["pending_action"] is not None
+            else None
+        )
+        intent = ConversationIntent(payload["parsed_intent"])
+
+        def education_write(operation_id):
+            self._education_stage_ledger.put(
+                f"education.{operation_id}",
+                operation_id,
+                "LEGACY_EDUCATION_STAGE",
+                {
+                    "committed_event_hashes": self._education_operation_hashes(
+                        operation_id
+                    )
+                },
+            )
+
+        def progress_write(operation_id):
+            hashes = tuple(
+                item.event_hash
+                for item in self.progress.events(old.learner_id)
+                if item.operation_id == operation_id
+            )
+            self._progress_stage_ledger.put(
+                f"progress.{operation_id}",
+                operation_id,
+                "LEGACY_PROGRESS_STAGE",
+                {"committed_event_hashes": hashes},
+            )
+
+        def conversation_write(operation_id):
+            existing = tuple(
+                item
+                for item in self.conversations.turns(old.conversation_id)
+                if item.operation_id == operation_id
+            )
+            if not existing:
+                self._record(
+                    old,
+                    new,
+                    intent,
+                    retry_text,
+                    response,
+                    created_at=created_at,
+                    pending_action=pending_action,
+                    operation_id=operation_id,
+                )
+            self._conversation_stage_ledger.put(
+                f"conversation.{operation_id}",
+                operation_id,
+                "LEGACY_CONVERSATION_STAGE",
+                {"public_response_hash": response_hash(response)},
+            )
+
+        recovered = self.saga.recover(
+            operation.operation_id,
+            (
+                (
+                    TutorOperationStatus.EDUCATION_APPLIED,
+                    "EducationalSessionStore",
+                    education_write,
+                    self._education_stage_ledger.inspect_operation,
+                ),
+                (
+                    TutorOperationStatus.PROGRESS_APPLIED,
+                    "LearnerProgressStore",
+                    progress_write,
+                    self._progress_stage_ledger.inspect_operation,
+                ),
+                (
+                    TutorOperationStatus.CONVERSATION_COMMITTED,
+                    "ConversationStore",
+                    conversation_write,
+                    self._conversation_stage_ledger.inspect_operation,
+                ),
+            ),
+        )
+        _, result = self.saga.publish(
+            recovered, response_hash(response), lambda: response
+        )
+        return result
 
     def confirm(
         self,
@@ -1215,6 +1391,50 @@ class ConversationalTutorService:
         if not matches:
             raise ValueError("explanation requires one chemical formula")
         return matches[-1]
+
+
+def _conversation_from_row(row):
+    value = dict(row)
+    value["state"] = ConversationState(value["state"])
+    value["previous_active_state"] = ConversationState(value["previous_active_state"])
+    value["turn_hashes"] = tuple(value["turn_hashes"])
+    return TutorConversation(**value)
+
+
+def _pending_action_from_row(row):
+    value = dict(row)
+    value["dependency_snapshot"] = tuple(value["dependency_snapshot"])
+    value["prepared_authority_hashes"] = tuple(
+        value.get("prepared_authority_hashes", ())
+    )
+    value["previous_state"] = ConversationState(value["previous_state"])
+    value["status"] = PendingActionStatus(value["status"])
+    return PendingAction(**value)
+
+
+def _public_response_from_row(row):
+    value = dict(row)
+    if value.get("exercise") is not None:
+        exercise = dict(value["exercise"])
+        exercise["session"] = PublicTutorSessionHandle(**exercise["session"])
+        exercise["learning_objectives"] = tuple(exercise["learning_objectives"])
+        value["exercise"] = PublicExercise(**exercise)
+    if value.get("submission") is not None:
+        submission = dict(value["submission"])
+        submission["session"] = PublicTutorSessionHandle(**submission["session"])
+        submission["diagnoses"] = tuple(submission["diagnoses"])
+        value["submission"] = PublicSubmissionResult(**submission)
+    if value.get("hint") is not None:
+        hint = dict(value["hint"])
+        hint["session"] = PublicTutorSessionHandle(**hint["session"])
+        value["hint"] = PublicHint(**hint)
+    if value.get("solution") is not None:
+        solution = dict(value["solution"])
+        solution["session"] = PublicTutorSessionHandle(**solution["session"])
+        value["solution"] = PublicSolution(**solution)
+    if value.get("prepared_action") is not None:
+        value["prepared_action"] = PublicPendingAction(**value["prepared_action"])
+    return PublicConversationResponse(**value)
 
 
 def _restore_pending_authority(payload, education):

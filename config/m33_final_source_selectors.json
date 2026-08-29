@@ -1,0 +1,104 @@
+{
+  "allowed_authority_domains": [
+    "opentextbc.ca",
+    "pressbooks.bccampus.ca",
+    "www.archives.gov",
+    "www.loc.gov",
+    "www.nps.gov",
+    "raw.githubusercontent.com"
+  ],
+  "final_source_seal_version": 1,
+  "resource_policy": {
+    "maximum_download_bytes": 16777216,
+    "maximum_documents": 64,
+    "network_during_compilation": false,
+    "required_genres": [
+      "open_educational_prose",
+      "public_institution_history",
+      "official_api_source_documentation"
+    ],
+    "runtime_network": false
+  },
+  "sets": [
+    {
+      "bundle_id": "m33-kinematics",
+      "domain_tags": ["kinematics", "school-physics"],
+      "license": "CC-BY-4.0",
+      "license_url": "https://pressbooks.bccampus.ca/test3/part/copyright-and-licensing/",
+      "resources": [
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/introduction-to-one-dimensional-kinematics/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/displacement/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/vectors-scalars-and-coordinate-systems/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/time-velocity-and-speed/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/acceleration/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/motion-equations-for-constant-acceleration-in-one-dimension/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/problem-solving-basics-for-one-dimensional-kinematics/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/falling-objects/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://pressbooks.bccampus.ca/test3/chapter/graphical-analysis-of-one-dimensional-motion/"}
+      ],
+      "source_identity": "BCcampus Pressbooks College Physics, one-dimensional kinematics",
+      "version": "2017-10-24-sitemap-snapshot"
+    },
+    {
+      "bundle_id": "m33-biology",
+      "domain_tags": ["biology", "cell-structure"],
+      "license": "CC-BY-4.0",
+      "license_url": "https://opentextbc.ca/biology/part/introduction-to-biology/",
+      "resources": [
+        {"adapter": "static_html", "selector": {}, "url": "https://opentextbc.ca/biology/chapter/3-1-how-cells-are-studied/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://opentextbc.ca/biology/chapter/3-2-comparing-prokaryotic-and-eukaryotic-cells/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://opentextbc.ca/biology/chapter/3-3-eukaryotic-cells/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://opentextbc.ca/biology/chapter/3-4-the-cell-membrane/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://opentextbc.ca/biology/chapter/3-5-passive-transport/"},
+        {"adapter": "static_html", "selector": {}, "url": "https://opentextbc.ca/biology/chapter/3-6-active-transport/"}
+      ],
+      "source_identity": "Concepts of Biology 1st Canadian Edition, Chapter 3 Cell Structure",
+      "version": "2021-03-04-sitemap-snapshot"
+    },
+    {
+      "bundle_id": "m33-history",
+      "domain_tags": ["history", "japanese-american-incarceration"],
+      "license": "US-government-public-material",
+      "license_url": "https://www.usa.gov/government-copyright",
+      "resources": [
+        {"adapter": "static_html", "selector": {}, "url": "https://www.nps.gov/manz/learn/historyculture/japanese-americans-at-manzanar.htm"},
+        {"adapter": "static_html", "selector": {}, "url": "https://www.archives.gov/education/lessons/japanese-relocation"},
+        {"adapter": "static_html", "selector": {}, "url": "https://www.loc.gov/classroom-materials/immigration/japanese/internment/"}
+      ],
+      "source_identity": "NPS, National Archives, and Library of Congress Japanese American incarceration materials",
+      "version": "retrieved-2026-08-29"
+    },
+    {
+      "bundle_id": "m33-java",
+      "domain_tags": ["java", "openjdk", "api-documentation"],
+      "license": "GPL-2.0-only WITH Classpath-exception-2.0",
+      "license_url": "https://github.com/openjdk/jdk/blob/jdk-21-ga/LICENSE",
+      "resources": [
+        {"adapter": "raw_text", "selector": {}, "url": "https://raw.githubusercontent.com/openjdk/jdk/jdk-21-ga/src/java.base/share/classes/java/util/List.java"},
+        {"adapter": "raw_text", "selector": {}, "url": "https://raw.githubusercontent.com/openjdk/jdk/jdk-21-ga/src/java.base/share/classes/java/util/ArrayList.java"},
+        {"adapter": "raw_text", "selector": {}, "url": "https://raw.githubusercontent.com/openjdk/jdk/jdk-21-ga/src/java.base/share/classes/java/util/AbstractList.java"},
+        {"adapter": "raw_text", "selector": {}, "url": "https://raw.githubusercontent.com/openjdk/jdk/jdk-21-ga/src/java.base/share/classes/java/util/Collections.java"},
+        {"adapter": "raw_text", "selector": {}, "url": "https://raw.githubusercontent.com/openjdk/jdk/jdk-21-ga/src/java.base/share/classes/java/util/Comparator.java"},
+        {"adapter": "raw_text", "selector": {}, "url": "https://raw.githubusercontent.com/openjdk/jdk/jdk-21-ga/src/java.base/share/classes/java/util/Iterator.java"},
+        {"adapter": "raw_text", "selector": {}, "url": "https://raw.githubusercontent.com/openjdk/jdk/jdk-21-ga/src/java.base/share/classes/java/util/Spliterator.java"},
+        {"adapter": "raw_text", "selector": {}, "url": "https://raw.githubusercontent.com/openjdk/jdk/jdk-21-ga/src/java.base/share/classes/java/util/RandomAccess.java"}
+      ],
+      "source_identity": "OpenJDK JDK 21 GA java.util API source documentation",
+      "version": "jdk-21-ga"
+    }
+  ],
+  "thresholds": {
+    "automatically_trusted_precision": "1.000000",
+    "duplicate_segment_rate_max": "0.020000",
+    "mandatory_pack_test_pass_rate": "1.000000",
+    "wrong_automatically_trusted": 0,
+    "wrong_trusted_heldout": 0
+  },
+  "task_schema": {
+    "biology": 125,
+    "history": 100,
+    "java": 125,
+    "kinematics": 150,
+    "minimum_semantically_unique": 500
+  }
+}

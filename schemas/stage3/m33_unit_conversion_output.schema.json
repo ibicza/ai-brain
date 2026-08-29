@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,"properties":{"exact_value":{"type":["string","null"]},"receipt_hash":{"type":["string","null"]},"status":{"enum":["CONVERTED_EXACT","NEEDS_NEW_CAPABILITY"]}},"required":["status","exact_value","receipt_hash"],"type":"object"}

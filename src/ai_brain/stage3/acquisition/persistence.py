@@ -103,6 +103,21 @@ class AcquisitionStore:
         row = self._load("proposals", digest)
         return tuple(_proposal(item) for item in row["proposals"])
 
+    def save_field_evidence(
+        self, proposal_set_hash: str, values: tuple[FieldSourceEvidence, ...]
+    ) -> str:
+        row = {
+            "proposal_set_hash": proposal_set_hash,
+            "field_evidence": [asdict(value) for value in values],
+        }
+        digest = content_hash(row)
+        self._save("field-evidence", digest, row)
+        return digest
+
+    def load_field_evidence(self, digest: str) -> tuple[FieldSourceEvidence, ...]:
+        row = self._load("field-evidence", digest)
+        return tuple(_field_evidence(item) for item in row["field_evidence"])
+
     def save_reviews(
         self, proposal_set_hash: str, values: tuple[AcquisitionReview, ...]
     ) -> str:
@@ -233,6 +248,16 @@ def _proposal(row) -> KnowledgeProposal:
             "extraction_method": ExtractionMethod(row["extraction_method"]),
             "status": ProposalStatus(row["status"]),
             "ambiguity_fields": tuple(row["ambiguity_fields"]),
+        }
+    )
+
+
+def _field_evidence(row) -> FieldSourceEvidence:
+    return FieldSourceEvidence(
+        **{
+            **row,
+            "heading_path": tuple(row["heading_path"]),
+            "extraction_method": ExtractionMethod(row["extraction_method"]),
         }
     )
 
