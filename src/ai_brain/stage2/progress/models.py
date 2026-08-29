@@ -52,6 +52,8 @@ class ProgressEvent:
     previous_event_hash: str | None
     schema_version: int
     event_hash: str
+    authority_hashes: tuple[str, ...] = ()
+    operation_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -97,3 +99,5 @@ class PublicProgressSummary:
     solutions_revealed: int
     suggested_next_concept: str | None
     suggestion_reason: str | None
+    history_status: str = "PROGRESS_HISTORY_VALID"
+    current_authority_status: str = "PROGRESS_CURRENT_AUTHORITY"

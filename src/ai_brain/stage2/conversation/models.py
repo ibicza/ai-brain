@@ -44,7 +44,9 @@ class ConversationIntent(StrEnum):
 
 class PendingActionStatus(StrEnum):
     PREPARED = "PREPARED"
+    EXECUTING = "EXECUTING"
     EXECUTED = "EXECUTED"
+    FAILED = "FAILED"
     CANCELLED = "CANCELLED"
     EXPIRED = "EXPIRED"
     STALE = "STALE"
@@ -105,6 +107,7 @@ class ConversationTurn:
     previous_turn_hash: str | None
     created_at: str
     turn_hash: str
+    operation_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -123,6 +126,7 @@ class PendingAction:
     status: PendingActionStatus
     schema_version: int
     pending_hash: str
+    prepared_authority_hashes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

@@ -26,6 +26,7 @@ def prepare_pending_action(
     payload: dict,
     dependency_snapshot: tuple[str, ...],
     previous_state: ConversationState,
+    prepared_authority_hashes: tuple[str, ...] = (),
     ttl_seconds: int = 300,
     created_at: str | None = None,
 ) -> PendingAction:
@@ -52,6 +53,7 @@ def prepare_pending_action(
         "expires_at": expires,
         "status": PendingActionStatus.PREPARED,
         "schema_version": PENDING_ACTION_SCHEMA_VERSION,
+        "prepared_authority_hashes": prepared_authority_hashes,
     }
     return PendingAction(**body, pending_hash=content_hash(body))
 
@@ -59,10 +61,11 @@ def prepare_pending_action(
 def verify_pending(action: PendingAction) -> None:
     body = asdict(action)
     digest = body.pop("pending_hash")
-    if (
-        action.schema_version != PENDING_ACTION_SCHEMA_VERSION
-        or content_hash(body) != digest
-    ):
+    valid_hash = content_hash(body) == digest
+    if not valid_hash and not action.prepared_authority_hashes:
+        body.pop("prepared_authority_hashes")
+        valid_hash = content_hash(body) == digest
+    if action.schema_version != PENDING_ACTION_SCHEMA_VERSION or not valid_hash:
         raise ValueError("pending action hash or schema mismatch")
 
 
@@ -89,7 +92,32 @@ def authorize_pending(
         raise ValueError("pending action expired")
     if action.dependency_snapshot != dependency_snapshot:
         raise ValueError("pending action dependencies changed")
-    provisional = replace(action, status=PendingActionStatus.EXECUTED, pending_hash="")
+    provisional = replace(action, status=PendingActionStatus.EXECUTING, pending_hash="")
+    body = asdict(provisional)
+    body.pop("pending_hash")
+    return replace(provisional, pending_hash=content_hash(body))
+
+
+def transition_pending(
+    action: PendingAction, status: PendingActionStatus
+) -> PendingAction:
+    """Record a terminal execution outcome without granting execution authority."""
+    verify_pending(action)
+    allowed = {
+        PendingActionStatus.EXECUTING: {
+            PendingActionStatus.EXECUTED,
+            PendingActionStatus.FAILED,
+            PendingActionStatus.STALE,
+        },
+        PendingActionStatus.PREPARED: {
+            PendingActionStatus.CANCELLED,
+            PendingActionStatus.EXPIRED,
+            PendingActionStatus.STALE,
+        },
+    }
+    if status not in allowed.get(action.status, set()):
+        raise ValueError("invalid pending action status transition")
+    provisional = replace(action, status=status, pending_hash="")
     body = asdict(provisional)
     body.pop("pending_hash")
     return replace(provisional, pending_hash=content_hash(body))

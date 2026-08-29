@@ -557,6 +557,7 @@ class TutorEvent:
     previous_event_hash: str | None
     created_at: str
     event_hash: str
+    operation_id: str | None = None
 
 
 @dataclass(frozen=True)

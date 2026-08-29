@@ -13,7 +13,7 @@ from ai_brain.stage2.education.artifact_authority import (
 
 def replay_conversation(service, conversation_id: str) -> ConversationReplayResult:
     try:
-        service.conversations.verify()
+        service.conversations.verify(structural_only=True)
         conversation = service.conversations.get(conversation_id)
         turns = service.conversations.turns(conversation_id)
     except (KeyError, TypeError, ValueError):

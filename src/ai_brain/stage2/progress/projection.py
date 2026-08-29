@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import asdict
 
 from ai_brain.stage2.facts.canonical import content_hash
-from ai_brain.stage2.progress.concepts import CONCEPTS
 from ai_brain.stage2.progress.events import verify_progress_event
 from ai_brain.stage2.progress.models import (
     ConceptProgressProjection,
@@ -17,7 +16,10 @@ from ai_brain.stage2.progress.version import PROGRESS_POLICY_VERSION
 
 
 def project_progress(
-    learner_id: str, events: tuple[ProgressEvent, ...]
+    learner_id: str,
+    events: tuple[ProgressEvent, ...],
+    *,
+    concept_ids: tuple[str, ...] | None = None,
 ) -> tuple[ConceptProgressProjection, ...]:
     relevant: list[ProgressEvent] = []
     previous = None
@@ -34,8 +36,15 @@ def project_progress(
             relevant.clear()
         else:
             relevant.append(event)
+    concepts = concept_ids
+    if concepts is None:
+        concepts = tuple(
+            dict.fromkeys(concept for event in events for concept in event.concept_ids)
+        )
+    if len(set(concepts)) != len(concepts):
+        raise ValueError("projection requires unique concepts")
     return tuple(
-        _project_concept(learner_id, concept, relevant) for concept in CONCEPTS
+        _project_concept(learner_id, concept, relevant) for concept in concepts
     )
 
 

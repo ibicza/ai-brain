@@ -63,6 +63,7 @@ def start_session(
     *,
     session_id: str,
     created_at: str | None = None,
+    operation_id: str | None = None,
 ) -> tuple[TutorSession, TutorEvent]:
     timestamp = created_at or utc_now()
     event = make_event(
@@ -75,6 +76,7 @@ def start_session(
         },
         previous_event_hash=None,
         created_at=timestamp,
+        operation_id=operation_id,
     )
     body = {
         "session_id": session_id,
@@ -104,6 +106,7 @@ def make_event(
     payload: dict[str, Any],
     previous_event_hash: str | None,
     created_at: str | None = None,
+    operation_id: str | None = None,
 ) -> TutorEvent:
     if event_type not in EVENT_TYPES or sequence < 1:
         raise ValueError("invalid tutor event")
@@ -115,6 +118,7 @@ def make_event(
         "payload": payload,
         "previous_event_hash": previous_event_hash,
         "created_at": created_at or utc_now(),
+        "operation_id": operation_id,
     }
     body["event_id"] = f"education.event.{content_hash(body)[:24]}"
     return TutorEvent(**body, event_hash=content_hash(body))
@@ -178,7 +182,11 @@ def verify_session_hash(session: TutorSession) -> None:
 def verify_event_hash(event: TutorEvent) -> None:
     body = asdict(event)
     digest = body.pop("event_hash")
-    if content_hash(body) != digest:
+    valid_hash = content_hash(body) == digest
+    if not valid_hash and body.get("operation_id") is None:
+        body.pop("operation_id")
+        valid_hash = content_hash(body) == digest
+    if not valid_hash:
         raise ValueError("tutor event hash mismatch")
     if event.event_type not in EVENT_TYPES or event.sequence < 1:
         raise ValueError("invalid tutor event")

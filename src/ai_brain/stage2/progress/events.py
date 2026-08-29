@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import asdict
 
 from ai_brain.stage2.facts.canonical import content_hash, utc_now
-from ai_brain.stage2.progress.concepts import CONCEPTS
 from ai_brain.stage2.progress.models import ProgressEvent, ProgressEventKind
 from ai_brain.stage2.progress.version import LEARNER_PROGRESS_SCHEMA_VERSION
 
@@ -28,10 +27,17 @@ def make_progress_event(
     hint_count: int = 0,
     solution_revealed: bool = False,
     observed_at: str | None = None,
+    authority_hashes: tuple[str, ...] = (),
+    operation_id: str | None = None,
 ) -> ProgressEvent:
     if not learner_id or not conversation_id or not tutor_session_id:
         raise ValueError("progress event requires explicit identity bindings")
-    if not concept_ids or not set(concept_ids) <= set(CONCEPTS):
+    if not concept_ids or any(
+        not item
+        or len(item) > 128
+        or not item.replace("_", "").replace("-", "").isalnum()
+        for item in concept_ids
+    ):
         raise ValueError("progress event has invalid concept bindings")
     if (
         sequence < 1
@@ -60,6 +66,8 @@ def make_progress_event(
         "observed_at": observed_at or utc_now(),
         "previous_event_hash": previous_event_hash,
         "schema_version": LEARNER_PROGRESS_SCHEMA_VERSION,
+        "authority_hashes": authority_hashes,
+        "operation_id": operation_id,
     }
     body["event_id"] = f"progress.event.{content_hash(body)[:24]}"
     return ProgressEvent(**body, event_hash=content_hash(body))
@@ -68,8 +76,13 @@ def make_progress_event(
 def verify_progress_event(event: ProgressEvent) -> None:
     body = asdict(event)
     digest = body.pop("event_hash")
+    valid_hash = content_hash(body) == digest
+    if not valid_hash and event.schema_version == 1:
+        body.pop("authority_hashes", None)
+        body.pop("operation_id", None)
+        valid_hash = content_hash(body) == digest
     if (
-        event.schema_version != LEARNER_PROGRESS_SCHEMA_VERSION
-        or content_hash(body) != digest
+        event.schema_version not in {1, LEARNER_PROGRESS_SCHEMA_VERSION}
+        or not valid_hash
     ):
         raise ValueError("progress event hash or schema mismatch")

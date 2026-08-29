@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from ai_brain.stage2.facts.canonical import content_hash, utc_now
-from ai_brain.stage2.progress.concepts import CONCEPTS, PREREQUISITES
 from ai_brain.stage2.progress.models import (
     ConceptProgressProjection,
     ConceptProgressStatus,
@@ -20,8 +19,14 @@ def recommend_exercise(
     recent_semantic_key: str | None = None,
     review_requested: bool = False,
     generated_at: str | None = None,
+    concepts: tuple[str, ...] | None = None,
+    prerequisites: dict[str, tuple[str, ...]] | None = None,
 ) -> ExerciseRecommendation:
     by_concept = {item.concept_id: item for item in projections}
+    concepts = concepts or tuple(by_concept)
+    prerequisites = prerequisites or {}
+    if not concepts or not set(concepts) <= set(by_concept):
+        raise ValueError("recommendation requires projections for every concept")
     selected_concept = None
     reason = None
     for status, code in (
@@ -34,7 +39,7 @@ def recommend_exercise(
         selected_concept = next(
             (
                 c
-                for c in CONCEPTS
+                for c in concepts
                 if by_concept[c].status is status and candidates.get(c)
             ),
             None,
@@ -46,12 +51,12 @@ def recommend_exercise(
         selected_concept = next(
             (
                 c
-                for c in CONCEPTS
+                for c in concepts
                 if by_concept[c].status is ConceptProgressStatus.NOT_SEEN
                 and candidates.get(c)
                 and all(
                     by_concept[p].status is ConceptProgressStatus.DEMONSTRATED
-                    for p in PREREQUISITES.get(c, ())
+                    for p in prerequisites.get(c, ())
                 )
             ),
             None,
@@ -61,7 +66,7 @@ def recommend_exercise(
         selected_concept = next(
             (
                 c
-                for c in CONCEPTS
+                for c in concepts
                 if by_concept[c].status is ConceptProgressStatus.DEMONSTRATED
                 and candidates.get(c)
             ),
@@ -77,7 +82,7 @@ def recommend_exercise(
         available = candidates[selected_concept]
     hashes = tuple(item[0] for item in available)
     prerequisite_state = tuple(
-        (p, by_concept[p].status.value) for p in PREREQUISITES.get(selected_concept, ())
+        (p, by_concept[p].status.value) for p in prerequisites.get(selected_concept, ())
     )
     body = {
         "learner_id": learner_id,

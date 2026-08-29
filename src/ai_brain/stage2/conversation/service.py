@@ -17,10 +17,15 @@ from ai_brain.stage2.conversation.models import (
     Speaker,
     TutorConversation,
 )
+from ai_brain.stage2.conversation.operations import (
+    TutorOperationJournal,
+    TutorOperationStatus,
+)
 from ai_brain.stage2.conversation.pending_actions import (
     authorize_pending,
     prepare_pending_action,
     public_pending,
+    transition_pending,
 )
 from ai_brain.stage2.conversation.persistence import ConversationStore
 from ai_brain.stage2.conversation.responses import response_hash, verify_public_response
@@ -38,31 +43,15 @@ from ai_brain.stage2.education.models import (
     AnswerParseStatus,
     ExerciseFamily,
     ExplanationMode,
+    GradingStatus,
 )
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash, utc_now
-from ai_brain.stage2.progress.concepts import CONCEPTS
 from ai_brain.stage2.progress.events import make_progress_event
 from ai_brain.stage2.progress.models import ProgressEventKind
 from ai_brain.stage2.progress.persistence import LearnerProgressStore
 from ai_brain.stage2.progress.projection import project_progress
+from ai_brain.stage2.progress.recommendations import recommend_exercise
 from ai_brain.stage2.progress.rendering import render_progress_summary
-
-FAMILY_CONCEPTS = {
-    ExerciseFamily.FACT_RETRIEVAL: ("ELEMENT_IDENTITY",),
-    ExerciseFamily.FORMULA_COMPOSITION: (
-        "FORMULA_PARSING",
-        "SUBSCRIPT_COUNTING",
-        "FORMULA_COMPOSITION",
-    ),
-    ExerciseFamily.MOLAR_MASS_SIMPLE: (
-        "ATOMIC_WEIGHT_SINGLE",
-        "FORMULA_PARSING",
-        "MOLAR_MASS_SIMPLE",
-    ),
-    ExerciseFamily.MOLAR_MASS_GROUPED: ("GROUP_MULTIPLIER", "MOLAR_MASS_GROUPED"),
-    ExerciseFamily.MASS_AMOUNT: ("MASS_TO_MOLES", "MOLES_TO_MASS", "UNIT_DIMENSION"),
-    ExerciseFamily.AMOUNT_ENTITIES: ("MOLES_TO_FORMULA_ENTITIES", "UNIT_DIMENSION"),
-}
 
 
 class ConversationalTutorService:
@@ -71,11 +60,18 @@ class ConversationalTutorService:
         education,
         conversations: ConversationStore,
         progress: LearnerProgressStore,
+        operations: TutorOperationJournal | None = None,
     ) -> None:
         self.education = education
         self.conversations = conversations
         self.progress = progress
+        self.operations = operations or TutorOperationJournal.open_or_initialize(
+            conversations.root / "operations"
+        )
         self.progress.authority_check = self._verify_progress_authority
+        self.conversations.semantic_authority = self
+        self._pending_authority: dict[str, tuple[object, object]] = {}
+        self._catalog_candidates = self._index_catalog_candidates()
 
     @classmethod
     def open(
@@ -85,6 +81,7 @@ class ConversationalTutorService:
             education,
             ConversationStore.open_or_initialize(conversation_root),
             LearnerProgressStore.open_or_initialize(progress_root),
+            TutorOperationJournal.open_or_initialize(conversation_root / "operations"),
         )
 
     def start(
@@ -168,18 +165,84 @@ class ConversationalTutorService:
             active_session=working.active_tutor_session_id is not None,
             pending_action=working.pending_action_id is not None,
         )
-        outcome = self._execute(working, parsed, text, created_at=created_at)
-        new, response = outcome[:2]
-        pending_action = outcome[2] if len(outcome) == 3 else None
-        return self._record(
-            conversation,
-            new,
-            parsed.intent,
-            text,
-            response,
+        operation = self.operations.prepare(
+            learner_id=conversation.learner_id,
+            conversation_id=conversation.conversation_id,
+            intent=parsed.intent.value,
+            input_hash=content_hash(
+                {"text": text, "conversation_hash": conversation.conversation_hash}
+            ),
+            expected_educational_side_effects=(parsed.intent.value,),
+            expected_progress_side_effects=(parsed.intent.value,),
+            expected_conversation_result="PUBLIC_TURN",
             created_at=created_at,
-            pending_action=pending_action,
         )
+        if operation.status is not TutorOperationStatus.PREPARED:
+            raise ValueError("tutor operation retry requires explicit recovery")
+        try:
+            outcome = self._execute(
+                working,
+                parsed,
+                text,
+                created_at=created_at,
+                operation_id=operation.operation_id,
+            )
+            new, response = outcome[:2]
+            pending_action = outcome[2] if len(outcome) == 3 else None
+            operation = self.operations.advance(
+                operation,
+                TutorOperationStatus.EDUCATION_APPLIED,
+                content_hash({"state": new.state, "response": response.response_kind}),
+                updated_at=created_at,
+            )
+            operation = self.operations.advance(
+                operation,
+                TutorOperationStatus.PROGRESS_APPLIED,
+                content_hash(
+                    tuple(
+                        item.event_hash
+                        for item in self.progress.events(conversation.learner_id)
+                    )
+                ),
+                updated_at=created_at,
+            )
+            result = self._record(
+                conversation,
+                new,
+                parsed.intent,
+                text,
+                response,
+                created_at=created_at,
+                pending_action=pending_action,
+                operation_id=operation.operation_id,
+            )
+            operation = self.operations.advance(
+                operation,
+                TutorOperationStatus.CONVERSATION_COMMITTED,
+                response_hash(result),
+                updated_at=created_at,
+            )
+            self.operations.advance(
+                operation,
+                TutorOperationStatus.COMPLETED,
+                response_hash(result),
+                updated_at=created_at,
+            )
+            return result
+        except Exception as error:
+            current = self.operations.get(operation.operation_id)
+            failure = content_hash(
+                {"type": type(error).__name__, "message": str(error)}
+            )
+            if current.status is TutorOperationStatus.PREPARED:
+                self.operations.failed(current, failure)
+            elif current.status not in {
+                TutorOperationStatus.COMPLETED,
+                TutorOperationStatus.FAILED,
+                TutorOperationStatus.RECOVERY_REQUIRED,
+            }:
+                self.operations.recovery_required(current, failure)
+            raise
 
     def confirm(
         self,
@@ -199,7 +262,7 @@ class ConversationalTutorService:
         if pending_id != conversation.pending_action_id:
             raise ValueError("pending action handle mismatch")
         action = self.conversations.get_pending(pending_id)
-        executed = authorize_pending(
+        executing = authorize_pending(
             action,
             learner_id=conversation.learner_id,
             conversation_id=conversation_id,
@@ -209,18 +272,55 @@ class ConversationalTutorService:
         )
         if action.action_kind != "EXPLAIN_MOLAR_MASS":
             raise ValueError("unsupported pending action kind")
-        # Consume before external execution: a crash can lose an action, never replay it.
-        self.conversations.replace_pending(action, executed)
-        _, prepared, proposal = self.education.chemistry.prepare_tool(
-            "chemistry_molar_mass", action.payload
-        )
-        result = self.education.confirm_explanation(
-            prepared,
-            proposal,
-            identity=conversation.learner_id,
-            language=conversation.language,
-            mode=ExplanationMode.FULL,
-        )
+        # Persist EXECUTING before invocation. Recovery never replays an ambiguous
+        # physical invocation, so this is at-most-once execution, not a claim of
+        # physically exactly-once CPU work across process death.
+        self.conversations.replace_pending(action, executing)
+        authority = self._pending_authority.pop(action.pending_id, None)
+        if authority is None:
+            stale = transition_pending(executing, PendingActionStatus.STALE)
+            self.conversations.replace_pending(executing, stale)
+            return self._failed_pending_response(
+                conversation,
+                action,
+                original_text,
+                "Pending action authority is unavailable after recovery.",
+                created_at,
+            )
+        prepared, proposal = authority
+        if (
+            prepared.response_hash,
+            proposal.proposal_hash,
+        ) != action.prepared_authority_hashes:
+            stale = transition_pending(executing, PendingActionStatus.STALE)
+            self.conversations.replace_pending(executing, stale)
+            return self._failed_pending_response(
+                conversation,
+                action,
+                original_text,
+                "Pending action authority hash mismatch.",
+                created_at,
+            )
+        try:
+            result = self.education.confirm_explanation(
+                prepared,
+                proposal,
+                identity=conversation.learner_id,
+                language=conversation.language,
+                mode=ExplanationMode.FULL,
+            )
+        except Exception as error:  # noqa: BLE001 - persist exact pending failure
+            failed = transition_pending(executing, PendingActionStatus.FAILED)
+            self.conversations.replace_pending(executing, failed)
+            return self._failed_pending_response(
+                conversation,
+                action,
+                original_text,
+                f"Trusted calculation failed: {type(error).__name__}.",
+                created_at,
+            )
+        executed = transition_pending(executing, PendingActionStatus.EXECUTED)
+        self.conversations.replace_pending(executing, executed)
         new = self._change(
             conversation,
             state=action.previous_state,
@@ -228,6 +328,25 @@ class ConversationalTutorService:
             updated_at=created_at or utc_now(),
         )
         response = self._response(new, "EXPLANATION", result.text or "")
+        return self._record(
+            conversation,
+            new,
+            ConversationIntent.CONFIRM_PENDING_ACTION,
+            original_text,
+            response,
+            created_at=created_at,
+        )
+
+    def _failed_pending_response(
+        self, conversation, action, original_text, message, created_at
+    ):
+        new = self._change(
+            conversation,
+            state=action.previous_state,
+            pending_action_id=None,
+            updated_at=created_at or utc_now(),
+        )
+        response = self._response(new, "PENDING_ACTION_FAILED", message)
         return self._record(
             conversation,
             new,
@@ -284,10 +403,19 @@ class ConversationalTutorService:
 
     def progress_summary(self, conversation_id: str):
         conversation = self.conversations.get(conversation_id)
+        events = self.progress.events(conversation.learner_id)
+        projections = self._project(conversation.learner_id, events)
+        current_authority = self._progress_is_current(events)
+        recommendation = (
+            self._recommend(conversation, projections, required=False)
+            if current_authority
+            else None
+        )
         return render_progress_summary(
-            project_progress(
-                conversation.learner_id, self.progress.events(conversation.learner_id)
-            )
+            projections,
+            recommendation,
+            events=events,
+            current_authority=current_authority,
         )
 
     def export_progress(self, learner_id: str) -> str:
@@ -301,6 +429,10 @@ class ConversationalTutorService:
         events = self.progress.events(learner_id)
         if not events:
             raise ValueError("no observable progress exists for this learner")
+        if not self._progress_is_current(events):
+            raise ValueError(
+                "stale progress history cannot authorize a new reset event"
+            )
         last = events[-1]
         event = make_progress_event(
             learner_id=learner_id,
@@ -308,7 +440,7 @@ class ConversationalTutorService:
             tutor_session_id=last.tutor_session_id,
             catalog_entry_hash=last.catalog_entry_hash,
             semantic_key_hash=last.semantic_key_hash,
-            concept_ids=tuple(CONCEPTS),
+            concept_ids=self._concept_ids(),
             event_kind=ProgressEventKind.PROGRESS_RESET,
             sequence=len(events) + 1,
             previous_event_hash=last.event_hash,
@@ -326,7 +458,9 @@ class ConversationalTutorService:
             "deleted_event_count": self.progress.delete_learner(learner_id),
         }
 
-    def _execute(self, conversation, parsed, raw_text, *, created_at=None):
+    def _execute(
+        self, conversation, parsed, raw_text, *, created_at=None, operation_id=None
+    ):
         intent = parsed.intent
         language = conversation.language
         timestamp = created_at or utc_now()
@@ -340,11 +474,49 @@ class ConversationalTutorService:
             ConversationIntent.REQUEST_EXERCISE,
             ConversationIntent.REQUEST_NEXT_EXERCISE,
         }:
-            self._abandon_if_needed(conversation, created_at=timestamp)
+            self._abandon_if_needed(
+                conversation, created_at=timestamp, operation_id=operation_id
+            )
             seed = len(conversation.turn_hashes)
-            family = ExerciseFamily(parsed.payload.get("family", "MOLAR_MASS_SIMPLE"))
+            recommendation = None
+            selected_entry = None
+            if intent is ConversationIntent.REQUEST_NEXT_EXERCISE:
+                events = self.progress.events(conversation.learner_id)
+                projections = self._project(conversation.learner_id, events)
+                recommendation = (
+                    self._recommend(conversation, projections, required=False)
+                    if self._progress_is_current(events)
+                    else None
+                )
+                if recommendation is None:
+                    return conversation, self._response(
+                        conversation,
+                        "NO_CURRENT_RECOMMENDATION",
+                        "Нет актуальной задачи с выполненными предпосылками."
+                        if language == "ru"
+                        else "No current prerequisite-satisfied exercise is available.",
+                    )
+                selected_entry = self.education.catalog.by_entry_hash(
+                    recommendation.selected_entry_hash
+                )
+            family = (
+                selected_entry.exercise_spec.family
+                if selected_entry
+                else ExerciseFamily(parsed.payload.get("family", "MOLAR_MASS_SIMPLE"))
+            )
+            if selected_entry is not None:
+                matches = [
+                    x
+                    for x in self.education.catalog.entries
+                    if x.exercise_spec.family is family
+                ]
+                seed = matches.index(selected_entry)
             exercise = self.education.create_exercise(
-                family, seed=seed, language=language
+                family,
+                seed=seed,
+                language=language,
+                created_at=timestamp,
+                operation_id=operation_id,
             )
             new = self._change(
                 conversation,
@@ -353,17 +525,28 @@ class ConversationalTutorService:
                 updated_at=timestamp,
             )
             self._observe(
-                new, ProgressEventKind.EXERCISE_PRESENTED, created_at=timestamp
+                new,
+                ProgressEventKind.EXERCISE_PRESENTED,
+                created_at=timestamp,
+                operation_id=operation_id,
             )
             return new, self._response(
                 new,
                 "EXERCISE",
-                "Решите задачу." if language == "ru" else "Solve this exercise.",
+                ("Решите задачу." if language == "ru" else "Solve this exercise.")
+                + (
+                    f" Recommendation: {recommendation.reason_code.value}."
+                    if recommendation
+                    else ""
+                ),
                 exercise=exercise,
             )
         if intent is ConversationIntent.SUBMIT_ANSWER:
             submission = self.education.submit_answer(
-                conversation.active_tutor_session_id, parsed.payload["text"]
+                conversation.active_tutor_session_id,
+                parsed.payload["text"],
+                created_at=timestamp,
+                operation_id=operation_id,
             )
             self._observe(
                 conversation,
@@ -371,6 +554,7 @@ class ConversationalTutorService:
                 correct=submission.status.startswith("CORRECT"),
                 grading=True,
                 created_at=timestamp,
+                operation_id=operation_id,
             )
             if submission.status.startswith("CORRECT"):
                 self._observe(
@@ -379,30 +563,39 @@ class ConversationalTutorService:
                     correct=True,
                     grading=True,
                     created_at=timestamp,
+                    operation_id=operation_id,
                 )
             return conversation, self._response(
                 conversation, "SUBMISSION", submission.feedback, submission=submission
             )
         if intent is ConversationIntent.REQUEST_HINT:
-            hint = self.education.hint(conversation.active_tutor_session_id)
+            hint = self.education.hint(
+                conversation.active_tutor_session_id,
+                created_at=timestamp,
+                operation_id=operation_id,
+            )
             self._observe(
                 conversation,
                 ProgressEventKind.HINT_USED,
                 hint_level=hint.level,
                 created_at=timestamp,
+                operation_id=operation_id,
             )
             return conversation, self._response(
                 conversation, "HINT", hint.text, hint=hint
             )
         if intent is ConversationIntent.REQUEST_SOLUTION:
             solution = self.education.show_solution(
-                conversation.active_tutor_session_id
+                conversation.active_tutor_session_id,
+                created_at=timestamp,
+                operation_id=operation_id,
             )
             self._observe(
                 conversation,
                 ProgressEventKind.SOLUTION_REVEALED,
                 solution=True,
                 created_at=timestamp,
+                operation_id=operation_id,
             )
             return conversation, self._response(
                 conversation, "SOLUTION", solution.text, solution=solution
@@ -456,13 +649,16 @@ class ConversationalTutorService:
                 "unit": "g/mol",
                 "significant_digits": 8,
             }
-            outcome = self.education.explain_tool(
+            outcome = self.education._explain_tool_internal(
                 "chemistry_molar_mass", arguments, language=language
             )
-            if not outcome.confirmation_required:
+            if len(outcome) >= 3 and hasattr(outcome[2], "explanation_hash"):
                 return conversation, self._response(
-                    conversation, "EXPLANATION", outcome.text or ""
+                    conversation,
+                    "EXPLANATION",
+                    outcome[2].text,
                 )
+            _, prepared, proposal = outcome
             action = prepare_pending_action(
                 learner_id=conversation.learner_id,
                 conversation_id=conversation.conversation_id,
@@ -472,8 +668,13 @@ class ConversationalTutorService:
                 payload=arguments,
                 dependency_snapshot=self._dependency_snapshot(),
                 previous_state=conversation.state,
+                prepared_authority_hashes=(
+                    prepared.response_hash,
+                    proposal.proposal_hash,
+                ),
                 created_at=timestamp,
             )
+            self._pending_authority[action.pending_id] = (prepared, proposal)
             new = self._change(
                 conversation,
                 state=ConversationState.AWAITING_CONFIRMATION,
@@ -526,7 +727,9 @@ class ConversationalTutorService:
                 "Занятие продолжено." if language == "ru" else "Tutoring resumed.",
             )
         if intent is ConversationIntent.END_CONVERSATION:
-            self._abandon_if_needed(conversation, created_at=timestamp)
+            self._abandon_if_needed(
+                conversation, created_at=timestamp, operation_id=operation_id
+            )
             new = self._change(
                 conversation, state=ConversationState.CLOSED, updated_at=timestamp
             )
@@ -599,6 +802,7 @@ class ConversationalTutorService:
         hint_level=None,
         solution=False,
         created_at=None,
+        operation_id=None,
     ):
         session = self.education.store.get_session(conversation.active_tutor_session_id)
         instance = self.education.store.get_artifact(
@@ -609,13 +813,54 @@ class ConversationalTutorService:
         )
         events = self.progress.events(conversation.learner_id)
         previous = events[-1].event_hash if events else None
-        concepts = FAMILY_CONCEPTS.get(spec.family, (CONCEPTS[0],))
-        grading_hash = session.grading_result_hashes[-1] if grading else None
+        concepts = self.education.domain_runtime.concepts_for_exercise_family(
+            spec.family.value
+        )
         prior_session_events = self.education.store.events(session.session_id)
+        matching_types = {
+            ProgressEventKind.EXERCISE_PRESENTED: "SESSION_PRESENTED",
+            ProgressEventKind.ANSWER_GRADED: "ANSWER_GRADED",
+            ProgressEventKind.HINT_USED: "HINT_ISSUED",
+            ProgressEventKind.SOLUTION_REVEALED: "SOLUTION_REVEALED",
+            ProgressEventKind.EXERCISE_SOLVED: "ANSWER_GRADED",
+            ProgressEventKind.EXERCISE_ABANDONED: "SESSION_ABANDONED",
+        }
+        authority_event = next(
+            (
+                item
+                for item in reversed(prior_session_events)
+                if item.event_type == matching_types.get(kind)
+            ),
+            None,
+        )
+        if authority_event is None:
+            raise ValueError("progress observation lacks educational authority event")
+        grading_hash = None
+        authority_hashes = [authority_event.event_hash]
+        if kind in {ProgressEventKind.ANSWER_GRADED, ProgressEventKind.EXERCISE_SOLVED}:
+            grading_hash = authority_event.payload.get("grading_result_hash")
+            grade = self.education.store.get_artifact(
+                grading_hash, expected_kind="grading_result"
+            )
+            correct = grade.correctness_status in {
+                GradingStatus.CORRECT,
+                GradingStatus.CORRECT_EQUIVALENT_UNIT,
+                GradingStatus.CORRECT_WITH_ACCEPTABLE_ROUNDING,
+            }
+            if kind is ProgressEventKind.EXERCISE_SOLVED and not correct:
+                raise ValueError("solved progress requires a correct trusted grade")
+            authority_hashes.append(grading_hash)
         hints = sum(item.event_type == "HINT_ISSUED" for item in prior_session_events)
-        revealed = solution or any(
+        if kind is ProgressEventKind.HINT_USED:
+            hint_hash = authority_event.payload["hint_hash"]
+            hint = self.education.store.get_artifact(hint_hash, expected_kind="hint")
+            hint_level = int(hint.level)
+            authority_hashes.append(hint_hash)
+        revealed = any(
             item.event_type == "SOLUTION_REVEALED" for item in prior_session_events
         )
+        if kind is ProgressEventKind.SOLUTION_REVEALED:
+            authority_hashes.append(authority_event.payload["explanation_hash"])
         event = make_progress_event(
             learner_id=conversation.learner_id,
             conversation_id=conversation.conversation_id,
@@ -633,35 +878,128 @@ class ConversationalTutorService:
             hint_count=hints,
             solution_revealed=revealed,
             observed_at=created_at,
+            authority_hashes=tuple(authority_hashes),
+            operation_id=operation_id,
         )
         self.progress.append(event, authority_check=self._verify_progress_authority)
 
-    def _abandon_if_needed(self, conversation, *, created_at):
+    def _abandon_if_needed(self, conversation, *, created_at, operation_id=None):
         if conversation.active_tutor_session_id is None:
             return
         session = self.education.store.get_session(conversation.active_tutor_session_id)
         if session.status.value not in {"SOLVED", "ABANDONED"}:
+            self.education.abandon(
+                session.session_id,
+                created_at=created_at,
+                operation_id=operation_id,
+            )
             self._observe(
                 conversation,
                 ProgressEventKind.EXERCISE_ABANDONED,
                 created_at=created_at,
+                operation_id=operation_id,
             )
 
     def _verify_progress_authority(self, event):
         conversation = self.conversations.get(event.conversation_id)
         if conversation.learner_id != event.learner_id:
             raise ValueError("cross-learner progress authority")
-        session, _, instance, _ = self.education._load(event.tutor_session_id)
+        session = self.education.store.get_session(event.tutor_session_id)
+        entry = self.education.catalog.by_entry_hash(session.catalog_entry_hash)
+        require_current(evaluate_entry_currentness(self.education.chemistry, entry))
+        instance = self.education.store.get_artifact(
+            session.exercise_hash, expected_kind="exercise_instance_internal"
+        )
         if (
             session.catalog_entry_hash != event.catalog_entry_hash
             or instance.semantic_key_hash != event.semantic_key_hash
         ):
             raise ValueError("progress authority binding mismatch")
+        expected_concepts = self.education.domain_runtime.concepts_for_exercise_family(
+            entry.exercise_spec.family.value
+        )
+        if event.concept_ids != expected_concepts:
+            raise ValueError(
+                "progress concepts are not derived from the installed pack"
+            )
         if (
             event.grading_result_hash
             and event.grading_result_hash not in session.grading_result_hashes
         ):
             raise ValueError("progress grading reference mismatch")
+        authority_events = {
+            item.event_hash: item
+            for item in self.education.store.events(session.session_id)
+        }
+        if (
+            not event.authority_hashes
+            or event.authority_hashes[0] not in authority_events
+        ):
+            raise ValueError(
+                "progress event lacks an exact educational event authority"
+            )
+        source = authority_events[event.authority_hashes[0]]
+        expected_type = {
+            ProgressEventKind.EXERCISE_PRESENTED: "SESSION_PRESENTED",
+            ProgressEventKind.ANSWER_GRADED: "ANSWER_GRADED",
+            ProgressEventKind.HINT_USED: "HINT_ISSUED",
+            ProgressEventKind.SOLUTION_REVEALED: "SOLUTION_REVEALED",
+            ProgressEventKind.EXERCISE_SOLVED: "ANSWER_GRADED",
+            ProgressEventKind.EXERCISE_ABANDONED: "SESSION_ABANDONED",
+        }.get(event.event_kind)
+        if expected_type is not None and source.event_type != expected_type:
+            raise ValueError("progress event kind disagrees with educational authority")
+        if event.operation_id is not None and source.operation_id != event.operation_id:
+            raise ValueError("progress and education operation IDs disagree")
+        if event.observed_at != source.created_at:
+            raise ValueError("progress timestamp is not authority-derived")
+        if event.event_kind in {
+            ProgressEventKind.ANSWER_GRADED,
+            ProgressEventKind.EXERCISE_SOLVED,
+        }:
+            grading_hash = source.payload["grading_result_hash"]
+            if (
+                event.grading_result_hash != grading_hash
+                or len(event.authority_hashes) < 2
+                or event.authority_hashes[1] != grading_hash
+            ):
+                raise ValueError("progress grade is not authority-derived")
+            grade = self.education.store.get_artifact(
+                grading_hash, expected_kind="grading_result"
+            )
+            correct = grade.correctness_status in {
+                GradingStatus.CORRECT,
+                GradingStatus.CORRECT_EQUIVALENT_UNIT,
+                GradingStatus.CORRECT_WITH_ACCEPTABLE_ROUNDING,
+            }
+            if event.correct is not correct:
+                raise ValueError("progress correctness is not authority-derived")
+        if event.event_kind is ProgressEventKind.HINT_USED:
+            hint = self.education.store.get_artifact(
+                source.payload["hint_hash"], expected_kind="hint"
+            )
+            expected_count = sum(
+                item.event_type == "HINT_ISSUED" and item.sequence <= source.sequence
+                for item in authority_events.values()
+            )
+            if (
+                event.hint_level != int(hint.level)
+                or event.hint_count != expected_count
+                or len(event.authority_hashes) < 2
+                or event.authority_hashes[1] != hint.hint_hash
+            ):
+                raise ValueError("progress hint level is not authority-derived")
+        if event.event_kind is ProgressEventKind.SOLUTION_REVEALED and (
+            not event.solution_revealed
+            or len(event.authority_hashes) < 2
+            or event.authority_hashes[1] != source.payload["explanation_hash"]
+        ):
+            raise ValueError("solution progress disagrees with session authority")
+        if (
+            event.event_kind is ProgressEventKind.EXERCISE_ABANDONED
+            and session.status.value != "ABANDONED"
+        ):
+            raise ValueError("abandoned progress lacks a valid session transition")
 
     def _dependency_snapshot(self):
         return (
@@ -673,7 +1011,72 @@ class ConversationalTutorService:
                 value
                 for _, value in self.education.chemistry.registry.current_manifest_hashes()
             ),
+            self.education.domain_runtime.pack_hash(),
         )
+
+    def _concept_ids(self):
+        return tuple(
+            item.concept_id
+            for item in self.education.domain_runtime.concept_graph().nodes
+        )
+
+    def _project(self, learner_id, events):
+        return project_progress(learner_id, events, concept_ids=self._concept_ids())
+
+    def _progress_is_current(self, events):
+        try:
+            for event in events:
+                if event.event_kind is not ProgressEventKind.PROGRESS_RESET:
+                    self._verify_progress_authority(event)
+            return True
+        except (KeyError, ValueError):
+            return False
+
+    def _recommend(self, conversation, projections, *, required):
+        graph = self.education.domain_runtime.concept_graph()
+        prerequisites: dict[str, tuple[str, ...]] = {}
+        for concept in self._concept_ids():
+            prerequisites[concept] = tuple(
+                edge.target_concept_id
+                for edge in graph.edges
+                if edge.kind.value == "PREREQUISITE"
+                and edge.source_concept_id == concept
+            )
+        recent = None
+        events = self.progress.events(conversation.learner_id)
+        if events:
+            recent = events[-1].semantic_key_hash
+        try:
+            return recommend_exercise(
+                conversation.learner_id,
+                projections,
+                self._catalog_candidates,
+                recent_semantic_key=recent,
+                concepts=self._concept_ids(),
+                prerequisites=prerequisites,
+            )
+        except ValueError:
+            if required:
+                raise
+            return None
+
+    def _index_catalog_candidates(self):
+        """Index the catalog whose full authority closure was verified on open."""
+        candidates: dict[str, list[tuple[str, str]]] = {
+            concept: [] for concept in self._concept_ids()
+        }
+        for entry in self.education.catalog.entries:
+            try:
+                concepts = self.education.domain_runtime.concepts_for_exercise_family(
+                    entry.exercise_spec.family.value
+                )
+            except KeyError:
+                continue
+            for concept in concepts:
+                candidates[concept].append(
+                    (entry.entry_hash, entry.semantic_key.semantic_key_hash)
+                )
+        return {key: tuple(value) for key, value in candidates.items()}
 
     def _record(
         self,
@@ -685,6 +1088,7 @@ class ConversationalTutorService:
         *,
         created_at=None,
         pending_action=None,
+        operation_id=None,
     ):
         verify_public_response(response)
         timestamp = created_at or utc_now()
@@ -699,6 +1103,7 @@ class ConversationalTutorService:
             "public_response_hash": digest,
             "previous_turn_hash": old.turn_hashes[-1] if old.turn_hashes else None,
             "created_at": timestamp,
+            "operation_id": operation_id,
         }
         body["turn_id"] = f"conversation.turn.{content_hash(body)[:24]}"
         turn = ConversationTurn(**body, turn_hash=content_hash(body))

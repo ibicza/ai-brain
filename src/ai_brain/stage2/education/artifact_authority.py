@@ -163,7 +163,10 @@ class EducationalArtifactAuthorityVerifier:
         if not events:
             raise ValueError("session lacks events")
         state, first = start_session(
-            instance, session_id=session_id, created_at=events[0].created_at
+            instance,
+            session_id=session_id,
+            created_at=events[0].created_at,
+            operation_id=events[0].operation_id,
         )
         if events[0] != first:
             raise ValueError("presentation event is not reproducible")

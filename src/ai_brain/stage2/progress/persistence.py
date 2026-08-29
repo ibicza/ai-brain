@@ -6,7 +6,7 @@ import json
 import shutil
 import sqlite3
 from collections.abc import Callable
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from dataclasses import asdict
 from pathlib import Path
 
@@ -60,7 +60,7 @@ class LearnerProgressStore:
             row = connection.execute(
                 "SELECT value FROM metadata WHERE key='schema_version'"
             ).fetchone()
-        if row is None or row[0] != str(LEARNER_PROGRESS_SCHEMA_VERSION):
+        if row is None or row[0] not in {"1", str(LEARNER_PROGRESS_SCHEMA_VERSION)}:
             raise ValueError("learner progress store requires an explicit rebuild")
         return store
 
@@ -79,6 +79,12 @@ class LearnerProgressStore:
         authority_check: Callable[[ProgressEvent], None] | None = None,
     ) -> None:
         verify_progress_event(event)
+        with self._connection() as connection:
+            schema = connection.execute(
+                "SELECT value FROM metadata WHERE key='schema_version'"
+            ).fetchone()
+        if schema is None or schema[0] != str(LEARNER_PROGRESS_SCHEMA_VERSION):
+            raise ValueError("legacy progress history is read-only")
         if not event.trusted_current and event.event_kind in {
             ProgressEventKind.ANSWER_GRADED,
             ProgressEventKind.EXERCISE_SOLVED,
@@ -127,6 +133,8 @@ class LearnerProgressStore:
                 raise ValueError("progress event checksum mismatch")
             row = json.loads(payload)
             row["concept_ids"] = tuple(row["concept_ids"])
+            row["authority_hashes"] = tuple(row.get("authority_hashes", ()))
+            row["operation_id"] = row.get("operation_id")
             row["event_kind"] = ProgressEventKind(row["event_kind"])
             result.append(ProgressEvent(**row))
         return tuple(result)
@@ -188,13 +196,15 @@ class LearnerProgressStore:
         return deleted
 
     def backup(self, output: Path) -> dict[str, object]:
-        self.verify()
+        verification = self.verify(structural_only=True)
         output.parent.mkdir(parents=True, exist_ok=True)
-        with self._connection() as source, sqlite3.connect(output) as target:
+        with self._connection() as source, closing(sqlite3.connect(output)) as target:
             source.backup(target)
         digest = bytes_hash(output.read_bytes())
         return {
+            **verification,
             "status": "BACKED_UP",
+            "history_verification": verification["status"],
             "bytes_hash": digest,
             "event_count": sum(len(self.events(item)) for item in self.learner_ids()),
         }
@@ -207,7 +217,7 @@ class LearnerProgressStore:
             raise FileExistsError("progress restore target already exists")
         shutil.copyfile(backup, target)
         result = cls.open(target_root)
-        result.verify()
+        result.verify(structural_only=True)
         return result
 
     @contextmanager

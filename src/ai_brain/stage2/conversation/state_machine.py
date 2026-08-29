@@ -50,6 +50,15 @@ def require_action_allowed(
 ) -> None:
     if state is ConversationState.CLOSED:
         raise ValueError("conversation is closed")
+    if state is ConversationState.AWAITING_CONFIRMATION and intent not in {
+        ConversationIntent.CONFIRM_PENDING_ACTION,
+        ConversationIntent.CANCEL_PENDING_ACTION,
+        ConversationIntent.PAUSE,
+        ConversationIntent.END_CONVERSATION,
+    }:
+        raise ValueError(
+            "only confirm, cancel, pause, or end is allowed while confirmation is pending"
+        )
     if state is ConversationState.PAUSED and intent not in {
         ConversationIntent.RESUME,
         ConversationIntent.END_CONVERSATION,

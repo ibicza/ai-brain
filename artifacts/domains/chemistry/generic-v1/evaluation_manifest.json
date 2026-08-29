@@ -1,0 +1,1 @@
+{"minimum_pass_rate":"1.0","runtime_network":false,"schema_version":1,"test_cases":["chemistry.load","chemistry.recommend"]}

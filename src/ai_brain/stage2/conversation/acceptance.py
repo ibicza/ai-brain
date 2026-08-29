@@ -118,7 +118,9 @@ def run_scripted_acceptance(
         first = project_progress(event.learner_id, (event,))
         second = project_progress(event.learner_id, (event,))
         projection_mismatches += first != second
-    empty = project_progress("recommendation-learner", ())
+    empty = project_progress(
+        "recommendation-learner", (), concept_ids=("ELEMENT_IDENTITY",)
+    )
     wrong_recommendations = 0
     for index in range(recommendation_count):
         recommendation = recommend_exercise(

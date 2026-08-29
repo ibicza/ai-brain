@@ -238,6 +238,7 @@ def hint_plan_from_dict(row: dict[str, Any]) -> HintPlan:
 
 
 def event_from_dict(row: dict[str, Any]) -> TutorEvent:
+    row.setdefault("operation_id", None)
     _exact(row, set(TutorEvent.__dataclass_fields__))
     return TutorEvent(**row)
 

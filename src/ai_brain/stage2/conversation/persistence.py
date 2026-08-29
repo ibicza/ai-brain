@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import shutil
 import sqlite3
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from dataclasses import asdict
 from pathlib import Path
 
@@ -33,6 +33,7 @@ class ConversationStore:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
         self.database_path = self.root / "conversations.sqlite3"
+        self.semantic_authority = None
 
     @classmethod
     def initialize(cls, root: Path) -> ConversationStore:
@@ -210,6 +211,7 @@ class ConversationStore:
             if bytes_hash(payload.encode()) != checksum:
                 raise ValueError("conversation turn checksum mismatch")
             row = json.loads(payload)
+            row.setdefault("operation_id", None)
             row["speaker"] = Speaker(row["speaker"])
             row["parsed_intent"] = ConversationIntent(row["parsed_intent"])
             result.append(ConversationTurn(**row))
@@ -241,6 +243,9 @@ class ConversationStore:
             raise KeyError("unknown pending action")
         payload = json.loads(row[0])
         payload["dependency_snapshot"] = tuple(payload["dependency_snapshot"])
+        payload["prepared_authority_hashes"] = tuple(
+            payload.get("prepared_authority_hashes", ())
+        )
         payload["previous_state"] = ConversationState(payload["previous_state"])
         payload["status"] = PendingActionStatus(payload["status"])
         action = PendingAction(**payload)
@@ -264,7 +269,10 @@ class ConversationStore:
             if updated.rowcount != 1:
                 raise ValueError("pending action was already consumed")
 
-    def verify(self) -> dict[str, object]:
+    def verify(
+        self, service=None, *, structural_only: bool = False
+    ) -> dict[str, object]:
+        service = None if structural_only else (service or self.semantic_authority)
         with self._connection() as connection:
             ids = tuple(
                 row[0]
@@ -283,6 +291,16 @@ class ConversationStore:
                 _verify_turn(turn)
                 if turn.sequence != sequence or turn.previous_turn_hash != previous:
                     raise ValueError("invalid conversation turn chain")
+                if service is not None and turn.operation_id is not None:
+                    operation = service.operations.get(turn.operation_id)
+                    if (
+                        operation.status.value != "COMPLETED"
+                        or operation.conversation_id != identity
+                        or operation.intent != turn.parsed_intent.value
+                    ):
+                        raise ValueError(
+                            "conversation turn lacks completed operation authority"
+                        )
                 with self._connection() as connection:
                     response = connection.execute(
                         "SELECT response_hash,payload,payload_hash FROM public_responses WHERE turn_hash=?",
@@ -305,6 +323,25 @@ class ConversationStore:
                 exercise = public.get("exercise")
                 if exercise is not None:
                     active_session_id = exercise["session"]["session_id"]
+                    if service is not None:
+                        educational = service.education.store.get_session(
+                            active_session_id
+                        )
+                        if educational.catalog_entry_hash not in {
+                            item.entry_hash
+                            for item in service.education.catalog.entries
+                        }:
+                            raise ValueError(
+                                "conversation exercise lacks catalog authority"
+                            )
+                for authority_name in ("submission", "hint", "solution"):
+                    authority = public.get(authority_name)
+                    if authority is not None and service is not None:
+                        handle = authority.get("session")
+                        if not handle or handle.get("session_id") != active_session_id:
+                            raise ValueError(
+                                "conversation response has wrong educational session"
+                            )
                 previous = turn.turn_hash
             if conversation.turn_hashes != tuple(item.turn_hash for item in turns):
                 raise ValueError("conversation turn index mismatch")
@@ -315,12 +352,35 @@ class ConversationStore:
                 raise ValueError(
                     "conversation state is not replayable from public turns"
                 )
+            if conversation.state is ConversationState.AWAITING_CONFIRMATION:
+                if not conversation.pending_action_id:
+                    raise ValueError("confirmation state lacks pending action")
+                pending = self.get_pending(conversation.pending_action_id)
+                if pending.status is not PendingActionStatus.PREPARED:
+                    raise ValueError("confirmation state references consumed action")
+            elif conversation.pending_action_id is not None:
+                raise ValueError("non-confirmation state retains pending action")
             turn_count += len(turns)
-        return {
+        result = {
             "status": "VERIFIED",
             "conversation_count": len(ids),
             "turn_count": turn_count,
         }
+        if service is not None:
+            progress = service.progress.verify(
+                authority_check=service._verify_progress_authority
+            )
+            operations = service.operations.verify()
+            if operations["recovery_required"]:
+                raise ValueError(
+                    "conversation service has unrecovered tutor operations"
+                )
+            result.update(
+                semantic_status="AUTHORITY_VERIFIED",
+                progress_event_count=progress["event_count"],
+                tutor_operation_count=operations["operation_count"],
+            )
+        return result
 
     def conversation_ids(self) -> tuple[str, ...]:
         with self._connection() as connection:
@@ -332,9 +392,9 @@ class ConversationStore:
             )
 
     def backup(self, output: Path) -> dict[str, object]:
-        verification = self.verify()
+        verification = self.verify(structural_only=True)
         output.parent.mkdir(parents=True, exist_ok=True)
-        with self._connection() as source, sqlite3.connect(output) as target:
+        with self._connection() as source, closing(sqlite3.connect(output)) as target:
             source.backup(target)
         return {
             **verification,
@@ -375,5 +435,9 @@ def _verify_conversation(value: TutorConversation) -> None:
 def _verify_turn(value: ConversationTurn) -> None:
     body = asdict(value)
     digest = body.pop("turn_hash")
-    if content_hash(body) != digest:
+    valid_hash = content_hash(body) == digest
+    if not valid_hash and body.get("operation_id") is None:
+        body.pop("operation_id")
+        valid_hash = content_hash(body) == digest
+    if not valid_hash:
         raise ValueError("conversation turn hash mismatch")

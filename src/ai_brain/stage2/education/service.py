@@ -58,8 +58,13 @@ from ai_brain.stage2.education.persistence import EducationalSessionStore
 from ai_brain.stage2.education.replay import replay_educational_session
 from ai_brain.stage2.education.sessions import apply_event, make_event, start_session
 from ai_brain.stage2.facts.canonical import content_hash, utc_now
+from ai_brain.stage3.domains.loader import load_pack
+from ai_brain.stage3.domains.registry import InstalledDomainRegistry
+from ai_brain.stage3.domains.runtime import GenericDomainRuntime
 
 DEFAULT_CATALOG_PATH = Path("artifacts/education/m30/catalog_v4.json")
+DEFAULT_DOMAIN_PACK_PATH = Path("artifacts/domains/chemistry/generic-v1")
+DEFAULT_INSTALLED_DOMAIN_REGISTRY = Path("artifacts/stage3/installed-domains")
 
 
 class EducationalExecutionMonitor:
@@ -91,11 +96,15 @@ class EducationalService:
         chemistry: ChemistryDomainService,
         store: EducationalSessionStore,
         catalog: EducationalCatalogV2,
+        domain_runtime=None,
     ) -> None:
         self.chemistry = chemistry
         self.adapter = ChemistryEducationAdapter(chemistry)
         self.store = store
         self.catalog = catalog
+        self.domain_runtime = domain_runtime or GenericDomainRuntime(
+            load_pack(DEFAULT_DOMAIN_PACK_PATH)
+        )
         self.execution_monitor = EducationalExecutionMonitor(chemistry.registry)
 
     @classmethod
@@ -105,6 +114,8 @@ class EducationalService:
         store_root: Path,
         *,
         catalog_path: Path = DEFAULT_CATALOG_PATH,
+        domain_pack_path: Path = DEFAULT_DOMAIN_PACK_PATH,
+        installed_domain_registry: Path = DEFAULT_INSTALLED_DOMAIN_REGISTRY,
     ) -> EducationalService:
         chemistry = ChemistryDomainService.open(chemistry_root)
         store = EducationalSessionStore.open_or_initialize(store_root)
@@ -114,7 +125,17 @@ class EducationalService:
             if not store.session_ids():
                 raise
             catalog = EducationalCatalogV2.load_historical(catalog_path)
-        return cls(chemistry, store, catalog)
+        runtime = GenericDomainRuntime(load_pack(domain_pack_path))
+        if runtime.domain_id() != "chemistry":
+            raise ValueError("educational catalog domain does not match installed pack")
+        installed = InstalledDomainRegistry.open(installed_domain_registry).show(
+            runtime.domain_id(), runtime._pack.manifest.pack_version
+        )
+        if installed.pack_hash != runtime.pack_hash():
+            raise ValueError(
+                "educational domain pack is not the approved installed pack"
+            )
+        return cls(chemistry, store, catalog, runtime)
 
     def explain_tool(
         self,
@@ -285,6 +306,7 @@ class EducationalService:
         difficulty: int | None = None,
         session_id: str | None = None,
         created_at: str | None = None,
+        operation_id: str | None = None,
     ):
         presented, session = self._create_exercise_internal(
             family,
@@ -293,6 +315,7 @@ class EducationalService:
             difficulty=difficulty,
             session_id=session_id,
             created_at=created_at,
+            operation_id=operation_id,
         )
         return public_exercise(presented, session_status=session.status.value)
 
@@ -305,6 +328,7 @@ class EducationalService:
         difficulty: int | None = None,
         session_id: str | None = None,
         created_at: str | None = None,
+        operation_id: str | None = None,
     ):
         before = self.execution_monitor.count
         entry = self.catalog.select(family, seed=seed, difficulty=difficulty)
@@ -345,7 +369,10 @@ class EducationalService:
             )[:24]
         )
         session, event = start_session(
-            instance, session_id=identity, created_at=timestamp
+            instance,
+            session_id=identity,
+            created_at=timestamp,
+            operation_id=operation_id,
         )
         presented = present_exercise(instance, entry.exercise_spec, session_id=identity)
         verify_presented_exercise(presented)
@@ -364,12 +391,14 @@ class EducationalService:
         *,
         confirmed: bool = False,
         created_at: str | None = None,
+        operation_id: str | None = None,
     ):
         _, grade, check, current = self._submit_answer_internal(
             session_id,
             raw_answer,
             confirmed=confirmed,
             created_at=created_at,
+            operation_id=operation_id,
         )
         return PublicSubmissionResult(
             parse_status=grade.parse_status.value,
@@ -390,6 +419,7 @@ class EducationalService:
         *,
         confirmed: bool = False,
         created_at: str | None = None,
+        operation_id: str | None = None,
     ):
         session, spec, instance, graph = self._load(session_id)
         timestamp = created_at or utc_now()
@@ -407,6 +437,7 @@ class EducationalService:
             payload={"student_answer_hash": answer.answer_hash},
             previous_event_hash=session.last_event_hash,
             created_at=timestamp,
+            operation_id=operation_id,
         )
         attempted = apply_event(session, submitted)
         self.store.append_event(session, attempted, submitted)
@@ -436,6 +467,7 @@ class EducationalService:
             },
             previous_event_hash=attempted.last_event_hash,
             created_at=timestamp,
+            operation_id=operation_id,
         )
         current = apply_event(attempted, graded)
         self.store.append_event(attempted, current, graded)
@@ -447,9 +479,13 @@ class EducationalService:
         *,
         level: HintLevel | None = None,
         created_at: str | None = None,
+        operation_id: str | None = None,
     ):
         artifact, current = self._hint_internal(
-            session_id, level=level, created_at=created_at
+            session_id,
+            level=level,
+            created_at=created_at,
+            operation_id=operation_id,
         )
         return PublicHint(
             level=int(artifact.level),
@@ -465,6 +501,7 @@ class EducationalService:
         *,
         level: HintLevel | None = None,
         created_at: str | None = None,
+        operation_id: str | None = None,
     ):
         session, _, instance, graph = self._load(session_id)
         selected = level or HintLevel(min(5, len(session.hint_hashes) + 1))
@@ -490,14 +527,21 @@ class EducationalService:
             payload={"hint_hash": hint.hint_hash, "level": int(selected)},
             previous_event_hash=session.last_event_hash,
             created_at=created_at or utc_now(),
+            operation_id=operation_id,
         )
         current = apply_event(session, event)
         self.store.append_event(session, current, event)
         return hint, current
 
-    def show_solution(self, session_id: str, *, created_at: str | None = None):
+    def show_solution(
+        self,
+        session_id: str,
+        *,
+        created_at: str | None = None,
+        operation_id: str | None = None,
+    ):
         artifact, current = self._show_solution_internal(
-            session_id, created_at=created_at
+            session_id, created_at=created_at, operation_id=operation_id
         )
         return PublicSolution(
             text=_learner_text(artifact.text),
@@ -506,8 +550,33 @@ class EducationalService:
             ),
         )
 
+    def abandon(
+        self,
+        session_id: str,
+        *,
+        created_at: str | None = None,
+        operation_id: str | None = None,
+    ):
+        session = self.store.get_session(session_id)
+        event = make_event(
+            session_id,
+            sequence=len(self.store.events(session_id)) + 1,
+            event_type="SESSION_ABANDONED",
+            payload={},
+            previous_event_hash=session.last_event_hash,
+            created_at=created_at or utc_now(),
+            operation_id=operation_id,
+        )
+        current = apply_event(session, event)
+        self.store.append_event(session, current, event)
+        return current
+
     def _show_solution_internal(
-        self, session_id: str, *, created_at: str | None = None
+        self,
+        session_id: str,
+        *,
+        created_at: str | None = None,
+        operation_id: str | None = None,
     ):
         session, _, _, graph = self._load(session_id)
         plan = build_explanation_plan(
@@ -534,6 +603,7 @@ class EducationalService:
             payload={"explanation_hash": explanation.explanation_hash},
             previous_event_hash=session.last_event_hash,
             created_at=created_at or utc_now(),
+            operation_id=operation_id,
         )
         current = apply_event(session, event)
         self.store.append_event(session, current, event)
@@ -556,6 +626,7 @@ class EducationalService:
             "status": "AUTHORITY_VERIFIED",
             "domain": self.chemistry.verify(),
             "catalog": self.catalog.verify(self.chemistry),
+            "domain_pack": self.domain_runtime.verify_currentness(),
             "educational_store_structural": authority["structural"],
             "educational_store_authority": authority,
             "trusted_imports_torch": False,
