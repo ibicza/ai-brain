@@ -1,0 +1,29 @@
+{
+  "branch": "exp/stage2-conversational-tutor",
+  "catalog": {
+    "bytes": 53994760,
+    "catalog_hash": "27e4be229eac94813ee96e6a2fe457432d15c577742ca9c812a8b42cead37b28",
+    "git_blob_sha1": "4473b0bed467f8f2ea22af43952089f6f2d020e7",
+    "path": "artifacts/education/m30/catalog_v4.json",
+    "sha256": "d59ca6f5b37375a07583a422f7ab35d7241aec349272f1beb8c3f012601e7e60"
+  },
+  "evidence": [
+    {"bytes": 1397, "git_blob_sha1": "4c2b963cde9b9d27f4127838f76d5f151999ac2e", "path": "runs/m30_final_gate/local_exact_sha.log", "sha256": "8e96fd77c9f390915332796d2d3a66d0f953ffb371435872e60dd35c4813b7c1"},
+    {"bytes": 432, "git_blob_sha1": "3bf78c738c121cb2a76a085e22a19d5febbdf507", "path": "runs/m30_final_gate/local_prior_regressions.log", "sha256": "7a4c18a92bcbd5006810fd3cb5dbfba448debea37fbf7981d1a240c7f2dd6360"},
+    {"bytes": 1131, "git_blob_sha1": "3a747e975085a85a56f295586b1505d1a1d344f0", "path": "runs/m30_final_gate/local_acceptance.json", "sha256": "a1c4693719576a32efe90adc62e0ae1cd7ceda35ad823e0ddb330fc72c7efcb1"},
+    {"bytes": 2519, "git_blob_sha1": "f628f779daa886fe0607ab549189355fca8b27e5", "path": "runs/m30_final_gate/local_performance.json", "sha256": "1ee88db40fb47faee80788c1040e1e5e538726c8692334dce466f10d23bd808b"},
+    {"bytes": 99, "git_blob_sha1": "ad09df7b01e49d0bf5e85175247c357c599149cd", "path": "runs/m30_final_gate/local_backup_restore.log", "sha256": "c5663762adf1faa79cca5cdfb0fb69c9d4f1b75291d60f7439bd82bd0aeda04f"},
+    {"bytes": 1440, "git_blob_sha1": "1c6026872531dfb54188aba062f90046a07330ad", "path": "runs/m30_final_gate/local_cli_smoke.log", "sha256": "11a9b727bf262db49fde56685754b37f2332dc9b8f65428601d5e06040c4187a"},
+    {"bytes": 459, "git_blob_sha1": "fd56f86cd508a43222916bc5d06c50ad14d487bf", "path": "runs/m30_final_gate/karina_exact_sha.log", "sha256": "8f4456e123e5f4d5d925d83c7c625c577f766acc5f5aeda6d956aade0566c41a"},
+    {"bytes": 912, "git_blob_sha1": "ec6d1e21559b602b6bdb169f1ebead6f4761427c", "path": "runs/m30_final_gate/karina_full_suite.log", "sha256": "019fc362416f64b4e3f9669c8e8c1dfbd5b34eb50b63e30096e003a9eb15545b"},
+    {"bytes": 432, "git_blob_sha1": "188908967279ee7774508a18722096e4893f3005", "path": "runs/m30_final_gate/karina_prior_regressions.log", "sha256": "1a1b0ead112742782e5ffff74af8475efe6eed6e4a46a04d60d0ba8bf629584e"},
+    {"bytes": 1131, "git_blob_sha1": "3a747e975085a85a56f295586b1505d1a1d344f0", "path": "runs/m30_final_gate/karina_acceptance.json", "sha256": "a1c4693719576a32efe90adc62e0ae1cd7ceda35ad823e0ddb330fc72c7efcb1"},
+    {"bytes": 2520, "git_blob_sha1": "f589f67e7cded41537c297c6616c11ba33d64ca6", "path": "runs/m30_final_gate/karina_performance.json", "sha256": "92542005e7946c4ee2d20708ea0e2e4e392f2f6a429511b903c6462e331588b8"},
+    {"bytes": 99, "git_blob_sha1": "b3c4e57d2f2525d4ed0060fbed53bb70e90acec0", "path": "runs/m30_final_gate/karina_backup_restore.log", "sha256": "a09f4ff043a82d9224b5db4280ee154739cb7787d3e0e11899f8708c9a5b66cf"},
+    {"bytes": 1002, "git_blob_sha1": "4f976d21bc491a403c0b2806298521eba566b0e9", "path": "runs/m30_final_gate/karina_catalog_rebuild.log", "sha256": "883e8e5c054d07f127eb080510e2348133592fe35919813f2c1b7300437e0842"}
+  ],
+  "implementation_commit": "0da9e8a316698257b7726bc406618ba3e8669e32",
+  "implementation_tree": "ca4554f774d28d2534256fb50af1fff769bee2dc",
+  "parent_commit": "28fa0e3429ad08650b7a61396bbd62be7201b933",
+  "schema_version": 1
+}
