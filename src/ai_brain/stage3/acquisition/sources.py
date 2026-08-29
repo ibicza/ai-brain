@@ -40,6 +40,7 @@ _EXTENSIONS = {
     ".htm": SourceMediaType.HTML,
     ".json": SourceMediaType.JSON,
     ".pdf": SourceMediaType.PDF,
+    ".java": SourceMediaType.JAVA_SOURCE,
 }
 _RESOURCE_POLICY = {
     "file_bytes": MAX_FILE_BYTES,

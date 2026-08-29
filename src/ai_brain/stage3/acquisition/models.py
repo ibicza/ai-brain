@@ -18,6 +18,7 @@ class SourceMediaType(StrEnum):
     JSON = "application/json"
     PDF = "application/pdf"
     JAVADOC_HTML = "text/x-javadoc-html"
+    JAVA_SOURCE = "text/x-java-source"
 
 
 class SegmentKind(StrEnum):

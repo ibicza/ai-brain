@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import re
-from dataclasses import asdict
+import unicodedata
+from collections import Counter, defaultdict
+from dataclasses import asdict, dataclass, replace
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage3.acquisition.models import (
@@ -18,9 +20,54 @@ from ai_brain.stage3.acquisition.version import MAX_CODE_BLOCK_BYTES, MAX_SEGMEN
 
 _API = re.compile(r"(?:@api\s+|\b(?:public|protected|private)\s+).+\([^)]*\)")
 _EQUATION = re.compile(r"(?:@equation\s+|\b[A-Za-z][A-Za-z0-9_]*\s*=\s*[^=])")
+MAX_EXACT_DUPLICATE_RATE = "0.02"
+_MAX_DUPLICATE_NUMERATOR = 2
+_MAX_DUPLICATE_DENOMINATOR = 100
+
+
+@dataclass(frozen=True)
+class SegmentAlias:
+    duplicate_segment_id: str
+    canonical_segment_id: str
+    normalized_segment_hash: str
+    alias_hash: str
+
+
+@dataclass(frozen=True)
+class SegmentDeduplicationReport:
+    status: str
+    total_segments: int
+    unique_segments: int
+    exact_duplicates: int
+    duplicate_rate: str
+    input_exact_duplicates: int
+    input_duplicate_rate: str
+    top_duplicate_sources: tuple[tuple[str, int, tuple[str, ...]], ...]
+    proposal_count_before: int
+    proposal_count_after: int
+    trusted_proposals_blocked: int
+    alias_count: int
+    report_hash: str
+
+
+@dataclass(frozen=True)
+class DeduplicatedSegments:
+    segments: tuple[SourceSegment, ...]
+    aliases: tuple[SegmentAlias, ...]
+    report: SegmentDeduplicationReport
+
+
+class DuplicateSegmentGateError(ValueError):
+    def __init__(self, report: SegmentDeduplicationReport) -> None:
+        super().__init__("exact duplicate segment rate exceeds 0.02")
+        self.report = report
 
 
 def segment_bundle(bundle: SourceBundle, store) -> tuple[SourceSegment, ...]:
+    return segment_bundle_with_report(bundle, store).segments
+
+
+def segment_bundle_with_report(bundle: SourceBundle, store) -> DeduplicatedSegments:
     verify_bundle(bundle, store=store)
     result: list[SourceSegment] = []
     for document in bundle.documents:
@@ -54,7 +101,133 @@ def segment_bundle(bundle: SourceBundle, store) -> tuple[SourceSegment, ...]:
             raise ValueError("segment count exceeds resource policy")
     values = tuple(result)
     verify_segments(bundle, values, store)
-    return values
+    if "java" in {item.casefold() for item in bundle.domain_tags}:
+        deduplicated = deduplicate_segments(values)
+        verify_segments(bundle, deduplicated.segments, store)
+        require_unique_segments(deduplicated.segments)
+        return deduplicated
+    report = _deduplication_report(values, values, (), ())
+    return DeduplicatedSegments(values, (), report)
+
+
+def normalized_segment_hash(segment: SourceSegment) -> str:
+    text = unicodedata.normalize("NFKC", segment.canonical_text)
+    normalized = "\n".join(" ".join(line.split()) for line in text.splitlines()).strip()
+    return bytes_hash(normalized.encode("utf-8"))
+
+
+def deduplicate_segments(
+    segments: tuple[SourceSegment, ...],
+) -> DeduplicatedSegments:
+    canonical: dict[tuple[SegmentKind, str], SourceSegment] = {}
+    kept: list[SourceSegment] = []
+    aliases: list[SegmentAlias] = []
+    duplicate_groups: dict[str, list[SourceSegment]] = defaultdict(list)
+    for segment in segments:
+        if segment.kind is SegmentKind.DOCUMENT:
+            kept.append(segment)
+            continue
+        digest = normalized_segment_hash(segment)
+        key = (segment.kind, digest)
+        duplicate_groups[digest].append(segment)
+        first = canonical.get(key)
+        if first is None:
+            canonical[key] = segment
+            kept.append(segment)
+            continue
+        values = {
+            "duplicate_segment_id": segment.segment_id,
+            "canonical_segment_id": first.segment_id,
+            "normalized_segment_hash": digest,
+        }
+        aliases.append(SegmentAlias(**values, alias_hash=content_hash(values)))
+    report = _deduplication_report(
+        segments,
+        tuple(kept),
+        tuple(aliases),
+        tuple(duplicate_groups.values()),
+    )
+    return DeduplicatedSegments(tuple(kept), tuple(aliases), report)
+
+
+def require_unique_segments(
+    segments: tuple[SourceSegment, ...],
+) -> SegmentDeduplicationReport:
+    audited = deduplicate_segments(segments)
+    input_total = audited.report.unique_segments + audited.report.input_exact_duplicates
+    if (
+        audited.report.input_exact_duplicates * _MAX_DUPLICATE_DENOMINATOR
+        >= input_total * _MAX_DUPLICATE_NUMERATOR
+    ):
+        raise DuplicateSegmentGateError(audited.report)
+    return audited.report
+
+
+def with_proposal_counts(
+    report: SegmentDeduplicationReport,
+    *,
+    before: int,
+    after: int,
+    trusted_blocked: int,
+) -> SegmentDeduplicationReport:
+    provisional = replace(
+        report,
+        proposal_count_before=before,
+        proposal_count_after=after,
+        trusted_proposals_blocked=trusted_blocked,
+        report_hash="",
+    )
+    body = asdict(provisional)
+    body.pop("report_hash")
+    return replace(provisional, report_hash=content_hash(body))
+
+
+def _deduplication_report(before, after, aliases, groups):
+    after_counts = Counter(
+        normalized_segment_hash(item)
+        for item in after
+        if item.kind is not SegmentKind.DOCUMENT
+    )
+    after_total = sum(after_counts.values())
+    after_duplicates = sum(count - 1 for count in after_counts.values() if count > 1)
+    input_counts = Counter(
+        normalized_segment_hash(item)
+        for item in before
+        if item.kind is not SegmentKind.DOCUMENT
+    )
+    input_total = sum(input_counts.values())
+    input_duplicates = sum(count - 1 for count in input_counts.values() if count > 1)
+    top = []
+    for group in groups:
+        if len(group) < 2:
+            continue
+        top.append(
+            (
+                normalized_segment_hash(group[0]),
+                len(group),
+                tuple(sorted({item.document_id for item in group})),
+            )
+        )
+    top.sort(key=lambda item: (-item[1], item[0]))
+    body = {
+        "status": "PASS" if after_duplicates == 0 else "FAIL",
+        "total_segments": after_total,
+        "unique_segments": len(after_counts),
+        "exact_duplicates": after_duplicates,
+        "duplicate_rate": _rate(after_duplicates, after_total),
+        "input_exact_duplicates": input_duplicates,
+        "input_duplicate_rate": _rate(input_duplicates, input_total),
+        "top_duplicate_sources": tuple(top[:20]),
+        "proposal_count_before": 0,
+        "proposal_count_after": 0,
+        "trusted_proposals_blocked": 0,
+        "alias_count": len(aliases),
+    }
+    return SegmentDeduplicationReport(**body, report_hash=content_hash(body))
+
+
+def _rate(numerator: int, denominator: int) -> str:
+    return "0.000000" if denominator == 0 else f"{numerator / denominator:.6f}"
 
 
 def verify_segments(

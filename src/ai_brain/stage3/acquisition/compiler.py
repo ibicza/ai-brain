@@ -6,12 +6,17 @@ from dataclasses import asdict, replace
 from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
+from ai_brain.stage3.acquisition.identity import PrecompilerIdentityConflict
 from ai_brain.stage3.acquisition.models import (
     KnowledgeProposal,
     ProposalApproval,
     ProposalStatus,
     SourceBundle,
     SourceSegment,
+)
+from ai_brain.stage3.acquisition.trust import (
+    ProposalTrustGateReport,
+    verify_trust_gate_report,
 )
 from ai_brain.stage3.capabilities.models import CapabilityRequirement
 from ai_brain.stage3.domains.loader import load_pack
@@ -47,9 +52,21 @@ def compile_provisional_pack(
     *,
     domain_id: str,
     pack_version: str = "0.1.0-provisional",
+    trust_gate_report: ProposalTrustGateReport | None = None,
 ):
     if output.exists():
         raise FileExistsError("provisional pack target exists")
+    java_domain = "java" in {item.casefold() for item in bundle.domain_tags}
+    if java_domain:
+        if trust_gate_report is None:
+            raise ValueError(
+                "Java pack compilation requires an exact trust gate report"
+            )
+        verify_trust_gate_report(trust_gate_report)
+        if trust_gate_report.domain.casefold() != "java":
+            raise ValueError("Java pack trust report domain mismatch")
+        if trust_gate_report.precompiler.status != "PASS":
+            raise PrecompilerIdentityConflict(trust_gate_report.precompiler)
     approved_hashes = {item.approved_proposal_hash for item in approvals}
     selected = tuple(
         sorted(
@@ -64,6 +81,10 @@ def compile_provisional_pack(
     )
     if not selected or len(selected) != len(approvals):
         raise ValueError("pack compilation requires exact approved proposal closure")
+    if java_domain and {item.proposal_id for item in selected} != set(
+        trust_gate_report.trusted_proposal_ids
+    ):
+        raise ValueError("Java pack selection is outside trusted proposal closure")
     segment_by_id = {item.segment_id: item for item in segments}
     aliases = _aliases(domain_id, selected)
     records = []
