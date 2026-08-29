@@ -44,17 +44,19 @@ from ai_brain.stage3.knowledge_ir.version import (
     UNIVERSAL_KNOWLEDGE_IR_SCHEMA_VERSION,
     UNIVERSAL_KNOWLEDGE_IR_VERSION,
 )
+from ai_brain.stage3.providers.persistence import load_provider_registry
 
 ROOT = Path(__file__).resolve().parents[1]
-CHEMISTRY = ROOT / "artifacts/domains/chemistry/generic-v1"
-TAXONOMY = ROOT / "tests/fixtures/domains/taxonomy-v1"
-QUANTITY = ROOT / "tests/fixtures/domains/quantity-equation-v1"
-CAPABILITIES = ROOT / "artifacts/stage3/capabilities/registry_v1.json"
-INSTALLED = ROOT / "artifacts/stage3/installed-domains"
+CHEMISTRY = ROOT / "artifacts/domains/chemistry/generic-v2"
+TAXONOMY = ROOT / "tests/fixtures/domains/taxonomy-v2"
+QUANTITY = ROOT / "tests/fixtures/domains/quantity-equation-v2"
+CAPABILITIES = ROOT / "artifacts/stage3/capabilities/registry_v2.json"
+PROVIDERS = ROOT / "artifacts/stage3/providers/registry_v2.json"
+INSTALLED = ROOT / "artifacts/stage3/installed-domains-v2"
 
 
 def test_versions_and_complete_typed_vocabulary():
-    assert UNIVERSAL_KNOWLEDGE_IR_VERSION == "1.0.0"
+    assert UNIVERSAL_KNOWLEDGE_IR_VERSION == "2.0.0"
     assert {
         UNIVERSAL_KNOWLEDGE_IR_SCHEMA_VERSION,
         DOMAIN_PACK_SCHEMA_VERSION,
@@ -63,7 +65,7 @@ def test_versions_and_complete_typed_vocabulary():
         CONCEPT_GRAPH_SCHEMA_VERSION,
         PACK_APPROVAL_SCHEMA_VERSION,
         CAPABILITY_RESOLUTION_SCHEMA_VERSION,
-    } == {1}
+    } == {2}
     assert len(KnowledgeKind) == 25
     assert len(EpistemicCharacter) == 7
 
@@ -125,11 +127,8 @@ def test_generic_core_has_no_chemistry_import_or_domain_branch():
 
 
 def test_capabilities_resolve_exactly_and_never_fall_back():
-    registry = load_registry(CAPABILITIES)
-    providers = {
-        item.provider_id: item.provider_implementation_hash
-        for item in registry.descriptors
-    }
+    providers = load_provider_registry(PROVIDERS)
+    registry = load_registry(CAPABILITIES, providers)
     known = registry.descriptors[0]
     result = resolve_capability(
         registry,
@@ -138,40 +137,47 @@ def test_capabilities_resolve_exactly_and_never_fall_back():
         ),
         requesting_domain_id="test",
         requesting_pack_hash="0" * 64,
-        provider_hashes=providers,
+        provider_registry=providers,
     )
     assert result.status is ResolutionStatus.RESOLVED
-    providers[known.provider_id] = "0" * 64
-    with pytest.raises(ValueError, match="implementation"):
-        resolve_capability(
-            registry,
-            CapabilityRequirement(
-                known.capability_id, "*", known.allowed_execution_contexts[0]
-            ),
-            requesting_domain_id="test",
-            requesting_pack_hash="0" * 64,
-            provider_hashes=providers,
-        )
+    stale = resolve_capability(
+        registry,
+        CapabilityRequirement(
+            known.capability_id, "*", known.allowed_execution_contexts[0]
+        ),
+        requesting_domain_id="test",
+        requesting_pack_hash="0" * 64,
+        provider_registry=None,
+    )
+    assert stale.status is ResolutionStatus.NEEDS_NEW_CAPABILITY
     unknown = resolve_capability(
         registry,
         CapabilityRequirement("missing.capability.v1", "*", "USER_RUNTIME"),
         requesting_domain_id="test",
         requesting_pack_hash="0" * 64,
-        provider_hashes={
-            item.provider_id: item.provider_implementation_hash
-            for item in registry.descriptors
-        },
+        provider_registry=providers,
     )
     assert unknown.status is ResolutionStatus.NEEDS_NEW_CAPABILITY
 
 
 def test_installed_registry_backup_restore_and_history_safe_uninstall(tmp_path):
-    registry = InstalledDomainRegistry.open(INSTALLED)
-    assert registry.verify()["installed_count"] == 1
+    providers = load_provider_registry(PROVIDERS)
+    capabilities = load_registry(CAPABILITIES, providers)
+    registry = InstalledDomainRegistry.open(
+        INSTALLED,
+        capability_registry=capabilities,
+        provider_registry=providers,
+    )
+    assert registry.verify()["installed_count"] == 7
     backup = tmp_path / "registry.sqlite3"
     assert registry.backup(backup)["status"] == "BACKED_UP"
-    restored = InstalledDomainRegistry.restore(backup, tmp_path / "restored")
-    item = restored.show("chemistry", "generic-v1")
+    restored = InstalledDomainRegistry.restore(
+        backup,
+        tmp_path / "restored",
+        capability_registry=capabilities,
+        provider_registry=providers,
+    )
+    item = restored.show("chemistry", "generic-v2")
     result = restored.uninstall(item.domain_id, item.pack_version)
     assert result["history_status"] == "HISTORY_VALID_BUT_PACK_UNAVAILABLE"
 
@@ -250,7 +256,7 @@ def test_model_cannot_self_approve_pack():
     with pytest.raises(ValueError, match="MODEL or blank reviewer"):
         approve_pack(
             pack_hash=pack.manifest.pack_content_hash,
-            knowledge_ir_schema=1,
+            knowledge_ir_schema=UNIVERSAL_KNOWLEDGE_IR_SCHEMA_VERSION,
             concept_graph_hash=pack.manifest.concept_graph_hash,
             source_binding_hashes=pack.manifest.source_binding_hashes,
             capability_resolution_receipt_hashes=(),

@@ -65,6 +65,8 @@ class CapabilityDescriptor:
     authority_class: AuthorityClass
     provider_type: ProviderType
     provider_id: str
+    provider_version: str
+    provider_manifest_hash: str
     provider_implementation_hash: str
     required_capabilities: tuple[str, ...]
     allowed_execution_contexts: tuple[str, ...]
@@ -86,13 +88,21 @@ class CapabilityResolutionReceipt:
     requesting_pack_hash: str
     required_capability_id: str
     required_version_range: str
+    selected_capability_version: str
     selected_descriptor_hash: str
     provider_id: str
+    provider_version: str
+    provider_manifest_hash: str
     provider_implementation_hash: str
     dependency_capabilities: tuple[str, ...]
+    dependency_receipt_hashes: tuple[str, ...]
+    dependency_dag_hash: str
     authority_class: AuthorityClass
     execution_context: str
+    input_schema_hash: str
+    output_schema_hash: str
     registry_hash: str
+    provider_registry_hash: str
     resolved_at: str
     schema_version: int
     receipt_hash: str
@@ -103,3 +113,4 @@ class CapabilityResolution:
     status: ResolutionStatus
     descriptor: CapabilityDescriptor | None
     receipt: CapabilityResolutionReceipt | None
+    closure_receipts: tuple[CapabilityResolutionReceipt, ...] = ()

@@ -7,10 +7,13 @@ from pathlib import Path
 from ai_brain.stage2.facts.canonical import canonical_json
 from ai_brain.stage3.capabilities.models import *
 from ai_brain.stage3.capabilities.registry import CapabilityRegistry
+from ai_brain.stage3.providers.registry import ProviderRegistry
 
 
-def save_registry(registry: CapabilityRegistry, path: Path) -> None:
-    registry.verify()
+def save_registry(
+    registry: CapabilityRegistry, path: Path, provider_registry: ProviderRegistry
+) -> None:
+    registry.verify(provider_registry)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(
@@ -19,7 +22,9 @@ def save_registry(registry: CapabilityRegistry, path: Path) -> None:
     temporary.replace(path)
 
 
-def load_registry(path: Path) -> CapabilityRegistry:
+def load_registry(
+    path: Path, provider_registry: ProviderRegistry | None = None
+) -> CapabilityRegistry:
     row = json.loads(path.read_text(encoding="utf-8"))
     descriptors = tuple(
         CapabilityDescriptor(
@@ -36,5 +41,6 @@ def load_registry(path: Path) -> CapabilityRegistry:
         for x in row["descriptors"]
     )
     value = CapabilityRegistry(descriptors, row["schema_version"], row["registry_hash"])
-    value.verify()
+    if provider_registry is not None:
+        value.verify(provider_registry)
     return value

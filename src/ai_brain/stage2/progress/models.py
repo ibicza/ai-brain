@@ -32,6 +32,33 @@ class RecommendationReason(StrEnum):
 
 
 @dataclass(frozen=True)
+class AnswerGradedFacts:
+    grading_result_hash: str
+    correct: bool
+
+
+@dataclass(frozen=True)
+class HintUsedFacts:
+    hint_hash: str
+    level: int
+
+
+@dataclass(frozen=True)
+class SolutionRevealedFacts:
+    explanation_hash: str
+
+
+@dataclass(frozen=True)
+class ObservationFacts:
+    authority_artifact_hash: str | None = None
+
+
+type ProgressEventPayload = (
+    AnswerGradedFacts | HintUsedFacts | SolutionRevealedFacts | ObservationFacts
+)
+
+
+@dataclass(frozen=True)
 class ProgressEvent:
     event_id: str
     sequence: int
@@ -42,18 +69,42 @@ class ProgressEvent:
     semantic_key_hash: str
     concept_ids: tuple[str, ...]
     event_kind: ProgressEventKind
-    grading_result_hash: str | None
-    correct: bool | None
+    payload: ProgressEventPayload
     trusted_current: bool
-    hint_level: int | None
-    hint_count: int
-    solution_revealed: bool
     observed_at: str
     previous_event_hash: str | None
     schema_version: int
     event_hash: str
     authority_hashes: tuple[str, ...] = ()
     operation_id: str | None = None
+
+    @property
+    def grading_result_hash(self) -> str | None:
+        return (
+            self.payload.grading_result_hash
+            if isinstance(self.payload, AnswerGradedFacts)
+            else None
+        )
+
+    @property
+    def correct(self) -> bool | None:
+        return (
+            self.payload.correct
+            if isinstance(self.payload, AnswerGradedFacts)
+            else None
+        )
+
+    @property
+    def hint_level(self) -> int | None:
+        return self.payload.level if isinstance(self.payload, HintUsedFacts) else None
+
+    @property
+    def hint_count(self) -> int:
+        return int(isinstance(self.payload, HintUsedFacts))
+
+    @property
+    def solution_revealed(self) -> bool:
+        return isinstance(self.payload, SolutionRevealedFacts)
 
 
 @dataclass(frozen=True)

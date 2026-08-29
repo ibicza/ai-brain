@@ -1,7 +1,8 @@
-"""Strict immutable universal knowledge records.
+"""Immutable Universal Knowledge IR v2 records.
 
-The IR is descriptive.  It contains no Python source and grants no execution
-authority; executable operations can only be referenced by capability ID.
+The IR is descriptive data. It never contains executable source and grants no
+execution authority; executable work is referenced only by installed capability
+IDs and verified provider manifests.
 """
 
 from __future__ import annotations
@@ -35,7 +36,6 @@ class KnowledgeKind(StrEnum):
     TEST_CASE = "TEST_CASE"
     EXERCISE_FAMILY = "EXERCISE_FAMILY"
     INTERPRETATION = "INTERPRETATION"
-    # A typed rule relation is needed to represent reviewed generic dependencies.
     DEPENDENCY_RULE = "DEPENDENCY_RULE"
 
 
@@ -47,6 +47,54 @@ class EpistemicCharacter(StrEnum):
     NORMATIVE = "NORMATIVE"
     INTERPRETIVE = "INTERPRETIVE"
     CONTESTED = "CONTESTED"
+
+
+class ValueTypeKind(StrEnum):
+    BOOLEAN = "BOOLEAN"
+    INTEGER = "INTEGER"
+    DECIMAL = "DECIMAL"
+    RATIONAL = "RATIONAL"
+    STRING = "STRING"
+    ENTITY = "ENTITY"
+    QUANTITY = "QUANTITY"
+
+
+@dataclass(frozen=True)
+class DimensionVector:
+    length: int = 0
+    mass: int = 0
+    time: int = 0
+    electric_current: int = 0
+    temperature: int = 0
+    amount: int = 0
+    luminous_intensity: int = 0
+
+
+@dataclass(frozen=True)
+class EntityTypeRef:
+    entity_type_id: str
+
+
+@dataclass(frozen=True)
+class UnitRef:
+    unit_id: str
+    dimension: DimensionVector
+    scale_numerator: int = 1
+    scale_denominator: int = 1
+
+
+@dataclass(frozen=True)
+class QuantityTypeRef:
+    quantity_type_id: str
+    dimension: DimensionVector
+    canonical_unit: UnitRef | None = None
+
+
+@dataclass(frozen=True)
+class ValueTypeRef:
+    kind: ValueTypeKind
+    entity_type: EntityTypeRef | None = None
+    quantity_type: QuantityTypeRef | None = None
 
 
 class ExpressionKind(StrEnum):
@@ -67,8 +115,7 @@ class ExpressionKind(StrEnum):
 @dataclass(frozen=True)
 class VariableBinding:
     variable_id: str
-    value_type: str
-    unit_or_dimension: str | None
+    value_type: ValueTypeRef
     domain_role: str
     minimum: str | None = None
     maximum: str | None = None
@@ -81,6 +128,7 @@ class Expression:
     value: str | bool | int | None = None
     children: tuple[Expression, ...] = ()
     capability_id: str | None = None
+    result_type: ValueTypeRef | None = None
 
 
 @dataclass(frozen=True)
@@ -111,18 +159,42 @@ class ProcedureStep:
     step_id: str
     kind: ProcedureStepKind
     input_refs: tuple[str, ...]
-    output_type: str
+    output_type: ValueTypeRef
     capability_id: str | None = None
     authority_ref: str | None = None
     next_step_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
-class TextContent:
+class ConceptContent:
     canonical_name_ru: str
     canonical_name_en: str
-    text_ru: str
-    text_en: str
+    description_ru: str
+    description_en: str
+
+
+@dataclass(frozen=True)
+class DefinitionContent:
+    term_id: str
+    definition_ru: str
+    definition_en: str
+
+
+@dataclass(frozen=True)
+class EntityTypeContent:
+    entity_type_id: str
+    canonical_name_ru: str
+    canonical_name_en: str
+    parent_entity_type_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class RelationTypeContent:
+    predicate_id: str
+    subject_type: EntityTypeRef
+    object_type: EntityTypeRef
+    transitive: bool
+    symmetric: bool
 
 
 @dataclass(frozen=True)
@@ -130,13 +202,40 @@ class RelationContent:
     subject_id: str
     predicate_id: str
     object_id: str
+    subject_type: EntityTypeRef
+    object_type: EntityTypeRef
 
 
 @dataclass(frozen=True)
 class QuantityContent:
-    value_type: str
-    dimension: str
-    canonical_unit: str | None
+    quantity_type: QuantityTypeRef
+    canonical_name_ru: str
+    canonical_name_en: str
+
+
+@dataclass(frozen=True)
+class UnitDefinitionContent:
+    unit: UnitRef
+    symbol: str
+    canonical_name_ru: str
+    canonical_name_en: str
+
+
+@dataclass(frozen=True)
+class ClaimSchemaContent:
+    subject_type: EntityTypeRef
+    predicate_id: str
+    object_type: ValueTypeRef
+    qualifier_ids: tuple[str, ...] = ()
+    receiver_type: str | None = None
+    parameters: tuple[tuple[str, str], ...] = ()
+    return_type: str | None = None
+    generic_constraints: tuple[str, ...] = ()
+    preconditions: tuple[str, ...] = ()
+    postconditions: tuple[str, ...] = ()
+    declared_exceptions: tuple[str, ...] = ()
+    deprecated_since: str | None = None
+    examples: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -152,7 +251,65 @@ class RuleContent:
 class ProcedureContent:
     entry_step_id: str
     steps: tuple[ProcedureStep, ...]
-    output_type: str
+    output_type: ValueTypeRef
+
+
+@dataclass(frozen=True)
+class TemporalRelationContent:
+    subject_id: str
+    predicate_id: str
+    object_id: str
+    start: str | None
+    end: str | None
+
+
+@dataclass(frozen=True)
+class SpatialRelationContent:
+    subject_id: str
+    predicate_id: str
+    object_id: str
+    reference_frame: str
+
+
+@dataclass(frozen=True)
+class CausalClaimContent:
+    cause_id: str
+    effect_id: str
+    claim_text: str
+    mechanism: str | None = None
+
+
+@dataclass(frozen=True)
+class ApplicabilityConditionContent:
+    condition_id: str
+    expression: Expression
+    variables: tuple[VariableBinding, ...]
+
+
+@dataclass(frozen=True)
+class ExceptionRuleContent:
+    rule_id: str
+    exception_condition_ids: tuple[str, ...]
+    effect_text: str
+
+
+@dataclass(frozen=True)
+class ExampleContent:
+    statement: str
+    referenced_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class CounterexampleContent:
+    statement: str
+    refuted_record_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class TestCaseContent:
+    target_record_id: str
+    input_values: tuple[tuple[str, str], ...]
+    expected_values: tuple[tuple[str, str], ...]
 
 
 @dataclass(frozen=True)
@@ -164,13 +321,35 @@ class ExerciseFamilyContent:
     difficulty_levels: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class InterpretationContent:
+    claim_text: str
+    perspective: str
+    supported_record_ids: tuple[str, ...]
+    contrast_record_ids: tuple[str, ...] = ()
+
+
 type KnowledgeContent = (
-    TextContent
+    ConceptContent
+    | DefinitionContent
+    | EntityTypeContent
+    | RelationTypeContent
     | RelationContent
     | QuantityContent
+    | UnitDefinitionContent
+    | ClaimSchemaContent
     | RuleContent
     | ProcedureContent
+    | TemporalRelationContent
+    | SpatialRelationContent
+    | CausalClaimContent
+    | ApplicabilityConditionContent
+    | ExceptionRuleContent
+    | ExampleContent
+    | CounterexampleContent
+    | TestCaseContent
     | ExerciseFamilyContent
+    | InterpretationContent
 )
 
 
@@ -188,3 +367,7 @@ class KnowledgeRecord:
     created_at: str
     content: KnowledgeContent
     content_hash: str
+
+
+# Compatibility import only. No v2 kind maps to a generic fallback.
+TextContent = ConceptContent

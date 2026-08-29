@@ -63,8 +63,8 @@ from ai_brain.stage3.domains.registry import InstalledDomainRegistry
 from ai_brain.stage3.domains.runtime import GenericDomainRuntime
 
 DEFAULT_CATALOG_PATH = Path("artifacts/education/m30/catalog_v4.json")
-DEFAULT_DOMAIN_PACK_PATH = Path("artifacts/domains/chemistry/generic-v1")
-DEFAULT_INSTALLED_DOMAIN_REGISTRY = Path("artifacts/stage3/installed-domains")
+DEFAULT_DOMAIN_PACK_PATH = Path("artifacts/domains/chemistry/generic-v2")
+DEFAULT_INSTALLED_DOMAIN_REGISTRY = Path("artifacts/stage3/installed-domains-v2")
 
 
 class EducationalExecutionMonitor:

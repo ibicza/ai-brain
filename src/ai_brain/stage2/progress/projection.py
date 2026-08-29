@@ -59,7 +59,21 @@ def _project_concept(
     ]
     correct = [e for e in graded if e.correct is True]
     incorrect = [e for e in graded if e.correct is False]
-    qualifying = [e for e in correct if not e.solution_revealed and e.hint_count <= 1]
+
+    def prior_count(graded_event, kind):
+        return sum(
+            event.event_kind is kind
+            and event.tutor_session_id == graded_event.tutor_session_id
+            and event.sequence < graded_event.sequence
+            for event in evidence
+        )
+
+    qualifying = [
+        e
+        for e in correct
+        if prior_count(e, ProgressEventKind.SOLUTION_REVEALED) == 0
+        and prior_count(e, ProgressEventKind.HINT_USED) <= 1
+    ]
     demonstrated_at = None
     distinct: list[str] = []
     for event in qualifying:
@@ -86,10 +100,16 @@ def _project_concept(
         "correct_count": len(correct),
         "incorrect_count": len(incorrect),
         "correct_without_hint_count": sum(
-            e.hint_count == 0 and not e.solution_revealed for e in correct
+            prior_count(e, ProgressEventKind.HINT_USED) == 0
+            and prior_count(e, ProgressEventKind.SOLUTION_REVEALED) == 0
+            for e in correct
         ),
-        "hints_used": sum(e.hint_count for e in evidence),
-        "solutions_revealed": sum(e.solution_revealed for e in evidence),
+        "hints_used": sum(
+            e.event_kind is ProgressEventKind.HINT_USED for e in evidence
+        ),
+        "solutions_revealed": sum(
+            e.event_kind is ProgressEventKind.SOLUTION_REVEALED for e in evidence
+        ),
         "distinct_semantic_keys_attempted": tuple(
             dict.fromkeys(e.semantic_key_hash for e in graded)
         ),

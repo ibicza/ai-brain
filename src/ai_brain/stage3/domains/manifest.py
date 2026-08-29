@@ -45,6 +45,9 @@ class SourceBinding:
     source_hashes: tuple[str, ...]
     derivation_hashes: tuple[str, ...]
     source_chain_hash: str
+    document_hashes: tuple[str, ...]
+    segment_hashes: tuple[str, ...]
+    field_evidence: tuple[tuple[str, str], ...]
     binding_hash: str
 
 

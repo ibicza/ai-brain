@@ -22,11 +22,15 @@ class DomainRuntime(Protocol):
 
 class GenericDomainRuntime:
     def __init__(
-        self, pack: DomainPack, adapters: dict[str, object] | None = None
+        self,
+        pack: DomainPack,
+        adapters: dict[str, object] | None = None,
+        installed_registry=None,
     ) -> None:
         validate_pack(pack)
         self._pack = pack
         self._adapters = adapters or {}
+        self._installed_registry = installed_registry
 
     def domain_id(self):
         return self._pack.manifest.domain_id
@@ -88,7 +92,18 @@ class GenericDomainRuntime:
         return self._adapters[binding.adapter_id]
 
     def verify_currentness(self):
-        return {**validate_pack(self._pack), "current": True}
+        if self._installed_registry is None:
+            return {
+                **validate_pack(self._pack),
+                "current": False,
+                "reason": "INSTALLED_AUTHORITY_REQUIRED",
+            }
+        result = self._installed_registry.verify_currentness(
+            self.domain_id(), self._pack.manifest.pack_version
+        )
+        if result["pack_hash"] != self.pack_hash():
+            raise ValueError("runtime pack differs from installed authority")
+        return result
 
     def public_domain_summary(self):
         m = self._pack.manifest

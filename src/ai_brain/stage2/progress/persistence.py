@@ -12,7 +12,14 @@ from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, utc_now
 from ai_brain.stage2.progress.events import verify_progress_event
-from ai_brain.stage2.progress.models import ProgressEvent, ProgressEventKind
+from ai_brain.stage2.progress.models import (
+    AnswerGradedFacts,
+    HintUsedFacts,
+    ObservationFacts,
+    ProgressEvent,
+    ProgressEventKind,
+    SolutionRevealedFacts,
+)
 from ai_brain.stage2.progress.projection import project_progress
 from ai_brain.stage2.progress.version import LEARNER_PROGRESS_SCHEMA_VERSION
 
@@ -60,7 +67,7 @@ class LearnerProgressStore:
             row = connection.execute(
                 "SELECT value FROM metadata WHERE key='schema_version'"
             ).fetchone()
-        if row is None or row[0] not in {"1", str(LEARNER_PROGRESS_SCHEMA_VERSION)}:
+        if row is None or row[0] != str(LEARNER_PROGRESS_SCHEMA_VERSION):
             raise ValueError("learner progress store requires an explicit rebuild")
         return store
 
@@ -136,6 +143,13 @@ class LearnerProgressStore:
             row["authority_hashes"] = tuple(row.get("authority_hashes", ()))
             row["operation_id"] = row.get("operation_id")
             row["event_kind"] = ProgressEventKind(row["event_kind"])
+            payload_type = {
+                ProgressEventKind.ANSWER_GRADED: AnswerGradedFacts,
+                ProgressEventKind.EXERCISE_SOLVED: AnswerGradedFacts,
+                ProgressEventKind.HINT_USED: HintUsedFacts,
+                ProgressEventKind.SOLUTION_REVEALED: SolutionRevealedFacts,
+            }.get(row["event_kind"], ObservationFacts)
+            row["payload"] = payload_type(**row["payload"])
             result.append(ProgressEvent(**row))
         return tuple(result)
 

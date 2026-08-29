@@ -206,7 +206,7 @@ def test_projection_requires_two_distinct_qualifying_keys():
     assert projection.status is ConceptProgressStatus.DEMONSTRATED
 
 
-def test_projection_rejects_duplicate_or_overhelped_evidence_and_supports_reset():
+def test_projection_ignores_legacy_snapshot_counters_and_supports_reset():
     events = []
     previous = None
     for sequence, (key, hints, reset) in enumerate(
@@ -242,7 +242,9 @@ def test_projection_rejects_duplicate_or_overhelped_evidence_and_supports_reset(
         for item in project_progress("projection-learner", tuple(events[:3]))
         if item.concept_id == "FORMULA_PARSING"
     )
-    assert before_reset.status is ConceptProgressStatus.PRACTICING
+    # M-32 v3 deliberately ignores the legacy cumulative hint_count snapshot.
+    # Only an actual HINT_USED event can disqualify a graded observation.
+    assert before_reset.status is ConceptProgressStatus.DEMONSTRATED
     after_reset = next(
         item
         for item in project_progress("projection-learner", tuple(events))

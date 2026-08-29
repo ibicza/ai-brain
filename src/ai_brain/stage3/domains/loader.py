@@ -106,6 +106,9 @@ def load_pack(root: Path) -> DomainPack:
                 "evidence_hashes": tuple(x["evidence_hashes"]),
                 "source_hashes": tuple(x["source_hashes"]),
                 "derivation_hashes": tuple(x["derivation_hashes"]),
+                "document_hashes": tuple(x["document_hashes"]),
+                "segment_hashes": tuple(x["segment_hashes"]),
+                "field_evidence": tuple(tuple(item) for item in x["field_evidence"]),
             }
         )
         for x in _read(root / "source_bindings.json")

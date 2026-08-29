@@ -46,6 +46,16 @@ class TutorOperation:
     operation_hash: str
 
 
+@dataclass(frozen=True)
+class StoreStageReceipt:
+    operation_id: str
+    stage: TutorOperationStatus
+    store_id: str
+    committed_record_hashes: tuple[str, ...]
+    committed_at: str
+    receipt_hash: str
+
+
 _NEXT = {
     TutorOperationStatus.PREPARED: TutorOperationStatus.EDUCATION_APPLIED,
     TutorOperationStatus.EDUCATION_APPLIED: TutorOperationStatus.PROGRESS_APPLIED,
@@ -303,6 +313,11 @@ class TutorOperationJournal:
         if self.crash_injector is not None:
             self.crash_injector(value.status.value, value)
 
+    def inject(self, point: str, value: TutorOperation) -> None:
+        """Expose exact before/after write and publication crash points."""
+        if self.crash_injector is not None:
+            self.crash_injector(point, value)
+
     @contextmanager
     def _connection(self):
         c = sqlite3.connect(self.database_path, timeout=5.0)
@@ -332,3 +347,105 @@ def _load(payload: str) -> TutorOperation:
     value = TutorOperation(**row)
     verify_operation(value)
     return value
+
+
+class TutorSagaCoordinator:
+    """Advance the journal only around verified idempotent real-store commits."""
+
+    def __init__(self, journal: TutorOperationJournal) -> None:
+        self.journal = journal
+
+    def apply_store_stage(
+        self,
+        operation: TutorOperation,
+        stage: TutorOperationStatus,
+        *,
+        store_id: str,
+        write,
+        inspect,
+        committed_at: str | None = None,
+    ) -> tuple[TutorOperation, StoreStageReceipt]:
+        if _NEXT.get(operation.status) is not stage:
+            raise ValueError("saga store stage is out of order")
+        self.journal.inject(f"before_{stage.value.casefold()}_store_write", operation)
+        hashes = tuple(inspect(operation.operation_id))
+        if not hashes:
+            write(operation.operation_id)
+            hashes = tuple(inspect(operation.operation_id))
+        if not hashes or len(set(hashes)) != len(hashes):
+            raise ValueError("store commit lacks unique operation-bound records")
+        stamp = committed_at or utc_now()
+        body = {
+            "operation_id": operation.operation_id,
+            "stage": stage,
+            "store_id": store_id,
+            "committed_record_hashes": hashes,
+            "committed_at": stamp,
+        }
+        receipt = StoreStageReceipt(**body, receipt_hash=content_hash(body))
+        self.journal.inject(f"after_{stage.value.casefold()}_store_write", operation)
+        self.journal.inject(
+            f"before_{stage.value.casefold()}_journal_advance", operation
+        )
+        advanced = self.journal.advance(
+            operation, stage, receipt.receipt_hash, updated_at=stamp
+        )
+        self.journal.inject(f"after_{stage.value.casefold()}_journal_advance", advanced)
+        return advanced, receipt
+
+    def publish(self, operation: TutorOperation, response_hash: str, publish):
+        if operation.status is not TutorOperationStatus.CONVERSATION_COMMITTED:
+            raise ValueError("public response publication requires committed stores")
+        self.journal.inject("before_final_public_response_publication", operation)
+        result = publish()
+        completed = self.journal.advance(
+            operation, TutorOperationStatus.COMPLETED, response_hash
+        )
+        self.journal.inject("after_final_public_response_publication", completed)
+        return completed, result
+
+    def recover(
+        self,
+        operation_id: str,
+        stages: tuple[tuple[TutorOperationStatus, str, object, object], ...],
+    ) -> TutorOperation:
+        operation = self.journal.get(operation_id)
+        if operation.status is not TutorOperationStatus.RECOVERY_REQUIRED:
+            raise ValueError("saga operation is not recovery-required")
+        verified: dict[TutorOperationStatus, str] = {}
+        for stage, store_id, write, inspect in stages:
+            if any(recorded == stage.value for recorded, _ in operation.step_receipts):
+                continue
+            self.journal.inject(
+                f"before_{stage.value.casefold()}_store_write", operation
+            )
+            hashes = tuple(inspect(operation.operation_id))
+            if not hashes:
+                write(operation.operation_id)
+                hashes = tuple(inspect(operation.operation_id))
+            if not hashes or len(set(hashes)) != len(hashes):
+                raise ValueError("recovery store inspection is irreconcilable")
+            body = {
+                "operation_id": operation.operation_id,
+                "stage": stage,
+                "store_id": store_id,
+                "committed_record_hashes": hashes,
+                "committed_at": operation.updated_at,
+            }
+            receipt = StoreStageReceipt(**body, receipt_hash=content_hash(body))
+            verified[stage] = receipt.receipt_hash
+            self.journal.inject(
+                f"after_{stage.value.casefold()}_store_write", operation
+            )
+        return self.journal.recover(operation_id, verified)
+
+
+def _stage_index(value: TutorOperationStatus) -> int:
+    order = (
+        TutorOperationStatus.PREPARED,
+        TutorOperationStatus.EDUCATION_APPLIED,
+        TutorOperationStatus.PROGRESS_APPLIED,
+        TutorOperationStatus.CONVERSATION_COMMITTED,
+        TutorOperationStatus.COMPLETED,
+    )
+    return order.index(value) if value in order else -1

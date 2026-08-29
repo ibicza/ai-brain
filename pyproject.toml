@@ -23,6 +23,7 @@ ai-brain-chemistry = "ai_brain.stage2.domains.chemistry.cli:main"
 ai-brain-tutor = "ai_brain.stage2.education.cli:main"
 ai-brain-domains = "ai_brain.stage3.domains.cli:main"
 ai-brain-capabilities = "ai_brain.stage3.capabilities.cli:main"
+ai-brain-acquire = "ai_brain.stage3.acquisition.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]

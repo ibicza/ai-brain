@@ -1,0 +1,56 @@
+"""Single explicit KnowledgeKind-to-content-type table for IR v2."""
+
+from ai_brain.stage3.knowledge_ir.records import (
+    ApplicabilityConditionContent,
+    CausalClaimContent,
+    ClaimSchemaContent,
+    ConceptContent,
+    CounterexampleContent,
+    DefinitionContent,
+    EntityTypeContent,
+    ExampleContent,
+    ExceptionRuleContent,
+    ExerciseFamilyContent,
+    InterpretationContent,
+    KnowledgeKind,
+    ProcedureContent,
+    QuantityContent,
+    RelationContent,
+    RelationTypeContent,
+    RuleContent,
+    SpatialRelationContent,
+    TemporalRelationContent,
+    TestCaseContent,
+    UnitDefinitionContent,
+)
+
+CONTENT_TYPES: dict[KnowledgeKind, type] = {
+    KnowledgeKind.CONCEPT: ConceptContent,
+    KnowledgeKind.DEFINITION: DefinitionContent,
+    KnowledgeKind.ENTITY_TYPE: EntityTypeContent,
+    KnowledgeKind.RELATION_TYPE: RelationTypeContent,
+    KnowledgeKind.TAXONOMY_EDGE: RelationContent,
+    KnowledgeKind.PART_WHOLE_RELATION: RelationContent,
+    KnowledgeKind.QUANTITY_TYPE: QuantityContent,
+    KnowledgeKind.UNIT_DEFINITION: UnitDefinitionContent,
+    KnowledgeKind.CLAIM_SCHEMA: ClaimSchemaContent,
+    KnowledgeKind.EQUATION_RULE: RuleContent,
+    KnowledgeKind.CONSTRAINT_RULE: RuleContent,
+    KnowledgeKind.PROCEDURE: ProcedureContent,
+    KnowledgeKind.ALGORITHM: RuleContent,
+    KnowledgeKind.STATE_TRANSITION: RuleContent,
+    KnowledgeKind.CAUSAL_RULE: CausalClaimContent,
+    KnowledgeKind.TEMPORAL_RELATION: TemporalRelationContent,
+    KnowledgeKind.SPATIAL_RELATION: SpatialRelationContent,
+    KnowledgeKind.APPLICABILITY_CONDITION: ApplicabilityConditionContent,
+    KnowledgeKind.EXCEPTION_RULE: ExceptionRuleContent,
+    KnowledgeKind.EXAMPLE: ExampleContent,
+    KnowledgeKind.COUNTEREXAMPLE: CounterexampleContent,
+    KnowledgeKind.TEST_CASE: TestCaseContent,
+    KnowledgeKind.EXERCISE_FAMILY: ExerciseFamilyContent,
+    KnowledgeKind.INTERPRETATION: InterpretationContent,
+    KnowledgeKind.DEPENDENCY_RULE: RuleContent,
+}
+
+if set(CONTENT_TYPES) != set(KnowledgeKind):  # import-time invariant
+    raise RuntimeError("IR v2 content mapping is incomplete")

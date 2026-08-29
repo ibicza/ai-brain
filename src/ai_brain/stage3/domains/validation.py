@@ -155,6 +155,9 @@ def validate_pack(pack: DomainPack) -> dict[str, object]:
                 *item.evidence_hashes,
                 *item.source_hashes,
                 *item.derivation_hashes,
+                *item.document_hashes,
+                *item.segment_hashes,
+                *(digest for _, digest in item.field_evidence),
                 item.source_chain_hash,
             ),
             "source reference",
@@ -182,12 +185,17 @@ def validate_pack(pack: DomainPack) -> dict[str, object]:
         "test_cases",
         "minimum_pass_rate",
         "runtime_network",
+        "expected_record_count",
+        "source_span_exactness",
     }:
         raise ValueError("evaluation manifest has unsupported fields")
     if (
-        pack.evaluation_manifest["schema_version"] != 1
+        pack.evaluation_manifest["schema_version"] != 2
         or pack.evaluation_manifest["runtime_network"] is not False
         or not pack.evaluation_manifest["test_cases"]
+        or pack.evaluation_manifest["expected_record_count"]
+        != len(pack.knowledge_records)
+        or pack.evaluation_manifest["source_span_exactness"] != "1.0"
     ):
         raise ValueError("evaluation manifest violates the offline test policy")
     body = asdict(manifest)

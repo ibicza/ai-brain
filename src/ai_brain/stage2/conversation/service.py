@@ -52,6 +52,19 @@ from ai_brain.stage2.progress.persistence import LearnerProgressStore
 from ai_brain.stage2.progress.projection import project_progress
 from ai_brain.stage2.progress.recommendations import recommend_exercise
 from ai_brain.stage2.progress.rendering import render_progress_summary
+from ai_brain.stage2.router.models import (
+    DependencySnapshot,
+    NextAction,
+    RequestEnvelope,
+    RequestSourceKind,
+    ResponseStage,
+    RouteAuthority,
+    RouteDecision,
+    RouteStatus,
+    RouteTarget,
+    ToolCallProposal,
+    UnifiedResponseEnvelope,
+)
 
 
 class ConversationalTutorService:
@@ -262,14 +275,37 @@ class ConversationalTutorService:
         if pending_id != conversation.pending_action_id:
             raise ValueError("pending action handle mismatch")
         action = self.conversations.get_pending(pending_id)
-        executing = authorize_pending(
-            action,
-            learner_id=conversation.learner_id,
-            conversation_id=conversation_id,
-            language=conversation.language,
-            dependency_snapshot=self._dependency_snapshot(),
-            now=created_at,
-        )
+        if action.status is PendingActionStatus.EXECUTING:
+            failed = transition_pending(action, PendingActionStatus.FAILED)
+            self.conversations.replace_pending(action, failed)
+            return self._failed_pending_response(
+                conversation,
+                action,
+                original_text,
+                "Ambiguous executing action was closed as verified FAILED.",
+                created_at,
+            )
+        try:
+            executing = authorize_pending(
+                action,
+                learner_id=conversation.learner_id,
+                conversation_id=conversation_id,
+                language=conversation.language,
+                dependency_snapshot=self._dependency_snapshot(),
+                now=created_at,
+            )
+        except ValueError as error:
+            message = str(error)
+            if "expired" in message:
+                terminal = transition_pending(action, PendingActionStatus.EXPIRED)
+            elif "dependencies changed" in message:
+                terminal = transition_pending(action, PendingActionStatus.STALE)
+            else:
+                raise
+            self.conversations.replace_pending(action, terminal)
+            return self._failed_pending_response(
+                conversation, action, original_text, message, created_at
+            )
         if action.action_kind != "EXPLAIN_MOLAR_MASS":
             raise ValueError("unsupported pending action kind")
         # Persist EXECUTING before invocation. Recovery never replays an ambiguous
@@ -278,15 +314,17 @@ class ConversationalTutorService:
         self.conversations.replace_pending(action, executing)
         authority = self._pending_authority.pop(action.pending_id, None)
         if authority is None:
-            stale = transition_pending(executing, PendingActionStatus.STALE)
-            self.conversations.replace_pending(executing, stale)
-            return self._failed_pending_response(
-                conversation,
-                action,
-                original_text,
-                "Pending action authority is unavailable after recovery.",
-                created_at,
-            )
+            authority = _restore_pending_authority(action.payload, self.education)
+            if authority is None:
+                stale = transition_pending(executing, PendingActionStatus.STALE)
+                self.conversations.replace_pending(executing, stale)
+                return self._failed_pending_response(
+                    conversation,
+                    action,
+                    original_text,
+                    "Pending action authority cannot be reconstructed exactly.",
+                    created_at,
+                )
         prepared, proposal = authority
         if (
             prepared.response_hash,
@@ -665,7 +703,19 @@ class ConversationalTutorService:
                 action_kind="EXPLAIN_MOLAR_MASS",
                 request_hash=content_hash(raw_text),
                 language=language,
-                payload=arguments,
+                payload={
+                    "tool_arguments": arguments,
+                    "prepared_response": asdict(prepared),
+                    "tool_proposal": asdict(proposal),
+                    "request": asdict(
+                        self.education.chemistry.unified._requests[proposal.request_id]
+                    ),
+                    "route_decision": asdict(
+                        self.education.chemistry.unified._decisions[
+                            proposal.route_decision_hash
+                        ]
+                    ),
+                },
                 dependency_snapshot=self._dependency_snapshot(),
                 previous_state=conversation.state,
                 prepared_authority_hashes=(
@@ -836,6 +886,8 @@ class ConversationalTutorService:
         if authority_event is None:
             raise ValueError("progress observation lacks educational authority event")
         grading_hash = None
+        hint_hash = None
+        explanation_hash = None
         authority_hashes = [authority_event.event_hash]
         if kind in {ProgressEventKind.ANSWER_GRADED, ProgressEventKind.EXERCISE_SOLVED}:
             grading_hash = authority_event.payload.get("grading_result_hash")
@@ -860,7 +912,8 @@ class ConversationalTutorService:
             item.event_type == "SOLUTION_REVEALED" for item in prior_session_events
         )
         if kind is ProgressEventKind.SOLUTION_REVEALED:
-            authority_hashes.append(authority_event.payload["explanation_hash"])
+            explanation_hash = authority_event.payload["explanation_hash"]
+            authority_hashes.append(explanation_hash)
         event = make_progress_event(
             learner_id=conversation.learner_id,
             conversation_id=conversation.conversation_id,
@@ -877,6 +930,8 @@ class ConversationalTutorService:
             hint_level=hint_level,
             hint_count=hints,
             solution_revealed=revealed,
+            hint_hash=hint_hash,
+            explanation_hash=explanation_hash,
             observed_at=created_at,
             authority_hashes=tuple(authority_hashes),
             operation_id=operation_id,
@@ -978,19 +1033,16 @@ class ConversationalTutorService:
             hint = self.education.store.get_artifact(
                 source.payload["hint_hash"], expected_kind="hint"
             )
-            expected_count = sum(
-                item.event_type == "HINT_ISSUED" and item.sequence <= source.sequence
-                for item in authority_events.values()
-            )
             if (
                 event.hint_level != int(hint.level)
-                or event.hint_count != expected_count
+                or event.payload.hint_hash != hint.hint_hash
                 or len(event.authority_hashes) < 2
                 or event.authority_hashes[1] != hint.hint_hash
             ):
                 raise ValueError("progress hint level is not authority-derived")
         if event.event_kind is ProgressEventKind.SOLUTION_REVEALED and (
             not event.solution_revealed
+            or event.payload.explanation_hash != source.payload["explanation_hash"]
             or len(event.authority_hashes) < 2
             or event.authority_hashes[1] != source.payload["explanation_hash"]
         ):
@@ -1163,3 +1215,50 @@ class ConversationalTutorService:
         if not matches:
             raise ValueError("explanation requires one chemical formula")
         return matches[-1]
+
+
+def _restore_pending_authority(payload, education):
+    """Rehydrate the exact hash-bound prepared artifacts without re-routing."""
+    try:
+        response_row = dict(payload["prepared_response"])
+        proposal_row = dict(payload["tool_proposal"])
+        request_row = dict(payload["request"])
+        decision_row = dict(payload["route_decision"])
+        response_row["route_target"] = RouteTarget(response_row["route_target"])
+        response_row["route_authority"] = RouteAuthority(
+            response_row["route_authority"]
+        )
+        response_row["route_status"] = RouteStatus(response_row["route_status"])
+        response_row["response_stage"] = ResponseStage(response_row["response_stage"])
+        response_row["warnings"] = tuple(response_row["warnings"])
+        prepared = UnifiedResponseEnvelope(**response_row)
+        proposal = ToolCallProposal(**proposal_row)
+        request_row["source_kind"] = RequestSourceKind(request_row["source_kind"])
+        request = RequestEnvelope(**request_row)
+        dependency_row = dict(decision_row["dependencies"])
+        dependency_row["tool_implementation_manifest_hashes"] = tuple(
+            tuple(item)
+            for item in dependency_row["tool_implementation_manifest_hashes"]
+        )
+        decision_row["dependencies"] = DependencySnapshot(**dependency_row)
+        decision_row["selected_target"] = RouteTarget(decision_row["selected_target"])
+        decision_row["route_status"] = RouteStatus(decision_row["route_status"])
+        decision_row["route_authority"] = RouteAuthority(
+            decision_row["route_authority"]
+        )
+        decision_row["candidate_targets"] = tuple(
+            RouteTarget(item) for item in decision_row["candidate_targets"]
+        )
+        decision_row["ambiguity_fields"] = tuple(decision_row["ambiguity_fields"])
+        decision_row["required_next_action"] = NextAction(
+            decision_row["required_next_action"]
+        )
+        decision = RouteDecision(**decision_row)
+    except (KeyError, TypeError, ValueError):
+        return None
+    unified = education.chemistry.unified
+    unified._requests[request.request_id] = request
+    unified._decisions[decision.route_decision_hash] = decision
+    unified._tool_proposals[proposal.proposal_hash] = proposal
+    unified._responses[prepared.response_hash] = prepared
+    return prepared, proposal

@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,"properties":{"authority_receipt_hash":{"pattern":"^[0-9a-f]{64}$","type":"string"},"result":{"type":"object"}},"required":["result","authority_receipt_hash"],"type":"object"}

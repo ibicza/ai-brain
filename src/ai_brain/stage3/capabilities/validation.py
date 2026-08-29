@@ -13,6 +13,7 @@ from ai_brain.stage3.capabilities.models import (
 
 _ID = re.compile(r"^[a-z][a-z0-9_.-]{2,127}$")
 _HEX = re.compile(r"^[0-9a-f]{64}$")
+_SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 
 
 def descriptor_hash(value: CapabilityDescriptor) -> str:
@@ -22,19 +23,24 @@ def descriptor_hash(value: CapabilityDescriptor) -> str:
 
 
 def validate_descriptor(value: CapabilityDescriptor) -> None:
-    if not _ID.fullmatch(value.capability_id) or not value.version:
+    if not _ID.fullmatch(value.capability_id) or not _SEMVER.fullmatch(value.version):
         raise ValueError("invalid capability identity")
     if not value.canonical_name_ru or not value.canonical_name_en:
         raise ValueError("capability requires canonical RU/EN names")
     for digest in (
         value.input_schema_hash,
         value.output_schema_hash,
+        value.provider_manifest_hash,
         value.provider_implementation_hash,
         value.resource_policy_hash,
     ):
         if not _HEX.fullmatch(digest):
             raise ValueError("capability hashes must be exact SHA-256")
-    if not value.provider_id or not value.allowed_execution_contexts:
+    if (
+        not value.provider_id
+        or not _SEMVER.fullmatch(value.provider_version)
+        or not value.allowed_execution_contexts
+    ):
         raise ValueError("capability provider and contexts are required")
     if (
         value.authority_class is AuthorityClass.ASSISTIVE_ONLY
