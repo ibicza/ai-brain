@@ -1,0 +1,18 @@
+M-34.1 Karina exact-SHA gate
+host: karina / Linux
+checkout: detached clean worktree
+base: 5bfe424f68bfd6c1414c6048cdc4f35f41dd6daf
+implementation_sha: 8d6624300c6be664a997ffe69215d4919808064c
+clean_before_gate: true
+ruff_format: PASS (757 files already formatted)
+ruff_check: PASS
+targeted: PASS (40 passed in 36.98s)
+full_suite: PASS (836 passed in 291.42s)
+acceptance: PASS
+acceptance_sha256: 8caa510a605955de48223aea9d3e637d3c2ef6360b49d107779d16e558ee0443
+acceptance_report_hash: e0b4bf48607accb22568e61ef30bc53a20b480a3c569d15fb25b7b877337c0ae
+runtime_network: false
+torch_loaded: false
+source_execution: false
+annotation_processing: false
+clean_after_gate: true
