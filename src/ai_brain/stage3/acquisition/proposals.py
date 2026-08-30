@@ -5,12 +5,21 @@ from dataclasses import asdict, replace
 from ai_brain.stage2.facts.canonical import content_hash
 from ai_brain.stage3.acquisition.classifiers import classify_segment
 from ai_brain.stage3.acquisition.extractors import extract_candidate
+from ai_brain.stage3.acquisition.java_proposals import (
+    JavaProposalBatch,
+    propose_java_knowledge,
+)
+from ai_brain.stage3.acquisition.java_source_index import (
+    JavaSourceIndex,
+    bundle_requires_java_policy,
+)
 from ai_brain.stage3.acquisition.models import (
     KnowledgeProposal,
     ProposalStatus,
     SourceBundle,
     SourceSegment,
 )
+from ai_brain.stage3.acquisition.segmentation import DeduplicatedSegments
 from ai_brain.stage3.acquisition.version import (
     KNOWLEDGE_PROPOSAL_SCHEMA_VERSION,
     SOURCE_COMPILER_VERSION,
@@ -18,8 +27,20 @@ from ai_brain.stage3.acquisition.version import (
 
 
 def propose_knowledge(
-    bundle: SourceBundle, segments: tuple[SourceSegment, ...]
+    bundle: SourceBundle,
+    segments: tuple[SourceSegment, ...],
+    *,
+    java_source_index: JavaSourceIndex | None = None,
+    segmentation_result: DeduplicatedSegments | None = None,
 ) -> tuple[KnowledgeProposal, ...]:
+    if bundle_requires_java_policy(bundle):
+        if java_source_index is None or segmentation_result is None:
+            raise ValueError(
+                "Java proposal generation requires source index and full segmentation result"
+            )
+        return propose_java_knowledge(
+            bundle, segmentation_result, java_source_index
+        ).proposals
     result = []
     for segment in segments:
         classified = classify_segment(segment)
@@ -50,6 +71,14 @@ def propose_knowledge(
         proposal = KnowledgeProposal(**body, proposal_hash=content_hash(body))
         result.append(proposal)
     return tuple(result)
+
+
+def propose_java_batch(
+    bundle: SourceBundle,
+    segmentation_result: DeduplicatedSegments,
+    java_source_index: JavaSourceIndex,
+) -> JavaProposalBatch:
+    return propose_java_knowledge(bundle, segmentation_result, java_source_index)
 
 
 def with_status(value: KnowledgeProposal, status: ProposalStatus) -> KnowledgeProposal:

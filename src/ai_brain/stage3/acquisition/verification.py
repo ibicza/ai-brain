@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, replace
 
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.java_source_index import bundle_requires_java_policy
 from ai_brain.stage3.acquisition.models import (
     ExtractionMethod,
     KnowledgeProposal,
@@ -28,6 +29,7 @@ def verify_proposals(
     store,
 ) -> tuple[KnowledgeProposal, ...]:
     verify_segments(bundle, segments, store)
+    java_policy = bundle_requires_java_policy(bundle)
     segment_ids = {item.segment_id for item in segments}
     result = []
     for proposal in proposals:
@@ -42,6 +44,16 @@ def verify_proposals(
             or proposal.schema_version != KNOWLEDGE_PROPOSAL_SCHEMA_VERSION
         ):
             raise ValueError("proposal compiler or schema mismatch")
+        if java_policy:
+            if proposal.status in {ProposalStatus.VERIFIED, ProposalStatus.APPROVED}:
+                raise ValueError(
+                    "Java proposal status contradicts authoritative semantic trust"
+                )
+            if proposal.extraction_method is not ExtractionMethod.JAVA_AST:
+                raise ValueError("Java proposal was not produced by the AST extractor")
+            _validate_as_record(bundle, proposal)
+            result.append(with_status(proposal, ProposalStatus.PROPOSED))
+            continue
         if proposal.extraction_method is ExtractionMethod.ASSISTIVE_MODEL_PROPOSAL:
             if proposal.status is ProposalStatus.VERIFIED:
                 raise ValueError("assistive proposal cannot mark itself verified")
@@ -61,22 +73,7 @@ def verify_proposals(
                 )
             )
             continue
-        record = KnowledgeRecord(
-            proposal.proposal_id,
-            bundle.bundle_id,
-            proposal.proposed_kind,
-            UNIVERSAL_KNOWLEDGE_IR_SCHEMA_VERSION,
-            proposal.proposed_epistemic_character,
-            proposal.segment_ids,
-            proposal.proposed_dependencies,
-            proposal.proposed_applicability,
-            proposal.proposed_capabilities,
-            bundle.created_at,
-            proposal.proposed_content,
-            "",
-        )
-        record = replace(record, content_hash=record_content_hash(record))
-        validate_record(record)
+        _validate_as_record(bundle, proposal)
         status = (
             ProposalStatus.VERIFIED
             if proposal.extraction_method is ExtractionMethod.DETERMINISTIC_STRUCTURED
@@ -84,6 +81,25 @@ def verify_proposals(
         )
         result.append(with_status(proposal, status))
     return tuple(result)
+
+
+def _validate_as_record(bundle: SourceBundle, proposal: KnowledgeProposal) -> None:
+    record = KnowledgeRecord(
+        proposal.proposal_id,
+        bundle.bundle_id,
+        proposal.proposed_kind,
+        UNIVERSAL_KNOWLEDGE_IR_SCHEMA_VERSION,
+        proposal.proposed_epistemic_character,
+        proposal.segment_ids,
+        proposal.proposed_dependencies,
+        proposal.proposed_applicability,
+        proposal.proposed_capabilities,
+        bundle.created_at,
+        proposal.proposed_content,
+        "",
+    )
+    record = replace(record, content_hash=record_content_hash(record))
+    validate_record(record)
 
 
 def _verify_proposal_hash(value: KnowledgeProposal) -> None:

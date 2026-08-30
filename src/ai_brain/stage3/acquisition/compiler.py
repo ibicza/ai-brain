@@ -7,6 +7,12 @@ from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.identity import PrecompilerIdentityConflict
+from ai_brain.stage3.acquisition.java_evidence import evidence_by_proposal
+from ai_brain.stage3.acquisition.java_pipeline import (
+    TrustBoundProposalBatch,
+    verify_trust_bound_batch,
+)
+from ai_brain.stage3.acquisition.java_source_index import bundle_requires_java_policy
 from ai_brain.stage3.acquisition.models import (
     KnowledgeProposal,
     ProposalApproval,
@@ -16,7 +22,6 @@ from ai_brain.stage3.acquisition.models import (
 )
 from ai_brain.stage3.acquisition.trust import (
     ProposalTrustGateReport,
-    verify_trust_gate_report,
 )
 from ai_brain.stage3.capabilities.models import CapabilityRequirement
 from ai_brain.stage3.domains.loader import load_pack
@@ -53,20 +58,35 @@ def compile_provisional_pack(
     domain_id: str,
     pack_version: str = "0.1.0-provisional",
     trust_gate_report: ProposalTrustGateReport | None = None,
+    trust_bound_batch: TrustBoundProposalBatch | None = None,
+    store=None,
 ):
     if output.exists():
         raise FileExistsError("provisional pack target exists")
-    java_domain = "java" in {item.casefold() for item in bundle.domain_tags}
+    java_domain = bundle_requires_java_policy(bundle)
     if java_domain:
-        if trust_gate_report is None:
+        if trust_gate_report is not None:
+            if trust_gate_report.precompiler.status == "FAIL":
+                raise PrecompilerIdentityConflict(trust_gate_report.precompiler)
+            trusted_ids = set(trust_gate_report.trusted_proposal_ids)
+            if any(item.proposal_id not in trusted_ids for item in proposals):
+                raise ValueError(
+                    "Java pack selection is outside trusted proposal closure"
+                )
             raise ValueError(
-                "Java pack compilation requires an exact trust gate report"
+                "legacy Java trust gate report is not a complete trust closure"
             )
-        verify_trust_gate_report(trust_gate_report)
-        if trust_gate_report.domain.casefold() != "java":
-            raise ValueError("Java pack trust report domain mismatch")
-        if trust_gate_report.precompiler.status != "PASS":
-            raise PrecompilerIdentityConflict(trust_gate_report.precompiler)
+        if trust_bound_batch is None or store is None:
+            raise ValueError(
+                "Java pack compilation requires an exact trust-bound batch and store; "
+                "a legacy trust gate report is insufficient"
+            )
+        verify_trust_bound_batch(trust_bound_batch, store)
+        if (
+            trust_bound_batch.bundle != bundle
+            or trust_bound_batch.segmentation.segments != segments
+        ):
+            raise ValueError("Java compiler inputs differ from trust closure")
     approved_hashes = {item.approved_proposal_hash for item in approvals}
     selected = tuple(
         sorted(
@@ -81,12 +101,25 @@ def compile_provisional_pack(
     )
     if not selected or len(selected) != len(approvals):
         raise ValueError("pack compilation requires exact approved proposal closure")
-    if java_domain and {item.proposal_id for item in selected} != set(
-        trust_gate_report.trusted_proposal_ids
-    ):
-        raise ValueError("Java pack selection is outside trusted proposal closure")
+    if java_domain:
+        trusted = {
+            item.proposal_id: item for item in trust_bound_batch.trusted_proposals
+        }
+        approval_by_id = {item.proposal_id: item for item in approvals}
+        if {item.proposal_id for item in selected} != set(trusted):
+            raise ValueError("Java pack selection is outside trusted proposal closure")
+        for item in selected:
+            approval = approval_by_id[item.proposal_id]
+            if (
+                approval.original_proposal_hash
+                != trusted[item.proposal_id].proposal_hash
+                or approval.approved_proposal_hash != item.proposal_hash
+            ):
+                raise ValueError(
+                    "Java approval does not bind trusted proposal revision"
+                )
     segment_by_id = {item.segment_id: item for item in segments}
-    aliases = _aliases(domain_id, selected)
+    aliases = _aliases(domain_id, selected, signature_aware=java_domain)
     records = []
     sources = []
     for proposal in selected:
@@ -115,25 +148,45 @@ def compile_provisional_pack(
             )
         )
         segment_hashes = tuple(item.segment_hash for item in bound_segments)
-        evidence = tuple(
-            (f"content.{field}", segment.source_span_hash)
-            for segment in bound_segments
-            for field in sorted(asdict(content))
-        )
-        source = SourceBinding(
-            source_id,
-            (),
-            (),
-            tuple(item.source_span_hash for item in bound_segments),
-            tuple(
+        if java_domain:
+            exact_evidence = evidence_by_proposal(trust_bound_batch.field_evidence)[
+                proposal.proposal_id
+            ]
+            evidence = tuple(
+                (item.field_path, item.evidence_hash) for item in exact_evidence
+            )
+            evidence_hashes = tuple(item.evidence_hash for item in exact_evidence)
+            source_hashes = tuple(item.source_span_hash for item in exact_evidence)
+            derivation_hashes = tuple(
+                item.transformation_hash for item in exact_evidence
+            )
+            semantic_identity_hashes = tuple(
+                sorted({item.semantic_identity_hash for item in exact_evidence})
+            )
+        else:
+            evidence = tuple(
+                (f"content.{field}", segment.source_span_hash)
+                for segment in bound_segments
+                for field in sorted(asdict(content))
+            )
+            evidence_hashes = tuple(item.source_span_hash for item in bound_segments)
+            source_hashes = tuple(
                 next(
                     document.bytes_hash
                     for document in bundle.documents
                     if document.document_id == item.document_id
                 )
                 for item in bound_segments
-            ),
+            )
+            derivation_hashes = ()
+            semantic_identity_hashes = ()
+        source = SourceBinding(
+            source_id,
             (),
+            semantic_identity_hashes,
+            evidence_hashes,
+            source_hashes,
+            derivation_hashes,
             content_hash((document_hashes, segment_hashes, evidence)),
             document_hashes,
             segment_hashes,
@@ -229,17 +282,48 @@ def compile_provisional_pack(
             "schema_version": DOMAIN_PACK_SCHEMA_VERSION,
         },
     )
-    return load_pack(output)
+    pack = load_pack(output)
+    if java_domain:
+        verify_compiled_java_evidence(pack, trust_bound_batch, selected)
+    return pack
+
+
+def verify_compiled_java_evidence(pack, batch, selected_proposals=None) -> None:
+    selected = selected_proposals or batch.trusted_proposals
+    evidence_map = evidence_by_proposal(batch.field_evidence)
+    if len(pack.source_bindings) != len(selected):
+        raise ValueError("compiled Java evidence binding count mismatch")
+    for proposal, binding in zip(selected, pack.source_bindings, strict=True):
+        evidence = evidence_map[proposal.proposal_id]
+        if (
+            binding.evidence_hashes != tuple(item.evidence_hash for item in evidence)
+            or binding.source_hashes
+            != tuple(item.source_span_hash for item in evidence)
+            or binding.derivation_hashes
+            != tuple(item.transformation_hash for item in evidence)
+            or binding.claim_refs
+            != tuple(sorted({item.semantic_identity_hash for item in evidence}))
+            or binding.field_evidence
+            != tuple((item.field_path, item.evidence_hash) for item in evidence)
+        ):
+            raise ValueError(
+                "compiled Java source binding lost exact evidence receipts"
+            )
 
 
 def _aliases(
-    domain_id: str, proposals: tuple[KnowledgeProposal, ...]
+    domain_id: str,
+    proposals: tuple[KnowledgeProposal, ...],
+    *,
+    signature_aware: bool = False,
 ) -> dict[str, str]:
     result = {}
     for proposal in proposals:
         identity = f"{domain_id}.knowledge.{proposal.proposal_hash[:32]}"
         result[proposal.proposal_id] = identity
-        for alias in _content_aliases(proposal.proposed_content):
+        for alias in _content_aliases(
+            proposal.proposed_content, signature_aware=signature_aware
+        ):
             if alias in result and result[alias] != identity:
                 raise ValueError(
                     "approved proposals contain a conflicting semantic identity"
@@ -248,7 +332,9 @@ def _aliases(
     return result
 
 
-def _content_aliases(content: KnowledgeContent) -> tuple[str, ...]:
+def _content_aliases(
+    content: KnowledgeContent, *, signature_aware: bool = False
+) -> tuple[str, ...]:
     if isinstance(content, ConceptContent):
         return (_slug(content.canonical_name_en),)
     if isinstance(content, DefinitionContent):
@@ -260,6 +346,11 @@ def _content_aliases(content: KnowledgeContent) -> tuple[str, ...]:
     if isinstance(content, UnitDefinitionContent):
         return (content.unit.unit_id,)
     if isinstance(content, ClaimSchemaContent) and content.receiver_type:
+        if signature_aware:
+            parameters = ",".join(value for _, value in content.parameters)
+            return (
+                _slug(f"{content.receiver_type}.{content.predicate_id}({parameters})"),
+            )
         return (_slug(f"{content.receiver_type}.{content.predicate_id}"),)
     return ()
 

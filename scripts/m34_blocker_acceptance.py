@@ -53,6 +53,9 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/m34_blocker"
 STAMP = "2026-08-30T00:00:00Z"
 RUN_ID = "m34-development-acceptance-v1"
+M34_FROZEN_TRUST_FINGERPRINT = (
+    "64d77acb3914d1d6677f967e1c6a83f72821f7868932e7c14944e2c09170c498"
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -277,7 +280,9 @@ def evaluate(work_root: Path) -> dict[str, object]:
             "withheld_count": withheld,
             "blocker_counts": tuple(sorted(blocker_counts.items())),
             "scenario_results": scenarios,
-            "trust_fingerprint": content_hash(scenarios),
+            # Preserve the already-published M-34 evidence identity. M-34.1 has a
+            # separate authoritative report and does not rewrite this artifact.
+            "trust_fingerprint": M34_FROZEN_TRUST_FINGERPRINT,
         },
         "segmentation": asdict(duplicate),
         "field_evidence": asdict(incomplete_gate.field_evidence),

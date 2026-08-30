@@ -8,6 +8,10 @@ from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
+from ai_brain.stage3.acquisition.java_source_index import (
+    JavaSourceIndex,
+    bundle_requires_java_policy,
+)
 from ai_brain.stage3.acquisition.models import (
     SegmentKind,
     SourceBundle,
@@ -30,6 +34,9 @@ class SegmentAlias:
     duplicate_segment_id: str
     canonical_segment_id: str
     normalized_segment_hash: str
+    original_document_id: str
+    original_source_location: SourceLocation
+    original_source_span_hash: str
     alias_hash: str
 
 
@@ -47,6 +54,11 @@ class SegmentDeduplicationReport:
     proposal_count_after: int
     trusted_proposals_blocked: int
     alias_count: int
+    physical_duplicates: int
+    physical_duplicate_rate: str
+    lexical_repetitions: int
+    lexical_repetition_rate: str
+    top_lexical_repetitions: tuple[tuple[str, int, tuple[str, ...]], ...]
     report_hash: str
 
 
@@ -67,8 +79,15 @@ def segment_bundle(bundle: SourceBundle, store) -> tuple[SourceSegment, ...]:
     return segment_bundle_with_report(bundle, store).segments
 
 
-def segment_bundle_with_report(bundle: SourceBundle, store) -> DeduplicatedSegments:
+def segment_bundle_with_report(
+    bundle: SourceBundle,
+    store,
+    *,
+    java_source_index: JavaSourceIndex | None = None,
+) -> DeduplicatedSegments:
     verify_bundle(bundle, store=store)
+    java_policy = bundle_requires_java_policy(bundle)
+    authoritative_java = java_policy and java_source_index is not None
     result: list[SourceSegment] = []
     for document in bundle.documents:
         raw = store.get_blob(document.bytes_hash)
@@ -89,7 +108,30 @@ def segment_bundle_with_report(bundle: SourceBundle, store) -> DeduplicatedSegme
                 page=1 if document.media_type is SourceMediaType.PDF else None,
             )
         )
-        if document.media_type is SourceMediaType.PDF:
+        if document.media_type is SourceMediaType.JAVA_SOURCE and authoritative_java:
+            declarations = tuple(
+                item
+                for item in java_source_index.declarations
+                if item.document_id == document.document_id
+            )
+            for declaration in declarations:
+                location = declaration.declaration_span
+                result.append(
+                    _segment(
+                        bundle.bundle_id,
+                        document.document_id,
+                        SegmentKind.API_SIGNATURE,
+                        len(result),
+                        raw[location.byte_start : location.byte_end].decode("utf-8"),
+                        raw,
+                        location.byte_start,
+                        location.byte_end,
+                        location.line_start,
+                        location.line_end,
+                        (declaration.receiver_type,),
+                    )
+                )
+        elif document.media_type is SourceMediaType.PDF:
             result.extend(
                 _pdf_segments(bundle.bundle_id, document.document_id, raw, len(result))
             )
@@ -101,11 +143,13 @@ def segment_bundle_with_report(bundle: SourceBundle, store) -> DeduplicatedSegme
             raise ValueError("segment count exceeds resource policy")
     values = tuple(result)
     verify_segments(bundle, values, store)
-    if "java" in {item.casefold() for item in bundle.domain_tags}:
+    if authoritative_java:
         deduplicated = deduplicate_segments(values)
         verify_segments(bundle, deduplicated.segments, store)
         require_unique_segments(deduplicated.segments)
         return deduplicated
+    if java_policy:
+        return _legacy_lexical_deduplication(values)
     report = _deduplication_report(values, values, (), ())
     return DeduplicatedSegments(values, (), report)
 
@@ -119,17 +163,28 @@ def normalized_segment_hash(segment: SourceSegment) -> str:
 def deduplicate_segments(
     segments: tuple[SourceSegment, ...],
 ) -> DeduplicatedSegments:
-    canonical: dict[tuple[SegmentKind, str], SourceSegment] = {}
+    canonical: dict[tuple[str, int, int, str, SegmentKind], SourceSegment] = {}
     kept: list[SourceSegment] = []
     aliases: list[SegmentAlias] = []
-    duplicate_groups: dict[str, list[SourceSegment]] = defaultdict(list)
+    physical_groups: dict[
+        tuple[str, int, int, str, SegmentKind], list[SourceSegment]
+    ] = defaultdict(list)
+    lexical_groups: dict[str, list[SourceSegment]] = defaultdict(list)
     for segment in segments:
         if segment.kind is SegmentKind.DOCUMENT:
             kept.append(segment)
             continue
         digest = normalized_segment_hash(segment)
-        key = (segment.kind, digest)
-        duplicate_groups[digest].append(segment)
+        location = segment.source_location
+        key = (
+            segment.document_id,
+            location.byte_start,
+            location.byte_end,
+            segment.source_span_hash,
+            segment.kind,
+        )
+        physical_groups[key].append(segment)
+        lexical_groups[digest].append(segment)
         first = canonical.get(key)
         if first is None:
             canonical[key] = segment
@@ -139,14 +194,68 @@ def deduplicate_segments(
             "duplicate_segment_id": segment.segment_id,
             "canonical_segment_id": first.segment_id,
             "normalized_segment_hash": digest,
+            "original_document_id": segment.document_id,
+            "original_source_location": segment.source_location,
+            "original_source_span_hash": segment.source_span_hash,
         }
         aliases.append(SegmentAlias(**values, alias_hash=content_hash(values)))
     report = _deduplication_report(
         segments,
         tuple(kept),
         tuple(aliases),
-        tuple(duplicate_groups.values()),
+        tuple(physical_groups.values()),
+        tuple(lexical_groups.values()),
     )
+    return DeduplicatedSegments(tuple(kept), tuple(aliases), report)
+
+
+def _legacy_lexical_deduplication(
+    segments: tuple[SourceSegment, ...],
+) -> DeduplicatedSegments:
+    """Keep the M-34 diagnostic API stable; it is not trust-bearing in M-34.1."""
+
+    canonical: dict[tuple[str, SegmentKind], SourceSegment] = {}
+    kept = []
+    aliases = []
+    groups: dict[tuple[str, SegmentKind], list[SourceSegment]] = defaultdict(list)
+    for segment in segments:
+        if segment.kind is SegmentKind.DOCUMENT:
+            kept.append(segment)
+            continue
+        digest = normalized_segment_hash(segment)
+        key = (digest, segment.kind)
+        groups[key].append(segment)
+        first = canonical.get(key)
+        if first is None:
+            canonical[key] = segment
+            kept.append(segment)
+            continue
+        values = {
+            "duplicate_segment_id": segment.segment_id,
+            "canonical_segment_id": first.segment_id,
+            "normalized_segment_hash": digest,
+            "original_document_id": segment.document_id,
+            "original_source_location": segment.source_location,
+            "original_source_span_hash": segment.source_span_hash,
+        }
+        aliases.append(SegmentAlias(**values, alias_hash=content_hash(values)))
+    report = _deduplication_report(
+        segments,
+        tuple(kept),
+        tuple(aliases),
+        tuple(groups.values()),
+        tuple(groups.values()),
+    )
+    input_total = sum(item.kind is not SegmentKind.DOCUMENT for item in segments)
+    report = replace(
+        report,
+        input_exact_duplicates=len(aliases),
+        input_duplicate_rate=_rate(len(aliases), input_total),
+        report_hash="",
+    )
+    report_body = asdict(report)
+    report_body.pop("report_hash")
+    report = replace(report, report_hash=content_hash(report_body))
     return DeduplicatedSegments(tuple(kept), tuple(aliases), report)
 
 
@@ -182,23 +291,25 @@ def with_proposal_counts(
     return replace(provisional, report_hash=content_hash(body))
 
 
-def _deduplication_report(before, after, aliases, groups):
-    after_counts = Counter(
-        normalized_segment_hash(item)
-        for item in after
-        if item.kind is not SegmentKind.DOCUMENT
+def _deduplication_report(before, after, aliases, physical_groups, lexical_groups=()):
+    after_values = tuple(
+        item for item in after if item.kind is not SegmentKind.DOCUMENT
     )
-    after_total = sum(after_counts.values())
-    after_duplicates = sum(count - 1 for count in after_counts.values() if count > 1)
-    input_counts = Counter(
-        normalized_segment_hash(item)
-        for item in before
-        if item.kind is not SegmentKind.DOCUMENT
+    before_values = tuple(
+        item for item in before if item.kind is not SegmentKind.DOCUMENT
     )
-    input_total = sum(input_counts.values())
-    input_duplicates = sum(count - 1 for count in input_counts.values() if count > 1)
+    after_total = len(after_values)
+    after_physical = Counter(_physical_key(item) for item in after_values)
+    after_duplicates = sum(count - 1 for count in after_physical.values() if count > 1)
+    input_total = len(before_values)
+    input_physical = Counter(_physical_key(item) for item in before_values)
+    input_duplicates = sum(count - 1 for count in input_physical.values() if count > 1)
+    lexical_counts = Counter(normalized_segment_hash(item) for item in after_values)
+    lexical_repetitions = sum(
+        count - 1 for count in lexical_counts.values() if count > 1
+    )
     top = []
-    for group in groups:
+    for group in physical_groups:
         if len(group) < 2:
             continue
         top.append(
@@ -209,10 +320,23 @@ def _deduplication_report(before, after, aliases, groups):
             )
         )
     top.sort(key=lambda item: (-item[1], item[0]))
+    lexical_top = []
+    for group in lexical_groups:
+        physical = {_physical_key(item) for item in group}
+        if len(physical) < 2:
+            continue
+        lexical_top.append(
+            (
+                normalized_segment_hash(group[0]),
+                len(physical),
+                tuple(sorted({item.document_id for item in group})),
+            )
+        )
+    lexical_top.sort(key=lambda item: (-item[1], item[0]))
     body = {
         "status": "PASS" if after_duplicates == 0 else "FAIL",
         "total_segments": after_total,
-        "unique_segments": len(after_counts),
+        "unique_segments": after_total - after_duplicates,
         "exact_duplicates": after_duplicates,
         "duplicate_rate": _rate(after_duplicates, after_total),
         "input_exact_duplicates": input_duplicates,
@@ -222,8 +346,24 @@ def _deduplication_report(before, after, aliases, groups):
         "proposal_count_after": 0,
         "trusted_proposals_blocked": 0,
         "alias_count": len(aliases),
+        "physical_duplicates": after_duplicates,
+        "physical_duplicate_rate": _rate(after_duplicates, after_total),
+        "lexical_repetitions": lexical_repetitions,
+        "lexical_repetition_rate": _rate(lexical_repetitions, after_total),
+        "top_lexical_repetitions": tuple(lexical_top[:20]),
     }
     return SegmentDeduplicationReport(**body, report_hash=content_hash(body))
+
+
+def _physical_key(segment: SourceSegment):
+    location = segment.source_location
+    return (
+        segment.document_id,
+        location.byte_start,
+        location.byte_end,
+        segment.source_span_hash,
+        segment.kind,
+    )
 
 
 def _rate(numerator: int, denominator: int) -> str:

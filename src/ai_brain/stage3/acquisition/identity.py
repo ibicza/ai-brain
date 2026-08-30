@@ -687,6 +687,7 @@ def _symbol_key(value: CanonicalSemanticIdentity):
         value.nested_type_path,
         value.member_kind,
         value.member_name,
+        value.erased_jvm_signature,
     )
 
 
@@ -730,11 +731,6 @@ def _conflict_kind(left, right):
         return "DUPLICATE_CANONICAL_IDENTITY"
     if same_identity and not same_span:
         return "SAME_IDENTITY_DIFFERENT_SOURCE_SPANS"
-    if (
-        left.normalized_claim_text_hash == right.normalized_claim_text_hash
-        and _symbol_key(left) != _symbol_key(right)
-    ):
-        return "SAME_CLAIM_HASH_DIFFERENT_IDENTITIES"
     if same_span and (
         left.member_kind != right.member_kind
         or left.erased_jvm_signature != right.erased_jvm_signature

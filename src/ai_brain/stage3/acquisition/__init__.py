@@ -6,6 +6,12 @@ from ai_brain.stage3.acquisition.identity import (
     match_java_source_location,
     parse_java_source_identities,
 )
+from ai_brain.stage3.acquisition.java_goldens import load_java_golden_manifest
+from ai_brain.stage3.acquisition.java_pipeline import (
+    run_java_trust_pipeline,
+    verify_trust_bound_batch,
+)
+from ai_brain.stage3.acquisition.java_source_index import index_java_bundle
 from ai_brain.stage3.acquisition.proposals import propose_knowledge
 from ai_brain.stage3.acquisition.segmentation import (
     deduplicate_segments,
@@ -20,10 +26,14 @@ __all__ = [
     "deduplicate_segments",
     "detect_precompiler_identity_conflicts",
     "evaluate_proposal_trust_gate",
+    "index_java_bundle",
     "ingest_bundle",
+    "load_java_golden_manifest",
     "match_java_source_location",
     "parse_java_source_identities",
     "propose_knowledge",
+    "run_java_trust_pipeline",
     "segment_bundle",
     "segment_bundle_with_report",
+    "verify_trust_bound_batch",
 ]

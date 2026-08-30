@@ -4,8 +4,13 @@ from dataclasses import asdict, replace
 
 from ai_brain.stage2.education.models import ActorIdentityType
 from ai_brain.stage2.facts.canonical import content_hash, normalize_datetime, utc_now
+from ai_brain.stage3.acquisition.java_pipeline import (
+    TrustBoundProposalBatch,
+    assert_java_proposal_state_authority,
+)
 from ai_brain.stage3.acquisition.models import (
     AcquisitionReview,
+    ExtractionMethod,
     KnowledgeProposal,
     ProposalApproval,
     ProposalStatus,
@@ -25,8 +30,20 @@ def review_proposal(
     rationale: str,
     edited_content: KnowledgeContent | None = None,
     timestamp: str | None = None,
+    trust_authorization: TrustBoundProposalBatch | None = None,
 ) -> tuple[KnowledgeProposal, AcquisitionReview, ProposalApproval | None]:
     approving = decision in {ReviewDecision.APPROVE, ReviewDecision.EDIT_AND_APPROVE}
+    if proposal.extraction_method is ExtractionMethod.JAVA_AST:
+        if proposal.status is ProposalStatus.VERIFIED:
+            raise ValueError(
+                "Java VERIFIED status contradicts semantic trust authority"
+            )
+        if approving:
+            if trust_authorization is None:
+                raise ValueError("Java approval requires authoritative trust closure")
+            assert_java_proposal_state_authority(proposal, trust_authorization)
+            if edited_content is not None:
+                raise ValueError("edited Java content requires a new trust evaluation")
     if approving and (
         reviewer_type is ActorIdentityType.MODEL or not reviewer_identity.strip()
     ):
