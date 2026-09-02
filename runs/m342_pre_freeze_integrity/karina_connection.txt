@@ -1,0 +1,10 @@
+The earlier probes targeted stale address 192.168.100.5 and are superseded.
+Corrected target: ibicza@192.168.100.6
+Implementation SHA: 8f4802e0cf2199b4e9bae1552492c5115fa1123d
+Detached exact-SHA worktree clean: true
+Ruff: PASS
+Targeted tests: 18 passed in 22.65s
+Full suite: 840 passed in 292.88s
+Measured acceptance: READY_FOR_FRESH_FREEZE
+Cross-platform hash comparison: 14 compared, 0 differences
+Untouched/final evaluation executed: false

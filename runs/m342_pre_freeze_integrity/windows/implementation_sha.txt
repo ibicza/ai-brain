@@ -1,0 +1,6 @@
+branch=exp/stage3-m342-pre-freeze-integrity
+base=7629cf0088803cdf7cf3f9816d0d76cd26dd5e7f
+implementation=8f4802e0cf2199b4e9bae1552492c5115fa1123d
+origin_implementation=8f4802e0cf2199b4e9bae1552492c5115fa1123d
+m33_outcome_c_ancestor=false
+untouched_final_evaluation_executed=false
