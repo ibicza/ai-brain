@@ -1,28 +1,27 @@
-"""Independently reproducible Java proposal field evidence."""
+"""Policy-denominated, independently reproducible Java field evidence."""
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import asdict, dataclass
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
+from ai_brain.stage3.acquisition.java_evidence_policy import (
+    JavaEvidenceClass,
+    JavaEvidencePolicyManifest,
+    JavaEvidenceRequirement,
+    enumerate_java_evidence_requirements,
+    load_java_evidence_policy,
+    verify_java_evidence_policy,
+)
 from ai_brain.stage3.acquisition.java_proposals import JavaProposalBatch
 from ai_brain.stage3.acquisition.java_source_index import (
     JavaSourceIndex,
     declaration_by_node_id,
 )
-from ai_brain.stage3.acquisition.models import (
-    SourceBundle,
-    SourceLocation,
-)
-from ai_brain.stage3.knowledge_ir.records import ClaimSchemaContent
+from ai_brain.stage3.acquisition.models import SourceBundle, SourceLocation
 
-JAVA_EVIDENCE_EXTRACTOR_VERSION = "m341.java-field-evidence.v1"
-JAVA_EVIDENCE_EXTRACTOR_HASH = content_hash(
-    {
-        "extractor": JAVA_EVIDENCE_EXTRACTOR_VERSION,
-        "policy": "ast-node-or-token-span;schema-metadata-excluded",
-    }
-)
+JAVA_EVIDENCE_EXTRACTOR_VERSION = "m342.java-field-evidence.v2"
 
 
 @dataclass(frozen=True)
@@ -30,13 +29,14 @@ class JavaFieldEvidence:
     proposal_id: str
     proposal_hash: str
     field_path: str
-    evidence_class: str
+    evidence_class: JavaEvidenceClass
     document_id: str
     document_bytes_hash: str
     source_location: SourceLocation
     source_span_hash: str
     parser_node_id: str
     semantic_identity_hash: str
+    requirement_hash: str
     transformation_id: str
     transformation_version: str
     transformation_hash: str
@@ -50,9 +50,18 @@ class JavaFieldEvidenceManifest:
     bundle_hash: str
     source_index_hash: str
     proposal_manifest_hash: str
+    evidence_policy_hash: str
+    requirement_manifest_hash: str
     required_field_count: int
     evidence_count: int
+    exact_count: int
+    missing_count: int
+    extra_count: int
+    duplicate_count: int
+    wrong_count: int
     completeness_ratio: str
+    exactness_ratio: str
+    missing_requirements: tuple[tuple[str, str], ...]
     evidence: tuple[JavaFieldEvidence, ...]
     manifest_hash: str
 
@@ -62,20 +71,26 @@ def build_java_field_evidence_manifest(
     source_index: JavaSourceIndex,
     bundle: SourceBundle,
     store,
+    *,
+    policy: JavaEvidencePolicyManifest | None = None,
+    omit_fields: tuple[str, ...] = (),
 ) -> JavaFieldEvidenceManifest:
-    evidence = _recompute_evidence(proposal_batch, source_index, bundle, store)
-    body = {
-        "bundle_hash": bundle.bundle_hash,
-        "source_index_hash": source_index.index_hash,
-        "proposal_manifest_hash": proposal_batch.proposal_manifest_hash,
-        "required_field_count": len(evidence),
-        "evidence_count": len(evidence),
-        "completeness_ratio": "1.000000" if evidence else "0.000000",
-        "evidence": evidence,
-    }
-    if not evidence:
-        raise ValueError("Java field evidence denominator cannot be empty")
-    return JavaFieldEvidenceManifest(**body, manifest_hash=content_hash(body))
+    policy = policy or load_java_evidence_policy()
+    requirements = enumerate_java_evidence_requirements(
+        proposal_batch, source_index, policy
+    )
+    evidence = _generate_evidence(
+        requirements,
+        proposal_batch,
+        source_index,
+        bundle,
+        store,
+        policy,
+        omit_fields=frozenset(omit_fields),
+    )
+    return _manifest(
+        proposal_batch, source_index, bundle, policy, requirements, evidence
+    )
 
 
 def verify_java_field_evidence_manifest(
@@ -84,24 +99,43 @@ def verify_java_field_evidence_manifest(
     source_index: JavaSourceIndex,
     bundle: SourceBundle,
     store,
+    *,
+    policy: JavaEvidencePolicyManifest | None = None,
 ) -> None:
     body = asdict(manifest)
     claimed = body.pop("manifest_hash")
     if content_hash(body) != claimed:
         raise ValueError("Java field evidence manifest hash mismatch")
-    expected = _recompute_evidence(proposal_batch, source_index, bundle, store)
-    if not expected:
-        raise ValueError("Java field evidence denominator cannot be empty")
-    if (
-        manifest.bundle_hash != bundle.bundle_hash
-        or manifest.source_index_hash != source_index.index_hash
-        or manifest.proposal_manifest_hash != proposal_batch.proposal_manifest_hash
-        or manifest.required_field_count != len(expected)
-        or manifest.evidence_count != len(expected)
-        or manifest.completeness_ratio != "1.000000"
-        or manifest.evidence != expected
-    ):
-        raise ValueError("Java field evidence is incomplete or not reproducible")
+    policy = policy or load_java_evidence_policy()
+    verify_java_evidence_policy(policy)
+    requirements = enumerate_java_evidence_requirements(
+        proposal_batch, source_index, policy
+    )
+    expected_evidence = _generate_evidence(
+        requirements,
+        proposal_batch,
+        source_index,
+        bundle,
+        store,
+        policy,
+        omit_fields=frozenset(),
+    )
+    rebuilt = _manifest(
+        proposal_batch,
+        source_index,
+        bundle,
+        policy,
+        requirements,
+        manifest.evidence,
+    )
+    if rebuilt != manifest:
+        raise ValueError("Java field evidence metrics are not reproducible")
+    expected_by_key = {
+        (item.proposal_id, item.field_path): item for item in expected_evidence
+    }
+    for item in manifest.evidence:
+        if expected_by_key.get((item.proposal_id, item.field_path)) != item:
+            raise ValueError("Java field evidence transformation mismatch")
 
 
 def evidence_by_proposal(
@@ -116,162 +150,125 @@ def evidence_by_proposal(
     }
 
 
-def _recompute_evidence(proposal_batch, source_index, bundle, store):
+def incomplete_evidence_proposal_ids(
+    manifest: JavaFieldEvidenceManifest,
+) -> frozenset[str]:
+    return frozenset(item[0] for item in manifest.missing_requirements)
+
+
+def _generate_evidence(
+    requirements,
+    proposal_batch,
+    source_index,
+    bundle,
+    store,
+    policy,
+    *,
+    omit_fields,
+):
     if (
         proposal_batch.bundle_hash != bundle.bundle_hash
         or proposal_batch.source_index_hash != source_index.index_hash
     ):
         raise ValueError("Java evidence input closure mismatch")
     nodes = declaration_by_node_id(source_index)
-    proposals = {item.proposal_id: item for item in proposal_batch.proposals}
     documents = {item.document_id: item for item in bundle.documents}
     result = []
-    for binding in proposal_batch.bindings:
-        proposal = proposals.get(binding.proposal_id)
-        declaration = nodes.get(binding.parser_node_id)
-        if proposal is None or declaration is None:
-            raise ValueError("Java proposal-to-AST binding is incomplete")
-        document = documents.get(declaration.document_id)
-        if document is None:
-            raise ValueError("Java evidence document is outside bundle")
+    for requirement in requirements:
+        if requirement.field_path in omit_fields:
+            continue
+        declaration = nodes[requirement.parser_node_id]
+        document = documents[declaration.document_id]
         raw = store.get_blob(document.bytes_hash)
-        result.extend(_proposal_evidence(proposal, declaration, raw))
-    ordered = tuple(
-        sorted(result, key=lambda item: (item.proposal_id, item.field_path))
-    )
-    keys = {(item.proposal_id, item.field_path) for item in ordered}
-    if len(keys) != len(ordered):
-        raise ValueError("duplicate Java field evidence")
-    return ordered
-
-
-def _proposal_evidence(proposal, declaration, raw):
-    if not isinstance(proposal.proposed_content, ClaimSchemaContent):
-        raise TypeError("Java AST proposal must contain ClaimSchemaContent")
-    content = proposal.proposed_content
-    fields = [
-        (
-            "content.receiver_type",
-            "deterministically_derived",
-            declaration.name_span,
-            "receiver",
-            declaration.receiver_type,
-        ),
-        (
-            "content.predicate_id",
-            "directly_source_backed",
-            declaration.name_span,
-            "member-name",
-            "<init>"
-            if declaration.member_kind == "constructor"
-            else declaration.member_name,
-        ),
-    ]
-    for index, parameter in enumerate(declaration.parameters):
-        fields.extend(
-            (
-                (
-                    f"content.parameters[{index}].name",
-                    "directly_source_backed",
-                    parameter.name_span,
-                    "parameter-name",
-                    parameter.name,
-                ),
-                (
-                    f"content.parameters[{index}].type",
-                    "directly_source_backed",
-                    parameter.type_span,
-                    "parameter-type",
-                    parameter.source_type,
-                ),
-            )
-        )
-    if declaration.member_kind == "method" and declaration.return_type is not None:
-        return_span = declaration.type_token_spans[-1]
-        fields.append(
-            (
-                "content.return_type",
-                "directly_source_backed",
-                return_span,
-                "return-type",
-                declaration.return_type,
-            )
-        )
-    for index, (name, bound) in enumerate(declaration.type_variable_bounds):
-        fields.append(
-            (
-                f"content.generic_constraints[{index}]",
-                "deterministically_derived",
-                declaration.declaration_span,
-                "generic-constraint",
-                f"{name} extends {bound}",
-            )
-        )
-    for index, exception in enumerate(declaration.declared_exceptions):
-        fields.append(
-            (
-                f"content.declared_exceptions[{index}]",
-                "directly_source_backed",
-                declaration.declaration_span,
-                "declared-exception",
-                exception,
-            )
-        )
-    expected = _proposal_field_values(content)
-    result = []
-    for field_path, evidence_class, location, transformation, normalized in fields:
-        if expected.get(field_path) != normalized:
-            raise ValueError(f"Java proposal field differs from AST: {field_path}")
+        location = requirement.source_location
         span = raw[location.byte_start : location.byte_end]
-        transformation_id = f"m341.java.{transformation}.v1"
         transformation_hash = content_hash(
             {
-                "extractor_hash": JAVA_EVIDENCE_EXTRACTOR_HASH,
-                "transformation_id": transformation_id,
+                "policy_artifact_hash": policy.policy_artifact_hash,
+                "policy_manifest_hash": policy.manifest_hash,
+                "transformation_id": requirement.transformation_id,
+                "extractor_version": JAVA_EVIDENCE_EXTRACTOR_VERSION,
             }
         )
         receipt_body = {
-            "proposal_id": proposal.proposal_id,
-            "proposal_hash": proposal.proposal_hash,
-            "field_path": field_path,
+            "requirement_hash": requirement.requirement_hash,
+            "proposal_hash": requirement.proposal_hash,
             "document_bytes_hash": declaration.source_snapshot_hash,
             "source_span_hash": bytes_hash(span),
-            "parser_node_id": declaration.node_id,
+            "semantic_identity_hash": declaration.declaration_hash,
             "transformation_hash": transformation_hash,
-            "normalized_output": normalized,
+            "normalized_output": requirement.expected_output,
         }
         body = {
-            "proposal_id": proposal.proposal_id,
-            "proposal_hash": proposal.proposal_hash,
-            "field_path": field_path,
-            "evidence_class": evidence_class,
+            "proposal_id": requirement.proposal_id,
+            "proposal_hash": requirement.proposal_hash,
+            "field_path": requirement.field_path,
+            "evidence_class": requirement.evidence_class,
             "document_id": declaration.document_id,
             "document_bytes_hash": declaration.source_snapshot_hash,
             "source_location": location,
             "source_span_hash": bytes_hash(span),
             "parser_node_id": declaration.node_id,
             "semantic_identity_hash": declaration.declaration_hash,
-            "transformation_id": transformation_id,
+            "requirement_hash": requirement.requirement_hash,
+            "transformation_id": requirement.transformation_id,
             "transformation_version": JAVA_EVIDENCE_EXTRACTOR_VERSION,
             "transformation_hash": transformation_hash,
-            "normalized_output": normalized,
+            "normalized_output": requirement.expected_output,
             "derivation_receipt_hash": content_hash(receipt_body),
         }
         result.append(JavaFieldEvidence(**body, evidence_hash=content_hash(body)))
-    return tuple(result)
+    return tuple(sorted(result, key=lambda item: (item.proposal_id, item.field_path)))
 
 
-def _proposal_field_values(content: ClaimSchemaContent):
-    values = {
-        "content.receiver_type": content.receiver_type,
-        "content.predicate_id": content.predicate_id,
-        "content.return_type": content.return_type,
+def _manifest(
+    proposal_batch,
+    source_index,
+    bundle,
+    policy,
+    requirements: tuple[JavaEvidenceRequirement, ...],
+    evidence,
+):
+    required = {(item.proposal_id, item.field_path): item for item in requirements}
+    counts = Counter((item.proposal_id, item.field_path) for item in evidence)
+    present = {(item.proposal_id, item.field_path): item for item in evidence}
+    duplicates = sum(value - 1 for value in counts.values() if value > 1)
+    missing = tuple(sorted(set(required) - set(present)))
+    extra = tuple(sorted(set(present) - set(required)))
+    exact = sum(
+        item.requirement_hash == required[key].requirement_hash
+        and item.normalized_output == required[key].expected_output
+        and item.evidence_class == required[key].evidence_class
+        for key, item in present.items()
+        if key in required and counts[key] == 1
+    )
+    wrong = len(set(required).intersection(present)) - exact
+    requirement_manifest = tuple(
+        (item.proposal_id, item.field_path, item.requirement_hash)
+        for item in requirements
+    )
+    denominator = len(required)
+    exact_denominator = len(evidence)
+    body = {
+        "bundle_hash": bundle.bundle_hash,
+        "source_index_hash": source_index.index_hash,
+        "proposal_manifest_hash": proposal_batch.proposal_manifest_hash,
+        "evidence_policy_hash": policy.manifest_hash,
+        "requirement_manifest_hash": content_hash(requirement_manifest),
+        "required_field_count": denominator,
+        "evidence_count": len(evidence),
+        "exact_count": exact,
+        "missing_count": len(missing),
+        "extra_count": len(extra),
+        "duplicate_count": duplicates,
+        "wrong_count": wrong,
+        "completeness_ratio": _ratio(denominator - len(missing), denominator),
+        "exactness_ratio": _ratio(exact, exact_denominator),
+        "missing_requirements": missing,
+        "evidence": tuple(evidence),
     }
-    for index, (name, value_type) in enumerate(content.parameters):
-        values[f"content.parameters[{index}].name"] = name
-        values[f"content.parameters[{index}].type"] = value_type
-    for index, value in enumerate(content.generic_constraints):
-        values[f"content.generic_constraints[{index}]"] = value
-    for index, value in enumerate(content.declared_exceptions):
-        values[f"content.declared_exceptions[{index}]"] = value
-    return values
+    return JavaFieldEvidenceManifest(**body, manifest_hash=content_hash(body))
+
+
+def _ratio(numerator: int, denominator: int) -> str:
+    return "N/A" if denominator == 0 else f"{numerator / denominator:.6f}"

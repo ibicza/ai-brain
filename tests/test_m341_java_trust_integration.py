@@ -1,9 +1,8 @@
+"""M-34.2 supersedes the common-mode M-34.1 Java integration evaluator."""
+
 from __future__ import annotations
 
-import ast
-import inspect
 import json
-import runpy
 import subprocess
 import sys
 from dataclasses import asdict, replace
@@ -13,417 +12,370 @@ import pytest
 
 from ai_brain.stage2.education.models import ActorIdentityType
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.compiler import compile_provisional_pack
 from ai_brain.stage3.acquisition.java_evidence import (
     build_java_field_evidence_manifest,
-    verify_java_field_evidence_manifest,
 )
 from ai_brain.stage3.acquisition.java_goldens import (
     load_java_golden_manifest,
-    verify_java_golden_manifest,
+)
+from ai_brain.stage3.acquisition.java_metrics import (
+    automatic_trust_confusion,
+    binary_confusion,
+    evidence_confusion,
+    safe_abstention,
+    set_detection_confusion,
+    source_location_confusion,
 )
 from ai_brain.stage3.acquisition.java_pipeline import (
-    detect_java_identity_conflicts,
+    bind_java_trust,
     run_java_trust_pipeline,
     verify_trust_bound_batch,
 )
-from ai_brain.stage3.acquisition.models import (
-    ExtractionMethod,
-    ProposalStatus,
-    ReviewDecision,
+from ai_brain.stage3.acquisition.java_replay import (
+    JAVA_REPLAY_FILENAME,
+    verify_compiled_java_evidence_standalone,
 )
+from ai_brain.stage3.acquisition.java_seal import (
+    load_golden_seal_receipt,
+    load_java_trust_evaluation_config,
+    verify_golden_seal_receipt,
+)
+from ai_brain.stage3.acquisition.models import ReviewDecision
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
-from ai_brain.stage3.acquisition.proposals import propose_knowledge, with_status
 from ai_brain.stage3.acquisition.review import review_proposal
 from ai_brain.stage3.acquisition.sources import ingest_bundle
-from ai_brain.stage3.acquisition.trust import ProposalTrustState
-from ai_brain.stage3.acquisition.verification import verify_proposals
 
 ROOT = Path(__file__).resolve().parents[1]
-CORPUS = ROOT / "tests/fixtures/m341_java/corpus"
-GOLDENS = ROOT / "tests/fixtures/m341_java/goldens/sealed_locations.json"
-STAMP = "2026-08-30T00:00:00Z"
+CORPUS = ROOT / "tests/fixtures/m342_java/corpus"
+ORACLE = ROOT / "tests/fixtures/m342_java/oracle"
+STAMP = "2026-09-02T00:00:00Z"
 
 
 @pytest.fixture(scope="module")
 def java_closure(tmp_path_factory):
-    root = tmp_path_factory.mktemp("m341-closure")
+    root = tmp_path_factory.mktemp("m342-closure")
     store = AcquisitionStore.open_or_initialize(root / "store")
     paths = tuple(sorted(CORPUS.rglob("*.java"), key=lambda item: item.name))
-    bundle = ingest_bundle(
-        paths,
-        bundle_id="m341-test",
-        imported_at=STAMP,
-        store=store,
-    )
-    goldens = load_java_golden_manifest(GOLDENS)
+    bundle = ingest_bundle(paths, bundle_id="m342-dev", imported_at=STAMP, store=store)
+    goldens = load_java_golden_manifest(ORACLE / "semantic_goldens.json")
+    seal = load_golden_seal_receipt(ORACLE / "golden_seal_receipt.json")
+    config = load_java_trust_evaluation_config()
     batch = run_java_trust_pipeline(
         bundle,
         store,
         goldens,
-        deterministic_run_id="m341.pytest.v1",
+        seal,
+        config,
+        deterministic_run_id="m342.pytest.v1",
     )
-    return store, bundle, goldens, batch
-
-
-def test_real_public_pipeline_meets_scale_and_trust_thresholds(java_closure):
-    store, _bundle, goldens, batch = java_closure
-    verify_trust_bound_batch(batch, store)
-    assert batch.source_index.declaration_count == 1146
-    assert len(batch.proposal_batch.proposals) == 931
-    assert goldens.positive_count == 300
-    assert batch.trusted_count == 300
-    assert batch.withheld_count == 631
-    assert batch.field_evidence.required_field_count == 4718
-    assert batch.field_evidence.completeness_ratio == "1.000000"
-
-
-def test_parser_coordinates_overloads_and_unsupported_abstention(java_closure):
-    _store, _bundle, _goldens, batch = java_closure
-    declarations = batch.source_index.declarations
-    clock = next(item for item in declarations if item.member_name == "tickMillis")
-    assert (clock.declaration_span.line_start, clock.declaration_span.line_end) == (
-        232,
-        234,
+    authorizations = verify_trust_bound_batch(
+        batch, store, seal, batch.parser_common_artifact
     )
-    overloads = {
-        item.erased_jvm_descriptor
-        for item in declarations
-        if item.source_unit_id == "Adversarial01Overloads.java"
-        and item.member_name == "foo"
-    }
-    assert len(overloads) == 3
-    assert "foo(I)Ljava/lang/String;" in overloads
-    unsupported = {
-        item.unsupported_reason for item in declarations if not item.supported
-    }
-    assert "unresolved_parameter_type:MissingType" in unsupported
-    assert "local_type_member" in unsupported
+    return root, store, batch, authorizations
 
 
-def test_import_multiline_text_block_and_repeated_occurrence_regressions(
+def test_compiler_oracle_and_resolver_agree_on_all_600_targets(java_closure):
+    _root, _store, batch, authorizations = java_closure
+    assert (
+        batch.golden_manifest.positive_count,
+        batch.golden_manifest.negative_count,
+    ) == (
+        300,
+        300,
+    )
+    assert batch.golden_manifest.semantic_negative_count == 300
+    assert (batch.trusted_count, batch.withheld_count, len(authorizations)) == (
+        300,
+        300,
+        300,
+    )
+    assert batch.blocker_counts == (
+        ("untrusted_ambiguous_parameter_type:Value", 60),
+        ("untrusted_unresolved_parameter_type:AbsentType", 60),
+        ("untrusted_unresolved_parameter_type:Imported", 60),
+        ("untrusted_unresolved_parameter_type:Widget", 60),
+        ("untrusted_unresolved_parameter_type:missing.pkg.Type", 60),
+    )
+    assert batch.source_index.type_universe.symbol_count == 5002
+    assert all(
+        item.type_universe_manifest_hash
+        == batch.source_index.type_universe_manifest_hash
+        for item in batch.source_index.declarations
+    )
+
+
+def test_varargs_arrays_nested_and_generic_erasure_match_javac(java_closure):
+    _root, _store, batch, _authorizations = java_closure
+    declarations = {
+        item.member_name: item
+        for item in batch.source_index.declarations
+        if item.member_kind == "method"
+    }
+    assert declarations["p004"].erased_jvm_descriptor.endswith(
+        "([Ljava/lang/String;)[Ljava/lang/String;"
+    )
+    assert declarations["p005"].erased_jvm_descriptor.endswith(
+        "([Ljava/lang/String;)[Ljava/lang/String;"
+    )
+    assert declarations["p007"].erased_jvm_descriptor.endswith(
+        "([[Ljava/lang/Number;)[[Ljava/lang/Number;"
+    )
+    assert "Map$Entry" in declarations["p002"].erased_jvm_descriptor
+    assert "PositiveCorpus$Nested" in declarations["p003"].erased_jvm_descriptor
+
+
+def test_evidence_denominator_precedes_generation_and_constructor_void_is_required(
     java_closure,
 ):
-    store, bundle, _goldens, batch = java_closure
-    declarations = batch.source_index.declarations
-    function = next(
-        item
-        for item in declarations
-        if item.source_unit_id == "Adversarial05FunctionImport.java"
-        and item.member_name == "apply"
-    )
-    assert "Ljava/util/function/Function;" in function.erased_jvm_descriptor
-    assert "dev/m341/synthetic/Function" not in function.erased_jvm_descriptor
-    multiline = next(
-        item
-        for item in declarations
-        if item.source_unit_id == "Adversarial08Multiline.java"
-        and item.member_name == "multiline"
-    )
-    document = next(
-        item for item in bundle.documents if item.document_id == multiline.document_id
-    )
-    raw = store.get_blob(document.bytes_hash)
-    exact = raw[
-        multiline.declaration_span.byte_start : multiline.declaration_span.byte_end
-    ]
-    assert exact.startswith(b"@Deprecated")
-    assert exact.endswith(b"}")
-    assert multiline.declaration_span.line_start == 4
-    assert multiline.declaration_span.line_end == 11
-    text_method = next(
-        item
-        for item in declarations
-        if item.source_unit_id == "Adversarial14TextBlocks.java"
-        and item.member_name == "text"
-    )
-    assert text_method.receiver_type == "dev.m341.synthetic.Adversarial14TextBlocks"
-    repeated_occurrences = {
-        (
-            item.document_id,
-            item.declaration_span.byte_start,
-            item.declaration_span.byte_end,
-        )
-        for item in declarations
-        if item.source_unit_id
-        in {"Adversarial03RepeatOne.java", "Adversarial04RepeatTwo.java"}
-        and item.member_name == "repeated"
-    }
-    repeated = tuple(
-        item
-        for item in batch.segmentation.segments
-        if (
-            item.document_id,
-            item.source_location.byte_start,
-            item.source_location.byte_end,
-        )
-        in repeated_occurrences
-    )
-    assert len(repeated) == 2
+    _root, store, batch, _authorizations = java_closure
+    matrix = evidence_confusion(batch.field_evidence)
     assert (
-        len({(item.document_id, item.source_location.byte_start) for item in repeated})
-        == 2
+        matrix.required,
+        matrix.present,
+        matrix.exact,
+        matrix.missing,
+        matrix.extra,
+        matrix.duplicate,
+        matrix.wrong,
+    ) == (12598, 12598, 12598, 0, 0, 0, 0)
+    constructor = next(
+        item
+        for item in batch.trusted_proposals
+        if item.proposed_content.predicate_id == "<init>"
     )
-
-
-def test_physical_duplicates_are_distinct_from_lexical_repetition(java_closure):
-    _store, _bundle, _goldens, batch = java_closure
-    report = batch.segmentation.report
-    assert report.physical_duplicates == 0
-    assert report.alias_count == 0
-    assert report.lexical_repetitions >= 1
-    assert batch.duplicate_derived_trusted_proposals == 0
-
-
-def test_java_proposals_cannot_self_assert_verified_authority(java_closure):
-    store, bundle, _goldens, batch = java_closure
-    proposals = batch.proposal_batch.proposals
-    assert {item.status for item in proposals} == {ProposalStatus.PROPOSED}
-    assert {item.extraction_method for item in proposals} == {ExtractionMethod.JAVA_AST}
-    assert (
-        verify_proposals(bundle, batch.segmentation.segments, proposals, store)
-        == proposals
+    constructor_evidence = tuple(
+        item
+        for item in batch.field_evidence.evidence
+        if item.proposal_id == constructor.proposal_id
+        and item.field_path == "content.return_type"
     )
-    with pytest.raises(ValueError, match="requires source index"):
-        propose_knowledge(bundle, batch.segmentation.segments)
-    assert (
-        "required_fields"
-        not in inspect.signature(build_java_field_evidence_manifest).parameters
-    )
-
-
-def test_java_policy_is_selected_by_media_not_domain_tags(tmp_path):
-    store = AcquisitionStore.open_or_initialize(tmp_path / "store")
-    source = CORPUS / "synthetic/Adversarial01Overloads.java"
-    bundle = ingest_bundle(
-        (source,),
-        bundle_id="tag-independent-java",
-        domain_tags=("openjdk", "api"),
-        imported_at=STAMP,
-        store=store,
-    )
-    with pytest.raises(ValueError, match="requires source index"):
-        propose_knowledge(bundle, ())
-
-
-def test_evidence_and_golden_tampering_are_recomputed(java_closure):
-    store, bundle, goldens, batch = java_closure
-    first = batch.field_evidence.evidence[0]
-    forged_evidence = replace(
-        batch.field_evidence,
-        evidence=(
-            replace(first, normalized_output="forged"),
-            *batch.field_evidence.evidence[1:],
-        ),
-    )
-    with pytest.raises(ValueError):
-        verify_java_field_evidence_manifest(
-            forged_evidence,
-            batch.proposal_batch,
-            batch.source_index,
-            bundle,
-            store,
-        )
-    forged_golden = replace(
-        goldens,
-        goldens=(replace(goldens.goldens[0], start_offset=0), *goldens.goldens[1:]),
-    )
-    with pytest.raises(ValueError):
-        verify_java_golden_manifest(forged_golden)
-
-
-def test_complete_field_evidence_adversarial_matrix(java_closure):
-    store, bundle, _goldens, batch = java_closure
-    evidence = batch.field_evidence.evidence
-    first = evidence[0]
-    other = next(item for item in evidence if item.proposal_id != first.proposal_id)
-
-    def sealed(item):
-        body = asdict(item)
-        body.pop("evidence_hash")
-        return replace(item, evidence_hash=content_hash(body))
-
-    def manifest(values, required=None):
-        value = replace(
-            batch.field_evidence,
-            evidence=tuple(values),
-            required_field_count=len(values) if required is None else required,
-            evidence_count=len(values),
-            completeness_ratio="1.000000" if values else "0.000000",
-            manifest_hash="",
-        )
-        body = asdict(value)
-        body.pop("manifest_hash")
-        return replace(value, manifest_hash=content_hash(body))
-
-    shifted = replace(
-        first.source_location,
-        byte_start=first.source_location.byte_start + 1,
-    )
-    mutations = (
-        sealed(replace(first, normalized_output="caller supplied")),
-        sealed(replace(first, source_location=shifted)),
-        sealed(replace(first, parser_node_id="java-node." + "0" * 32)),
-        sealed(replace(first, transformation_id="invented")),
-        sealed(replace(first, transformation_hash="1" * 64)),
-        sealed(replace(first, field_path="synthetic.field")),
-        sealed(
-            replace(
-                first,
-                document_id=other.document_id,
-                document_bytes_hash=other.document_bytes_hash,
-                source_location=other.source_location,
-                source_span_hash=other.source_span_hash,
-            )
-        ),
-        sealed(
-            replace(
-                first,
-                proposal_id=other.proposal_id,
-                proposal_hash=other.proposal_hash,
-            )
-        ),
-    )
-    candidates = [manifest((item, *evidence[1:])) for item in mutations]
-    candidates.extend(
-        (
-            manifest(evidence[1:]),
-            manifest((first, first, *evidence[1:])),
-            manifest((), required=0),
-        )
-    )
-    for candidate in candidates:
-        with pytest.raises(ValueError):
-            verify_java_field_evidence_manifest(
-                candidate,
-                batch.proposal_batch,
-                batch.source_index,
-                bundle,
-                store,
-            )
-
-
-def test_conflicts_implicate_only_bound_proposals_and_overloads_pass(java_closure):
-    _store, _bundle, _goldens, batch = java_closure
-    assert batch.conflict_report.status == "PASS"
-    duplicated = replace(
+    assert len(constructor_evidence) == 1
+    assert constructor_evidence[0].transformation_id == "constructor-void-return"
+    mutated = build_java_field_evidence_manifest(
         batch.proposal_batch,
-        bindings=(batch.proposal_batch.bindings[0], *batch.proposal_batch.bindings),
+        batch.source_index,
+        batch.bundle,
+        store,
+        policy=batch.evidence_policy,
+        omit_fields=("content.return_type",),
     )
-    report = detect_java_identity_conflicts(duplicated, batch.source_index)
-    assert report.status == "FAIL"
-    assert {item.conflict_kind for item in report.conflicts} == {
-        "DUPLICATE_PROPOSAL_BINDING",
-        "ONE_PROPOSAL_MULTIPLE_DECLARATIONS",
-    }
-    assert report.implicated_proposal_ids == (
-        batch.proposal_batch.bindings[0].proposal_id,
+    assert mutated.required_field_count == 12598
+    assert mutated.missing_count == 600
+    rebound = bind_java_trust(
+        batch.bundle,
+        batch.segmentation,
+        batch.source_index,
+        batch.proposal_batch,
+        mutated,
+        batch.evidence_policy,
+        batch.golden_manifest,
+        batch.golden_seal,
+        batch.evaluation_config,
+        batch.parser_common_artifact,
+        batch.parser_platform_artifact,
+        deterministic_run_id="m342.pytest.missing-evidence",
     )
+    assert rebound.trusted_count == 0
 
 
-def test_review_requires_trust_and_forbids_contradictory_java_status(java_closure):
-    _store, _bundle, _goldens, batch = java_closure
-    proposal = batch.trusted_proposals[0]
-    updated, _review, approval = review_proposal(
-        proposal,
-        reviewer_identity="human",
+def test_external_seal_and_review_capabilities_reject_rehashed_forgery(java_closure):
+    _root, _store, batch, authorizations = java_closure
+    golden = batch.golden_manifest.goldens[0]
+    altered = replace(golden, member_name="forged", golden_hash="")
+    altered = replace(
+        altered,
+        golden_hash=content_hash(
+            {
+                key: value
+                for key, value in asdict(altered).items()
+                if key != "golden_hash"
+            }
+        ),
+    )
+    forged_manifest = replace(
+        batch.golden_manifest,
+        goldens=(altered, *batch.golden_manifest.goldens[1:]),
+        manifest_hash="",
+    )
+    forged_manifest = replace(
+        forged_manifest,
+        manifest_hash=content_hash(
+            {
+                key: value
+                for key, value in asdict(forged_manifest).items()
+                if key != "manifest_hash"
+            }
+        ),
+    )
+    with pytest.raises(ValueError, match="golden seal"):
+        verify_golden_seal_receipt(
+            batch.golden_seal, forged_manifest, batch.evaluation_config
+        )
+    trusted = batch.trusted_proposals[0]
+    authentic = next(
+        item
+        for item in authorizations
+        if item.trusted_proposal_id == trusted.proposal_id
+    )
+    review_proposal(
+        trusted,
+        reviewer_identity="m342-human",
         reviewer_type=ActorIdentityType.USER,
         decision=ReviewDecision.APPROVE,
-        rationale="exact independent golden",
+        rationale="authentic capability",
         timestamp=STAMP,
-        trust_authorization=batch,
+        trust_authorization=authentic,
     )
-    assert updated.status is ProposalStatus.APPROVED
-    assert approval is not None
-    with pytest.raises(ValueError, match="contradicts"):
+    forged = replace(authentic, authorization_hash="0" * 64)
+    with pytest.raises(ValueError, match="authorization hash"):
         review_proposal(
-            with_status(proposal, ProposalStatus.VERIFIED),
-            reviewer_identity="human",
+            trusted,
+            reviewer_identity="m342-human",
             reviewer_type=ActorIdentityType.USER,
             decision=ReviewDecision.APPROVE,
-            rationale="invalid shortcut",
+            rationale="forged capability",
             timestamp=STAMP,
-            trust_authorization=batch,
+            trust_authorization=forged,
         )
-    withheld = next(
-        proposal
-        for proposal, decision in zip(
-            batch.proposal_batch.proposals, batch.decisions, strict=True
-        )
-        if decision.final_state is ProposalTrustState.WITHHELD
-    )
-    with pytest.raises(ValueError, match="withheld"):
+    copied = replace(authentic)
+    with pytest.raises(ValueError, match="outside authoritative"):
         review_proposal(
-            withheld,
-            reviewer_identity="human",
+            trusted,
+            reviewer_identity="m342-human",
             reviewer_type=ActorIdentityType.USER,
             decision=ReviewDecision.APPROVE,
-            rationale="must fail",
+            rationale="copied capability",
             timestamp=STAMP,
-            trust_authorization=batch,
+            trust_authorization=copied,
         )
 
 
-def test_full_closure_rejects_replay_and_hash_tamper(java_closure):
-    store, bundle, _goldens, batch = java_closure
-    with pytest.raises(ValueError):
-        verify_trust_bound_batch(replace(batch, batch_hash="0" * 64), store)
-    with pytest.raises(ValueError):
-        verify_trust_bound_batch(
-            replace(batch, bundle=replace(bundle, bundle_id="replay")), store
+def test_all_metrics_are_derived_from_raw_sets(java_closure):
+    _root, _store, batch, _authorizations = java_closure
+    targets = {item.golden_id: item for item in batch.golden_manifest.goldens}
+    expected = set(targets)
+    extracted = set(targets)
+    proposal = binary_confusion(expected, extracted, expected)
+    assert (
+        proposal.true_positive,
+        proposal.false_positive,
+        proposal.false_negative,
+    ) == (
+        600,
+        0,
+        0,
+    )
+    assert (proposal.precision, proposal.recall) == ("1.000000", "1.000000")
+    locations = {
+        (
+            item.document_bytes_hash,
+            item.start_offset,
+            item.end_offset,
         )
-
-
-def test_golden_author_is_independent_and_reproducible(tmp_path):
-    script = ROOT / "scripts/m341_author_java_goldens.py"
-    tree = ast.parse(script.read_text(encoding="utf-8"))
-    imported = {
-        alias.name
-        for node in ast.walk(tree)
-        if isinstance(node, (ast.Import, ast.ImportFrom))
-        for alias in node.names
+        for item in targets.values()
     }
-    assert not any(value.startswith("ai_brain") for value in imported)
-    output = tmp_path / "sealed.json"
-    subprocess.run(
-        [sys.executable, str(script), "--output", str(output)],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
+    location = source_location_confusion(locations, locations)
+    assert (location.precision, location.recall) == ("1.000000", "1.000000")
+    positive = {key for key, item in targets.items() if item.expected_supported}
+    trusted = {
+        decision.golden_id
+        for decision in batch.decisions
+        if decision.golden_id is not None and decision.final_state.value == "trusted"
+    }
+    trust = automatic_trust_confusion(positive, trusted, expected)
+    assert (
+        trust.correct_trusted,
+        trust.wrong_trusted,
+        trust.correct_withheld,
+        trust.incorrect_withheld,
+    ) == (300, 0, 300, 0)
+    assert (trust.precision, trust.recall, trust.coverage, trust.wrong_count) == (
+        "1.000000",
+        "1.000000",
+        "1.000000",
+        0,
     )
-    assert output.read_bytes() == GOLDENS.read_bytes()
+    abstention = safe_abstention(expected - positive, trusted)
+    assert abstention.abstention_rate == "1.000000"
+    assert binary_confusion({"a"}, set(), {"a"}).recall == "0.000000"
+    assert binary_confusion(set(), set(), set()).precision == "N/A"
+    assert automatic_trust_confusion({"a"}, set(), {"a"}).coverage == "0.000000"
+    conflict = set_detection_confusion({"seed"}, set())
+    assert (conflict.recall, conflict.precision) == ("0.000000", "N/A")
 
 
-def test_acceptance_covers_200_negatives_compile_and_disjointness(tmp_path):
-    output = tmp_path / "acceptance.json"
-    subprocess.run(
+@pytest.fixture(scope="module")
+def compiled_pack(java_closure):
+    root, store, batch, authorizations = java_closure
+    authorization_by_id = {item.trusted_proposal_id: item for item in authorizations}
+    reviewed = []
+    approvals = []
+    for proposal in batch.trusted_proposals:
+        updated, _review, approval = review_proposal(
+            proposal,
+            reviewer_identity="m342-human",
+            reviewer_type=ActorIdentityType.USER,
+            decision=ReviewDecision.APPROVE,
+            rationale="sealed development corpus",
+            timestamp=STAMP,
+            trust_authorization=authorization_by_id[proposal.proposal_id],
+        )
+        reviewed.append(updated)
+        approvals.append(approval)
+    output = root / "compiled-pack"
+    compile_provisional_pack(
+        batch.bundle,
+        batch.segmentation.segments,
+        tuple(reviewed),
+        tuple(approvals),
+        output,
+        domain_id="m342-java-dev",
+        trust_bound_batch=batch,
+        store=store,
+    )
+    return output
+
+
+def test_compiled_evidence_replays_in_a_fresh_process(compiled_pack):
+    result = subprocess.run(
         [
             sys.executable,
-            str(ROOT / "scripts/m341_java_trust_acceptance.py"),
-            "--output",
-            str(output),
+            str(ROOT / "scripts/m342_verify_java_evidence.py"),
+            str(compiled_pack),
         ],
         cwd=ROOT,
         check=True,
         capture_output=True,
         text=True,
     )
-    report = json.loads(output.read_text(encoding="utf-8"))
+    report = json.loads(result.stdout)
     assert report["status"] == "PASS"
-    assert report["corpus"]["real_file_count"] >= 20
-    assert report["corpus"]["synthetic_file_count"] >= 20
-    assert report["corpus"]["m33_overlap_count"] == 0
-    assert report["negative_evaluation"]["constructed_count"] >= 200
-    assert report["negative_evaluation"]["false_accept_count"] == 0
-    assert report["negative_evaluation"]["tamper_case_count"] == 10
-    assert report["negative_evaluation"]["tamper_rejection_count"] == 10
-    assert report["review_and_compile"]["compiled_record_count"] == 300
-    assert report["review_and_compile"]["source_binding_count"] == 300
-    assert report["torch_loaded"] is False
-    assert output.read_bytes().endswith(b"\n")
-    assert b"\r\n" not in output.read_bytes()
+    assert report["trusted_proposal_count"] == 300
+    assert report["evidence_count"] == 12598
 
 
-def test_acceptance_cannot_pass_with_zero_trusted_proposals():
-    namespace = runpy.run_path(str(ROOT / "scripts/m341_java_trust_acceptance.py"))
-    assert namespace["_acceptance_status"]({"trusted_count": False}) == "FAIL"
+@pytest.mark.parametrize(
+    "path",
+    (
+        "source_blobs",
+        "field_evidence_manifest_hash",
+        "trust_closure",
+        "golden_seal",
+        "evidence_policy_manifest_hash",
+        "trust_decisions",
+        "proposal_manifest_hash",
+        "compiled_source_bindings",
+    ),
+)
+def test_standalone_replay_rejects_independent_tamper(compiled_pack, tmp_path, path):
+    target = tmp_path / "pack"
+    target.mkdir()
+    for source in compiled_pack.iterdir():
+        (target / source.name).write_bytes(source.read_bytes())
+    artifact = target / JAVA_REPLAY_FILENAME
+    row = json.loads(artifact.read_text(encoding="utf-8"))
+    row[path] = "tampered"
+    artifact.write_text(json.dumps(row), encoding="utf-8")
+    with pytest.raises(ValueError):
+        verify_compiled_java_evidence_standalone(target)

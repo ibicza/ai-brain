@@ -12,6 +12,11 @@ from ai_brain.stage3.acquisition.java_pipeline import (
     TrustBoundProposalBatch,
     verify_trust_bound_batch,
 )
+from ai_brain.stage3.acquisition.java_replay import (
+    JAVA_REPLAY_DEPENDENCY_PREFIX,
+    JAVA_REPLAY_FILENAME,
+    build_java_replay_artifact,
+)
 from ai_brain.stage3.acquisition.java_source_index import bundle_requires_java_policy
 from ai_brain.stage3.acquisition.models import (
     KnowledgeProposal,
@@ -81,7 +86,12 @@ def compile_provisional_pack(
                 "Java pack compilation requires an exact trust-bound batch and store; "
                 "a legacy trust gate report is insufficient"
             )
-        verify_trust_bound_batch(trust_bound_batch, store)
+        verify_trust_bound_batch(
+            trust_bound_batch,
+            store,
+            trust_bound_batch.golden_seal,
+            trust_bound_batch.parser_common_artifact,
+        )
         if (
             trust_bound_batch.bundle != bundle
             or trust_bound_batch.segmentation.segments != segments
@@ -229,6 +239,16 @@ def compile_provisional_pack(
         "expected_record_count": len(records),
         "source_span_exactness": "1.0",
     }
+    replay_artifact = (
+        build_java_replay_artifact(trust_bound_batch, store, tuple(sources))
+        if java_domain
+        else None
+    )
+    dependencies = (
+        (JAVA_REPLAY_DEPENDENCY_PREFIX + replay_artifact["artifact_hash"],)
+        if replay_artifact
+        else ()
+    )
     manifest = DomainPackManifest(
         domain_id,
         pack_version,
@@ -244,7 +264,7 @@ def compile_provisional_pack(
         requirements,
         (),
         content_hash(evaluation),
-        (),
+        dependencies,
         "",
         bundle.created_at,
     )
@@ -273,6 +293,8 @@ def compile_provisional_pack(
     _write(output / "adapter_bindings.json", [])
     _write(output / "evaluation_manifest.json", evaluation)
     _write(output / "source_bindings.json", [asdict(item) for item in sources])
+    if replay_artifact is not None:
+        _write(output / JAVA_REPLAY_FILENAME, replay_artifact)
     _write(
         output / "pack_manifest.json",
         {

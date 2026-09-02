@@ -36,7 +36,7 @@ def load_pack(root: Path) -> DomainPack:
     missing = _FILES - names
     if missing:
         raise ValueError(f"domain pack files missing: {sorted(missing)}")
-    unexpected = names - (_FILES | {"approval.json"})
+    unexpected = names - (_FILES | {"approval.json", "java_evidence_closure.json"})
     if unexpected:
         raise ValueError(f"unexpected domain pack files: {sorted(unexpected)}")
     for name in _FILES:
@@ -59,6 +59,15 @@ def load_pack(root: Path) -> DomainPack:
             "dependency_packs": tuple(manifest_row["dependency_packs"]),
         }
     )
+    java_dependencies = tuple(
+        item
+        for item in manifest.dependency_packs
+        if item.startswith("java-evidence-closure.")
+    )
+    if ((root / "java_evidence_closure.json").is_file()) != bool(
+        java_dependencies
+    ) or len(java_dependencies) > 1:
+        raise ValueError("Java evidence closure dependency mismatch")
     lines = (root / "knowledge.jsonl").read_text(encoding="utf-8").splitlines()
     if len(lines) > 100_000 or any(
         len(line.encode("utf-8")) > 4 * 1024 * 1024 for line in lines

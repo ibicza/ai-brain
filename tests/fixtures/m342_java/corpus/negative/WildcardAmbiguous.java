@@ -1,0 +1,65 @@
+package dev.m342.negative;
+import dev.m342.alpha.*;
+import dev.m342.beta.*;
+public class WildcardAmbiguous {
+    public void wildcard000(Value value) {}
+    public void wildcard001(Value value) {}
+    public void wildcard002(Value value) {}
+    public void wildcard003(Value value) {}
+    public void wildcard004(Value value) {}
+    public void wildcard005(Value value) {}
+    public void wildcard006(Value value) {}
+    public void wildcard007(Value value) {}
+    public void wildcard008(Value value) {}
+    public void wildcard009(Value value) {}
+    public void wildcard010(Value value) {}
+    public void wildcard011(Value value) {}
+    public void wildcard012(Value value) {}
+    public void wildcard013(Value value) {}
+    public void wildcard014(Value value) {}
+    public void wildcard015(Value value) {}
+    public void wildcard016(Value value) {}
+    public void wildcard017(Value value) {}
+    public void wildcard018(Value value) {}
+    public void wildcard019(Value value) {}
+    public void wildcard020(Value value) {}
+    public void wildcard021(Value value) {}
+    public void wildcard022(Value value) {}
+    public void wildcard023(Value value) {}
+    public void wildcard024(Value value) {}
+    public void wildcard025(Value value) {}
+    public void wildcard026(Value value) {}
+    public void wildcard027(Value value) {}
+    public void wildcard028(Value value) {}
+    public void wildcard029(Value value) {}
+    public void wildcard030(Value value) {}
+    public void wildcard031(Value value) {}
+    public void wildcard032(Value value) {}
+    public void wildcard033(Value value) {}
+    public void wildcard034(Value value) {}
+    public void wildcard035(Value value) {}
+    public void wildcard036(Value value) {}
+    public void wildcard037(Value value) {}
+    public void wildcard038(Value value) {}
+    public void wildcard039(Value value) {}
+    public void wildcard040(Value value) {}
+    public void wildcard041(Value value) {}
+    public void wildcard042(Value value) {}
+    public void wildcard043(Value value) {}
+    public void wildcard044(Value value) {}
+    public void wildcard045(Value value) {}
+    public void wildcard046(Value value) {}
+    public void wildcard047(Value value) {}
+    public void wildcard048(Value value) {}
+    public void wildcard049(Value value) {}
+    public void wildcard050(Value value) {}
+    public void wildcard051(Value value) {}
+    public void wildcard052(Value value) {}
+    public void wildcard053(Value value) {}
+    public void wildcard054(Value value) {}
+    public void wildcard055(Value value) {}
+    public void wildcard056(Value value) {}
+    public void wildcard057(Value value) {}
+    public void wildcard058(Value value) {}
+    public void wildcard059(Value value) {}
+}

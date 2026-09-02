@@ -4,22 +4,38 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import asdict, dataclass, replace
+from weakref import ref
 
 from ai_brain.stage2.facts.canonical import content_hash
 from ai_brain.stage3.acquisition.java_evidence import (
     JavaFieldEvidenceManifest,
     build_java_field_evidence_manifest,
     evidence_by_proposal,
+    incomplete_evidence_proposal_ids,
     verify_java_field_evidence_manifest,
+)
+from ai_brain.stage3.acquisition.java_evidence_policy import (
+    JavaEvidencePolicyManifest,
+    load_java_evidence_policy,
 )
 from ai_brain.stage3.acquisition.java_goldens import (
     JavaGoldenLocation,
     JavaGoldenManifest,
     verify_java_golden_manifest,
 )
+from ai_brain.stage3.acquisition.java_parser_artifact import (
+    JavaParserArtifactManifest,
+    JavaParserCommonArtifactManifest,
+    verify_java_parser_artifact,
+)
 from ai_brain.stage3.acquisition.java_proposals import (
     JavaProposalBatch,
     propose_java_knowledge,
+)
+from ai_brain.stage3.acquisition.java_seal import (
+    GoldenSealReceipt,
+    JavaTrustEvaluationConfig,
+    verify_golden_seal_receipt,
 )
 from ai_brain.stage3.acquisition.java_source_index import (
     JAVA_PARSER_VERSION,
@@ -46,7 +62,9 @@ from ai_brain.stage3.acquisition.trust import (
 )
 from ai_brain.stage3.acquisition.verification import verify_proposals
 
-JAVA_TRUST_CHECKER_VERSION = "m341.authoritative-java-trust.v1"
+JAVA_TRUST_CHECKER_VERSION = "m342.authoritative-java-trust.v2"
+JAVA_TRUST_VERIFIER_VERSION = "m342.java-trust-verifier.v1"
+_ISSUED_AUTHORIZATIONS: dict[int, ref] = {}
 
 
 @dataclass(frozen=True)
@@ -92,8 +110,14 @@ class JavaTrustClosure:
     proposal_manifest_hash: str
     semantic_identity_manifest_hash: str
     source_index_hash: str
+    type_universe_manifest_hash: str
+    resolution_receipt_manifest_hash: str
     parser_version: str
+    parser_common_artifact_manifest_hash: str
     golden_manifest_hash: str
+    golden_seal_hash: str
+    target_census_hash: str
+    evidence_policy_hash: str
     field_evidence_manifest_hash: str
     conflict_report_hash: str
     trust_decision_manifest_hash: str
@@ -110,7 +134,12 @@ class TrustBoundProposalBatch:
     source_index: JavaSourceIndex
     proposal_batch: JavaProposalBatch
     field_evidence: JavaFieldEvidenceManifest
+    evidence_policy: JavaEvidencePolicyManifest
     golden_manifest: JavaGoldenManifest
+    golden_seal: GoldenSealReceipt
+    evaluation_config: JavaTrustEvaluationConfig
+    parser_common_artifact: JavaParserCommonArtifactManifest
+    parser_platform_artifact: JavaParserArtifactManifest
     conflict_report: JavaConflictReport
     decisions: tuple[JavaTrustDecision, ...]
     trusted_proposals: tuple[KnowledgeProposal, ...]
@@ -122,10 +151,27 @@ class TrustBoundProposalBatch:
     batch_hash: str
 
 
+@dataclass(frozen=True)
+class VerifiedJavaTrustAuthorization:
+    batch_hash: str
+    closure_hash: str
+    trusted_proposal_id: str
+    trusted_proposal_hash: str
+    decision_hash: str
+    transition_receipt_hashes: tuple[str, ...]
+    golden_seal_hash: str
+    evidence_policy_hash: str
+    source_index_hash: str
+    verifier_version: str
+    authorization_hash: str
+
+
 def run_java_trust_pipeline(
     bundle: SourceBundle,
     store,
     golden_manifest: JavaGoldenManifest,
+    golden_seal: GoldenSealReceipt,
+    evaluation_config: JavaTrustEvaluationConfig,
     *,
     deterministic_run_id: str,
 ) -> TrustBoundProposalBatch:
@@ -133,6 +179,16 @@ def run_java_trust_pipeline(
 
     if not bundle_requires_java_policy(bundle):
         raise ValueError("Java trust pipeline requires JAVA_SOURCE media")
+    verify_golden_seal_receipt(golden_seal, golden_manifest, evaluation_config)
+    parser_common, parser_platform = verify_java_parser_artifact()
+    if (
+        parser_common.manifest_hash
+        != evaluation_config.expected_parser_common_artifact_hash
+    ):
+        raise ValueError("Java parser artifact is outside evaluation configuration")
+    evidence_policy = load_java_evidence_policy()
+    if evidence_policy.manifest_hash != evaluation_config.expected_evidence_policy_hash:
+        raise ValueError("Java evidence policy is outside evaluation configuration")
     source_index = index_java_bundle(bundle, store)
     segmentation = segment_bundle_with_report(
         bundle, store, java_source_index=source_index
@@ -144,7 +200,11 @@ def run_java_trust_pipeline(
     if verified != proposal_batch.proposals:
         raise ValueError("Java structural verification changed proposal authority")
     evidence = build_java_field_evidence_manifest(
-        proposal_batch, source_index, bundle, store
+        proposal_batch,
+        source_index,
+        bundle,
+        store,
+        policy=evidence_policy,
     )
     return bind_java_trust(
         bundle,
@@ -152,7 +212,12 @@ def run_java_trust_pipeline(
         source_index,
         proposal_batch,
         evidence,
+        evidence_policy,
         golden_manifest,
+        golden_seal,
+        evaluation_config,
+        parser_common,
+        parser_platform,
         deterministic_run_id=deterministic_run_id,
     )
 
@@ -163,24 +228,33 @@ def bind_java_trust(
     source_index: JavaSourceIndex,
     proposal_batch: JavaProposalBatch,
     field_evidence: JavaFieldEvidenceManifest,
+    evidence_policy: JavaEvidencePolicyManifest,
     golden_manifest: JavaGoldenManifest,
+    golden_seal: GoldenSealReceipt,
+    evaluation_config: JavaTrustEvaluationConfig,
+    parser_common_artifact: JavaParserCommonArtifactManifest,
+    parser_platform_artifact: JavaParserArtifactManifest,
     *,
     deterministic_run_id: str,
 ) -> TrustBoundProposalBatch:
     if not bundle_requires_java_policy(bundle):
         raise ValueError("mutable domain tags cannot enable Java trust")
     _verify_golden_source_manifest(golden_manifest, bundle)
+    verify_golden_seal_receipt(golden_seal, golden_manifest, evaluation_config)
+    if field_evidence.evidence_policy_hash != evidence_policy.manifest_hash:
+        raise ValueError("Java evidence is outside sealed evidence policy")
     conflict_report = detect_java_identity_conflicts(proposal_batch, source_index)
     nodes = declaration_by_node_id(source_index)
     binding_by_proposal = {item.proposal_id: item for item in proposal_batch.bindings}
     evidence_map = evidence_by_proposal(field_evidence)
-    golden_map = _goldens_by_symbol(golden_manifest)
+    golden_map = _goldens_by_physical(golden_manifest)
     implicated = set(conflict_report.implicated_proposal_ids)
+    incomplete_evidence = incomplete_evidence_proposal_ids(field_evidence)
     decisions = []
     for proposal in proposal_batch.proposals:
         binding = binding_by_proposal[proposal.proposal_id]
         declaration = nodes[binding.parser_node_id]
-        golden_values = golden_map.get(_declaration_symbol_key(declaration), ())
+        golden_values = golden_map.get(_physical_key(declaration), ())
         blocker = None
         golden = None
         exact = False
@@ -192,7 +266,9 @@ def bind_java_trust(
             )
         elif proposal.proposal_id in implicated:
             blocker = "untrusted_conflicting_identity"
-        elif not evidence_map.get(proposal.proposal_id):
+        elif proposal.proposal_id in incomplete_evidence or not evidence_map.get(
+            proposal.proposal_id
+        ):
             blocker = "untrusted_missing_field_evidence"
         elif len(golden_values) == 0:
             blocker = "untrusted_golden_location_required"
@@ -246,7 +322,10 @@ def bind_java_trust(
         source_index,
         proposal_batch,
         field_evidence,
+        evidence_policy,
         golden_manifest,
+        golden_seal,
+        parser_common_artifact,
         conflict_report,
         decision_values,
         trusted,
@@ -261,7 +340,12 @@ def bind_java_trust(
         "source_index": source_index,
         "proposal_batch": proposal_batch,
         "field_evidence": field_evidence,
+        "evidence_policy": evidence_policy,
         "golden_manifest": golden_manifest,
+        "golden_seal": golden_seal,
+        "evaluation_config": evaluation_config,
+        "parser_common_artifact": parser_common_artifact,
+        "parser_platform_artifact": parser_platform_artifact,
         "conflict_report": conflict_report,
         "decisions": decision_values,
         "trusted_proposals": trusted,
@@ -274,11 +358,26 @@ def bind_java_trust(
     return TrustBoundProposalBatch(**body, batch_hash=content_hash(body))
 
 
-def verify_trust_bound_batch(batch: TrustBoundProposalBatch, store) -> None:
+def verify_trust_bound_batch(
+    batch: TrustBoundProposalBatch,
+    store,
+    expected_golden_seal: GoldenSealReceipt,
+    expected_parser_artifact: JavaParserCommonArtifactManifest,
+) -> tuple[VerifiedJavaTrustAuthorization, ...]:
     body = asdict(batch)
     claimed = body.pop("batch_hash")
     if content_hash(body) != claimed:
         raise ValueError("trust-bound Java batch hash mismatch")
+    verify_golden_seal_receipt(
+        expected_golden_seal, batch.golden_manifest, batch.evaluation_config
+    )
+    actual_common, actual_platform = verify_java_parser_artifact()
+    if (
+        expected_parser_artifact != actual_common
+        or batch.parser_common_artifact != actual_common
+        or batch.parser_platform_artifact != actual_platform
+    ):
+        raise ValueError("trust closure parser artifact substitution")
     verify_java_source_index(batch.source_index, batch.bundle, store)
     verify_segments(batch.bundle, batch.segmentation.segments, store)
     rebuilt_segmentation = segment_bundle_with_report(
@@ -299,6 +398,7 @@ def verify_trust_bound_batch(batch: TrustBoundProposalBatch, store) -> None:
         batch.source_index,
         batch.bundle,
         store,
+        policy=batch.evidence_policy,
     )
     rebuilt = bind_java_trust(
         batch.bundle,
@@ -306,26 +406,69 @@ def verify_trust_bound_batch(batch: TrustBoundProposalBatch, store) -> None:
         batch.source_index,
         batch.proposal_batch,
         batch.field_evidence,
+        batch.evidence_policy,
         batch.golden_manifest,
+        batch.golden_seal,
+        batch.evaluation_config,
+        batch.parser_common_artifact,
+        batch.parser_platform_artifact,
         deterministic_run_id=batch.closure.deterministic_run_id,
     )
     if rebuilt != batch:
         raise ValueError("trust closure replay or substitution mismatch")
+    return tuple(
+        _authorization(batch, item)
+        for item in batch.decisions
+        if item.final_state is ProposalTrustState.TRUSTED
+    )
 
 
 def assert_java_proposal_state_authority(
-    proposal: KnowledgeProposal, batch: TrustBoundProposalBatch
+    proposal: KnowledgeProposal, authorization: VerifiedJavaTrustAuthorization
 ) -> None:
-    decision = next(
-        (item for item in batch.decisions if item.proposal_id == proposal.proposal_id),
-        None,
-    )
-    if decision is None or decision.proposal_hash != proposal.proposal_hash:
+    body = asdict(authorization)
+    claimed = body.pop("authorization_hash")
+    if content_hash(body) != claimed:
+        raise ValueError("Java trust authorization hash mismatch")
+    if (
+        _ISSUED_AUTHORIZATIONS.get(id(authorization), lambda: None)()
+        is not authorization
+        or authorization.trusted_proposal_id != proposal.proposal_id
+        or authorization.trusted_proposal_hash != proposal.proposal_hash
+        or authorization.verifier_version != JAVA_TRUST_VERIFIER_VERSION
+    ):
         raise ValueError("proposal is outside authoritative Java trust closure")
-    if decision.final_state is not ProposalTrustState.TRUSTED:
-        if proposal.status in {ProposalStatus.VERIFIED, ProposalStatus.APPROVED}:
-            raise ValueError("untrusted Java proposal has contradictory status")
-        raise ValueError("withheld Java proposal cannot be approved or compiled")
+
+
+def _authorization(batch, decision):
+    proposal = next(
+        item
+        for item in batch.trusted_proposals
+        if item.proposal_id == decision.proposal_id
+    )
+    body = {
+        "batch_hash": batch.batch_hash,
+        "closure_hash": batch.closure.closure_hash,
+        "trusted_proposal_id": proposal.proposal_id,
+        "trusted_proposal_hash": proposal.proposal_hash,
+        "decision_hash": decision.decision_hash,
+        "transition_receipt_hashes": tuple(
+            item.receipt_hash for item in decision.transition_receipts
+        ),
+        "golden_seal_hash": batch.golden_seal.seal_receipt_hash,
+        "evidence_policy_hash": batch.evidence_policy.manifest_hash,
+        "source_index_hash": batch.source_index.index_hash,
+        "verifier_version": JAVA_TRUST_VERIFIER_VERSION,
+    }
+    authorization = VerifiedJavaTrustAuthorization(
+        **body, authorization_hash=content_hash(body)
+    )
+    identity = id(authorization)
+    _ISSUED_AUTHORIZATIONS[identity] = ref(
+        authorization,
+        lambda _value, key=identity: _ISSUED_AUTHORIZATIONS.pop(key, None),
+    )
+    return authorization
 
 
 def detect_java_identity_conflicts(
@@ -467,7 +610,10 @@ def _make_closure(
     source_index,
     proposal_batch,
     evidence,
+    evidence_policy,
     goldens,
+    golden_seal,
+    parser_common,
     conflicts,
     decisions,
     trusted,
@@ -492,6 +638,14 @@ def _make_closure(
         (proposal_id, declarations[node_id].declaration_hash)
         for proposal_id, node_id in sorted(proposal_nodes.items())
     )
+    resolution_receipts = tuple(
+        (
+            item.node_id,
+            tuple(parameter.resolution_receipt_hash for parameter in item.parameters),
+            item.return_resolution_receipt_hash,
+        )
+        for item in source_index.declarations
+    )
     body = {
         "bundle_id": bundle.bundle_id,
         "bundle_hash": bundle.bundle_hash,
@@ -501,8 +655,14 @@ def _make_closure(
         "proposal_manifest_hash": proposal_batch.proposal_manifest_hash,
         "semantic_identity_manifest_hash": content_hash(identity_manifest),
         "source_index_hash": source_index.index_hash,
+        "type_universe_manifest_hash": source_index.type_universe_manifest_hash,
+        "resolution_receipt_manifest_hash": content_hash(resolution_receipts),
         "parser_version": JAVA_PARSER_VERSION,
+        "parser_common_artifact_manifest_hash": parser_common.manifest_hash,
         "golden_manifest_hash": goldens.manifest_hash,
+        "golden_seal_hash": golden_seal.seal_receipt_hash,
+        "target_census_hash": golden_seal.target_census_hash,
+        "evidence_policy_hash": evidence_policy.manifest_hash,
         "field_evidence_manifest_hash": evidence.manifest_hash,
         "conflict_report_hash": conflicts.report_hash,
         "trust_decision_manifest_hash": content_hash(
@@ -528,37 +688,19 @@ def _verify_golden_source_manifest(golden_manifest, bundle):
         raise ValueError("golden manifest belongs to another source closure")
 
 
-def _goldens_by_symbol(manifest):
+def _goldens_by_physical(manifest):
     result: dict[tuple, list[JavaGoldenLocation]] = {}
     for item in manifest.goldens:
-        result.setdefault(_golden_symbol_key(item), []).append(item)
+        result.setdefault(
+            (
+                item.document_bytes_hash,
+                item.source_unit_id,
+                item.start_offset,
+                item.end_offset,
+            ),
+            [],
+        ).append(item)
     return {key: tuple(values) for key, values in result.items()}
-
-
-def _declaration_symbol_key(value):
-    return (
-        value.source_unit_id,
-        value.package_name,
-        value.top_level_type_name,
-        value.nested_type_path,
-        value.member_kind,
-        value.member_name,
-        value.canonical_source_signature,
-        value.erased_jvm_descriptor,
-    )
-
-
-def _golden_symbol_key(value):
-    return (
-        value.source_unit_id,
-        value.package_name,
-        value.top_level_type_name,
-        value.nested_type_path,
-        value.member_kind,
-        value.member_name,
-        value.canonical_source_signature,
-        value.erased_jvm_descriptor,
-    )
 
 
 def _golden_exact(declaration, golden):
@@ -568,6 +710,12 @@ def _golden_exact(declaration, golden):
         and golden.end_offset == declaration.declaration_span.byte_end
         and golden.start_line == declaration.declaration_span.line_start
         and golden.end_line == declaration.declaration_span.line_end
+        and golden.package_name == declaration.package_name
+        and golden.top_level_type_name == declaration.top_level_type_name
+        and golden.nested_type_path == declaration.nested_type_path
+        and golden.member_kind == declaration.member_kind
+        and golden.member_name == declaration.member_name
+        and golden.erased_jvm_descriptor == declaration.erased_jvm_descriptor
         and golden.expected_supported
     )
 
@@ -608,15 +756,14 @@ def _conflict(kind, proposal_ids, node_ids, locations):
 
 
 def _duplicate_derived_candidates(segmentation, proposal_batch):
-    duplicated_targets = {item.canonical_segment_id for item in segmentation.aliases}
-    return sum(
-        item.segment_id in duplicated_targets for item in proposal_batch.bindings
-    )
+    multiplicity = Counter(item.canonical_segment_id for item in segmentation.aliases)
+    return sum(multiplicity[item.segment_id] for item in proposal_batch.bindings)
 
 
 def _duplicate_derived_trusted(segmentation, proposal_batch, trusted_ids):
-    duplicated_targets = {item.canonical_segment_id for item in segmentation.aliases}
+    multiplicity = Counter(item.canonical_segment_id for item in segmentation.aliases)
     return sum(
-        item.proposal_id in trusted_ids and item.segment_id in duplicated_targets
+        multiplicity[item.segment_id]
         for item in proposal_batch.bindings
+        if item.proposal_id in trusted_ids
     )

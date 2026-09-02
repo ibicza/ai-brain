@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import importlib.metadata
 import re
 from dataclasses import asdict, dataclass, replace
 
@@ -10,6 +9,19 @@ import tree_sitter_java
 from tree_sitter import Language, Node, Parser
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
+from ai_brain.stage3.acquisition.java_parser_artifact import (
+    TREE_SITTER_JAVA_SOURCE_SHA256,
+    TREE_SITTER_JAVA_VERSION,
+    TREE_SITTER_VERSION,
+    verify_java_parser_artifact,
+)
+from ai_brain.stage3.acquisition.java_type_universe import (
+    JavaResolutionKind,
+    JavaTypeResolution,
+    JavaTypeUniverse,
+    build_java_type_universe,
+    resolve_java_type,
+)
 from ai_brain.stage3.acquisition.models import (
     SourceBundle,
     SourceDocument,
@@ -18,11 +30,6 @@ from ai_brain.stage3.acquisition.models import (
 )
 from ai_brain.stage3.acquisition.sources import verify_bundle
 
-TREE_SITTER_VERSION = "0.25.2"
-TREE_SITTER_JAVA_VERSION = "0.23.5"
-TREE_SITTER_JAVA_SOURCE_SHA256 = (
-    "f5cd57b8f1270a7f0438878750d02ccc79421d45cca65ff284f1527e9ef02e38"
-)
 JAVA_PARSER_VERSION = (
     f"tree-sitter/{TREE_SITTER_VERSION}+tree-sitter-java/{TREE_SITTER_JAVA_VERSION}"
 )
@@ -57,45 +64,6 @@ _PRIMITIVE_DESCRIPTORS = {
     "short": "S",
     "void": "V",
 }
-_JAVA_LANG = {
-    "Appendable",
-    "ArithmeticException",
-    "AutoCloseable",
-    "Boolean",
-    "Byte",
-    "CharSequence",
-    "Character",
-    "Class",
-    "ClassLoader",
-    "Cloneable",
-    "Comparable",
-    "Deprecated",
-    "Double",
-    "Enum",
-    "Error",
-    "Exception",
-    "Float",
-    "IllegalArgumentException",
-    "IllegalStateException",
-    "IndexOutOfBoundsException",
-    "Integer",
-    "Iterable",
-    "Long",
-    "Math",
-    "Number",
-    "Object",
-    "Override",
-    "Record",
-    "Runnable",
-    "RuntimeException",
-    "Short",
-    "String",
-    "StringBuilder",
-    "System",
-    "Throwable",
-    "UnsupportedOperationException",
-    "Void",
-}
 
 
 @dataclass(frozen=True)
@@ -103,6 +71,9 @@ class JavaParameter:
     name: str
     source_type: str
     resolved_type: str | None
+    resolution_kind: JavaResolutionKind | None
+    resolution_receipt_hash: str | None
+    resolution: JavaTypeResolution | None
     type_span: SourceLocation
     name_span: SourceLocation
     varargs: bool
@@ -136,6 +107,10 @@ class JavaDeclaration:
     type_variable_bounds: tuple[tuple[str, str], ...]
     return_type: str | None
     resolved_return_type: str | None
+    return_resolution_kind: JavaResolutionKind | None
+    return_resolution_receipt_hash: str | None
+    return_resolution: JavaTypeResolution | None
+    type_universe_manifest_hash: str | None
     declared_exceptions: tuple[str, ...]
     source_span_hash: str
     javadoc_span_hash: str | None
@@ -151,9 +126,12 @@ class JavaSourceIndex:
     parser_version: str
     grammar_version: str
     grammar_artifact_sha256: str
+    parser_common_artifact_manifest_hash: str
     source_execution: bool
     annotation_processing: bool
     document_manifest_hash: str
+    type_universe: JavaTypeUniverse
+    type_universe_manifest_hash: str
     declarations: tuple[JavaDeclaration, ...]
     declaration_count: int
     supported_declaration_count: int
@@ -180,7 +158,7 @@ def bundle_requires_java_policy(bundle: SourceBundle) -> bool:
 
 def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
     verify_bundle(bundle, store=store)
-    _verify_parser_installation()
+    parser_common, _parser_platform = verify_java_parser_artifact()
     documents = tuple(
         document
         for document in bundle.documents
@@ -192,8 +170,13 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
     for document in sorted(documents, key=lambda item: item.document_id):
         raw = store.get_blob(document.bytes_hash)
         declarations.extend(_index_document(document, raw))
-    known_types = _known_types(tuple(declarations))
-    resolved = tuple(_resolve_declaration(item, known_types) for item in declarations)
+    source_symbols = tuple(
+        item.receiver_type
+        for item in declarations
+        if item.member_kind in _TYPE_NODES.values()
+    )
+    universe = build_java_type_universe(source_symbols)
+    resolved = tuple(_resolve_declaration(item, universe) for item in declarations)
     ordered = tuple(
         sorted(
             resolved,
@@ -212,9 +195,12 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
         "parser_version": JAVA_PARSER_VERSION,
         "grammar_version": TREE_SITTER_JAVA_VERSION,
         "grammar_artifact_sha256": TREE_SITTER_JAVA_SOURCE_SHA256,
+        "parser_common_artifact_manifest_hash": parser_common.manifest_hash,
         "source_execution": False,
         "annotation_processing": False,
         "document_manifest_hash": content_hash(document_rows),
+        "type_universe": universe,
+        "type_universe_manifest_hash": universe.manifest_hash,
         "declarations": ordered,
         "declaration_count": len(ordered),
         "supported_declaration_count": sum(item.supported for item in ordered),
@@ -233,17 +219,6 @@ def verify_java_source_index(
 
 def declaration_by_node_id(index: JavaSourceIndex) -> dict[str, JavaDeclaration]:
     return {item.node_id: item for item in index.declarations}
-
-
-def _verify_parser_installation() -> None:
-    if (
-        importlib.metadata.version("tree-sitter") != TREE_SITTER_VERSION
-        or importlib.metadata.version("tree-sitter-java") != TREE_SITTER_JAVA_VERSION
-    ):
-        raise RuntimeError("unpinned Java parser installation")
-    language = Language(tree_sitter_java.language())
-    if language.abi_version != 14:
-        raise RuntimeError("unexpected tree-sitter-java grammar ABI")
 
 
 def _index_document(
@@ -519,6 +494,9 @@ def _make_declaration(
             name=item[0],
             source_type=item[1],
             resolved_type=None,
+            resolution_kind=None,
+            resolution_receipt_hash=None,
+            resolution=None,
             type_span=item[2],
             name_span=item[3],
             varargs=item[4],
@@ -571,6 +549,10 @@ def _make_declaration(
         "type_variable_bounds": type_variables,
         "return_type": return_type,
         "resolved_return_type": None,
+        "return_resolution_kind": None,
+        "return_resolution_receipt_hash": None,
+        "return_resolution": None,
+        "type_universe_manifest_hash": None,
         "declared_exceptions": declared_exceptions,
         "source_span_hash": bytes_hash(raw[node.start_byte : node.end_byte]),
         "javadoc_span_hash": (
@@ -596,48 +578,60 @@ def _make_declaration(
 
 
 def _resolve_declaration(
-    declaration: JavaDeclaration, known_types: dict[str, tuple[str, ...]]
+    declaration: JavaDeclaration, universe: JavaTypeUniverse
 ) -> JavaDeclaration:
     imports = _explicit_import_map(declaration.imports)
     variables = dict(declaration.type_variable_bounds)
     parameters = []
     unresolved = declaration.unsupported_reason
     for parameter in declaration.parameters:
-        resolved = _resolve_type(
+        resolution = resolve_java_type(
             parameter.source_type,
-            declaration,
-            imports,
-            variables,
-            known_types,
+            universe=universe,
+            package_name=declaration.package_name,
+            receiver_type=declaration.receiver_type,
+            explicit_imports=imports,
+            wildcard_imports=declaration.wildcard_imports,
+            type_variables=variables,
         )
-        if resolved is None:
-            unresolved = (
-                unresolved or f"unresolved_parameter_type:{parameter.source_type}"
-            )
-        provisional = replace(parameter, resolved_type=resolved, parameter_hash="")
+        if resolution.resolved_type is None:
+            label = resolution.resolution_kind.value.lower()
+            unresolved = unresolved or f"{label}_parameter_type:{parameter.source_type}"
+        provisional = replace(
+            parameter,
+            resolved_type=resolution.resolved_type,
+            resolution_kind=resolution.resolution_kind,
+            resolution_receipt_hash=resolution.receipt_hash,
+            resolution=resolution,
+            parameter_hash="",
+        )
         row = asdict(provisional)
         row.pop("parameter_hash")
         parameters.append(replace(provisional, parameter_hash=content_hash(row)))
-    resolved_return = (
-        _resolve_type(
+    return_resolution = (
+        resolve_java_type(
             declaration.return_type,
-            declaration,
-            imports,
-            variables,
-            known_types,
+            universe=universe,
+            package_name=declaration.package_name,
+            receiver_type=declaration.receiver_type,
+            explicit_imports=imports,
+            wildcard_imports=declaration.wildcard_imports,
+            type_variables=variables,
         )
         if declaration.return_type
         else None
     )
+    resolved_return = (
+        return_resolution.resolved_type if return_resolution is not None else None
+    )
     if declaration.member_kind in {"method", "constructor"}:
         if declaration.return_type and resolved_return is None:
-            unresolved = (
-                unresolved or f"unresolved_return_type:{declaration.return_type}"
-            )
+            label = return_resolution.resolution_kind.value.lower()
+            unresolved = unresolved or f"{label}_return_type:{declaration.return_type}"
         parameter_descriptors = tuple(
-            _descriptor(item.resolved_type, item.varargs) for item in parameters
+            _descriptor(item.resolved_type, universe) for item in parameters
         )
-        return_descriptor = _descriptor(resolved_return, False, allow_void=True)
+        return_descriptor = _descriptor(resolved_return, universe, allow_void=True)
         descriptor = (
             UNRESOLVED_DESCRIPTOR
             if None in parameter_descriptors or return_descriptor is None
@@ -653,6 +647,14 @@ def _resolve_declaration(
         declaration,
         parameters=tuple(parameters),
         resolved_return_type=resolved_return,
+        return_resolution_kind=(
+            return_resolution.resolution_kind if return_resolution else None
+        ),
+        return_resolution_receipt_hash=(
+            return_resolution.receipt_hash if return_resolution else None
+        ),
+        return_resolution=return_resolution,
+        type_universe_manifest_hash=universe.manifest_hash,
         erased_jvm_descriptor=descriptor,
         supported=supported,
         unsupported_reason=unresolved,
@@ -663,65 +665,11 @@ def _resolve_declaration(
     return replace(provisional, declaration_hash=content_hash(row))
 
 
-def _resolve_type(value, declaration, imports, variables, known_types):
-    if value is None:
-        return None
-    text = _clean_type(value)
-    dimensions = 0
-    if text.endswith("..."):
-        dimensions += 1
-        text = text[:-3]
-    while text.endswith("[]"):
-        dimensions += 1
-        text = text[:-2]
-    text = _erase_generics(text).strip()
-    if text.startswith("? extends "):
-        text = text[10:].strip()
-    elif text.startswith("? super ") or text == "?":
-        text = "Object"
-    if text in _PRIMITIVE_DESCRIPTORS:
-        resolved = text
-    elif text in variables:
-        bound = variables[text] or "Object"
-        resolved = (
-            _resolve_type(bound, declaration, imports, {}, known_types)
-            or "java.lang.Object"
-        )
-    else:
-        parts = text.replace("$", ".").split(".")
-        head = parts[0]
-        if head in imports:
-            candidates = imports[head]
-            if len(candidates) != 1:
-                return None
-            resolved = ".".join((candidates[0], *parts[1:]))
-        elif head in _JAVA_LANG:
-            resolved = ".".join((f"java.lang.{head}", *parts[1:]))
-        elif head and head[0].islower() and len(parts) > 1:
-            resolved = text
-        else:
-            candidates = set(known_types.get(head, ()))
-            current_prefix = ".".join(
-                item
-                for item in (declaration.package_name, declaration.top_level_type_name)
-                if item
-            )
-            candidates.update(
-                item
-                for item in known_types.get(head, ())
-                if item == current_prefix or item.startswith(current_prefix + ".")
-            )
-            if len(candidates) != 1:
-                return None
-            resolved = ".".join((next(iter(candidates)), *parts[1:]))
-    return resolved + "[]" * dimensions
-
-
-def _descriptor(value: str | None, varargs: bool, *, allow_void=False):
+def _descriptor(value: str | None, universe: JavaTypeUniverse, *, allow_void=False):
     if value is None:
         return None
     text = value
-    dimensions = 1 if varargs else 0
+    dimensions = 0
     while text.endswith("[]"):
         dimensions += 1
         text = text[:-2]
@@ -729,27 +677,18 @@ def _descriptor(value: str | None, varargs: bool, *, allow_void=False):
         return None
     descriptor = _PRIMITIVE_DESCRIPTORS.get(text)
     if descriptor is None:
-        descriptor = f"L{text.replace('.', '/')};"
+        descriptor = f"L{_binary_type_name(text, universe).replace('.', '/')};"
     return "[" * dimensions + descriptor
 
 
-def _known_types(declarations):
-    values: dict[str, set[str]] = {}
-    for item in declarations:
-        if item.member_kind not in {
-            "class",
-            "interface",
-            "enum",
-            "record",
-            "annotation",
-        }:
-            continue
-        full = item.receiver_type
-        values.setdefault(item.member_name, set()).add(full)
-        values.setdefault(item.top_level_type_name, set()).add(
-            _receiver(item.package_name, (item.top_level_type_name,))
-        )
-    return {key: tuple(sorted(value)) for key, value in values.items()}
+def _binary_type_name(value: str, universe: JavaTypeUniverse) -> str:
+    parts = value.split(".")
+    symbols = set(universe.symbols)
+    for size in range(1, len(parts)):
+        prefix = ".".join(parts[:size])
+        if prefix in symbols:
+            return prefix + "$" + "$".join(parts[size:])
+    return value
 
 
 def _package_name(root, raw):

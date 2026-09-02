@@ -1,0 +1,1 @@
+{"census_count":600,"compile_options":["--release","21","-proc:none"],"helper_hash":"783270b924ba6fa0b41c2741ef63f568ed5eea0fe4fb0d054c37164d3c2cda63","javac_version":"javac 25.0.2","oracle_count":600,"oracle_options":["--release","21","-proc:none","-Xlint:none"],"receipt_hash":"c18ac9d3e23ee7ea690c3a2a2d1bc3755b1bbb51fd5e7d59036aa4ba22f4a362","schema_version":1,"source_count":9}

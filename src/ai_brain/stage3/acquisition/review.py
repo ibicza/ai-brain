@@ -5,7 +5,7 @@ from dataclasses import asdict, replace
 from ai_brain.stage2.education.models import ActorIdentityType
 from ai_brain.stage2.facts.canonical import content_hash, normalize_datetime, utc_now
 from ai_brain.stage3.acquisition.java_pipeline import (
-    TrustBoundProposalBatch,
+    VerifiedJavaTrustAuthorization,
     assert_java_proposal_state_authority,
 )
 from ai_brain.stage3.acquisition.models import (
@@ -30,7 +30,7 @@ def review_proposal(
     rationale: str,
     edited_content: KnowledgeContent | None = None,
     timestamp: str | None = None,
-    trust_authorization: TrustBoundProposalBatch | None = None,
+    trust_authorization: VerifiedJavaTrustAuthorization | None = None,
 ) -> tuple[KnowledgeProposal, AcquisitionReview, ProposalApproval | None]:
     approving = decision in {ReviewDecision.APPROVE, ReviewDecision.EDIT_AND_APPROVE}
     if proposal.extraction_method is ExtractionMethod.JAVA_AST:
