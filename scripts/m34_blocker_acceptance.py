@@ -298,6 +298,7 @@ def _source(root, name):
         (FIXTURES / name,),
         bundle_id=f"m34-{Path(name).stem.casefold()}",
         domain_tags=("java", "development-fixture"),
+        canonical_identity=False,
         imported_at=STAMP,
         version="development-v1",
         store=store,

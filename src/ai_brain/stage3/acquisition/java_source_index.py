@@ -130,10 +130,14 @@ class JavaDeclaration:
     deprecated_since: str | None
     deprecation_span: SourceLocation | None
     modifiers: tuple[str, ...]
+    annotations: tuple[str, ...]
     type_parameters: tuple[str, ...]
     type_variable_bounds: tuple[tuple[str, str], ...]
     type_variables_detail: tuple[JavaTypeVariable, ...]
     direct_super_types: tuple[str, ...]
+    unresolved_direct_super_types: tuple[str, ...]
+    inheritance_closed: bool
+    unresolved_type_dependencies: tuple[str, ...]
     return_type: str | None
     resolved_return_type: str | None
     return_resolution_kind: JavaResolutionKind | None
@@ -209,7 +213,9 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
     if not documents:
         raise ValueError("Java source index requires JAVA_SOURCE documents")
     declarations = []
-    for document in sorted(documents, key=lambda item: item.document_id):
+    for document in sorted(
+        documents, key=lambda item: item.relative_path.encode("utf-8")
+    ):
         raw = store.get_blob(document.bytes_hash)
         declarations.extend(_index_document(document, raw))
     source_symbols = tuple(
@@ -224,7 +230,12 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
         if item.member_kind in _TYPE_NODES.values() and not item.local_type
     )
     universe = build_java_type_universe(source_symbols)
-    direct_supers = _resolved_super_type_graph(declarations, universe)
+    direct_supers, unresolved_super_owners = _resolved_super_type_graph(
+        declarations, universe
+    )
+    incomplete_inheritance = _incomplete_inheritance_owners(
+        direct_supers, unresolved_super_owners
+    )
     resolved = tuple(
         _resolve_declaration(
             item,
@@ -232,6 +243,7 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
             lexical_owner_types=_transitive_super_types(
                 item.receiver_type, direct_supers
             ),
+            inheritance_closed=item.receiver_type not in incomplete_inheritance,
         )
         for item in declarations
     )
@@ -247,7 +259,9 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
     )
     document_rows = tuple(
         (item.document_id, item.document_hash, item.bytes_hash, item.relative_path)
-        for item in sorted(documents, key=lambda value: value.document_id)
+        for item in sorted(
+            documents, key=lambda value: value.relative_path.encode("utf-8")
+        )
     )
     body = {
         "parser_version": JAVA_PARSER_VERSION,
@@ -296,6 +310,11 @@ def _index_document(
     result: list[JavaDeclaration] = []
 
     def walk(node: Node, context: _TypeContext | None, in_executable: bool) -> None:
+        if node.type == "object_creation_expression":
+            # Anonymous-class members have no named receiver identity in the
+            # current IR.  Excluding them is deterministic and preserves exact
+            # location recall without misattributing them to the enclosing type.
+            return
         if node.type in _TYPE_NODES:
             type_declaration, next_context = _type_declaration(
                 node,
@@ -647,6 +666,7 @@ def _make_declaration(
     if type_node is not None:
         type_spans += (_location(type_node, raw),)
     modifiers = _modifiers(node, raw)
+    annotations = _annotations(node, raw)
     type_parameter_names = tuple(item[0] for item in type_variables)
     body = {
         "node_id": "",
@@ -673,10 +693,14 @@ def _make_declaration(
         "deprecated_since": deprecated_since,
         "deprecation_span": deprecation_span,
         "modifiers": modifiers,
+        "annotations": annotations,
         "type_parameters": type_parameter_names,
         "type_variable_bounds": type_variables,
         "type_variables_detail": type_variables_detail,
         "direct_super_types": direct_super_types,
+        "unresolved_direct_super_types": (),
+        "inheritance_closed": True,
+        "unresolved_type_dependencies": (),
         "return_type": return_type,
         "resolved_return_type": None,
         "return_resolution_kind": None,
@@ -720,12 +744,25 @@ def _resolve_declaration(
     universe: JavaTypeUniverse,
     *,
     lexical_owner_types: tuple[str, ...] = (),
+    inheritance_closed: bool = True,
 ) -> JavaDeclaration:
     imports = _explicit_import_map(declaration.imports)
     variables = dict(declaration.type_variable_bounds)
     occurrences: list[JavaTypeOccurrenceResolution] = []
     parameters = []
     unresolved = declaration.unsupported_reason
+
+    def resolve_dependency(source_type):
+        return resolve_java_type(
+            source_type,
+            universe=universe,
+            package_name=declaration.package_name,
+            receiver_type=declaration.receiver_type,
+            explicit_imports=imports,
+            wildcard_imports=declaration.wildcard_imports,
+            type_variables=variables,
+            lexical_owner_types=lexical_owner_types,
+        )
 
     def resolve_occurrence(field_path, source_type, location):
         resolution = resolve_java_type(
@@ -853,6 +890,44 @@ def _resolve_declaration(
     )
     if receiver_resolution.resolved_type is None:
         unresolved = unresolved or f"invalid_receiver_type:{declaration.receiver_type}"
+    signature_sources = (
+        *(item.source_type for item in declaration.parameters),
+        *((declaration.return_type,) if declaration.return_type else ()),
+        *declaration.declared_exceptions,
+        *(bound for item in declaration.type_variables_detail for bound in item.bounds),
+    )
+    unresolved_dependencies = tuple(
+        sorted(
+            {
+                reference
+                for source_type in signature_sources
+                for reference in _named_type_references(source_type, variables)
+                if resolve_dependency(reference).resolved_type is None
+            }
+        )
+    )
+    unresolved_supers = tuple(
+        sorted(
+            {
+                reference
+                for source_type in declaration.direct_super_types
+                for reference in _named_type_references(source_type, variables)
+                if resolve_dependency(reference).resolved_type is None
+            }
+        )
+    )
+    if unresolved_dependencies:
+        unresolved = unresolved or (
+            "unresolved_signature_dependency:" + unresolved_dependencies[0]
+        )
+    if (unresolved_supers or not inheritance_closed) and (
+        "Override" in declaration.annotations
+        or declaration.member_kind == "constructor"
+    ):
+        detail = (
+            unresolved_supers[0] if unresolved_supers else declaration.receiver_type
+        )
+        unresolved = unresolved or "unresolved_inheritance_contract:" + detail
     supported = declaration.supported and unresolved is None
     provisional = replace(
         declaration,
@@ -874,6 +949,9 @@ def _resolve_declaration(
             item.complete_receipt_hash for item in exception_resolutions
         ),
         type_occurrence_resolutions=tuple(occurrences),
+        unresolved_direct_super_types=unresolved_supers,
+        inheritance_closed=inheritance_closed,
+        unresolved_type_dependencies=unresolved_dependencies,
         erased_jvm_descriptor=descriptor,
         supported=supported,
         unsupported_reason=unresolved,
@@ -1008,10 +1086,12 @@ def _direct_super_types(node, raw):
 
 def _resolved_super_type_graph(declarations, universe):
     graph = {}
+    unresolved_owners = set()
     for declaration in declarations:
         if declaration.member_kind not in _TYPE_NODES.values():
             continue
         imports = _explicit_import_map(declaration.imports)
+        variables = dict(declaration.type_variable_bounds)
         values = []
         for source_type in declaration.direct_super_types:
             resolution = resolve_java_type(
@@ -1021,12 +1101,38 @@ def _resolved_super_type_graph(declarations, universe):
                 receiver_type=declaration.receiver_type,
                 explicit_imports=imports,
                 wildcard_imports=declaration.wildcard_imports,
-                type_variables=dict(declaration.type_variable_bounds),
+                type_variables=variables,
             )
             if resolution.resolved_type is not None:
                 values.append(resolution.resolved_type)
+            for reference in _named_type_references(source_type, variables):
+                dependency = resolve_java_type(
+                    reference,
+                    universe=universe,
+                    package_name=declaration.package_name,
+                    receiver_type=declaration.receiver_type,
+                    explicit_imports=imports,
+                    wildcard_imports=declaration.wildcard_imports,
+                    type_variables=variables,
+                )
+                if dependency.resolved_type is None:
+                    unresolved_owners.add(declaration.receiver_type)
         graph[declaration.receiver_type] = tuple(dict.fromkeys(values))
-    return graph
+    return graph, tuple(sorted(unresolved_owners))
+
+
+def _incomplete_inheritance_owners(graph, unresolved_owners):
+    incomplete = set(unresolved_owners)
+    changed = True
+    while changed:
+        changed = False
+        for owner, direct_supers in graph.items():
+            if owner not in incomplete and any(
+                value in incomplete for value in direct_supers
+            ):
+                incomplete.add(owner)
+                changed = True
+    return frozenset(incomplete)
 
 
 def _transitive_super_types(receiver_type, graph):
@@ -1136,6 +1242,52 @@ def _modifiers(node, raw):
             )
         )
     )
+
+
+def _annotations(node, raw):
+    container = next(
+        (item for item in node.named_children if item.type == "modifiers"), None
+    )
+    if container is None:
+        return ()
+    return tuple(
+        sorted(
+            {
+                value.rsplit(".", 1)[-1]
+                for value in re.findall(
+                    r"@([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)",
+                    _text(container, raw),
+                )
+            }
+        )
+    )
+
+
+def _named_type_references(source_type, variables):
+    if not source_type:
+        return ()
+    ignored = {
+        "byte",
+        "short",
+        "int",
+        "long",
+        "char",
+        "float",
+        "double",
+        "boolean",
+        "void",
+        "extends",
+        "super",
+        "var",
+    }
+    values = []
+    for value in re.findall(
+        r"[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*", _clean_type(source_type)
+    ):
+        if value in ignored or value.split(".", 1)[0] in variables:
+            continue
+        values.append(value)
+    return tuple(dict.fromkeys(values))
 
 
 def _deprecation(node, raw):

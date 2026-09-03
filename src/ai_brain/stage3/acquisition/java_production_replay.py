@@ -15,6 +15,7 @@ from ai_brain.stage3.acquisition.java_production import (
 )
 from ai_brain.stage3.acquisition.models import AcquisitionManifest, SourceBundle
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore, _document
+from ai_brain.stage3.domains.aliases import ALIAS_SEMANTICS_DEPENDENCY_PREFIX
 from ai_brain.stage3.domains.loader import load_pack
 
 JAVA_PRODUCTION_REPLAY_SCHEMA_VERSION = 1
@@ -63,9 +64,19 @@ def verify_compiled_java_production_standalone(pack_root: Path) -> dict[str, obj
     claimed = row.pop("artifact_hash")
     if content_hash(row) != claimed:
         raise ValueError("Java production replay artifact hash mismatch")
-    if pack.manifest.dependency_packs != (
-        JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX + claimed,
-    ):
+    replay_dependencies = tuple(
+        item
+        for item in pack.manifest.dependency_packs
+        if item.startswith(JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX)
+    )
+    other_dependencies = tuple(
+        item
+        for item in pack.manifest.dependency_packs
+        if item.startswith(ALIAS_SEMANTICS_DEPENDENCY_PREFIX)
+    )
+    if replay_dependencies != (JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX + claimed,) or (
+        pack.alias_semantics is None
+    ) != (not other_dependencies):
         raise ValueError("pack does not bind exact Java production replay artifact")
     if row["schema_version"] != JAVA_PRODUCTION_REPLAY_SCHEMA_VERSION:
         raise ValueError("unsupported Java production replay schema")
@@ -121,6 +132,7 @@ def _expected_artifacts(batch: JavaProductionTrustBatch) -> dict[str, object]:
         "proposal_field_manifest_hash": batch.proposal_batch.proposal_field_manifest_hash,
         "trust_decision_manifest_hash": batch.closure.trust_decision_manifest_hash,
         "trusted_proposal_manifest_hash": batch.closure.trusted_proposal_manifest_hash,
+        "packability_report_hash": batch.packability_report.report_hash,
         "release_identity_hash": batch.release_identity.identity_hash,
     }
 

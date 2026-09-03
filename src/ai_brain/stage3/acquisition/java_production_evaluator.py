@@ -48,6 +48,7 @@ class JavaProductionEvaluationReport:
     field_evidence: object
     resolution: object
     diagnostic_categories: tuple[dict, ...]
+    breakdowns: dict
     wrong_trusted_count: int
     passed: bool
     report_hash: str
@@ -81,7 +82,11 @@ def evaluate_sealed_java_production(
     }
     location = source_location_confusion(expected_locations, actual_locations)
     semantic = semantic_content_confusion(
-        golden_manifest, batch.proposal_batch, batch.source_index, batch.decisions
+        golden_manifest,
+        batch.proposal_batch,
+        batch.source_index,
+        batch.decisions,
+        include_semantic_status=not batch.closure.checker_version.startswith("m335."),
     )
     by_location = {
         (
@@ -115,6 +120,7 @@ def evaluate_sealed_java_production(
     evidence = evidence_confusion(batch.field_evidence)
     resolution = _resolution_report(golden_manifest, batch)
     diagnostic_categories = _diagnostic_report(golden_manifest, sealed_output)
+    breakdowns = _breakdown_report(golden_manifest, sealed_output, semantic)
     passed = (
         location.precision == "1.000000"
         and location.recall >= "0.950000"
@@ -135,6 +141,7 @@ def evaluate_sealed_java_production(
         "field_evidence": evidence,
         "resolution": resolution,
         "diagnostic_categories": diagnostic_categories,
+        "breakdowns": breakdowns,
         "wrong_trusted_count": trust.wrong_trusted,
         "passed": passed,
     }
@@ -161,18 +168,14 @@ def _resolution_report(goldens, batch):
         "descriptor_agreement": 0,
         "declaration_agreement": 0,
         "declaration_total": 0,
+        "expected_declaration_total": 0,
     }
+    mismatches = []
     for golden in goldens.goldens:
         semantics = golden.expected_semantics
         if semantics is None:
             continue
-        counts["declaration_total"] += 1
-        counts["parameters"] += len(semantics.source_parameter_types)
-        counts["returns"] += 1
-        counts["bounds"] += sum(len(item) for item in semantics.intersection_bounds)
-        counts["throws"] += len(semantics.declared_exception_source_types)
-        counts["receivers"] += 1
-        counts["module_accessibility"] += 1
+        counts["expected_declaration_total"] += 1
         key = (
             golden.document_bytes_hash,
             golden.source_unit_id,
@@ -182,17 +185,34 @@ def _resolution_report(goldens, batch):
         declaration = declarations.get(key)
         if declaration is None:
             continue
+        counts["declaration_total"] += 1
+        counts["parameters"] += len(semantics.source_parameter_types)
+        counts["returns"] += 1
+        counts["bounds"] += sum(len(item) for item in semantics.intersection_bounds)
+        counts["throws"] += len(semantics.declared_exception_source_types)
+        counts["receivers"] += 1
+        counts["module_accessibility"] += 1
         if golden.erased_jvm_descriptor == declaration.erased_jvm_descriptor:
             counts["descriptor_agreement"] += 1
-        if (
-            semantics.complete_type_resolution_manifest_hash
-            == type_resolution_semantic_manifest_hash(declaration)
-        ):
+        actual_resolution_hash = type_resolution_semantic_manifest_hash(declaration)
+        if semantics.complete_type_resolution_manifest_hash == actual_resolution_hash:
             counts["declaration_agreement"] += 1
+        else:
+            mismatches.append(
+                {
+                    "golden_id": golden.golden_id,
+                    "source_unit_id": golden.source_unit_id,
+                    "start_offset": golden.start_offset,
+                    "canonical_source_signature": golden.canonical_source_signature,
+                    "expected_hash": semantics.complete_type_resolution_manifest_hash,
+                    "actual_hash": actual_resolution_hash,
+                }
+            )
     total = counts["declaration_total"]
     counts["oracle_agreement"] = (
         "N/A" if total == 0 else f"{counts['declaration_agreement'] / total:.6f}"
     )
+    counts["declaration_mismatches"] = tuple(mismatches)
     return counts
 
 
@@ -242,3 +262,74 @@ def _diagnostic_report(goldens, sealed_output):
             }
         )
     return tuple(result)
+
+
+def _breakdown_report(goldens, sealed_output, semantic):
+    rows = {
+        (
+            item["document_bytes_hash"],
+            item["source_unit_id"],
+            item["start_offset"],
+            item["end_offset"],
+        ): item
+        for item in sealed_output["candidate_rows"]
+    }
+    semantic_mismatches = {item.golden_id for item in semantic.mismatches}
+    dimensions = {"source_root": {}, "java_construct": {}, "blocker_category": {}}
+    for golden in goldens.goldens:
+        expected = golden.expected_semantics
+        if expected is None:
+            continue
+        key = (
+            golden.document_bytes_hash,
+            golden.source_unit_id,
+            golden.start_offset,
+            golden.end_offset,
+        )
+        row = rows.get(key)
+        values = {
+            "source_root": golden.source_unit_id.partition("/")[0],
+            "java_construct": (
+                "CONSTRUCTOR"
+                if golden.canonical_source_signature.startswith("<init>(")
+                else "METHOD"
+            ),
+            "blocker_category": expected.expected_blocker_reason or "SUPPORTED",
+        }
+        for dimension, value in values.items():
+            counters = dimensions[dimension].setdefault(
+                value,
+                {
+                    "expected_count": 0,
+                    "located_count": 0,
+                    "semantic_exact_count": 0,
+                    "expected_supported_count": 0,
+                    "trusted_count": 0,
+                    "correct_trusted_count": 0,
+                    "wrong_trusted_count": 0,
+                    "withheld_count": 0,
+                },
+            )
+            counters["expected_count"] += 1
+            counters["expected_supported_count"] += int(expected.expected_supported)
+            if row is None:
+                continue
+            counters["located_count"] += 1
+            counters["semantic_exact_count"] += int(
+                golden.golden_id not in semantic_mismatches
+            )
+            trusted = row["production_trust_state"] == "trusted"
+            counters["trusted_count"] += int(trusted)
+            counters["correct_trusted_count"] += int(
+                trusted and expected.expected_supported
+            )
+            counters["wrong_trusted_count"] += int(
+                trusted and not expected.expected_supported
+            )
+            counters["withheld_count"] += int(not trusted)
+    return {
+        dimension: tuple(
+            {"value": value, **counters} for value, counters in sorted(groups.items())
+        )
+        for dimension, groups in sorted(dimensions.items())
+    }

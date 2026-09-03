@@ -115,19 +115,19 @@ def _receiver_type(_requirement, declaration, *_args):
 
 
 def _java_object_type(_requirement, declaration, *_args):
+    source_return = _normalize_type(declaration.return_type or "")
+    resolved_return = _normalize_type(declaration.resolved_return_type or "")
     if declaration.member_kind == "constructor":
         return ValueTypeRef(
             ValueTypeKind.ENTITY, EntityTypeRef(declaration.receiver_type)
         )
-    if (declaration.return_type or "").strip().endswith(("[]", "...")) or (
-        declaration.resolved_return_type or ""
-    ).strip().endswith("[]"):
+    if source_return.endswith(("[]", "...")) or resolved_return.endswith("[]"):
         return ValueTypeRef(
             ValueTypeKind.ENTITY,
-            EntityTypeRef(declaration.resolved_return_type or declaration.return_type),
+            EntityTypeRef(resolved_return or source_return),
         )
-    source = _base_type(declaration.return_type or "")
-    resolved = _base_type(declaration.resolved_return_type or "")
+    source = _base_type(source_return)
+    resolved = _base_type(resolved_return)
     if source == "void" or resolved == "void":
         return ValueTypeRef(ValueTypeKind.VOID)
     if source == "boolean" or resolved == "boolean":
@@ -149,7 +149,7 @@ def _java_object_type(_requirement, declaration, *_args):
         return ValueTypeRef(ValueTypeKind.STRING)
     return ValueTypeRef(
         ValueTypeKind.ENTITY,
-        EntityTypeRef(declaration.resolved_return_type or declaration.return_type),
+        EntityTypeRef(resolved_return or source_return),
     )
 
 
@@ -157,7 +157,7 @@ def _generic_constraint(requirement, declaration, *_args):
     item = tuple(
         value for value in declaration.type_variables_detail if value.explicit_bounds
     )[_index(requirement.field_path)]
-    return f"{item.name} extends {' & '.join(item.bounds)}"
+    return f"{item.name} extends {' & '.join(_normalize_type(value) for value in item.bounds)}"
 
 
 def _declared_exception_source(requirement, declaration, *_args):
@@ -181,7 +181,7 @@ def _callable_kind(_requirement, declaration, *_args):
 
 def _resolved_parameter(requirement, declaration, *_args):
     item = declaration.parameters[_index(requirement.field_path)]
-    return item.resolved_type or f"UNRESOLVED:{item.source_type}"
+    return item.resolved_type or f"UNRESOLVED:{_normalize_type(item.source_type)}"
 
 
 def _parameter_dimensions(requirement, declaration, *_args):
@@ -194,7 +194,9 @@ def _parameter_varargs(requirement, declaration, *_args):
 
 
 def _resolved_return(_requirement, declaration, *_args):
-    return declaration.resolved_return_type or f"UNRESOLVED:{declaration.return_type}"
+    return declaration.resolved_return_type or (
+        f"UNRESOLVED:{_normalize_type(declaration.return_type)}"
+    )
 
 
 def _return_dimensions(_requirement, declaration, *_args):
@@ -206,27 +208,30 @@ def _method_type_parameter(requirement, declaration, *_args):
 
 
 def _intersection_bound(requirement, declaration, *_args):
-    return _callable_type_details(declaration)[_index(requirement.field_path)].bounds[
+    value = _callable_type_details(declaration)[_index(requirement.field_path)].bounds[
         _index(requirement.field_path, 1)
     ]
+    return _normalize_type(value)
 
 
 def _intersection_bound_shape(_requirement, declaration, *_args):
     return tuple(
-        item.bounds if item.explicit_bounds else ()
+        tuple(_normalize_type(value) for value in item.bounds)
+        if item.explicit_bounds
+        else ()
         for item in _callable_type_details(declaration)
     )
 
 
 def _first_bound(requirement, declaration, *_args):
     item = _callable_type_details(declaration)[_index(requirement.field_path)]
-    return item.first_bound_erasure or f"UNRESOLVED:{item.bounds[0]}"
+    return item.first_bound_erasure or f"UNRESOLVED:{_normalize_type(item.bounds[0])}"
 
 
 def _resolved_exception(requirement, declaration, *_args):
     index = _index(requirement.field_path)
     return declaration.resolved_declared_exceptions[index] or (
-        f"UNRESOLVED:{declaration.declared_exceptions[index]}"
+        f"UNRESOLVED:{_normalize_type(declaration.declared_exceptions[index])}"
     )
 
 

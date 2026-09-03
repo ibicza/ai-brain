@@ -4,6 +4,15 @@ import json
 from pathlib import Path
 
 from ai_brain.stage3.capabilities.models import CapabilityRequirement
+from ai_brain.stage3.domains.aliases import (
+    ALIAS_SEMANTICS_DEPENDENCY_PREFIX,
+    ALIAS_SEMANTICS_FILENAME,
+    AliasSemantics,
+    AuthoritativeIdentity,
+    ExactReferenceAlias,
+    SearchAliasEntry,
+    verify_alias_semantics,
+)
 from ai_brain.stage3.domains.manifest import *
 from ai_brain.stage3.domains.pack import *
 from ai_brain.stage3.domains.validation import validate_pack
@@ -42,6 +51,7 @@ def load_pack(root: Path) -> DomainPack:
             "approval.json",
             "java_evidence_closure.json",
             "java_production_closure.json",
+            ALIAS_SEMANTICS_FILENAME,
         }
     )
     if unexpected:
@@ -77,6 +87,17 @@ def load_pack(root: Path) -> DomainPack:
     )
     if java_artifacts != len(java_dependencies) or len(java_dependencies) > 1:
         raise ValueError("Java evidence closure dependency mismatch")
+    alias_dependencies = tuple(
+        item
+        for item in manifest.dependency_packs
+        if item.startswith(ALIAS_SEMANTICS_DEPENDENCY_PREFIX)
+    )
+    alias_path = root / ALIAS_SEMANTICS_FILENAME
+    if (
+        len(alias_dependencies) != int(alias_path.is_file())
+        or len(alias_dependencies) > 1
+    ):
+        raise ValueError("pack alias-semantics dependency mismatch")
     lines = (root / "knowledge.jsonl").read_text(encoding="utf-8").splitlines()
     if len(lines) > 100_000 or any(
         len(line.encode("utf-8")) > 4 * 1024 * 1024 for line in lines
@@ -131,6 +152,33 @@ def load_pack(root: Path) -> DomainPack:
         )
         for x in _read(root / "source_bindings.json")
     )
+    alias_semantics = None
+    if alias_path.is_file():
+        alias_row = _read(alias_path)
+        alias_semantics = AliasSemantics(
+            schema_version=alias_row["schema_version"],
+            authoritative_identities=tuple(
+                AuthoritativeIdentity(**item)
+                for item in alias_row["authoritative_identities"]
+            ),
+            exact_references=tuple(
+                ExactReferenceAlias(**item) for item in alias_row["exact_references"]
+            ),
+            search_aliases=tuple(
+                SearchAliasEntry(
+                    alias=item["alias"], record_ids=tuple(item["record_ids"])
+                )
+                for item in alias_row["search_aliases"]
+            ),
+            index_hash=alias_row["index_hash"],
+        )
+        if alias_dependencies != (
+            ALIAS_SEMANTICS_DEPENDENCY_PREFIX + alias_semantics.index_hash,
+        ):
+            raise ValueError("pack binds another alias-semantics index")
+        verify_alias_semantics(
+            alias_semantics, tuple(item.knowledge_id for item in records)
+        )
     value = DomainPack(
         str(root),
         manifest,
@@ -140,6 +188,7 @@ def load_pack(root: Path) -> DomainPack:
         adapters,
         sources,
         _read(root / "evaluation_manifest.json"),
+        alias_semantics,
     )
     validate_pack(value)
     pack_manifest = _read(root / "pack_manifest.json")

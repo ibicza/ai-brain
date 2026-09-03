@@ -32,30 +32,42 @@ def write(path: Path, value) -> None:
 
 
 def run_oracle(java, classes, corpus, sources, patch_java_base=None):
-    command = [
-        str(java),
+    arguments = [
         "-Dfile.encoding=UTF-8",
     ]
     if patch_java_base is not None:
-        command.append(f"-Dm344.patchJavaBase={patch_java_base.resolve()}")
-    command.extend(
+        arguments.append(f"-Dm344.patchJavaBase={patch_java_base.resolve().as_posix()}")
+    arguments.extend(
         [
             "-cp",
-            str(classes),
+            classes.resolve().as_posix(),
             "JavaSemanticProposalOracle",
             "oracle",
-            str(corpus.resolve()),
+            corpus.resolve().as_posix(),
         ]
     )
-    command.extend(str(path.resolve()) for path in sources)
-    completed = subprocess.run(
-        command,
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-    )
+    arguments.extend(path.resolve().as_posix() for path in sources)
+    # Java launcher argument files avoid the Windows CreateProcess command-line
+    # limit while preserving the exact, explicitly ordered source list.
+    with tempfile.TemporaryDirectory(prefix="m335-java-oracle-args-") as temporary:
+        argument_file = Path(temporary) / "oracle.args"
+        argument_file.write_text(
+            "\n".join(_java_argument(value) for value in arguments) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        completed = subprocess.run(
+            [str(java), f"@{argument_file.resolve().as_posix()}"],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
     return tuple(json.loads(line) for line in completed.stdout.splitlines() if line)
+
+
+def _java_argument(value: str) -> str:
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
 def object_type(row):

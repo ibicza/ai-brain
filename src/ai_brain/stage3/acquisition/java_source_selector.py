@@ -9,6 +9,9 @@ import tree_sitter_java
 from tree_sitter import Language, Parser
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
+from ai_brain.stage3.acquisition.java_disclosed_corpus import (
+    load_m335_disclosed_corpus_denylist,
+)
 from ai_brain.stage3.acquisition.java_release import JAVA_TARGET_RELEASE
 
 JAVA_SOURCE_SELECTOR_VERSION = "m344.final-java-selector.v1"
@@ -80,6 +83,11 @@ def frozen_final_source_selector_policy(
             "Apache-2.0",
         ),
     )
+    disclosed = load_m335_disclosed_corpus_denylist()
+    permanent_denylist = (
+        *disclosed["raw_source_hashes"],
+        *disclosed["canonical_text_hashes"],
+    )
     body = {
         "target_release": JAVA_TARGET_RELEASE,
         "families": families,
@@ -106,7 +114,9 @@ def frozen_final_source_selector_policy(
         "maximum_files": 240,
         "maximum_total_bytes": 16 * 1024 * 1024,
         "selection_strategy": "sha256(F13_SHA + family_id + relative_path), ascending",
-        "prior_corpus_hash_denylist": tuple(sorted(set(prior_corpus_hash_denylist))),
+        "prior_corpus_hash_denylist": tuple(
+            sorted({*prior_corpus_hash_denylist, *permanent_denylist})
+        ),
         "required_licenses": ("Apache-2.0",),
     }
     return JavaFinalSourceSelectorPolicy(**body, policy_hash=content_hash(body))
@@ -137,7 +147,18 @@ def select_final_java_sources(
             if not _contains_real_callable_type(raw):
                 continue
             digest = bytes_hash(raw)
-            if digest in policy.prior_corpus_hash_denylist:
+            canonical = (
+                raw.decode("utf-8", errors="strict")
+                .replace("\r\n", "\n")
+                .replace("\r", "\n")
+                .rstrip()
+                + "\n"
+            )
+            canonical_digest = bytes_hash(canonical.encode("utf-8"))
+            if (
+                digest in policy.prior_corpus_hash_denylist
+                or canonical_digest in policy.prior_corpus_hash_denylist
+            ):
                 continue
             rank = content_hash((f13_sha, family_id, relative))
             ranked.append((rank, family_id, relative, path, len(raw)))

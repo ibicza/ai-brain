@@ -19,6 +19,12 @@ from ai_brain.stage3.acquisition.java_evidence_policy import (
     JavaEvidencePolicyManifest,
     load_production_java_evidence_policy,
 )
+from ai_brain.stage3.acquisition.java_identity import canonical_java_callable_identity
+from ai_brain.stage3.acquisition.java_packability import (
+    JavaPackabilityReport,
+    build_java_packability_report,
+    verify_java_packability_report,
+)
 from ai_brain.stage3.acquisition.java_parser_artifact import (
     JavaParserArtifactManifest,
     JavaParserCommonArtifactManifest,
@@ -60,8 +66,8 @@ from ai_brain.stage3.acquisition.trust import (
 )
 from ai_brain.stage3.acquisition.verification import verify_proposals
 
-JAVA_PRODUCTION_CHECKER_VERSION = "m344.source-entailed-java-trust.v1"
-JAVA_PRODUCTION_VERIFIER_VERSION = "m344.java-production-verifier.v1"
+JAVA_PRODUCTION_CHECKER_VERSION = "m335.source-entailed-java-trust.v2"
+JAVA_PRODUCTION_VERIFIER_VERSION = "m335.java-production-verifier.v2"
 _ISSUED_AUTHORIZATIONS: dict[int, ref] = {}
 
 
@@ -117,6 +123,7 @@ class JavaProductionTrustClosure:
     evidence_policy_coverage_hash: str | None
     field_evidence_manifest_hash: str
     conflict_report_hash: str
+    packability_report_hash: str
     trust_decision_manifest_hash: str
     trusted_proposal_manifest_hash: str
     checker_version: str
@@ -137,6 +144,7 @@ class JavaProductionTrustBatch:
     parser_common_artifact: JavaParserCommonArtifactManifest
     parser_platform_artifact: JavaParserArtifactManifest
     conflict_report: JavaProductionConflictReport
+    packability_report: JavaPackabilityReport
     decisions: tuple[JavaProductionTrustDecision, ...]
     trusted_proposals: tuple[KnowledgeProposal, ...]
     trusted_count: int
@@ -230,14 +238,36 @@ def bind_java_production_trust(
     consistency = evaluate_java_release_consistency(release_identity)
     if field_evidence.evidence_policy_hash != evidence_policy.manifest_hash:
         raise ValueError("Java evidence is outside frozen production policy")
-    conflicts = detect_java_production_identity_conflicts(proposal_batch, source_index)
     nodes = declaration_by_node_id(source_index)
     bindings = {item.proposal_id: item for item in proposal_batch.bindings}
     evidence_map = evidence_by_proposal(field_evidence)
     incomplete = nonexact_evidence_proposal_ids(
         field_evidence, proposal_batch, source_index, evidence_policy
     )
+    classpath_blockers = _classpath_closure_blockers(proposal_batch, source_index)
+    semantic_eligible = tuple(
+        proposal.proposal_id
+        for proposal in proposal_batch.proposals
+        if proposal.status not in {ProposalStatus.VERIFIED, ProposalStatus.APPROVED}
+        and nodes[bindings[proposal.proposal_id].parser_node_id].supported
+        and proposal.proposal_id not in incomplete
+        and proposal.proposal_id not in classpath_blockers
+        and evidence_map.get(proposal.proposal_id)
+    )
+    packability = build_java_packability_report(
+        proposal_batch,
+        source_index,
+        release_identity,
+        semantic_eligible,
+        domain_id="java",
+    )
+    verify_java_packability_report(packability)
+    conflicts = detect_java_production_identity_conflicts(proposal_batch, source_index)
     implicated = set(conflicts.implicated_proposal_ids)
+    packability_blockers = dict(packability.withholding_reasons)
+    canonical_identities = {
+        item.proposal_id: item.identity.identity_hash for item in packability.bindings
+    }
     decisions = []
     for proposal in proposal_batch.proposals:
         declaration = nodes[bindings[proposal.proposal_id].parser_node_id]
@@ -250,6 +280,10 @@ def bind_java_production_trust(
             )
         elif proposal.proposal_id in implicated:
             blocker = "untrusted_conflicting_identity"
+        elif proposal.proposal_id in classpath_blockers:
+            blocker = "untrusted_" + classpath_blockers[proposal.proposal_id]
+        elif proposal.proposal_id in packability_blockers:
+            blocker = f"untrusted_{packability_blockers[proposal.proposal_id].lower()}"
         elif proposal.proposal_id in incomplete or not evidence_map.get(
             proposal.proposal_id
         ):
@@ -261,6 +295,7 @@ def bind_java_production_trust(
                 evidence_map.get(proposal.proposal_id, ()),
                 blocker,
                 deterministic_run_id,
+                canonical_identities.get(proposal.proposal_id),
             )
         )
     decision_values = tuple(sorted(decisions, key=lambda item: item.proposal_id))
@@ -270,8 +305,17 @@ def bind_java_production_trust(
         if item.final_state is ProposalTrustState.TRUSTED
     }
     trusted = tuple(
-        item for item in proposal_batch.proposals if item.proposal_id in trusted_ids
+        sorted(
+            (
+                item
+                for item in proposal_batch.proposals
+                if item.proposal_id in trusted_ids
+            ),
+            key=lambda item: item.proposal_id,
+        )
     )
+    if tuple(item.proposal_id for item in trusted) != packability.packable_proposal_ids:
+        raise ValueError("final Java trust differs from successful packability closure")
     duplicate_derived = _duplicate_derived_trusted(
         segmentation, proposal_batch, trusted_ids
     )
@@ -296,6 +340,7 @@ def bind_java_production_trust(
         release_identity,
         parser_common_artifact,
         conflicts,
+        packability,
         decision_values,
         trusted,
         deterministic_run_id,
@@ -315,6 +360,7 @@ def bind_java_production_trust(
         "parser_common_artifact": parser_common_artifact,
         "parser_platform_artifact": parser_platform_artifact,
         "conflict_report": conflicts,
+        "packability_report": packability,
         "decisions": decision_values,
         "trusted_proposals": trusted,
         "trusted_count": len(trusted),
@@ -323,7 +369,7 @@ def bind_java_production_trust(
         "duplicate_derived_trusted_proposals": duplicate_derived,
         "closure": closure,
     }
-    return JavaProductionTrustBatch(**body, batch_hash=content_hash(body))
+    return JavaProductionTrustBatch(**body, batch_hash=_production_batch_hash(body))
 
 
 def verify_java_production_batch(
@@ -332,7 +378,7 @@ def verify_java_production_batch(
 ) -> tuple[VerifiedJavaProductionAuthorization, ...]:
     body = asdict(batch)
     claimed = body.pop("batch_hash")
-    if content_hash(body) != claimed:
+    if _production_batch_hash(body) != claimed:
         raise ValueError("Java production batch hash mismatch")
     verify_java_release_identity(batch.release_identity)
     actual_common, actual_platform = verify_java_parser_artifact()
@@ -408,12 +454,14 @@ def seal_java_production_output(batch: JavaProductionTrustBatch) -> dict:
     nodes = declaration_by_node_id(batch.source_index)
     bindings = {item.proposal_id: item for item in batch.proposal_batch.bindings}
     decisions = {item.proposal_id: item for item in batch.decisions}
+    packability = {item.proposal_id: item for item in batch.packability_report.bindings}
     rows = []
     for proposal in sorted(
         batch.proposal_batch.proposals, key=lambda item: item.proposal_id
     ):
         declaration = nodes[bindings[proposal.proposal_id].parser_node_id]
         decision = decisions[proposal.proposal_id]
+        packability_binding = packability.get(proposal.proposal_id)
         rows.append(
             {
                 "proposal_id": proposal.proposal_id,
@@ -428,6 +476,16 @@ def seal_java_production_output(batch: JavaProductionTrustBatch) -> dict:
                 "member_kind": declaration.member_kind,
                 "member_name": declaration.member_name,
                 "declaration_hash": declaration.declaration_hash,
+                "canonical_callable_identity": (
+                    asdict(packability_binding.identity)
+                    if packability_binding is not None
+                    else None
+                ),
+                "candidate_record_id": (
+                    packability_binding.record_id
+                    if packability_binding is not None
+                    else None
+                ),
                 "proposal_content": asdict(proposal.proposed_content),
                 "production_supported": declaration.supported,
                 "production_trust_state": decision.final_state.value,
@@ -445,6 +503,7 @@ def seal_java_production_output(batch: JavaProductionTrustBatch) -> dict:
             batch.proposal_batch.proposal_field_manifest_hash
         ),
         "field_evidence_manifest_hash": batch.field_evidence.manifest_hash,
+        "packability_report_hash": batch.packability_report.report_hash,
         "trust_closure_hash": batch.closure.closure_hash,
         "candidate_rows": tuple(rows),
     }
@@ -456,23 +515,25 @@ def detect_java_production_identity_conflicts(
     source_index: JavaSourceIndex,
 ) -> JavaProductionConflictReport:
     nodes = declaration_by_node_id(source_index)
+    proposals = {item.proposal_id: item for item in proposal_batch.proposals}
+    release = frozen_java_release_identity()
     conflicts = {}
     by_proposal: dict[str, list] = {}
     by_physical: dict[tuple, list] = {}
     by_signature: dict[tuple, list] = {}
+    identities = {}
     for binding in proposal_batch.bindings:
         declaration = nodes[binding.parser_node_id]
         by_proposal.setdefault(binding.proposal_id, []).append(binding)
         by_physical.setdefault(_physical_key(declaration), []).append(binding)
-        by_signature.setdefault(
-            (
-                declaration.receiver_type,
-                declaration.member_kind,
-                declaration.member_name,
-                declaration.erased_jvm_descriptor,
-            ),
-            [],
-        ).append(binding)
+        if (
+            not declaration.supported
+            or declaration.erased_jvm_descriptor == "UNRESOLVED"
+        ):
+            continue
+        identity = canonical_java_callable_identity(declaration, release)
+        identities[binding.proposal_id] = identity
+        by_signature.setdefault(identity.runtime_key, []).append(binding)
     for values, kind in (
         *(
             (values, "ONE_PROPOSAL_MULTIPLE_DECLARATIONS")
@@ -482,7 +543,6 @@ def detect_java_production_identity_conflicts(
             (values, "MULTIPLE_PROPOSALS_SAME_DECLARATION")
             for values in by_physical.values()
         ),
-        *((values, "ILLEGAL_DUPLICATE_SIGNATURE") for values in by_signature.values()),
     ):
         if len(values) < 2:
             continue
@@ -504,6 +564,33 @@ def detect_java_production_identity_conflicts(
                 (_location(left_node), _location(right_node)),
             )
             conflicts[conflict.conflict_hash] = conflict
+    for signature_bindings in by_signature.values():
+        if len(signature_bindings) < 2:
+            continue
+        for left, right in combinations(signature_bindings, 2):
+            left_node, right_node = (
+                nodes[left.parser_node_id],
+                nodes[right.parser_node_id],
+            )
+            left_identity = identities[left.proposal_id]
+            right_identity = identities[right.proposal_id]
+            semantic_hashes = {
+                content_hash(asdict(proposals[left.proposal_id].proposed_content)),
+                content_hash(asdict(proposals[right.proposal_id].proposed_content)),
+            }
+            if left_identity.source_scope != right_identity.source_scope:
+                kind = "CROSS_SOURCE_BINARY_COLLISION"
+            elif len(semantic_hashes) == 1:
+                kind = "SAME_CANONICAL_IDENTITY_SAME_CONTENT"
+            else:
+                kind = "SAME_CANONICAL_IDENTITY_DIFFERENT_CONTENT"
+            conflict = _conflict(
+                kind,
+                (left.proposal_id, right.proposal_id),
+                (left.parser_node_id, right.parser_node_id),
+                (_location(left_node), _location(right_node)),
+            )
+            conflicts[conflict.conflict_hash] = conflict
     values = tuple(conflicts[key] for key in sorted(conflicts))
     implicated = tuple(
         sorted({value for item in values for value in item.proposal_ids})
@@ -518,7 +605,9 @@ def detect_java_production_identity_conflicts(
     return JavaProductionConflictReport(**body, report_hash=content_hash(body))
 
 
-def _production_decision(proposal, declaration, evidence, blocker, run_id):
+def _production_decision(
+    proposal, declaration, evidence, blocker, run_id, canonical_identity_hash
+):
     if blocker:
         steps = ((ProposalTrustState.CANDIDATE, ProposalTrustState.WITHHELD, blocker),)
         state = ProposalTrustState.WITHHELD
@@ -543,7 +632,13 @@ def _production_decision(proposal, declaration, evidence, blocker, run_id):
         state = ProposalTrustState.TRUSTED
     transitions = tuple(
         _transition(
-            proposal.proposal_id, previous, following, reason, declaration, run_id
+            proposal.proposal_id,
+            previous,
+            following,
+            reason,
+            declaration,
+            run_id,
+            canonical_identity_hash,
         )
         for previous, following, reason in steps
     )
@@ -561,14 +656,23 @@ def _production_decision(proposal, declaration, evidence, blocker, run_id):
     return JavaProductionTrustDecision(**body, decision_hash=content_hash(body))
 
 
-def _transition(proposal_id, previous, following, reason, declaration, run_id):
+def _transition(
+    proposal_id,
+    previous,
+    following,
+    reason,
+    declaration,
+    run_id,
+    canonical_identity_hash,
+):
     body = {
         "proposal_id": proposal_id,
         "previous_state": previous,
         "next_state": following,
         "reason": reason,
         "source_document_hash": declaration.source_snapshot_hash,
-        "semantic_identity_hash": declaration.declaration_hash,
+        "semantic_identity_hash": canonical_identity_hash
+        or declaration.declaration_hash,
         "source_span_hash": declaration.source_span_hash,
         "checker_version": JAVA_PRODUCTION_CHECKER_VERSION,
         "deterministic_run_id": run_id,
@@ -586,6 +690,7 @@ def _make_production_closure(
     release,
     parser_common,
     conflicts,
+    packability,
     decisions,
     trusted,
     run_id,
@@ -601,10 +706,9 @@ def _make_production_closure(
         )
         for item in segmentation.segments
     )
-    nodes = declaration_by_node_id(source_index)
     identity = tuple(
-        (binding.proposal_id, nodes[binding.parser_node_id].declaration_hash)
-        for binding in proposals.bindings
+        (binding.proposal_id, binding.identity.identity_hash)
+        for binding in packability.bindings
     )
     resolution = tuple(
         (
@@ -633,6 +737,7 @@ def _make_production_closure(
         "evidence_policy_coverage_hash": evidence.policy_coverage_hash,
         "field_evidence_manifest_hash": evidence.manifest_hash,
         "conflict_report_hash": conflicts.report_hash,
+        "packability_report_hash": packability.report_hash,
         "trust_decision_manifest_hash": content_hash(
             tuple((item.proposal_id, item.decision_hash) for item in decisions)
         ),
@@ -643,6 +748,29 @@ def _make_production_closure(
         "deterministic_run_id": run_id,
     }
     return JavaProductionTrustClosure(**body, closure_hash=content_hash(body))
+
+
+def _production_batch_hash(body) -> str:
+    """Hash only platform-independent production semantics.
+
+    The native parser wheel remains verified and retained as a process audit field,
+    but its Windows/Linux payload identity cannot define production semantics.
+    """
+
+    values = dict(body)
+    values.pop("parser_platform_artifact", None)
+    bundle = values["bundle"]
+    values["bundle"] = {
+        "bundle_id": (
+            bundle.bundle_id if hasattr(bundle, "bundle_id") else bundle["bundle_id"]
+        ),
+        "bundle_hash": (
+            bundle.bundle_hash
+            if hasattr(bundle, "bundle_hash")
+            else bundle["bundle_hash"]
+        ),
+    }
+    return content_hash(values)
 
 
 def _authorization(batch, decision):
@@ -710,3 +838,42 @@ def _duplicate_derived_trusted(segmentation, proposal_batch, trusted_ids):
         item.proposal_id: item.segment_id for item in proposal_batch.bindings
     }
     return sum(segment_by_proposal[item] in aliases for item in trusted_ids)
+
+
+def _classpath_closure_blockers(proposal_batch, source_index):
+    """Withhold signature cohorts whose classpath meaning is not closed.
+
+    A single unresolved overload can make resolved siblings illegal after
+    erasure.  This closure uses source/type-universe facts only.
+    """
+
+    nodes = declaration_by_node_id(source_index)
+    bindings = {item.proposal_id: item for item in proposal_batch.bindings}
+    groups = {}
+    for proposal in proposal_batch.proposals:
+        declaration = nodes[bindings[proposal.proposal_id].parser_node_id]
+        key = (
+            declaration.receiver_type,
+            declaration.member_kind,
+            declaration.member_name,
+        )
+        groups.setdefault(key, []).append((proposal.proposal_id, declaration))
+    result = {}
+    for values in groups.values():
+        if any(
+            not declaration.supported
+            and declaration.unsupported_reason
+            and any(
+                token in declaration.unsupported_reason
+                for token in (
+                    "parameter_type",
+                    "return_type",
+                    "signature_dependency",
+                )
+            )
+            for _proposal_id, declaration in values
+        ):
+            for proposal_id, declaration in values:
+                if declaration.supported:
+                    result[proposal_id] = "unresolved_overload_cohort"
+    return result

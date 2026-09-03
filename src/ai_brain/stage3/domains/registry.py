@@ -38,6 +38,7 @@ from ai_brain.stage3.knowledge_ir.version import (
 )
 
 _INTERNAL_PACK_DEPENDENCY_PREFIXES = (
+    "alias-semantics.",
     "java-evidence-closure.",
     "java-production-closure.",
 )

@@ -40,6 +40,13 @@ from ai_brain.stage3.acquisition.trust import (
     ProposalTrustGateReport,
 )
 from ai_brain.stage3.capabilities.models import CapabilityRequirement
+from ai_brain.stage3.domains.aliases import (
+    ALIAS_SEMANTICS_DEPENDENCY_PREFIX,
+    ALIAS_SEMANTICS_FILENAME,
+    AuthoritativeIdentity,
+    ExactReferenceAlias,
+    build_alias_semantics,
+)
 from ai_brain.stage3.domains.loader import load_pack
 from ai_brain.stage3.domains.manifest import (
     DomainPackManifest,
@@ -158,7 +165,34 @@ def compile_provisional_pack(
                     "Java approval does not bind trusted proposal revision"
                 )
     segment_by_id = {item.segment_id: item for item in segments}
-    aliases = _aliases(domain_id, selected, signature_aware=java_domain)
+    alias_semantics = None
+    if production_trust_batch is not None:
+        report = production_trust_batch.packability_report
+        if report.status != "PASS":
+            raise ValueError("Java final trust has no successful packability report")
+        pack_bindings = {item.proposal_id: item for item in report.bindings}
+        aliases = dict(report.exact_references)
+        authorities = tuple(
+            AuthoritativeIdentity(
+                record_id=pack_bindings[item.proposal_id].record_id,
+                authority_kind="JAVA_CANONICAL_CALLABLE",
+                canonical_value=canonical_json(
+                    asdict(pack_bindings[item.proposal_id].identity)
+                ),
+                identity_hash=pack_bindings[item.proposal_id].identity.identity_hash,
+            )
+            for item in selected
+        )
+        alias_semantics = build_alias_semantics(
+            authorities,
+            tuple(
+                ExactReferenceAlias(reference, record_id)
+                for reference, record_id in report.exact_references
+            ),
+            dict(report.search_aliases),
+        )
+    else:
+        aliases = _aliases(domain_id, selected, signature_aware=java_domain)
     records = []
     sources = []
     for proposal in selected:
@@ -284,8 +318,21 @@ def compile_provisional_pack(
         )
         replay_filename = JAVA_REPLAY_FILENAME
         replay_prefix = JAVA_REPLAY_DEPENDENCY_PREFIX
-    dependencies = (
-        (replay_prefix + replay_artifact["artifact_hash"],) if replay_artifact else ()
+    dependencies = tuple(
+        item
+        for item in (
+            (
+                replay_prefix + replay_artifact["artifact_hash"]
+                if replay_artifact
+                else None
+            ),
+            (
+                ALIAS_SEMANTICS_DEPENDENCY_PREFIX + alias_semantics.index_hash
+                if alias_semantics
+                else None
+            ),
+        )
+        if item is not None
     )
     manifest = DomainPackManifest(
         domain_id,
@@ -333,6 +380,8 @@ def compile_provisional_pack(
     _write(output / "source_bindings.json", [asdict(item) for item in sources])
     if replay_artifact is not None:
         _write(output / replay_filename, replay_artifact)
+    if alias_semantics is not None:
+        _write(output / ALIAS_SEMANTICS_FILENAME, asdict(alias_semantics))
     _write(
         output / "pack_manifest.json",
         {

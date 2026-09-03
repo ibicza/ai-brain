@@ -85,7 +85,7 @@ def build_java_claim_content(declaration) -> ClaimSchemaContent:
         ),
         return_type=_canonical_source_type(declaration.return_type),
         generic_constraints=tuple(
-            f"{item.name} extends {' & '.join(item.bounds)}"
+            f"{item.name} extends {' & '.join(_canonical_source_type(value) for value in item.bounds)}"
             for item in details
             if item.explicit_bounds
         ),
@@ -95,7 +95,8 @@ def build_java_claim_content(declaration) -> ClaimSchemaContent:
         deprecated_since=declaration.deprecated_since,
         java_callable_kind="CONSTRUCTOR" if constructor else "METHOD",
         resolved_parameter_types=tuple(
-            parameter.resolved_type or f"UNRESOLVED:{parameter.source_type}"
+            parameter.resolved_type
+            or f"UNRESOLVED:{_canonical_source_type(parameter.source_type)}"
             for parameter in declaration.parameters
         ),
         parameter_array_dimensions=tuple(
@@ -106,19 +107,26 @@ def build_java_claim_content(declaration) -> ClaimSchemaContent:
             parameter.varargs for parameter in declaration.parameters
         ),
         resolved_return_type=(
-            declaration.resolved_return_type or f"UNRESOLVED:{declaration.return_type}"
+            declaration.resolved_return_type
+            or f"UNRESOLVED:{_canonical_source_type(declaration.return_type)}"
         ),
         return_array_dimensions=return_dimensions,
         method_type_parameters=tuple(item.name for item in details),
         intersection_bounds=tuple(
-            item.bounds if item.explicit_bounds else () for item in details
+            (
+                tuple(_canonical_source_type(value) for value in item.bounds)
+                if item.explicit_bounds
+                else ()
+            )
+            for item in details
         ),
         first_bound_erasures=tuple(
-            item.first_bound_erasure or f"UNRESOLVED:{item.bounds[0]}"
+            item.first_bound_erasure
+            or f"UNRESOLVED:{_canonical_source_type(item.bounds[0])}"
             for item in details
         ),
         resolved_declared_exceptions=tuple(
-            value or f"UNRESOLVED:{source}"
+            value or f"UNRESOLVED:{_canonical_source_type(source)}"
             for source, value in zip(
                 declaration.declared_exceptions,
                 declaration.resolved_declared_exceptions,
@@ -134,6 +142,8 @@ def build_java_claim_content(declaration) -> ClaimSchemaContent:
 
 
 def java_value_type(source_type: str | None, resolved_type: str | None) -> ValueTypeRef:
+    source_type = _canonical_source_type(source_type)
+    resolved_type = _canonical_source_type(resolved_type)
     if (source_type or "").strip().endswith(("[]", "...")) or (
         resolved_type or ""
     ).strip().endswith("[]"):
@@ -221,7 +231,12 @@ def flatten_semantic_payload(value, prefix="content") -> dict[str, object]:
 
 
 def semantic_content_confusion(
-    golden_manifest, proposal_batch, source_index, trust_decisions=()
+    golden_manifest,
+    proposal_batch,
+    source_index,
+    trust_decisions=(),
+    *,
+    include_semantic_status=True,
 ):
     declarations = {item.node_id: item for item in source_index.declarations}
     proposals = {item.proposal_id: item for item in proposal_batch.proposals}
@@ -289,6 +304,9 @@ def semantic_content_confusion(
                 "blocker_reason": actual_blocker,
             },
         }
+        if not include_semantic_status:
+            expected.pop("semantic_status")
+            actual.pop("semantic_status")
         exact_value = (
             canonical_json(expected) == canonical_json(actual)
             and golden.canonical_source_signature

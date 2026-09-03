@@ -7,6 +7,10 @@ from dataclasses import asdict, dataclass
 from pathlib import PurePosixPath
 
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.java_freeze_roles import (
+    PROTECTED_FINAL_ROLES,
+    classify_final_artifact_role,
+)
 
 M344_FROZEN_PREFIXES = (
     ".gitattributes",
@@ -262,7 +266,9 @@ def verify_java_git_freeze_protocol(
     final_hashes = {
         complete["h13"][path]
         for path in fh
-        if path in complete["h13"] and _under(path, h13_prefixes)
+        if path in complete["h13"]
+        and _under(path, h13_prefixes)
+        and classify_final_artifact_role(path) in PROTECTED_FINAL_ROLES
     }
     overlap = tuple(sorted(final_hashes & set(complete["f13"].values())))
     passed = all(

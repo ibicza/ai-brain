@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from dataclasses import asdict
 from html.parser import HTMLParser
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from ai_brain.stage2.facts.canonical import (
     bytes_hash,
@@ -24,6 +25,9 @@ from ai_brain.stage3.acquisition.models import (
 )
 from ai_brain.stage3.acquisition.version import (
     ACQUISITION_SCHEMA_VERSION,
+    CANONICAL_ACQUISITION_SCHEMA_VERSION,
+    CANONICAL_SOURCE_COMPILER_VERSION,
+    LEGACY_SOURCE_COMPILER_VERSION,
     MAX_BUNDLE_BYTES,
     MAX_DOCUMENTS,
     MAX_FILE_BYTES,
@@ -64,6 +68,7 @@ def ingest_bundle(
     imported_at: str | None = None,
     version: str = "1.0.0",
     source_root: Path | None = None,
+    canonical_identity: bool | None = None,
     store=None,
 ) -> SourceBundle:
     if not bundle_id or not paths or len(paths) > MAX_DOCUMENTS:
@@ -72,6 +77,8 @@ def ingest_bundle(
         raise ValueError("unsupported source language")
     stamp = imported_at or utc_now()
     normalize_datetime(stamp)
+    if any(path.is_symlink() for path in paths):
+        raise ValueError("source symlink or non-file is forbidden")
     resolved = tuple(path.resolve(strict=True) for path in paths)
     if len(set(resolved)) != len(resolved):
         raise ValueError("duplicate source document")
@@ -84,13 +91,21 @@ def ingest_bundle(
         or any(not path.is_relative_to(resolved_root) for path in resolved)
     ):
         raise ValueError("source root does not contain every source document")
-    documents = []
-    for index, path in enumerate(resolved):
-        if paths[index].is_symlink() or not path.is_file():
+    candidates = []
+    original_relative_paths = []
+    for path in resolved:
+        if not path.is_file():
             raise ValueError("source symlink or non-file is forbidden")
         raw = path.read_bytes()
         if not raw or len(raw) > MAX_FILE_BYTES:
             raise ValueError("source document size is outside policy")
+        original_relative_path = (
+            path.relative_to(resolved_root).as_posix()
+            if resolved_root is not None
+            else path.name
+        )
+        original_relative_paths.append(original_relative_path)
+        relative_path = _canonical_relative_path(original_relative_path)
         media = _media_type(path, raw)
         canonical = _canonical_text(raw, media)
         if any(
@@ -100,12 +115,64 @@ def ingest_bundle(
             raise ValueError("source line exceeds resource policy")
         raw_hash = bytes_hash(raw)
         text_hash = bytes_hash(canonical.encode("utf-8"))
-        document_id = f"{bundle_id}.document.{index + 1:03d}"
         structure = _structure(canonical, media)
-        relative_path = (
-            path.relative_to(resolved_root).as_posix()
-            if resolved_root is not None
-            else path.name
+        candidates.append(
+            (
+                relative_path.encode("utf-8"),
+                raw_hash,
+                relative_path,
+                raw,
+                canonical,
+                media,
+                structure,
+            )
+        )
+    if canonical_identity is not None and not isinstance(canonical_identity, bool):
+        raise TypeError("canonical_identity must be bool or None")
+    has_java = any(item[5] is SourceMediaType.JAVA_SOURCE for item in candidates)
+    if canonical_identity and not has_java:
+        raise ValueError("canonical identity v2 is currently defined for Java bundles")
+    canonical_java = has_java and canonical_identity is not False
+    if canonical_java:
+        relative_paths = tuple(item[2] for item in candidates)
+        if len(
+            {unicodedata.normalize("NFC", item) for item in original_relative_paths}
+        ) != len(original_relative_paths):
+            raise ValueError("Unicode-normalization source path collision")
+        if len(relative_paths) != len(set(relative_paths)):
+            raise ValueError("duplicate normalized source path")
+        if len({item.casefold() for item in relative_paths}) != len(relative_paths):
+            raise ValueError("casefold source path collision")
+        candidates.sort(key=lambda item: (item[0], item[1]))
+    schema_version = (
+        CANONICAL_ACQUISITION_SCHEMA_VERSION
+        if canonical_java
+        else ACQUISITION_SCHEMA_VERSION
+    )
+    compiler_version = (
+        CANONICAL_SOURCE_COMPILER_VERSION if canonical_java else SOURCE_COMPILER_VERSION
+    )
+    documents = []
+    for index, (
+        _path_bytes,
+        raw_hash,
+        relative_path,
+        raw,
+        canonical,
+        media,
+        structure,
+    ) in enumerate(candidates):
+        text_hash = bytes_hash(canonical.encode("utf-8"))
+        identity_body = {
+            "schema_version": schema_version,
+            "bundle_id": bundle_id,
+            "relative_path": relative_path,
+            "bytes_hash": raw_hash,
+        }
+        document_id = (
+            f"{bundle_id}.document.{content_hash(identity_body)[:32]}"
+            if canonical_java
+            else f"{bundle_id}.document.{index + 1:03d}"
         )
         values = {
             "document_id": document_id,
@@ -120,29 +187,43 @@ def ingest_bundle(
             "parent_bundle_id": bundle_id,
             "structure": structure,
         }
-        document = SourceDocument(**values, document_hash=content_hash(values))
+        document = SourceDocument(
+            **values,
+            document_hash=content_hash(
+                _document_semantic_body(values) if canonical_java else values
+            ),
+        )
         documents.append(document)
         if store is not None:
             store.put_blob(raw, expected_hash=raw_hash)
             store.put_blob(canonical.encode("utf-8"), expected_hash=text_hash)
     manifest_values = {
-        "compiler_version": SOURCE_COMPILER_VERSION,
+        "compiler_version": compiler_version,
         "resource_policy_hash": content_hash(_RESOURCE_POLICY),
         "runtime_network": False,
         "document_hashes": tuple(item.document_hash for item in documents),
-        "schema_version": ACQUISITION_SCHEMA_VERSION,
+        "schema_version": schema_version,
     }
     manifest = AcquisitionManifest(
         **manifest_values, manifest_hash=content_hash(manifest_values)
     )
     bundle_values = {
         "bundle_id": bundle_id,
-        "domain_tags": tuple(dict.fromkeys(domain_tags)),
+        "domain_tags": (
+            tuple(sorted(set(domain_tags)))
+            if canonical_java
+            else tuple(dict.fromkeys(domain_tags))
+        ),
         "documents": tuple(documents),
         "manifest": manifest,
         "created_at": stamp,
     }
-    bundle = SourceBundle(**bundle_values, bundle_hash=content_hash(bundle_values))
+    bundle = SourceBundle(
+        **bundle_values,
+        bundle_hash=content_hash(
+            _bundle_semantic_body(bundle_values) if canonical_java else bundle_values
+        ),
+    )
     verify_bundle(bundle, store=store)
     if store is not None:
         store.save_bundle(bundle)
@@ -150,8 +231,17 @@ def ingest_bundle(
 
 
 def verify_bundle(bundle: SourceBundle, *, store=None) -> None:
+    if bundle.manifest.schema_version not in {
+        ACQUISITION_SCHEMA_VERSION,
+        CANONICAL_ACQUISITION_SCHEMA_VERSION,
+    }:
+        raise ValueError("unsupported acquisition schema")
+    legacy = bundle.manifest.schema_version == ACQUISITION_SCHEMA_VERSION
+    expected_compiler = (
+        LEGACY_SOURCE_COMPILER_VERSION if legacy else CANONICAL_SOURCE_COMPILER_VERSION
+    )
     if (
-        bundle.manifest.compiler_version != SOURCE_COMPILER_VERSION
+        bundle.manifest.compiler_version != expected_compiler
         or bundle.manifest.runtime_network
     ):
         raise ValueError("unsupported or network-enabled acquisition manifest")
@@ -168,10 +258,8 @@ def verify_bundle(bundle: SourceBundle, *, store=None) -> None:
     for document in bundle.documents:
         body = asdict(document)
         digest = body.pop("document_hash")
-        if (
-            document.parent_bundle_id != bundle.bundle_id
-            or content_hash(body) != digest
-        ):
+        actual = content_hash(body if legacy else _document_semantic_body(body))
+        if document.parent_bundle_id != bundle.bundle_id or actual != digest:
             raise ValueError("source document hash or parent mismatch")
         if store is not None:
             raw = store.get_blob(document.bytes_hash)
@@ -183,8 +271,49 @@ def verify_bundle(bundle: SourceBundle, *, store=None) -> None:
                 raise ValueError("stored source bytes changed")
     body = asdict(bundle)
     digest = body.pop("bundle_hash")
-    if content_hash(body) != digest:
+    actual = content_hash(body if legacy else _bundle_semantic_body(body))
+    if actual != digest:
         raise ValueError("source bundle hash mismatch")
+
+
+def _document_semantic_body(values) -> dict:
+    """Exclude the acquisition event timestamp from semantic identity."""
+
+    return {key: value for key, value in values.items() if key != "imported_at"}
+
+
+def _bundle_semantic_body(values) -> dict:
+    """Bind stable document identities, not platform/audit event metadata."""
+
+    documents = values["documents"]
+    return {
+        "schema_version": values["manifest"].schema_version
+        if hasattr(values["manifest"], "schema_version")
+        else values["manifest"]["schema_version"],
+        "bundle_id": values["bundle_id"],
+        "domain_tags": values["domain_tags"],
+        "document_hashes": tuple(
+            item.document_hash
+            if hasattr(item, "document_hash")
+            else item["document_hash"]
+            for item in documents
+        ),
+        "manifest_hash": values["manifest"].manifest_hash
+        if hasattr(values["manifest"], "manifest_hash")
+        else values["manifest"]["manifest_hash"],
+    }
+
+
+def _canonical_relative_path(value: str) -> str:
+    if not value or "\\" in value:
+        raise ValueError("non-canonical source relative path")
+    normalized = unicodedata.normalize("NFC", value)
+    path = PurePosixPath(normalized)
+    if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
+        raise ValueError("unsafe source relative path")
+    if normalized != path.as_posix():
+        raise ValueError("source relative path is not canonical POSIX")
+    return normalized
 
 
 def _media_type(path: Path, raw: bytes) -> SourceMediaType:

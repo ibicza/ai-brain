@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from ai_brain.stage3.domains.aliases import resolve_alias, verify_alias_semantics
 from ai_brain.stage3.domains.pack import ConceptGraph, DomainPack
 from ai_brain.stage3.domains.validation import validate_pack
 
@@ -16,6 +17,7 @@ class DomainRuntime(Protocol):
     def resolve_catalog_candidates(self, entries, concept_id: str): ...
     def resolve_fact_schema(self, knowledge_id: str): ...
     def resolve_adapter(self, capability_id: str): ...
+    def resolve_knowledge_alias(self, query: str): ...
     def verify_currentness(self) -> dict: ...
     def public_domain_summary(self) -> dict: ...
 
@@ -28,6 +30,11 @@ class GenericDomainRuntime:
         installed_registry=None,
     ) -> None:
         validate_pack(pack)
+        if pack.alias_semantics is not None:
+            verify_alias_semantics(
+                pack.alias_semantics,
+                tuple(item.knowledge_id for item in pack.knowledge_records),
+            )
         self._pack = pack
         self._adapters = adapters or {}
         self._installed_registry = installed_registry
@@ -90,6 +97,11 @@ class GenericDomainRuntime:
         if binding is None or binding.adapter_id not in self._adapters:
             raise KeyError(capability_id)
         return self._adapters[binding.adapter_id]
+
+    def resolve_knowledge_alias(self, query):
+        if self._pack.alias_semantics is None:
+            raise KeyError("pack has no explicit alias semantics")
+        return resolve_alias(self._pack.alias_semantics, str(query))
 
     def verify_currentness(self):
         if self._installed_registry is None:

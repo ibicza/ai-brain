@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+from ai_brain.stage3.domains.aliases import AliasSemantics
 from ai_brain.stage3.domains.manifest import (
     AdapterBinding,
     DomainPackManifest,
@@ -58,3 +59,4 @@ class DomainPack:
     adapter_bindings: tuple[AdapterBinding, ...]
     source_bindings: tuple[SourceBinding, ...]
     evaluation_manifest: dict
+    alias_semantics: AliasSemantics | None = None
