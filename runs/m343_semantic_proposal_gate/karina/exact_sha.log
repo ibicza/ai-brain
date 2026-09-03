@@ -1,0 +1,10 @@
+platform=karina
+host=ibicza@192.168.100.6
+checkout=/home/ibicza/m343-exact-zWdrm9/repo
+head=981c25a4deb3998cd46963e4c0f315f0140d8d4c
+worktree_clean=true
+base=ed8cae0a8ad9d36530ae23ce9e07aae2615a9f48
+merge_commit_count_base_to_implementation=0
+m33=b94c17dc8b1026fe9e338b5fc0a4926b23d68a39
+m33_outside_ancestry=true
+untouched_final_evaluation_executed=false

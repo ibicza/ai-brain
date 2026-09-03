@@ -1,0 +1,11 @@
+{
+  "duplicate_derived_trusted_proposals": 0,
+  "lexical_repetition_rate": "0.744493",
+  "lexical_repetitions": 1352,
+  "physical_duplicate_rate": "0.000000",
+  "physical_duplicates": 0,
+  "report_hash": "71a07233ebf00d48a745a450115a6bf02d99d1b19f8820b6354ef5a077bad9ee",
+  "schema_version": 1,
+  "total_segments": 1816,
+  "unique_segments": 1816
+}

@@ -1,0 +1,61 @@
+{
+  "files": [
+    {
+      "bytes": 12668,
+      "path": "docs/m343_semantic_proposal_gate_report.md",
+      "sha256": "5aafc4430121dc48181cf12bb83a9e966fd29330d82270605f91de9c45a5a739"
+    },
+    {
+      "bytes": 1782,
+      "path": "runs/m343_semantic_proposal_gate/cross_platform_hashes.json",
+      "sha256": "29156f6256e0d448f40bcf20c59bceabe519980dc4424f284b6ba0d1553845c8"
+    },
+    {
+      "bytes": 3590,
+      "path": "runs/m343_semantic_proposal_gate/evidence.json",
+      "sha256": "1560af59ba3e8e2e80c60b73f840e1f66f6a8f2c5e7b8cb1cbcfe22abefd8e44"
+    },
+    {
+      "bytes": 210,
+      "path": "runs/m343_semantic_proposal_gate/release_facts.json",
+      "sha256": "b25a31cf6a70861dea0f8e42f1f8cfa5ce3fa2d3cdc68b34a151d03beca2931c"
+    },
+    {
+      "bytes": 349,
+      "path": "runs/m343_semantic_proposal_gate/segmentation_metrics.json",
+      "sha256": "033587d3ea8846d40531f9329f218a24d1b38b0731129ce15517eb4c5896736b"
+    },
+    {
+      "bytes": 40330,
+      "path": "runs/m343_semantic_proposal_gate/karina/acceptance_report.json",
+      "sha256": "3ba61c0ec4d9f6476348f4e1dbc70d010987503b2424d33138a93db36f21fc48"
+    },
+    {
+      "bytes": 22257,
+      "path": "runs/m343_semantic_proposal_gate/karina/pre_freeze_gate.json",
+      "sha256": "2265443db2f5179686fb19220253547e7736383c90c2c9656192ac2bdc2d4bc6"
+    },
+    {
+      "bytes": 356,
+      "path": "runs/m343_semantic_proposal_gate/karina/exact_sha.log",
+      "sha256": "e8cab2da19e716c24d8ef83edb15f85bb6c5d824d0423d7d9275908d3816e5f0"
+    },
+    {
+      "bytes": 40854,
+      "path": "runs/m343_semantic_proposal_gate/windows/acceptance_report.json",
+      "sha256": "ab4324569c399066752d320d1d9742f307f58092e477df973437c6eb88eb26ec"
+    },
+    {
+      "bytes": 22257,
+      "path": "runs/m343_semantic_proposal_gate/windows/pre_freeze_gate.json",
+      "sha256": "2265443db2f5179686fb19220253547e7736383c90c2c9656192ac2bdc2d4bc6"
+    },
+    {
+      "bytes": 490,
+      "path": "runs/m343_semantic_proposal_gate/windows/exact_sha.log",
+      "sha256": "86803c0e196cd7f6b0fb45d7f971f9bc14d109adb067f2454ea4c2c737d6a422"
+    }
+  ],
+  "implementation_sha": "981c25a4deb3998cd46963e4c0f315f0140d8d4c",
+  "schema_version": 1
+}

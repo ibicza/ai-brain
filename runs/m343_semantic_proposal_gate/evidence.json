@@ -1,0 +1,123 @@
+{
+  "base_sha": "ed8cae0a8ad9d36530ae23ce9e07aae2615a9f48",
+  "branch": "exp/stage3-m343-semantic-proposal-gate",
+  "corpus": {
+    "callables": 1733,
+    "constructors": 51,
+    "generic_methods": 175,
+    "intersection_bound_methods": 25,
+    "legal_overload_groups": 125,
+    "nested_member_cases": 25,
+    "packages": 18,
+    "pinned_module_roots": 3,
+    "positive_targets": 1233,
+    "prior_source_hash_intersection": 0,
+    "real_sources": 50,
+    "semantic_negative_targets": 500,
+    "source_files": 105,
+    "synthetic_sources": 55,
+    "throws_declarations": 150
+  },
+  "decision": "READY_FOR_FRESH_FREEZE",
+  "diagnostics": {
+    "COMPILER_ERROR": 149,
+    "INACCESSIBLE_TYPE": 105,
+    "NON_EXPORTED_MODULE_PACKAGE": 3,
+    "UNRESOLVED_TYPE": 266
+  },
+  "evidence": {
+    "duplicate": 0,
+    "exact": 63762,
+    "extra": 0,
+    "missing": 0,
+    "oracle_field_exact": 44384,
+    "oracle_field_total": 44384,
+    "present": 63762,
+    "required": 63762,
+    "wrong": 0
+  },
+  "gate": {
+    "fail": 0,
+    "mandatory": 70,
+    "meta_mutations_blocked": 17,
+    "pass": 70,
+    "standalone_mutations_rejected": 7
+  },
+  "implementation_sha": "981c25a4deb3998cd46963e4c0f315f0140d8d4c",
+  "location_confusion": {
+    "exact_true_positive": 1733,
+    "missing_false_negative": 0,
+    "precision": "1.000000",
+    "recall": "1.000000",
+    "wrong_location_false_positive": 0
+  },
+  "oracle_implementation_sha256": "f8f4c628515c4cd66cca6a670c1077b1205fb1e9678d96a2621e007ec848b0a7",
+  "policy": {
+    "exactly_matched_fields": 63762,
+    "multiple_matches": 0,
+    "policy_manifest_hash": "aa13eb29070e88169aeebdd44cd19a4087be4962f1424469f29c663830911ffd",
+    "unknown_fields": 0,
+    "unmatched_fields": 0,
+    "zero_match_mandatory_rules": 0
+  },
+  "platforms": {
+    "cross_platform_difference_count": 0,
+    "gate_report_hash": "cb14b5f569d32d3f0f2885272e019d93f256956a266484537527412c49ec0e21",
+    "karina": {
+      "acceptance_report_hash": "cc1a1493bddb9dd545ac0c803ac018cfb0a00ddfdcc0a72fbf6c168fb2a7bdad",
+      "decision": "READY_FOR_FRESH_FREEZE",
+      "full_suite_pass": true,
+      "host": "ibicza@192.168.100.6",
+      "ruff_pass": true,
+      "targeted_tests_pass": true,
+      "worktree_clean": true
+    },
+    "windows": {
+      "acceptance_report_hash": "b633b6582f993bdf6cd2c1485b46155926e041332fb71320c0c7bf3ae1f0ab8a",
+      "decision": "READY_FOR_FRESH_FREEZE",
+      "full_suite_pass": true,
+      "ruff_pass": true,
+      "targeted_tests_pass": true,
+      "worktree_clean": true
+    }
+  },
+  "process_audit": {
+    "allowed_subprocess_invocations": 11,
+    "annotation_processor_invocations": 0,
+    "generated_class_executions": 0,
+    "os_system_attempts": 0,
+    "socket_attempts": 0,
+    "source_executions": 0,
+    "unexpected_subprocesses": 0
+  },
+  "replay": {
+    "authorizations": 1233,
+    "canonical_text_blobs": 105,
+    "evidence_receipts": 63762,
+    "raw_source_blobs": 105,
+    "source_paths": 105,
+    "status": "PASS",
+    "trusted_proposals": 1233
+  },
+  "schema_version": 1,
+  "semantic_confusion": {
+    "correct_location_wrong_content": 0,
+    "exact_true_positive": 1733,
+    "missing_false_negative": 0,
+    "per_field_mismatch_counts": {},
+    "precision": "1.000000",
+    "recall": "1.000000",
+    "semantic_false_positive": 0,
+    "spurious_proposal": 0
+  },
+  "trust_confusion": {
+    "correct_trusted": 1233,
+    "correct_withheld": 500,
+    "coverage": "1.000000",
+    "incorrect_withheld": 0,
+    "precision": "1.000000",
+    "recall": "1.000000",
+    "wrong_trusted": 0
+  },
+  "untouched_final_evaluation_executed": false
+}
