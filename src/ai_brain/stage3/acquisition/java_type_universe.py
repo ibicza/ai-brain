@@ -156,6 +156,7 @@ def resolve_java_type(
     explicit_imports: dict[str, tuple[str, ...]],
     wildcard_imports: tuple[str, ...],
     type_variables: dict[str, str],
+    lexical_owner_types: tuple[str, ...] = (),
 ) -> JavaTypeResolution:
     cleaned, dimensions = _type_shape(source_type)
     erased = _erase_generics(cleaned).strip()
@@ -180,6 +181,7 @@ def resolve_java_type(
             explicit_imports=explicit_imports,
             wildcard_imports=wildcard_imports,
             type_variables={},
+            lexical_owner_types=lexical_owner_types,
         )
         resolved = bound_resolution.resolved_type
         kind = JavaResolutionKind.TYPE_VARIABLE
@@ -197,7 +199,14 @@ def resolve_java_type(
     else:
         parts = erased.replace("$", ".").split(".")
         head, tail = parts[0], parts[1:]
-        lexical = _lexical_candidates(head, tail, receiver_type, package_name, symbols)
+        lexical = _lexical_candidates(
+            head,
+            tail,
+            receiver_type,
+            package_name,
+            symbols,
+            lexical_owner_types,
+        )
         if len(lexical) == 1:
             resolved, kind, candidates = (
                 lexical[0],
@@ -267,8 +276,12 @@ def resolve_java_type(
                             )
                         elif len(wildcard) > 1:
                             kind, candidates = JavaResolutionKind.AMBIGUOUS, wildcard
-    if resolved is not None and resolved not in _PRIMITIVES and not _is_accessible(
-        metadata[resolved], package_name=package_name, receiver_type=receiver_type
+    if (
+        resolved is not None
+        and resolved not in _PRIMITIVES
+        and not _is_accessible(
+            metadata[resolved], package_name=package_name, receiver_type=receiver_type
+        )
     ):
         candidates = (resolved,)
         resolved = None
@@ -336,7 +349,9 @@ def _qualified_candidates(value: str, symbols: set[str]) -> tuple[str, ...]:
     return (normalized,) if normalized in symbols else ()
 
 
-def _lexical_candidates(head, tail, receiver_type, package_name, symbols):
+def _lexical_candidates(
+    head, tail, receiver_type, package_name, symbols, lexical_owner_types=()
+):
     receiver = receiver_type.replace("$", ".")
     package_prefix = f"{package_name}." if package_name else ""
     type_name = receiver.removeprefix(package_prefix)
@@ -353,6 +368,11 @@ def _lexical_candidates(head, tail, receiver_type, package_name, symbols):
             if candidate in symbols:
                 result.add(candidate)
                 break
+    for owner in lexical_owner_types:
+        candidate = ".".join((owner.replace("$", "."), head, *tail))
+        if candidate in symbols:
+            result.add(candidate)
+            break
     return tuple(sorted(result))
 
 
@@ -383,8 +403,7 @@ def source_symbol_metadata(
 def _platform_symbol_metadata(binary_name: str) -> JavaSymbolMetadata:
     package, top, enclosing = _name_parts(binary_name)
     exported = not (
-        binary_name.startswith(("sun.", "jdk.internal."))
-        or ".internal." in binary_name
+        binary_name.startswith(("sun.", "jdk.internal.")) or ".internal." in binary_name
     )
     module = (
         "java.base"
@@ -444,13 +463,16 @@ def _is_accessible(
 ) -> bool:
     if not symbol.package_exported or symbol.symbol_kind == "local":
         return False
-    if symbol.enclosing_access == "PRIVATE" and not receiver_type.startswith(
-        f"{symbol.enclosing_binary_name}."
-    ) and receiver_type != symbol.enclosing_binary_name:
+    if (
+        symbol.enclosing_access == "PRIVATE"
+        and not receiver_type.startswith(f"{symbol.enclosing_binary_name}.")
+        and receiver_type != symbol.enclosing_binary_name
+    ):
         return False
     if symbol.access == "PRIVATE":
-        return receiver_type == symbol.enclosing_binary_name or receiver_type.startswith(
-            f"{symbol.enclosing_binary_name}."
+        return (
+            receiver_type == symbol.enclosing_binary_name
+            or receiver_type.startswith(f"{symbol.enclosing_binary_name}.")
         )
     if symbol.access == "PACKAGE":
         return package_name == symbol.package_name

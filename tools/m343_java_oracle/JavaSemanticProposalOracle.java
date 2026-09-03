@@ -62,8 +62,13 @@ public final class JavaSemanticProposalOracle {
         try (StandardJavaFileManager files = compiler.getStandardFileManager(
                 diagnostics, Locale.ROOT, StandardCharsets.UTF_8)) {
             Iterable<? extends JavaFileObject> inputs = files.getJavaFileObjectsFromPaths(paths);
-            List<String> options = List.of(
-                "--release", "21", "-proc:none", "-Xlint:none", "-Xmaxerrs", "10000");
+            List<String> options = new ArrayList<>(List.of(
+                "--release", "21", "-proc:none", "-Xlint:none", "-Xmaxerrs", "10000"));
+            String patchModuleRoot = System.getProperty("m344.patchJavaBase");
+            if (patchModuleRoot != null && !patchModuleRoot.isBlank()) {
+                options.add("--patch-module");
+                options.add("java.base=" + patchModuleRoot);
+            }
             JavacTask task = (JavacTask) compiler.getTask(
                 null, files, diagnostics, options, null, inputs);
             List<CompilationUnitTree> units = new ArrayList<>();

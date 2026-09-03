@@ -18,6 +18,7 @@ from ai_brain.stage3.knowledge_ir.records import ClaimSchemaContent
 
 JAVA_EVIDENCE_POLICY_VERSION = "m342.java-evidence-policy.v1"
 M343_JAVA_EVIDENCE_POLICY_VERSION = "m343.executable-java-evidence-policy.v1"
+M344_JAVA_EVIDENCE_POLICY_VERSION = "m344.production-java-evidence-policy.v1"
 _M342_POLICY_ARTIFACT_HASH = (
     "49e50398c3f568afdf74ab4a261c44396efcc1e9075001d6d3ee1578ffa99afd"
 )
@@ -141,56 +142,456 @@ _RULES = (
 )
 
 _M343_RULES = (
-    ("subject", "content.subject_type", "FIXED_SCHEMA_METADATA", "subject-type", "ALL", True, False),
-    ("predicate-method", "content.predicate_id", "DIRECT_SOURCE", "member-name", "METHOD", True, False),
-    ("predicate-constructor", "content.predicate_id", "DETERMINISTIC_DERIVATION", "constructor-predicate", "CONSTRUCTOR", True, False),
-    ("object", "content.object_type", "DETERMINISTIC_DERIVATION", "java-object-type", "ALL", True, False),
-    ("qualifiers", "content.qualifier_ids", "FIXED_SCHEMA_METADATA", "fixed-empty-qualifiers", "ALL", True, False),
-    ("receiver", "content.receiver_type", "DETERMINISTIC_DERIVATION", "receiver-type", "ALL", True, False),
-    ("parameter-name", "content.parameters[*].name", "DIRECT_SOURCE", "parameter-name", "ALL", True, False),
-    ("parameter-type", "content.parameters[*].type", "DIRECT_SOURCE", "parameter-source-type", "ALL", True, False),
-    ("parameters-empty", "content.parameters", "NOT_APPLICABLE", "empty-parameters", "ALL", False, True),
-    ("return-method", "content.return_type", "DIRECT_SOURCE", "return-source-type", "METHOD", True, False),
-    ("return-constructor", "content.return_type", "DETERMINISTIC_DERIVATION", "constructor-return-type", "CONSTRUCTOR", True, False),
-    ("generic-constraint", "content.generic_constraints[*]", "DETERMINISTIC_DERIVATION", "generic-constraint", "ALL", True, False),
-    ("generic-empty", "content.generic_constraints", "NOT_APPLICABLE", "empty-generic-constraints", "ALL", False, True),
-    ("preconditions", "content.preconditions", "FIXED_SCHEMA_METADATA", "fixed-empty-preconditions", "ALL", True, False),
-    ("postconditions", "content.postconditions", "FIXED_SCHEMA_METADATA", "fixed-empty-postconditions", "ALL", True, False),
-    ("exception-source", "content.declared_exceptions[*]", "DIRECT_SOURCE", "declared-exception-source", "ALL", True, False),
-    ("exceptions-empty", "content.declared_exceptions", "NOT_APPLICABLE", "empty-declared-exceptions", "ALL", False, True),
-    ("deprecated-present", "content.deprecated_since", "DIRECT_SOURCE", "deprecated-since", "DEPRECATED", True, False),
-    ("deprecated-absent", "content.deprecated_since", "NOT_APPLICABLE", "absent-deprecated-since", "NOT_DEPRECATED", True, False),
-    ("examples", "content.examples", "NOT_APPLICABLE", "fixed-empty-examples", "ALL", True, False),
-    ("callable-kind", "content.java_callable_kind", "DETERMINISTIC_DERIVATION", "callable-kind", "ALL", True, False),
-    ("resolved-parameter", "content.resolved_parameter_types[*]", "DETERMINISTIC_DERIVATION", "resolved-parameter-type", "ALL", True, False),
-    ("resolved-parameters-empty", "content.resolved_parameter_types", "NOT_APPLICABLE", "empty-resolved-parameters", "ALL", False, True),
-    ("parameter-dimension", "content.parameter_array_dimensions[*]", "DETERMINISTIC_DERIVATION", "parameter-array-dimensions", "ALL", True, False),
-    ("parameter-dimensions-empty", "content.parameter_array_dimensions", "NOT_APPLICABLE", "empty-parameter-dimensions", "ALL", False, True),
-    ("parameter-varargs", "content.parameter_varargs[*]", "DETERMINISTIC_DERIVATION", "parameter-varargs", "ALL", True, False),
-    ("parameter-varargs-empty", "content.parameter_varargs", "NOT_APPLICABLE", "empty-parameter-varargs", "ALL", False, True),
-    ("resolved-return", "content.resolved_return_type", "DETERMINISTIC_DERIVATION", "resolved-return-type", "ALL", True, False),
-    ("return-dimension", "content.return_array_dimensions", "DETERMINISTIC_DERIVATION", "return-array-dimensions", "ALL", True, False),
-    ("type-parameter", "content.method_type_parameters[*]", "DIRECT_SOURCE", "method-type-parameter", "ALL", True, False),
-    ("type-parameters-empty", "content.method_type_parameters", "NOT_APPLICABLE", "empty-method-type-parameters", "ALL", False, True),
-    ("intersection-bound", "content.intersection_bounds[*][*]", "DIRECT_SOURCE", "intersection-bound", "ALL", True, False),
-    ("intersection-shape", "content.intersection_bounds", "DETERMINISTIC_DERIVATION", "intersection-bound-shape", "ALL", False, True),
-    ("first-bound", "content.first_bound_erasures[*]", "DETERMINISTIC_DERIVATION", "first-bound-erasure", "ALL", True, False),
-    ("first-bounds-empty", "content.first_bound_erasures", "NOT_APPLICABLE", "empty-first-bound-erasures", "ALL", False, True),
-    ("resolved-exception", "content.resolved_declared_exceptions[*]", "DETERMINISTIC_DERIVATION", "resolved-declared-exception", "ALL", True, False),
-    ("resolved-exceptions-empty", "content.resolved_declared_exceptions", "NOT_APPLICABLE", "empty-resolved-exceptions", "ALL", False, True),
-    ("modifier", "content.modifiers[*]", "DIRECT_SOURCE", "modifier", "ALL", True, False),
-    ("modifiers-empty", "content.modifiers", "NOT_APPLICABLE", "empty-modifiers", "ALL", False, True),
-    ("accessibility", "content.accessibility", "DETERMINISTIC_DERIVATION", "accessibility", "ALL", True, False),
-    ("enclosing-access", "content.enclosing_type_accessibility", "DETERMINISTIC_DERIVATION", "enclosing-accessibility", "ALL", True, False),
-    ("module", "content.module_name", "NOT_APPLICABLE", "module-name", "ALL", True, False),
-    ("package-export", "content.package_exported", "DETERMINISTIC_DERIVATION", "package-exported", "ALL", True, False),
-    ("envelope-kind", "envelope.proposed_kind", "FIXED_SCHEMA_METADATA", "fixed-proposed-kind", "ALL", True, False),
-    ("envelope-epistemic", "envelope.epistemic_character", "FIXED_SCHEMA_METADATA", "fixed-epistemic-character", "ALL", True, False),
-    ("envelope-extraction", "envelope.extraction_method", "FIXED_SCHEMA_METADATA", "fixed-extraction-method", "ALL", True, False),
-    ("envelope-status", "envelope.status_authority", "DETERMINISTIC_DERIVATION", "status-authority", "ALL", True, False),
-    ("envelope-ambiguity", "envelope.ambiguity_fields", "DETERMINISTIC_DERIVATION", "ambiguity-fields", "ALL", True, False),
-    ("envelope-segment", "envelope.source_segment_binding", "DETERMINISTIC_DERIVATION", "source-segment-binding", "ALL", True, False),
-    ("envelope-node", "envelope.parser_node_binding", "DETERMINISTIC_DERIVATION", "parser-node-binding", "ALL", True, False),
+    (
+        "subject",
+        "content.subject_type",
+        "FIXED_SCHEMA_METADATA",
+        "subject-type",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "predicate-method",
+        "content.predicate_id",
+        "DIRECT_SOURCE",
+        "member-name",
+        "METHOD",
+        True,
+        False,
+    ),
+    (
+        "predicate-constructor",
+        "content.predicate_id",
+        "DETERMINISTIC_DERIVATION",
+        "constructor-predicate",
+        "CONSTRUCTOR",
+        True,
+        False,
+    ),
+    (
+        "object",
+        "content.object_type",
+        "DETERMINISTIC_DERIVATION",
+        "java-object-type",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "qualifiers",
+        "content.qualifier_ids",
+        "FIXED_SCHEMA_METADATA",
+        "fixed-empty-qualifiers",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "receiver",
+        "content.receiver_type",
+        "DETERMINISTIC_DERIVATION",
+        "receiver-type",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "parameter-name",
+        "content.parameters[*].name",
+        "DIRECT_SOURCE",
+        "parameter-name",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "parameter-type",
+        "content.parameters[*].type",
+        "DIRECT_SOURCE",
+        "parameter-source-type",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "parameters-empty",
+        "content.parameters",
+        "NOT_APPLICABLE",
+        "empty-parameters",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "return-method",
+        "content.return_type",
+        "DIRECT_SOURCE",
+        "return-source-type",
+        "METHOD",
+        True,
+        False,
+    ),
+    (
+        "return-constructor",
+        "content.return_type",
+        "DETERMINISTIC_DERIVATION",
+        "constructor-return-type",
+        "CONSTRUCTOR",
+        True,
+        False,
+    ),
+    (
+        "generic-constraint",
+        "content.generic_constraints[*]",
+        "DETERMINISTIC_DERIVATION",
+        "generic-constraint",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "generic-empty",
+        "content.generic_constraints",
+        "NOT_APPLICABLE",
+        "empty-generic-constraints",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "preconditions",
+        "content.preconditions",
+        "FIXED_SCHEMA_METADATA",
+        "fixed-empty-preconditions",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "postconditions",
+        "content.postconditions",
+        "FIXED_SCHEMA_METADATA",
+        "fixed-empty-postconditions",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "exception-source",
+        "content.declared_exceptions[*]",
+        "DIRECT_SOURCE",
+        "declared-exception-source",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "exceptions-empty",
+        "content.declared_exceptions",
+        "NOT_APPLICABLE",
+        "empty-declared-exceptions",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "deprecated-present",
+        "content.deprecated_since",
+        "DIRECT_SOURCE",
+        "deprecated-since",
+        "DEPRECATED",
+        True,
+        False,
+    ),
+    (
+        "deprecated-absent",
+        "content.deprecated_since",
+        "NOT_APPLICABLE",
+        "absent-deprecated-since",
+        "NOT_DEPRECATED",
+        True,
+        False,
+    ),
+    (
+        "examples",
+        "content.examples",
+        "NOT_APPLICABLE",
+        "fixed-empty-examples",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "callable-kind",
+        "content.java_callable_kind",
+        "DETERMINISTIC_DERIVATION",
+        "callable-kind",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "resolved-parameter",
+        "content.resolved_parameter_types[*]",
+        "DETERMINISTIC_DERIVATION",
+        "resolved-parameter-type",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "resolved-parameters-empty",
+        "content.resolved_parameter_types",
+        "NOT_APPLICABLE",
+        "empty-resolved-parameters",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "parameter-dimension",
+        "content.parameter_array_dimensions[*]",
+        "DETERMINISTIC_DERIVATION",
+        "parameter-array-dimensions",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "parameter-dimensions-empty",
+        "content.parameter_array_dimensions",
+        "NOT_APPLICABLE",
+        "empty-parameter-dimensions",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "parameter-varargs",
+        "content.parameter_varargs[*]",
+        "DETERMINISTIC_DERIVATION",
+        "parameter-varargs",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "parameter-varargs-empty",
+        "content.parameter_varargs",
+        "NOT_APPLICABLE",
+        "empty-parameter-varargs",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "resolved-return",
+        "content.resolved_return_type",
+        "DETERMINISTIC_DERIVATION",
+        "resolved-return-type",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "return-dimension",
+        "content.return_array_dimensions",
+        "DETERMINISTIC_DERIVATION",
+        "return-array-dimensions",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "type-parameter",
+        "content.method_type_parameters[*]",
+        "DIRECT_SOURCE",
+        "method-type-parameter",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "type-parameters-empty",
+        "content.method_type_parameters",
+        "NOT_APPLICABLE",
+        "empty-method-type-parameters",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "intersection-bound",
+        "content.intersection_bounds[*][*]",
+        "DIRECT_SOURCE",
+        "intersection-bound",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "intersection-shape",
+        "content.intersection_bounds",
+        "DETERMINISTIC_DERIVATION",
+        "intersection-bound-shape",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "first-bound",
+        "content.first_bound_erasures[*]",
+        "DETERMINISTIC_DERIVATION",
+        "first-bound-erasure",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "first-bounds-empty",
+        "content.first_bound_erasures",
+        "NOT_APPLICABLE",
+        "empty-first-bound-erasures",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "resolved-exception",
+        "content.resolved_declared_exceptions[*]",
+        "DETERMINISTIC_DERIVATION",
+        "resolved-declared-exception",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "resolved-exceptions-empty",
+        "content.resolved_declared_exceptions",
+        "NOT_APPLICABLE",
+        "empty-resolved-exceptions",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "modifier",
+        "content.modifiers[*]",
+        "DIRECT_SOURCE",
+        "modifier",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "modifiers-empty",
+        "content.modifiers",
+        "NOT_APPLICABLE",
+        "empty-modifiers",
+        "ALL",
+        False,
+        True,
+    ),
+    (
+        "accessibility",
+        "content.accessibility",
+        "DETERMINISTIC_DERIVATION",
+        "accessibility",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "enclosing-access",
+        "content.enclosing_type_accessibility",
+        "DETERMINISTIC_DERIVATION",
+        "enclosing-accessibility",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "module",
+        "content.module_name",
+        "NOT_APPLICABLE",
+        "module-name",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "package-export",
+        "content.package_exported",
+        "DETERMINISTIC_DERIVATION",
+        "package-exported",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "envelope-kind",
+        "envelope.proposed_kind",
+        "FIXED_SCHEMA_METADATA",
+        "fixed-proposed-kind",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "envelope-epistemic",
+        "envelope.epistemic_character",
+        "FIXED_SCHEMA_METADATA",
+        "fixed-epistemic-character",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "envelope-extraction",
+        "envelope.extraction_method",
+        "FIXED_SCHEMA_METADATA",
+        "fixed-extraction-method",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "envelope-status",
+        "envelope.status_authority",
+        "DETERMINISTIC_DERIVATION",
+        "status-authority",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "envelope-ambiguity",
+        "envelope.ambiguity_fields",
+        "DETERMINISTIC_DERIVATION",
+        "ambiguity-fields",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "envelope-segment",
+        "envelope.source_segment_binding",
+        "DETERMINISTIC_DERIVATION",
+        "source-segment-binding",
+        "ALL",
+        True,
+        False,
+    ),
+    (
+        "envelope-node",
+        "envelope.parser_node_binding",
+        "DETERMINISTIC_DERIVATION",
+        "parser-node-binding",
+        "ALL",
+        True,
+        False,
+    ),
 )
 
 
@@ -221,7 +622,9 @@ def load_executable_java_evidence_policy() -> JavaEvidencePolicyManifest:
             "required": values[5],
             "corpus_inapplicable_allowed": values[6],
         }
-        rules.append(ExecutableJavaEvidencePolicyRule(**body, rule_hash=content_hash(body)))
+        rules.append(
+            ExecutableJavaEvidencePolicyRule(**body, rule_hash=content_hash(body))
+        )
     body = {
         "schema_version": 2,
         "policy_version": M343_JAVA_EVIDENCE_POLICY_VERSION,
@@ -232,12 +635,52 @@ def load_executable_java_evidence_policy() -> JavaEvidencePolicyManifest:
     return JavaEvidencePolicyManifest(**body, manifest_hash=content_hash(body))
 
 
+def load_production_java_evidence_policy() -> JavaEvidencePolicyManifest:
+    """Return the frozen production policy without corpus-shape assumptions.
+
+    Rules remain mandatory whenever applicable to a proposal.  A rule applying
+    only to a construct (for example constructors or generic bounds) may have a
+    zero corpus denominator; diversity is enforced separately by the corpus
+    gate and must never weaken per-proposal evidence completeness.
+    """
+
+    rules = []
+    for values in _M343_RULES:
+        applicability = values[4]
+        body = {
+            "rule_id": values[0],
+            "field_pattern": values[1],
+            "evidence_class": JavaEvidenceClass(values[2]),
+            "transformation_id": values[3],
+            "applicability": applicability,
+            "required": values[5],
+            "corpus_inapplicable_allowed": (
+                values[6] or applicability != "ALL" or "[*]" in values[1]
+            ),
+        }
+        rules.append(
+            ExecutableJavaEvidencePolicyRule(**body, rule_hash=content_hash(body))
+        )
+    body = {
+        "schema_version": 3,
+        "policy_version": M344_JAVA_EVIDENCE_POLICY_VERSION,
+        "policy_artifact_hash": bytes_hash(Path(__file__).read_bytes()),
+        "rules": tuple(rules),
+        "rule_count": len(rules),
+    }
+    return JavaEvidencePolicyManifest(**body, manifest_hash=content_hash(body))
+
+
 def verify_java_evidence_policy(policy: JavaEvidencePolicyManifest) -> None:
-    expected = (
-        load_java_evidence_policy()
-        if policy.schema_version == 1
-        else load_executable_java_evidence_policy()
-    )
+    loaders = {
+        1: load_java_evidence_policy,
+        2: load_executable_java_evidence_policy,
+        3: load_production_java_evidence_policy,
+    }
+    try:
+        expected = loaders[policy.schema_version]()
+    except KeyError as error:
+        raise ValueError("unknown Java evidence policy schema") from error
     if policy != expected:
         raise ValueError("Java evidence policy artifact or manifest mismatch")
 
@@ -248,7 +691,7 @@ def enumerate_java_evidence_requirements(
     policy: JavaEvidencePolicyManifest,
 ) -> tuple[JavaEvidenceRequirement, ...]:
     verify_java_evidence_policy(policy)
-    if policy.schema_version == 2:
+    if policy.schema_version in {2, 3}:
         requirements, coverage = match_java_evidence_policy(
             proposal_batch, source_index, policy
         )
@@ -296,8 +739,8 @@ def match_java_evidence_policy(
     source_index: JavaSourceIndex,
     policy: JavaEvidencePolicyManifest,
 ) -> tuple[tuple[JavaEvidenceRequirement, ...], JavaEvidencePolicyCoverage]:
-    if policy.schema_version != 2:
-        raise ValueError("executable policy matcher requires schema v2")
+    if policy.schema_version not in {2, 3}:
+        raise ValueError("executable policy matcher requires schema v2 or v3")
     nodes = declaration_by_node_id(source_index)
     proposals = {item.proposal_id: item for item in proposal_batch.proposals}
     result = []
@@ -308,9 +751,7 @@ def match_java_evidence_policy(
     for binding in proposal_batch.bindings:
         proposal = proposals[binding.proposal_id]
         declaration = nodes[binding.parser_node_id]
-        inventory = _semantic_field_inventory(
-            proposal, declaration, binding.segment_id
-        )
+        inventory = _semantic_field_inventory(proposal, declaration, binding.segment_id)
         seen_content_fields.update(
             item[0].split(".", 2)[1].split("[", 1)[0]
             for item in inventory
@@ -318,9 +759,7 @@ def match_java_evidence_policy(
         )
         for path, value, location in inventory:
             matches = tuple(
-                rule
-                for rule in policy.rules
-                if _rule_matches(rule, path, declaration)
+                rule for rule in policy.rules if _rule_matches(rule, path, declaration)
             )
             if not matches:
                 unmatched.append(f"{proposal.proposal_id}:{path}")
@@ -342,7 +781,9 @@ def match_java_evidence_policy(
                 "policy_rule_id": rule.rule_id,
                 "policy_rule_hash": rule.rule_hash,
             }
-            result.append(JavaEvidenceRequirement(**body, requirement_hash=content_hash(body)))
+            result.append(
+                JavaEvidenceRequirement(**body, requirement_hash=content_hash(body))
+            )
     expected_content_fields = {item.name for item in fields(ClaimSchemaContent)}
     unknown = tuple(sorted(expected_content_fields - seen_content_fields))
     zero = tuple(
@@ -354,7 +795,9 @@ def match_java_evidence_policy(
             and counts[rule.rule_id] == 0
         )
     )
-    ordered = tuple(sorted(result, key=lambda item: (item.proposal_id, item.field_path)))
+    ordered = tuple(
+        sorted(result, key=lambda item: (item.proposal_id, item.field_path))
+    )
     coverage_body = {
         "policy_manifest_hash": policy.manifest_hash,
         "generated_field_count": len(ordered) + len(unmatched) + len(multiple),
@@ -534,6 +977,15 @@ def _semantic_field_inventory(proposal, declaration, segment_id):
     content = proposal.proposed_content
     name = declaration.name_span
     declaration_span = declaration.declaration_span
+    callable_type_details = tuple(
+        item
+        for item in declaration.type_variables_detail
+        if all(
+            declaration_span.byte_start <= span.byte_start
+            and span.byte_end <= declaration_span.byte_end
+            for span in item.bound_spans
+        )
+    )
     result = [
         ("content.subject_type", content.subject_type, name),
         ("content.predicate_id", content.predicate_id, name),
@@ -573,7 +1025,7 @@ def _semantic_field_inventory(proposal, declaration, segment_id):
         content.generic_constraints,
         tuple(
             item.bound_spans[0]
-            for item in declaration.type_variables_detail
+            for item in callable_type_details
             if item.explicit_bounds
         ),
         declaration_span,
@@ -625,7 +1077,11 @@ def _semantic_field_inventory(proposal, declaration, segment_id):
     )
     result.extend(
         (
-            ("content.resolved_return_type", content.resolved_return_type, return_location),
+            (
+                "content.resolved_return_type",
+                content.resolved_return_type,
+                return_location,
+            ),
             (
                 "content.return_array_dimensions",
                 content.return_array_dimensions,
@@ -637,7 +1093,7 @@ def _semantic_field_inventory(proposal, declaration, segment_id):
         result,
         "content.method_type_parameters",
         content.method_type_parameters,
-        tuple(item.bound_spans[0] for item in declaration.type_variables_detail),
+        tuple(item.bound_spans[0] for item in callable_type_details),
         declaration_span,
     )
     intersection_values = tuple(
@@ -647,7 +1103,7 @@ def _semantic_field_inventory(proposal, declaration, segment_id):
     )
     if intersection_values:
         for outer, inner, value in intersection_values:
-            detail = declaration.type_variables_detail[outer]
+            detail = callable_type_details[outer]
             result.append(
                 (
                     f"content.intersection_bounds[{outer}][{inner}]",
@@ -656,12 +1112,18 @@ def _semantic_field_inventory(proposal, declaration, segment_id):
                 )
             )
     else:
-        result.append(("content.intersection_bounds", content.intersection_bounds, declaration_span))
+        result.append(
+            (
+                "content.intersection_bounds",
+                content.intersection_bounds,
+                declaration_span,
+            )
+        )
     _append_collection(
         result,
         "content.first_bound_erasures",
         content.first_bound_erasures,
-        tuple(item.bound_spans[0] for item in declaration.type_variables_detail),
+        tuple(item.bound_spans[0] for item in callable_type_details),
         declaration_span,
     )
     _append_collection(
@@ -723,7 +1185,10 @@ def _rule_matches(rule, path: str, declaration) -> bool:
         return False
     if rule.applicability == "DEPRECATED" and declaration.deprecated_since is None:
         return False
-    if rule.applicability == "NOT_DEPRECATED" and declaration.deprecated_since is not None:
+    if (
+        rule.applicability == "NOT_DEPRECATED"
+        and declaration.deprecated_since is not None
+    ):
         return False
     pattern = re.escape(rule.field_pattern).replace(r"\[\*\]", r"\[\d+\]")
     return re.fullmatch(pattern, path) is not None

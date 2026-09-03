@@ -176,9 +176,7 @@ def nonexact_evidence_proposal_ids(
     requirements = enumerate_java_evidence_requirements(
         proposal_batch, source_index, policy
     )
-    expected = {
-        (item.proposal_id, item.field_path): item for item in requirements
-    }
+    expected = {(item.proposal_id, item.field_path): item for item in requirements}
     counts = Counter((item.proposal_id, item.field_path) for item in manifest.evidence)
     invalid = {item[0] for item in manifest.missing_requirements}
     for item in manifest.evidence:
@@ -216,7 +214,7 @@ def _generate_evidence(
     bindings = {item.proposal_id: item for item in proposal_batch.bindings}
     registry = (
         load_java_evidence_transformation_manifest()
-        if policy.schema_version == 2
+        if policy.schema_version in {2, 3}
         else None
     )
     result = []

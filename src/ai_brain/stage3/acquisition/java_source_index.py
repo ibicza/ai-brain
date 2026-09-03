@@ -49,8 +49,10 @@ _TYPE_BODIES = {
     "enum_body",
     "annotation_type_body",
 }
+_CALLABLE_CONTAINERS = _TYPE_BODIES | {"enum_body_declarations"}
 _METHOD_NODES = {
     "method_declaration": "method",
+    "annotation_type_element_declaration": "method",
     "constructor_declaration": "constructor",
     "compact_constructor_declaration": "constructor",
 }
@@ -131,6 +133,7 @@ class JavaDeclaration:
     type_parameters: tuple[str, ...]
     type_variable_bounds: tuple[tuple[str, str], ...]
     type_variables_detail: tuple[JavaTypeVariable, ...]
+    direct_super_types: tuple[str, ...]
     return_type: str | None
     resolved_return_type: str | None
     return_resolution_kind: JavaResolutionKind | None
@@ -182,6 +185,8 @@ class _TypeContext:
     record_parameters: tuple[tuple[str, str, SourceLocation, SourceLocation, bool], ...]
     accessibility: str
     enclosing_type_accessibility: str
+    declaration_kind: str
+    direct_super_types: tuple[str, ...]
 
 
 def bundle_requires_java_policy(bundle: SourceBundle) -> bool:
@@ -219,7 +224,17 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
         if item.member_kind in _TYPE_NODES.values() and not item.local_type
     )
     universe = build_java_type_universe(source_symbols)
-    resolved = tuple(_resolve_declaration(item, universe) for item in declarations)
+    direct_supers = _resolved_super_type_graph(declarations, universe)
+    resolved = tuple(
+        _resolve_declaration(
+            item,
+            universe,
+            lexical_owner_types=_transitive_super_types(
+                item.receiver_type, direct_supers
+            ),
+        )
+        for item in declarations
+    )
     ordered = tuple(
         sorted(
             resolved,
@@ -301,7 +316,7 @@ def _index_document(
             return
         if context is not None and node.parent is not None:
             parent_type = node.parent.type
-            if node.type in _METHOD_NODES and parent_type in _TYPE_BODIES:
+            if node.type in _METHOD_NODES and parent_type in _CALLABLE_CONTAINERS:
                 result.append(
                     _method_declaration(
                         node,
@@ -319,7 +334,7 @@ def _index_document(
                     for child in body.named_children:
                         walk(child, context, True)
                 return
-            if node.type == "field_declaration" and parent_type in _TYPE_BODIES:
+            if node.type == "field_declaration" and parent_type in _CALLABLE_CONTAINERS:
                 result.extend(
                     _field_declarations(
                         node,
@@ -381,6 +396,7 @@ def _type_declaration(
         else ()
     )
     receiver = _receiver(package, names)
+    direct_super_types = _direct_super_types(node, raw)
     declaration = _make_declaration(
         node=node,
         name_node=name_node,
@@ -399,6 +415,7 @@ def _type_declaration(
         parameters=(),
         type_variables=type_variables,
         type_variables_detail=type_details,
+        direct_super_types=direct_super_types,
         return_type=None,
         declared_exceptions=(),
         declared_exception_spans=(),
@@ -407,7 +424,19 @@ def _type_declaration(
         unsupported_reason="local_type" if local else None,
     )
     own_access = _accessibility(declaration.modifiers)
-    enclosing_access = context.accessibility if context else "PUBLIC"
+    if (
+        context is not None
+        and context.declaration_kind in {"interface", "annotation"}
+        and own_access == "PACKAGE"
+    ):
+        own_access = "PUBLIC"
+    enclosing_access = (
+        _combined_accessibility(
+            context.accessibility, context.enclosing_type_accessibility
+        )
+        if context
+        else "PUBLIC"
+    )
     return declaration, _TypeContext(
         names,
         local,
@@ -416,6 +445,8 @@ def _type_declaration(
         record_parameters,
         own_access,
         enclosing_access,
+        _TYPE_NODES[node.type],
+        direct_super_types,
     )
 
 
@@ -460,6 +491,7 @@ def _method_declaration(
         parameters=parameters,
         type_variables=type_variables,
         type_variables_detail=type_details,
+        direct_super_types=context.direct_super_types,
         return_type="void" if kind == "constructor" else return_type,
         declared_exceptions=exceptions,
         declared_exception_spans=exception_spans,
@@ -501,6 +533,7 @@ def _field_declarations(
                 parameters=(),
                 type_variables=context.type_variables,
                 type_variables_detail=context.type_variables_detail,
+                direct_super_types=context.direct_super_types,
                 return_type=source_type,
                 declared_exceptions=(),
                 declared_exception_spans=(),
@@ -539,6 +572,7 @@ def _enum_constant(
         parameters=(),
         type_variables=context.type_variables,
         type_variables_detail=context.type_variables_detail,
+        direct_super_types=context.direct_super_types,
         return_type=_receiver(package, context.names),
         declared_exceptions=(),
         declared_exception_spans=(),
@@ -569,6 +603,7 @@ def _make_declaration(
     parameters,
     type_variables,
     type_variables_detail,
+    direct_super_types,
     return_type,
     declared_exceptions,
     declared_exception_spans,
@@ -641,6 +676,7 @@ def _make_declaration(
         "type_parameters": type_parameter_names,
         "type_variable_bounds": type_variables,
         "type_variables_detail": type_variables_detail,
+        "direct_super_types": direct_super_types,
         "return_type": return_type,
         "resolved_return_type": None,
         "return_resolution_kind": None,
@@ -654,7 +690,7 @@ def _make_declaration(
         "type_occurrence_resolutions": (),
         "accessibility": _accessibility(modifiers),
         "enclosing_type_accessibility": enclosing_type_accessibility,
-        "module_name": None,
+        "module_name": _source_module_name(document.relative_path),
         "package_exported": True,
         "source_span_hash": bytes_hash(raw[node.start_byte : node.end_byte]),
         "javadoc_span_hash": (
@@ -680,7 +716,10 @@ def _make_declaration(
 
 
 def _resolve_declaration(
-    declaration: JavaDeclaration, universe: JavaTypeUniverse
+    declaration: JavaDeclaration,
+    universe: JavaTypeUniverse,
+    *,
+    lexical_owner_types: tuple[str, ...] = (),
 ) -> JavaDeclaration:
     imports = _explicit_import_map(declaration.imports)
     variables = dict(declaration.type_variable_bounds)
@@ -697,6 +736,7 @@ def _resolve_declaration(
             explicit_imports=imports,
             wildcard_imports=declaration.wildcard_imports,
             type_variables=variables,
+            lexical_owner_types=lexical_owner_types,
         )
         body = {
             "field_path": field_path,
@@ -705,9 +745,7 @@ def _resolve_declaration(
             "resolution": resolution,
         }
         occurrences.append(
-            JavaTypeOccurrenceResolution(
-                **body, occurrence_hash=content_hash(body)
-            )
+            JavaTypeOccurrenceResolution(**body, occurrence_hash=content_hash(body))
         )
         return resolution
 
@@ -766,7 +804,11 @@ def _resolve_declaration(
             (
                 declaration.name_span
                 if declaration.member_kind == "constructor"
-                else declaration.type_token_spans[-1]
+                else (
+                    declaration.type_token_spans[-1]
+                    if declaration.type_token_spans
+                    else declaration.name_span
+                )
             ),
         )
         if declaration.return_type
@@ -946,6 +988,59 @@ def _type_variables(node, raw):
     return tuple(result), tuple(details)
 
 
+def _direct_super_types(node, raw):
+    result = []
+    superclass = node.child_by_field_name("superclass")
+    if superclass is not None and superclass.named_children:
+        result.append(_text(superclass.named_children[0], raw))
+    interfaces = node.child_by_field_name("interfaces")
+    if interfaces is not None:
+        result.extend(
+            _text(item, raw)
+            for item in interfaces.named_children
+            if item.type not in {"extends_interfaces", "super_interfaces"}
+        )
+        for container in interfaces.named_children:
+            if container.type in {"extends_interfaces", "super_interfaces"}:
+                result.extend(_text(item, raw) for item in container.named_children)
+    return tuple(result)
+
+
+def _resolved_super_type_graph(declarations, universe):
+    graph = {}
+    for declaration in declarations:
+        if declaration.member_kind not in _TYPE_NODES.values():
+            continue
+        imports = _explicit_import_map(declaration.imports)
+        values = []
+        for source_type in declaration.direct_super_types:
+            resolution = resolve_java_type(
+                source_type,
+                universe=universe,
+                package_name=declaration.package_name,
+                receiver_type=declaration.receiver_type,
+                explicit_imports=imports,
+                wildcard_imports=declaration.wildcard_imports,
+                type_variables=dict(declaration.type_variable_bounds),
+            )
+            if resolution.resolved_type is not None:
+                values.append(resolution.resolved_type)
+        graph[declaration.receiver_type] = tuple(dict.fromkeys(values))
+    return graph
+
+
+def _transitive_super_types(receiver_type, graph):
+    result = []
+    pending = list(graph.get(receiver_type, ()))
+    while pending:
+        value = pending.pop(0)
+        if value in result:
+            continue
+        result.append(value)
+        pending.extend(graph.get(value, ()))
+    return tuple(result)
+
+
 def _parameter_parts(container, raw):
     if container is None:
         return ()
@@ -992,11 +1087,21 @@ def _parameter_parts(container, raw):
             )
         if name_node is None or type_node is None:
             raise ValueError("Java grammar parameter lacks typed name")
+        trailing = raw[name_node.end_byte : parameter.end_byte].decode(
+            "utf-8", errors="strict"
+        )
+        post_name_dimensions = len(re.findall(r"\[\s*\]", trailing))
+        source_type = _text(type_node, raw) + "[]" * post_name_dimensions
+        type_location = (
+            _location(parameter, raw)
+            if post_name_dimensions
+            else _location(type_node, raw)
+        )
         result.append(
             (
                 _text(name_node, raw),
-                _text(type_node, raw) + ("..." if varargs else ""),
-                _location(type_node, raw),
+                source_type + ("..." if varargs else ""),
+                type_location,
                 _location(name_node, raw),
                 varargs,
             )
@@ -1023,10 +1128,12 @@ def _modifiers(node, raw):
     if container is None:
         return ()
     return tuple(
-        re.findall(
-            r"\b(?:public|protected|private|abstract|static|final|"
-            r"synchronized|native|strictfp|default|transient|volatile|sealed)\b",
-            _text(container, raw),
+        sorted(
+            re.findall(
+                r"\b(?:public|protected|private|abstract|static|final|"
+                r"synchronized|native|strictfp|default|transient|volatile|sealed)\b",
+                _text(container, raw),
+            )
         )
     )
 
@@ -1059,7 +1166,9 @@ def _accessibility(modifiers) -> str:
 
 
 def _combined_accessibility(value: str, enclosing: str) -> str:
-    ranking = {"PUBLIC": 0, "PROTECTED": 1, "PACKAGE": 2, "PRIVATE": 3}
+    value = "PUBLIC" if value == "PROTECTED" else value
+    enclosing = "PUBLIC" if enclosing == "PROTECTED" else enclosing
+    ranking = {"PUBLIC": 0, "PACKAGE": 1, "PRIVATE": 2}
     return max((value, enclosing), key=ranking.__getitem__)
 
 
@@ -1068,6 +1177,12 @@ def _associated_javadoc(node):
     if sibling is not None and sibling.type == "block_comment":
         return sibling
     return None
+
+
+def _source_module_name(relative_path: str) -> str | None:
+    normalized = relative_path.replace("\\", "/")
+    first, separator, _rest = normalized.partition("/")
+    return first if separator and first.startswith(("java.", "jdk.")) else None
 
 
 def _body_node(node):
@@ -1135,4 +1250,4 @@ def _erase_generics(value):
 
 
 def _normalize_source_signature(value):
-    return " ".join(value.split()).replace(" ,", ",")
+    return re.sub(r",\s+", ",", " ".join(value.split()).replace(" ,", ","))

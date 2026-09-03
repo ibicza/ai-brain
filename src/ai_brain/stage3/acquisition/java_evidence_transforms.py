@@ -82,7 +82,18 @@ def _parameter_name(requirement, declaration, *_args):
 def _parameter_source_type(requirement, declaration, *_args):
     parameter = declaration.parameters[_index(requirement.field_path)]
     value = _normalize_type(_span(_args[-1], parameter.type_span))
-    return value + ("..." if parameter.varargs else "")
+    expected = _normalize_type(parameter.source_type)
+    if value + ("..." if parameter.varargs else "") == expected:
+        return expected
+    compact_value = re.sub(r"\s+", "", value)
+    compact_expected = re.sub(r"\s+", "", expected)
+    if (
+        parameter.name in value
+        and _base_type(compact_expected) in compact_value
+        and compact_value.count("[]") == compact_expected.count("[]")
+    ):
+        return expected
+    raise ValueError("parameter source-type transformation is not source-entailed")
 
 
 def _return_source_type(_requirement, declaration, *_args):
@@ -113,9 +124,7 @@ def _java_object_type(_requirement, declaration, *_args):
     ).strip().endswith("[]"):
         return ValueTypeRef(
             ValueTypeKind.ENTITY,
-            EntityTypeRef(
-                declaration.resolved_return_type or declaration.return_type
-            ),
+            EntityTypeRef(declaration.resolved_return_type or declaration.return_type),
         )
     source = _base_type(declaration.return_type or "")
     resolved = _base_type(declaration.resolved_return_type or "")
@@ -145,15 +154,17 @@ def _java_object_type(_requirement, declaration, *_args):
 
 
 def _generic_constraint(requirement, declaration, *_args):
-    item = tuple(value for value in declaration.type_variables_detail if value.explicit_bounds)[
-        _index(requirement.field_path)
-    ]
+    item = tuple(
+        value for value in declaration.type_variables_detail if value.explicit_bounds
+    )[_index(requirement.field_path)]
     return f"{item.name} extends {' & '.join(item.bounds)}"
 
 
 def _declared_exception_source(requirement, declaration, *_args):
     index = _index(requirement.field_path)
-    return _normalize_type(_span(_args[-1], declaration.declared_exception_spans[index]))
+    return _normalize_type(
+        _span(_args[-1], declaration.declared_exception_spans[index])
+    )
 
 
 def _deprecated_since(_requirement, declaration, *_args):
@@ -191,11 +202,11 @@ def _return_dimensions(_requirement, declaration, *_args):
 
 
 def _method_type_parameter(requirement, declaration, *_args):
-    return declaration.type_variables_detail[_index(requirement.field_path)].name
+    return _callable_type_details(declaration)[_index(requirement.field_path)].name
 
 
 def _intersection_bound(requirement, declaration, *_args):
-    return declaration.type_variables_detail[_index(requirement.field_path)].bounds[
+    return _callable_type_details(declaration)[_index(requirement.field_path)].bounds[
         _index(requirement.field_path, 1)
     ]
 
@@ -203,12 +214,12 @@ def _intersection_bound(requirement, declaration, *_args):
 def _intersection_bound_shape(_requirement, declaration, *_args):
     return tuple(
         item.bounds if item.explicit_bounds else ()
-        for item in declaration.type_variables_detail
+        for item in _callable_type_details(declaration)
     )
 
 
 def _first_bound(requirement, declaration, *_args):
-    item = declaration.type_variables_detail[_index(requirement.field_path)]
+    item = _callable_type_details(declaration)[_index(requirement.field_path)]
     return item.first_bound_erasure or f"UNRESOLVED:{item.bounds[0]}"
 
 
@@ -216,6 +227,19 @@ def _resolved_exception(requirement, declaration, *_args):
     index = _index(requirement.field_path)
     return declaration.resolved_declared_exceptions[index] or (
         f"UNRESOLVED:{declaration.declared_exceptions[index]}"
+    )
+
+
+def _callable_type_details(declaration):
+    span = declaration.declaration_span
+    return tuple(
+        item
+        for item in declaration.type_variables_detail
+        if all(
+            span.byte_start <= location.byte_start
+            and location.byte_end <= span.byte_end
+            for location in item.bound_spans
+        )
     )
 
 
@@ -256,7 +280,7 @@ def _constant(value):
 
 
 def _normalize_type(value: str) -> str:
-    return " ".join(value.split()).replace(" []", "[]")
+    return re.sub(r",\s+", ",", " ".join(value.split()).replace(" []", "[]"))
 
 
 def _base_type(value: str) -> str:

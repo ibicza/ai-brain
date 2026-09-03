@@ -8,6 +8,10 @@ from ai_brain.stage3.acquisition.java_pipeline import (
     VerifiedJavaTrustAuthorization,
     assert_java_proposal_state_authority,
 )
+from ai_brain.stage3.acquisition.java_production import (
+    VerifiedJavaProductionAuthorization,
+    assert_java_production_authority,
+)
 from ai_brain.stage3.acquisition.models import (
     AcquisitionReview,
     ExtractionMethod,
@@ -30,7 +34,10 @@ def review_proposal(
     rationale: str,
     edited_content: KnowledgeContent | None = None,
     timestamp: str | None = None,
-    trust_authorization: VerifiedJavaTrustAuthorization | None = None,
+    trust_authorization: (
+        VerifiedJavaTrustAuthorization | VerifiedJavaProductionAuthorization | None
+    ) = None,
+    external_user_approval_hash: str | None = None,
 ) -> tuple[KnowledgeProposal, AcquisitionReview, ProposalApproval | None]:
     approving = decision in {ReviewDecision.APPROVE, ReviewDecision.EDIT_AND_APPROVE}
     if proposal.extraction_method is ExtractionMethod.JAVA_AST:
@@ -41,7 +48,17 @@ def review_proposal(
         if approving:
             if trust_authorization is None:
                 raise ValueError("Java approval requires authoritative trust closure")
-            assert_java_proposal_state_authority(proposal, trust_authorization)
+            if isinstance(trust_authorization, VerifiedJavaProductionAuthorization):
+                assert_java_production_authority(proposal, trust_authorization)
+                if (
+                    reviewer_type is ActorIdentityType.USER
+                    and not external_user_approval_hash
+                ):
+                    raise ValueError(
+                        "USER approval requires an external approval artifact"
+                    )
+            else:
+                assert_java_proposal_state_authority(proposal, trust_authorization)
             if edited_content is not None:
                 raise ValueError("edited Java content requires a new trust evaluation")
     if approving and (

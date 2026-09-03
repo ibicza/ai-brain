@@ -37,6 +37,11 @@ from ai_brain.stage3.knowledge_ir.version import (
     UNIVERSAL_KNOWLEDGE_IR_SCHEMA_VERSION,
 )
 
+_INTERNAL_PACK_DEPENDENCY_PREFIXES = (
+    "java-evidence-closure.",
+    "java-production-closure.",
+)
+
 
 class InstalledDomainStatus(StrEnum):
     ACTIVE = "ACTIVE"
@@ -496,6 +501,8 @@ class InstalledDomainRegistry:
     def _dependency_items(self, pack: DomainPack) -> tuple[InstalledDomain, ...]:
         result = []
         for reference in pack.manifest.dependency_packs:
+            if reference.startswith(_INTERNAL_PACK_DEPENDENCY_PREFIXES):
+                continue
             domain, separator, version = reference.partition("@")
             item = self.show(domain, version if separator else None)
             if item.status is not InstalledDomainStatus.ACTIVE:

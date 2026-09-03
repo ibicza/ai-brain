@@ -59,7 +59,16 @@ def build_java_claim_content(declaration) -> ClaimSchemaContent:
             declaration.resolved_return_type,
         )
     )
-    details = declaration.type_variables_detail
+    details = tuple(
+        item
+        for item in declaration.type_variables_detail
+        if not hasattr(item, "bound_spans")
+        or all(
+            declaration.declaration_span.byte_start <= span.byte_start
+            and span.byte_end <= declaration.declaration_span.byte_end
+            for span in item.bound_spans
+        )
+    )
     return_dimensions = (
         declaration.return_resolution.array_dimensions
         if declaration.return_resolution is not None
@@ -71,16 +80,18 @@ def build_java_claim_content(declaration) -> ClaimSchemaContent:
         object_type=object_type,
         receiver_type=declaration.receiver_type,
         parameters=tuple(
-            (parameter.name, parameter.source_type)
+            (parameter.name, _canonical_source_type(parameter.source_type))
             for parameter in declaration.parameters
         ),
-        return_type=declaration.return_type,
+        return_type=_canonical_source_type(declaration.return_type),
         generic_constraints=tuple(
             f"{item.name} extends {' & '.join(item.bounds)}"
             for item in details
             if item.explicit_bounds
         ),
-        declared_exceptions=declaration.declared_exceptions,
+        declared_exceptions=tuple(
+            _canonical_source_type(item) for item in declaration.declared_exceptions
+        ),
         deprecated_since=declaration.deprecated_since,
         java_callable_kind="CONSTRUCTOR" if constructor else "METHOD",
         resolved_parameter_types=tuple(
@@ -95,8 +106,7 @@ def build_java_claim_content(declaration) -> ClaimSchemaContent:
             parameter.varargs for parameter in declaration.parameters
         ),
         resolved_return_type=(
-            declaration.resolved_return_type
-            or f"UNRESOLVED:{declaration.return_type}"
+            declaration.resolved_return_type or f"UNRESOLVED:{declaration.return_type}"
         ),
         return_array_dimensions=return_dimensions,
         method_type_parameters=tuple(item.name for item in details),
@@ -123,9 +133,7 @@ def build_java_claim_content(declaration) -> ClaimSchemaContent:
     )
 
 
-def java_value_type(
-    source_type: str | None, resolved_type: str | None
-) -> ValueTypeRef:
+def java_value_type(source_type: str | None, resolved_type: str | None) -> ValueTypeRef:
     if (source_type or "").strip().endswith(("[]", "...")) or (
         resolved_type or ""
     ).strip().endswith("[]"):
@@ -166,16 +174,35 @@ def proposal_field_manifest_hash(content: ClaimSchemaContent) -> str:
 
 
 def type_resolution_semantic_manifest_hash(declaration) -> str:
-    rows = tuple(
-        (
-            item.field_path,
-            item.source_type,
-            item.resolution.resolved_type,
-            item.resolution.array_dimensions,
+    rows = []
+    type_indexes = {}
+    for item in declaration.type_occurrence_resolutions:
+        field_path = item.field_path
+        if field_path.startswith("type_parameters["):
+            if not (
+                declaration.declaration_span.byte_start
+                <= item.source_location.byte_start
+                and item.source_location.byte_end
+                <= declaration.declaration_span.byte_end
+            ):
+                continue
+            original = int(field_path.split("[", 1)[1].split("]", 1)[0])
+            if original not in type_indexes:
+                type_indexes[original] = len(type_indexes)
+            field_path = re.sub(
+                r"^type_parameters\[\d+\]",
+                f"type_parameters[{type_indexes[original]}]",
+                field_path,
+            )
+        rows.append(
+            (
+                field_path,
+                _canonical_source_type(item.source_type),
+                item.resolution.resolved_type,
+                item.resolution.array_dimensions,
+            )
         )
-        for item in declaration.type_occurrence_resolutions
-    )
-    return content_hash(rows)
+    return content_hash(tuple(rows))
 
 
 def flatten_semantic_payload(value, prefix="content") -> dict[str, object]:
@@ -297,7 +324,9 @@ def semantic_content_confusion(
                 JavaSemanticMismatch(**body, mismatch_hash=content_hash(body))
             )
     spurious = sum(
-        len(values) for key, values in by_location.items() if key not in expected_locations
+        len(values)
+        for key, values in by_location.items()
+        if key not in expected_locations
     )
     total = len(golden_manifest.goldens)
     semantic_fp = wrong_content + spurious
@@ -344,3 +373,9 @@ def _base_type(value: str) -> str:
         elif depth == 0:
             result.append(character)
     return "".join(result).strip()
+
+
+def _canonical_source_type(value: str | None) -> str | None:
+    if value is None:
+        return None
+    return re.sub(r",\s+", ",", value.strip())

@@ -12,6 +12,17 @@ from ai_brain.stage3.acquisition.java_pipeline import (
     TrustBoundProposalBatch,
     verify_trust_bound_batch,
 )
+from ai_brain.stage3.acquisition.java_production import (
+    JavaProductionTrustBatch,
+    VerifiedJavaProductionAuthorization,
+    assert_java_production_authority,
+    verify_java_production_batch,
+)
+from ai_brain.stage3.acquisition.java_production_replay import (
+    JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX,
+    JAVA_PRODUCTION_REPLAY_FILENAME,
+    build_java_production_replay_artifact,
+)
 from ai_brain.stage3.acquisition.java_replay import (
     JAVA_REPLAY_DEPENDENCY_PREFIX,
     JAVA_REPLAY_FILENAME,
@@ -64,6 +75,8 @@ def compile_provisional_pack(
     pack_version: str = "0.1.0-provisional",
     trust_gate_report: ProposalTrustGateReport | None = None,
     trust_bound_batch: TrustBoundProposalBatch | None = None,
+    production_trust_batch: JavaProductionTrustBatch | None = None,
+    production_authorizations: tuple[VerifiedJavaProductionAuthorization, ...] = (),
     store=None,
 ):
     if output.exists():
@@ -81,21 +94,38 @@ def compile_provisional_pack(
             raise ValueError(
                 "legacy Java trust gate report is not a complete trust closure"
             )
-        if trust_bound_batch is None or store is None:
+        if (trust_bound_batch is None) == (
+            production_trust_batch is None
+        ) or store is None:
             raise ValueError(
-                "Java pack compilation requires an exact trust-bound batch and store; "
+                "Java pack compilation requires exactly one trust batch and store; "
                 "a legacy trust gate report is insufficient"
             )
-        verify_trust_bound_batch(
-            trust_bound_batch,
-            store,
-            trust_bound_batch.golden_seal,
-            trust_bound_batch.parser_common_artifact,
-        )
-        if (
-            trust_bound_batch.bundle != bundle
-            or trust_bound_batch.segmentation.segments != segments
-        ):
+        batch = production_trust_batch or trust_bound_batch
+        if production_trust_batch is not None:
+            if production_authorizations:
+                trusted = {
+                    item.proposal_id: item
+                    for item in production_trust_batch.trusted_proposals
+                }
+                if {
+                    item.trusted_proposal_id for item in production_authorizations
+                } != set(trusted):
+                    raise ValueError("production authorization denominator mismatch")
+                for authorization in production_authorizations:
+                    assert_java_production_authority(
+                        trusted[authorization.trusted_proposal_id], authorization
+                    )
+            else:
+                verify_java_production_batch(production_trust_batch, store)
+        else:
+            verify_trust_bound_batch(
+                trust_bound_batch,
+                store,
+                trust_bound_batch.golden_seal,
+                trust_bound_batch.parser_common_artifact,
+            )
+        if batch.bundle != bundle or batch.segmentation.segments != segments:
             raise ValueError("Java compiler inputs differ from trust closure")
     approved_hashes = {item.approved_proposal_hash for item in approvals}
     selected = tuple(
@@ -112,9 +142,8 @@ def compile_provisional_pack(
     if not selected or len(selected) != len(approvals):
         raise ValueError("pack compilation requires exact approved proposal closure")
     if java_domain:
-        trusted = {
-            item.proposal_id: item for item in trust_bound_batch.trusted_proposals
-        }
+        batch = production_trust_batch or trust_bound_batch
+        trusted = {item.proposal_id: item for item in batch.trusted_proposals}
         approval_by_id = {item.proposal_id: item for item in approvals}
         if {item.proposal_id for item in selected} != set(trusted):
             raise ValueError("Java pack selection is outside trusted proposal closure")
@@ -159,7 +188,8 @@ def compile_provisional_pack(
         )
         segment_hashes = tuple(item.segment_hash for item in bound_segments)
         if java_domain:
-            exact_evidence = evidence_by_proposal(trust_bound_batch.field_evidence)[
+            batch = production_trust_batch or trust_bound_batch
+            exact_evidence = evidence_by_proposal(batch.field_evidence)[
                 proposal.proposal_id
             ]
             evidence = tuple(
@@ -239,15 +269,23 @@ def compile_provisional_pack(
         "expected_record_count": len(records),
         "source_span_exactness": "1.0",
     }
-    replay_artifact = (
-        build_java_replay_artifact(trust_bound_batch, store, tuple(sources))
-        if java_domain
-        else None
-    )
+    replay_artifact = None
+    replay_filename = None
+    replay_prefix = None
+    if java_domain and production_trust_batch is not None:
+        replay_artifact = build_java_production_replay_artifact(
+            production_trust_batch, store, tuple(sources)
+        )
+        replay_filename = JAVA_PRODUCTION_REPLAY_FILENAME
+        replay_prefix = JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX
+    elif java_domain:
+        replay_artifact = build_java_replay_artifact(
+            trust_bound_batch, store, tuple(sources)
+        )
+        replay_filename = JAVA_REPLAY_FILENAME
+        replay_prefix = JAVA_REPLAY_DEPENDENCY_PREFIX
     dependencies = (
-        (JAVA_REPLAY_DEPENDENCY_PREFIX + replay_artifact["artifact_hash"],)
-        if replay_artifact
-        else ()
+        (replay_prefix + replay_artifact["artifact_hash"],) if replay_artifact else ()
     )
     manifest = DomainPackManifest(
         domain_id,
@@ -294,7 +332,7 @@ def compile_provisional_pack(
     _write(output / "evaluation_manifest.json", evaluation)
     _write(output / "source_bindings.json", [asdict(item) for item in sources])
     if replay_artifact is not None:
-        _write(output / JAVA_REPLAY_FILENAME, replay_artifact)
+        _write(output / replay_filename, replay_artifact)
     _write(
         output / "pack_manifest.json",
         {
@@ -306,7 +344,9 @@ def compile_provisional_pack(
     )
     pack = load_pack(output)
     if java_domain:
-        verify_compiled_java_evidence(pack, trust_bound_batch, selected)
+        verify_compiled_java_evidence(
+            pack, production_trust_batch or trust_bound_batch, selected
+        )
     return pack
 
 
