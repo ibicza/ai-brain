@@ -1,0 +1,15 @@
+platform=karina
+branch=exp/stage3-m335-java-determinism-repair
+exact_i14_sha=f738eaf1b4c710776c0cc37b13d8c07dac248158
+parent_e13_sha=f1599585c7b45e73eb3ba3cd9113155188eb6d26
+python=3.12.14
+java=Microsoft OpenJDK 21.0.11+10-LTS
+javac=21.0.11
+tmux_session=m335-java-determinism-repair
+detached_worktree=/home/ibicza/ai-brain-m335-i14-f738eaf
+head_exact=true
+worktree_clean=true
+branch_upstream_equal=true
+targeted_tests=79
+full_suite_tests=891
+new_untouched_final_evaluation_executed=false

@@ -17,3 +17,12 @@ started with `findThreads(Predicate<Thread>)` on Windows and
 The fix canonicalizes input paths before assigning content-derived IDs. Native
 parser wheel identity remains verified as a platform audit but is excluded from
 the platform-independent production batch hash.
+
+## Exact-I14 repaired result
+
+Both eight-case permutation matrices passed with zero internal differences.
+The cross-platform comparator checked nine complete production/evaluation
+artifacts, the complete candidate-pack tree and the per-case platform-independent
+component sets: 11/11 comparisons were byte-identical, difference count was
+zero and the first divergent stage was `NONE`. Its report hash is
+`0dda209bc0bbd172a01fcfe8047c38b552d34a655473df1fbff79e3237eb9ed9`.
