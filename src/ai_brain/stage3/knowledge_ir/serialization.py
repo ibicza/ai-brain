@@ -179,6 +179,41 @@ def _applicability(row: dict) -> Applicability:
 
 def _content_from_dict(kind: KnowledgeKind, row: dict) -> KnowledgeContent:
     cls = _CONTENT[kind]
+    if cls is ClaimSchemaContent:
+        legacy = {
+            "subject_type",
+            "predicate_id",
+            "object_type",
+            "qualifier_ids",
+            "receiver_type",
+            "parameters",
+            "return_type",
+            "generic_constraints",
+            "preconditions",
+            "postconditions",
+            "declared_exceptions",
+            "deprecated_since",
+            "examples",
+        }
+        if set(row) == legacy:
+            row = {
+                **row,
+                "java_callable_kind": None,
+                "resolved_parameter_types": [],
+                "parameter_array_dimensions": [],
+                "parameter_varargs": [],
+                "resolved_return_type": None,
+                "return_array_dimensions": 0,
+                "method_type_parameters": [],
+                "intersection_bounds": [],
+                "first_bound_erasures": [],
+                "resolved_declared_exceptions": [],
+                "modifiers": [],
+                "accessibility": None,
+                "enclosing_type_accessibility": None,
+                "module_name": None,
+                "package_exported": None,
+            }
     _exact(row, {field.name for field in fields(cls)}, f"{kind.value} content")
     if cls is ConceptContent:
         return ConceptContent(**row)
@@ -223,6 +258,20 @@ def _content_from_dict(kind: KnowledgeKind, row: dict) -> KnowledgeContent:
                 "postconditions": tuple(row["postconditions"]),
                 "declared_exceptions": tuple(row["declared_exceptions"]),
                 "examples": tuple(row["examples"]),
+                "resolved_parameter_types": tuple(row["resolved_parameter_types"]),
+                "parameter_array_dimensions": tuple(
+                    row["parameter_array_dimensions"]
+                ),
+                "parameter_varargs": tuple(row["parameter_varargs"]),
+                "method_type_parameters": tuple(row["method_type_parameters"]),
+                "intersection_bounds": tuple(
+                    tuple(item) for item in row["intersection_bounds"]
+                ),
+                "first_bound_erasures": tuple(row["first_bound_erasures"]),
+                "resolved_declared_exceptions": tuple(
+                    row["resolved_declared_exceptions"]
+                ),
+                "modifiers": tuple(row["modifiers"]),
             }
         )
     if cls is RuleContent:

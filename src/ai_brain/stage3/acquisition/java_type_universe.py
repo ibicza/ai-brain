@@ -51,11 +51,28 @@ class JavaSymbolInventoryManifest:
 
 
 @dataclass(frozen=True)
+class JavaSymbolMetadata:
+    binary_name: str
+    package_name: str
+    module_name: str | None
+    symbol_kind: str
+    top_level_binary_name: str
+    enclosing_binary_name: str | None
+    access: str
+    enclosing_access: str
+    package_exported: bool
+    origin: str
+    receipt_hash: str
+
+
+@dataclass(frozen=True)
 class JavaTypeUniverse:
     platform_inventory: JavaSymbolInventoryManifest
     source_symbols: tuple[str, ...]
     source_symbols_hash: str
     symbols: tuple[str, ...]
+    symbol_metadata: tuple[JavaSymbolMetadata, ...]
+    symbol_metadata_hash: str
     symbol_count: int
     manifest_hash: str
 
@@ -69,6 +86,8 @@ class JavaTypeResolution:
     candidates: tuple[str, ...]
     array_dimensions: int
     universe_manifest_hash: str
+    symbol_receipt_hash: str | None
+    complete_receipt_hash: str
     receipt_hash: str
 
 
@@ -92,20 +111,38 @@ def load_java21_inventory() -> tuple[JavaSymbolInventoryManifest, tuple[str, ...
 
 def build_java_type_universe(source_symbols) -> JavaTypeUniverse:
     platform, platform_symbols = load_java21_inventory()
-    source = tuple(sorted(set(source_symbols)))
+    source_metadata = tuple(
+        item if isinstance(item, JavaSymbolMetadata) else source_symbol_metadata(item)
+        for item in source_symbols
+    )
+    source_by_name = {item.binary_name: item for item in source_metadata}
+    source = tuple(sorted(source_by_name))
     symbols = tuple(sorted(set(platform_symbols).union(source)))
+    metadata = tuple(
+        sorted(
+            (
+                *(_platform_symbol_metadata(item) for item in platform_symbols),
+                *source_by_name.values(),
+            ),
+            key=lambda item: item.binary_name,
+        )
+    )
     body = {
         "platform_inventory": platform,
         "source_symbols": source,
         "source_symbols_hash": content_hash(source),
         "symbols": symbols,
+        "symbol_metadata": metadata,
+        "symbol_metadata_hash": content_hash(metadata),
         "symbol_count": len(symbols),
     }
     return JavaTypeUniverse(**body, manifest_hash=content_hash(body))
 
 
 def verify_java_type_universe(universe: JavaTypeUniverse) -> None:
-    rebuilt = build_java_type_universe(universe.source_symbols)
+    rebuilt = build_java_type_universe(
+        item for item in universe.symbol_metadata if item.origin == "SOURCE"
+    )
     if rebuilt != universe:
         raise ValueError("Java type universe is not reproducible")
 
@@ -127,6 +164,7 @@ def resolve_java_type(
     elif erased.startswith("? super ") or erased == "?":
         erased = "Object"
     symbols = set(universe.symbols)
+    metadata = {item.binary_name: item for item in universe.symbol_metadata}
     kind = JavaResolutionKind.UNRESOLVED
     candidates: tuple[str, ...] = ()
     resolved = None
@@ -143,9 +181,9 @@ def resolve_java_type(
             wildcard_imports=wildcard_imports,
             type_variables={},
         )
-        resolved = bound_resolution.resolved_type or "java.lang.Object"
+        resolved = bound_resolution.resolved_type
         kind = JavaResolutionKind.TYPE_VARIABLE
-        candidates = (resolved,)
+        candidates = (resolved,) if resolved is not None else ()
     elif _looks_fully_qualified(erased):
         matches = _qualified_candidates(erased, symbols)
         if len(matches) == 1:
@@ -229,9 +267,20 @@ def resolve_java_type(
                             )
                         elif len(wildcard) > 1:
                             kind, candidates = JavaResolutionKind.AMBIGUOUS, wildcard
+    if resolved is not None and resolved not in _PRIMITIVES and not _is_accessible(
+        metadata[resolved], package_name=package_name, receiver_type=receiver_type
+    ):
+        candidates = (resolved,)
+        resolved = None
+        kind = JavaResolutionKind.UNRESOLVED
+    symbol_receipt_hash = (
+        metadata[resolved].receipt_hash
+        if resolved is not None and resolved not in _PRIMITIVES
+        else None
+    )
     if resolved is not None:
         resolved += "[]" * dimensions
-    body = {
+    legacy_body = {
         "source_type": source_type,
         "erased_source_type": erased,
         "resolved_type": resolved,
@@ -240,7 +289,15 @@ def resolve_java_type(
         "array_dimensions": dimensions,
         "universe_manifest_hash": universe.manifest_hash,
     }
-    return JavaTypeResolution(**body, receipt_hash=content_hash(body))
+    body = {
+        **legacy_body,
+        "symbol_receipt_hash": symbol_receipt_hash,
+    }
+    return JavaTypeResolution(
+        **body,
+        complete_receipt_hash=content_hash(body),
+        receipt_hash=content_hash(legacy_body),
+    )
 
 
 def _type_shape(value: str) -> tuple[str, int]:
@@ -297,3 +354,104 @@ def _lexical_candidates(head, tail, receiver_type, package_name, symbols):
                 result.add(candidate)
                 break
     return tuple(sorted(result))
+
+
+def source_symbol_metadata(
+    binary_name: str,
+    *,
+    symbol_kind: str = "class",
+    access: str = "PUBLIC",
+    enclosing_access: str = "PUBLIC",
+    local_type: bool = False,
+) -> JavaSymbolMetadata:
+    package, top, enclosing = _name_parts(binary_name)
+    body = {
+        "binary_name": binary_name.replace("$", "."),
+        "package_name": package,
+        "module_name": None,
+        "symbol_kind": "local" if local_type else symbol_kind,
+        "top_level_binary_name": top,
+        "enclosing_binary_name": enclosing,
+        "access": access,
+        "enclosing_access": enclosing_access,
+        "package_exported": True,
+        "origin": "SOURCE",
+    }
+    return JavaSymbolMetadata(**body, receipt_hash=content_hash(body))
+
+
+def _platform_symbol_metadata(binary_name: str) -> JavaSymbolMetadata:
+    package, top, enclosing = _name_parts(binary_name)
+    exported = not (
+        binary_name.startswith(("sun.", "jdk.internal."))
+        or ".internal." in binary_name
+    )
+    module = (
+        "java.base"
+        if binary_name.startswith(
+            (
+                "java.lang.",
+                "java.util.",
+                "java.io.",
+                "java.net.",
+                "java.nio.",
+                "java.time.",
+                "java.math.",
+                "java.security.",
+                "java.text.",
+            )
+        )
+        else "java.platform"
+    )
+    body = {
+        "binary_name": binary_name.replace("$", "."),
+        "package_name": package,
+        "module_name": module,
+        "symbol_kind": "TYPE",
+        "top_level_binary_name": top,
+        "enclosing_binary_name": enclosing,
+        "access": "PUBLIC",
+        "enclosing_access": "PUBLIC",
+        "package_exported": exported,
+        "origin": "JAVA21_PLATFORM",
+    }
+    return JavaSymbolMetadata(**body, receipt_hash=content_hash(body))
+
+
+def _name_parts(binary_name: str) -> tuple[str, str, str | None]:
+    value = binary_name.replace("$", ".")
+    parts = value.split(".")
+    first_type = next(
+        (index for index, part in enumerate(parts) if part and part[0].isupper()),
+        max(0, len(parts) - 1),
+    )
+    package = ".".join(parts[:first_type])
+    type_parts = parts[first_type:]
+    top = ".".join((*parts[:first_type], type_parts[0]))
+    enclosing = (
+        ".".join((*parts[:first_type], *type_parts[:-1]))
+        if len(type_parts) > 1
+        else None
+    )
+    return package, top, enclosing
+
+
+def _is_accessible(
+    symbol: JavaSymbolMetadata,
+    *,
+    package_name: str | None,
+    receiver_type: str,
+) -> bool:
+    if not symbol.package_exported or symbol.symbol_kind == "local":
+        return False
+    if symbol.enclosing_access == "PRIVATE" and not receiver_type.startswith(
+        f"{symbol.enclosing_binary_name}."
+    ) and receiver_type != symbol.enclosing_binary_name:
+        return False
+    if symbol.access == "PRIVATE":
+        return receiver_type == symbol.enclosing_binary_name or receiver_type.startswith(
+            f"{symbol.enclosing_binary_name}."
+        )
+    if symbol.access == "PACKAGE":
+        return package_name == symbol.package_name
+    return True

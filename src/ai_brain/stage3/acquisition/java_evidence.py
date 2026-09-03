@@ -12,7 +12,12 @@ from ai_brain.stage3.acquisition.java_evidence_policy import (
     JavaEvidenceRequirement,
     enumerate_java_evidence_requirements,
     load_java_evidence_policy,
+    match_java_evidence_policy,
     verify_java_evidence_policy,
+)
+from ai_brain.stage3.acquisition.java_evidence_transforms import (
+    load_java_evidence_transformation_manifest,
+    normalized_transformation_output,
 )
 from ai_brain.stage3.acquisition.java_proposals import JavaProposalBatch
 from ai_brain.stage3.acquisition.java_source_index import (
@@ -42,6 +47,8 @@ class JavaFieldEvidence:
     transformation_hash: str
     normalized_output: str
     derivation_receipt_hash: str
+    transformation_registry_hash: str | None
+    output_hash: str
     evidence_hash: str
 
 
@@ -63,6 +70,8 @@ class JavaFieldEvidenceManifest:
     exactness_ratio: str
     missing_requirements: tuple[tuple[str, str], ...]
     evidence: tuple[JavaFieldEvidence, ...]
+    transformation_registry_hash: str | None
+    policy_coverage_hash: str | None
     manifest_hash: str
 
 
@@ -156,6 +165,36 @@ def incomplete_evidence_proposal_ids(
     return frozenset(item[0] for item in manifest.missing_requirements)
 
 
+def nonexact_evidence_proposal_ids(
+    manifest: JavaFieldEvidenceManifest,
+    proposal_batch: JavaProposalBatch,
+    source_index: JavaSourceIndex,
+    policy: JavaEvidencePolicyManifest,
+) -> frozenset[str]:
+    """Return every proposal without a one-to-one exact requirement receipt."""
+
+    requirements = enumerate_java_evidence_requirements(
+        proposal_batch, source_index, policy
+    )
+    expected = {
+        (item.proposal_id, item.field_path): item for item in requirements
+    }
+    counts = Counter((item.proposal_id, item.field_path) for item in manifest.evidence)
+    invalid = {item[0] for item in manifest.missing_requirements}
+    for item in manifest.evidence:
+        key = (item.proposal_id, item.field_path)
+        requirement = expected.get(key)
+        if (
+            requirement is None
+            or counts[key] != 1
+            or item.requirement_hash != requirement.requirement_hash
+            or item.normalized_output != requirement.expected_output
+            or item.evidence_class != requirement.evidence_class
+        ):
+            invalid.add(item.proposal_id)
+    return frozenset(invalid)
+
+
 def _generate_evidence(
     requirements,
     proposal_batch,
@@ -173,6 +212,13 @@ def _generate_evidence(
         raise ValueError("Java evidence input closure mismatch")
     nodes = declaration_by_node_id(source_index)
     documents = {item.document_id: item for item in bundle.documents}
+    proposals = {item.proposal_id: item for item in proposal_batch.proposals}
+    bindings = {item.proposal_id: item for item in proposal_batch.bindings}
+    registry = (
+        load_java_evidence_transformation_manifest()
+        if policy.schema_version == 2
+        else None
+    )
     result = []
     for requirement in requirements:
         if requirement.field_path in omit_fields:
@@ -182,12 +228,28 @@ def _generate_evidence(
         raw = store.get_blob(document.bytes_hash)
         location = requirement.source_location
         span = raw[location.byte_start : location.byte_end]
+        normalized_output = (
+            normalized_transformation_output(
+                requirement.transformation_id,
+                requirement=requirement,
+                declaration=declaration,
+                proposal=proposals[requirement.proposal_id],
+                binding=bindings[requirement.proposal_id],
+                raw_source=raw,
+            )
+            if registry is not None
+            else requirement.expected_output
+        )
         transformation_hash = content_hash(
             {
                 "policy_artifact_hash": policy.policy_artifact_hash,
                 "policy_manifest_hash": policy.manifest_hash,
                 "transformation_id": requirement.transformation_id,
                 "extractor_version": JAVA_EVIDENCE_EXTRACTOR_VERSION,
+                "transformation_registry_hash": (
+                    registry.transformation_manifest_hash if registry else None
+                ),
+                "policy_rule_hash": requirement.policy_rule_hash,
             }
         )
         receipt_body = {
@@ -197,7 +259,8 @@ def _generate_evidence(
             "source_span_hash": bytes_hash(span),
             "semantic_identity_hash": declaration.declaration_hash,
             "transformation_hash": transformation_hash,
-            "normalized_output": requirement.expected_output,
+            "normalized_output": normalized_output,
+            "output_hash": content_hash(normalized_output),
         }
         body = {
             "proposal_id": requirement.proposal_id,
@@ -214,8 +277,12 @@ def _generate_evidence(
             "transformation_id": requirement.transformation_id,
             "transformation_version": JAVA_EVIDENCE_EXTRACTOR_VERSION,
             "transformation_hash": transformation_hash,
-            "normalized_output": requirement.expected_output,
+            "normalized_output": normalized_output,
             "derivation_receipt_hash": content_hash(receipt_body),
+            "transformation_registry_hash": (
+                registry.transformation_manifest_hash if registry else None
+            ),
+            "output_hash": content_hash(normalized_output),
         }
         result.append(JavaFieldEvidence(**body, evidence_hash=content_hash(body)))
     return tuple(sorted(result, key=lambda item: (item.proposal_id, item.field_path)))
@@ -249,6 +316,17 @@ def _manifest(
     )
     denominator = len(required)
     exact_denominator = len(evidence)
+    if policy.schema_version == 2:
+        _requirements, coverage = match_java_evidence_policy(
+            proposal_batch, source_index, policy
+        )
+        registry_hash = (
+            load_java_evidence_transformation_manifest().transformation_manifest_hash
+        )
+        coverage_hash = coverage.coverage_hash
+    else:
+        registry_hash = None
+        coverage_hash = None
     body = {
         "bundle_hash": bundle.bundle_hash,
         "source_index_hash": source_index.index_hash,
@@ -266,6 +344,8 @@ def _manifest(
         "exactness_ratio": _ratio(exact, exact_denominator),
         "missing_requirements": missing,
         "evidence": tuple(evidence),
+        "transformation_registry_hash": registry_hash,
+        "policy_coverage_hash": coverage_hash,
     }
     return JavaFieldEvidenceManifest(**body, manifest_hash=content_hash(body))
 

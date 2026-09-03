@@ -45,6 +45,23 @@ _NUMERIC = {
     ValueTypeKind.RATIONAL,
     ValueTypeKind.QUANTITY,
 }
+_JAVA_CLAIM_FIELDS = (
+    "java_callable_kind",
+    "resolved_parameter_types",
+    "parameter_array_dimensions",
+    "parameter_varargs",
+    "resolved_return_type",
+    "return_array_dimensions",
+    "method_type_parameters",
+    "intersection_bounds",
+    "first_bound_erasures",
+    "resolved_declared_exceptions",
+    "modifiers",
+    "accessibility",
+    "enclosing_type_accessibility",
+    "module_name",
+    "package_exported",
+)
 
 
 class VariableSymbolTable:
@@ -67,6 +84,19 @@ class VariableSymbolTable:
 def record_content_hash(record: KnowledgeRecord) -> str:
     body = asdict(record)
     body.pop("content_hash")
+    if isinstance(record.content, ClaimSchemaContent) and (
+        record.content.java_callable_kind is None
+    ):
+        # Universal IR v2 packs created before M-34.3 have no Java extension
+        # fields. Their frozen hashes remain authoritative when every added
+        # field is at its explicit non-Java default.
+        if any(
+            body["content"][field] not in (None, (), 0)
+            for field in _JAVA_CLAIM_FIELDS
+        ):
+            raise ValueError("non-Java claim contains partial Java semantics")
+        for field in _JAVA_CLAIM_FIELDS:
+            body["content"].pop(field)
     return content_hash(body)
 
 
@@ -210,7 +240,43 @@ def validate_records(
 
 def _validate_content(record: KnowledgeRecord) -> None:
     content = record.content
-    if isinstance(content, RuleContent):
+    if isinstance(content, ClaimSchemaContent):
+        validate_value_type(content.object_type)
+        if content.java_callable_kind is not None:
+            if content.java_callable_kind not in {"METHOD", "CONSTRUCTOR"}:
+                raise ValueError("invalid Java callable kind")
+            parameter_count = len(content.parameters)
+            if not all(
+                len(values) == parameter_count
+                for values in (
+                    content.resolved_parameter_types,
+                    content.parameter_array_dimensions,
+                    content.parameter_varargs,
+                )
+            ):
+                raise ValueError("Java callable parameter semantics are incomplete")
+            if len(content.intersection_bounds) != len(
+                content.method_type_parameters
+            ) or len(content.first_bound_erasures) != len(
+                content.method_type_parameters
+            ):
+                raise ValueError("Java callable generic semantics are incomplete")
+            if content.return_array_dimensions < 0 or any(
+                value < 0 for value in content.parameter_array_dimensions
+            ):
+                raise ValueError("Java array dimensions cannot be negative")
+            if content.java_callable_kind == "CONSTRUCTOR":
+                if (
+                    content.predicate_id != "<init>"
+                    or content.object_type.kind is not ValueTypeKind.ENTITY
+                    or content.return_type != "void"
+                ):
+                    raise ValueError("constructor semantic is not explicit")
+            elif content.resolved_return_type == "void" and (
+                content.object_type.kind is not ValueTypeKind.VOID
+            ):
+                raise ValueError("void Java method must use VOID value semantics")
+    elif isinstance(content, RuleContent):
         if record.kind not in _RULE_KINDS:
             raise ValueError("typed rule content has incompatible kind")
         symbols = _validate_bindings(content.variables)

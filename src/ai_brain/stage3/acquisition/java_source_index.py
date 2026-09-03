@@ -21,6 +21,7 @@ from ai_brain.stage3.acquisition.java_type_universe import (
     JavaTypeUniverse,
     build_java_type_universe,
     resolve_java_type,
+    source_symbol_metadata,
 )
 from ai_brain.stage3.acquisition.models import (
     SourceBundle,
@@ -81,6 +82,27 @@ class JavaParameter:
 
 
 @dataclass(frozen=True)
+class JavaTypeVariable:
+    name: str
+    bounds: tuple[str, ...]
+    bound_spans: tuple[SourceLocation, ...]
+    explicit_bounds: bool
+    resolved_bounds: tuple[str | None, ...]
+    resolution_receipt_hashes: tuple[str, ...]
+    first_bound_erasure: str | None
+    variable_hash: str
+
+
+@dataclass(frozen=True)
+class JavaTypeOccurrenceResolution:
+    field_path: str
+    source_type: str
+    source_location: SourceLocation
+    resolution: JavaTypeResolution
+    occurrence_hash: str
+
+
+@dataclass(frozen=True)
 class JavaDeclaration:
     node_id: str
     document_id: str
@@ -89,6 +111,7 @@ class JavaDeclaration:
     package_name: str | None
     imports: tuple[str, ...]
     wildcard_imports: tuple[str, ...]
+    static_imports: tuple[str, ...]
     top_level_type_name: str
     nested_type_path: tuple[str, ...]
     local_type: bool
@@ -102,9 +125,12 @@ class JavaDeclaration:
     parameters: tuple[JavaParameter, ...]
     type_token_spans: tuple[SourceLocation, ...]
     javadoc_span: SourceLocation | None
+    deprecated_since: str | None
+    deprecation_span: SourceLocation | None
     modifiers: tuple[str, ...]
     type_parameters: tuple[str, ...]
     type_variable_bounds: tuple[tuple[str, str], ...]
+    type_variables_detail: tuple[JavaTypeVariable, ...]
     return_type: str | None
     resolved_return_type: str | None
     return_resolution_kind: JavaResolutionKind | None
@@ -112,6 +138,14 @@ class JavaDeclaration:
     return_resolution: JavaTypeResolution | None
     type_universe_manifest_hash: str | None
     declared_exceptions: tuple[str, ...]
+    declared_exception_spans: tuple[SourceLocation, ...]
+    resolved_declared_exceptions: tuple[str | None, ...]
+    exception_resolution_receipt_hashes: tuple[str, ...]
+    type_occurrence_resolutions: tuple[JavaTypeOccurrenceResolution, ...]
+    accessibility: str
+    enclosing_type_accessibility: str
+    module_name: str | None
+    package_exported: bool
     source_span_hash: str
     javadoc_span_hash: str | None
     parser_version: str
@@ -144,7 +178,10 @@ class _TypeContext:
     names: tuple[str, ...]
     local_type: bool
     type_variables: tuple[tuple[str, str], ...]
+    type_variables_detail: tuple[JavaTypeVariable, ...]
     record_parameters: tuple[tuple[str, str, SourceLocation, SourceLocation, bool], ...]
+    accessibility: str
+    enclosing_type_accessibility: str
 
 
 def bundle_requires_java_policy(bundle: SourceBundle) -> bool:
@@ -171,9 +208,15 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
         raw = store.get_blob(document.bytes_hash)
         declarations.extend(_index_document(document, raw))
     source_symbols = tuple(
-        item.receiver_type
+        source_symbol_metadata(
+            item.receiver_type,
+            symbol_kind=item.member_kind,
+            access=item.accessibility,
+            enclosing_access=item.enclosing_type_accessibility,
+            local_type=item.local_type,
+        )
         for item in declarations
-        if item.member_kind in _TYPE_NODES.values()
+        if item.member_kind in _TYPE_NODES.values() and not item.local_type
     )
     universe = build_java_type_universe(source_symbols)
     resolved = tuple(_resolve_declaration(item, universe) for item in declarations)
@@ -234,7 +277,7 @@ def _index_document(
     if tree.root_node.has_error:
         raise ValueError(f"Java grammar parse failure: {document.relative_path}")
     package = _package_name(tree.root_node, raw)
-    imports, wildcard_imports = _imports(tree.root_node, raw)
+    imports, wildcard_imports, static_imports = _imports(tree.root_node, raw)
     result: list[JavaDeclaration] = []
 
     def walk(node: Node, context: _TypeContext | None, in_executable: bool) -> None:
@@ -248,6 +291,7 @@ def _index_document(
                 package,
                 imports,
                 wildcard_imports,
+                static_imports,
             )
             result.append(type_declaration)
             body = _body_node(node)
@@ -267,6 +311,7 @@ def _index_document(
                         package,
                         imports,
                         wildcard_imports,
+                        static_imports,
                     )
                 )
                 body = node.child_by_field_name("body")
@@ -284,6 +329,7 @@ def _index_document(
                         package,
                         imports,
                         wildcard_imports,
+                        static_imports,
                     )
                 )
                 return
@@ -297,6 +343,7 @@ def _index_document(
                         package,
                         imports,
                         wildcard_imports,
+                        static_imports,
                     )
                 )
                 return
@@ -317,14 +364,17 @@ def _type_declaration(
     package,
     imports,
     wildcard_imports,
+    static_imports,
 ):
     name_node = _required_field(node, "name")
     name = _text(name_node, raw)
     names = (name,) if context is None else context.names + (name,)
     local = in_executable or (context.local_type if context else False)
-    own_type_variables = _type_variables(node, raw)
+    own_type_variables, own_type_details = _type_variables(node, raw)
     inherited = context.type_variables if context else ()
     type_variables = inherited + own_type_variables
+    inherited_details = context.type_variables_detail if context else ()
+    type_details = inherited_details + own_type_details
     record_parameters = (
         _parameter_parts(node.child_by_field_name("parameters"), raw)
         if node.type == "record_declaration"
@@ -339,6 +389,7 @@ def _type_declaration(
         package=package,
         imports=imports,
         wildcard_imports=wildcard_imports,
+        static_imports=static_imports,
         names=names,
         local_type=local,
         member_kind=_TYPE_NODES[node.type],
@@ -347,16 +398,29 @@ def _type_declaration(
         canonical_source_signature=None,
         parameters=(),
         type_variables=type_variables,
+        type_variables_detail=type_details,
         return_type=None,
         declared_exceptions=(),
+        declared_exception_spans=(),
+        enclosing_type_accessibility=(context.accessibility if context else "PUBLIC"),
         supported=not local,
         unsupported_reason="local_type" if local else None,
     )
-    return declaration, _TypeContext(names, local, type_variables, record_parameters)
+    own_access = _accessibility(declaration.modifiers)
+    enclosing_access = context.accessibility if context else "PUBLIC"
+    return declaration, _TypeContext(
+        names,
+        local,
+        type_variables,
+        type_details,
+        record_parameters,
+        own_access,
+        enclosing_access,
+    )
 
 
 def _method_declaration(
-    node, context, document, raw, package, imports, wildcard_imports
+    node, context, document, raw, package, imports, wildcard_imports, static_imports
 ):
     name_node = _required_field(node, "name")
     name = _text(name_node, raw)
@@ -366,11 +430,12 @@ def _method_declaration(
         if node.type == "compact_constructor_declaration"
         else _parameter_parts(node.child_by_field_name("parameters"), raw)
     )
-    own_type_variables = _type_variables(node, raw)
+    own_type_variables, own_type_details = _type_variables(node, raw)
     type_variables = context.type_variables + own_type_variables
+    type_details = context.type_variables_detail + own_type_details
     type_node = node.child_by_field_name("type")
     return_type = None if kind == "constructor" else _text(type_node, raw)
-    exceptions = _throws(node, raw)
+    exceptions, exception_spans = _throws(node, raw)
     signature_name = "<init>" if kind == "constructor" else name
     signature = (
         f"{signature_name}({','.join(item[1] for item in parameters)})"
@@ -385,6 +450,7 @@ def _method_declaration(
         package=package,
         imports=imports,
         wildcard_imports=wildcard_imports,
+        static_imports=static_imports,
         names=context.names,
         local_type=local,
         member_kind=kind,
@@ -393,15 +459,20 @@ def _method_declaration(
         canonical_source_signature=_normalize_source_signature(signature),
         parameters=parameters,
         type_variables=type_variables,
+        type_variables_detail=type_details,
         return_type="void" if kind == "constructor" else return_type,
         declared_exceptions=exceptions,
+        declared_exception_spans=exception_spans,
+        enclosing_type_accessibility=_combined_accessibility(
+            context.accessibility, context.enclosing_type_accessibility
+        ),
         supported=not local,
         unsupported_reason="local_type_member" if local else None,
     )
 
 
 def _field_declarations(
-    node, context, document, raw, package, imports, wildcard_imports
+    node, context, document, raw, package, imports, wildcard_imports, static_imports
 ):
     type_node = node.child_by_field_name("type")
     source_type = _text(type_node, raw)
@@ -420,6 +491,7 @@ def _field_declarations(
                 package=package,
                 imports=imports,
                 wildcard_imports=wildcard_imports,
+                static_imports=static_imports,
                 names=context.names,
                 local_type=context.local_type,
                 member_kind="field",
@@ -428,8 +500,13 @@ def _field_declarations(
                 canonical_source_signature=f"{name}:{source_type}",
                 parameters=(),
                 type_variables=context.type_variables,
+                type_variables_detail=context.type_variables_detail,
                 return_type=source_type,
                 declared_exceptions=(),
+                declared_exception_spans=(),
+                enclosing_type_accessibility=_combined_accessibility(
+                    context.accessibility, context.enclosing_type_accessibility
+                ),
                 supported=not context.local_type,
                 unsupported_reason=(
                     "local_type_member" if context.local_type else None
@@ -439,7 +516,9 @@ def _field_declarations(
     return tuple(result)
 
 
-def _enum_constant(node, context, document, raw, package, imports, wildcard_imports):
+def _enum_constant(
+    node, context, document, raw, package, imports, wildcard_imports, static_imports
+):
     name_node = node.named_children[0]
     name = _text(name_node, raw)
     return _make_declaration(
@@ -450,6 +529,7 @@ def _enum_constant(node, context, document, raw, package, imports, wildcard_impo
         package=package,
         imports=imports,
         wildcard_imports=wildcard_imports,
+        static_imports=static_imports,
         names=context.names,
         local_type=context.local_type,
         member_kind="constant",
@@ -458,8 +538,13 @@ def _enum_constant(node, context, document, raw, package, imports, wildcard_impo
         canonical_source_signature=f"{name}:{_receiver(package, context.names)}",
         parameters=(),
         type_variables=context.type_variables,
+        type_variables_detail=context.type_variables_detail,
         return_type=_receiver(package, context.names),
         declared_exceptions=(),
+        declared_exception_spans=(),
+        enclosing_type_accessibility=_combined_accessibility(
+            context.accessibility, context.enclosing_type_accessibility
+        ),
         supported=not context.local_type,
         unsupported_reason="local_type_member" if context.local_type else None,
     )
@@ -474,6 +559,7 @@ def _make_declaration(
     package,
     imports,
     wildcard_imports,
+    static_imports,
     names,
     local_type,
     member_kind,
@@ -482,13 +568,17 @@ def _make_declaration(
     canonical_source_signature,
     parameters,
     type_variables,
+    type_variables_detail,
     return_type,
     declared_exceptions,
+    declared_exception_spans,
+    enclosing_type_accessibility,
     supported,
     unsupported_reason,
 ):
-    declaration_span = _location(node)
+    declaration_span = _location(node, raw)
     javadoc_node = _associated_javadoc(node)
+    deprecated_since, deprecation_span = _deprecation(node, raw)
     parameter_rows = tuple(
         JavaParameter(
             name=item[0],
@@ -520,7 +610,7 @@ def _make_declaration(
     type_spans = tuple(item.type_span for item in parameter_rows)
     type_node = node.child_by_field_name("type")
     if type_node is not None:
-        type_spans += (_location(type_node),)
+        type_spans += (_location(type_node, raw),)
     modifiers = _modifiers(node, raw)
     type_parameter_names = tuple(item[0] for item in type_variables)
     body = {
@@ -531,6 +621,7 @@ def _make_declaration(
         "package_name": package,
         "imports": imports,
         "wildcard_imports": wildcard_imports,
+        "static_imports": static_imports,
         "top_level_type_name": names[0],
         "nested_type_path": names[1:],
         "local_type": local_type,
@@ -540,13 +631,16 @@ def _make_declaration(
         "canonical_source_signature": canonical_source_signature,
         "erased_jvm_descriptor": UNRESOLVED_DESCRIPTOR,
         "declaration_span": declaration_span,
-        "name_span": _location(name_node),
+        "name_span": _location(name_node, raw),
         "parameters": parameter_rows,
         "type_token_spans": type_spans,
-        "javadoc_span": _location(javadoc_node) if javadoc_node else None,
+        "javadoc_span": _location(javadoc_node, raw) if javadoc_node else None,
+        "deprecated_since": deprecated_since,
+        "deprecation_span": deprecation_span,
         "modifiers": modifiers,
         "type_parameters": type_parameter_names,
         "type_variable_bounds": type_variables,
+        "type_variables_detail": type_variables_detail,
         "return_type": return_type,
         "resolved_return_type": None,
         "return_resolution_kind": None,
@@ -554,6 +648,14 @@ def _make_declaration(
         "return_resolution": None,
         "type_universe_manifest_hash": None,
         "declared_exceptions": declared_exceptions,
+        "declared_exception_spans": declared_exception_spans,
+        "resolved_declared_exceptions": (),
+        "exception_resolution_receipt_hashes": (),
+        "type_occurrence_resolutions": (),
+        "accessibility": _accessibility(modifiers),
+        "enclosing_type_accessibility": enclosing_type_accessibility,
+        "module_name": None,
+        "package_exported": True,
         "source_span_hash": bytes_hash(raw[node.start_byte : node.end_byte]),
         "javadoc_span_hash": (
             bytes_hash(raw[javadoc_node.start_byte : javadoc_node.end_byte])
@@ -582,17 +684,66 @@ def _resolve_declaration(
 ) -> JavaDeclaration:
     imports = _explicit_import_map(declaration.imports)
     variables = dict(declaration.type_variable_bounds)
+    occurrences: list[JavaTypeOccurrenceResolution] = []
     parameters = []
     unresolved = declaration.unsupported_reason
-    for parameter in declaration.parameters:
+
+    def resolve_occurrence(field_path, source_type, location):
         resolution = resolve_java_type(
-            parameter.source_type,
+            source_type,
             universe=universe,
             package_name=declaration.package_name,
             receiver_type=declaration.receiver_type,
             explicit_imports=imports,
             wildcard_imports=declaration.wildcard_imports,
             type_variables=variables,
+        )
+        body = {
+            "field_path": field_path,
+            "source_type": source_type,
+            "source_location": location,
+            "resolution": resolution,
+        }
+        occurrences.append(
+            JavaTypeOccurrenceResolution(
+                **body, occurrence_hash=content_hash(body)
+            )
+        )
+        return resolution
+
+    resolved_type_variables = []
+    for variable_index, variable in enumerate(declaration.type_variables_detail):
+        resolutions = tuple(
+            resolve_occurrence(
+                f"type_parameters[{variable_index}].bounds[{bound_index}]",
+                bound,
+                variable.bound_spans[bound_index],
+            )
+            for bound_index, bound in enumerate(variable.bounds)
+        )
+        if variable.explicit_bounds and any(
+            item.resolved_type is None for item in resolutions
+        ):
+            unresolved = unresolved or f"invalid_type_variable_bound:{variable.name}"
+        body = {
+            "name": variable.name,
+            "bounds": variable.bounds,
+            "bound_spans": variable.bound_spans,
+            "explicit_bounds": variable.explicit_bounds,
+            "resolved_bounds": tuple(item.resolved_type for item in resolutions),
+            "resolution_receipt_hashes": tuple(
+                item.complete_receipt_hash for item in resolutions
+            ),
+            "first_bound_erasure": resolutions[0].resolved_type,
+        }
+        resolved_type_variables.append(
+            JavaTypeVariable(**body, variable_hash=content_hash(body))
+        )
+    for parameter in declaration.parameters:
+        resolution = resolve_occurrence(
+            f"parameters[{len(parameters)}].type",
+            parameter.source_type,
+            parameter.type_span,
         )
         if resolution.resolved_type is None:
             label = resolution.resolution_kind.value.lower()
@@ -601,7 +752,7 @@ def _resolve_declaration(
             parameter,
             resolved_type=resolution.resolved_type,
             resolution_kind=resolution.resolution_kind,
-            resolution_receipt_hash=resolution.receipt_hash,
+            resolution_receipt_hash=resolution.complete_receipt_hash,
             resolution=resolution,
             parameter_hash="",
         )
@@ -609,14 +760,14 @@ def _resolve_declaration(
         row.pop("parameter_hash")
         parameters.append(replace(provisional, parameter_hash=content_hash(row)))
     return_resolution = (
-        resolve_java_type(
+        resolve_occurrence(
+            "return_type",
             declaration.return_type,
-            universe=universe,
-            package_name=declaration.package_name,
-            receiver_type=declaration.receiver_type,
-            explicit_imports=imports,
-            wildcard_imports=declaration.wildcard_imports,
-            type_variables=variables,
+            (
+                declaration.name_span
+                if declaration.member_kind == "constructor"
+                else declaration.type_token_spans[-1]
+            ),
         )
         if declaration.return_type
         else None
@@ -642,19 +793,45 @@ def _resolve_declaration(
         )
     else:
         descriptor = UNRESOLVED_DESCRIPTOR
+    exception_resolutions = tuple(
+        resolve_occurrence(
+            f"declared_exceptions[{index}]",
+            source_type,
+            declaration.declared_exception_spans[index],
+        )
+        for index, source_type in enumerate(declaration.declared_exceptions)
+    )
+    for source_type, resolution in zip(
+        declaration.declared_exceptions, exception_resolutions, strict=True
+    ):
+        if resolution.resolved_type is None:
+            unresolved = unresolved or f"invalid_throws_type:{source_type}"
+    receiver_resolution = resolve_occurrence(
+        "receiver_type", declaration.receiver_type, declaration.name_span
+    )
+    if receiver_resolution.resolved_type is None:
+        unresolved = unresolved or f"invalid_receiver_type:{declaration.receiver_type}"
     supported = declaration.supported and unresolved is None
     provisional = replace(
         declaration,
         parameters=tuple(parameters),
+        type_variables_detail=tuple(resolved_type_variables),
         resolved_return_type=resolved_return,
         return_resolution_kind=(
             return_resolution.resolution_kind if return_resolution else None
         ),
         return_resolution_receipt_hash=(
-            return_resolution.receipt_hash if return_resolution else None
+            return_resolution.complete_receipt_hash if return_resolution else None
         ),
         return_resolution=return_resolution,
         type_universe_manifest_hash=universe.manifest_hash,
+        resolved_declared_exceptions=tuple(
+            item.resolved_type for item in exception_resolutions
+        ),
+        exception_resolution_receipt_hashes=tuple(
+            item.complete_receipt_hash for item in exception_resolutions
+        ),
+        type_occurrence_resolutions=tuple(occurrences),
         erased_jvm_descriptor=descriptor,
         supported=supported,
         unsupported_reason=unresolved,
@@ -705,20 +882,20 @@ def _package_name(root, raw):
 def _imports(root, raw):
     explicit = []
     wildcard = []
+    static = []
     for node in root.named_children:
         if node.type != "import_declaration":
             continue
-        value = (
-            _text(node, raw)
-            .removeprefix("import ")
-            .removeprefix("static ")
-            .rstrip(";")
-            .strip()
-        )
+        statement = _text(node, raw).removeprefix("import ").rstrip(";").strip()
+        is_static = statement.startswith("static ")
+        value = statement.removeprefix("static ").strip()
+        if is_static:
+            static.append(value)
+            continue
         (wildcard if value.endswith(".*") else explicit).append(
             value.removesuffix(".*")
         )
-    return tuple(sorted(explicit)), tuple(sorted(wildcard))
+    return tuple(sorted(explicit)), tuple(sorted(wildcard)), tuple(sorted(static))
 
 
 def _explicit_import_map(values):
@@ -733,8 +910,9 @@ def _type_variables(node, raw):
         (item for item in node.named_children if item.type == "type_parameters"), None
     )
     if container is None:
-        return ()
+        return (), ()
     result = []
+    details = []
     for parameter in container.named_children:
         if parameter.type != "type_parameter":
             continue
@@ -743,13 +921,29 @@ def _type_variables(node, raw):
             (item for item in parameter.named_children if item.type == "type_bound"),
             None,
         )
-        bound = (
-            _text(bound_node.named_children[0], raw)
-            if bound_node and bound_node.named_children
-            else "Object"
+        bound_nodes = tuple(bound_node.named_children) if bound_node else ()
+        bounds = (
+            tuple(_text(item, raw) for item in bound_nodes)
+            if bound_nodes
+            else ("Object",)
         )
-        result.append((name, bound))
-    return tuple(result)
+        spans = (
+            tuple(_location(item, raw) for item in bound_nodes)
+            if bound_nodes
+            else (_location(parameter.named_children[0], raw),)
+        )
+        result.append((name, bounds[0]))
+        body = {
+            "name": name,
+            "bounds": bounds,
+            "bound_spans": spans,
+            "explicit_bounds": bool(bound_nodes),
+            "resolved_bounds": (),
+            "resolution_receipt_hashes": (),
+            "first_bound_erasure": None,
+        }
+        details.append(JavaTypeVariable(**body, variable_hash=content_hash(body)))
+    return tuple(result), tuple(details)
 
 
 def _parameter_parts(container, raw):
@@ -802,8 +996,8 @@ def _parameter_parts(container, raw):
             (
                 _text(name_node, raw),
                 _text(type_node, raw) + ("..." if varargs else ""),
-                _location(type_node),
-                _location(name_node),
+                _location(type_node, raw),
+                _location(name_node, raw),
                 varargs,
             )
         )
@@ -815,11 +1009,10 @@ def _throws(node, raw):
         (item for item in node.named_children if item.type == "throws"), None
     )
     if container is None:
-        return ()
-    return tuple(
-        _text(item, raw)
-        for item in container.named_children
-        if item.type not in {"throws"}
+        return (), ()
+    nodes = tuple(item for item in container.named_children if item.type != "throws")
+    return tuple(_text(item, raw) for item in nodes), tuple(
+        _location(item, raw) for item in nodes
     )
 
 
@@ -830,8 +1023,44 @@ def _modifiers(node, raw):
     if container is None:
         return ()
     return tuple(
-        value for value in _text(container, raw).split() if not value.startswith("@")
+        re.findall(
+            r"\b(?:public|protected|private|abstract|static|final|"
+            r"synchronized|native|strictfp|default|transient|volatile|sealed)\b",
+            _text(container, raw),
+        )
     )
+
+
+def _deprecation(node, raw):
+    container = next(
+        (item for item in node.named_children if item.type == "modifiers"), None
+    )
+    if container is None:
+        return None, None
+    text = _text(container, raw)
+    match = re.search(
+        r'@(?:java\.lang\.)?Deprecated\s*\([^)]*\bsince\s*=\s*"([^"]*)"',
+        text,
+    )
+    if match is None:
+        return None, None
+    return match.group(1), _location(container, raw)
+
+
+def _accessibility(modifiers) -> str:
+    values = set(modifiers)
+    if "public" in values:
+        return "PUBLIC"
+    if "protected" in values:
+        return "PROTECTED"
+    if "private" in values:
+        return "PRIVATE"
+    return "PACKAGE"
+
+
+def _combined_accessibility(value: str, enclosing: str) -> str:
+    ranking = {"PUBLIC": 0, "PROTECTED": 1, "PACKAGE": 2, "PRIVATE": 3}
+    return max((value, enclosing), key=ranking.__getitem__)
 
 
 def _associated_javadoc(node):
@@ -867,9 +1096,12 @@ def _text(node, raw):
     return raw[node.start_byte : node.end_byte].decode("utf-8", errors="strict")
 
 
-def _location(node):
-    start_line = node.start_point.row + 1
-    end_line = max(start_line, node.end_point.row + (1 if node.end_point.column else 0))
+def _location(node, raw):
+    # Tree-sitter counts LF rows, while Java and SourceLocation treat CR, LF,
+    # and CRLF as logical line terminators. Derive lines from trusted bytes so
+    # CR-only inputs preserve the same coordinates as javac's LineMap.
+    start_line = _line_number(raw, node.start_byte)
+    end_line = _line_number(raw, max(node.start_byte, node.end_byte - 1))
     return SourceLocation(
         node.start_byte,
         node.end_byte,
@@ -877,6 +1109,11 @@ def _location(node):
         end_line,
         (),
     )
+
+
+def _line_number(raw: bytes, offset: int) -> int:
+    prefix = raw[:offset]
+    return 1 + prefix.count(b"\n") + prefix.count(b"\r") - prefix.count(b"\r\n")
 
 
 def _clean_type(value):

@@ -57,6 +57,7 @@ class ValueTypeKind(StrEnum):
     STRING = "STRING"
     ENTITY = "ENTITY"
     QUANTITY = "QUANTITY"
+    VOID = "VOID"
 
 
 @dataclass(frozen=True)
@@ -236,6 +237,21 @@ class ClaimSchemaContent:
     declared_exceptions: tuple[str, ...] = ()
     deprecated_since: str | None = None
     examples: tuple[str, ...] = ()
+    java_callable_kind: str | None = None
+    resolved_parameter_types: tuple[str, ...] = ()
+    parameter_array_dimensions: tuple[int, ...] = ()
+    parameter_varargs: tuple[bool, ...] = ()
+    resolved_return_type: str | None = None
+    return_array_dimensions: int = 0
+    method_type_parameters: tuple[str, ...] = ()
+    intersection_bounds: tuple[tuple[str, ...], ...] = ()
+    first_bound_erasures: tuple[str, ...] = ()
+    resolved_declared_exceptions: tuple[str, ...] = ()
+    modifiers: tuple[str, ...] = ()
+    accessibility: str | None = None
+    enclosing_type_accessibility: str | None = None
+    module_name: str | None = None
+    package_exported: bool | None = None
 
 
 @dataclass(frozen=True)

@@ -157,6 +157,33 @@ def set_detection_confusion(expected_ids, detected_ids):
     )
 
 
+def conflict_instance_confusion(expected_conflicts, detected_conflicts):
+    """Compare complete conflict instances, never only their kind labels."""
+
+    expected_values = tuple(expected_conflicts)
+    detected_values = tuple(detected_conflicts)
+    expected = {item.conflict_hash: item for item in expected_values}
+    detected = {item.conflict_hash: item for item in detected_values}
+    if len(expected) != len(expected_values):
+        raise ValueError("duplicate expected Java conflict instance ID")
+    if len(detected) != len(detected_values):
+        raise ValueError("duplicate detected Java conflict instance ID")
+    # A matching ID must also carry the exact implicated proposals,
+    # declarations, locations and kind. This explicitly guards fixtures that
+    # accidentally reduce truth to a set of conflict-kind strings.
+    exact_ids = {
+        key for key in set(expected) & set(detected) if expected[key] == detected[key]
+    }
+    altered_ids = (set(expected) & set(detected)) - exact_ids
+    expected_ids = (set(expected) - altered_ids) | {
+        f"expected-altered:{key}" for key in altered_ids
+    }
+    detected_ids = (set(detected) - altered_ids) | {
+        f"detected-altered:{key}" for key in altered_ids
+    }
+    return set_detection_confusion(expected_ids, detected_ids)
+
+
 def safe_abstention(expected_withheld, actual_trusted):
     expected = set(expected_withheld)
     trusted = set(actual_trusted)

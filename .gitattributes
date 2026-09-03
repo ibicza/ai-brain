@@ -28,3 +28,6 @@ artifacts/domains/chemistry/m281/** binary
 artifacts/domains/chemistry/m282/** binary
 artifacts/domains/chemistry/m29/** binary
 artifacts/education/m29/** binary
+
+# M-34.3 replay fixtures intentionally include LF, CRLF, CR, and no-final-newline.
+tests/fixtures/m343_java/corpus/** binary

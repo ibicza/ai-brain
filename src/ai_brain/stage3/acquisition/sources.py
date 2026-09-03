@@ -63,6 +63,7 @@ def ingest_bundle(
     language: str = "en",
     imported_at: str | None = None,
     version: str = "1.0.0",
+    source_root: Path | None = None,
     store=None,
 ) -> SourceBundle:
     if not bundle_id or not paths or len(paths) > MAX_DOCUMENTS:
@@ -77,6 +78,12 @@ def ingest_bundle(
     total = sum(path.stat().st_size for path in resolved)
     if total > MAX_BUNDLE_BYTES:
         raise ValueError("source bundle exceeds resource policy")
+    resolved_root = source_root.resolve(strict=True) if source_root else None
+    if resolved_root is not None and (
+        not resolved_root.is_dir()
+        or any(not path.is_relative_to(resolved_root) for path in resolved)
+    ):
+        raise ValueError("source root does not contain every source document")
     documents = []
     for index, path in enumerate(resolved):
         if paths[index].is_symlink() or not path.is_file():
@@ -95,14 +102,19 @@ def ingest_bundle(
         text_hash = bytes_hash(canonical.encode("utf-8"))
         document_id = f"{bundle_id}.document.{index + 1:03d}"
         structure = _structure(canonical, media)
+        relative_path = (
+            path.relative_to(resolved_root).as_posix()
+            if resolved_root is not None
+            else path.name
+        )
         values = {
             "document_id": document_id,
             "media_type": media,
             "language": language,
-            "relative_path": path.name,
+            "relative_path": relative_path,
             "bytes_hash": raw_hash,
             "canonical_text_hash": text_hash,
-            "source_metadata": (("original_name", path.name),),
+            "source_metadata": (("original_name", relative_path),),
             "imported_at": stamp,
             "version": version,
             "parent_bundle_id": bundle_id,

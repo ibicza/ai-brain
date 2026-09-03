@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.java_semantics import (
+    build_java_claim_content,
+    proposal_field_manifest_hash,
+)
 from ai_brain.stage3.acquisition.java_source_index import JavaSourceIndex
 from ai_brain.stage3.acquisition.models import (
     ExtractionMethod,
@@ -17,14 +21,7 @@ from ai_brain.stage3.acquisition.version import (
     KNOWLEDGE_PROPOSAL_SCHEMA_VERSION,
     SOURCE_COMPILER_VERSION,
 )
-from ai_brain.stage3.knowledge_ir.records import (
-    ClaimSchemaContent,
-    EntityTypeRef,
-    EpistemicCharacter,
-    KnowledgeKind,
-    ValueTypeKind,
-    ValueTypeRef,
-)
+from ai_brain.stage3.knowledge_ir.records import EpistemicCharacter, KnowledgeKind
 
 
 @dataclass(frozen=True)
@@ -45,6 +42,7 @@ class JavaProposalBatch:
     proposals: tuple[KnowledgeProposal, ...]
     bindings: tuple[JavaProposalBinding, ...]
     proposal_manifest_hash: str
+    proposal_field_manifest_hash: str
     batch_hash: str
 
 
@@ -75,24 +73,7 @@ def propose_java_knowledge(
         )
         if segment is None:
             raise ValueError("Java declaration has no physical source segment")
-        content = ClaimSchemaContent(
-            EntityTypeRef(declaration.receiver_type),
-            "<init>"
-            if declaration.member_kind == "constructor"
-            else declaration.member_name,
-            ValueTypeRef(ValueTypeKind.STRING),
-            receiver_type=declaration.receiver_type,
-            parameters=tuple(
-                (parameter.name, parameter.source_type)
-                for parameter in declaration.parameters
-            ),
-            return_type=declaration.return_type,
-            generic_constraints=tuple(
-                f"{name} extends {bound}"
-                for name, bound in declaration.type_variable_bounds
-            ),
-            declared_exceptions=declaration.declared_exceptions,
-        )
+        content = build_java_claim_content(declaration)
         body = {
             "proposal_id": "",
             "source_bundle_id": bundle.bundle_id,
@@ -136,5 +117,11 @@ def propose_java_knowledge(
         "proposals": ordered,
         "bindings": binding_values,
         "proposal_manifest_hash": content_hash(manifest),
+        "proposal_field_manifest_hash": content_hash(
+            tuple(
+                (item.proposal_id, proposal_field_manifest_hash(item.proposed_content))
+                for item in ordered
+            )
+        ),
     }
     return JavaProposalBatch(**body, batch_hash=content_hash(body))
