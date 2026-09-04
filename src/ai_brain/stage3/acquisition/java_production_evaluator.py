@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage2.facts.canonical import canonical_json, content_hash
+from ai_brain.stage3.acquisition.java_diagnostic_scope import (
+    JavaDiagnosticScope,
+    diagnostic_scope_from_receipt,
+)
 from ai_brain.stage3.acquisition.java_goldens import (
     JavaGoldenManifest,
     verify_java_golden_manifest,
@@ -59,7 +63,9 @@ def evaluate_sealed_java_production(
     batch: JavaProductionTrustBatch,
     golden_manifest: JavaGoldenManifest,
 ) -> JavaProductionEvaluationReport:
-    if seal_java_production_output(batch) != sealed_output:
+    if canonical_json(seal_java_production_output(batch)) != canonical_json(
+        sealed_output
+    ):
         raise ValueError("evaluator received a batch different from sealed production")
     verify_java_golden_manifest(golden_manifest)
     expected_locations = {
@@ -131,6 +137,12 @@ def evaluate_sealed_java_production(
         and trust.coverage >= "0.800000"
         and evidence.exactness == "1.000000"
         and resolution["oracle_agreement"] == "1.000000"
+        and sum(
+            item["trusted_count"]
+            for item in diagnostic_categories
+            if item["scope"] == JavaDiagnosticScope.DECLARATION_HEADER_BLOCKING.value
+        )
+        == 0
     )
     body = {
         "production_output_hash": sealed_output["production_output_hash"],
@@ -241,9 +253,17 @@ def _diagnostic_report(goldens, sealed_output):
                 "production_trust_state"
             ]
     result = []
-    for category in JAVA_DIAGNOSTIC_CATEGORIES:
+    observed = {
+        (category, scope.value)
+        for category in JAVA_DIAGNOSTIC_CATEGORIES
+        for scope in JavaDiagnosticScope
+    }
+    for category, scope_value in sorted(observed):
         receipts = tuple(
-            item for item in goldens.diagnostics if item.normalized_category == category
+            item
+            for item in goldens.diagnostics
+            if item.normalized_category == category
+            and diagnostic_scope_from_receipt(item).value == scope_value
         )
         targets = {target for item in receipts for target in item.target_ids}
         trusted = sum(state_by_target.get(item) == "trusted" for item in targets)
@@ -251,6 +271,7 @@ def _diagnostic_report(goldens, sealed_output):
         result.append(
             {
                 "category": category,
+                "scope": scope_value,
                 "expected_count": len(receipts),
                 "observed_count": len(receipts),
                 "target_count": len(targets),

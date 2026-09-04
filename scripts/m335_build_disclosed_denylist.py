@@ -43,6 +43,7 @@ def main() -> None:
         )
     )
     by_source = defaultdict(list)
+    declaration_fingerprints = set()
     for item in production["candidate_rows"]:
         fingerprint = content_hash(
             (
@@ -54,6 +55,7 @@ def main() -> None:
             )
         )
         by_source[item["source_unit_id"]].append(fingerprint)
+        declaration_fingerprints.add(fingerprint)
     declaration_manifests = tuple(
         (path, content_hash(tuple(sorted(values))))
         for path, values in sorted(by_source.items())
@@ -72,6 +74,10 @@ def main() -> None:
         ),
         "path_hash_manifest": tuple(entries),
         "declaration_manifest_hashes": declaration_manifests,
+        "declaration_fingerprints": tuple(sorted(declaration_fingerprints)),
+        "individual_declaration_fingerprint_manifest_hash": content_hash(
+            tuple(sorted(declaration_fingerprints))
+        ),
         "declaration_fingerprint_manifest_hash": content_hash(declaration_manifests),
     }
     output = (

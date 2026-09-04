@@ -9,9 +9,16 @@ from dataclasses import asdict
 from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
+from ai_brain.stage3.acquisition.java_compilation_identity import (
+    JAVA_SEMANTIC_COMPILATION_EPOCH,
+)
 from ai_brain.stage3.acquisition.java_production import (
     JavaProductionTrustBatch,
     run_java_acquisition_pipeline,
+)
+from ai_brain.stage3.acquisition.java_release import (
+    JavaReleaseIdentity,
+    verify_java_release_identity,
 )
 from ai_brain.stage3.acquisition.models import AcquisitionManifest, SourceBundle
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore, _document
@@ -41,7 +48,7 @@ def build_java_production_replay_artifact(batch, store, source_bindings):
     body = {
         "schema_version": JAVA_PRODUCTION_REPLAY_SCHEMA_VERSION,
         "deterministic_run_id": batch.closure.deterministic_run_id,
-        "bundle": asdict(batch.bundle),
+        "bundle": _semantic_bundle(batch.bundle),
         "raw_source_blobs": raw_blobs,
         "canonical_text_blobs": canonical_blobs,
         "source_paths": tuple(
@@ -55,6 +62,18 @@ def build_java_production_replay_artifact(batch, store, source_bindings):
         "compiled_source_bindings": tuple(asdict(item) for item in source_bindings),
     }
     return {**body, "artifact_hash": content_hash(body)}
+
+
+def _semantic_bundle(bundle):
+    """Serialize replay semantics without acquisition-event timestamps."""
+
+    row = asdict(bundle)
+    row["created_at"] = JAVA_SEMANTIC_COMPILATION_EPOCH
+    row["documents"] = tuple(
+        {**document, "imported_at": JAVA_SEMANTIC_COMPILATION_EPOCH}
+        for document in row["documents"]
+    )
+    return row
 
 
 def verify_compiled_java_production_standalone(pack_root: Path) -> dict[str, object]:
@@ -84,6 +103,8 @@ def verify_compiled_java_production_standalone(pack_root: Path) -> dict[str, obj
     expected = row["expected_production_artifacts"]
     if content_hash(expected) != row["expected_production_artifacts_hash"]:
         raise ValueError("production replay expected-artifact hash mismatch")
+    release = JavaReleaseIdentity(**row["release_identity"])
+    verify_java_release_identity(release)
     with tempfile.TemporaryDirectory(prefix="m344-production-replay-") as temporary:
         store = AcquisitionStore.open_or_initialize(Path(temporary) / "store")
         for digest, encoded in (
@@ -97,6 +118,7 @@ def verify_compiled_java_production_standalone(pack_root: Path) -> dict[str, obj
             _bundle(row["bundle"]),
             store,
             deterministic_run_id=row["deterministic_run_id"],
+            release_identity=release,
         )
     if _expected_artifacts(batch) != expected:
         raise ValueError("standalone Java production replay mismatch")
@@ -104,6 +126,10 @@ def verify_compiled_java_production_standalone(pack_root: Path) -> dict[str, obj
         row["parser_common_artifact"]
     ):
         raise ValueError("standalone Java parser artifact mismatch")
+    if canonical_json(asdict(batch.release_identity)) != canonical_json(
+        row["release_identity"]
+    ):
+        raise ValueError("standalone Java release identity mismatch")
     if canonical_json(
         [asdict(item) for item in pack.source_bindings]
     ) != canonical_json(row["compiled_source_bindings"]):

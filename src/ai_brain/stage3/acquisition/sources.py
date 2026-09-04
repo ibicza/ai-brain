@@ -105,7 +105,9 @@ def ingest_bundle(
             else path.name
         )
         original_relative_paths.append(original_relative_path)
-        relative_path = _canonical_relative_path(original_relative_path)
+        relative_path = _canonical_relative_path(
+            original_relative_path, require_nfc=False
+        )
         media = _media_type(path, raw)
         canonical = _canonical_text(raw, media)
         if any(
@@ -255,7 +257,10 @@ def verify_bundle(bundle: SourceBundle, *, store=None) -> None:
     manifest_digest = manifest_body.pop("manifest_hash")
     if content_hash(manifest_body) != manifest_digest:
         raise ValueError("acquisition manifest hash mismatch")
+    if not legacy:
+        _verify_canonical_java_bundle_shape(bundle)
     for document in bundle.documents:
+        normalize_datetime(document.imported_at)
         body = asdict(document)
         digest = body.pop("document_hash")
         actual = content_hash(body if legacy else _document_semantic_body(body))
@@ -269,11 +274,50 @@ def verify_bundle(bundle: SourceBundle, *, store=None) -> None:
                 or bytes_hash(canonical) != document.canonical_text_hash
             ):
                 raise ValueError("stored source bytes changed")
+    normalize_datetime(bundle.created_at)
     body = asdict(bundle)
     digest = body.pop("bundle_hash")
     actual = content_hash(body if legacy else _bundle_semantic_body(body))
     if actual != digest:
         raise ValueError("source bundle hash mismatch")
+
+
+def _verify_canonical_java_bundle_shape(bundle: SourceBundle) -> None:
+    """Independently prove the v2 path, order, ID and tag invariants."""
+
+    if not bundle.documents or any(
+        item.media_type is not SourceMediaType.JAVA_SOURCE for item in bundle.documents
+    ):
+        raise ValueError("canonical Java bundle contains a non-Java document")
+    paths = tuple(item.relative_path for item in bundle.documents)
+    canonical_paths = tuple(_canonical_relative_path(item) for item in paths)
+    if paths != canonical_paths or len(paths) != len(set(paths)):
+        raise ValueError("canonical Java bundle path set is not canonical and unique")
+    if len({item.casefold() for item in paths}) != len(paths):
+        raise ValueError("canonical Java bundle has a casefold path collision")
+    expected_order = tuple(
+        sorted(
+            bundle.documents,
+            key=lambda item: (item.relative_path.encode("utf-8"), item.bytes_hash),
+        )
+    )
+    if bundle.documents != expected_order:
+        raise ValueError("canonical Java bundle document order mismatch")
+    expected_tags = tuple(sorted(set(bundle.domain_tags)))
+    if bundle.domain_tags != expected_tags:
+        raise ValueError("canonical Java bundle domain tags are not sorted and unique")
+    for document in bundle.documents:
+        identity_body = {
+            "schema_version": bundle.manifest.schema_version,
+            "bundle_id": bundle.bundle_id,
+            "relative_path": document.relative_path,
+            "bytes_hash": document.bytes_hash,
+        }
+        expected_id = f"{bundle.bundle_id}.document.{content_hash(identity_body)[:32]}"
+        if document.document_id != expected_id:
+            raise ValueError("canonical Java document ID is not content-derived")
+        if document.source_metadata != (("original_name", document.relative_path),):
+            raise ValueError("canonical Java document metadata leaks a source root")
 
 
 def _document_semantic_body(values) -> dict:
@@ -304,10 +348,12 @@ def _bundle_semantic_body(values) -> dict:
     }
 
 
-def _canonical_relative_path(value: str) -> str:
-    if not value or "\\" in value:
+def _canonical_relative_path(value: str, *, require_nfc: bool = True) -> str:
+    if not value or "\\" in value or "\x00" in value or re.match(r"^[A-Za-z]:", value):
         raise ValueError("non-canonical source relative path")
     normalized = unicodedata.normalize("NFC", value)
+    if require_nfc and normalized != value:
+        raise ValueError("source relative path is not NFC")
     path = PurePosixPath(normalized)
     if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
         raise ValueError("unsafe source relative path")

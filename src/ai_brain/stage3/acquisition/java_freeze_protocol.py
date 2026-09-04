@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import PurePosixPath
@@ -9,7 +10,9 @@ from pathlib import PurePosixPath
 from ai_brain.stage2.facts.canonical import content_hash
 from ai_brain.stage3.acquisition.java_freeze_roles import (
     PROTECTED_FINAL_ROLES,
+    build_final_artifact_role_manifest,
     classify_final_artifact_role,
+    verify_role_aware_disclosure,
 )
 
 M344_FROZEN_PREFIXES = (
@@ -38,6 +41,28 @@ M344_COMMIT_MESSAGES = (
     "M-34.4 freeze oracle-free Java acquisition",
     "M-34.4 untouched real-Java evaluation",
     "M-34.4 exact-SHA fresh-freeze evidence",
+)
+
+M336_BASE_SHA = "6b0c31e6e6f987216923a66e332370aeeffa9f48"
+M336_EXCLUDED_M33_SHA = "b94c17dc8b1026fe9e338b5fc0a4926b23d68a39"
+M336_BRANCH = "exp/stage3-m336-fresh-java-freeze"
+M336_FROZEN_PREFIXES = M344_FROZEN_PREFIXES
+M336_H15_PREFIXES = (
+    "docs/m336_final_semantic_metrics.md",
+    "docs/m336_final_source_inventory.md",
+    "docs/m336_final_trust_metrics.md",
+    "docs/m336_runtime_proof.md",
+    "evaluation/m336_final_java",
+)
+M336_E15_PREFIXES = (
+    "docs/m336_final_freeze_report.md",
+    "runs/m336_final_freeze_report.md",
+    "runs/m336_final_gate",
+)
+M336_COMMIT_MESSAGES = (
+    "M-33.6 freeze Java acquisition v2",
+    "M-33.6 untouched Java black-box evaluation",
+    "M-33.6 exact-SHA Java freeze evidence",
 )
 
 
@@ -88,6 +113,31 @@ class GitJavaFreezeProtocolReport:
     unauthorized_h13_to_e13_paths: tuple[str, ...]
     frozen_paths_changed_after_f13: tuple[str, ...]
     final_hash_overlap_with_f13: tuple[str, ...]
+    passed: bool
+    report_hash: str
+
+
+@dataclass(frozen=True)
+class M336GitFreezeProtocolReport:
+    base_sha: str
+    f15_sha: str
+    h15_sha: str
+    e15_sha: str
+    branch_tip_sha: str
+    upstream_sha: str
+    exact_parent_chain: bool
+    exact_commit_messages: bool
+    merge_commit_count: int
+    excluded_m33_outside_ancestry: bool
+    f15_to_h15_changed_paths: tuple[str, ...]
+    h15_to_e15_changed_paths: tuple[str, ...]
+    unauthorized_f15_to_h15_paths: tuple[str, ...]
+    unauthorized_h15_to_e15_paths: tuple[str, ...]
+    frozen_paths_changed_after_f15: tuple[str, ...]
+    role_manifest_hash: str
+    committed_role_manifest_matches: bool
+    derived_protected_token_count: int
+    protected_disclosure_passed: bool
     passed: bool
     report_hash: str
 
@@ -305,6 +355,149 @@ def verify_java_git_freeze_protocol(
         "passed": passed,
     }
     return GitJavaFreezeProtocolReport(**body, report_hash=content_hash(body))
+
+
+def verify_m336_git_freeze_protocol(
+    repository,
+    *,
+    f15_sha: str,
+    h15_sha: str,
+    e15_sha: str,
+    upstream: str,
+    base_sha: str = M336_BASE_SHA,
+    excluded_m33_sha: str = M336_EXCLUDED_M33_SHA,
+    branch: str = M336_BRANCH,
+    h15_prefixes: tuple[str, ...] = M336_H15_PREFIXES,
+    e15_prefixes: tuple[str, ...] = M336_E15_PREFIXES,
+    frozen_prefixes: tuple[str, ...] = M336_FROZEN_PREFIXES,
+) -> M336GitFreezeProtocolReport:
+    """Verify the dedicated E14 -> F15 -> H15 -> E15 release from Git objects."""
+
+    frozen_inputs = (
+        (base_sha, M336_BASE_SHA, "base"),
+        (excluded_m33_sha, M336_EXCLUDED_M33_SHA, "excluded branch"),
+        (branch, M336_BRANCH, "branch"),
+        (tuple(sorted(h15_prefixes)), tuple(sorted(M336_H15_PREFIXES)), "H15 paths"),
+        (tuple(sorted(e15_prefixes)), tuple(sorted(M336_E15_PREFIXES)), "E15 paths"),
+        (
+            tuple(sorted(frozen_prefixes)),
+            tuple(sorted(M336_FROZEN_PREFIXES)),
+            "frozen paths",
+        ),
+    )
+    for actual, expected, label in frozen_inputs:
+        if actual != expected:
+            raise ValueError(f"incomplete or substituted M-33.6 {label} policy")
+    root = str(repository)
+    shas = {
+        name: _exact_commit(root, value)
+        for name, value in (
+            ("base", base_sha),
+            ("f15", f15_sha),
+            ("h15", h15_sha),
+            ("e15", e15_sha),
+            ("excluded", excluded_m33_sha),
+        )
+    }
+    parents = {
+        name: tuple(
+            _git(root, "rev-list", "--parents", "-n", "1", shas[name]).split()[1:]
+        )
+        for name in ("f15", "h15", "e15")
+    }
+    exact_chain = (
+        parents["f15"] == (shas["base"],)
+        and parents["h15"] == (shas["f15"],)
+        and parents["e15"] == (shas["h15"],)
+    )
+    exact_messages = (
+        tuple(
+            _git(root, "show", "-s", "--format=%s", shas[name])
+            for name in ("f15", "h15", "e15")
+        )
+        == M336_COMMIT_MESSAGES
+    )
+    merge_count = sum(len(value) != 1 for value in parents.values())
+    tip = _exact_commit(root, branch)
+    upstream_sha = _exact_commit(root, upstream)
+    outside = not _is_ancestor(root, shas["excluded"], shas["e15"])
+    complete = {name: _git_tree(root, shas[name], ()) for name in ("f15", "h15", "e15")}
+    frozen = {
+        name: _git_tree(root, shas[name], frozen_prefixes)
+        for name in ("f15", "h15", "e15")
+    }
+    fh = _changed_paths(complete["f15"], complete["h15"])
+    he = _changed_paths(complete["h15"], complete["e15"])
+    invalid_fh = tuple(path for path in fh if not _under(path, h15_prefixes))
+    invalid_he = tuple(path for path in he if not _under(path, e15_prefixes))
+    frozen_changed = tuple(
+        path
+        for path in sorted(set().union(*(set(value) for value in frozen.values())))
+        if not (
+            frozen["f15"].get(path)
+            == frozen["h15"].get(path)
+            == frozen["e15"].get(path)
+        )
+    )
+    f_bytes = _git_blob_bytes(root, shas["f15"], tuple(complete["f15"]))
+    h_paths = tuple(path for path in fh if path in complete["h15"])
+    h_bytes = _git_blob_bytes(root, shas["h15"], h_paths)
+    role_manifest = build_final_artifact_role_manifest(h_bytes)
+    committed_role_path = "evaluation/m336_final_java/role_manifest.json"
+    committed_role_manifest_matches = committed_role_path in h_bytes and json.loads(
+        h_bytes[committed_role_path].decode("utf-8")
+    ) == asdict(role_manifest)
+    disclosure = verify_role_aware_disclosure(f_bytes, h_bytes, role_manifest)
+    passed = all(
+        (
+            exact_chain,
+            exact_messages,
+            merge_count == 0,
+            outside,
+            tip == shas["e15"],
+            upstream_sha == tip,
+            not invalid_fh,
+            not invalid_he,
+            not frozen_changed,
+            committed_role_manifest_matches,
+            disclosure.passed,
+        )
+    )
+    body = {
+        "base_sha": shas["base"],
+        "f15_sha": shas["f15"],
+        "h15_sha": shas["h15"],
+        "e15_sha": shas["e15"],
+        "branch_tip_sha": tip,
+        "upstream_sha": upstream_sha,
+        "exact_parent_chain": exact_chain,
+        "exact_commit_messages": exact_messages,
+        "merge_commit_count": merge_count,
+        "excluded_m33_outside_ancestry": outside,
+        "f15_to_h15_changed_paths": fh,
+        "h15_to_e15_changed_paths": he,
+        "unauthorized_f15_to_h15_paths": invalid_fh,
+        "unauthorized_h15_to_e15_paths": invalid_he,
+        "frozen_paths_changed_after_f15": frozen_changed,
+        "role_manifest_hash": role_manifest.manifest_hash,
+        "committed_role_manifest_matches": committed_role_manifest_matches,
+        "derived_protected_token_count": disclosure.derived_protected_token_count,
+        "protected_disclosure_passed": disclosure.passed,
+        "passed": passed,
+    }
+    return M336GitFreezeProtocolReport(**body, report_hash=content_hash(body))
+
+
+def _git_blob_bytes(repository: str, commit_sha: str, paths) -> dict[str, bytes]:
+    result = {}
+    for path in paths:
+        process = subprocess.run(
+            ["git", "-C", repository, "show", f"{commit_sha}:{path}"],
+            check=True,
+            capture_output=True,
+        )
+        result[path] = process.stdout
+    return result
 
 
 def _git_tree(repository: str, commit_sha: str, frozen_prefixes):

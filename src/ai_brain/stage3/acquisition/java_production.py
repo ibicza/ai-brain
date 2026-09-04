@@ -316,6 +316,10 @@ def bind_java_production_trust(
     )
     if tuple(item.proposal_id for item in trusted) != packability.packable_proposal_ids:
         raise ValueError("final Java trust differs from successful packability closure")
+    verify_java_packability_report(
+        packability,
+        trusted_proposal_ids=tuple(item.proposal_id for item in trusted),
+    )
     duplicate_derived = _duplicate_derived_trusted(
         segmentation, proposal_batch, trusted_ids
     )
@@ -592,11 +596,12 @@ def detect_java_production_identity_conflicts(
             )
             conflicts[conflict.conflict_hash] = conflict
     values = tuple(conflicts[key] for key in sorted(conflicts))
-    implicated = tuple(
-        sorted({value for item in values for value in item.proposal_ids})
+    fatal = tuple(
+        item for item in values if item.conflict_kind != "CROSS_SOURCE_BINARY_COLLISION"
     )
+    implicated = tuple(sorted({value for item in fatal for value in item.proposal_ids}))
     body = {
-        "status": "FAIL" if values else "PASS",
+        "status": "FAIL" if fatal else "PASS",
         "proposal_count": len(proposal_batch.proposals),
         "conflict_count": len(values),
         "implicated_proposal_ids": implicated,

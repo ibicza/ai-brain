@@ -7,6 +7,9 @@ from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.identity import PrecompilerIdentityConflict
+from ai_brain.stage3.acquisition.java_compilation_identity import (
+    JAVA_SEMANTIC_COMPILATION_EPOCH,
+)
 from ai_brain.stage3.acquisition.java_evidence import evidence_by_proposal
 from ai_brain.stage3.acquisition.java_pipeline import (
     TrustBoundProposalBatch,
@@ -195,16 +198,22 @@ def compile_provisional_pack(
         aliases = _aliases(domain_id, selected, signature_aware=java_domain)
     records = []
     sources = []
+    semantic_created_at = (
+        JAVA_SEMANTIC_COMPILATION_EPOCH if java_domain else bundle.created_at
+    )
     for proposal in selected:
         knowledge_id = aliases[proposal.proposal_id]
         content = _rewrite_content(proposal.proposed_content, aliases)
         dependencies = tuple(
             _resolve(alias, aliases) for alias in proposal.proposed_dependencies
         )
-        applicability = tuple(
-            _resolve(alias, aliases)
-            for alias in proposal.proposed_applicability
-            if alias in aliases
+        applicability = resolve_applicability_references(
+            proposal.proposed_applicability,
+            aliases,
+            inline_condition_hashes=(content_hash(asdict(proposal.proposed_content)),),
+            source_backed_inline_conditions=(
+                proposal.proposed_applicability if not java_domain else ()
+            ),
         )
         source_id = f"source.{proposal.proposal_hash[:32]}"
         bound_segments = tuple(segment_by_id[item] for item in proposal.segment_ids)
@@ -280,7 +289,7 @@ def compile_provisional_pack(
             dependencies,
             applicability,
             proposal.proposed_capabilities,
-            bundle.created_at,
+            semantic_created_at,
             content,
             "",
         )
@@ -351,7 +360,7 @@ def compile_provisional_pack(
         content_hash(evaluation),
         dependencies,
         "",
-        bundle.created_at,
+        semantic_created_at,
     )
     manifest = replace(
         manifest,
@@ -529,6 +538,38 @@ def _resolve(value: str, aliases: dict[str, str]) -> str:
         return aliases[value]
     except KeyError as error:
         raise ValueError(f"approved proposal has unresolved target: {value}") from error
+
+
+def resolve_applicability_references(
+    references: tuple[str, ...],
+    exact_aliases: dict[str, str],
+    *,
+    inline_condition_hashes: tuple[str, ...] = (),
+    source_backed_inline_conditions: tuple[str, ...] = (),
+) -> tuple[str, ...]:
+    """Resolve every applicability value explicitly; never discard a missing alias."""
+
+    resolved = []
+    inline = frozenset(inline_condition_hashes)
+    source_backed = frozenset(source_backed_inline_conditions)
+    for reference in references:
+        if reference in exact_aliases:
+            resolved.append(exact_aliases[reference])
+            continue
+        if reference.startswith("inline-condition:"):
+            digest = reference.removeprefix("inline-condition:")
+            if digest in inline:
+                continue
+            raise ValueError("unbound inline applicability condition")
+        if reference in source_backed:
+            # The approved non-Java proposal carries this typed condition inline;
+            # it is not a KnowledgeRecord edge and must be explicitly declared by
+            # the compiler caller rather than disappearing through alias lookup.
+            continue
+        if reference == "REVIEW_REQUIRED":
+            raise ValueError("applicability requires explicit review")
+        raise ValueError(f"unresolved applicability reference: {reference}")
+    return tuple(resolved)
 
 
 def _concept_graph(records: tuple[KnowledgeRecord, ...]) -> ConceptGraph:

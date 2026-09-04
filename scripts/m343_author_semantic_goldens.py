@@ -256,7 +256,7 @@ def flatten(value, prefix="content"):
     return result
 
 
-def diagnostics(rows, targets, corpus):
+def diagnostics(rows, targets, corpus, *, scope_v2=False):
     result = []
     by_unit = {}
     for target in targets:
@@ -272,17 +272,26 @@ def diagnostics(rows, targets, corpus):
         affected = overlapping or [
             item for item in candidates if not item["oracle_supported"]
         ]
-        applicability = "UNIT_HEADER"
+        applicability = "ENCLOSING_TYPE_BLOCKING" if scope_v2 else "UNIT_HEADER"
         if overlapping:
             raw = (corpus / row["source_unit_id"]).read_bytes()
             body_start = raw.find(
                 b"{", overlapping[0]["start_offset"], overlapping[0]["end_offset"]
             )
-            applicability = (
-                "BODY"
-                if body_start >= 0 and row["start_offset"] > body_start
-                else "HEADER"
-            )
+            if scope_v2:
+                applicability = (
+                    "BODY_ONLY"
+                    if body_start >= 0 and row["start_offset"] > body_start
+                    else "DECLARATION_HEADER_BLOCKING"
+                )
+            else:
+                applicability = (
+                    "BODY"
+                    if body_start >= 0 and row["start_offset"] > body_start
+                    else "HEADER"
+                )
+        elif scope_v2 and not affected:
+            applicability = "AMBIENT_FILE"
         body = {
             "diagnostic_code": row["diagnostic_code"],
             "diagnostic_kind": row["diagnostic_kind"],
@@ -294,7 +303,8 @@ def diagnostics(rows, targets, corpus):
             "target_ids": [item["target_id"] for item in affected],
             "normalized_category": row["normalized_category"],
             "applicability": applicability,
-            "trust_relevant": applicability != "BODY",
+            "trust_relevant": applicability
+            not in {"BODY", "BODY_ONLY", "AMBIENT_FILE", "UNRELATED_DECLARATION"},
         }
         result.append({**body, "receipt_hash": digest(body)})
     return sorted(
@@ -347,6 +357,7 @@ def main():
     parser.add_argument("--authority-purpose", default="development-only-pre-freeze")
     parser.add_argument("--config-id", default="m343.external-java-trust-evaluation.v1")
     parser.add_argument("--real-prefix", action="append", default=[])
+    parser.add_argument("--diagnostic-scope-v2", action="store_true")
     parser.add_argument(
         "--disjoint-hash-manifest", type=Path, action="append", default=[]
     )
@@ -406,7 +417,9 @@ def main():
         "target_count": len(targets),
     }
     census = {**census_body, "census_hash": digest(census_body)}
-    diagnostic_rows = diagnostics(rows, targets, args.corpus)
+    diagnostic_rows = diagnostics(
+        rows, targets, args.corpus, scope_v2=args.diagnostic_scope_v2
+    )
     diagnostic_by_target = {}
     for item in diagnostic_rows:
         if item["trust_relevant"]:

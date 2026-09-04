@@ -11,12 +11,13 @@ from ai_brain.stage3.acquisition.java_source_index import (
     JavaDeclaration,
 )
 
-JAVA_CALLABLE_IDENTITY_SCHEMA_VERSION = 1
+JAVA_CALLABLE_IDENTITY_SCHEMA_VERSION = 2
 
 
 @dataclass(frozen=True)
 class JavaCanonicalCallableIdentity:
     schema_version: int
+    target_release: int
     release_identity_hash: str
     module_identity: str
     binary_receiver_identity: str
@@ -41,6 +42,7 @@ class JavaCanonicalCallableIdentity:
     @property
     def exact_reference(self) -> str:
         return (
+            f"java:{self.target_release}/{self.module_identity}@{self.source_scope}/"
             f"{self.binary_receiver_identity}#{self.member_name}"
             f"({self.erased_parameter_descriptor})"
         )
@@ -69,6 +71,7 @@ def canonical_java_callable_identity(
     kind = "CONSTRUCTOR" if declaration.member_kind == "constructor" else "METHOD"
     body = {
         "schema_version": JAVA_CALLABLE_IDENTITY_SCHEMA_VERSION,
+        "target_release": release.source_compatibility_release,
         "release_identity_hash": release.identity_hash,
         "module_identity": declaration.module_name or "UNNAMED",
         "binary_receiver_identity": owner,
@@ -85,6 +88,7 @@ def verify_java_callable_identity(identity: JavaCanonicalCallableIdentity) -> No
     claimed = body.pop("identity_hash")
     if (
         identity.schema_version != JAVA_CALLABLE_IDENTITY_SCHEMA_VERSION
+        or identity.target_release <= 0
         or identity.callable_kind not in {"METHOD", "CONSTRUCTOR"}
         or (identity.callable_kind == "CONSTRUCTOR")
         != (identity.member_name == "<init>")
