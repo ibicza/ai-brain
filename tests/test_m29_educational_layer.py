@@ -56,6 +56,7 @@ from ai_brain.stage2.facts.models import SourceKind
 
 ROOT = Path(__file__).resolve().parents[1]
 CHEMISTRY_ROOT = ROOT / "artifacts" / "domains" / "chemistry" / "m29"
+CHEMISTRY_CLEAN_BUILD_TIMEOUT_SECONDS = 300
 CATALOG_PATH = ROOT / "artifacts" / "education" / "m30" / "catalog_v4.json"
 
 
@@ -122,7 +123,10 @@ def test_chemistry_cli_builds_clean_pack_from_explicit_sources(tmp_path) -> None
         check=False,
         capture_output=True,
         text=True,
-        timeout=120,
+        # A clean source-to-SQLite build performs hundreds of durability-bound
+        # trusted transitions. The Windows cold/full-suite p99 is above the old
+        # generic 120 s subprocess cap; this is a build-stage-specific ceiling.
+        timeout=CHEMISTRY_CLEAN_BUILD_TIMEOUT_SECONDS,
     )
     assert completed.returncode == 0, completed.stderr
     assert ChemistryDomainService.open(target).verify()["domain_manifest_hash"]

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import PurePosixPath
@@ -12,6 +11,7 @@ from ai_brain.stage3.acquisition.java_freeze_roles import (
     PROTECTED_FINAL_ROLES,
     build_final_artifact_role_manifest,
     classify_final_artifact_role,
+    load_final_artifact_role_manifest,
     verify_role_aware_disclosure,
 )
 
@@ -138,6 +138,9 @@ class M336GitFreezeProtocolReport:
     committed_role_manifest_matches: bool
     derived_protected_token_count: int
     protected_disclosure_passed: bool
+    historical_false_disclosure_token_count: int
+    protocol_integrity: str
+    historical_experiment_outcome: str
     passed: bool
     report_hash: str
 
@@ -444,9 +447,10 @@ def verify_m336_git_freeze_protocol(
     h_bytes = _git_blob_bytes(root, shas["h15"], h_paths)
     role_manifest = build_final_artifact_role_manifest(h_bytes)
     committed_role_path = "evaluation/m336_final_java/role_manifest.json"
-    committed_role_manifest_matches = committed_role_path in h_bytes and json.loads(
-        h_bytes[committed_role_path].decode("utf-8")
-    ) == asdict(role_manifest)
+    committed_role_manifest_matches = False
+    if committed_role_path in h_bytes:
+        committed = load_final_artifact_role_manifest(h_bytes[committed_role_path])
+        committed_role_manifest_matches = committed == role_manifest
     disclosure = verify_role_aware_disclosure(f_bytes, h_bytes, role_manifest)
     passed = all(
         (
@@ -483,20 +487,53 @@ def verify_m336_git_freeze_protocol(
         "committed_role_manifest_matches": committed_role_manifest_matches,
         "derived_protected_token_count": disclosure.derived_protected_token_count,
         "protected_disclosure_passed": disclosure.passed,
+        "historical_false_disclosure_token_count": 0
+        if disclosure.passed
+        else len(disclosure.leaked_tokens),
+        "protocol_integrity": "PASS" if passed else "FAIL",
+        "historical_experiment_outcome": "OUTCOME_C_BLOCKED",
         "passed": passed,
     }
     return M336GitFreezeProtocolReport(**body, report_hash=content_hash(body))
 
 
 def _git_blob_bytes(repository: str, commit_sha: str, paths) -> dict[str, bytes]:
+    ordered = tuple(paths)
+    if not ordered:
+        return {}
+    process = subprocess.Popen(
+        ["git", "-C", repository, "cat-file", "--batch"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if process.stdin is None or process.stdout is None or process.stderr is None:
+        process.kill()
+        raise RuntimeError("Git batch pipes were not created")
     result = {}
-    for path in paths:
-        process = subprocess.run(
-            ["git", "-C", repository, "show", f"{commit_sha}:{path}"],
-            check=True,
-            capture_output=True,
+    for path in ordered:
+        process.stdin.write(f"{commit_sha}:{path}\n".encode())
+        process.stdin.flush()
+        header_bytes = process.stdout.readline()
+        if not header_bytes.endswith(b"\n"):
+            raise ValueError("truncated Git batch blob header")
+        header = header_bytes[:-1].decode("utf-8", errors="strict")
+        fields = header.rsplit(" ", 2)
+        if len(fields) != 3 or fields[1] != "blob" or not fields[2].isdigit():
+            raise ValueError(f"unexpected Git batch blob header: {header}")
+        size = int(fields[2])
+        payload = process.stdout.read(size)
+        if len(payload) != size or process.stdout.read(1) != b"\n":
+            raise ValueError("truncated Git batch blob payload")
+        result[path] = payload
+    process.stdin.close()
+    stderr = process.stderr.read()
+    if process.wait() != 0:
+        raise subprocess.CalledProcessError(
+            process.returncode, process.args, stderr=stderr
         )
-        result[path] = process.stdout
+    if process.stdout.read(1):
+        raise ValueError("unexpected trailing Git batch blob output")
     return result
 
 

@@ -11,7 +11,7 @@ from pathlib import Path, PurePosixPath
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 from ai_brain.stage3.acquisition.java_disclosed_corpus import (
-    load_m335_disclosed_corpus_denylist,
+    load_disclosed_java_corpus_denylist,
 )
 from ai_brain.stage3.acquisition.java_source_index import index_java_bundle
 from ai_brain.stage3.acquisition.java_source_selector import (
@@ -20,6 +20,7 @@ from ai_brain.stage3.acquisition.java_source_selector import (
     select_final_java_sources,
     verify_m336_final_source_corpus,
 )
+from ai_brain.stage3.acquisition.maven_provenance import inspect_source_archive
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
 from ai_brain.stage3.acquisition.sources import ingest_bundle
 
@@ -46,32 +47,17 @@ def _safe_extract(archive: Path, target: Path) -> None:
                 destination.write_bytes(opened.read(info))
 
 
-def _license_receipt(archive: Path, family, acquired_at: str) -> dict:
-    disclosed = load_m335_disclosed_corpus_denylist()
+def _license_receipt(
+    archive: Path, family, acquired_at: str, *, disclosed_regression: bool = False
+) -> dict:
+    disclosed = load_disclosed_java_corpus_denylist()
     archive_hash = bytes_hash(archive.read_bytes())
-    if archive_hash in disclosed["archive_hashes"]:
+    if archive_hash in disclosed["archive_hashes"] and not disclosed_regression:
         raise ValueError("final archive overlaps the permanent development denylist")
-    with zipfile.ZipFile(archive) as opened:
-        candidates = tuple(
-            sorted(
-                name
-                for name in opened.namelist()
-                if PurePosixPath(name).name.casefold()
-                in {"license", "license.txt", "license.md", "notice", "notice.txt"}
-            )
-        )
-        license_path = next(
-            (
-                name
-                for name in candidates
-                if "license" in PurePosixPath(name).name.casefold()
-                and b"Apache License" in opened.read(name)
-            ),
-            None,
-        )
-        if license_path is None:
-            raise ValueError("source archive lacks verifiable Apache-2.0 license text")
-        license_bytes = opened.read(license_path)
+    inspection = inspect_source_archive(archive.read_bytes())
+    exact = tuple(item for item in inspection.license_evidence if item.exact_match)
+    license_path = exact[0].evidence_path if len(exact) == 1 else None
+    license_hash = exact[0].raw_text_sha256 if len(exact) == 1 else None
     body = {
         "schema_version": 1,
         "family_id": family.family_id,
@@ -80,7 +66,11 @@ def _license_receipt(archive: Path, family, acquired_at: str) -> dict:
         "source_archive_sha256": archive_hash,
         "license_spdx": family.license_spdx,
         "license_archive_path": license_path,
-        "license_bytes_hash": bytes_hash(license_bytes),
+        "license_bytes_hash": license_hash,
+        "license_evidence_mode": (
+            "EMBEDDED_EXACT_LICENSE" if license_path else "EXTERNAL_EVIDENCE_REQUIRED"
+        ),
+        "qualification_status": "ELIGIBLE" if license_path else "REVIEW_REQUIRED",
         "acquired_at": acquired_at,
     }
     return {**body, "receipt_hash": content_hash(body)}
@@ -111,6 +101,7 @@ def main() -> None:
     parser.add_argument("--acquired-at", required=True)
     parser.add_argument("--work-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--disclosed-regression", action="store_true")
     args = parser.parse_args()
     if args.work_root.exists() or args.output.exists():
         raise FileExistsError("one-shot acquisition/selection target already exists")
@@ -127,12 +118,33 @@ def main() -> None:
     receipts = []
     for family in policy.families:
         archive = archives_root / f"{family.family_id}-{family.version}-sources.jar"
-        request = urllib.request.Request(
-            family.source_archive_url, headers={"User-Agent": "ai-brain-m336-freeze/1"}
-        )
-        with urllib.request.urlopen(request, timeout=120) as response:
-            archive.write_bytes(response.read())
-        receipts.append(_license_receipt(archive, family, args.acquired_at))
+        try:
+            request = urllib.request.Request(
+                family.source_archive_url,
+                headers={"User-Agent": "ai-brain-m336-freeze/1"},
+            )
+            with urllib.request.urlopen(request, timeout=120) as response:
+                archive.write_bytes(response.read())
+            receipt = _license_receipt(
+                archive,
+                family,
+                args.acquired_at,
+                disclosed_regression=args.disclosed_regression,
+            )
+        except (OSError, ValueError, zipfile.BadZipFile) as exc:
+            receipts.append(
+                {
+                    "schema_version": 2,
+                    "family_id": family.family_id,
+                    "requirement": "OPTIONAL",
+                    "qualification_status": "INELIGIBLE_PROVENANCE",
+                    "reason": type(exc).__name__,
+                }
+            )
+            continue
+        receipts.append(receipt)
+        if receipt["qualification_status"] != "ELIGIBLE":
+            continue
         root = roots_root / family.family_id
         _safe_extract(archive, root)
         roots.append((family.family_id, root))

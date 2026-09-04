@@ -5,13 +5,12 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
-from dataclasses import asdict
 from pathlib import Path
 
-from ai_brain.stage2.facts.canonical import canonical_json
 from ai_brain.stage3.acquisition.java_freeze_roles import (
     build_final_artifact_role_manifest,
     classify_final_artifact_role,
+    dump_final_artifact_role_manifest,
 )
 
 
@@ -179,9 +178,7 @@ def main() -> None:
     manifest = build_final_artifact_role_manifest(
         {path: b"" for path in relative_paths}
     )
-    role_path.write_text(
-        canonical_json(asdict(manifest)) + "\n", encoding="utf-8", newline="\n"
-    )
+    role_path.write_bytes(dump_final_artifact_role_manifest(manifest))
 
 
 if __name__ == "__main__":

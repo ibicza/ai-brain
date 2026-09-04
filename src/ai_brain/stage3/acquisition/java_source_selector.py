@@ -11,6 +11,7 @@ from tree_sitter import Language, Parser
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage3.acquisition.java_disclosed_corpus import (
+    load_disclosed_java_corpus_denylist,
     load_m335_disclosed_corpus_denylist,
 )
 from ai_brain.stage3.acquisition.java_release import JAVA_TARGET_RELEASE
@@ -177,7 +178,7 @@ def frozen_m336_final_source_selector_policy(
             "Apache-2.0",
         ),
     )
-    disclosed = load_m335_disclosed_corpus_denylist()
+    disclosed = load_disclosed_java_corpus_denylist()
     permanent = (
         *disclosed["archive_hashes"],
         *disclosed["raw_source_hashes"],
@@ -382,7 +383,7 @@ def m336_selector_receipt(policy, selected, roots, f15_sha):
 def verify_m336_final_source_corpus(bundle, source_index, policy):
     """Verify frozen census and all prior-corpus similarity classes after selection."""
 
-    disclosed = load_m335_disclosed_corpus_denylist()
+    disclosed = load_disclosed_java_corpus_denylist()
     documents = tuple(bundle.documents)
     callables = tuple(
         item

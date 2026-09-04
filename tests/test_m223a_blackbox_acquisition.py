@@ -139,6 +139,8 @@ def test_balanced_public_benchmark_has_no_hidden_behavior() -> None:
         "clause_count",
     ):
         assert f'"{forbidden}"' not in serialized
+    for path in (evaluator.MANIFEST_PATH, evaluator.PUBLIC_PATH, evaluator.HIDDEN_PATH):
+        assert b"\r" not in path.read_bytes()
 
 
 def test_false_accept_uses_independent_verifier_and_counterexample() -> None:

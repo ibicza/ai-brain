@@ -9,7 +9,7 @@ from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import PurePosixPath
 
-from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
+from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 
 FREEZE_ROLE_SCHEMA_VERSION = 2
 
@@ -79,6 +79,34 @@ class RoleAwareDisclosureReport:
     report_hash: str
 
 
+class DisclosureClaimKind(StrEnum):
+    FINAL_ARCHIVE_HASH = "FINAL_ARCHIVE_HASH"
+    FINAL_RAW_SOURCE_HASH = "FINAL_RAW_SOURCE_HASH"
+    FINAL_CANONICAL_SOURCE_HASH = "FINAL_CANONICAL_SOURCE_HASH"
+    FINAL_SELECTED_RELATIVE_PATH = "FINAL_SELECTED_RELATIVE_PATH"
+    FINAL_SOURCE_TREE_HASH = "FINAL_SOURCE_TREE_HASH"
+    FINAL_TARGET_IDENTITY = "FINAL_TARGET_IDENTITY"
+    FINAL_PRODUCTION_OUTPUT_HASH = "FINAL_PRODUCTION_OUTPUT_HASH"
+    FINAL_CANDIDATE_PACK_HASH = "FINAL_CANDIDATE_PACK_HASH"
+    FINAL_ORACLE_HASH = "FINAL_ORACLE_HASH"
+    FINAL_GOLDEN_HASH = "FINAL_GOLDEN_HASH"
+    FINAL_EVALUATION_HASH = "FINAL_EVALUATION_HASH"
+    FINAL_DECISION_HASH = "FINAL_DECISION_HASH"
+
+
+@dataclass(frozen=True)
+class DisclosureClaim:
+    claim_kind: DisclosureClaimKind
+    source_artifact_role: FinalArtifactRole
+    source_path: str
+    field_path: str
+    value: str
+    value_hash: str
+    secrecy_class: str
+    predeclared: bool
+    claim_hash: str
+
+
 def build_final_artifact_role_manifest(paths) -> FinalArtifactRoleManifest:
     raw_paths = tuple(paths)
     normalized_paths = tuple(_canonical_path(item) for item in raw_paths)
@@ -94,6 +122,92 @@ def build_final_artifact_role_manifest(paths) -> FinalArtifactRoleManifest:
         "protected_roles": tuple(sorted(PROTECTED_FINAL_ROLES, key=str)),
     }
     return FinalArtifactRoleManifest(**body, manifest_hash=content_hash(body))
+
+
+def dump_final_artifact_role_manifest(manifest: FinalArtifactRoleManifest) -> bytes:
+    verify_final_artifact_role_manifest(manifest)
+    return (canonical_json(asdict(manifest)) + "\n").encode("utf-8")
+
+
+def load_final_artifact_role_manifest(raw: bytes | str) -> FinalArtifactRoleManifest:
+    """Load canonical JSON into exact enums/tuples and reject duplicate keys."""
+
+    encoded = raw.encode("utf-8") if isinstance(raw, str) else raw
+    try:
+        value = json.loads(
+            encoded.decode("utf-8", errors="strict"), object_pairs_hook=_unique_object
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("malformed final artifact role manifest JSON") from exc
+    if not isinstance(value, dict) or set(value) != {
+        "schema_version",
+        "bindings",
+        "protected_roles",
+        "manifest_hash",
+    }:
+        raise ValueError("invalid final artifact role manifest field set")
+    if not isinstance(value["bindings"], list) or not isinstance(
+        value["protected_roles"], list
+    ):
+        raise TypeError("role manifest arrays must be JSON arrays")
+    bindings = []
+    for row in value["bindings"]:
+        if not isinstance(row, dict) or set(row) != {"relative_path", "role"}:
+            raise ValueError("invalid role binding field set")
+        if not isinstance(row["relative_path"], str) or not isinstance(
+            row["role"], str
+        ):
+            raise TypeError("invalid role binding type")
+        try:
+            role = FinalArtifactRole(row["role"])
+        except ValueError as exc:
+            raise ValueError("unknown final artifact role") from exc
+        bindings.append(
+            FinalArtifactRoleBinding(_canonical_path(row["relative_path"]), role)
+        )
+    try:
+        protected = tuple(FinalArtifactRole(item) for item in value["protected_roles"])
+    except (TypeError, ValueError) as exc:
+        raise ValueError("unknown protected final artifact role") from exc
+    manifest = FinalArtifactRoleManifest(
+        schema_version=value["schema_version"],
+        bindings=tuple(bindings),
+        protected_roles=protected,
+        manifest_hash=value["manifest_hash"],
+    )
+    verify_final_artifact_role_manifest(manifest)
+    if dump_final_artifact_role_manifest(manifest) != encoded:
+        raise ValueError("role manifest JSON is not canonical and byte-identical")
+    return manifest
+
+
+def verify_final_artifact_role_manifest(
+    manifest: FinalArtifactRoleManifest, h_artifacts=None
+) -> None:
+    if not isinstance(manifest, FinalArtifactRoleManifest):
+        raise TypeError("role manifest must be typed")
+    body = asdict(manifest)
+    claimed = body.pop("manifest_hash")
+    paths = tuple(item.relative_path for item in manifest.bindings)
+    expected_roles = tuple(sorted(PROTECTED_FINAL_ROLES, key=str))
+    if (
+        type(manifest.schema_version) is not int
+        or manifest.schema_version != FREEZE_ROLE_SCHEMA_VERSION
+        or not isinstance(claimed, str)
+        or content_hash(body) != claimed
+        or manifest.protected_roles != expected_roles
+        or paths != tuple(sorted(paths))
+        or len(paths) != len(set(paths))
+        or any(
+            item.role is not classify_final_artifact_role(item.relative_path)
+            for item in manifest.bindings
+        )
+    ):
+        raise ValueError("incomplete or weakened final artifact role manifest")
+    if h_artifacts is not None:
+        normalized = {_canonical_path(item) for item in h_artifacts}
+        if set(paths) != normalized:
+            raise ValueError("incomplete or weakened final artifact role manifest")
 
 
 def verify_role_aware_disclosure(
@@ -122,10 +236,19 @@ def verify_role_aware_disclosure(
             leaked_hashes.append(digest)
         else:
             neutral_reuse += 1
-    derived_tokens = derive_protected_disclosure_tokens(h_values, role_manifest)
+    claims = extract_disclosure_claims(h_values, role_manifest)
+    derived_tokens = tuple(
+        sorted({item.value for item in claims if not item.predeclared})
+    )
     normalized_tokens = tuple(sorted({*derived_tokens, *protected_tokens}))
-    f_text = b"\n".join(f_values.values()).decode("utf-8", errors="ignore")
-    leaked_tokens = tuple(item for item in normalized_tokens if item and item in f_text)
+    token_bytes = tuple(
+        (item, item.encode("utf-8")) for item in normalized_tokens if item
+    )
+    leaked_tokens = tuple(
+        item
+        for item, encoded in token_bytes
+        if any(encoded in raw for raw in f_values.values())
+    )
     passed = not leaked_paths and not leaked_tokens
     body = {
         "role_manifest_hash": role_manifest.manifest_hash,
@@ -220,70 +343,262 @@ def derive_protected_disclosure_tokens(
 ) -> tuple[str, ...]:
     """Derive release-sensitive values from protected H artifacts themselves."""
 
-    roles = {item.relative_path: item.role for item in role_manifest.bindings}
-    if set(roles) != {_canonical_path(path) for path in h_artifacts}:
-        raise ValueError("role manifest does not cover protected token inputs")
-    tokens = set()
-    for path, raw in h_artifacts.items():
-        canonical = _canonical_path(path)
-        if roles[canonical] not in PROTECTED_FINAL_ROLES:
-            continue
-        tokens.add(bytes_hash(raw))
-        try:
-            value = json.loads(raw.decode("utf-8", errors="strict"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            continue
-        _collect_disclosure_tokens(value, tokens)
-    return tuple(sorted(tokens))
-
-
-def _collect_disclosure_tokens(value, tokens: set[str], key: str = "") -> None:
-    if isinstance(value, dict):
-        for child_key, child in value.items():
-            _collect_disclosure_tokens(child, tokens, str(child_key).casefold())
-        return
-    if isinstance(value, list):
-        for child in value:
-            _collect_disclosure_tokens(child, tokens, key)
-        return
-    if not isinstance(value, str):
-        return
-    sensitive_key = any(
-        marker in key
-        for marker in (
-            "archive",
-            "hash",
-            "identity",
-            "relative_path",
-            "selected",
-            "source_unit",
-            "target_id",
-            "tree",
+    return tuple(
+        sorted(
+            {
+                item.value
+                for item in extract_disclosure_claims(h_artifacts, role_manifest)
+                if not item.predeclared
+            }
         )
     )
-    if (
-        re.fullmatch(r"[0-9a-f]{64}", value)
-        or value.startswith("java:")
-        or (sensitive_key and (value.endswith(".java") or len(value) >= 16))
-    ):
-        tokens.add(value)
+
+
+def extract_disclosure_claims(
+    h_artifacts: dict[str, bytes], role_manifest: FinalArtifactRoleManifest
+) -> tuple[DisclosureClaim, ...]:
+    """Extract secrets only from explicit role/field semantics."""
+
+    verify_final_artifact_role_manifest(role_manifest, h_artifacts)
+    roles = {item.relative_path: item.role for item in role_manifest.bindings}
+    claims = []
+    for raw_path, raw in sorted(h_artifacts.items()):
+        path = _canonical_path(raw_path)
+        role = roles[path]
+        if role is FinalArtifactRole.FINAL_SOURCE_BYTES:
+            claims.append(
+                _claim(
+                    DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
+                    role,
+                    path,
+                    "$bytes",
+                    bytes_hash(raw),
+                )
+            )
+            continue
+        if role not in PROTECTED_FINAL_ROLES:
+            _verify_neutral_artifact_schema(path, raw)
+            continue
+        if role is FinalArtifactRole.FINAL_EVALUATION and path.endswith(
+            "role_manifest.json"
+        ):
+            continue
+        try:
+            value = json.loads(
+                raw.decode("utf-8", errors="strict"), object_pairs_hook=_unique_object
+            )
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError(
+                f"protected structured artifact is not strict JSON: {path}"
+            ) from exc
+        if not isinstance(value, dict):
+            raise TypeError(f"protected structured artifact is not an object: {path}")
+        claims.extend(_claims_for_role(role, path, value))
+    return tuple(
+        sorted(claims, key=lambda item: (item.source_path, item.field_path, item.value))
+    )
+
+
+def verify_disclosure_claim_set(
+    h_artifacts: dict[str, bytes],
+    role_manifest: FinalArtifactRoleManifest,
+    claims: tuple[DisclosureClaim, ...],
+) -> None:
+    expected = extract_disclosure_claims(h_artifacts, role_manifest)
+    for claim in claims:
+        body = asdict(claim)
+        claimed_hash = body.pop("claim_hash")
+        if claim.predeclared or claim.secrecy_class != "FINAL_OBSERVED_VALUE":
+            raise ValueError("derived final secret cannot be caller-marked predeclared")
+        if content_hash(body) != claimed_hash:
+            raise ValueError("disclosure claim hash mismatch")
+    if claims != expected:
+        raise ValueError("incomplete or caller-modified disclosure claim set")
+
+
+def _claims_for_role(role, path, value) -> tuple[DisclosureClaim, ...]:
+    specifications = {
+        FinalArtifactRole.FINAL_SOURCE_RECEIPT: (
+            (
+                DisclosureClaimKind.FINAL_ARCHIVE_HASH,
+                ("archives", "*", "source_archive_sha256"),
+            ),
+            (
+                DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
+                ("archives", "*", "raw_source_hashes", "*"),
+            ),
+            (
+                DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
+                ("archives", "*", "canonical_source_hashes", "*"),
+            ),
+            (
+                DisclosureClaimKind.FINAL_SOURCE_TREE_HASH,
+                ("archives", "*", "source_tree_hash"),
+            ),
+        ),
+        FinalArtifactRole.FINAL_SELECTOR_OUTPUT: (
+            (DisclosureClaimKind.FINAL_ARCHIVE_HASH, ("archive_hash",)),
+            (
+                DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
+                ("selected_relative_paths", "*"),
+            ),
+            (DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH, ("selected", "*")),
+            (
+                DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
+                ("selected", "*", "relative_path"),
+            ),
+            (
+                DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
+                ("selected", "*", "raw_sha256"),
+            ),
+            (
+                DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
+                ("selected", "*", "canonical_sha256"),
+            ),
+        ),
+        FinalArtifactRole.FINAL_PRODUCTION_OUTPUT: (
+            (DisclosureClaimKind.FINAL_TARGET_IDENTITY, ("target_identities", "*")),
+            (
+                DisclosureClaimKind.FINAL_PRODUCTION_OUTPUT_HASH,
+                ("production_output_hash",),
+            ),
+            (DisclosureClaimKind.FINAL_PRODUCTION_OUTPUT_HASH, ("trust_closure_hash",)),
+            (DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH, ("candidate_pack_hash",)),
+            (
+                DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH,
+                ("candidate_pack_tree_hash",),
+            ),
+        ),
+        FinalArtifactRole.FINAL_CANDIDATE_PACK: (
+            (DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH, ("candidate_pack_hash",)),
+            (DisclosureClaimKind.FINAL_TARGET_IDENTITY, ("targets", "*", "target_id")),
+        ),
+        FinalArtifactRole.FINAL_ORACLE_OUTPUT: (
+            (DisclosureClaimKind.FINAL_ORACLE_HASH, ("oracle_hash",)),
+        ),
+        FinalArtifactRole.FINAL_GOLDEN: (
+            (DisclosureClaimKind.FINAL_GOLDEN_HASH, ("golden_hash",)),
+        ),
+        FinalArtifactRole.FINAL_EVALUATION: (
+            (DisclosureClaimKind.FINAL_EVALUATION_HASH, ("report_hash",)),
+        ),
+        FinalArtifactRole.FINAL_APPROVAL: (
+            (DisclosureClaimKind.FINAL_DECISION_HASH, ("approval_hash",)),
+        ),
+        FinalArtifactRole.FINAL_INSTALLATION: (
+            (
+                DisclosureClaimKind.FINAL_PRODUCTION_OUTPUT_HASH,
+                ("installed_pack_hash",),
+            ),
+        ),
+        FinalArtifactRole.FINAL_DECISION: (
+            (DisclosureClaimKind.FINAL_DECISION_HASH, ("decision_hash",)),
+        ),
+        FinalArtifactRole.FINAL_PHYSICAL_CENSUS: (
+            (DisclosureClaimKind.FINAL_EVALUATION_HASH, ("report_hash",)),
+        ),
+    }
+    result = []
+    for kind, field_path in specifications.get(role, ()):
+        for rendered, item in _field_values(value, field_path):
+            if isinstance(item, str) and _is_secret_value(kind, item):
+                result.append(_claim(kind, role, path, rendered, item))
+    return tuple(result)
+
+
+def _field_values(value, parts, prefix="$"):
+    if not parts:
+        return ((prefix, value),)
+    head, *tail = parts
+    if head == "*":
+        if not isinstance(value, list):
+            return ()
+        return tuple(
+            item
+            for index, child in enumerate(value)
+            for item in _field_values(child, tail, f"{prefix}[{index}]")
+        )
+    if not isinstance(value, dict) or head not in value:
+        return ()
+    return _field_values(value[head], tail, f"{prefix}.{head}")
+
+
+def _claim(kind, role, source_path, field_path, value) -> DisclosureClaim:
+    body = {
+        "claim_kind": kind,
+        "source_artifact_role": role,
+        "source_path": source_path,
+        "field_path": field_path,
+        "value": value,
+        "value_hash": bytes_hash(value.encode("utf-8")),
+        "secrecy_class": "FINAL_OBSERVED_VALUE",
+        "predeclared": False,
+    }
+    return DisclosureClaim(**body, claim_hash=content_hash(body))
+
+
+def _is_secret_value(kind: DisclosureClaimKind, value: str) -> bool:
+    if kind is DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH:
+        return value.endswith(".java")
+    if kind is DisclosureClaimKind.FINAL_TARGET_IDENTITY:
+        return value.startswith("java:")
+    return bool(re.fullmatch(r"[0-9a-f]{64}", value))
+
+
+_PROTECTED_FIELD_NAMES = frozenset(
+    {
+        "source_archive_sha256",
+        "raw_source_hashes",
+        "canonical_source_hashes",
+        "source_tree_hash",
+        "selected_relative_paths",
+        "target_identities",
+        "production_output_hash",
+        "trust_closure_hash",
+        "candidate_pack_hash",
+        "candidate_pack_tree_hash",
+        "oracle_hash",
+        "golden_hash",
+        "decision_hash",
+        "approval_hash",
+        "installed_pack_hash",
+    }
+)
+
+
+def _verify_neutral_artifact_schema(path: str, raw: bytes) -> None:
+    if not path.endswith(".json"):
+        return
+    try:
+        value = json.loads(
+            raw.decode("utf-8", errors="strict"), object_pairs_hook=_unique_object
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return
+    pending = [value]
+    while pending:
+        item = pending.pop()
+        if isinstance(item, dict):
+            if set(item) & _PROTECTED_FIELD_NAMES:
+                raise ValueError(
+                    f"protected structured fields placed under neutral role: {path}"
+                )
+            pending.extend(item.values())
+        elif isinstance(item, list):
+            pending.extend(item)
 
 
 def _verify_role_manifest(manifest, h_artifacts) -> None:
-    body = asdict(manifest)
-    claimed = body.pop("manifest_hash")
-    expected = build_final_artifact_role_manifest(h_artifacts)
-    paths = tuple(item.relative_path for item in manifest.bindings)
-    if (
-        manifest.schema_version != FREEZE_ROLE_SCHEMA_VERSION
-        or content_hash(body) != claimed
-        or manifest.protected_roles != tuple(sorted(PROTECTED_FINAL_ROLES, key=str))
-        or paths != tuple(sorted(paths))
-        or len(paths) != len(set(paths))
-        or set(paths) != {_canonical_path(item) for item in h_artifacts}
-        or manifest != expected
-    ):
-        raise ValueError("incomplete or weakened final artifact role manifest")
+    verify_final_artifact_role_manifest(manifest, h_artifacts)
+
+
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
 
 
 def _canonical_path(value: str) -> str:
