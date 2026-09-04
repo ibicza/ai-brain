@@ -259,9 +259,7 @@ def _content_from_dict(kind: KnowledgeKind, row: dict) -> KnowledgeContent:
                 "declared_exceptions": tuple(row["declared_exceptions"]),
                 "examples": tuple(row["examples"]),
                 "resolved_parameter_types": tuple(row["resolved_parameter_types"]),
-                "parameter_array_dimensions": tuple(
-                    row["parameter_array_dimensions"]
-                ),
+                "parameter_array_dimensions": tuple(row["parameter_array_dimensions"]),
                 "parameter_varargs": tuple(row["parameter_varargs"]),
                 "method_type_parameters": tuple(row["method_type_parameters"]),
                 "intersection_bounds": tuple(

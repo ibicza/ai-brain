@@ -10,46 +10,16 @@ from enum import StrEnum
 from pathlib import PurePosixPath
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
+from ai_brain.stage3.acquisition.final_artifact_contract import (
+    FINAL_ARTIFACT_CONTRACT_REGISTRY,
+    FinalArtifactRole,
+)
 
 FREEZE_ROLE_SCHEMA_VERSION = 2
 
 
-class FinalArtifactRole(StrEnum):
-    FINAL_SOURCE_BYTES = "FINAL_SOURCE_BYTES"
-    FINAL_ACQUISITION_BYTES = "FINAL_ACQUISITION_BYTES"
-    FINAL_SOURCE_RECEIPT = "FINAL_SOURCE_RECEIPT"
-    FINAL_SELECTOR_OUTPUT = "FINAL_SELECTOR_OUTPUT"
-    FINAL_PHYSICAL_CENSUS = "FINAL_PHYSICAL_CENSUS"
-    FINAL_PRODUCTION_OUTPUT = "FINAL_PRODUCTION_OUTPUT"
-    FINAL_CANDIDATE_PACK = "FINAL_CANDIDATE_PACK"
-    FINAL_ORACLE_OUTPUT = "FINAL_ORACLE_OUTPUT"
-    FINAL_GOLDEN = "FINAL_GOLDEN"
-    FINAL_EVALUATION = "FINAL_EVALUATION"
-    FINAL_APPROVAL = "FINAL_APPROVAL"
-    FINAL_INSTALLATION = "FINAL_INSTALLATION"
-    FINAL_DECISION = "FINAL_DECISION"
-    PROCESS_AUDIT = "PROCESS_AUDIT"
-    QUALITY_LOG = "QUALITY_LOG"
-    HUMAN_READABLE_REPORT = "HUMAN_READABLE_REPORT"
-    REPORT = "REPORT"
-    GENERIC_EMPTY_RESULT = "GENERIC_EMPTY_RESULT"
-
-
 PROTECTED_FINAL_ROLES = frozenset(
-    {
-        FinalArtifactRole.FINAL_SOURCE_BYTES,
-        FinalArtifactRole.FINAL_SOURCE_RECEIPT,
-        FinalArtifactRole.FINAL_SELECTOR_OUTPUT,
-        FinalArtifactRole.FINAL_PHYSICAL_CENSUS,
-        FinalArtifactRole.FINAL_PRODUCTION_OUTPUT,
-        FinalArtifactRole.FINAL_CANDIDATE_PACK,
-        FinalArtifactRole.FINAL_ORACLE_OUTPUT,
-        FinalArtifactRole.FINAL_GOLDEN,
-        FinalArtifactRole.FINAL_EVALUATION,
-        FinalArtifactRole.FINAL_APPROVAL,
-        FinalArtifactRole.FINAL_INSTALLATION,
-        FinalArtifactRole.FINAL_DECISION,
-    }
+    FINAL_ARTIFACT_CONTRACT_REGISTRY.contract.protected_roles
 )
 
 
@@ -264,7 +234,12 @@ def verify_role_aware_disclosure(
             leaked_hashes.append(digest)
         else:
             neutral_reuse += 1
-    claims = extract_disclosure_claims(h_values, role_manifest)
+    contract_invalid = False
+    try:
+        claims = extract_disclosure_claims(h_values, role_manifest)
+    except (TypeError, ValueError):
+        claims = ()
+        contract_invalid = True
     derived_tokens = tuple(
         sorted({item.value for item in claims if not item.predeclared})
     )
@@ -277,7 +252,7 @@ def verify_role_aware_disclosure(
         for item, encoded in token_bytes
         if any(encoded in raw for raw in f_values.values())
     )
-    passed = not leaked_paths and not leaked_tokens
+    passed = not leaked_paths and not leaked_tokens and not contract_invalid
     body = {
         "role_manifest_hash": role_manifest.manifest_hash,
         "protected_artifact_count": sum(
@@ -294,102 +269,11 @@ def verify_role_aware_disclosure(
 
 
 def classify_final_artifact_role(path: str) -> FinalArtifactRole:
-    value = _canonical_path(path)
-    name = PurePosixPath(value).name
-    if "/source_snapshots/" in f"/{value}" and name.endswith(".java"):
-        return FinalArtifactRole.FINAL_SOURCE_BYTES
-    if "/acquisition_bundle/candidates/" in f"/{value}" and name in {
-        "source.jar",
-        "pom.xml",
-        "scm.zip",
-    }:
-        return FinalArtifactRole.FINAL_ACQUISITION_BYTES
-    if value.startswith("artifacts/acquisition/disclosed_java/"):
-        return FinalArtifactRole.FINAL_SOURCE_RECEIPT
-    if name in {"source_acquisition_receipts.json", "jdk_provider_receipt.json"}:
-        return FinalArtifactRole.FINAL_SOURCE_RECEIPT
-    if (
-        name
-        in {
-            "candidate_qualification_receipts.json",
-            "sealed_acquisition_bundle.json",
-            "provenance.json",
-            "qualification.json",
-            "disclosed_match.json",
-        }
-        and "/acquisition_bundle/" in f"/{value}"
-    ):
-        return FinalArtifactRole.FINAL_SOURCE_RECEIPT
-    if name in {"selector_receipt.json", "selection_execution.json"}:
-        return FinalArtifactRole.FINAL_SELECTOR_OUTPUT
-    if name == "physical_census.json":
-        return FinalArtifactRole.FINAL_PHYSICAL_CENSUS
-    if name in {
-        "production_output.json",
-        "production_disclosure.json",
-        "production_counts.json",
-        "component_manifest.json",
-        "packability_report.json",
-        "trust_closure.json",
-        "candidate_replay.json",
-        "platform_comparison.json",
-        "production_summary.json",
-    }:
-        return FinalArtifactRole.FINAL_PRODUCTION_OUTPUT
-    if "/candidate_pack/" in f"/{value}" or name in {
-        "candidate_pack.json",
-        "candidate_pack_tree.json",
-        "candidate_pack_disclosure.json",
-    }:
-        return FinalArtifactRole.FINAL_CANDIDATE_PACK
-    if name == "oracle_disclosure.json":
-        return FinalArtifactRole.FINAL_ORACLE_OUTPUT
-    if name == "golden_disclosure.json":
-        return FinalArtifactRole.FINAL_GOLDEN
-    if "/oracle/" in f"/{value}" and "golden" in name:
-        return FinalArtifactRole.FINAL_GOLDEN
-    if "/oracle/" in f"/{value}":
-        return FinalArtifactRole.FINAL_ORACLE_OUTPUT
-    if "/goldens/" in f"/{value}" or name.startswith("golden_"):
-        return FinalArtifactRole.FINAL_GOLDEN
-    if name.startswith(("evaluation", "metrics_")) or name in {
-        "semantic_metrics.json",
-        "trust_metrics.json",
-        "source_overlap.json",
-        "input.json",
-        "role_manifest.json",
-        "disclosure_report.json",
-        "corpus_census.json",
-        "diagnostic_metrics.json",
-        "replay_mutations.json",
-        "final_metrics.json",
-        "final_gate.json",
-    }:
-        return FinalArtifactRole.FINAL_EVALUATION
-    if name in {"approval.json", "release_approval.json"}:
-        return FinalArtifactRole.FINAL_APPROVAL
-    if "/installed_pack/" in f"/{value}" or name in {
-        "installation.json",
-        "runtime_proof.json",
-    }:
-        return FinalArtifactRole.FINAL_INSTALLATION
-    if name in {"outcome.json", "blocked_result.json", "final_decision.json"}:
-        return FinalArtifactRole.FINAL_DECISION
-    if name in {"physical_census.json", "final_corpus_census.json"}:
-        return FinalArtifactRole.FINAL_PHYSICAL_CENSUS
-    if name in {"generic_empty_result.json", "empty_result.json"}:
-        return FinalArtifactRole.GENERIC_EMPTY_RESULT
-    if "audit" in name:
-        return FinalArtifactRole.PROCESS_AUDIT
-    if value.startswith("evaluation/m344_final_java/platform/") and name.endswith(
-        ".json"
-    ):
-        return FinalArtifactRole.PROCESS_AUDIT
-    if name.endswith((".log", ".txt")):
-        return FinalArtifactRole.QUALITY_LOG
-    if name.endswith(".md") and value.startswith(("docs/", "runs/")):
-        return FinalArtifactRole.HUMAN_READABLE_REPORT
-    raise ValueError(f"unknown final artifact role: {value}")
+    canonical = _canonical_path(path)
+    try:
+        return FINAL_ARTIFACT_CONTRACT_REGISTRY.match(canonical).role
+    except ValueError as exc:
+        raise ValueError(f"unknown final artifact role: {canonical}") from exc
 
 
 def derive_protected_disclosure_tokens(
@@ -507,51 +391,6 @@ def verify_schema_bound_disclosure(
 
     claims = extract_disclosure_claims(h_artifacts, role_manifest)
     roles = {item.relative_path: item.role for item in role_manifest.bindings}
-    mandatory = {
-        FinalArtifactRole.FINAL_SOURCE_BYTES: {
-            DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
-            DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
-            DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
-        },
-        FinalArtifactRole.FINAL_ACQUISITION_BYTES: {
-            DisclosureClaimKind.FINAL_ARCHIVE_HASH
-        },
-        FinalArtifactRole.FINAL_SOURCE_RECEIPT: {
-            DisclosureClaimKind.FINAL_ARCHIVE_HASH,
-            DisclosureClaimKind.FINAL_POM_HASH,
-            DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
-            DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
-            DisclosureClaimKind.FINAL_SOURCE_TREE_HASH,
-            DisclosureClaimKind.FINAL_SCM_REVISION,
-        },
-        FinalArtifactRole.FINAL_SELECTOR_OUTPUT: {
-            DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
-            DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
-            DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
-            DisclosureClaimKind.FINAL_SELECTOR_OUTPUT_HASH,
-        },
-        FinalArtifactRole.FINAL_PHYSICAL_CENSUS: {
-            DisclosureClaimKind.FINAL_EVALUATION_HASH
-        },
-        FinalArtifactRole.FINAL_PRODUCTION_OUTPUT: {
-            DisclosureClaimKind.FINAL_TARGET_IDENTITY,
-            DisclosureClaimKind.FINAL_PROPOSAL_MANIFEST_HASH,
-            DisclosureClaimKind.FINAL_TRUST_CLOSURE_HASH,
-            DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH,
-        },
-        FinalArtifactRole.FINAL_CANDIDATE_PACK: {
-            DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH,
-            DisclosureClaimKind.FINAL_TARGET_IDENTITY,
-        },
-        FinalArtifactRole.FINAL_ORACLE_OUTPUT: {DisclosureClaimKind.FINAL_ORACLE_HASH},
-        FinalArtifactRole.FINAL_GOLDEN: {DisclosureClaimKind.FINAL_GOLDEN_HASH},
-        FinalArtifactRole.FINAL_EVALUATION: {DisclosureClaimKind.FINAL_EVALUATION_HASH},
-        FinalArtifactRole.FINAL_APPROVAL: {DisclosureClaimKind.FINAL_DECISION_HASH},
-        FinalArtifactRole.FINAL_INSTALLATION: {
-            DisclosureClaimKind.FINAL_PRODUCTION_OUTPUT_HASH
-        },
-        FinalArtifactRole.FINAL_DECISION: {DisclosureClaimKind.FINAL_DECISION_HASH},
-    }
     reports = []
     for role in sorted(PROTECTED_FINAL_ROLES, key=str):
         paths = tuple(path for path, item_role in roles.items() if item_role is role)
@@ -559,7 +398,11 @@ def verify_schema_bound_disclosure(
             item for item in claims if item.source_artifact_role is role
         )
         observed_kinds = {item.claim_kind for item in role_claims}
-        missing_kinds = mandatory.get(role, set()) - observed_kinds if paths else set()
+        mandatory = {
+            DisclosureClaimKind(item)
+            for item in FINAL_ARTIFACT_CONTRACT_REGISTRY.required_claim_kinds(role)
+        }
+        missing_kinds = mandatory - observed_kinds if paths else set()
         extra_count = _unexpected_protected_field_count(h_artifacts, paths, role_claims)
         body = {
             "role": role,
@@ -586,142 +429,17 @@ def verify_schema_bound_disclosure(
 
 
 def _claims_for_role(role, path, value) -> tuple[DisclosureClaim, ...]:
-    specifications = {
-        FinalArtifactRole.FINAL_SOURCE_RECEIPT: (
-            (
-                DisclosureClaimKind.FINAL_POM_HASH,
-                ("archives", "*", "pom_sha256"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_ARCHIVE_HASH,
-                ("archives", "*", "source_archive_sha256"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
-                ("archives", "*", "raw_source_hashes", "*"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
-                ("archives", "*", "canonical_source_hashes", "*"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_SOURCE_TREE_HASH,
-                ("archives", "*", "source_tree_hash"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_SCM_REVISION,
-                ("archives", "*", "scm_revision"),
-            ),
-            (DisclosureClaimKind.FINAL_POM_HASH, ("pom_hash",)),
-            (DisclosureClaimKind.FINAL_ARCHIVE_HASH, ("archive_hash",)),
-            (
-                DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
-                ("raw_source_hashes", "*"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
-                ("canonical_source_hashes", "*"),
-            ),
-            (DisclosureClaimKind.FINAL_SOURCE_TREE_HASH, ("source_tree_hash",)),
-            (DisclosureClaimKind.FINAL_SCM_REVISION, ("scm_revision",)),
-        ),
-        FinalArtifactRole.FINAL_SELECTOR_OUTPUT: (
-            (DisclosureClaimKind.FINAL_ARCHIVE_HASH, ("archive_hash",)),
-            (
-                DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
-                ("selected_relative_paths", "*"),
-            ),
-            (DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH, ("selected", "*")),
-            (
-                DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
-                ("selected", "*", "relative_path"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
-                ("selected", "*", "raw_sha256"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
-                ("selected", "*", "canonical_sha256"),
-            ),
-            (
-                DisclosureClaimKind.FINAL_SELECTOR_OUTPUT_HASH,
-                ("selector_output_hash",),
-            ),
-        ),
-        FinalArtifactRole.FINAL_PRODUCTION_OUTPUT: (
-            (DisclosureClaimKind.FINAL_TARGET_IDENTITY, ("target_identities", "*")),
-            (
-                DisclosureClaimKind.FINAL_PRODUCTION_OUTPUT_HASH,
-                ("production_output_hash",),
-            ),
-            (DisclosureClaimKind.FINAL_PRODUCTION_OUTPUT_HASH, ("trust_closure_hash",)),
-            (DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH, ("candidate_pack_hash",)),
-            (
-                DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH,
-                ("candidate_pack_tree_hash",),
-            ),
-            (
-                DisclosureClaimKind.FINAL_PROPOSAL_MANIFEST_HASH,
-                ("proposal_manifest_hash",),
-            ),
-            (
-                DisclosureClaimKind.FINAL_TRUST_CLOSURE_HASH,
-                ("trust_closure_hash",),
-            ),
-        ),
-        FinalArtifactRole.FINAL_CANDIDATE_PACK: (
-            (DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH, ("candidate_pack_hash",)),
-            (DisclosureClaimKind.FINAL_TARGET_IDENTITY, ("targets", "*", "target_id")),
-        ),
-        FinalArtifactRole.FINAL_ORACLE_OUTPUT: (
-            (DisclosureClaimKind.FINAL_ORACLE_HASH, ("oracle_hash",)),
-        ),
-        FinalArtifactRole.FINAL_GOLDEN: (
-            (DisclosureClaimKind.FINAL_GOLDEN_HASH, ("golden_hash",)),
-        ),
-        FinalArtifactRole.FINAL_EVALUATION: (
-            (DisclosureClaimKind.FINAL_EVALUATION_HASH, ("report_hash",)),
-        ),
-        FinalArtifactRole.FINAL_APPROVAL: (
-            (DisclosureClaimKind.FINAL_DECISION_HASH, ("approval_hash",)),
-        ),
-        FinalArtifactRole.FINAL_INSTALLATION: (
-            (
-                DisclosureClaimKind.FINAL_PRODUCTION_OUTPUT_HASH,
-                ("installed_pack_hash",),
-            ),
-        ),
-        FinalArtifactRole.FINAL_DECISION: (
-            (DisclosureClaimKind.FINAL_DECISION_HASH, ("decision_hash",)),
-        ),
-        FinalArtifactRole.FINAL_PHYSICAL_CENSUS: (
-            (DisclosureClaimKind.FINAL_EVALUATION_HASH, ("report_hash",)),
-        ),
-    }
+    raw = (canonical_json(value) + "\n").encode("utf-8")
     result = []
-    for kind, field_path in specifications.get(role, ()):
-        for rendered, item in _field_values(value, field_path):
-            if isinstance(item, str) and _is_secret_value(kind, item):
-                result.append(_claim(kind, role, path, rendered, item))
+    for (
+        kind,
+        field_path,
+        item,
+    ) in FINAL_ARTIFACT_CONTRACT_REGISTRY.disclosure_claim_specs(path, raw):
+        typed_kind = DisclosureClaimKind(kind)
+        if _is_secret_value(typed_kind, item):
+            result.append(_claim(typed_kind, role, path, field_path, item))
     return tuple(result)
-
-
-def _field_values(value, parts, prefix="$"):
-    if not parts:
-        return ((prefix, value),)
-    head, *tail = parts
-    if head == "*":
-        if not isinstance(value, list):
-            return ()
-        return tuple(
-            item
-            for index, child in enumerate(value)
-            for item in _field_values(child, tail, f"{prefix}[{index}]")
-        )
-    if not isinstance(value, dict) or head not in value:
-        return ()
-    return _field_values(value[head], tail, f"{prefix}.{head}")
 
 
 def _claim(kind, role, source_path, field_path, value) -> DisclosureClaim:
@@ -748,57 +466,17 @@ def _is_secret_value(kind: DisclosureClaimKind, value: str) -> bool:
     return bool(re.fullmatch(r"[0-9a-f]{64}", value))
 
 
-_PROTECTED_FIELD_NAMES = frozenset(
-    {
-        "source_archive_sha256",
-        "raw_source_hashes",
-        "canonical_source_hashes",
-        "source_tree_hash",
-        "selected_relative_paths",
-        "target_identities",
-        "production_output_hash",
-        "trust_closure_hash",
-        "candidate_pack_hash",
-        "candidate_pack_tree_hash",
-        "oracle_hash",
-        "golden_hash",
-        "decision_hash",
-        "approval_hash",
-        "installed_pack_hash",
-        "pom_sha256",
-        "scm_revision",
-        "selector_output_hash",
-        "proposal_manifest_hash",
-    }
-)
-
-
 def _unexpected_protected_field_count(h_artifacts, paths, claims) -> int:
-    claimed_paths = {(item.source_path, item.field_path) for item in claims}
     count = 0
     for path in paths:
-        if path.endswith(".java"):
-            continue
         try:
-            value = json.loads(h_artifacts[path].decode("utf-8", errors="strict"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
+            validation = FINAL_ARTIFACT_CONTRACT_REGISTRY.validate(
+                path, h_artifacts[path]
+            )
+        except (TypeError, ValueError):
+            count += 1
             continue
-        pending = [("$", value)]
-        while pending:
-            prefix, item = pending.pop()
-            if isinstance(item, dict):
-                for key, child in item.items():
-                    child_path = f"{prefix}.{key}"
-                    if key in _PROTECTED_FIELD_NAMES and not any(
-                        claim_path == path and field_path.startswith(child_path)
-                        for claim_path, field_path in claimed_paths
-                    ):
-                        count += 1
-                    pending.append((child_path, child))
-            elif isinstance(item, list):
-                pending.extend(
-                    (f"{prefix}[{index}]", child) for index, child in enumerate(item)
-                )
+        count += len(validation.unexpected_fields) + len(validation.unclassified_fields)
     return count
 
 
@@ -817,11 +495,12 @@ def _verify_neutral_artifact_schema(path: str, raw: bytes) -> None:
         )
     except (UnicodeDecodeError, json.JSONDecodeError):
         return
+    secret_names = FINAL_ARTIFACT_CONTRACT_REGISTRY.disclosure_field_names()
     pending = [value]
     while pending:
         item = pending.pop()
         if isinstance(item, dict):
-            if set(item) & _PROTECTED_FIELD_NAMES:
+            if set(item) & secret_names:
                 raise ValueError(
                     f"protected structured fields placed under neutral role: {path}"
                 )

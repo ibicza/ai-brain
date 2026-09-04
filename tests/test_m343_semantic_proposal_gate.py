@@ -60,7 +60,9 @@ def m343_index(tmp_path_factory):
         tmp_path_factory.mktemp("m343-index") / "store"
     )
     paths = tuple(
-        sorted(CORPUS.rglob("*.java"), key=lambda item: item.relative_to(CORPUS).as_posix())
+        sorted(
+            CORPUS.rglob("*.java"), key=lambda item: item.relative_to(CORPUS).as_posix()
+        )
     )
     bundle = ingest_bundle(
         paths,
@@ -419,9 +421,7 @@ def test_external_config_needs_both_bytes_hash_and_authority_root():
 
 
 def test_future_f13_h13_e13_protocol_is_path_and_hash_closed():
-    f13 = frozen_tree_snapshot(
-        "F13", "1" * 40, {"src/product.py": "a" * 64}
-    )
+    f13 = frozen_tree_snapshot("F13", "1" * 40, {"src/product.py": "a" * 64})
     h13 = frozen_tree_snapshot(
         "H13",
         "2" * 40,
@@ -468,9 +468,7 @@ def test_complete_resolver_withholds_all_adversarial_type_classes(m343_index):
     _bundle, index = m343_index
     by_prefix = {
         prefix: [
-            item
-            for item in index.declarations
-            if item.member_name.startswith(prefix)
+            item for item in index.declarations if item.member_name.startswith(prefix)
         ]
         for prefix in (
             "invalidBound",
@@ -511,7 +509,9 @@ def test_intersection_varargs_deprecation_and_cr_lines_are_preserved(m343_index)
         "Comparable<T>",
     )
     assert len(intersection.type_variables_detail[0].resolution_receipt_hashes) == 2
-    varargs = next(item for item in index.declarations if item.member_name == "arrayValue")
+    varargs = next(
+        item for item in index.declarations if item.member_name == "arrayValue"
+    )
     assert varargs.parameters[0].varargs
     assert varargs.parameters[0].resolution.array_dimensions == 2
     assert varargs.return_resolution.array_dimensions == 2

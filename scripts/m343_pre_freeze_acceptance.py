@@ -172,10 +172,15 @@ def _load_peer(path):
         return None
     row = json.loads(path.read_text(encoding="utf-8"))
     claimed_report_hash = row.get("report_hash")
-    if content_hash({key: value for key, value in row.items() if key != "report_hash"}) != claimed_report_hash:
+    if (
+        content_hash({key: value for key, value in row.items() if key != "report_hash"})
+        != claimed_report_hash
+    ):
         raise ValueError("peer acceptance report hash mismatch")
     gate = row["gate"]
-    if content_hash(asdict(evaluate_pre_freeze_gate(row["raw_evidence"]))) != content_hash(gate):
+    if content_hash(
+        asdict(evaluate_pre_freeze_gate(row["raw_evidence"]))
+    ) != content_hash(gate):
         raise ValueError("peer pre-freeze gate decision does not replay")
     return row
 
@@ -271,12 +276,8 @@ def main() -> None:
                 store=store,
                 source_root=corpus_root,
             )
-            goldens = load_java_golden_manifest(
-                oracle_root / "semantic_goldens.json"
-            )
-            seal = load_golden_seal_receipt(
-                oracle_root / "golden_seal_receipt.json"
-            )
+            goldens = load_java_golden_manifest(oracle_root / "semantic_goldens.json")
+            seal = load_golden_seal_receipt(oracle_root / "golden_seal_receipt.json")
             config = load_external_java_trust_evaluation_config(
                 oracle_root / "evaluation_config.json",
                 expected_config_sha256=args.expected_config_sha256,
@@ -330,13 +331,44 @@ def main() -> None:
             tamper_root = temporary_root / "tamper"
             tamper_root.mkdir()
             tamper_specs = (
-                ("raw-source", lambda row: row["raw_source_blobs"][0].__setitem__(1, "AA==")),
-                ("canonical-text", lambda row: row["canonical_text_blobs"][0].__setitem__(1, "AA==")),
-                ("semantic-payload", lambda row: row["golden_manifest"]["goldens"][0].__setitem__("member_name", "forged")),
-                ("evaluation-config", lambda row: row["evaluation_config"].__setitem__("config_id", "forged")),
-                ("authority-root", lambda row: row["evaluation_config"].__setitem__("authority_root_hash", "0" * 64)),
-                ("relative-path", lambda row: row["source_paths"][0].__setitem__(0, "forged/Same.java")),
-                ("evidence-manifest", lambda row: row["expected_artifacts"].__setitem__("field_evidence_manifest_hash", "f" * 64)),
+                (
+                    "raw-source",
+                    lambda row: row["raw_source_blobs"][0].__setitem__(1, "AA=="),
+                ),
+                (
+                    "canonical-text",
+                    lambda row: row["canonical_text_blobs"][0].__setitem__(1, "AA=="),
+                ),
+                (
+                    "semantic-payload",
+                    lambda row: row["golden_manifest"]["goldens"][0].__setitem__(
+                        "member_name", "forged"
+                    ),
+                ),
+                (
+                    "evaluation-config",
+                    lambda row: row["evaluation_config"].__setitem__(
+                        "config_id", "forged"
+                    ),
+                ),
+                (
+                    "authority-root",
+                    lambda row: row["evaluation_config"].__setitem__(
+                        "authority_root_hash", "0" * 64
+                    ),
+                ),
+                (
+                    "relative-path",
+                    lambda row: row["source_paths"][0].__setitem__(
+                        0, "forged/Same.java"
+                    ),
+                ),
+                (
+                    "evidence-manifest",
+                    lambda row: row["expected_artifacts"].__setitem__(
+                        "field_evidence_manifest_hash", "f" * 64
+                    ),
+                ),
             )
             commands = [(*verifier, str(pack_root))]
             commands.extend(
@@ -480,13 +512,22 @@ def main() -> None:
                     == type_resolution_semantic_manifest_hash(declaration)
                 ):
                     resolution_exact += 1
-                if declaration.unsupported_reason and declaration.unsupported_reason.startswith("invalid_type_variable_bound"):
+                if (
+                    declaration.unsupported_reason
+                    and declaration.unsupported_reason.startswith(
+                        "invalid_type_variable_bound"
+                    )
+                ):
                     invalid_bound_fallback += sum(
                         item.first_bound_erasure == "java.lang.Object"
                         for item in declaration.type_variables_detail
                         if item.explicit_bounds
                     )
-                if declaration.declared_exceptions and not declaration.supported and declaration.unsupported_reason.startswith("invalid_throws_type"):
+                if (
+                    declaration.declared_exceptions
+                    and not declaration.supported
+                    and declaration.unsupported_reason.startswith("invalid_throws_type")
+                ):
                     unresolved_throws_accepted += int(
                         binding.proposal_id
                         in {item.proposal_id for item in batch.trusted_proposals}
@@ -500,17 +541,22 @@ def main() -> None:
                         binding.proposal_id
                         in {item.proposal_id for item in batch.trusted_proposals}
                     )
-                if expected.intersection_bounds != proposal.proposed_content.intersection_bounds:
+                if (
+                    expected.intersection_bounds
+                    != proposal.proposed_content.intersection_bounds
+                ):
                     missing_intersection += 1
                 if any(expected.parameter_varargs) and (
                     expected.parameter_array_dimensions
                     != proposal.proposed_content.parameter_array_dimensions
-                    or golden.erased_jvm_descriptor
-                    != declaration.erased_jvm_descriptor
+                    or golden.erased_jvm_descriptor != declaration.erased_jvm_descriptor
                 ):
                     varargs_errors += 1
                 actual_kind = proposal.proposed_content.object_type.kind.value
-                if actual_kind == "STRING" and expected.expected_object_type_kind != "STRING":
+                if (
+                    actual_kind == "STRING"
+                    and expected.expected_object_type_kind != "STRING"
+                ):
                     hardcoded_object_type += 1
                 if (
                     actual_kind == expected.expected_object_type_kind
@@ -619,16 +665,18 @@ def main() -> None:
                 "compiled_pack": pack.manifest.pack_content_hash,
                 "replay_artifact": replay_row["artifact_hash"],
             }
-            cross_exact = bool(
-                peer and peer["cross_platform_hashes"] == cross_hashes
-            )
+            cross_exact = bool(peer and peer["cross_platform_hashes"] == cross_hashes)
             peer_raw = peer["raw_evidence"] if peer else {}
             local_quality = all(item["passed"] for item in quality.values())
             windows_full = (
-                local_quality if args.platform == "windows" else bool(peer_raw.get("full_suite_windows_pass"))
+                local_quality
+                if args.platform == "windows"
+                else bool(peer_raw.get("full_suite_windows_pass"))
             )
             karina_full = (
-                local_quality if args.platform == "karina" else bool(peer_raw.get("full_suite_karina_pass"))
+                local_quality
+                if args.platform == "karina"
+                else bool(peer_raw.get("full_suite_karina_pass"))
             )
             newline_pass = (
                 newline_closure["required_profiles_present"]
@@ -649,51 +697,96 @@ def main() -> None:
                 "legal_overload_group_count": len(legal_overloads),
                 "constructor_count": corpus["constructor_count"],
                 "generic_method_count": corpus["generic_method_count"],
-                "intersection_bound_method_count": corpus["intersection_bound_method_count"],
+                "intersection_bound_method_count": corpus[
+                    "intersection_bound_method_count"
+                ],
                 "throws_declaration_count": corpus["throws_declaration_count"],
                 "nested_member_case_count": corpus["nested_member_case_count"],
-                "prior_source_hash_intersection_count": corpus["prior_source_hash_intersection_count"],
-                "location_precision": _ratio(location.exact_true_positive, location.exact_true_positive + location.wrong_location_false_positive),
-                "location_recall": _ratio(location.exact_true_positive, location.exact_true_positive + location.missing_false_negative),
-                "semantic_precision": _ratio(semantic.exact_true_positive, semantic.exact_true_positive + semantic.semantic_false_positive),
-                "semantic_recall": _ratio(semantic.exact_true_positive, semantic.exact_true_positive + semantic.missing_false_negative),
+                "prior_source_hash_intersection_count": corpus[
+                    "prior_source_hash_intersection_count"
+                ],
+                "location_precision": _ratio(
+                    location.exact_true_positive,
+                    location.exact_true_positive
+                    + location.wrong_location_false_positive,
+                ),
+                "location_recall": _ratio(
+                    location.exact_true_positive,
+                    location.exact_true_positive + location.missing_false_negative,
+                ),
+                "semantic_precision": _ratio(
+                    semantic.exact_true_positive,
+                    semantic.exact_true_positive + semantic.semantic_false_positive,
+                ),
+                "semantic_recall": _ratio(
+                    semantic.exact_true_positive,
+                    semantic.exact_true_positive + semantic.missing_false_negative,
+                ),
                 "correct_location_wrong_content": semantic.correct_location_wrong_content,
-                "trust_precision": _ratio(trust.correct_trusted, trust.correct_trusted + trust.wrong_trusted),
+                "trust_precision": _ratio(
+                    trust.correct_trusted, trust.correct_trusted + trust.wrong_trusted
+                ),
                 "wrong_trusted_count": trust.wrong_trusted,
                 "trust_coverage": _ratio(len(actual_trusted), len(expected_trusted)),
-                "resolution_oracle_agreement": _ratio(resolution_exact, resolution_total),
+                "resolution_oracle_agreement": _ratio(
+                    resolution_exact, resolution_total
+                ),
                 "invalid_bound_object_fallback_count": invalid_bound_fallback,
                 "unresolved_throws_accepted_count": unresolved_throws_accepted,
                 "inaccessible_types_accepted_count": inaccessible_accepted,
                 "missing_intersection_bound_count": missing_intersection,
                 "policy_unmatched_field_count": len(coverage.unmatched_fields),
-                "policy_multiply_matched_field_count": len(coverage.multiply_matched_fields),
-                "policy_unknown_proposal_field_count": len(coverage.unknown_proposal_fields),
-                "policy_zero_mandatory_rule_count": len(coverage.zero_match_mandatory_rules),
+                "policy_multiply_matched_field_count": len(
+                    coverage.multiply_matched_fields
+                ),
+                "policy_unknown_proposal_field_count": len(
+                    coverage.unknown_proposal_fields
+                ),
+                "policy_zero_mandatory_rule_count": len(
+                    coverage.zero_match_mandatory_rules
+                ),
                 "evidence_missing_count": evidence.missing,
                 "evidence_extra_count": evidence.extra,
                 "evidence_duplicate_count": evidence.duplicate,
                 "evidence_wrong_count": evidence.wrong,
                 "transformation_exactness": _ratio(evidence.exact, evidence.present),
-                "oracle_field_agreement": _ratio(oracle_field_exact, oracle_field_total),
+                "oracle_field_agreement": _ratio(
+                    oracle_field_exact, oracle_field_total
+                ),
                 "hardcoded_java_object_type_count": hardcoded_object_type,
-                "void_constructor_mapping_pass": mapping_exact == len(batch.proposal_batch.proposals),
-                "legal_overload_conflict_count": batch.conflict_report.conflict_count + int(not overload_all_trusted),
-                "conflict_precision": _ratio(len(conflict.detected_ids) - len(conflict.spurious_ids), len(conflict.detected_ids)),
-                "conflict_recall": _ratio(len(conflict.seeded_expected_ids) - len(conflict.missed_ids), len(conflict.seeded_expected_ids)),
-                "physical_duplicate_rate": _ratio(batch.segmentation.report.physical_duplicates, batch.segmentation.report.total_segments),
+                "void_constructor_mapping_pass": mapping_exact
+                == len(batch.proposal_batch.proposals),
+                "legal_overload_conflict_count": batch.conflict_report.conflict_count
+                + int(not overload_all_trusted),
+                "conflict_precision": _ratio(
+                    len(conflict.detected_ids) - len(conflict.spurious_ids),
+                    len(conflict.detected_ids),
+                ),
+                "conflict_recall": _ratio(
+                    len(conflict.seeded_expected_ids) - len(conflict.missed_ids),
+                    len(conflict.seeded_expected_ids),
+                ),
+                "physical_duplicate_rate": _ratio(
+                    batch.segmentation.report.physical_duplicates,
+                    batch.segmentation.report.total_segments,
+                ),
                 "duplicate_derived_trusted_count": batch.duplicate_derived_trusted_proposals,
-                "fresh_process_replay_pass": standalone["status"] == "PASS" and standalone["socket_attempts"] == 0,
+                "fresh_process_replay_pass": standalone["status"] == "PASS"
+                and standalone["socket_attempts"] == 0,
                 "newline_replay_pass": newline_pass,
-                "standalone_mutations_all_rejected": all(item["rejected"] for item in tamper_results),
-                "socket_attempt_count": process_report.socket_attempts + standalone["socket_attempts"],
+                "standalone_mutations_all_rejected": all(
+                    item["rejected"] for item in tamper_results
+                ),
+                "socket_attempt_count": process_report.socket_attempts
+                + standalone["socket_attempts"],
                 "unexpected_subprocess_count": process_report.unexpected_subprocess_count,
                 "source_execution_count": process_report.source_execution_count,
                 "annotation_processor_invocation_count": process_report.annotation_processor_invocation_count,
                 "fact_memory_write_count": counters["fact"],
                 "rule_memory_write_count": counters["rule"],
                 "registry_mutation_count": counters["registry"],
-                "pytorch_imported": (not torch_before and "torch" in sys.modules) or torch_before,
+                "pytorch_imported": (not torch_before and "torch" in sys.modules)
+                or torch_before,
                 "golden_seal_valid": True,
                 "parser_artifact_valid": True,
                 "full_gate_mutations_all_blocked": True,
@@ -705,7 +798,9 @@ def main() -> None:
                 "windows_worktree_clean": bool(release.get("windows_worktree_clean")),
                 "karina_worktree_clean": bool(release.get("karina_worktree_clean")),
                 "local_remote_sha_equal": bool(release.get("local_remote_sha_equal")),
-                "branch_pushed_without_merge": bool(release.get("branch_pushed_without_merge")),
+                "branch_pushed_without_merge": bool(
+                    release.get("branch_pushed_without_merge")
+                ),
                 "m33_outside_ancestry": bool(release.get("m33_outside_ancestry")),
                 "policy_layers_unchanged": bool(release.get("policy_layers_unchanged")),
                 "untouched_final_evaluation_executed": False,
@@ -767,7 +862,15 @@ def main() -> None:
         RuleMemory.save = originals["rule_save"]
         SkillRegistry.update_skill_metadata = originals["registry_update"]
         SkillRegistry.save = originals["registry_save"]
-    print(canonical_json({"platform": args.platform, "decision": gate.decision, "report_hash": report["report_hash"]}))
+    print(
+        canonical_json(
+            {
+                "platform": args.platform,
+                "decision": gate.decision,
+                "report_hash": report["report_hash"],
+            }
+        )
+    )
     if gate.decision is PreFreezeDecision.BLOCKED:
         raise SystemExit(1)
 

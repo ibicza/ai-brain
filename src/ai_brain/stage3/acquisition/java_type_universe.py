@@ -173,6 +173,8 @@ def resolve_java_type(
         resolved, kind = erased, JavaResolutionKind.PRIMITIVE
     elif erased in type_variables:
         bound = type_variables[erased] or "Object"
+        remaining_type_variables = dict(type_variables)
+        remaining_type_variables.pop(erased)
         bound_resolution = resolve_java_type(
             bound,
             universe=universe,
@@ -180,7 +182,7 @@ def resolve_java_type(
             receiver_type=receiver_type,
             explicit_imports=explicit_imports,
             wildcard_imports=wildcard_imports,
-            type_variables={},
+            type_variables=remaining_type_variables,
             lexical_owner_types=lexical_owner_types,
         )
         resolved = bound_resolution.resolved_type
@@ -216,7 +218,27 @@ def resolve_java_type(
         elif len(lexical) > 1:
             kind, candidates = JavaResolutionKind.AMBIGUOUS, lexical
         else:
-            declared_imports = explicit_imports.get(head, ())
+            imported_member_types = tuple(
+                sorted(
+                    {
+                        candidate
+                        for values in explicit_imports.values()
+                        for imported in values
+                        for candidate in _qualified_candidates(
+                            ".".join((imported, head, *tail)), symbols
+                        )
+                    }
+                )
+            )
+            if len(imported_member_types) == 1:
+                resolved, kind, candidates = (
+                    imported_member_types[0],
+                    JavaResolutionKind.EXPLICIT_IMPORT,
+                    imported_member_types,
+                )
+                declared_imports = ()
+            else:
+                declared_imports = explicit_imports.get(head, ())
             imported = tuple(
                 sorted(
                     value
@@ -224,7 +246,9 @@ def resolve_java_type(
                     for value in _qualified_candidates(".".join((base, *tail)), symbols)
                 )
             )
-            if len(declared_imports) == 1 and len(imported) == 1:
+            if resolved is not None:
+                pass
+            elif len(declared_imports) == 1 and len(imported) == 1:
                 resolved, kind, candidates = (
                     imported[0],
                     JavaResolutionKind.EXPLICIT_IMPORT,
@@ -368,6 +392,8 @@ def _lexical_candidates(
             if candidate in symbols:
                 result.add(candidate)
                 break
+    if result:
+        return tuple(sorted(result))
     for owner in lexical_owner_types:
         candidate = ".".join((owner.replace("$", "."), head, *tail))
         if candidate in symbols:
@@ -463,17 +489,14 @@ def _is_accessible(
 ) -> bool:
     if not symbol.package_exported or symbol.symbol_kind == "local":
         return False
+    receiver_top_level = _name_parts(receiver_type)[1]
     if (
         symbol.enclosing_access == "PRIVATE"
-        and not receiver_type.startswith(f"{symbol.enclosing_binary_name}.")
-        and receiver_type != symbol.enclosing_binary_name
+        and receiver_top_level != symbol.top_level_binary_name
     ):
         return False
     if symbol.access == "PRIVATE":
-        return (
-            receiver_type == symbol.enclosing_binary_name
-            or receiver_type.startswith(f"{symbol.enclosing_binary_name}.")
-        )
+        return receiver_top_level == symbol.top_level_binary_name
     if symbol.access == "PACKAGE":
         return package_name == symbol.package_name
     return True

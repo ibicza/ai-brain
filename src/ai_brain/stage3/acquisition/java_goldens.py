@@ -276,14 +276,18 @@ def verify_java_golden_manifest(manifest: JavaGoldenManifest) -> None:
         raise ValueError("Java golden semantic census is incomplete")
     if manifest.schema_version == 3:
         semantics = tuple(
-            item.expected_semantics for item in manifest.goldens if item.expected_semantics
+            item.expected_semantics
+            for item in manifest.goldens
+            if item.expected_semantics
         )
         if (
             len(semantics) != len(manifest.goldens)
             or manifest.semantic_manifest_hash != content_hash(semantics)
             or manifest.diagnostic_manifest_hash != content_hash(manifest.diagnostics)
             or any(_rehash(item, "semantic_hash") != item for item in semantics)
-            or any(_rehash(item, "receipt_hash") != item for item in manifest.diagnostics)
+            or any(
+                _rehash(item, "receipt_hash") != item for item in manifest.diagnostics
+            )
             or tuple(sorted(manifest.diagnostic_counts))
             != tuple(sorted(_diagnostic_counts(manifest.diagnostics)))
         ):

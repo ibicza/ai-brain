@@ -266,9 +266,7 @@ def bind_java_trust(
     binding_by_proposal = {item.proposal_id: item for item in proposal_batch.bindings}
     evidence_map = evidence_by_proposal(field_evidence)
     golden_map = _goldens_by_physical(golden_manifest)
-    diagnostic_map = {
-        item.receipt_hash: item for item in golden_manifest.diagnostics
-    }
+    diagnostic_map = {item.receipt_hash: item for item in golden_manifest.diagnostics}
     implicated = set(conflict_report.implicated_proposal_ids)
     incomplete_evidence = nonexact_evidence_proposal_ids(
         field_evidence, proposal_batch, source_index, evidence_policy
@@ -291,9 +289,7 @@ def bind_java_trust(
             blocker = "untrusted_contradictory_proposal_status"
         elif diagnostic_categories:
             golden = golden_values[0]
-            exact_location, _semantic = _golden_exact(
-                declaration, golden, proposal
-            )
+            exact_location, _semantic = _golden_exact(declaration, golden, proposal)
             blocker = "untrusted_compiler_diagnostic:" + diagnostic_categories[0]
         elif not declaration.supported:
             blocker = (
@@ -797,8 +793,7 @@ def _golden_exact(declaration, golden, proposal):
     )
     identity_exact = (
         location_exact
-        and golden.canonical_source_signature
-        == declaration.canonical_source_signature
+        and golden.canonical_source_signature == declaration.canonical_source_signature
         and golden.erased_jvm_descriptor == declaration.erased_jvm_descriptor
     )
     if golden.expected_semantics is None:

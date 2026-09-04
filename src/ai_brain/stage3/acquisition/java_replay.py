@@ -36,9 +36,7 @@ def build_java_replay_artifact(batch: TrustBoundProposalBatch, store, source_bin
         sorted(batch.bundle.documents, key=lambda item: item.relative_path)
     )
     raw_hashes = tuple(sorted({item.bytes_hash for item in documents}))
-    canonical_hashes = tuple(
-        sorted({item.canonical_text_hash for item in documents})
-    )
+    canonical_hashes = tuple(sorted({item.canonical_text_hash for item in documents}))
     raw_blobs = tuple(
         (digest, base64.b64encode(store.get_blob(digest)).decode("ascii"))
         for digest in raw_hashes
@@ -122,9 +120,7 @@ def _expected_artifacts(batch):
         "proposal_field_manifest_hash": (
             batch.proposal_batch.proposal_field_manifest_hash
         ),
-        "trust_decision_manifest_hash": (
-            batch.closure.trust_decision_manifest_hash
-        ),
+        "trust_decision_manifest_hash": (batch.closure.trust_decision_manifest_hash),
         "trusted_proposal_manifest_hash": (
             batch.closure.trusted_proposal_manifest_hash
         ),
@@ -203,17 +199,13 @@ def verify_compiled_java_evidence_standalone(pack_root: Path) -> dict[str, objec
                 for item in batch.trusted_proposals
             ],
             "parser_common_artifact": asdict(batch.parser_common_artifact),
-            "compiled_source_bindings": [
-                asdict(item) for item in pack.source_bindings
-            ],
+            "compiled_source_bindings": [asdict(item) for item in pack.source_bindings],
         }
         if row["schema_version"] == 1
         else {
             "expected_artifacts": _expected_artifacts(batch),
             "parser_common_artifact": asdict(batch.parser_common_artifact),
-            "compiled_source_bindings": [
-                asdict(item) for item in pack.source_bindings
-            ],
+            "compiled_source_bindings": [asdict(item) for item in pack.source_bindings],
         }
     )
     for key, value in expected.items():

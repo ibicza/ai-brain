@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/stage3/m336c_readiness_v1.schema.json",
+  "title": "M336CReadinessGate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "raw_report_hashes", "criteria", "pass_count", "mandatory_count", "failed_criteria", "publication_eligible_root_count", "decision", "gate_hash"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "raw_report_hashes": {"type": "array", "minItems": 14},
+    "criteria": {"type": "array", "minItems": 1},
+    "pass_count": {"type": "integer", "minimum": 0},
+    "mandatory_count": {"type": "integer", "minimum": 1},
+    "failed_criteria": {"type": "array", "items": {"type": "string"}},
+    "publication_eligible_root_count": {"type": "integer", "minimum": 0},
+    "decision": {"enum": ["READY_FOR_FRESH_JAVA_FREEZE_V3", "SAFE_CONSERVATIVE_SUBSET", "BLOCKED"]},
+    "gate_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

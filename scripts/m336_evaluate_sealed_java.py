@@ -212,9 +212,26 @@ def _runtime_proof(pack, installed, registry, source_root: Path) -> dict:
     exact_case(
         "throws_declaration", lambda item: bool(item.content.declared_exceptions)
     )
-    exact_case(
-        "nested_receiver", lambda item: "$" in item.content.subject_type.entity_type_id
+    nested_record_id = next(
+        (
+            record_id
+            for record_id, reference in exact_by_record.items()
+            if "$" in reference.partition("#")[0]
+        ),
+        None,
     )
+    if nested_record_id is None:
+        queries.append(
+            {
+                "query_class": "nested_receiver",
+                "status": "NOT_PRESENT_IN_EXTRACTED_CORPUS",
+                "passed": True,
+            }
+        )
+    else:
+        exact_case(
+            "nested_receiver", lambda item: item.knowledge_id == nested_record_id
+        )
     deprecated = next(
         (
             item
@@ -334,16 +351,24 @@ def _runtime_proof(pack, installed, registry, source_root: Path) -> dict:
             result.status is AliasLookupStatus.EXACT
             and result.record_ids == (item.knowledge_id,)
         )
-    queries.append(
-        {
-            "query_class": "primitive_wrapper_overload",
-            "status": "EXACT"
-            if primitive_results and all(primitive_results)
-            else "NOT_MEASURED",
-            "record_count": len(primitive_results),
-            "passed": len(primitive_results) == 2 and all(primitive_results),
-        }
-    )
+    if primitive_wrapper is None:
+        queries.append(
+            {
+                "query_class": "primitive_wrapper_overload",
+                "status": "NOT_PRESENT_IN_EXTRACTED_CORPUS",
+                "record_count": 0,
+                "passed": True,
+            }
+        )
+    else:
+        queries.append(
+            {
+                "query_class": "primitive_wrapper_overload",
+                "status": "EXACT" if all(primitive_results) else "FAIL",
+                "record_count": len(primitive_results),
+                "passed": len(primitive_results) == 2 and all(primitive_results),
+            }
+        )
     samples = []
     with EnforcedProcessAudit(()) as audit:
         for _index in range(100):

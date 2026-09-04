@@ -72,7 +72,9 @@ def _install_openjdk_sources(output: Path, source_archive: Path) -> None:
     }
     _write(
         output / "OPENJDK_PROVENANCE.json",
-        json.dumps(provenance, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+        json.dumps(
+            provenance, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ),
     )
     _write(
         output / "NOTICE.md",
@@ -87,7 +89,9 @@ All `synthetic/` and `support/` sources are deterministic M-34.3 fixtures.
 
 
 def _positive(index: int) -> str:
-    package = f"dev.m343.liba.p{index % 5}" if index < 13 else f"dev.m343.libb.p{index % 5}"
+    package = (
+        f"dev.m343.liba.p{index % 5}" if index < 13 else f"dev.m343.libb.p{index % 5}"
+    )
     name = f"RealCatalog{index:02d}"
     methods = []
     for group in range(4):
@@ -115,7 +119,7 @@ def _positive(index: int) -> str:
             "    public String[][] arrayValue(String[]... value) { return value; }",
             "    public void voidValue() {}",
             "    public Nested nestedValue(Nested value) { return value; }",
-            "    public String varargs(String... values) { return values.length == 0 ? \"\" : values[0]; }",
+            '    public String varargs(String... values) { return values.length == 0 ? "" : values[0]; }',
             "    public java.util.List<String> listValue(java.util.List<String> value) { return value; }",
             "    public java.util.Map<String,Integer> mapValue(java.util.Map<String,Integer> value) { return value; }",
             "    public java.util.Map.Entry<String,Integer> entryValue(java.util.Map.Entry<String,Integer> value) { return value; }",
@@ -131,9 +135,7 @@ def _positive(index: int) -> str:
             '    @Deprecated(since = "21", forRemoval = false)\n'
             "    public String legacyValue(String value) { return value; }"
         )
-        methods.append(
-            "    public int bodyOnlyError() { return missingBodySymbol; }"
-        )
+        methods.append("    public int bodyOnlyError() { return missingBodySymbol; }")
         methods.append(
             '    public String textBlock() { return """\n        { // text, not comment /* */ }\n        """; }'
         )
@@ -199,7 +201,9 @@ def _negative(index: int) -> str:
                 f"    public void {prefix}{value:02d}() throws {source_type} {{}}"
             )
         else:
-            methods.append(f"    public void {prefix}{value:02d}({source_type} value) {{}}")
+            methods.append(
+                f"    public void {prefix}{value:02d}({source_type} value) {{}}"
+            )
     return "\n".join(
         (
             f"package {package};",
@@ -229,7 +233,8 @@ def main() -> None:
             final_newline=index != 2,
         )
         _write(
-            args.output / f"synthetic/mutations/p{index % 5}/NegativeCatalog{index:02d}.java",
+            args.output
+            / f"synthetic/mutations/p{index % 5}/NegativeCatalog{index:02d}.java",
             _negative(index),
             newline="\r" if index == 24 else "\n",
         )

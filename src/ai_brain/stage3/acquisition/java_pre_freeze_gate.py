@@ -66,7 +66,12 @@ _SPECS = (
     ("trust.wrong", "wrong_trusted_count", "MAX", "0"),
     ("trust.coverage", "trust_coverage", "MIN", "0.800000"),
     ("resolution.oracle_agreement", "resolution_oracle_agreement", "MIN", "1.000000"),
-    ("resolution.invalid_bound_fallback", "invalid_bound_object_fallback_count", "MAX", "0"),
+    (
+        "resolution.invalid_bound_fallback",
+        "invalid_bound_object_fallback_count",
+        "MAX",
+        "0",
+    ),
     ("resolution.unresolved_throws", "unresolved_throws_accepted_count", "MAX", "0"),
     ("resolution.inaccessible", "inaccessible_types_accepted_count", "MAX", "0"),
     ("resolution.missing_intersection", "missing_intersection_bound_count", "MAX", "0"),
@@ -101,7 +106,12 @@ _SPECS = (
     ("seal.valid", "golden_seal_valid", "BOOL", "true"),
     ("parser.valid", "parser_artifact_valid", "BOOL", "true"),
     ("meta.full_gate", "full_gate_mutations_all_blocked", "BOOL", "true"),
-    ("platform.byte_identity", "cross_platform_artifacts_byte_identical", "BOOL", "true"),
+    (
+        "platform.byte_identity",
+        "cross_platform_artifacts_byte_identical",
+        "BOOL",
+        "true",
+    ),
     ("quality.ruff", "ruff_pass", "BOOL", "true"),
     ("quality.targeted", "targeted_tests_pass", "BOOL", "true"),
     ("quality.windows_full", "full_suite_windows_pass", "BOOL", "true"),
@@ -120,7 +130,9 @@ def evaluate_pre_freeze_gate(raw_evidence) -> PreFreezeGateReport:
     if set(raw_evidence) != {item[1] for item in _SPECS}:
         missing = sorted({item[1] for item in _SPECS} - set(raw_evidence))
         extra = sorted(set(raw_evidence) - {item[1] for item in _SPECS})
-        raise ValueError(f"pre-freeze raw evidence schema mismatch: {missing=} {extra=}")
+        raise ValueError(
+            f"pre-freeze raw evidence schema mismatch: {missing=} {extra=}"
+        )
     criteria = tuple(
         _criterion(identifier, key, operator, threshold, raw_evidence[key])
         for identifier, key, operator, threshold in _SPECS
@@ -154,9 +166,7 @@ def load_pre_freeze_gate_report(path: Path) -> tuple[dict, PreFreezeGateReport]:
     if set(row) != {"raw_evidence", "gate"}:
         raise ValueError("pre-freeze report envelope mismatch")
     gate = dict(row["gate"])
-    criteria = tuple(
-        PreFreezeCriterion(**item) for item in gate.pop("criteria")
-    )
+    criteria = tuple(PreFreezeCriterion(**item) for item in gate.pop("criteria"))
     decision = PreFreezeDecision(gate.pop("decision"))
     report = PreFreezeGateReport(
         **gate,
@@ -186,9 +196,7 @@ def run_full_gate_meta_mutations(raw_evidence):
         "missed_seeded_conflict": {
             "conflict_recall": {"numerator": 1, "denominator": 2}
         },
-        "spurious_conflict": {
-            "conflict_precision": {"numerator": 1, "denominator": 2}
-        },
+        "spurious_conflict": {"conflict_precision": {"numerator": 1, "denominator": 2}},
         "zero_trusted_proposals": {
             "trust_coverage": {"numerator": 0, "denominator": 1}
         },

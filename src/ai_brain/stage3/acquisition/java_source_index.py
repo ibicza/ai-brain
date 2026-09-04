@@ -787,6 +787,9 @@ def _resolve_declaration(
         return resolution
 
     resolved_type_variables = []
+    for annotation in declaration.annotations:
+        if resolve_dependency(annotation).resolved_type is None:
+            unresolved = unresolved or f"unresolved_annotation_type:{annotation}"
     for variable_index, variable in enumerate(declaration.type_variables_detail):
         resolutions = tuple(
             resolve_occurrence(
@@ -1233,30 +1236,38 @@ def _modifiers(node, raw):
     )
     if container is None:
         return ()
+    modifier_kinds = {
+        "public",
+        "protected",
+        "private",
+        "abstract",
+        "static",
+        "final",
+        "synchronized",
+        "native",
+        "strictfp",
+        "default",
+        "transient",
+        "volatile",
+        "sealed",
+    }
     return tuple(
         sorted(
-            re.findall(
-                r"\b(?:public|protected|private|abstract|static|final|"
-                r"synchronized|native|strictfp|default|transient|volatile|sealed)\b",
-                _text(container, raw),
-            )
+            child.type for child in container.children if child.type in modifier_kinds
         )
     )
 
 
 def _annotations(node, raw):
-    container = next(
-        (item for item in node.named_children if item.type == "modifiers"), None
-    )
-    if container is None:
-        return ()
+    body = node.child_by_field_name("body")
+    header_end = body.start_byte if body is not None else node.end_byte
     return tuple(
         sorted(
             {
                 value.rsplit(".", 1)[-1]
                 for value in re.findall(
                     r"@([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)",
-                    _text(container, raw),
+                    raw[node.start_byte : header_end].decode("utf-8"),
                 )
             }
         )

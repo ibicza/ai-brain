@@ -91,8 +91,7 @@ def record_content_hash(record: KnowledgeRecord) -> str:
         # fields. Their frozen hashes remain authoritative when every added
         # field is at its explicit non-Java default.
         if any(
-            body["content"][field] not in (None, (), 0)
-            for field in _JAVA_CLAIM_FIELDS
+            body["content"][field] not in (None, (), 0) for field in _JAVA_CLAIM_FIELDS
         ):
             raise ValueError("non-Java claim contains partial Java semantics")
         for field in _JAVA_CLAIM_FIELDS:

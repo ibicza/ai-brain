@@ -122,8 +122,7 @@ def verify_golden_seal_receipt(
         or (
             receipt.schema_version == 2
             and (
-                receipt.semantic_manifest_hash
-                != golden_manifest.semantic_manifest_hash
+                receipt.semantic_manifest_hash != golden_manifest.semantic_manifest_hash
                 or receipt.diagnostic_manifest_hash
                 != golden_manifest.diagnostic_manifest_hash
             )

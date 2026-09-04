@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/stage3/spdx_license_match_receipt_v1.schema.json",
+  "title": "SPDXLicenseMatchReceipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_document",
+    "source_document_sha256",
+    "document_role",
+    "spdx_snapshot_hash",
+    "template_license_id",
+    "matched_required_clauses",
+    "accepted_optional_omissions",
+    "accepted_replaceable_spans",
+    "unmatched_substantive_spans",
+    "matcher_implementation_hash",
+    "match_status",
+    "receipt_hash"
+  ],
+  "properties": {
+    "source_document": {"type": "string", "minLength": 1},
+    "source_document_sha256": {"$ref": "#/$defs/hash"},
+    "document_role": {"enum": ["PROJECT_LICENSE", "MODULE_LICENSE", "NOTICE", "THIRD_PARTY_LICENSE", "DEPENDENCY_LICENSE", "COPYRIGHT_NOTICE", "UNKNOWN_LICENSE_DOCUMENT"]},
+    "spdx_snapshot_hash": {"$ref": "#/$defs/hash"},
+    "template_license_id": {"type": ["string", "null"]},
+    "matched_required_clauses": {"$ref": "#/$defs/strings"},
+    "accepted_optional_omissions": {"$ref": "#/$defs/strings"},
+    "accepted_replaceable_spans": {"$ref": "#/$defs/strings"},
+    "unmatched_substantive_spans": {"$ref": "#/$defs/strings"},
+    "matcher_implementation_hash": {"$ref": "#/$defs/hash"},
+    "match_status": {"enum": ["EXACT_BYTES_MATCH", "EXACT_NORMALIZED_MATCH", "SPDX_TEMPLATE_MATCH", "MULTIPLE_TEMPLATE_MATCH", "NEAR_MATCH_REVIEW_REQUIRED", "NO_MATCH", "MALFORMED"]},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "strings": {"type": "array", "items": {"type": "string"}}
+  }
+}

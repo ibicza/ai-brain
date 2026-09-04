@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/stage3/source_authority_v1.schema.json",
+  "title": "SourceAuthorityDecision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source_authenticity", "knowledge_acquisition", "source_use_scopes", "publication", "license_expression", "license_fusion_status", "eligible_source_set_hash", "authorization_receipt_hash", "reasons", "decision_hash"],
+  "properties": {
+    "source_authenticity": {"enum": ["AUTHENTIC", "AUTHENTIC_WITH_SINGLE_CHANNEL", "REVIEW_REQUIRED", "CONFLICT", "INVALID"]},
+    "knowledge_acquisition": {"enum": ["ELIGIBLE_FOR_ANALYSIS", "ELIGIBLE_FOR_LOCAL_EVALUATION", "REVIEW_REQUIRED", "INELIGIBLE"]},
+    "source_use_scopes": {"type": "array", "items": {"enum": ["PRIVATE_LOCAL_ANALYSIS", "LOCAL_RESEARCH_EVALUATION", "DERIVED_KNOWLEDGE_ONLY", "RAW_SOURCE_RETENTION", "RAW_SOURCE_REDISTRIBUTION", "PUBLIC_REPRODUCIBLE_EVALUATION"]}},
+    "publication": {"type": "array", "minItems": 4, "maxItems": 4},
+    "license_expression": {"type": ["string", "null"]},
+    "license_fusion_status": {"enum": ["CORROBORATED", "VERIFIED_EXTERNAL_CHAIN", "SINGLE_CHANNEL_VERIFIED", "REVIEW_REQUIRED", "TRUE_LICENSE_CONFLICT", "ADDITIONAL_TERMS", "NO_PROJECT_LICENSE"]},
+    "eligible_source_set_hash": {"$ref": "#/$defs/hash"},
+    "authorization_receipt_hash": {"$ref": "#/$defs/hash"},
+    "reasons": {"type": "array", "items": {"type": "string"}},
+    "decision_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {"hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

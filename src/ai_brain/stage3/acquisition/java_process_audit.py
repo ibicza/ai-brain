@@ -174,8 +174,7 @@ class EnforcedProcessAudit:
             item.purpose == "GENERATED_CLASS_EXECUTION" for item in self._receipts
         )
         annotation = sum(
-            item.purpose == "JAVAC_ORACLE"
-            and "-proc:none" not in item.normalized_argv
+            item.purpose == "JAVAC_ORACLE" and "-proc:none" not in item.normalized_argv
             for item in self._receipts
         )
         body = {
