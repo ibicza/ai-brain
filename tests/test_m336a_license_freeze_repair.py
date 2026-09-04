@@ -40,9 +40,11 @@ from ai_brain.stage3.acquisition.maven_provenance import (
     license_text_evidence,
     maven_coordinate,
     parse_maven_pom,
-    resolve_license_evidence,
     validate_repository_exchange,
     verify_sha256_sidecar,
+)
+from ai_brain.stage3.acquisition.maven_provenance import (
+    resolve_historical_license_evidence as resolve_license_evidence,
 )
 from ai_brain.stage3.acquisition.source_artifact_provenance import (
     SOURCE_ARTIFACT_PROVENANCE_SCHEMA_VERSION,

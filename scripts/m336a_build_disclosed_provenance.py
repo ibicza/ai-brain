@@ -19,8 +19,10 @@ from ai_brain.stage3.acquisition.maven_provenance import (
     license_text_evidence,
     maven_coordinate,
     parse_maven_pom,
-    resolve_license_evidence,
     verify_sha256_sidecar,
+)
+from ai_brain.stage3.acquisition.maven_provenance import (
+    resolve_historical_license_evidence as resolve_license_evidence,
 )
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
 from ai_brain.stage3.acquisition.sources import ingest_bundle

@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "coordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "namespace", "name", "version", "classifier", "extension", "canonical_repository_path"],
+      "properties": {
+        "repository": {"const": "https://repo.maven.apache.org/maven2"},
+        "namespace": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "classifier": {"const": "sources"},
+        "extension": {"const": "jar"},
+        "canonical_repository_path": {"type": "string", "minLength": 1}
+      }
+    },
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["downloaded_bytes_sha256", "sidecar_sha256", "sidecar_verified", "detached_signature_url", "artifact_size", "detached_signature_sha256", "detached_signature_status", "signer_fingerprint", "frozen_key_provenance_hash", "signature_verification_receipt_hash"],
+      "properties": {
+        "downloaded_bytes_sha256": {"$ref": "#/$defs/sha256"},
+        "sidecar_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "sidecar_verified": {"type": "boolean"},
+        "detached_signature_url": {"type": ["string", "null"]},
+        "artifact_size": {"type": "integer", "minimum": 0},
+        "detached_signature_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "detached_signature_status": {"enum": ["ABSENT", "PRESENT_UNVERIFIED", "VERIFIED"]},
+        "signer_fingerprint": {"type": ["string", "null"]},
+        "frozen_key_provenance_hash": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "signature_verification_receipt_hash": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]}
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_host", "requested_url", "final_url", "redirect_chain", "content_length", "media_type", "network_receipt_hash"],
+      "properties": {
+        "repository_host": {"const": "repo.maven.apache.org"},
+        "requested_url": {"type": "string", "pattern": "^https://repo\\.maven\\.apache\\.org/maven2/"},
+        "final_url": {"type": "string", "pattern": "^https://repo\\.maven\\.apache\\.org/maven2/"},
+        "redirect_chain": {"type": "array", "items": {"type": "string"}},
+        "content_length": {"type": "integer", "minimum": 0},
+        "media_type": {"type": "string"},
+        "network_receipt_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "licenseClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spdx_identifier", "declaration_source", "declared_name", "declaration_hash"],
+      "properties": {
+        "spdx_identifier": {"type": "string", "minLength": 1},
+        "declaration_source": {"type": "string", "minLength": 1},
+        "declared_name": {"type": "string", "minLength": 1},
+        "declaration_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "licenseText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_path", "raw_text_sha256", "normalized_text_sha256", "canonical_license_sha256", "exact_match"],
+      "properties": {
+        "evidence_path": {"type": "string", "minLength": 1},
+        "raw_text_sha256": {"$ref": "#/$defs/sha256"},
+        "normalized_text_sha256": {"$ref": "#/$defs/sha256"},
+        "canonical_license_sha256": {"$ref": "#/$defs/sha256"},
+        "exact_match": {"type": "boolean"}
+      }
+    },
+    "scm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_url", "requested_ref", "immutable_commit", "tag_to_commit_verified", "source_tree_hash", "tag_object", "remote_ref_response_hash", "commit_retrieval_request_hash", "commit_retrieval_response_hash", "source_archive_sha256", "license_path", "license_raw_sha256", "receipt_hash"],
+      "properties": {
+        "repository_url": {"type": "string", "pattern": "^https://github\\.com/.+\\.git$"},
+        "requested_ref": {"type": "string", "pattern": "^refs/tags/"},
+        "immutable_commit": {"$ref": "#/$defs/commit"},
+        "tag_to_commit_verified": {"const": true},
+        "source_tree_hash": {"$ref": "#/$defs/sha256"},
+        "tag_object": {"oneOf": [{"$ref": "#/$defs/commit"}, {"type": "null"}]},
+        "remote_ref_response_hash": {"$ref": "#/$defs/sha256"},
+        "commit_retrieval_request_hash": {"$ref": "#/$defs/sha256"},
+        "commit_retrieval_response_hash": {"$ref": "#/$defs/sha256"},
+        "source_archive_sha256": {"$ref": "#/$defs/sha256"},
+        "license_path": {"type": ["string", "null"]},
+        "license_raw_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "receipt_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "correspondenceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_path", "repository_path", "raw_sha256", "canonical_sha256", "status", "entry_hash"],
+      "properties": {
+        "artifact_path": {"type": "string", "minLength": 1},
+        "repository_path": {"type": ["string", "null"]},
+        "raw_sha256": {"$ref": "#/$defs/sha256"},
+        "canonical_sha256": {"$ref": "#/$defs/sha256"},
+        "status": {"enum": ["RAW_EXACT_MATCH", "CANONICAL_TEXT_EXACT_MATCH", "PATH_RELOCATED_RAW_MATCH", "PATH_RELOCATED_CANONICAL_MATCH", "GENERATED_WITH_VERIFIED_PROVENANCE", "UNMATCHED", "AMBIGUOUS_MATCH"]},
+        "entry_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "correspondence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entries", "exact_match_count", "relocated_match_count", "generated_match_count", "unmatched_count", "ambiguous_count", "eligible_entry_count", "correspondence_hash", "raw_exact_match_count", "canonical_only_match_count", "relocated_raw_match_count", "relocated_canonical_match_count", "normalization_receipt_hash"],
+      "properties": {
+        "entries": {"type": "array", "items": {"$ref": "#/$defs/correspondenceEntry"}},
+        "exact_match_count": {"type": "integer", "minimum": 0},
+        "relocated_match_count": {"type": "integer", "minimum": 0},
+        "generated_match_count": {"type": "integer", "minimum": 0},
+        "unmatched_count": {"type": "integer", "minimum": 0},
+        "ambiguous_count": {"type": "integer", "minimum": 0},
+        "eligible_entry_count": {"type": "integer", "minimum": 0},
+        "correspondence_hash": {"$ref": "#/$defs/sha256"},
+        "raw_exact_match_count": {"type": "integer", "minimum": 0},
+        "canonical_only_match_count": {"type": "integer", "minimum": 0},
+        "relocated_raw_match_count": {"type": "integer", "minimum": 0},
+        "relocated_canonical_match_count": {"type": "integer", "minimum": 0},
+        "normalization_receipt_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acquired_at", "host", "acquisition_run_id", "network_receipt_hashes", "audit_hash"],
+      "properties": {
+        "acquired_at": {"type": "string", "minLength": 1},
+        "host": {"type": "string", "minLength": 1},
+        "acquisition_run_id": {"type": "string", "minLength": 1},
+        "network_receipt_hashes": {"type": "array", "items": {"$ref": "#/$defs/sha256"}},
+        "audit_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "coordinate", "artifact_digest", "repository_metadata", "pom_digest", "pom_repository_metadata", "license_claims", "license_texts", "license_evidence_mode", "license_status", "scm_revision", "correspondence", "artifact_authenticity_mode", "conflicts", "semantic_identity_hash", "audit_event", "envelope_hash"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "coordinate": {"$ref": "#/$defs/coordinate"},
+    "artifact_digest": {"$ref": "#/$defs/digest"},
+    "repository_metadata": {"$ref": "#/$defs/repository"},
+    "pom_digest": {"$ref": "#/$defs/digest"},
+    "pom_repository_metadata": {"$ref": "#/$defs/repository"},
+    "license_claims": {"type": "array", "items": {"$ref": "#/$defs/licenseClaim"}},
+    "license_texts": {"type": "array", "items": {"$ref": "#/$defs/licenseText"}},
+    "license_evidence_mode": {"enum": ["EMBEDDED_EXACT_LICENSE", "POM_PLUS_IMMUTABLE_SCM_LICENSE", "EMBEDDED_AND_SCM_CORROBORATED", "POM_DECLARATION_ONLY", "CONFLICTING_LICENSE_EVIDENCE", "NO_LICENSE_EVIDENCE"]},
+    "license_status": {"enum": ["VERIFIED", "REVIEW_REQUIRED", "CONFLICT", "INELIGIBLE", "UNRESOLVED", "BLOCKED"]},
+    "scm_revision": {"oneOf": [{"$ref": "#/$defs/scm"}, {"type": "null"}]},
+    "correspondence": {"oneOf": [{"$ref": "#/$defs/correspondence"}, {"type": "null"}]},
+    "artifact_authenticity_mode": {"enum": ["SHA256_SIDECAR_VERIFIED", "OPENPGP_SIGNATURE_VERIFIED", "IMMUTABLE_SCM_CONTENT_EQUIVALENCE", "MULTI_CHANNEL_VERIFIED", "REPOSITORY_TLS_ONLY"]},
+    "conflicts": {"type": "array", "items": {"type": "string"}},
+    "semantic_identity_hash": {"$ref": "#/$defs/sha256"},
+    "audit_event": {"$ref": "#/$defs/audit"},
+    "envelope_hash": {"$ref": "#/$defs/sha256"}
+  }
+}

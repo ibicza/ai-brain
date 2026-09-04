@@ -16,6 +16,7 @@ FREEZE_ROLE_SCHEMA_VERSION = 2
 
 class FinalArtifactRole(StrEnum):
     FINAL_SOURCE_BYTES = "FINAL_SOURCE_BYTES"
+    FINAL_ACQUISITION_BYTES = "FINAL_ACQUISITION_BYTES"
     FINAL_SOURCE_RECEIPT = "FINAL_SOURCE_RECEIPT"
     FINAL_SELECTOR_OUTPUT = "FINAL_SELECTOR_OUTPUT"
     FINAL_PHYSICAL_CENSUS = "FINAL_PHYSICAL_CENSUS"
@@ -92,6 +93,11 @@ class DisclosureClaimKind(StrEnum):
     FINAL_GOLDEN_HASH = "FINAL_GOLDEN_HASH"
     FINAL_EVALUATION_HASH = "FINAL_EVALUATION_HASH"
     FINAL_DECISION_HASH = "FINAL_DECISION_HASH"
+    FINAL_POM_HASH = "FINAL_POM_HASH"
+    FINAL_SCM_REVISION = "FINAL_SCM_REVISION"
+    FINAL_SELECTOR_OUTPUT_HASH = "FINAL_SELECTOR_OUTPUT_HASH"
+    FINAL_PROPOSAL_MANIFEST_HASH = "FINAL_PROPOSAL_MANIFEST_HASH"
+    FINAL_TRUST_CLOSURE_HASH = "FINAL_TRUST_CLOSURE_HASH"
 
 
 @dataclass(frozen=True)
@@ -105,6 +111,28 @@ class DisclosureClaim:
     secrecy_class: str
     predeclared: bool
     claim_hash: str
+
+
+@dataclass(frozen=True)
+class ProtectedRoleClaimReport:
+    role: FinalArtifactRole
+    protected_artifact_count: int
+    required_claim_count: int
+    extracted_claim_count: int
+    missing_claim_count: int
+    extra_claim_count: int
+    report_hash: str
+
+
+@dataclass(frozen=True)
+class SchemaBoundDisclosureReport:
+    role_reports: tuple[ProtectedRoleClaimReport, ...]
+    required_claim_count: int
+    extracted_claim_count: int
+    missing_claim_count: int
+    extra_claim_count: int
+    passed: bool
+    report_hash: str
 
 
 def build_final_artifact_role_manifest(paths) -> FinalArtifactRoleManifest:
@@ -270,7 +298,27 @@ def classify_final_artifact_role(path: str) -> FinalArtifactRole:
     name = PurePosixPath(value).name
     if "/source_snapshots/" in f"/{value}" and name.endswith(".java"):
         return FinalArtifactRole.FINAL_SOURCE_BYTES
+    if "/acquisition_bundle/candidates/" in f"/{value}" and name in {
+        "source.jar",
+        "pom.xml",
+        "scm.zip",
+    }:
+        return FinalArtifactRole.FINAL_ACQUISITION_BYTES
+    if value.startswith("artifacts/acquisition/disclosed_java/"):
+        return FinalArtifactRole.FINAL_SOURCE_RECEIPT
     if name in {"source_acquisition_receipts.json", "jdk_provider_receipt.json"}:
+        return FinalArtifactRole.FINAL_SOURCE_RECEIPT
+    if (
+        name
+        in {
+            "candidate_qualification_receipts.json",
+            "sealed_acquisition_bundle.json",
+            "provenance.json",
+            "qualification.json",
+            "disclosed_match.json",
+        }
+        and "/acquisition_bundle/" in f"/{value}"
+    ):
         return FinalArtifactRole.FINAL_SOURCE_RECEIPT
     if name in {"selector_receipt.json", "selection_execution.json"}:
         return FinalArtifactRole.FINAL_SELECTOR_OUTPUT
@@ -278,6 +326,7 @@ def classify_final_artifact_role(path: str) -> FinalArtifactRole:
         return FinalArtifactRole.FINAL_PHYSICAL_CENSUS
     if name in {
         "production_output.json",
+        "production_disclosure.json",
         "production_counts.json",
         "component_manifest.json",
         "packability_report.json",
@@ -290,8 +339,13 @@ def classify_final_artifact_role(path: str) -> FinalArtifactRole:
     if "/candidate_pack/" in f"/{value}" or name in {
         "candidate_pack.json",
         "candidate_pack_tree.json",
+        "candidate_pack_disclosure.json",
     }:
         return FinalArtifactRole.FINAL_CANDIDATE_PACK
+    if name == "oracle_disclosure.json":
+        return FinalArtifactRole.FINAL_ORACLE_OUTPUT
+    if name == "golden_disclosure.json":
+        return FinalArtifactRole.FINAL_GOLDEN
     if "/oracle/" in f"/{value}" and "golden" in name:
         return FinalArtifactRole.FINAL_GOLDEN
     if "/oracle/" in f"/{value}":
@@ -375,6 +429,35 @@ def extract_disclosure_claims(
                     bytes_hash(raw),
                 )
             )
+            claims.append(
+                _claim(
+                    DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
+                    role,
+                    path,
+                    "$canonical_bytes",
+                    bytes_hash(_canonical_source_bytes(raw)),
+                )
+            )
+            claims.append(
+                _claim(
+                    DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
+                    role,
+                    path,
+                    "$git_relative_path",
+                    path,
+                )
+            )
+            continue
+        if role is FinalArtifactRole.FINAL_ACQUISITION_BYTES:
+            claims.append(
+                _claim(
+                    DisclosureClaimKind.FINAL_ARCHIVE_HASH,
+                    role,
+                    path,
+                    "$bytes",
+                    bytes_hash(raw),
+                )
+            )
             continue
         if role not in PROTECTED_FINAL_ROLES:
             _verify_neutral_artifact_schema(path, raw)
@@ -416,9 +499,99 @@ def verify_disclosure_claim_set(
         raise ValueError("incomplete or caller-modified disclosure claim set")
 
 
+def verify_schema_bound_disclosure(
+    h_artifacts: dict[str, bytes],
+    role_manifest: FinalArtifactRoleManifest,
+) -> SchemaBoundDisclosureReport:
+    """Recompute mandatory claim denominators for every protected role."""
+
+    claims = extract_disclosure_claims(h_artifacts, role_manifest)
+    roles = {item.relative_path: item.role for item in role_manifest.bindings}
+    mandatory = {
+        FinalArtifactRole.FINAL_SOURCE_BYTES: {
+            DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
+            DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
+            DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
+        },
+        FinalArtifactRole.FINAL_ACQUISITION_BYTES: {
+            DisclosureClaimKind.FINAL_ARCHIVE_HASH
+        },
+        FinalArtifactRole.FINAL_SOURCE_RECEIPT: {
+            DisclosureClaimKind.FINAL_ARCHIVE_HASH,
+            DisclosureClaimKind.FINAL_POM_HASH,
+            DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
+            DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
+            DisclosureClaimKind.FINAL_SOURCE_TREE_HASH,
+            DisclosureClaimKind.FINAL_SCM_REVISION,
+        },
+        FinalArtifactRole.FINAL_SELECTOR_OUTPUT: {
+            DisclosureClaimKind.FINAL_SELECTED_RELATIVE_PATH,
+            DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
+            DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
+            DisclosureClaimKind.FINAL_SELECTOR_OUTPUT_HASH,
+        },
+        FinalArtifactRole.FINAL_PHYSICAL_CENSUS: {
+            DisclosureClaimKind.FINAL_EVALUATION_HASH
+        },
+        FinalArtifactRole.FINAL_PRODUCTION_OUTPUT: {
+            DisclosureClaimKind.FINAL_TARGET_IDENTITY,
+            DisclosureClaimKind.FINAL_PROPOSAL_MANIFEST_HASH,
+            DisclosureClaimKind.FINAL_TRUST_CLOSURE_HASH,
+            DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH,
+        },
+        FinalArtifactRole.FINAL_CANDIDATE_PACK: {
+            DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH,
+            DisclosureClaimKind.FINAL_TARGET_IDENTITY,
+        },
+        FinalArtifactRole.FINAL_ORACLE_OUTPUT: {DisclosureClaimKind.FINAL_ORACLE_HASH},
+        FinalArtifactRole.FINAL_GOLDEN: {DisclosureClaimKind.FINAL_GOLDEN_HASH},
+        FinalArtifactRole.FINAL_EVALUATION: {DisclosureClaimKind.FINAL_EVALUATION_HASH},
+        FinalArtifactRole.FINAL_APPROVAL: {DisclosureClaimKind.FINAL_DECISION_HASH},
+        FinalArtifactRole.FINAL_INSTALLATION: {
+            DisclosureClaimKind.FINAL_PRODUCTION_OUTPUT_HASH
+        },
+        FinalArtifactRole.FINAL_DECISION: {DisclosureClaimKind.FINAL_DECISION_HASH},
+    }
+    reports = []
+    for role in sorted(PROTECTED_FINAL_ROLES, key=str):
+        paths = tuple(path for path, item_role in roles.items() if item_role is role)
+        role_claims = tuple(
+            item for item in claims if item.source_artifact_role is role
+        )
+        observed_kinds = {item.claim_kind for item in role_claims}
+        missing_kinds = mandatory.get(role, set()) - observed_kinds if paths else set()
+        extra_count = _unexpected_protected_field_count(h_artifacts, paths, role_claims)
+        body = {
+            "role": role,
+            "protected_artifact_count": len(paths),
+            "required_claim_count": len(role_claims) + len(missing_kinds),
+            "extracted_claim_count": len(role_claims),
+            "missing_claim_count": len(missing_kinds),
+            "extra_claim_count": extra_count,
+        }
+        reports.append(ProtectedRoleClaimReport(**body, report_hash=content_hash(body)))
+    required = sum(item.required_claim_count for item in reports)
+    extracted = sum(item.extracted_claim_count for item in reports)
+    missing = sum(item.missing_claim_count for item in reports)
+    extra = sum(item.extra_claim_count for item in reports)
+    body = {
+        "role_reports": tuple(reports),
+        "required_claim_count": required,
+        "extracted_claim_count": extracted,
+        "missing_claim_count": missing,
+        "extra_claim_count": extra,
+        "passed": required > 0 and missing == 0 and extra == 0,
+    }
+    return SchemaBoundDisclosureReport(**body, report_hash=content_hash(body))
+
+
 def _claims_for_role(role, path, value) -> tuple[DisclosureClaim, ...]:
     specifications = {
         FinalArtifactRole.FINAL_SOURCE_RECEIPT: (
+            (
+                DisclosureClaimKind.FINAL_POM_HASH,
+                ("archives", "*", "pom_sha256"),
+            ),
             (
                 DisclosureClaimKind.FINAL_ARCHIVE_HASH,
                 ("archives", "*", "source_archive_sha256"),
@@ -435,6 +608,22 @@ def _claims_for_role(role, path, value) -> tuple[DisclosureClaim, ...]:
                 DisclosureClaimKind.FINAL_SOURCE_TREE_HASH,
                 ("archives", "*", "source_tree_hash"),
             ),
+            (
+                DisclosureClaimKind.FINAL_SCM_REVISION,
+                ("archives", "*", "scm_revision"),
+            ),
+            (DisclosureClaimKind.FINAL_POM_HASH, ("pom_hash",)),
+            (DisclosureClaimKind.FINAL_ARCHIVE_HASH, ("archive_hash",)),
+            (
+                DisclosureClaimKind.FINAL_RAW_SOURCE_HASH,
+                ("raw_source_hashes", "*"),
+            ),
+            (
+                DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
+                ("canonical_source_hashes", "*"),
+            ),
+            (DisclosureClaimKind.FINAL_SOURCE_TREE_HASH, ("source_tree_hash",)),
+            (DisclosureClaimKind.FINAL_SCM_REVISION, ("scm_revision",)),
         ),
         FinalArtifactRole.FINAL_SELECTOR_OUTPUT: (
             (DisclosureClaimKind.FINAL_ARCHIVE_HASH, ("archive_hash",)),
@@ -455,6 +644,10 @@ def _claims_for_role(role, path, value) -> tuple[DisclosureClaim, ...]:
                 DisclosureClaimKind.FINAL_CANONICAL_SOURCE_HASH,
                 ("selected", "*", "canonical_sha256"),
             ),
+            (
+                DisclosureClaimKind.FINAL_SELECTOR_OUTPUT_HASH,
+                ("selector_output_hash",),
+            ),
         ),
         FinalArtifactRole.FINAL_PRODUCTION_OUTPUT: (
             (DisclosureClaimKind.FINAL_TARGET_IDENTITY, ("target_identities", "*")),
@@ -467,6 +660,14 @@ def _claims_for_role(role, path, value) -> tuple[DisclosureClaim, ...]:
             (
                 DisclosureClaimKind.FINAL_CANDIDATE_PACK_HASH,
                 ("candidate_pack_tree_hash",),
+            ),
+            (
+                DisclosureClaimKind.FINAL_PROPOSAL_MANIFEST_HASH,
+                ("proposal_manifest_hash",),
+            ),
+            (
+                DisclosureClaimKind.FINAL_TRUST_CLOSURE_HASH,
+                ("trust_closure_hash",),
             ),
         ),
         FinalArtifactRole.FINAL_CANDIDATE_PACK: (
@@ -542,6 +743,8 @@ def _is_secret_value(kind: DisclosureClaimKind, value: str) -> bool:
         return value.endswith(".java")
     if kind is DisclosureClaimKind.FINAL_TARGET_IDENTITY:
         return value.startswith("java:")
+    if kind is DisclosureClaimKind.FINAL_SCM_REVISION:
+        return bool(re.fullmatch(r"[0-9a-f]{40}", value))
     return bool(re.fullmatch(r"[0-9a-f]{64}", value))
 
 
@@ -562,8 +765,47 @@ _PROTECTED_FIELD_NAMES = frozenset(
         "decision_hash",
         "approval_hash",
         "installed_pack_hash",
+        "pom_sha256",
+        "scm_revision",
+        "selector_output_hash",
+        "proposal_manifest_hash",
     }
 )
+
+
+def _unexpected_protected_field_count(h_artifacts, paths, claims) -> int:
+    claimed_paths = {(item.source_path, item.field_path) for item in claims}
+    count = 0
+    for path in paths:
+        if path.endswith(".java"):
+            continue
+        try:
+            value = json.loads(h_artifacts[path].decode("utf-8", errors="strict"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            continue
+        pending = [("$", value)]
+        while pending:
+            prefix, item = pending.pop()
+            if isinstance(item, dict):
+                for key, child in item.items():
+                    child_path = f"{prefix}.{key}"
+                    if key in _PROTECTED_FIELD_NAMES and not any(
+                        claim_path == path and field_path.startswith(child_path)
+                        for claim_path, field_path in claimed_paths
+                    ):
+                        count += 1
+                    pending.append((child_path, child))
+            elif isinstance(item, list):
+                pending.extend(
+                    (f"{prefix}[{index}]", child) for index, child in enumerate(item)
+                )
+    return count
+
+
+def _canonical_source_bytes(raw: bytes) -> bytes:
+    text = raw.decode("utf-8-sig", errors="strict")
+    text = unicodedata.normalize("NFC", text).replace("\r\n", "\n").replace("\r", "\n")
+    return (text.rstrip() + "\n").encode("utf-8")
 
 
 def _verify_neutral_artifact_schema(path: str, raw: bytes) -> None:

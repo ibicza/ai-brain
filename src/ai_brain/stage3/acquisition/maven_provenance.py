@@ -17,15 +17,18 @@ from pathlib import PurePosixPath
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage3.acquisition.source_artifact_provenance import (
     ArtifactDigestEvidence,
+    DetachedSignatureStatus,
     LicenseClaim,
     LicenseEvidenceMode,
     LicenseTextEvidence,
     ProvenanceStatus,
     RepositoryMetadataEvidence,
+    ScmRevisionVerificationReceipt,
     SourceArtifactCoordinate,
     SourceCorrespondenceStatus,
     SourceTreeCorrespondence,
     SourceTreeCorrespondenceEntry,
+    verify_scm_revision_receipt,
 )
 
 MAVEN_CENTRAL_HOSTS = frozenset({"repo.maven.apache.org"})
@@ -48,6 +51,7 @@ class MavenPomEvidence:
     scm_url: str | None
     pom_sha256: str
     evidence_hash: str
+    scm_tag: str | None = None
 
 
 @dataclass(frozen=True)
@@ -65,6 +69,8 @@ class FetchedMavenComponent:
     payload: bytes
     digest: ArtifactDigestEvidence
     repository: RepositoryMetadataEvidence
+    sidecar_payload: bytes | None = None
+    signature_payload: bytes | None = None
 
 
 class _StrictRedirectHandler(urllib.request.HTTPRedirectHandler):
@@ -146,8 +152,16 @@ class MavenCentralProvenanceProvider:
             sidecar_verified=sidecar_verified,
             detached_signature_url=f"{url}.asc" if signature is not None else None,
             artifact_size=len(payload),
+            detached_signature_sha256=bytes_hash(signature)
+            if signature is not None
+            else None,
+            detached_signature_status=DetachedSignatureStatus.PRESENT_UNVERIFIED
+            if signature is not None
+            else DetachedSignatureStatus.ABSENT,
         )
-        return FetchedMavenComponent(payload, digest_evidence, repository)
+        return FetchedMavenComponent(
+            payload, digest_evidence, repository, sidecar, signature
+        )
 
     def _optional_fetch(self, opener, url):
         try:
@@ -301,6 +315,7 @@ def parse_maven_pom(
         raise ValueError("duplicate Maven POM SCM metadata")
     connection = one(scm_nodes[0], "connection") if scm_nodes else None
     scm_url = one(scm_nodes[0], "url") if scm_nodes else None
+    scm_tag = one(scm_nodes[0], "tag") if scm_nodes else None
     body = {
         "coordinate": coordinate,
         "licenses": tuple(claims),
@@ -308,7 +323,8 @@ def parse_maven_pom(
         "scm_url": scm_url,
         "pom_sha256": bytes_hash(raw),
     }
-    return MavenPomEvidence(**body, evidence_hash=content_hash(body))
+    evidence_hash = content_hash({**body, "scm_tag": scm_tag})
+    return MavenPomEvidence(**body, evidence_hash=evidence_hash, scm_tag=scm_tag)
 
 
 def normalize_license_text(raw: bytes) -> bytes:
@@ -430,24 +446,39 @@ def correspond_source_trees(
         for path, value in repository_java
         if not prefixes or _canonical_archive_path(path).startswith(prefixes)
     )
-    by_hash = {}
+    by_raw_hash = {}
+    by_canonical_hash = {}
     for path, raw in repository:
-        by_hash.setdefault(bytes_hash(canonical_source_bytes(raw)), []).append(
-            (path, raw)
-        )
+        by_raw_hash.setdefault(bytes_hash(raw), []).append((path, raw))
+        by_canonical_hash.setdefault(
+            bytes_hash(canonical_source_bytes(raw)), []
+        ).append((path, raw))
     entries = []
     for path, raw in sorted(artifact):
         raw_hash = bytes_hash(raw)
         canonical_hash = bytes_hash(canonical_source_bytes(raw))
-        matches = by_hash.get(canonical_hash, ())
-        same_path = tuple(item for item in matches if item[0].endswith(path))
-        if len(same_path) == 1:
-            target, _ = same_path[0]
-            status = SourceCorrespondenceStatus.EXACT_MATCH
-        elif len(matches) == 1:
-            target, _ = matches[0]
-            status = SourceCorrespondenceStatus.PATH_RELOCATED_EXACT_CONTENT
-        elif not matches:
+        raw_matches = tuple(by_raw_hash.get(raw_hash, ()))
+        canonical_matches = tuple(by_canonical_hash.get(canonical_hash, ()))
+        raw_same_path = tuple(item for item in raw_matches if item[0].endswith(path))
+        canonical_same_path = tuple(
+            item for item in canonical_matches if item[0].endswith(path)
+        )
+        if len(raw_same_path) == 1:
+            target, _ = raw_same_path[0]
+            status = SourceCorrespondenceStatus.RAW_EXACT_MATCH
+        elif len(raw_matches) == 1:
+            target, _ = raw_matches[0]
+            status = SourceCorrespondenceStatus.PATH_RELOCATED_RAW_MATCH
+        elif len(raw_matches) > 1:
+            target = None
+            status = SourceCorrespondenceStatus.AMBIGUOUS_MATCH
+        elif len(canonical_same_path) == 1:
+            target, _ = canonical_same_path[0]
+            status = SourceCorrespondenceStatus.CANONICAL_TEXT_EXACT_MATCH
+        elif len(canonical_matches) == 1:
+            target, _ = canonical_matches[0]
+            status = SourceCorrespondenceStatus.PATH_RELOCATED_CANONICAL_MATCH
+        elif not canonical_matches:
             target = None
             status = SourceCorrespondenceStatus.UNMATCHED
         else:
@@ -470,24 +501,45 @@ def correspond_source_trees(
     eligible = sum(
         item.status
         in {
-            SourceCorrespondenceStatus.EXACT_MATCH,
-            SourceCorrespondenceStatus.PATH_RELOCATED_EXACT_CONTENT,
+            SourceCorrespondenceStatus.RAW_EXACT_MATCH,
+            SourceCorrespondenceStatus.CANONICAL_TEXT_EXACT_MATCH,
+            SourceCorrespondenceStatus.PATH_RELOCATED_RAW_MATCH,
+            SourceCorrespondenceStatus.PATH_RELOCATED_CANONICAL_MATCH,
             SourceCorrespondenceStatus.GENERATED_WITH_VERIFIED_PROVENANCE,
         }
         for item in entries
     )
+    normalization_receipt = content_hash(
+        {
+            "transform": "UTF8_SIG_STRICT+NFC+CRLF_TO_LF+TRIM_TRAILING_DOCUMENT+ONE_LF",
+            "implementation": "canonical_source_bytes.v2",
+        }
+    )
     body = {
         "entries": tuple(entries),
-        "exact_match_count": counts[SourceCorrespondenceStatus.EXACT_MATCH],
+        "exact_match_count": counts[SourceCorrespondenceStatus.RAW_EXACT_MATCH]
+        + counts[SourceCorrespondenceStatus.CANONICAL_TEXT_EXACT_MATCH],
         "relocated_match_count": counts[
-            SourceCorrespondenceStatus.PATH_RELOCATED_EXACT_CONTENT
-        ],
+            SourceCorrespondenceStatus.PATH_RELOCATED_RAW_MATCH
+        ]
+        + counts[SourceCorrespondenceStatus.PATH_RELOCATED_CANONICAL_MATCH],
         "generated_match_count": counts[
             SourceCorrespondenceStatus.GENERATED_WITH_VERIFIED_PROVENANCE
         ],
         "unmatched_count": counts[SourceCorrespondenceStatus.UNMATCHED],
         "ambiguous_count": counts[SourceCorrespondenceStatus.AMBIGUOUS_MATCH],
         "eligible_entry_count": eligible,
+        "raw_exact_match_count": counts[SourceCorrespondenceStatus.RAW_EXACT_MATCH],
+        "canonical_only_match_count": counts[
+            SourceCorrespondenceStatus.CANONICAL_TEXT_EXACT_MATCH
+        ],
+        "relocated_raw_match_count": counts[
+            SourceCorrespondenceStatus.PATH_RELOCATED_RAW_MATCH
+        ],
+        "relocated_canonical_match_count": counts[
+            SourceCorrespondenceStatus.PATH_RELOCATED_CANONICAL_MATCH
+        ],
+        "normalization_receipt_hash": normalization_receipt,
     }
     return SourceTreeCorrespondence(**body, correspondence_hash=content_hash(body))
 
@@ -497,14 +549,52 @@ def resolve_license_evidence(
     pom_claims: tuple[LicenseClaim, ...],
     embedded_texts: tuple[LicenseTextEvidence, ...],
     scm_text: LicenseTextEvidence | None,
+    scm_revision_receipt: ScmRevisionVerificationReceipt | None,
+    correspondence: SourceTreeCorrespondence | None,
+) -> tuple[LicenseEvidenceMode, ProvenanceStatus, tuple[str, ...]]:
+    if scm_revision_receipt is not None:
+        verify_scm_revision_receipt(scm_revision_receipt)
+    return _resolve_license_evidence(
+        pom_claims=pom_claims,
+        embedded_texts=embedded_texts,
+        scm_text=scm_text,
+        scm_verified=scm_revision_receipt is not None,
+        correspondence=correspondence,
+    )
+
+
+def resolve_historical_license_evidence(
+    *,
+    pom_claims: tuple[LicenseClaim, ...],
+    embedded_texts: tuple[LicenseTextEvidence, ...],
+    scm_text: LicenseTextEvidence | None,
     immutable_scm_verified: bool,
+    correspondence: SourceTreeCorrespondence | None,
+) -> tuple[LicenseEvidenceMode, ProvenanceStatus, tuple[str, ...]]:
+    """Compatibility for the frozen M-33.6a artifact builder; never production."""
+
+    return _resolve_license_evidence(
+        pom_claims=pom_claims,
+        embedded_texts=embedded_texts,
+        scm_text=scm_text,
+        scm_verified=immutable_scm_verified,
+        correspondence=correspondence,
+    )
+
+
+def _resolve_license_evidence(
+    *,
+    pom_claims: tuple[LicenseClaim, ...],
+    embedded_texts: tuple[LicenseTextEvidence, ...],
+    scm_text: LicenseTextEvidence | None,
+    scm_verified: bool,
     correspondence: SourceTreeCorrespondence | None,
 ) -> tuple[LicenseEvidenceMode, ProvenanceStatus, tuple[str, ...]]:
     pom_values = {item.spdx_identifier for item in pom_claims}
     embedded_exact = bool(embedded_texts) and all(
         item.exact_match for item in embedded_texts
     )
-    scm_exact = bool(scm_text and scm_text.exact_match and immutable_scm_verified)
+    scm_exact = bool(scm_text and scm_text.exact_match and scm_verified)
     pom_apache = pom_values == {"Apache-2.0"}
     conflicts = []
     if pom_values and pom_values != {"Apache-2.0"}:

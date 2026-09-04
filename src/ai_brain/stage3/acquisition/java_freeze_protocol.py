@@ -13,6 +13,7 @@ from ai_brain.stage3.acquisition.java_freeze_roles import (
     classify_final_artifact_role,
     load_final_artifact_role_manifest,
     verify_role_aware_disclosure,
+    verify_schema_bound_disclosure,
 )
 
 M344_FROZEN_PREFIXES = (
@@ -63,6 +64,28 @@ M336_COMMIT_MESSAGES = (
     "M-33.6 freeze Java acquisition v2",
     "M-33.6 untouched Java black-box evaluation",
     "M-33.6 exact-SHA Java freeze evidence",
+)
+
+M336B_BASE_SHA = "01fac1522c2cf694e440378b2bb58736ba4b9e28"
+M336B_BRANCH = "exp/stage3-m336b-fresh-java-freeze-v2"
+M336B_H17_PREFIXES = (
+    "artifacts/acquisition/disclosed_java",
+    "docs/m336b_final_provenance_report.md",
+    "docs/m336b_final_semantic_metrics.md",
+    "docs/m336b_final_source_inventory.md",
+    "docs/m336b_final_trust_metrics.md",
+    "docs/m336b_runtime_proof.md",
+    "evaluation/m336b_final_java",
+)
+M336B_E17_PREFIXES = (
+    "docs/m336b_final_freeze_report.md",
+    "runs/m336b_final_freeze_report.md",
+    "runs/m336b_final_gate",
+)
+M336B_COMMIT_MESSAGES = (
+    "M-33.6b freeze production provenance and Java acquisition v3",
+    "M-33.6b untouched Java black-box evaluation",
+    "M-33.6b exact-SHA Java freeze evidence",
 )
 
 
@@ -141,6 +164,33 @@ class M336GitFreezeProtocolReport:
     historical_false_disclosure_token_count: int
     protocol_integrity: str
     historical_experiment_outcome: str
+    passed: bool
+    report_hash: str
+
+
+@dataclass(frozen=True)
+class M336BGitFreezeProtocolReport:
+    base_sha: str
+    f17_sha: str
+    h17_sha: str
+    e17_sha: str
+    branch_tip_sha: str
+    upstream_sha: str
+    exact_parent_chain: bool
+    exact_commit_messages: bool
+    merge_commit_count: int
+    excluded_m33_outside_ancestry: bool
+    f17_to_h17_changed_paths: tuple[str, ...]
+    h17_to_e17_changed_paths: tuple[str, ...]
+    unauthorized_f17_to_h17_paths: tuple[str, ...]
+    unauthorized_h17_to_e17_paths: tuple[str, ...]
+    frozen_paths_changed_after_f17: tuple[str, ...]
+    role_manifest_hash: str
+    committed_role_manifest_matches: bool
+    mandatory_disclosure_required_count: int
+    mandatory_disclosure_missing_count: int
+    mandatory_disclosure_extra_count: int
+    protected_disclosure_passed: bool
     passed: bool
     report_hash: str
 
@@ -495,6 +545,118 @@ def verify_m336_git_freeze_protocol(
         "passed": passed,
     }
     return M336GitFreezeProtocolReport(**body, report_hash=content_hash(body))
+
+
+def verify_m336b_git_freeze_protocol(
+    repository,
+    *,
+    f17_sha: str,
+    h17_sha: str,
+    e17_sha: str,
+    upstream: str,
+) -> M336BGitFreezeProtocolReport:
+    """Derive the exact E16 -> F17 -> H17 -> E17 protocol from Git objects."""
+
+    root = str(repository)
+    shas = {
+        name: _exact_commit(root, value)
+        for name, value in (
+            ("base", M336B_BASE_SHA),
+            ("f17", f17_sha),
+            ("h17", h17_sha),
+            ("e17", e17_sha),
+            ("excluded", M336_EXCLUDED_M33_SHA),
+        )
+    }
+    parents = {
+        name: tuple(
+            _git(root, "rev-list", "--parents", "-n", "1", shas[name]).split()[1:]
+        )
+        for name in ("f17", "h17", "e17")
+    }
+    exact_chain = (
+        parents["f17"] == (shas["base"],)
+        and parents["h17"] == (shas["f17"],)
+        and parents["e17"] == (shas["h17"],)
+    )
+    messages = tuple(
+        _git(root, "show", "-s", "--format=%s", shas[name])
+        for name in ("f17", "h17", "e17")
+    )
+    merge_count = sum(len(value) != 1 for value in parents.values())
+    tip = _exact_commit(root, M336B_BRANCH)
+    upstream_sha = _exact_commit(root, upstream)
+    outside = not _is_ancestor(root, shas["excluded"], shas["e17"])
+    complete = {name: _git_tree(root, shas[name], ()) for name in ("f17", "h17", "e17")}
+    frozen = {
+        name: _git_tree(root, shas[name], M336_FROZEN_PREFIXES)
+        for name in ("f17", "h17", "e17")
+    }
+    fh = _changed_paths(complete["f17"], complete["h17"])
+    he = _changed_paths(complete["h17"], complete["e17"])
+    invalid_fh = tuple(path for path in fh if not _under(path, M336B_H17_PREFIXES))
+    invalid_he = tuple(path for path in he if not _under(path, M336B_E17_PREFIXES))
+    frozen_changed = tuple(
+        path
+        for path in sorted(set().union(*(set(value) for value in frozen.values())))
+        if not (
+            frozen["f17"].get(path)
+            == frozen["h17"].get(path)
+            == frozen["e17"].get(path)
+        )
+    )
+    f_bytes = _git_blob_bytes(root, shas["f17"], tuple(complete["f17"]))
+    h_paths = tuple(path for path in fh if path in complete["h17"])
+    h_bytes = _git_blob_bytes(root, shas["h17"], h_paths)
+    role_manifest = build_final_artifact_role_manifest(h_bytes)
+    committed_path = "evaluation/m336b_final_java/role_manifest.json"
+    committed_matches = False
+    if committed_path in h_bytes:
+        committed = load_final_artifact_role_manifest(h_bytes[committed_path])
+        committed_matches = committed == role_manifest
+    disclosure = verify_role_aware_disclosure(f_bytes, h_bytes, role_manifest)
+    schema = verify_schema_bound_disclosure(h_bytes, role_manifest)
+    passed = all(
+        (
+            exact_chain,
+            messages == M336B_COMMIT_MESSAGES,
+            merge_count == 0,
+            outside,
+            tip == shas["e17"],
+            upstream_sha == tip,
+            not invalid_fh,
+            not invalid_he,
+            not frozen_changed,
+            committed_matches,
+            disclosure.passed,
+            schema.passed,
+        )
+    )
+    body = {
+        "base_sha": shas["base"],
+        "f17_sha": shas["f17"],
+        "h17_sha": shas["h17"],
+        "e17_sha": shas["e17"],
+        "branch_tip_sha": tip,
+        "upstream_sha": upstream_sha,
+        "exact_parent_chain": exact_chain,
+        "exact_commit_messages": messages == M336B_COMMIT_MESSAGES,
+        "merge_commit_count": merge_count,
+        "excluded_m33_outside_ancestry": outside,
+        "f17_to_h17_changed_paths": fh,
+        "h17_to_e17_changed_paths": he,
+        "unauthorized_f17_to_h17_paths": invalid_fh,
+        "unauthorized_h17_to_e17_paths": invalid_he,
+        "frozen_paths_changed_after_f17": frozen_changed,
+        "role_manifest_hash": role_manifest.manifest_hash,
+        "committed_role_manifest_matches": committed_matches,
+        "mandatory_disclosure_required_count": schema.required_claim_count,
+        "mandatory_disclosure_missing_count": schema.missing_claim_count,
+        "mandatory_disclosure_extra_count": schema.extra_claim_count,
+        "protected_disclosure_passed": disclosure.passed and schema.passed,
+        "passed": passed,
+    }
+    return M336BGitFreezeProtocolReport(**body, report_hash=content_hash(body))
 
 
 def _git_blob_bytes(repository: str, commit_sha: str, paths) -> dict[str, bytes]:

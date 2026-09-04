@@ -18,6 +18,7 @@ from ai_brain.stage3.acquisition.java_release import JAVA_TARGET_RELEASE
 
 JAVA_SOURCE_SELECTOR_VERSION = "m344.final-java-selector.v1"
 M336_JAVA_SOURCE_SELECTOR_VERSION = "m336.final-java-selector.v2"
+M336B_JAVA_SOURCE_SELECTOR_VERSION = "m336b.final-java-selector.v3"
 M344_PRIOR_CORPUS_DENYLIST_MANIFEST_HASH = (
     "3b1dd97f81fffc6c6aee25267d49729e44b56d62fd217f208cfaf2a25d91d385"
 )
@@ -221,6 +222,73 @@ def frozen_m336_final_source_selector_policy(
     return JavaFinalSourceSelectorPolicy(**body, policy_hash=content_hash(body))
 
 
+def frozen_m336b_final_source_selector_policy(
+    *,
+    disclosed_rehearsal: bool = False,
+) -> JavaFinalSourceSelectorPolicy:
+    from ai_brain.stage3.acquisition.m336b_provenance import (
+        disclosed_m336a_rehearsal_pool,
+        frozen_m336b_candidate_pool,
+    )
+
+    candidates = (
+        disclosed_m336a_rehearsal_pool()
+        if disclosed_rehearsal
+        else frozen_m336b_candidate_pool()
+    )
+    families = tuple(
+        JavaSourceFamily(
+            item.family_id,
+            item.coordinate.version,
+            f"{item.coordinate.repository}/{item.coordinate.canonical_repository_path}",
+            "Apache-2.0",
+        )
+        for item in candidates
+    )
+    disclosed = load_disclosed_java_corpus_denylist()
+    permanent = ()
+    if not disclosed_rehearsal:
+        permanent = (
+            *disclosed["archive_hashes"],
+            *disclosed["raw_source_hashes"],
+            *disclosed["canonical_text_hashes"],
+        )
+    body = {
+        "target_release": JAVA_TARGET_RELEASE,
+        "families": families,
+        "eligible_suffixes": (".java",),
+        "excluded_parts": (
+            "generated",
+            "vendor",
+            "test",
+            "tests",
+            "module-info.java",
+            "package-info.java",
+        ),
+        "minimums": (
+            ("real_callable_files", 100),
+            ("real_callable_targets", 2_000),
+            ("receiver_types", 175),
+            ("packages", 15),
+            ("overload_groups", 125),
+            ("constructors", 75),
+            ("generic_methods", 100),
+            ("throws_declarations", 100),
+            ("nested_member_targets", 25),
+        ),
+        "maximum_files": 360,
+        "maximum_total_bytes": 24 * 1024 * 1024,
+        "maximum_root_target_fraction": "0.800000",
+        "selection_strategy": (
+            "per-family round-robin of sha256(F17_SHA + family_id + relative_path), "
+            "ascending; one invocation over the exact sorted eligible-root set"
+        ),
+        "prior_corpus_hash_denylist": tuple(sorted(set(permanent))),
+        "required_licenses": ("Apache-2.0",),
+    }
+    return JavaFinalSourceSelectorPolicy(**body, policy_hash=content_hash(body))
+
+
 def select_final_java_sources(
     roots: tuple[tuple[str, Path], ...],
     *,
@@ -378,6 +446,48 @@ def m336_selector_receipt(policy, selected, roots, f15_sha):
     body["selector_version"] = M336_JAVA_SOURCE_SELECTOR_VERSION
     body["f15_sha"] = body.pop("f13_sha")
     return {**body, "receipt_hash": content_hash(body)}
+
+
+def m336b_selector_receipt(policy, selected, roots, f17_sha):
+    root_map = tuple((name, path.resolve(strict=True)) for name, path in roots)
+    rows = []
+    for path in selected:
+        matches = tuple(
+            (name, root)
+            for name, root in root_map
+            if path.resolve().is_relative_to(root)
+        )
+        if len(matches) != 1:
+            raise ValueError("M-33.6b selected source has ambiguous root identity")
+        family, root = matches[0]
+        raw = path.read_bytes()
+        canonical = (
+            raw.decode("utf-8-sig", errors="strict")
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+            .rstrip()
+            + "\n"
+        ).encode("utf-8")
+        rows.append(
+            {
+                "family_id": family,
+                "relative_path": path.resolve().relative_to(root).as_posix(),
+                "raw_sha256": bytes_hash(raw),
+                "canonical_sha256": bytes_hash(canonical),
+            }
+        )
+    body = {
+        "schema_version": 1,
+        "selector_version": M336B_JAVA_SOURCE_SELECTOR_VERSION,
+        "policy_hash": policy.policy_hash,
+        "f17_sha": f17_sha,
+        "selected": tuple(rows),
+        "selector_invocation_count": 1,
+        "selector_rerun_count": 0,
+    }
+    output_hash = content_hash(body)
+    receipt_body = {**body, "selector_output_hash": output_hash}
+    return {**receipt_body, "receipt_hash": content_hash(receipt_body)}
 
 
 def verify_m336_final_source_corpus(bundle, source_index, policy):
