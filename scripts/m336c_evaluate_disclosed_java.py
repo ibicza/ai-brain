@@ -57,9 +57,11 @@ def main() -> None:
     if not sealed_path.is_file():
         raise ValueError("production is not sealed before evaluator creation")
     sealed_mtime = sealed_path.stat().st_mtime_ns
+    replay_started = time.perf_counter()
     replay = verify_compiled_java_production_standalone(
         production_root / "candidate_pack"
     )
+    replay_seconds = time.perf_counter() - replay_started
     batch = _reconstruct_batch(source_root, _load(sealed_path))
     jdk = verify_m336_jdk_provider(
         platform=args.platform, java=args.java, javac=args.javac
@@ -69,6 +71,7 @@ def main() -> None:
     project = Path(__file__).resolve().parents[1]
     tracemalloc.start()
     started = time.perf_counter()
+    javac_oracle_started = time.perf_counter()
     subprocess.run(
         (
             sys.executable,
@@ -99,8 +102,11 @@ def main() -> None:
         ),
         check=True,
     )
+    javac_oracle_seconds = time.perf_counter() - javac_oracle_started
     goldens = load_java_golden_manifest(oracle_root / "semantic_goldens.json")
+    semantic_started = time.perf_counter()
     evaluation = evaluate_sealed_java_production(_load(sealed_path), batch, goldens)
+    semantic_seconds = time.perf_counter() - semantic_started
     elapsed = time.perf_counter() - started
     _current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -108,11 +114,14 @@ def main() -> None:
     runtime = {"status": "NOT_RUN", "report_hash": content_hash("NOT_RUN")}
     approval = None
     installed = None
+    runtime_seconds = 0.0
     if evaluation.passed and replay["status"] == "PASS":
         approval, installed, registry, _providers, _capabilities = _approve_and_install(
             pack, args.output
         )
+        runtime_started = time.perf_counter()
         runtime = _runtime_proof(pack, installed, registry, source_root)
+        runtime_seconds = time.perf_counter() - runtime_started
     authority = _load(args.authority_report.resolve(strict=True))
     modes = {
         item["family_id"]: (
@@ -169,6 +178,10 @@ def main() -> None:
         "sample_count": 1,
         "throughput_targets_per_second": f"{len(goldens.goldens) / elapsed:.6f}",
         "peak_python_bytes": peak,
+        "javac_oracle_seconds": f"{javac_oracle_seconds:.9f}",
+        "semantic_evaluation_seconds": f"{semantic_seconds:.9f}",
+        "runtime_queries_seconds": f"{runtime_seconds:.9f}",
+        "replay_seconds": f"{replay_seconds:.9f}",
     }
     _write(args.output / "jdk_provider_receipt.json", asdict(jdk))
     _write(args.output / "evaluation_report.json", asdict(evaluation))

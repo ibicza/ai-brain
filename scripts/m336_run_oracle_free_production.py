@@ -188,6 +188,7 @@ def _single_sample(value: float) -> dict[str, object]:
         "p50_seconds": measured,
         "p95_seconds": measured,
         "p99_seconds": measured,
+        "total_seconds": measured,
     }
 
 
@@ -315,6 +316,17 @@ def main() -> None:
         ),
         "substage_percentiles": tuple(
             (key, _single_sample(value)) for key, value in sorted(timings.items())
+        ),
+        "m336d_requested_operation_count": 5,
+        "m336d_requested_operations": tuple(
+            (name, _single_sample(timings[source_name]))
+            for name, source_name in (
+                ("java_indexing", "source_indexing"),
+                ("proposal_production", "proposal_generation"),
+                ("trust_closure", "trust_closure_total"),
+                ("candidate_pack_construction", "candidate_pack_compilation"),
+                ("replay", "replay"),
+            )
         ),
     }
     summary_body = {

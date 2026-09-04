@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/stage3/m336d_legal_document_inventory_v1.schema.json",
+  "title": "M-33.6d complete legal document inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rows", "discovered_document_count", "classified_document_count", "unknown_role_count", "unclassified_document_count", "inventory_hash"],
+  "properties": {
+    "rows": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["container_id", "path", "raw_sha256", "normalized_sha256", "byte_size", "candidate_role", "role_evidence", "spdx_match_receipt_hash", "spdx_match_status", "spdx_license_id", "applicability_scope", "selected_as_project_license", "reason", "receipt_hash"],
+        "properties": {
+          "container_id": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "minLength": 1},
+          "raw_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "normalized_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "byte_size": {"type": "integer", "minimum": 1},
+          "candidate_role": {"enum": ["PROJECT_LICENSE", "MODULE_LICENSE", "NOTICE", "THIRD_PARTY_LICENSE", "DEPENDENCY_LICENSE", "COPYRIGHT_NOTICE", "UNKNOWN_LICENSE_DOCUMENT"]},
+          "role_evidence": {"type": "string", "minLength": 1},
+          "spdx_match_receipt_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "spdx_match_status": {"type": "string", "minLength": 1},
+          "spdx_license_id": {"type": ["string", "null"]},
+          "applicability_scope": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "path", "scope_hash"],
+            "properties": {
+              "kind": {"enum": ["PROJECT_ROOT", "MODULE_PATH", "SOURCE_PATH_PREFIX", "FILE_OVERRIDE"]},
+              "path": {"type": "string", "minLength": 1},
+              "scope_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          },
+          "selected_as_project_license": {"type": "boolean"},
+          "reason": {"type": "string", "minLength": 1},
+          "receipt_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "discovered_document_count": {"type": "integer", "minimum": 0},
+    "classified_document_count": {"type": "integer", "minimum": 0},
+    "unknown_role_count": {"type": "integer", "minimum": 0},
+    "unclassified_document_count": {"const": 0},
+    "inventory_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

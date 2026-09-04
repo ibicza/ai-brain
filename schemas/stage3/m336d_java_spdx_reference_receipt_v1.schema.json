@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/stage3/m336d_java_spdx_reference_receipt_v1.schema.json",
+  "title": "M-33.6d independent Java SPDX reference receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "automatic",
+    "case_id",
+    "match_status",
+    "normalized_sha256",
+    "reference_implementation_sha256",
+    "schema_version",
+    "source_document",
+    "source_document_sha256",
+    "template_license_id",
+    "receipt_sha256"
+  ],
+  "properties": {
+    "automatic": {"type": "boolean"},
+    "case_id": {"type": "string", "pattern": "^[a-z0-9._-]+$"},
+    "match_status": {"enum": ["EXACT_BYTES_MATCH", "EXACT_NORMALIZED_MATCH", "SPDX_TEMPLATE_MATCH", "MULTIPLE_TEMPLATE_MATCH", "NO_MATCH", "MALFORMED"]},
+    "normalized_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "reference_implementation_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schema_version": {"const": 1},
+    "source_document": {"type": "string", "minLength": 1},
+    "source_document_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "template_license_id": {"type": ["string", "null"]},
+    "receipt_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

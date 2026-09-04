@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/stage3/m336d_scm_correspondence_v1.schema.json",
+  "title": "M-33.6d SCM correspondence decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entries", "total_candidate_java_entries", "raw_exact_entries", "canonical_only_entries", "relocated_entries", "generated_entries", "unmatched_entries", "ambiguous_entries", "selected_entries", "selected_entries_with_complete_scm_correspondence", "complete_for_selected", "correspondence_hash"],
+  "properties": {
+    "entries": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_path", "scm_path", "correspondence_class", "selected", "complete", "reason", "decision_hash"],
+        "properties": {
+          "artifact_path": {"type": "string", "minLength": 1},
+          "scm_path": {"type": ["string", "null"]},
+          "correspondence_class": {"enum": ["RAW_EXACT_MATCH", "CANONICAL_TEXT_EXACT_MATCH", "PATH_RELOCATED_RAW_MATCH", "PATH_RELOCATED_CANONICAL_MATCH", "EXACT_MATCH", "PATH_RELOCATED_EXACT_CONTENT", "GENERATED_WITH_VERIFIED_PROVENANCE", "UNMATCHED", "AMBIGUOUS_MATCH"]},
+          "selected": {"type": "boolean"},
+          "complete": {"type": "boolean"},
+          "reason": {"type": "string", "minLength": 1},
+          "decision_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "total_candidate_java_entries": {"type": "integer", "minimum": 0},
+    "raw_exact_entries": {"type": "integer", "minimum": 0},
+    "canonical_only_entries": {"type": "integer", "minimum": 0},
+    "relocated_entries": {"type": "integer", "minimum": 0},
+    "generated_entries": {"type": "integer", "minimum": 0},
+    "unmatched_entries": {"type": "integer", "minimum": 0},
+    "ambiguous_entries": {"type": "integer", "minimum": 0},
+    "selected_entries": {"type": "integer", "minimum": 0},
+    "selected_entries_with_complete_scm_correspondence": {"type": "integer", "minimum": 0},
+    "complete_for_selected": {"type": "boolean"},
+    "correspondence_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

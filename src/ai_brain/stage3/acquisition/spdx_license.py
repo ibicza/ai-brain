@@ -22,10 +22,23 @@ SUPPORTED_LICENSE_IDS = (
     "BSD-2-Clause",
     "BSD-3-Clause",
     "GPL-2.0-only",
+    "Classpath-exception-2.0",
 )
 _XML_NAMESPACE = "{http://www.spdx.org/license}"
-_LICENSE_NAMES = frozenset({"license", "license.txt", "license.md", "copying"})
-_NOTICE_NAMES = frozenset({"notice", "notice.txt", "notice.md"})
+_LICENSE_NAMES = frozenset(
+    {
+        "license",
+        "license.txt",
+        "license.md",
+        "licence",
+        "licence.txt",
+        "licence.md",
+        "copying",
+        "copying.txt",
+        "copying.md",
+    }
+)
+_NOTICE_NAMES = frozenset({"notice", "notice.txt", "notice.md", "notices.txt"})
 _DEPENDENCY_MARKERS = ("dependenc", "third-party", "third_party", "thirdparty")
 
 
@@ -116,9 +129,9 @@ def classify_license_document(path: str) -> LicenseDocumentRole:
     parts = tuple(PurePosixPath(normalized).parts)
     name = parts[-1].casefold()
     lowered = normalized.casefold()
-    if name in _NOTICE_NAMES or name.startswith("notice-"):
+    if name in _NOTICE_NAMES or name.startswith(("notice-", "notice.")):
         return LicenseDocumentRole.NOTICE
-    if "copyright" in name:
+    if name.startswith("copyright"):
         return LicenseDocumentRole.COPYRIGHT_NOTICE
     if "licenseslashstarstyle" in name or "licenseheader" in name:
         return LicenseDocumentRole.COPYRIGHT_NOTICE
@@ -126,10 +139,26 @@ def classify_license_document(path: str) -> LicenseDocumentRole:
         return LicenseDocumentRole.DEPENDENCY_LICENSE
     if any(marker in lowered for marker in _DEPENDENCY_MARKERS):
         return LicenseDocumentRole.THIRD_PARTY_LICENSE
-    if name not in _LICENSE_NAMES and "license" not in name:
+    is_license_name = name in _LICENSE_NAMES or name.startswith(
+        ("license-", "license.", "licence-", "licence.", "copying-", "copying.")
+    )
+    if not is_license_name:
         return LicenseDocumentRole.UNKNOWN_LICENSE_DOCUMENT
     if any(
-        part.casefold() in {"docs", "doc", "assets", "vendor"} for part in parts[:-1]
+        part.casefold()
+        in {
+            "docs",
+            "doc",
+            "assets",
+            "vendor",
+            "vendors",
+            "legal",
+            "licenses",
+            "third-party",
+            "third_party",
+            "dependencies",
+        }
+        for part in parts[:-1]
     ):
         return LicenseDocumentRole.THIRD_PARTY_LICENSE
     # SCM archives have one synthetic top directory. JAR META-INF is a root channel.
@@ -308,6 +337,8 @@ class SPDXLicenseMatcher:
         canonical = text_path.read_bytes()
         root = ET.fromstring(xml_raw)
         license_node = root.find(f"{_XML_NAMESPACE}license")
+        if license_node is None:
+            license_node = root.find(f"{_XML_NAMESPACE}exception")
         if license_node is None or license_node.attrib.get("licenseId") != license_id:
             raise ValueError("SPDX XML license identity mismatch")
         text_node = license_node.find(f"{_XML_NAMESPACE}text")
@@ -549,6 +580,11 @@ def _required_prefilter(license_id: str, lexical: str) -> bool:
             "gnu general public license",
             "version 2 june 1991",
             "no warranty",
+        ),
+        "Classpath-exception-2.0": (
+            "linking this library",
+            "as a special exception",
+            "independent module",
         ),
     }[license_id]
     return all(anchor in lexical for anchor in anchors)

@@ -1,0 +1,11 @@
+# M-33.6d graph impact map
+
+The graph was rebuilt from exact E18 `38082dd1eab82ebfff46ad3c55f5021068909f83` before edits. The indexed baseline contained 16,576 nodes, 118,809 edges and 1,110 files. Initial `detect-changes --base E18` and depth-2 impact were empty.
+
+The first navigation pass covered the qualified source-authority builders/verifiers, `SPDXLicenseMatcher.match`, artifact-contract validation, H17 forensics, readiness, and their callers, callees and tests. Concrete source and tests then verified graph findings.
+
+R19 adds isolated leaves for the frozen authority registry, Java reference harness, SPDX expression/scope decisions, SCM correspondence decisions, legal inventory, recursive public/local contracts, adaptive attacker, H17 occurrence mapping, readiness V2, metadata/cache probes, exact freeze assembly, one-shot acquisition, external vault sealing, the 180-file selector, evaluator-separated production, independent evaluation, public H19 assembly, E19 evidence assembly and commit-protocol verification. The only existing production module changed is `spdx_license.py`, to load the frozen Classpath exception and broaden bounded legal-document filename classification. A post-R19 graph rebuild is mandatory before the freeze.
+
+The first post-change rebuild was provisional. The final tracked-file E18 impact pass sees five modified files, 65 directly changed nodes, 36 impacted nodes within two hops, 16 additional affected files, nine affected flows and risk 0.70. The graph also reports six apparent test gaps because untracked R19 tests/modules do not enter `detect-changes` until R19 exists. New R19 modules are covered by the dedicated 20-test suite and become tracked at R19; the production SPDX impact is additionally covered by 43 directly related regression tests and the 10,800-case differential corpus.
+
+The final pre-commit R19 rebuild parsed 980 files and emitted 14,853 nodes / 93,594 edges; the persistent status view contains 979 files, 13,506 nodes and 91,754 edges. The depth-two E18 impact remains limited to the tracked-file view because the graph change detector intentionally excludes untracked additions until R19 exists. The exact F19 graph is appended by the release workflow after the freeze commit.

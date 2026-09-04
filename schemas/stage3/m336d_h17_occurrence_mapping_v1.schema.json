@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/stage3/m336d_h17_occurrence_mapping_v1.schema.json",
+  "title": "M-33.6d exact H17 occurrence mapping",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "h17_sha", "e17_sha", "historical_occurrence_count", "mapped_occurrence_count", "unmapped_occurrence_count", "rows", "report_hash"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "h17_sha": {"const": "1a05ccfa0bad25a79e388dab7c6672fc308cb890"},
+    "e17_sha": {"const": "1541805f9cd6c19ff9c372afeefbd41148217736"},
+    "historical_occurrence_count": {"const": 36},
+    "mapped_occurrence_count": {"const": 36},
+    "unmapped_occurrence_count": {"const": 0},
+    "rows": {
+      "type": "array",
+      "minItems": 36,
+      "maxItems": 36,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["h17_artifact_path", "json_pointer", "field_name", "value_type", "old_artifact_role", "old_classifier_result", "current_artifact_type", "current_artifact_role", "current_field_class", "current_mandatory_disclosure_claim", "mapping_reason", "mapping_receipt_hash"],
+        "properties": {
+          "h17_artifact_path": {"type": "string", "minLength": 1},
+          "json_pointer": {"type": "string", "pattern": "^/"},
+          "field_name": {"type": "string", "minLength": 1},
+          "value_type": {"enum": ["string", "object", "array", "integer", "number", "boolean", "null"]},
+          "old_artifact_role": {"type": "string", "minLength": 1},
+          "old_classifier_result": {"type": "string", "minLength": 1},
+          "current_artifact_type": {"type": "string", "minLength": 1},
+          "current_artifact_role": {"type": "string", "minLength": 1},
+          "current_field_class": {"type": "string", "minLength": 1},
+          "current_mandatory_disclosure_claim": {"type": ["string", "null"]},
+          "mapping_reason": {"type": "string", "minLength": 1},
+          "mapping_receipt_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "report_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

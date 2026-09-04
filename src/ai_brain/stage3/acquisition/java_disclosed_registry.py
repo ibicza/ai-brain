@@ -281,6 +281,15 @@ def _reject_identity_conflicts(entries):
         values = {}
         for entry in entries:
             identity = getattr(entry, field)
+            # Failed/review acquisitions are still disclosed after their source JAR
+            # was downloaded.  An unavailable downstream SCM identity is encoded by
+            # the existing all-zero sentinel and is deliberately not an identity.
+            if field in {
+                "source_tree_hash",
+                "scm_revision",
+                "correspondence_hash",
+            } and set(identity) == {"0"}:
+                continue
             prior = values.setdefault(identity, entry.entry_hash)
             if prior != entry.entry_hash:
                 raise ValueError(

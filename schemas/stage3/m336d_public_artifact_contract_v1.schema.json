@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/stage3/m336d_public_artifact_contract_v1.schema.json",
+  "title": "M-33.6d public artifact contract registry",
+  "$defs": {
+    "field_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value_type", "required", "enum_values", "pattern", "minimum", "maximum", "min_items", "max_items", "unique_items", "sorted_items", "item_contract", "object_fields"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "value_type": {"enum": ["string", "integer", "boolean", "array", "object"]},
+        "required": {"type": "boolean"},
+        "enum_values": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "pattern": {"type": ["string", "null"]},
+        "minimum": {"type": ["integer", "null"]},
+        "maximum": {"type": ["integer", "null"]},
+        "min_items": {"type": ["integer", "null"], "minimum": 0},
+        "max_items": {"type": ["integer", "null"], "minimum": 0},
+        "unique_items": {"type": "boolean"},
+        "sorted_items": {"type": "boolean"},
+        "item_contract": {"anyOf": [{"$ref": "#/$defs/field_contract"}, {"type": "null"}]},
+        "object_fields": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/field_contract"}}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_types", "registry_hash"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_types": {
+      "type": "array",
+      "minItems": 11,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_type", "path_pattern", "role", "media_type", "schema_version", "fields", "expected_magic_hex", "minimum_bytes", "maximum_bytes", "contract_hash"],
+        "properties": {
+          "artifact_type": {"type": "string", "minLength": 1},
+          "path_pattern": {"type": "string", "minLength": 1},
+          "role": {"enum": ["FREEZE", "ACQUISITION_RECEIPTS", "QUALIFICATION", "SELECTOR", "PRODUCTION", "CANDIDATE_PACK", "VAULT_HASH_MANIFEST", "SEAL", "EVALUATION", "READINESS"]},
+          "media_type": {"enum": ["application/json", "application/vnd.sqlite3"]},
+          "schema_version": {"const": 1},
+          "fields": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/field_contract"}},
+          "expected_magic_hex": {"type": ["string", "null"], "pattern": "^[0-9a-f]+$"},
+          "minimum_bytes": {"type": ["integer", "null"], "minimum": 0},
+          "maximum_bytes": {"type": ["integer", "null"], "minimum": 1},
+          "contract_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "registry_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
