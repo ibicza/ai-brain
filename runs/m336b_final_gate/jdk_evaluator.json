@@ -1,0 +1,1 @@
+{"invocation_policy":["-proc:none"],"karina_archive_sha256":"1d58b1335d019bfe1c7c56979c927d0f51222c6dd41c33772d8396ea6cd409c1","reason":"MINIMUM_DISTINCT_ELIGIBLE_ROOTS_NOT_MET","report_hash":"4ff0e473a5bfea5d021db42a8e7c8e9c5153ac086e5b3d9bf488a6dfc0ddb0d7","schema_version":1,"status":"NOT_INVOKED","target_release":21,"vendor":"Microsoft","version":"21.0.11+10"}

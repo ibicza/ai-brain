@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "W:\toolbox_IDEA\programs\IdeaProjects\ai-brain-m336b-h17\scripts\m336b_assemble_h17.py", line 74, in <module>
+    main()
+  File "W:\toolbox_IDEA\programs\IdeaProjects\ai-brain-m336b-h17\scripts\m336b_assemble_h17.py", line 59, in main
+    manifest = build_final_artifact_role_manifest(artifacts)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "W:\toolbox_IDEA\programs\IdeaProjects\ai-brain-m336b-h17\src\ai_brain\stage3\acquisition\java_freeze_roles.py", line 143, in build_final_artifact_role_manifest
+    bindings = tuple(
+               ^^^^^^
+  File "W:\toolbox_IDEA\programs\IdeaProjects\ai-brain-m336b-h17\src\ai_brain\stage3\acquisition\java_freeze_roles.py", line 144, in <genexpr>
+    FinalArtifactRoleBinding(path, classify_final_artifact_role(path))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "W:\toolbox_IDEA\programs\IdeaProjects\ai-brain-m336b-h17\src\ai_brain\stage3\acquisition\java_freeze_roles.py", line 392, in classify_final_artifact_role
+    raise ValueError(f"unknown final artifact role: {value}")
+ValueError: unknown final artifact role: evaluation/m336b_final_java/candidate_qualification_receipts.json
+exit_code=1
