@@ -1,0 +1,39 @@
+{
+  "available_measurements": {
+    "h19_windows_quality_seconds": {
+      "full_suite": "1316.945152",
+      "java_reference_compile": "0.739774",
+      "no_torch_network": "1.876911",
+      "ruff_format": "0.182793",
+      "ruff_lint": "0.171223",
+      "targeted": "68.180099"
+    },
+    "h19_karina_quality_seconds": {
+      "full_suite": "375.108897",
+      "java_reference_compile": "0.473420",
+      "no_torch_network": "0.534289",
+      "ruff_format": "0.021005",
+      "ruff_lint": "0.019899",
+      "targeted": "17.318533"
+    },
+    "source_leak_scan": {
+      "peak_python_bytes": 68595312,
+      "public_files_per_second": "0.166780",
+      "scanned_java_files": 4390,
+      "seconds": "1085.260903"
+    }
+  },
+  "not_run_measurements": [
+    "selector_success_path",
+    "java_indexing",
+    "proposal_production",
+    "trust_closure",
+    "candidate_pack_construction",
+    "candidate_pack_compilation",
+    "candidate_replay",
+    "independent_semantic_evaluation",
+    "installed_runtime_queries"
+  ],
+  "report_hash": "45ba3a256d13c2ee32a27b2b6ea255f74d38c1d2d36559bb85c3b5c6c2b55265",
+  "schema_version": 1
+}

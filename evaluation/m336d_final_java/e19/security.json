@@ -1,0 +1,14 @@
+{
+  "adaptive_mutations_accepted": 0,
+  "adaptive_mutations_rejected": 10260,
+  "authority_forgery_accepted": 0,
+  "fresh_source_leak_count": 0,
+  "h17_exact_field_mapping": "36/36",
+  "moral_or_content_restriction_added": false,
+  "post_f19_contract_failure_count": 1,
+  "post_f19_vault_verifier_failure_count": 2,
+  "raw_source_committed": false,
+  "report_hash": "04e8034ac06d6b45ed3ce493e6313a436bcdb7a80265d1193bac5d87ff9ece16",
+  "schema_version": 1,
+  "source_leak_scan_status": "PASS"
+}

@@ -1,0 +1,15 @@
+.....................................F.........................          [100%]
+================================== FAILURES ===================================
+__________ test_disclosed_registry_remains_append_only_and_complete ___________
+
+    def test_disclosed_registry_remains_append_only_and_complete():
+        verify_disclosed_java_registry()
+        entries = load_disclosed_java_registry()
+>       assert len(entries) == 6
+E       AssertionError: assert 30 == 6
+E        +  where 30 = len((DisclosedJavaMaterialEntry(schema_version=1, coordinate='com.google.errorprone:error_prone_annotations:2.36.0', versi...iginating_chain='E16-F17-H17-E17', entry_hash='3af8a8960a4360135a11f2c40afc1b68499b25cea18ae8ed889b1edf63fb2cec'), ...))
+
+tests\test_m336c_spdx_contract_repair.py:395: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_m336c_spdx_contract_repair.py::test_disclosed_registry_remains_append_only_and_complete
+1 failed, 62 passed in 67.39s (0:01:07)

@@ -1,0 +1,29 @@
+{
+  "decision": "OUTCOME_C_BLOCKED",
+  "groups": [
+    {"name": "FRESHNESS", "reason": "zero pre-F19 body bytes; 24 optional families; 23 organizations; zero overlap; one acquisition and one selector invocation with zero reruns", "status": "PASS"},
+    {"name": "AUTHORITY", "reason": "one frozen root; zero accepted forgeries or widening/replay attacks; raw and excerpt publication denied", "status": "PASS"},
+    {"name": "LICENSE", "reason": "fresh selected-root production/reference comparison was not run after selector failure", "status": "NOT_RUN_AFTER_SELECTOR_BLOCK"},
+    {"name": "CORRESPONDENCE", "reason": "all candidate decisions exist, but no selected-file correspondence denominator was created", "status": "INCOMPLETE"},
+    {"name": "CANDIDATE", "reason": "five roots and 410 entries are analysis eligible, but selector produced zero of required 180 files and zero of required three roots", "status": "FAIL"},
+    {"name": "JAVA", "reason": "production, pack, replay, evaluator, trust closure and runtime were not run", "status": "NOT_RUN"},
+    {"name": "CONTRACT", "reason": "frozen public contract self-rejection and two frozen vault-verifier failures", "status": "FAIL"},
+    {"name": "QUALITY", "reason": "exact H19 targeted/full suites reject the append-only registry through a frozen six-entry assertion", "status": "FAIL"}
+  ],
+  "primary_counts": {
+    "analysis_eligible_java_entries": 410,
+    "analysis_eligible_roots": 5,
+    "derived_pack_publication_roots": 5,
+    "fresh_source_leak_count": 0,
+    "global_acquisition_count": 1,
+    "metrics_publication_roots": 5,
+    "raw_source_publication_roots": 0,
+    "selected_files": 0,
+    "selected_roots": 0,
+    "selector_invocation_count": 1,
+    "selector_rerun_count": 0,
+    "source_excerpt_publication_roots": 0
+  },
+  "report_hash": "b315ab8f8344dfa33b2c4a47b0fe5da31f15443163e54719a2581e61b3308d95",
+  "schema_version": 2
+}

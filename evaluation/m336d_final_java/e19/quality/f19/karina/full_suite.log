@@ -1,0 +1,238 @@
+=== FULL SUITE FILE 1/59 tests/test_arithmetic_rules.py ===
+........                                                                 [100%]
+8 passed in 0.01s
+=== FULL SUITE EXIT 0 tests/test_arithmetic_rules.py ===
+=== FULL SUITE FILE 2/59 tests/test_cli.py ===
+...................                                                      [100%]
+19 passed in 4.28s
+=== FULL SUITE EXIT 0 tests/test_cli.py ===
+=== FULL SUITE FILE 3/59 tests/test_data_generation.py ===
+........................................................................ [100%]
+72 passed in 0.15s
+=== FULL SUITE EXIT 0 tests/test_data_generation.py ===
+=== FULL SUITE FILE 4/59 tests/test_eval.py ===
+.........................                                                [100%]
+25 passed in 1.35s
+=== FULL SUITE EXIT 0 tests/test_eval.py ===
+=== FULL SUITE FILE 5/59 tests/test_eval_diagnostics.py ===
+............                                                             [100%]
+12 passed in 0.82s
+=== FULL SUITE EXIT 0 tests/test_eval_diagnostics.py ===
+=== FULL SUITE FILE 6/59 tests/test_m182_workspace_retrieval.py ===
+....                                                                     [100%]
+4 passed in 0.75s
+=== FULL SUITE EXIT 0 tests/test_m182_workspace_retrieval.py ===
+=== FULL SUITE FILE 7/59 tests/test_m191_faithful_addition.py ===
+....                                                                     [100%]
+4 passed in 0.76s
+=== FULL SUITE EXIT 0 tests/test_m191_faithful_addition.py ===
+=== FULL SUITE FILE 8/59 tests/test_m192_concrete_numeracy.py ===
+....                                                                     [100%]
+4 passed in 0.78s
+=== FULL SUITE EXIT 0 tests/test_m192_concrete_numeracy.py ===
+=== FULL SUITE FILE 9/59 tests/test_m192a_cardinality_lab.py ===
+.......                                                                  [100%]
+7 passed in 1.20s
+=== FULL SUITE EXIT 0 tests/test_m192a_cardinality_lab.py ===
+=== FULL SUITE FILE 10/59 tests/test_m192b_clean_cardinality_sanity.py ===
+......                                                                   [100%]
+6 passed in 0.92s
+=== FULL SUITE EXIT 0 tests/test_m192b_clean_cardinality_sanity.py ===
+=== FULL SUITE FILE 11/59 tests/test_m192c_count_state_representation.py ===
+..........                                                               [100%]
+10 passed in 1.11s
+=== FULL SUITE EXIT 0 tests/test_m192c_count_state_representation.py ===
+=== FULL SUITE FILE 12/59 tests/test_m201_compositional_dsl_variable_binding.py ===
+............                                                             [100%]
+12 passed in 0.78s
+=== FULL SUITE EXIT 0 tests/test_m201_compositional_dsl_variable_binding.py ===
+=== FULL SUITE FILE 13/59 tests/test_m201a_fair_compositional_retest.py ===
+............                                                             [100%]
+12 passed in 4.69s
+=== FULL SUITE EXIT 0 tests/test_m201a_fair_compositional_retest.py ===
+=== FULL SUITE FILE 14/59 tests/test_m20_external_state_rule_executor.py ===
+.............                                                            [100%]
+13 passed in 2.59s
+=== FULL SUITE EXIT 0 tests/test_m20_external_state_rule_executor.py ===
+=== FULL SUITE FILE 15/59 tests/test_m21_hybrid_neural_compiler_interpreter.py ===
+...........                                                              [100%]
+11 passed in 0.81s
+=== FULL SUITE EXIT 0 tests/test_m21_hybrid_neural_compiler_interpreter.py ===
+=== FULL SUITE FILE 16/59 tests/test_m221_oracle_free_rule_acquisition.py ===
+...........                                                              [100%]
+11 passed in 2.67s
+=== FULL SUITE EXIT 0 tests/test_m221_oracle_free_rule_acquisition.py ===
+=== FULL SUITE FILE 17/59 tests/test_m222_acquisition_integrity_cegis.py ===
+.............                                                            [100%]
+13 passed in 3.00s
+=== FULL SUITE EXIT 0 tests/test_m222_acquisition_integrity_cegis.py ===
+=== FULL SUITE FILE 18/59 tests/test_m223_stage1_acquisition_validation.py ===
+.............                                                            [100%]
+13 passed in 1.73s
+=== FULL SUITE EXIT 0 tests/test_m223_stage1_acquisition_validation.py ===
+=== FULL SUITE FILE 19/59 tests/test_m223a_blackbox_acquisition.py ===
+..........                                                               [100%]
+10 passed in 0.41s
+=== FULL SUITE EXIT 0 tests/test_m223a_blackbox_acquisition.py ===
+=== FULL SUITE FILE 20/59 tests/test_m22_verified_rule_acquisition.py ===
+...........                                                              [100%]
+11 passed in 1.19s
+=== FULL SUITE EXIT 0 tests/test_m22_verified_rule_acquisition.py ===
+=== FULL SUITE FILE 21/59 tests/test_m241_stage1_hardening.py ===
+........................................................................ [ 87%]
+..........                                                               [100%]
+82 passed in 0.42s
+=== FULL SUITE EXIT 0 tests/test_m241_stage1_hardening.py ===
+=== FULL SUITE FILE 22/59 tests/test_m241a_stage1_release_hardening.py ===
+..........                                                               [100%]
+10 passed in 0.19s
+=== FULL SUITE EXIT 0 tests/test_m241a_stage1_release_hardening.py ===
+=== FULL SUITE FILE 23/59 tests/test_m24_stage1_production.py ===
+......................                                                   [100%]
+22 passed in 2.88s
+=== FULL SUITE EXIT 0 tests/test_m24_stage1_production.py ===
+=== FULL SUITE FILE 24/59 tests/test_m252_semantic_route_safety.py ===
+...............                                                          [100%]
+15 passed in 15.30s
+=== FULL SUITE EXIT 0 tests/test_m252_semantic_route_safety.py ===
+=== FULL SUITE FILE 25/59 tests/test_m25_skill_registry.py ===
+...........................................                              [100%]
+43 passed in 33.60s
+=== FULL SUITE EXIT 0 tests/test_m25_skill_registry.py ===
+=== FULL SUITE FILE 26/59 tests/test_m261_factual_integrity.py ===
+.............................                                            [100%]
+29 passed in 0.59s
+=== FULL SUITE EXIT 0 tests/test_m261_factual_integrity.py ===
+=== FULL SUITE FILE 27/59 tests/test_m26_factual_memory.py ===
+..........................                                               [100%]
+26 passed in 0.72s
+=== FULL SUITE EXIT 0 tests/test_m26_factual_memory.py ===
+=== FULL SUITE FILE 28/59 tests/test_m271_router_hardening.py ===
+......................................                                   [100%]
+38 passed in 6.38s
+=== FULL SUITE EXIT 0 tests/test_m271_router_hardening.py ===
+=== FULL SUITE FILE 29/59 tests/test_m27_unified_router.py ===
+....................                                                     [100%]
+20 passed in 0.46s
+=== FULL SUITE EXIT 0 tests/test_m27_unified_router.py ===
+=== FULL SUITE FILE 30/59 tests/test_m281_chemistry_integrity.py ===
+............................................                             [100%]
+44 passed in 9.16s
+=== FULL SUITE EXIT 0 tests/test_m281_chemistry_integrity.py ===
+=== FULL SUITE FILE 31/59 tests/test_m282_chemistry_provenance.py ===
+..........                                                               [100%]
+10 passed in 2.98s
+=== FULL SUITE EXIT 0 tests/test_m282_chemistry_provenance.py ===
+=== FULL SUITE FILE 32/59 tests/test_m28_chemistry.py ===
+...........                                                              [100%]
+11 passed in 8.36s
+=== FULL SUITE EXIT 0 tests/test_m28_chemistry.py ===
+=== FULL SUITE FILE 33/59 tests/test_m28_preflight_hardening.py ===
+.............                                                            [100%]
+13 passed in 60.03s (0:01:00)
+=== FULL SUITE EXIT 0 tests/test_m28_preflight_hardening.py ===
+=== FULL SUITE FILE 34/59 tests/test_m291_educational_integrity.py ===
+.............                                                            [100%]
+13 passed in 26.61s
+=== FULL SUITE EXIT 0 tests/test_m291_educational_integrity.py ===
+=== FULL SUITE FILE 35/59 tests/test_m292_educational_hardening.py ===
+...........                                                              [100%]
+11 passed in 15.22s
+=== FULL SUITE EXIT 0 tests/test_m292_educational_hardening.py ===
+=== FULL SUITE FILE 36/59 tests/test_m29_educational_layer.py ===
+.........................                                                [100%]
+25 passed in 24.53s
+=== FULL SUITE EXIT 0 tests/test_m29_educational_layer.py ===
+=== FULL SUITE FILE 37/59 tests/test_m30_conversation_progress.py ===
+............                                                             [100%]
+12 passed in 9.38s
+=== FULL SUITE EXIT 0 tests/test_m30_conversation_progress.py ===
+=== FULL SUITE FILE 38/59 tests/test_m30_phase0_authority.py ===
+............                                                             [100%]
+12 passed in 12.47s
+=== FULL SUITE EXIT 0 tests/test_m30_phase0_authority.py ===
+=== FULL SUITE FILE 39/59 tests/test_m31_universal_knowledge.py ===
+......................                                                   [100%]
+22 passed in 1.90s
+=== FULL SUITE EXIT 0 tests/test_m31_universal_knowledge.py ===
+=== FULL SUITE FILE 40/59 tests/test_m32_source_to_knowledge.py ===
+................                                                         [100%]
+16 passed in 16.07s
+=== FULL SUITE EXIT 0 tests/test_m32_source_to_knowledge.py ===
+=== FULL SUITE FILE 41/59 tests/test_m335_java_determinism_repair.py ===
+................                                                         [100%]
+16 passed in 2.87s
+=== FULL SUITE EXIT 0 tests/test_m335_java_determinism_repair.py ===
+=== FULL SUITE FILE 42/59 tests/test_m336_fresh_java_freeze.py ===
+.............                                                            [100%]
+13 passed in 3.13s
+=== FULL SUITE EXIT 0 tests/test_m336_fresh_java_freeze.py ===
+=== FULL SUITE FILE 43/59 tests/test_m336a_license_freeze_repair.py ===
+........................................................................ [ 88%]
+.........                                                                [100%]
+81 passed in 2.22s
+=== FULL SUITE EXIT 0 tests/test_m336a_license_freeze_repair.py ===
+=== FULL SUITE FILE 44/59 tests/test_m336b_production_provenance.py ===
+..........                                                               [100%]
+10 passed in 0.25s
+=== FULL SUITE EXIT 0 tests/test_m336b_production_provenance.py ===
+=== FULL SUITE FILE 45/59 tests/test_m336c_spdx_contract_repair.py ===
+....................                                                     [100%]
+20 passed in 12.95s
+=== FULL SUITE EXIT 0 tests/test_m336c_spdx_contract_repair.py ===
+=== FULL SUITE FILE 46/59 tests/test_m336d_fresh_java_freeze_v3.py ===
+.........s..........                                                     [100%]
+19 passed, 1 skipped in 1.71s
+=== FULL SUITE EXIT 0 tests/test_m336d_fresh_java_freeze_v3.py ===
+=== FULL SUITE FILE 47/59 tests/test_m341_java_trust_integration.py ===
+..............                                                           [100%]
+14 passed in 35.08s
+=== FULL SUITE EXIT 0 tests/test_m341_java_trust_integration.py ===
+=== FULL SUITE FILE 48/59 tests/test_m342_java_type_universe.py ===
+....                                                                     [100%]
+4 passed in 3.81s
+=== FULL SUITE EXIT 0 tests/test_m342_java_type_universe.py ===
+=== FULL SUITE FILE 49/59 tests/test_m343_semantic_proposal_gate.py ===
+..........................                                               [100%]
+26 passed in 3.80s
+=== FULL SUITE EXIT 0 tests/test_m343_semantic_proposal_gate.py ===
+=== FULL SUITE FILE 50/59 tests/test_m344_oracle_free_java.py ===
+.........                                                                [100%]
+9 passed in 2.93s
+=== FULL SUITE EXIT 0 tests/test_m344_oracle_free_java.py ===
+=== FULL SUITE FILE 51/59 tests/test_m34_blocker_rework.py ===
+..........                                                               [100%]
+10 passed in 0.63s
+=== FULL SUITE EXIT 0 tests/test_m34_blocker_rework.py ===
+=== FULL SUITE FILE 52/59 tests/test_model_smoke.py ===
+...                                                                      [100%]
+3 passed in 3.78s
+=== FULL SUITE EXIT 0 tests/test_model_smoke.py ===
+=== FULL SUITE FILE 53/59 tests/test_recurrent_transformer.py ===
+.....                                                                    [100%]
+5 passed in 0.75s
+=== FULL SUITE EXIT 0 tests/test_recurrent_transformer.py ===
+=== FULL SUITE FILE 54/59 tests/test_runtime_device.py ===
+..s                                                                      [100%]
+2 passed, 1 skipped in 1.21s
+=== FULL SUITE EXIT 0 tests/test_runtime_device.py ===
+=== FULL SUITE FILE 55/59 tests/test_segments.py ===
+..                                                                       [100%]
+2 passed in 0.72s
+=== FULL SUITE EXIT 0 tests/test_segments.py ===
+=== FULL SUITE FILE 56/59 tests/test_tiny_transformer.py ===
+..........                                                               [100%]
+10 passed in 1.25s
+=== FULL SUITE EXIT 0 tests/test_tiny_transformer.py ===
+=== FULL SUITE FILE 57/59 tests/test_tokenizer.py ===
+......                                                                   [100%]
+6 passed in 0.03s
+=== FULL SUITE EXIT 0 tests/test_tokenizer.py ===
+=== FULL SUITE FILE 58/59 tests/test_training.py ===
+...........................                                              [100%]
+27 passed in 1.38s
+=== FULL SUITE EXIT 0 tests/test_training.py ===
+=== FULL SUITE FILE 59/59 tests/test_workspace_abi.py ===
+.....                                                                    [100%]
+5 passed in 0.01s
+=== FULL SUITE EXIT 0 tests/test_workspace_abi.py ===

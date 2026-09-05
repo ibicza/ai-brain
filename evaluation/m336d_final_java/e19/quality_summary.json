@@ -1,0 +1,13 @@
+{
+  "f19": {
+    "karina": {"clean_worktree": true, "full_suite_passed": 1033, "report_hash": "737c1bb8e09077b9a56e8e2a7b5e3cf08f74f034d54d4818119a6ae50d9b022c", "status": "PASS"},
+    "windows": {"clean_worktree": true, "full_suite_passed": 1034, "report_hash": "cf655fe433da7527086bc3383b896eacaf24c08f276b294dad957abe0361f59a", "status": "PASS"}
+  },
+  "h19": {
+    "failure": "tests/test_m336c_spdx_contract_repair.py asserts historical registry cardinality 6; append-only H19 cardinality is 30",
+    "karina": {"clean_worktree": true, "full_suite_passed": 1032, "report_hash": "3369e88a9fba118a1a88911160625a7c39792fc2407d74bdf08e1aea802e423b", "status": "FAIL"},
+    "windows": {"clean_worktree": true, "full_suite_passed": 1033, "report_hash": "330435b7574647f990c73efedf960443ada820e1917a3dc6ca765ee35efa5164", "status": "FAIL"}
+  },
+  "report_hash": "4b99cb2b748f5767a3a8ca3b8731edefc4793740deb92aba0ca99518aad14ef5",
+  "schema_version": 1
+}

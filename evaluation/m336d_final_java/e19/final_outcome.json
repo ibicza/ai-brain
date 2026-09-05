@@ -1,0 +1,24 @@
+{
+  "blockers": [
+    {"code": "FRESH_SELECTOR_FEWER_THAN_THREE_CALLABLE_QUALIFIED_ROOTS", "evidence": "h19/selector_failure.json"},
+    {"code": "FROZEN_VAULT_VERIFIER_PATH_ORDER_MISMATCH", "evidence": "h19/cross_platform_vault_comparison.json"},
+    {"code": "FROZEN_PUBLIC_CONTRACT_SELF_REJECTION", "evidence": "h19/public_contract_failure.json"},
+    {"code": "FROZEN_LEGACY_DISCLOSURE_CARDINALITY_ASSERTION", "evidence": "e19/quality/h19"}
+  ],
+  "candidate_pack_created": false,
+  "e18_sha": "38082dd1eab82ebfff46ad3c55f5021068909f83",
+  "evaluator_started": false,
+  "f19_sha": "845f65056805acd7517ba4959d38d7d3df8ad7ff",
+  "h19_sha": "a9527e4731255c4a717cf34e9619ca5c8d07dc66",
+  "independent_evaluation_status": "NOT_RUN",
+  "installed_runtime_status": "NOT_RUN",
+  "outcome": "OUTCOME_C_BLOCKED",
+  "production_started": false,
+  "raw_fresh_source_committed": false,
+  "report_hash": "cddceb1f6688b2b3d9dbcfab9371bb9abdb66567fd0f82017510a4865950233c",
+  "r19_sha": "3199c02356de6e7cc9e261504e30f336dd6f09ea",
+  "schema_version": 1,
+  "selected_file_count": 0,
+  "selector_invocation_count": 1,
+  "selector_rerun_count": 0
+}

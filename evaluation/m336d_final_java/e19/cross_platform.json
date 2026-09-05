@@ -1,0 +1,14 @@
+{
+  "frozen_vault_verifier": {
+    "karina": "FAIL",
+    "reason": "WINDOWS_PATH_ORDER_IN_MANIFEST_DIFFERS_FROM_PORTABLE_BYTE_ORDER",
+    "windows": "FAIL"
+  },
+  "platform_independent_vault_difference_count": 0,
+  "portable_byte_sorted_vault_tree_hash": "e8d6eae2b740643d4a77277e9b165d2bdfe308ea80cad30fad87eea244102150",
+  "production_semantic_difference_count": null,
+  "production_semantic_status": "NOT_RUN",
+  "report_hash": "41425f761260584ce9b0a10c33fbc109d427b9b8b3c7cfa48f7c729627396df7",
+  "schema_version": 1,
+  "vault_file_count": 4469
+}

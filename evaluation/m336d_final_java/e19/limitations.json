@@ -1,0 +1,12 @@
+{
+  "limitations": [
+    "The one-shot selector terminated before producing a selector receipt or selected manifest.",
+    "No production output, candidate pack, replay, independent evaluator output, or installed-runtime result exists.",
+    "The frozen vault verifier is not portable because its expected and observed path orderings differ.",
+    "The frozen public contract rejects the acquisition report emitted by the same frozen pipeline.",
+    "The frozen M-33.6c regression asserts a historical registry cardinality of six and rejects the append-only H19 registry cardinality of thirty.",
+    "Performance coverage is partial because all stages after selector failure were not run."
+  ],
+  "report_hash": "1653322182d5bcac4bbf61697acc92a072ea53f48f3ab46ee7f70745864365ce",
+  "schema_version": 1
+}

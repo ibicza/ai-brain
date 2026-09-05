@@ -1,0 +1,14 @@
+{
+  "evidence_artifact_count": 60,
+  "evidence_manifest_bytes_hash": "b8357ae82910d37f28fc021dbd8c7b5de97da25da17d9a0fa465d75e03d9ea91",
+  "evidence_manifest_hash": "101c37c685b3832b89dcdd1faeebb02a120083758c67b25ccea79749fa86bf72",
+  "f19_sha": "845f65056805acd7517ba4959d38d7d3df8ad7ff",
+  "h19_seal_report_hash": "d571d3da8678a425828239de956edd699bcc3584be6edcd66f20d4d65c557424",
+  "h19_sha": "a9527e4731255c4a717cf34e9619ca5c8d07dc66",
+  "implementation_changed_after_f19": false,
+  "outcome": "OUTCOME_C_BLOCKED",
+  "production_started": false,
+  "raw_fresh_source_committed": false,
+  "report_hash": "6d266249d9942e64a271514cd4b9ce842e9bd3498625dea7432d362d891b620c",
+  "schema_version": 1
+}

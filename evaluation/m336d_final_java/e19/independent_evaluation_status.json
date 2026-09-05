@@ -1,0 +1,15 @@
+{
+  "candidate_pack_compilation": "NOT_RUN",
+  "candidate_replay": "NOT_RUN",
+  "evaluator_started": false,
+  "independent_java_semantic_evaluation": "NOT_RUN",
+  "independent_selected_root_spdx_evaluation": "NOT_RUN",
+  "installed_runtime": "NOT_RUN",
+  "production_seal_created": false,
+  "reason": "FRESH_SELECTOR_FEWER_THAN_THREE_CALLABLE_QUALIFIED_ROOTS",
+  "report_hash": "5838ac7253d9d0ce769ac30e625c268c96ddf34dc194eb776f99eb7c266d0adc",
+  "schema_version": 1,
+  "semantic_metrics": null,
+  "trust_metrics": null,
+  "wrong_trusted": null
+}
