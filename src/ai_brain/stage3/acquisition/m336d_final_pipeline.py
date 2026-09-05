@@ -1039,6 +1039,7 @@ def _probe_one(seed: CandidateSeed, *, timestamp: str, host: str):
         "source_url": source_url,
         "pom_url": pom_url,
         "metadata_pom_sha256": bytes_hash(pom),
+        "packaging": _pom_packaging(pom),
         "pom_license_declarations": tuple(
             sorted(
                 (
@@ -1404,6 +1405,12 @@ def _acquire_one(policy, *, vault_root: Path, maven, scm):
         "qualification_errors": tuple(errors),
         "_raw_source_hashes": raw_source_hashes,
         "_canonical_source_hashes": canonical_source_hashes,
+        # Private acquisition facts retained for the M-33.6e file-scoped
+        # qualification pass. They are never emitted by the M-33.6d producer.
+        "_archive_java_paths": tuple(
+            path for path, _raw in (inspection.java_entries if inspection else ())
+        ),
+        "_legal_inventory_rows": tuple(inventory.rows) if inventory else (),
         "_vault_files": vault_files,
         "_performance_seconds": performance,
     }
@@ -2036,6 +2043,26 @@ def _pom_declared_java_releases(raw: bytes) -> tuple[tuple[str, str], ...]:
         if name in names and value:
             rows.add((name, value))
     return tuple(sorted(rows))
+
+
+def _pom_packaging(raw: bytes) -> str:
+    """Return declared Maven packaging; Maven defaults an omission to ``jar``."""
+
+    upper = raw.upper()
+    if b"<!DOCTYPE" in upper or b"<!ENTITY" in upper:
+        raise ValueError("Maven POM DTD and external entities are forbidden")
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError as exc:
+        raise ValueError("malformed Maven POM XML") from exc
+    values = tuple(
+        (node.text or "").strip()
+        for node in root
+        if node.tag.rsplit("}", 1)[-1] == "packaging" and (node.text or "").strip()
+    )
+    if len(values) > 1:
+        raise ValueError("Maven POM contains duplicate packaging metadata")
+    return values[0] if values else "jar"
 
 
 def _performance_summary(samples: list[float]) -> dict:

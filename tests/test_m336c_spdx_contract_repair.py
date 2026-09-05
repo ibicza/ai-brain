@@ -5,11 +5,13 @@ from pathlib import Path
 
 import pytest
 
+from ai_brain.stage2.facts.canonical import bytes_hash
 from ai_brain.stage3.acquisition.final_artifact_contract import (
     FINAL_ARTIFACT_CONTRACT_REGISTRY,
     FinalArtifactContractRegistry,
 )
 from ai_brain.stage3.acquisition.java_disclosed_registry import (
+    DEFAULT_REGISTRY_ROOT,
     load_disclosed_java_registry,
     verify_disclosed_java_registry,
 )
@@ -392,8 +394,19 @@ def test_contract_generated_h_stage_and_1008_mutations():
 def test_disclosed_registry_remains_append_only_and_complete():
     verify_disclosed_java_registry()
     entries = load_disclosed_java_registry()
-    assert len(entries) == 6
-    assert len({item.coordinate for item in entries}) == 6
+    original = {
+        "1809dd68e2364946d46c99a1b18d618fa91a2b3fa5428689706c0f859adf6367": "a73ea18b9a96d2e994202d3b0605cb18b8b7997915fee141b52ff4be63eda360",
+        "3af8a8960a4360135a11f2c40afc1b68499b25cea18ae8ed889b1edf63fb2cec": "615de11625683b817780002d70a77f2586ffbf036e8f58249e0b1f65c7376be3",
+        "90d38902f2e25ec189a58c7178c769380fd1ae456fe9e9edfe49e2cabd044c86": "e7264e3b28518556309b81b0ed81b1574923e67b095140ba97ce53ab8e2a3d46",
+        "e5ae3b04b4828ae968bbcf62fbc60b2e8df7133f010cacd95ea04c3b2886f009": "7f7ae9d130adfaad0e77fd975f5dbcfa0a7b70ecbad90a4433b8afa486b358a1",
+        "ef369dd8fd69caed6b66303e49e8311498f866f9c4d7b2a396d24d131c7e8cef": "7e4aa4dc19eed1495baf9de825d84c879099544888448d2b5df40be271e73a95",
+        "fba996ecfaf240e9781ba4ca3a7776285e75286f508dcd3f282fd11b09e23b0e": "a5411c1d88107a8f3682cfcc0cfd35dcd73b5a9c0b310f92f662beac31854409",
+    }
+    assert original.keys() <= {item.entry_hash for item in entries}
+    assert len({item.coordinate for item in entries}) == len(entries)
+    for entry_hash, expected_bytes_hash in original.items():
+        path = DEFAULT_REGISTRY_ROOT / "entries" / f"{entry_hash}.json"
+        assert bytes_hash(path.read_bytes()) == expected_bytes_hash
     for item in entries:
         assert item.archive_hash
         assert item.pom_hash

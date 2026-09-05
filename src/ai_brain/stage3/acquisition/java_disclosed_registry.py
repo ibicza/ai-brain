@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 
 DISCLOSED_REGISTRY_SCHEMA_VERSION = 1
+DISCLOSED_REGISTRY_APPEND_SCHEMA_VERSION = 2
+_GIT_SHA = re.compile(r"[0-9a-f]{40}\Z")
 DEFAULT_REGISTRY_ROOT = (
     Path(__file__).resolve().parents[4] / "artifacts/acquisition/disclosed_java"
 )
@@ -41,6 +44,20 @@ class DisclosedJavaRegistryManifest:
     previous_manifest_hash: str | None
     entry_hashes: tuple[str, ...]
     manifest_hash: str
+
+
+@dataclass(frozen=True)
+class DisclosureRegistryAppendReceipt:
+    schema_version: int
+    previous_registry_manifest_hash: str
+    previous_entry_count: int
+    appended_entry_hashes: tuple[str, ...]
+    appended_entry_count: int
+    resulting_entry_count: int
+    resulting_manifest_hash: str
+    acquisition_run_id: str
+    f20_sha: str
+    receipt_hash: str
 
 
 def build_disclosed_java_material_entry(**values) -> DisclosedJavaMaterialEntry:
@@ -187,6 +204,124 @@ def append_disclosed_java_entries(
     return manifest
 
 
+def append_disclosed_java_entries_v2(
+    root: Path,
+    entries: tuple[DisclosedJavaMaterialEntry, ...],
+    *,
+    acquisition_run_id: str,
+    f20_sha: str,
+) -> tuple[DisclosedJavaRegistryManifest, DisclosureRegistryAppendReceipt]:
+    """Append a new ordered suffix and bind it to the fresh acquisition."""
+
+    if not root.exists():
+        raise ValueError("registry v2 requires an existing disclosed-history root")
+    if not entries:
+        raise ValueError("registry v2 append cannot be empty")
+    if not acquisition_run_id or _GIT_SHA.fullmatch(f20_sha) is None:
+        raise ValueError("registry v2 append requires run ID and exact F20")
+    verify_disclosed_java_registry(root)
+    current = _load_current_manifest(root)
+    existing = load_disclosed_java_registry(root)
+    new_entries = tuple(entries)
+    for entry in new_entries:
+        verify_disclosed_java_material_entry(entry)
+    appended_hashes = tuple(sorted(item.entry_hash for item in new_entries))
+    if len(set(appended_hashes)) != len(appended_hashes):
+        raise ValueError("registry v2 append contains a duplicate entry hash")
+    if set(appended_hashes) & set(current.entry_hashes):
+        raise ValueError("registry v2 append repeats an existing entry hash")
+    _reject_identity_conflicts((*existing, *new_entries))
+    resulting_hashes = (*current.entry_hashes, *appended_hashes)
+    manifest_body = {
+        "schema_version": DISCLOSED_REGISTRY_APPEND_SCHEMA_VERSION,
+        "previous_manifest_hash": current.manifest_hash,
+        "entry_hashes": resulting_hashes,
+    }
+    manifest = DisclosedJavaRegistryManifest(
+        **manifest_body, manifest_hash=content_hash(manifest_body)
+    )
+    entries_root = root / "entries"
+    manifests_root = root / "manifests"
+    manifest_raw = _dump_manifest(manifest)
+    manifest_path = manifests_root / f"{manifest.manifest_hash}.json"
+    current_path = root / "registry_manifest.json"
+    current_raw = current_path.read_bytes()
+    entry_payloads = tuple(
+        (
+            entries_root / f"{entry.entry_hash}.json",
+            dump_disclosed_java_material_entry(entry),
+        )
+        for entry in new_entries
+    )
+    if manifest_path.exists():
+        raise ValueError("registry v2 manifest path already exists")
+    if any(path.exists() for path, _raw in entry_payloads):
+        raise ValueError("registry v2 entry path already exists")
+    created: list[Path] = []
+    current_replaced = False
+    try:
+        for path, raw in entry_payloads:
+            path.write_bytes(raw)
+            created.append(path)
+        manifest_path.write_bytes(manifest_raw)
+        created.append(manifest_path)
+        current_path.write_bytes(manifest_raw)
+        current_replaced = True
+        verify_disclosed_java_registry(root)
+    except Exception:
+        if current_replaced or current_path.read_bytes() != current_raw:
+            current_path.write_bytes(current_raw)
+        for path in reversed(created):
+            path.unlink(missing_ok=True)
+        raise
+    receipt_body = {
+        "schema_version": DISCLOSED_REGISTRY_APPEND_SCHEMA_VERSION,
+        "previous_registry_manifest_hash": current.manifest_hash,
+        "previous_entry_count": len(current.entry_hashes),
+        "appended_entry_hashes": appended_hashes,
+        "appended_entry_count": len(appended_hashes),
+        "resulting_entry_count": len(resulting_hashes),
+        "resulting_manifest_hash": manifest.manifest_hash,
+        "acquisition_run_id": acquisition_run_id,
+        "f20_sha": f20_sha,
+    }
+    receipt = DisclosureRegistryAppendReceipt(
+        **receipt_body, receipt_hash=content_hash(receipt_body)
+    )
+    verify_disclosure_registry_append_receipt(receipt, current, manifest)
+    return manifest, receipt
+
+
+def verify_disclosure_registry_append_receipt(
+    receipt: DisclosureRegistryAppendReceipt,
+    previous: DisclosedJavaRegistryManifest,
+    resulting: DisclosedJavaRegistryManifest,
+) -> None:
+    body = asdict(receipt)
+    claimed = body.pop("receipt_hash")
+    if (
+        receipt.schema_version != DISCLOSED_REGISTRY_APPEND_SCHEMA_VERSION
+        or receipt.previous_registry_manifest_hash != previous.manifest_hash
+        or receipt.previous_entry_count != len(previous.entry_hashes)
+        or receipt.appended_entry_count != len(receipt.appended_entry_hashes)
+        or receipt.appended_entry_count <= 0
+        or tuple(sorted(set(receipt.appended_entry_hashes)))
+        != receipt.appended_entry_hashes
+        or set(receipt.appended_entry_hashes) & set(previous.entry_hashes)
+        or receipt.resulting_entry_count
+        != receipt.previous_entry_count + receipt.appended_entry_count
+        or receipt.resulting_manifest_hash != resulting.manifest_hash
+        or resulting.schema_version != DISCLOSED_REGISTRY_APPEND_SCHEMA_VERSION
+        or resulting.previous_manifest_hash != previous.manifest_hash
+        or resulting.entry_hashes
+        != (*previous.entry_hashes, *receipt.appended_entry_hashes)
+        or not receipt.acquisition_run_id
+        or _GIT_SHA.fullmatch(receipt.f20_sha) is None
+        or content_hash(body) != claimed
+    ):
+        raise ValueError("invalid disclosure registry append receipt")
+
+
 def load_disclosed_java_registry(
     root: Path = DEFAULT_REGISTRY_ROOT,
 ) -> tuple[DisclosedJavaMaterialEntry, ...]:
@@ -206,23 +341,44 @@ def verify_disclosed_java_registry(root: Path = DEFAULT_REGISTRY_ROOT) -> None:
         return
     manifest = _load_current_manifest(root)
     actual = tuple(sorted(path.stem for path in (root / "entries").glob("*.json")))
-    if actual != manifest.entry_hashes:
+    if actual != tuple(sorted(manifest.entry_hashes)):
         raise ValueError("disclosed registry is truncated or contains an unknown entry")
     entries = load_disclosed_java_registry(root)
     _reject_identity_conflicts(entries)
     seen = set()
     cursor = manifest
-    while cursor.previous_manifest_hash is not None:
+    while True:
         if cursor.manifest_hash in seen:
             raise ValueError("disclosed registry manifest chain contains a cycle")
         seen.add(cursor.manifest_hash)
+        snapshot_path = root / "manifests" / f"{cursor.manifest_hash}.json"
+        if (
+            not snapshot_path.exists()
+            or _load_manifest(snapshot_path.read_bytes()) != cursor
+        ):
+            raise ValueError(
+                "disclosed registry manifest snapshot is missing or replaced"
+            )
+        if cursor.previous_manifest_hash is None:
+            break
         previous_path = root / "manifests" / f"{cursor.previous_manifest_hash}.json"
         if not previous_path.exists():
             raise ValueError("disclosed registry manifest history is missing")
         previous = _load_manifest(previous_path.read_bytes())
-        if not set(previous.entry_hashes).issubset(cursor.entry_hashes):
+        if cursor.schema_version == DISCLOSED_REGISTRY_APPEND_SCHEMA_VERSION:
+            prefix = cursor.entry_hashes[: len(previous.entry_hashes)]
+            if prefix != previous.entry_hashes or len(cursor.entry_hashes) <= len(
+                previous.entry_hashes
+            ):
+                raise ValueError(
+                    "disclosed registry v2 append history is not an exact prefix"
+                )
+        elif not set(previous.entry_hashes).issubset(cursor.entry_hashes):
             raise ValueError("disclosed registry rollback or deletion detected")
         cursor = previous
+    known_manifests = {path.stem for path in (root / "manifests").glob("*.json")}
+    if known_manifests != seen:
+        raise ValueError("disclosed registry contains a skipped/orphan manifest parent")
 
 
 def _load_current_manifest(root):
@@ -250,8 +406,16 @@ def _load_manifest(raw):
     body = asdict(manifest)
     claimed = body.pop("manifest_hash")
     if (
-        manifest.schema_version != DISCLOSED_REGISTRY_SCHEMA_VERSION
-        or tuple(sorted(set(manifest.entry_hashes))) != manifest.entry_hashes
+        manifest.schema_version
+        not in {
+            DISCLOSED_REGISTRY_SCHEMA_VERSION,
+            DISCLOSED_REGISTRY_APPEND_SCHEMA_VERSION,
+        }
+        or len(set(manifest.entry_hashes)) != len(manifest.entry_hashes)
+        or (
+            manifest.schema_version == DISCLOSED_REGISTRY_SCHEMA_VERSION
+            and tuple(sorted(manifest.entry_hashes)) != manifest.entry_hashes
+        )
         or any(not _hash(item) for item in manifest.entry_hashes)
         or (
             manifest.previous_manifest_hash is not None
