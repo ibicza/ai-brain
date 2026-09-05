@@ -1,0 +1,21 @@
+{
+  "acquisition_count": 1,
+  "evidence_manifest_bytes_hash": "b873c5f8f0977a9dbd7a6b4e10e94b8657b9be9666d069c838dd54d4d2535848",
+  "evidence_manifest_hash": "12a33851e670cf0d7b07dc1db40d9d3c2e3092f6c4f9623ecc9f42e2d3f0761c",
+  "f19_sha": "845f65056805acd7517ba4959d38d7d3df8ad7ff",
+  "frozen_public_contract_status": "FAIL",
+  "frozen_vault_verifier_karina_status": "FAIL",
+  "frozen_vault_verifier_windows_status": "FAIL",
+  "outcome": "OUTCOME_C_BLOCKED",
+  "portable_vault_file_count": 4469,
+  "portable_vault_tree_hash": "e8d6eae2b740643d4a77277e9b165d2bdfe308ea80cad30fad87eea244102150",
+  "production_started": false,
+  "raw_source_committed": false,
+  "report_hash": "d571d3da8678a425828239de956edd699bcc3584be6edcd66f20d4d65c557424",
+  "schema_version": 1,
+  "selected_file_count": 0,
+  "selector_invocation_count": 1,
+  "selector_rerun_count": 0,
+  "source_leak_count": 0,
+  "source_leak_scan_status": "PASS"
+}

@@ -1,0 +1,22 @@
+{
+  "artifact_count": 14,
+  "f19_sha": "845f65056805acd7517ba4959d38d7d3df8ad7ff",
+  "manifest_hash": "12a33851e670cf0d7b07dc1db40d9d3c2e3092f6c4f9623ecc9f42e2d3f0761c",
+  "rows": [
+    {"bytes": 18257, "path": "h19/acquisition_receipts.json", "sha256": "9353213112f5a5f107f3f3609f739b9ef3df145c478e4dac6ac43a8e8a7918d9"},
+    {"bytes": 642, "path": "h19/blocked_summary.json", "sha256": "efe871bade1ca8ad598d4c639fc79a15f565852e679ebaee8805415a7526c78a"},
+    {"bytes": 440, "path": "h19/cross_platform_vault_comparison.json", "sha256": "04075a863fe744bf17766e9fdc2f2c8fbe44ad259758e5be159835515999f002"},
+    {"bytes": 2223, "path": "h19/disclosed_registry_manifest.json", "sha256": "01825bab163e9bed45e26e7af79fa54cb365b561319cb0e0b7d4671e4f0c5446"},
+    {"bytes": 905913, "path": "h19/disclosure_registry_append.json", "sha256": "af4b5590a555ba8e2581f3c5450134e53d878ca4b21ae8388618ba675a1fc5b3"},
+    {"bytes": 461, "path": "h19/physical_census.json", "sha256": "9accb2ce5da1f36863f303da80c44c378a26c2334428faefd86f8a56aa9152c3"},
+    {"bytes": 407, "path": "h19/public_contract_failure.json", "sha256": "3a9c18457c291f4c08649dd43a4a2e011dc0ce57f24afa3b010375c1cae2007c"},
+    {"bytes": 57936, "path": "h19/qualification_decisions.json", "sha256": "9a257e9acabb23fb7abef7a9bec6f00e23fb94bbdc95a4946dd96669464c5504"},
+    {"bytes": 520, "path": "h19/selector_failure.json", "sha256": "ad90927f643c2109bd074e33092f7784e1117aa36adb5316d1f7090a7f7651c9"},
+    {"bytes": 616, "path": "h19/source_leak_scan.json", "sha256": "c2e7d37524bd6ad70843668df5367937c40bdd56b797a07a9d144855957408ed"},
+    {"bytes": 11244, "path": "h19/source_overlap.json", "sha256": "f5d3b22a581c55cddff1f8d33161765f02c137a06d37efe637f5a0eaf56e3618"},
+    {"bytes": 2548704, "path": "h19/vault_manifest.json", "sha256": "c55683161e2090be087e10ae1d1f35b664230048bff807e78a83091f97cbe077"},
+    {"bytes": 234, "path": "h19/vault_verification_karina.json", "sha256": "8b2eb587bdb8160eafc1a0829e6da409d3eceb542519d7458a080c3644829db9"},
+    {"bytes": 234, "path": "h19/vault_verification_windows.json", "sha256": "8b2eb587bdb8160eafc1a0829e6da409d3eceb542519d7458a080c3644829db9"}
+  ],
+  "schema_version": 1
+}
