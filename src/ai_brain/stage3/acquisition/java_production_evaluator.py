@@ -26,6 +26,10 @@ from ai_brain.stage3.acquisition.java_semantics import (
     semantic_content_confusion,
     type_resolution_semantic_manifest_hash,
 )
+from ai_brain.stage3.acquisition.m336f_thresholds import (
+    M336F_JAVA_ACCEPTANCE_THRESHOLDS,
+    ratio_meets_threshold,
+)
 
 JAVA_DIAGNOSTIC_CATEGORIES = (
     "AMBIGUOUS_TYPE",
@@ -92,7 +96,9 @@ def evaluate_sealed_java_production(
         batch.proposal_batch,
         batch.source_index,
         batch.decisions,
-        include_semantic_status=not batch.closure.checker_version.startswith("m335."),
+        include_semantic_status=not batch.closure.checker_version.startswith(
+            ("m335.", "m336f.")
+        ),
     )
     by_location = {
         (
@@ -127,20 +133,62 @@ def evaluate_sealed_java_production(
     resolution = _resolution_report(golden_manifest, batch)
     diagnostic_categories = _diagnostic_report(golden_manifest, sealed_output)
     breakdowns = _breakdown_report(golden_manifest, sealed_output, semantic)
+    thresholds = M336F_JAVA_ACCEPTANCE_THRESHOLDS
     passed = (
-        location.precision == "1.000000"
-        and location.recall >= "0.950000"
-        and semantic.exact_semantic_precision == "1.000000"
-        and semantic.exact_semantic_recall >= "0.950000"
-        and trust.precision == "1.000000"
-        and trust.wrong_trusted == 0
-        and trust.coverage >= "0.800000"
-        and evidence.exactness == "1.000000"
-        and resolution["oracle_agreement"] == "1.000000"
+        ratio_meets_threshold(
+            location.exact_true_positive,
+            location.exact_true_positive + location.wrong_location_false_positive,
+            thresholds.location_precision,
+        )
+        and ratio_meets_threshold(
+            location.exact_true_positive,
+            location.exact_true_positive + location.missing_false_negative,
+            thresholds.location_recall,
+        )
+        and ratio_meets_threshold(
+            semantic.exact_true_positive,
+            semantic.exact_true_positive + semantic.semantic_false_positive,
+            thresholds.semantic_precision,
+        )
+        and ratio_meets_threshold(
+            semantic.exact_true_positive,
+            semantic.exact_true_positive + semantic.missing_false_negative,
+            thresholds.semantic_recall,
+        )
+        and ratio_meets_threshold(
+            trust.correct_trusted,
+            trust.correct_trusted + trust.wrong_trusted,
+            thresholds.trust_precision,
+        )
+        and trust.wrong_trusted == thresholds.wrong_trusted
+        and ratio_meets_threshold(
+            trust.correct_trusted,
+            trust.correct_trusted + trust.incorrect_withheld,
+            thresholds.safe_trust_coverage,
+        )
+        and ratio_meets_threshold(
+            evidence.exact,
+            evidence.present,
+            thresholds.field_evidence_exactness,
+        )
+        and evidence.missing
+        == evidence.extra
+        == evidence.duplicate
+        == evidence.wrong
+        == 0
+        and ratio_meets_threshold(
+            resolution["declaration_agreement"],
+            resolution["declaration_total"],
+            thresholds.resolution_agreement,
+        )
         and sum(
             item["trusted_count"]
             for item in diagnostic_categories
-            if item["scope"] == JavaDiagnosticScope.DECLARATION_HEADER_BLOCKING.value
+            if item["scope"]
+            in {
+                JavaDiagnosticScope.DECLARATION_HEADER_BLOCKING.value,
+                JavaDiagnosticScope.ENCLOSING_TYPE_BLOCKING.value,
+            }
         )
         == 0
     )

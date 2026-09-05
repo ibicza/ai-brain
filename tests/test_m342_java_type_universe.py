@@ -98,6 +98,12 @@ def test_missing_explicit_fqn_and_foreign_simple_names_abstain():
     assert _resolve("ZoneId", package_name="foreign.package").resolved_type is None
 
 
+def test_jdk_unsupported_exported_sun_misc_type_is_in_frozen_inventory():
+    resolved = _resolve("Unsafe", explicit_imports={"Unsafe": ("sun.misc.Unsafe",)})
+    assert resolved.resolution_kind is JavaResolutionKind.EXPLICIT_IMPORT
+    assert resolved.resolved_type == "sun.misc.Unsafe"
+
+
 def test_wildcard_ambiguity_and_invalid_duplicate_imports_abstain():
     source = ("alpha.Value", "beta.Value")
     wildcard = _resolve(

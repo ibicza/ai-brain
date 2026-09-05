@@ -155,7 +155,7 @@ def _java_object_type(_requirement, declaration, *_args):
 
 def _generic_constraint(requirement, declaration, *_args):
     item = tuple(
-        value for value in declaration.type_variables_detail if value.explicit_bounds
+        value for value in _callable_type_details(declaration) if value.explicit_bounds
     )[_index(requirement.field_path)]
     return f"{item.name} extends {' & '.join(_normalize_type(value) for value in item.bounds)}"
 

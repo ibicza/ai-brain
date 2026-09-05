@@ -14,7 +14,12 @@ from ai_brain.stage3.acquisition.java_compilation_identity import (
 )
 from ai_brain.stage3.acquisition.java_production import (
     JavaProductionTrustBatch,
+    bind_java_production_trust,
     run_java_acquisition_pipeline,
+)
+from ai_brain.stage3.acquisition.java_production_compiler import (
+    java_compilation_trust_gate_from_dict,
+    java_production_compiler_report_from_dict,
 )
 from ai_brain.stage3.acquisition.java_release import (
     JavaReleaseIdentity,
@@ -25,7 +30,7 @@ from ai_brain.stage3.acquisition.persistence import AcquisitionStore, _document
 from ai_brain.stage3.domains.aliases import ALIAS_SEMANTICS_DEPENDENCY_PREFIX
 from ai_brain.stage3.domains.loader import load_pack
 
-JAVA_PRODUCTION_REPLAY_SCHEMA_VERSION = 1
+JAVA_PRODUCTION_REPLAY_SCHEMA_VERSION = 2
 JAVA_PRODUCTION_REPLAY_FILENAME = "java_production_closure.json"
 JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX = "java-production-closure."
 
@@ -45,8 +50,9 @@ def build_java_production_replay_artifact(batch, store, source_bindings):
         for digest in canonical_hashes
     )
     expected = _expected_artifacts(batch)
+    compiler_aware = batch.compiler_report is not None
     body = {
-        "schema_version": JAVA_PRODUCTION_REPLAY_SCHEMA_VERSION,
+        "schema_version": 2 if compiler_aware else 1,
         "deterministic_run_id": batch.closure.deterministic_run_id,
         "bundle": _semantic_bundle(batch.bundle),
         "raw_source_blobs": raw_blobs,
@@ -60,6 +66,14 @@ def build_java_production_replay_artifact(batch, store, source_bindings):
         "expected_production_artifacts_hash": content_hash(expected),
         "parser_common_artifact": asdict(batch.parser_common_artifact),
         "compiled_source_bindings": tuple(asdict(item) for item in source_bindings),
+        **(
+            {
+                "compiler_report": asdict(batch.compiler_report),
+                "compilation_trust_gate": asdict(batch.compilation_trust_gate),
+            }
+            if compiler_aware
+            else {}
+        ),
     }
     return {**body, "artifact_hash": content_hash(body)}
 
@@ -97,7 +111,7 @@ def verify_compiled_java_production_standalone(pack_root: Path) -> dict[str, obj
         pack.alias_semantics is None
     ) != (not other_dependencies):
         raise ValueError("pack does not bind exact Java production replay artifact")
-    if row["schema_version"] != JAVA_PRODUCTION_REPLAY_SCHEMA_VERSION:
+    if row["schema_version"] not in {1, JAVA_PRODUCTION_REPLAY_SCHEMA_VERSION}:
         raise ValueError("unsupported Java production replay schema")
     _verify_source_closure(row)
     expected = row["expected_production_artifacts"]
@@ -120,6 +134,27 @@ def verify_compiled_java_production_standalone(pack_root: Path) -> dict[str, obj
             deterministic_run_id=row["deterministic_run_id"],
             release_identity=release,
         )
+        if row["schema_version"] == 2:
+            compiler_report = java_production_compiler_report_from_dict(
+                row["compiler_report"]
+            )
+            compilation_gate = java_compilation_trust_gate_from_dict(
+                row["compilation_trust_gate"]
+            )
+            batch = bind_java_production_trust(
+                batch.bundle,
+                batch.segmentation,
+                batch.source_index,
+                batch.proposal_batch,
+                batch.field_evidence,
+                batch.evidence_policy,
+                batch.release_identity,
+                batch.parser_common_artifact,
+                batch.parser_platform_artifact,
+                compiler_report=compiler_report,
+                compilation_trust_gate=compilation_gate,
+                deterministic_run_id=row["deterministic_run_id"],
+            )
     if _expected_artifacts(batch) != expected:
         raise ValueError("standalone Java production replay mismatch")
     if canonical_json(asdict(batch.parser_common_artifact)) != canonical_json(
@@ -142,6 +177,9 @@ def verify_compiled_java_production_standalone(pack_root: Path) -> dict[str, obj
         "evidence_count": batch.field_evidence.evidence_count,
         "raw_source_blob_count": len(row["raw_source_blobs"]),
         "canonical_text_blob_count": len(row["canonical_text_blobs"]),
+        "compiler_report_hash": (
+            batch.compiler_report.report_hash if batch.compiler_report else None
+        ),
     }
 
 

@@ -7,6 +7,9 @@ from decimal import Decimal
 from enum import StrEnum
 
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.m336f_thresholds import (
+    M336F_JAVA_ACCEPTANCE_THRESHOLDS,
+)
 
 
 class JavaPreFreezeV2Decision(StrEnum):
@@ -67,14 +70,54 @@ M344_PRE_FREEZE_V2_SPECS = (
     ("corpus.nested", "real_nested_member_target_count", "MIN", "20"),
     ("corpus.package_info_excluded", "package_info_callable_file_count", "MAX", "0"),
     ("corpus.synthetic_share", "synthetic_target_share", "MAX", "0.500000"),
-    ("location.precision", "real_location_precision", "MIN", "1.000000"),
-    ("location.recall", "real_location_recall", "MIN", "0.950000"),
-    ("semantic.precision", "real_semantic_precision", "MIN", "1.000000"),
-    ("semantic.recall", "real_semantic_recall", "MIN", "0.950000"),
-    ("trust.precision", "real_trust_precision", "MIN", "1.000000"),
-    ("trust.wrong", "wrong_trusted_count", "MAX", "0"),
-    ("trust.coverage", "real_trust_coverage", "MIN", "0.800000"),
-    ("evidence.exactness", "trusted_field_evidence_exactness", "MIN", "1.000000"),
+    (
+        "location.precision",
+        "real_location_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_precision,
+    ),
+    (
+        "location.recall",
+        "real_location_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_recall,
+    ),
+    (
+        "semantic.precision",
+        "real_semantic_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_precision,
+    ),
+    (
+        "semantic.recall",
+        "real_semantic_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_recall,
+    ),
+    (
+        "trust.precision",
+        "real_trust_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.trust_precision,
+    ),
+    (
+        "trust.wrong",
+        "wrong_trusted_count",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.wrong_trusted),
+    ),
+    (
+        "trust.coverage",
+        "real_trust_coverage",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.safe_trust_coverage,
+    ),
+    (
+        "evidence.exactness",
+        "trusted_field_evidence_exactness",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.field_evidence_exactness,
+    ),
     ("release.consistency", "release_consistency_pass", "BOOL", "true"),
     ("review.identity", "automated_reviewer_not_user", "BOOL", "true"),
     ("freeze.git_derived", "freeze_snapshots_git_derived", "BOOL", "true"),

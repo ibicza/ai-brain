@@ -7,6 +7,9 @@ from decimal import Decimal
 from enum import StrEnum
 
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.m336f_thresholds import (
+    M336F_JAVA_ACCEPTANCE_THRESHOLDS,
+)
 
 
 class M335PreFreezeDecision(StrEnum):
@@ -56,20 +59,75 @@ M335_PRE_FREEZE_V3_SPECS = (
     ("packability.replay", "candidate_pack_replay_pass", "BOOL", "true"),
     ("packability.install", "candidate_pack_installation_pass", "BOOL", "true"),
     ("packability.runtime", "candidate_runtime_query_pass", "BOOL", "true"),
-    ("packability.post_trust", "post_trust_identity_failure_count", "MAX", "0"),
+    (
+        "packability.post_trust",
+        "post_trust_identity_failure_count",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.post_trust_pack_failures),
+    ),
     ("determinism.matrix", "permutation_matrix_pass", "BOOL", "true"),
     ("determinism.platform", "cross_platform_component_match", "BOOL", "true"),
     ("determinism.first", "first_divergent_stage_none", "BOOL", "true"),
-    ("determinism.differences", "platform_independent_difference_count", "MAX", "0"),
-    ("semantic.location_precision", "location_precision", "MIN", "1.000000"),
-    ("semantic.location_recall", "location_recall", "MIN", "0.950000"),
-    ("semantic.precision", "semantic_precision", "MIN", "1.000000"),
-    ("semantic.recall", "semantic_recall", "MIN", "0.950000"),
-    ("trust.precision", "automatic_trust_precision", "MIN", "1.000000"),
-    ("trust.wrong", "wrong_trusted_count", "MAX", "0"),
-    ("trust.coverage", "trust_coverage", "MIN", "0.800000"),
-    ("evidence.exactness", "trusted_field_evidence_exactness", "MIN", "1.000000"),
-    ("resolution.agreement", "resolution_agreement", "MIN", "1.000000"),
+    (
+        "determinism.differences",
+        "platform_independent_difference_count",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.cross_platform_semantic_differences),
+    ),
+    (
+        "semantic.location_precision",
+        "location_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_precision,
+    ),
+    (
+        "semantic.location_recall",
+        "location_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_recall,
+    ),
+    (
+        "semantic.precision",
+        "semantic_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_precision,
+    ),
+    (
+        "semantic.recall",
+        "semantic_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_recall,
+    ),
+    (
+        "trust.precision",
+        "automatic_trust_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.trust_precision,
+    ),
+    (
+        "trust.wrong",
+        "wrong_trusted_count",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.wrong_trusted),
+    ),
+    (
+        "trust.coverage",
+        "trust_coverage",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.safe_trust_coverage,
+    ),
+    (
+        "evidence.exactness",
+        "trusted_field_evidence_exactness",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.field_evidence_exactness,
+    ),
+    (
+        "resolution.agreement",
+        "resolution_agreement",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.resolution_agreement,
+    ),
     ("freeze.roles", "role_aware_verifier_pass", "BOOL", "true"),
     ("freeze.neutral", "neutral_blob_reuse_pass", "BOOL", "true"),
     ("freeze.mutations", "all_disclosure_mutations_blocked", "BOOL", "true"),

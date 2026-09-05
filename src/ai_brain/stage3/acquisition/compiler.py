@@ -150,7 +150,10 @@ def compile_provisional_pack(
         )
     )
     if not selected or len(selected) != len(approvals):
-        raise ValueError("pack compilation requires exact approved proposal closure")
+        raise ValueError(
+            "pack compilation requires exact approved proposal closure: "
+            f"selected={len(selected)} approvals={len(approvals)}"
+        )
     if java_domain:
         batch = production_trust_batch or trust_bound_batch
         trusted = {item.proposal_id: item for item in batch.trusted_proposals}

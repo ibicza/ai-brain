@@ -416,6 +416,13 @@ def _type_declaration(
     )
     receiver = _receiver(package, names)
     direct_super_types = _direct_super_types(node, raw)
+    own_access = _accessibility(_modifiers(node, raw))
+    if (
+        context is not None
+        and context.declaration_kind in {"interface", "annotation"}
+        and own_access == "PACKAGE"
+    ):
+        own_access = "PUBLIC"
     declaration = _make_declaration(
         node=node,
         name_node=name_node,
@@ -441,14 +448,8 @@ def _type_declaration(
         enclosing_type_accessibility=(context.accessibility if context else "PUBLIC"),
         supported=not local,
         unsupported_reason="local_type" if local else None,
+        accessibility_override=own_access,
     )
-    own_access = _accessibility(declaration.modifiers)
-    if (
-        context is not None
-        and context.declaration_kind in {"interface", "annotation"}
-        and own_access == "PACKAGE"
-    ):
-        own_access = "PUBLIC"
     enclosing_access = (
         _combined_accessibility(
             context.accessibility, context.enclosing_type_accessibility
@@ -629,6 +630,7 @@ def _make_declaration(
     enclosing_type_accessibility,
     supported,
     unsupported_reason,
+    accessibility_override=None,
 ):
     declaration_span = _location(node, raw)
     javadoc_node = _associated_javadoc(node)
@@ -712,7 +714,7 @@ def _make_declaration(
         "resolved_declared_exceptions": (),
         "exception_resolution_receipt_hashes": (),
         "type_occurrence_resolutions": (),
-        "accessibility": _accessibility(modifiers),
+        "accessibility": accessibility_override or _accessibility(modifiers),
         "enclosing_type_accessibility": enclosing_type_accessibility,
         "module_name": _source_module_name(document.relative_path),
         "package_exported": True,
@@ -1073,18 +1075,40 @@ def _direct_super_types(node, raw):
     result = []
     superclass = node.child_by_field_name("superclass")
     if superclass is not None and superclass.named_children:
-        result.append(_text(superclass.named_children[0], raw))
+        result.extend(
+            _split_direct_super_types(_text(superclass.named_children[0], raw))
+        )
     interfaces = node.child_by_field_name("interfaces")
     if interfaces is not None:
-        result.extend(
-            _text(item, raw)
-            for item in interfaces.named_children
-            if item.type not in {"extends_interfaces", "super_interfaces"}
-        )
+        for item in interfaces.named_children:
+            if item.type not in {"extends_interfaces", "super_interfaces"}:
+                result.extend(_split_direct_super_types(_text(item, raw)))
         for container in interfaces.named_children:
             if container.type in {"extends_interfaces", "super_interfaces"}:
-                result.extend(_text(item, raw) for item in container.named_children)
+                for item in container.named_children:
+                    result.extend(_split_direct_super_types(_text(item, raw)))
     return tuple(result)
+
+
+def _split_direct_super_types(value: str) -> tuple[str, ...]:
+    """Split a direct-super list while preserving commas inside generic types."""
+
+    result = []
+    start = depth = 0
+    for index, character in enumerate(value):
+        if character == "<":
+            depth += 1
+        elif character == ">":
+            depth -= 1
+            if depth < 0:
+                raise ValueError("malformed direct-super generic type")
+        elif character == "," and depth == 0:
+            result.append(value[start:index].strip())
+            start = index + 1
+    if depth:
+        raise ValueError("malformed direct-super generic type")
+    result.append(value[start:].strip())
+    return tuple(item for item in result if item)
 
 
 def _resolved_super_type_graph(declarations, universe):

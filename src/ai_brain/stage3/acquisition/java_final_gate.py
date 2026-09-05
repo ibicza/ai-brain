@@ -7,6 +7,9 @@ from decimal import Decimal
 from enum import Enum, StrEnum
 
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.m336f_thresholds import (
+    M336F_JAVA_ACCEPTANCE_THRESHOLDS,
+)
 
 
 class JavaFinalOutcome(str, Enum):
@@ -44,15 +47,60 @@ M344_FINAL_GATE_SPECS = (
     ("corpus.generics", "real_generic_method_count", "MIN", "100"),
     ("corpus.throws", "real_throws_declaration_count", "MIN", "100"),
     ("corpus.nested", "real_nested_member_target_count", "MIN", "25"),
-    ("location.precision", "real_location_precision", "MIN", "1.000000"),
-    ("location.recall", "real_location_recall", "MIN", "0.950000"),
-    ("semantic.precision", "real_semantic_precision", "MIN", "1.000000"),
-    ("semantic.recall", "real_semantic_recall", "MIN", "0.950000"),
-    ("trust.precision", "real_trust_precision", "MIN", "1.000000"),
-    ("trust.wrong", "wrong_trusted_count", "MAX", "0"),
-    ("trust.coverage", "real_trust_coverage", "MIN", "0.800000"),
-    ("evidence.exact", "trusted_field_evidence_exactness", "MIN", "1.000000"),
-    ("resolution.exact", "resolution_oracle_agreement", "MIN", "1.000000"),
+    (
+        "location.precision",
+        "real_location_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_precision,
+    ),
+    (
+        "location.recall",
+        "real_location_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_recall,
+    ),
+    (
+        "semantic.precision",
+        "real_semantic_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_precision,
+    ),
+    (
+        "semantic.recall",
+        "real_semantic_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_recall,
+    ),
+    (
+        "trust.precision",
+        "real_trust_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.trust_precision,
+    ),
+    (
+        "trust.wrong",
+        "wrong_trusted_count",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.wrong_trusted),
+    ),
+    (
+        "trust.coverage",
+        "real_trust_coverage",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.safe_trust_coverage,
+    ),
+    (
+        "evidence.exact",
+        "trusted_field_evidence_exactness",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.field_evidence_exactness,
+    ),
+    (
+        "resolution.exact",
+        "resolution_oracle_agreement",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.resolution_agreement,
+    ),
     ("duplicates.none", "duplicate_derived_trusted", "MAX", "0"),
     ("release.exact", "release_consistency_pass", "BOOL", "true"),
     ("production.oracle_free", "oracle_free_production_pass", "BOOL", "true"),
@@ -118,7 +166,11 @@ def _display(value) -> str:
         return str(value).lower()
     if isinstance(value, dict):
         denominator = value["denominator"]
-        return "N/A" if denominator == 0 else f"{value['numerator'] / denominator:.6f}"
+        return (
+            "N/A"
+            if denominator == 0
+            else f"{Decimal(value['numerator']) / Decimal(denominator):.6f}"
+        )
     return str(value)
 
 
@@ -128,10 +180,10 @@ def _compare(value, operator: str, threshold: str) -> bool:
     if isinstance(value, dict):
         if value["denominator"] == 0:
             return False
-        measured = value["numerator"] / value["denominator"]
+        measured = Decimal(value["numerator"]) / Decimal(value["denominator"])
     else:
-        measured = float(value)
-    target = float(threshold)
+        measured = Decimal(str(value))
+    target = Decimal(threshold)
     return measured >= target if operator == "MIN" else measured <= target
 
 
@@ -173,20 +225,86 @@ M336_FINAL_GATE_SPECS = (
     ("corpus.nested", "real_nested_member_target_count", "MIN", "25", False),
     ("corpus.synthetic", "synthetic_target_count", "MAX", "0", True),
     ("corpus.root_share", "maximum_root_target_fraction", "MAX", "0.800000", False),
-    ("location.precision", "location_precision", "MIN", "1.000000", False),
-    ("location.recall", "location_recall", "MIN", "0.950000", False),
-    ("semantic.precision", "semantic_precision", "MIN", "1.000000", False),
-    ("semantic.recall", "semantic_recall", "MIN", "0.950000", False),
-    ("trust.precision", "trust_precision", "MIN", "1.000000", True),
-    ("trust.wrong", "wrong_trusted_count", "MAX", "0", True),
-    ("trust.coverage", "trust_coverage", "MIN", "0.800000", False),
-    ("evidence.exact", "field_evidence_exactness", "MIN", "1.000000", True),
-    ("resolution.exact", "resolution_agreement", "MIN", "1.000000", True),
+    (
+        "location.precision",
+        "location_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_precision,
+        False,
+    ),
+    (
+        "location.recall",
+        "location_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_recall,
+        False,
+    ),
+    (
+        "semantic.precision",
+        "semantic_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_precision,
+        False,
+    ),
+    (
+        "semantic.recall",
+        "semantic_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_recall,
+        False,
+    ),
+    (
+        "trust.precision",
+        "trust_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.trust_precision,
+        True,
+    ),
+    (
+        "trust.wrong",
+        "wrong_trusted_count",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.wrong_trusted),
+        True,
+    ),
+    (
+        "trust.coverage",
+        "trust_coverage",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.safe_trust_coverage,
+        False,
+    ),
+    (
+        "evidence.exact",
+        "field_evidence_exactness",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.field_evidence_exactness,
+        True,
+    ),
+    (
+        "resolution.exact",
+        "resolution_agreement",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.resolution_agreement,
+        True,
+    ),
     ("packability.coverage", "trusted_packability_coverage", "MIN", "1.000000", True),
-    ("packability.post", "post_trust_pack_failures", "MAX", "0", True),
+    (
+        "packability.post",
+        "post_trust_pack_failures",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.post_trust_pack_failures),
+        True,
+    ),
     ("packability.overload", "legal_overloads_blocked", "MAX", "0", True),
     ("diagnostics.header", "trusted_header_blocking_diagnostics", "MAX", "0", True),
-    ("platform.differences", "platform_independent_differences", "MAX", "0", True),
+    (
+        "platform.differences",
+        "platform_independent_differences",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.cross_platform_semantic_differences),
+        True,
+    ),
     ("isolation.dependencies", "production_evaluator_dependencies", "MAX", "0", True),
     ("isolation.golden_reads", "production_golden_reads", "MAX", "0", True),
     ("corpus.overlap", "final_source_overlap", "MAX", "0", True),

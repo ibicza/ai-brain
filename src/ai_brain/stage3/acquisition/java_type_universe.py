@@ -428,26 +428,30 @@ def source_symbol_metadata(
 
 def _platform_symbol_metadata(binary_name: str) -> JavaSymbolMetadata:
     package, top, enclosing = _name_parts(binary_name)
-    exported = not (
+    jdk_unsupported_export = binary_name.startswith(
+        ("com.sun.nio.file.", "sun.misc.", "sun.reflect.")
+    )
+    exported = jdk_unsupported_export or not (
         binary_name.startswith(("sun.", "jdk.internal.")) or ".internal." in binary_name
     )
-    module = (
-        "java.base"
-        if binary_name.startswith(
-            (
-                "java.lang.",
-                "java.util.",
-                "java.io.",
-                "java.net.",
-                "java.nio.",
-                "java.time.",
-                "java.math.",
-                "java.security.",
-                "java.text.",
-            )
+    if jdk_unsupported_export:
+        module = "jdk.unsupported"
+    elif binary_name.startswith(
+        (
+            "java.lang.",
+            "java.util.",
+            "java.io.",
+            "java.net.",
+            "java.nio.",
+            "java.time.",
+            "java.math.",
+            "java.security.",
+            "java.text.",
         )
-        else "java.platform"
-    )
+    ):
+        module = "java.base"
+    else:
+        module = "java.platform"
     body = {
         "binary_name": binary_name.replace("$", "."),
         "package_name": package,

@@ -9,6 +9,9 @@ from enum import StrEnum
 from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.m336f_thresholds import (
+    M336F_JAVA_ACCEPTANCE_THRESHOLDS,
+)
 
 
 class PreFreezeDecision(StrEnum):
@@ -57,15 +60,55 @@ _SPECS = (
     ("corpus.throws", "throws_declaration_count", "MIN", "50"),
     ("corpus.nested", "nested_member_case_count", "MIN", "25"),
     ("corpus.hash_disjoint", "prior_source_hash_intersection_count", "MAX", "0"),
-    ("location.precision", "location_precision", "MIN", "1.000000"),
-    ("location.recall", "location_recall", "MIN", "0.950000"),
-    ("semantic.precision", "semantic_precision", "MIN", "1.000000"),
-    ("semantic.recall", "semantic_recall", "MIN", "0.950000"),
+    (
+        "location.precision",
+        "location_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_precision,
+    ),
+    (
+        "location.recall",
+        "location_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_recall,
+    ),
+    (
+        "semantic.precision",
+        "semantic_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_precision,
+    ),
+    (
+        "semantic.recall",
+        "semantic_recall",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_recall,
+    ),
     ("semantic.wrong_content", "correct_location_wrong_content", "MAX", "0"),
-    ("trust.precision", "trust_precision", "MIN", "1.000000"),
-    ("trust.wrong", "wrong_trusted_count", "MAX", "0"),
-    ("trust.coverage", "trust_coverage", "MIN", "0.800000"),
-    ("resolution.oracle_agreement", "resolution_oracle_agreement", "MIN", "1.000000"),
+    (
+        "trust.precision",
+        "trust_precision",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.trust_precision,
+    ),
+    (
+        "trust.wrong",
+        "wrong_trusted_count",
+        "MAX",
+        str(M336F_JAVA_ACCEPTANCE_THRESHOLDS.wrong_trusted),
+    ),
+    (
+        "trust.coverage",
+        "trust_coverage",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.safe_trust_coverage,
+    ),
+    (
+        "resolution.oracle_agreement",
+        "resolution_oracle_agreement",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.resolution_agreement,
+    ),
     (
         "resolution.invalid_bound_fallback",
         "invalid_bound_object_fallback_count",
@@ -83,8 +126,18 @@ _SPECS = (
     ("evidence.extra", "evidence_extra_count", "MAX", "0"),
     ("evidence.duplicate", "evidence_duplicate_count", "MAX", "0"),
     ("evidence.wrong", "evidence_wrong_count", "MAX", "0"),
-    ("evidence.transform_exactness", "transformation_exactness", "MIN", "1.000000"),
-    ("evidence.oracle_agreement", "oracle_field_agreement", "MIN", "1.000000"),
+    (
+        "evidence.transform_exactness",
+        "transformation_exactness",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.field_evidence_exactness,
+    ),
+    (
+        "evidence.oracle_agreement",
+        "oracle_field_agreement",
+        "MIN",
+        M336F_JAVA_ACCEPTANCE_THRESHOLDS.field_evidence_exactness,
+    ),
     ("ir.hardcoded_object_type", "hardcoded_java_object_type_count", "MAX", "0"),
     ("ir.void_constructor", "void_constructor_mapping_pass", "BOOL", "true"),
     ("overload.legal_conflicts", "legal_overload_conflict_count", "MAX", "0"),

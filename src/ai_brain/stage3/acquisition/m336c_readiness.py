@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from enum import StrEnum
 
 from ai_brain.stage2.facts.canonical import content_hash
+from ai_brain.stage3.acquisition.m336f_thresholds import (
+    M336F_JAVA_ACCEPTANCE_THRESHOLDS,
+)
 
 
 class M336CReadinessDecision(StrEnum):
@@ -299,25 +303,56 @@ def evaluate_m336c_readiness(
         "wrong_trusted",
         ("evaluator",),
         evaluator["wrong_trusted_count"],
-        evaluator["wrong_trusted_count"] == 0,
+        evaluator["wrong_trusted_count"]
+        == M336F_JAVA_ACCEPTANCE_THRESHOLDS.wrong_trusted,
     )
     for name, threshold in (
-        ("location_precision", 1.0),
-        ("location_recall", 0.95),
-        ("semantic_precision", 1.0),
-        ("semantic_recall", 0.95),
-        ("trust_precision", 1.0),
-        ("trust_coverage", 0.8),
-        ("field_evidence_exactness", 1.0),
-        ("resolution_agreement", 1.0),
+        (
+            "location_precision",
+            Decimal(M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_precision),
+        ),
+        (
+            "location_recall",
+            Decimal(M336F_JAVA_ACCEPTANCE_THRESHOLDS.location_recall),
+        ),
+        (
+            "semantic_precision",
+            Decimal(M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_precision),
+        ),
+        (
+            "semantic_recall",
+            Decimal(M336F_JAVA_ACCEPTANCE_THRESHOLDS.semantic_recall),
+        ),
+        (
+            "trust_precision",
+            Decimal(M336F_JAVA_ACCEPTANCE_THRESHOLDS.trust_precision),
+        ),
+        (
+            "trust_coverage",
+            Decimal(M336F_JAVA_ACCEPTANCE_THRESHOLDS.safe_trust_coverage),
+        ),
+        (
+            "field_evidence_exactness",
+            Decimal(M336F_JAVA_ACCEPTANCE_THRESHOLDS.field_evidence_exactness),
+        ),
+        (
+            "resolution_agreement",
+            Decimal(M336F_JAVA_ACCEPTANCE_THRESHOLDS.resolution_agreement),
+        ),
     ):
         observed = _ratio(evaluator[name])
-        criterion(name, ("evaluator",), f"{observed:.6f}", observed >= threshold)
+        criterion(
+            name,
+            ("evaluator",),
+            f"{observed:.6f}",
+            observed >= threshold,
+        )
     criterion(
         "post_trust_pack_failures",
         ("java_production",),
         production["post_trust_pack_failures"],
-        production["post_trust_pack_failures"] == 0,
+        production["post_trust_pack_failures"]
+        == M336F_JAVA_ACCEPTANCE_THRESHOLDS.post_trust_pack_failures,
     )
     criterion(
         "production_evaluator_dependencies",
@@ -419,11 +454,11 @@ def verify_m336c_readiness(
         )
 
 
-def _ratio(value) -> float:
+def _ratio(value) -> Decimal:
     try:
-        result = float(value)
-    except (TypeError, ValueError) as exc:
+        result = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError) as exc:
         raise ValueError("readiness ratio is not numeric") from exc
-    if not 0.0 <= result <= 1.0:
+    if not Decimal(0) <= result <= Decimal(1):
         raise ValueError("readiness ratio is outside [0,1]")
     return result

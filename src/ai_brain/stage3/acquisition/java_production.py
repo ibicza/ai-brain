@@ -30,6 +30,15 @@ from ai_brain.stage3.acquisition.java_parser_artifact import (
     JavaParserCommonArtifactManifest,
     verify_java_parser_artifact,
 )
+from ai_brain.stage3.acquisition.java_production_compiler import (
+    JavaCompilationTrustGate,
+    JavaProductionCompilationProbe,
+    JavaProductionCompilerReport,
+    build_java_compilation_trust_gate,
+    run_java_production_compilation_probe,
+    verify_java_compilation_trust_gate,
+    verify_java_production_compiler_report,
+)
 from ai_brain.stage3.acquisition.java_proposals import (
     JavaProposalBatch,
     propose_java_knowledge,
@@ -67,6 +76,7 @@ from ai_brain.stage3.acquisition.trust import (
 from ai_brain.stage3.acquisition.verification import verify_proposals
 
 JAVA_PRODUCTION_CHECKER_VERSION = "m335.source-entailed-java-trust.v2"
+M336F_JAVA_PRODUCTION_CHECKER_VERSION = "m336f.compiler-aware-java-trust.v1"
 JAVA_PRODUCTION_VERIFIER_VERSION = "m335.java-production-verifier.v2"
 _ISSUED_AUTHORIZATIONS: dict[int, ref] = {}
 
@@ -98,6 +108,10 @@ class JavaProductionTrustDecision:
     final_state: ProposalTrustState
     blocker_reason: str | None
     evidence_receipt_hashes: tuple[str, ...]
+    compiler_report_hash: str | None
+    diagnostic_binding_hashes: tuple[str, ...]
+    compilation_policy_hash: str | None
+    applicable_blocking_diagnostic_hashes: tuple[str, ...]
     transition_receipts: tuple[TrustTransitionReceipt, ...]
     decision_hash: str
 
@@ -126,6 +140,10 @@ class JavaProductionTrustClosure:
     packability_report_hash: str
     trust_decision_manifest_hash: str
     trusted_proposal_manifest_hash: str
+    compiler_report_hash: str | None
+    diagnostic_binding_manifest_hash: str | None
+    compilation_policy_hash: str | None
+    compilation_trust_gate_hash: str | None
     checker_version: str
     deterministic_run_id: str
     closure_hash: str
@@ -151,6 +169,8 @@ class JavaProductionTrustBatch:
     withheld_count: int
     blocker_counts: tuple[tuple[str, int], ...]
     duplicate_derived_trusted_proposals: int
+    compiler_report: JavaProductionCompilerReport | None
+    compilation_trust_gate: JavaCompilationTrustGate | None
     closure: JavaProductionTrustClosure
     batch_hash: str
 
@@ -217,6 +237,53 @@ def run_java_acquisition_pipeline(
     )
 
 
+def run_compiler_aware_java_acquisition_pipeline(
+    bundle: SourceBundle,
+    store,
+    *,
+    deterministic_run_id: str,
+    compilation_probe: JavaProductionCompilationProbe,
+    javac_executable,
+    source_entry_ids: dict[str, str],
+    compilation_work_root=None,
+    release_identity: JavaReleaseIdentity | None = None,
+) -> JavaProductionTrustBatch:
+    """Run M-33.6f production with javac evidence and no evaluator authority."""
+
+    base = run_java_acquisition_pipeline(
+        bundle,
+        store,
+        deterministic_run_id=deterministic_run_id,
+        release_identity=release_identity,
+    )
+    compiler_report = run_java_production_compilation_probe(
+        bundle=bundle,
+        store=store,
+        source_index=base.source_index,
+        probe=compilation_probe,
+        javac_executable=javac_executable,
+        source_entry_ids=source_entry_ids,
+        compilation_work_root=compilation_work_root,
+    )
+    compilation_gate = build_java_compilation_trust_gate(
+        compiler_report, base.source_index
+    )
+    return bind_java_production_trust(
+        bundle,
+        base.segmentation,
+        base.source_index,
+        base.proposal_batch,
+        base.field_evidence,
+        base.evidence_policy,
+        base.release_identity,
+        base.parser_common_artifact,
+        base.parser_platform_artifact,
+        compiler_report=compiler_report,
+        compilation_trust_gate=compilation_gate,
+        deterministic_run_id=deterministic_run_id,
+    )
+
+
 def bind_java_production_trust(
     bundle: SourceBundle,
     segmentation: DeduplicatedSegments,
@@ -228,6 +295,8 @@ def bind_java_production_trust(
     parser_common_artifact: JavaParserCommonArtifactManifest,
     parser_platform_artifact: JavaParserArtifactManifest,
     *,
+    compiler_report: JavaProductionCompilerReport | None = None,
+    compilation_trust_gate: JavaCompilationTrustGate | None = None,
     deterministic_run_id: str,
 ) -> JavaProductionTrustBatch:
     """Grant trust from source identity, resolution, and exact field evidence only."""
@@ -238,6 +307,13 @@ def bind_java_production_trust(
     consistency = evaluate_java_release_consistency(release_identity)
     if field_evidence.evidence_policy_hash != evidence_policy.manifest_hash:
         raise ValueError("Java evidence is outside frozen production policy")
+    if (compiler_report is None) != (compilation_trust_gate is None):
+        raise ValueError("compiler report and trust gate must be supplied together")
+    if compiler_report is not None:
+        verify_java_production_compiler_report(compiler_report)
+        verify_java_compilation_trust_gate(
+            compilation_trust_gate, compiler_report, source_index
+        )
     nodes = declaration_by_node_id(source_index)
     bindings = {item.proposal_id: item for item in proposal_batch.bindings}
     evidence_map = evidence_by_proposal(field_evidence)
@@ -245,13 +321,25 @@ def bind_java_production_trust(
         field_evidence, proposal_batch, source_index, evidence_policy
     )
     classpath_blockers = _classpath_closure_blockers(proposal_batch, source_index)
+    compiler_blockers = (
+        set(compilation_trust_gate.blocked_declaration_ids)
+        if compilation_trust_gate is not None
+        else set()
+    )
     semantic_eligible = tuple(
         proposal.proposal_id
         for proposal in proposal_batch.proposals
         if proposal.status not in {ProposalStatus.VERIFIED, ProposalStatus.APPROVED}
         and nodes[bindings[proposal.proposal_id].parser_node_id].supported
         and proposal.proposal_id not in incomplete
-        and proposal.proposal_id not in classpath_blockers
+        and (
+            compilation_trust_gate is not None
+            or proposal.proposal_id not in classpath_blockers
+        )
+        and bindings[proposal.proposal_id].parser_node_id not in compiler_blockers
+        and not (
+            compilation_trust_gate is not None and compilation_trust_gate.batch_blocked
+        )
         and evidence_map.get(proposal.proposal_id)
     )
     packability = build_java_packability_report(
@@ -269,6 +357,16 @@ def bind_java_production_trust(
         item.proposal_id: item.identity.identity_hash for item in packability.bindings
     }
     decisions = []
+    diagnostic_hashes = (
+        tuple(item.binding_hash for item in compiler_report.bindings)
+        if compiler_report is not None
+        else ()
+    )
+    blocking_by_declaration = (
+        dict(compilation_trust_gate.applicable_blocking_diagnostic_hashes)
+        if compilation_trust_gate is not None
+        else {}
+    )
     for proposal in proposal_batch.proposals:
         declaration = nodes[bindings[proposal.proposal_id].parser_node_id]
         blocker = None
@@ -280,7 +378,16 @@ def bind_java_production_trust(
             )
         elif proposal.proposal_id in implicated:
             blocker = "untrusted_conflicting_identity"
-        elif proposal.proposal_id in classpath_blockers:
+        elif (
+            compilation_trust_gate is not None and compilation_trust_gate.batch_blocked
+        ):
+            blocker = "untrusted_compiler_batch"
+        elif declaration.node_id in compiler_blockers:
+            blocker = "untrusted_compiler_blocking_diagnostic"
+        elif (
+            compilation_trust_gate is None
+            and proposal.proposal_id in classpath_blockers
+        ):
             blocker = "untrusted_" + classpath_blockers[proposal.proposal_id]
         elif proposal.proposal_id in packability_blockers:
             blocker = f"untrusted_{packability_blockers[proposal.proposal_id].lower()}"
@@ -296,6 +403,18 @@ def bind_java_production_trust(
                 blocker,
                 deterministic_run_id,
                 canonical_identities.get(proposal.proposal_id),
+                compiler_report_hash=(
+                    compiler_report.report_hash if compiler_report is not None else None
+                ),
+                diagnostic_binding_hashes=diagnostic_hashes,
+                compilation_policy_hash=(
+                    compilation_trust_gate.compilation_policy_hash
+                    if compilation_trust_gate is not None
+                    else None
+                ),
+                applicable_blocking_diagnostic_hashes=blocking_by_declaration.get(
+                    declaration.node_id, ()
+                ),
             )
         )
     decision_values = tuple(sorted(decisions, key=lambda item: item.proposal_id))
@@ -304,6 +423,12 @@ def bind_java_production_trust(
         for item in decision_values
         if item.final_state is ProposalTrustState.TRUSTED
     }
+    if any(
+        item.applicable_blocking_diagnostic_hashes
+        for item in decision_values
+        if item.proposal_id in trusted_ids
+    ):
+        raise ValueError("trusted Java proposal retains a blocking compiler diagnostic")
     trusted = tuple(
         sorted(
             (
@@ -348,6 +473,8 @@ def bind_java_production_trust(
         decision_values,
         trusted,
         deterministic_run_id,
+        compiler_report,
+        compilation_trust_gate,
     )
     counts = Counter(
         item.blocker_reason for item in decision_values if item.blocker_reason
@@ -371,6 +498,8 @@ def bind_java_production_trust(
         "withheld_count": len(decision_values) - len(trusted),
         "blocker_counts": tuple(sorted(counts.items())),
         "duplicate_derived_trusted_proposals": duplicate_derived,
+        "compiler_report": compiler_report,
+        "compilation_trust_gate": compilation_trust_gate,
         "closure": closure,
     }
     return JavaProductionTrustBatch(**body, batch_hash=_production_batch_hash(body))
@@ -423,6 +552,8 @@ def verify_java_production_batch(
         batch.release_identity,
         batch.parser_common_artifact,
         batch.parser_platform_artifact,
+        compiler_report=batch.compiler_report,
+        compilation_trust_gate=batch.compilation_trust_gate,
         deterministic_run_id=batch.closure.deterministic_run_id,
     )
     if rebuilt != batch:
@@ -494,11 +625,23 @@ def seal_java_production_output(batch: JavaProductionTrustBatch) -> dict:
                 "production_supported": declaration.supported,
                 "production_trust_state": decision.final_state.value,
                 "production_blocker_reason": decision.blocker_reason,
+                **(
+                    {
+                        "compiler_report_hash": decision.compiler_report_hash,
+                        "diagnostic_binding_hashes": decision.diagnostic_binding_hashes,
+                        "compilation_policy_hash": decision.compilation_policy_hash,
+                        "applicable_blocking_diagnostic_hashes": (
+                            decision.applicable_blocking_diagnostic_hashes
+                        ),
+                    }
+                    if batch.compiler_report is not None
+                    else {}
+                ),
                 "decision_hash": decision.decision_hash,
             }
         )
     body = {
-        "schema_version": 1,
+        "schema_version": 2 if batch.compiler_report is not None else 1,
         "release_identity": asdict(batch.release_identity),
         "bundle_hash": batch.bundle.bundle_hash,
         "source_index_hash": batch.source_index.index_hash,
@@ -510,6 +653,22 @@ def seal_java_production_output(batch: JavaProductionTrustBatch) -> dict:
         "packability_report_hash": batch.packability_report.report_hash,
         "trust_closure_hash": batch.closure.closure_hash,
         "candidate_rows": tuple(rows),
+        **(
+            {
+                "compiler_report_hash": batch.compiler_report.report_hash,
+                "compiler_diagnostic_count": batch.compiler_report.diagnostic_count,
+                "diagnostic_binding_count": len(batch.compiler_report.bindings),
+                "unknown_scope_diagnostic_count": (
+                    batch.compiler_report.unknown_scope_count
+                ),
+                "unmapped_diagnostic_count": (
+                    batch.compiler_report.unmapped_diagnostic_count
+                ),
+                "compilation_trust_gate_hash": (batch.compilation_trust_gate.gate_hash),
+            }
+            if batch.compiler_report is not None
+            else {}
+        ),
     }
     return {**body, "production_output_hash": content_hash(body)}
 
@@ -611,7 +770,17 @@ def detect_java_production_identity_conflicts(
 
 
 def _production_decision(
-    proposal, declaration, evidence, blocker, run_id, canonical_identity_hash
+    proposal,
+    declaration,
+    evidence,
+    blocker,
+    run_id,
+    canonical_identity_hash,
+    *,
+    compiler_report_hash,
+    diagnostic_binding_hashes,
+    compilation_policy_hash,
+    applicable_blocking_diagnostic_hashes,
 ):
     if blocker:
         steps = ((ProposalTrustState.CANDIDATE, ProposalTrustState.WITHHELD, blocker),)
@@ -656,6 +825,12 @@ def _production_decision(
         "evidence_receipt_hashes": tuple(
             item.derivation_receipt_hash for item in evidence
         ),
+        "compiler_report_hash": compiler_report_hash,
+        "diagnostic_binding_hashes": tuple(sorted(diagnostic_binding_hashes)),
+        "compilation_policy_hash": compilation_policy_hash,
+        "applicable_blocking_diagnostic_hashes": tuple(
+            sorted(applicable_blocking_diagnostic_hashes)
+        ),
         "transition_receipts": transitions,
     }
     return JavaProductionTrustDecision(**body, decision_hash=content_hash(body))
@@ -699,6 +874,8 @@ def _make_production_closure(
     decisions,
     trusted,
     run_id,
+    compiler_report,
+    compilation_trust_gate,
 ):
     physical = tuple(
         (
@@ -749,7 +926,29 @@ def _make_production_closure(
         "trusted_proposal_manifest_hash": content_hash(
             tuple((item.proposal_id, item.proposal_hash) for item in trusted)
         ),
-        "checker_version": JAVA_PRODUCTION_CHECKER_VERSION,
+        "compiler_report_hash": (
+            compiler_report.report_hash if compiler_report is not None else None
+        ),
+        "diagnostic_binding_manifest_hash": (
+            content_hash(tuple(item.binding_hash for item in compiler_report.bindings))
+            if compiler_report is not None
+            else None
+        ),
+        "compilation_policy_hash": (
+            compilation_trust_gate.compilation_policy_hash
+            if compilation_trust_gate is not None
+            else None
+        ),
+        "compilation_trust_gate_hash": (
+            compilation_trust_gate.gate_hash
+            if compilation_trust_gate is not None
+            else None
+        ),
+        "checker_version": (
+            M336F_JAVA_PRODUCTION_CHECKER_VERSION
+            if compiler_report is not None
+            else JAVA_PRODUCTION_CHECKER_VERSION
+        ),
         "deterministic_run_id": run_id,
     }
     return JavaProductionTrustClosure(**body, closure_hash=content_hash(body))

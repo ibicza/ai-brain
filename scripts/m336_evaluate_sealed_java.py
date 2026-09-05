@@ -25,8 +25,12 @@ from ai_brain.stage3.acquisition.java_goldens import load_java_golden_manifest
 from ai_brain.stage3.acquisition.java_jdk_provider import verify_m336_jdk_provider
 from ai_brain.stage3.acquisition.java_process_audit import EnforcedProcessAudit
 from ai_brain.stage3.acquisition.java_production import (
+    run_compiler_aware_java_acquisition_pipeline,
     run_java_acquisition_pipeline,
     seal_java_production_output,
+)
+from ai_brain.stage3.acquisition.java_production_compiler import (
+    build_java_production_compilation_probe,
 )
 from ai_brain.stage3.acquisition.java_production_evaluator import (
     evaluate_sealed_java_production,
@@ -77,7 +81,13 @@ def _percentiles(samples: list[float]) -> dict:
     }
 
 
-def _reconstruct_batch(source_root: Path, sealed: dict):
+def _reconstruct_batch(
+    source_root: Path,
+    sealed: dict,
+    *,
+    javac: Path | None = None,
+    source_entry_ids: dict[str, str] | None = None,
+):
     sources = tuple(
         sorted(
             source_root.rglob("*.java"),
@@ -94,9 +104,23 @@ def _reconstruct_batch(source_root: Path, sealed: dict):
             store=store,
             source_root=source_root,
         )
-        batch = run_java_acquisition_pipeline(
-            bundle, store, deterministic_run_id=RUN_ID
-        )
+        if sealed.get("schema_version") == 2:
+            if javac is None or source_entry_ids is None:
+                raise ValueError(
+                    "compiler-aware reconstruction requires javac and SourceEntryIds"
+                )
+            batch = run_compiler_aware_java_acquisition_pipeline(
+                bundle,
+                store,
+                deterministic_run_id=RUN_ID,
+                compilation_probe=build_java_production_compilation_probe(javac),
+                javac_executable=javac,
+                source_entry_ids=source_entry_ids,
+            )
+        else:
+            batch = run_java_acquisition_pipeline(
+                bundle, store, deterministic_run_id=RUN_ID
+            )
     if canonical_json(seal_java_production_output(batch)) != canonical_json(sealed):
         raise ValueError("reconstructed batch differs from sealed production output")
     return batch
