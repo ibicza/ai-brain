@@ -26,6 +26,7 @@ from ai_brain.stage3.acquisition.java_goldens import load_java_golden_manifest
 from ai_brain.stage3.acquisition.java_jdk_provider import (
     frozen_m336_jdk_provider_manifest,
     verify_m336_jdk_provider,
+    verify_m336_jdk_provider_evidence,
 )
 from ai_brain.stage3.acquisition.java_production_compiler import (
     java_production_compilation_probe_from_dict,
@@ -62,6 +63,10 @@ from ai_brain.stage3.acquisition.m336f_thresholds import (
 from ai_brain.stage3.acquisition.m336f_trust_opportunities import (
     build_trust_coverage_opportunity_report,
 )
+from ai_brain.stage3.acquisition.m336g_publication import (
+    run_java_public_pack_contract_validation,
+    verify_java_public_candidate_pack,
+)
 from ai_brain.stage3.domains.loader import load_pack
 
 
@@ -94,6 +99,9 @@ def _require_clean_exact(repository: Path, expected: str) -> None:
 
 
 def _verify_production_seals(args) -> None:
+    if args.m336g_publication:
+        _verify_m336g_production_seals(args)
+        return
     if args.development and (
         args.windows_production_root is None or args.karina_production_root is None
     ):
@@ -182,6 +190,7 @@ def _verify_production_seals(args) -> None:
                 for name in (
                     "production_evaluator_read_count",
                     "production_golden_read_count",
+                    "production_host_path_field_count",
                     "production_network_access_count",
                     "trusted_compiler_blocked_target_count",
                     "trusted_header_blocking_target_count",
@@ -214,6 +223,149 @@ def _verify_production_seals(args) -> None:
     )
     if any(values[0][name] != values[1][name] for name in neutral):
         raise ValueError("platform-neutral production seals differ before evaluation")
+
+
+def _verify_content_hash(value: dict, field: str) -> str:
+    body = dict(value)
+    claimed = body.pop(field, None)
+    if claimed is None or content_hash(body) != claimed:
+        raise ValueError(f"public artifact has an invalid {field}")
+    return claimed
+
+
+def _verify_m336g_production_seals(args) -> None:
+    incomplete_pair = (
+        args.windows_production_root is None or args.karina_production_root is None
+    )
+    if incomplete_pair and not args.development:
+        raise ValueError("M-33.6g evaluation requires both production seals")
+    if incomplete_pair:
+        platform_roots = ((args.platform, args.production_root),)
+    else:
+        expected_platform_root = {
+            "windows": args.windows_production_root,
+            "karina": args.karina_production_root,
+        }[args.platform].resolve(strict=True)
+        if args.production_root.resolve(strict=True) != expected_platform_root:
+            raise ValueError(
+                "evaluation production root does not match its platform seal"
+            )
+        platform_roots = (
+            ("windows", args.windows_production_root),
+            ("karina", args.karina_production_root),
+        )
+    values = []
+    for platform, root in platform_roots:
+        root = root.resolve(strict=True)
+        execution = _load(root / "m336g_production_execution.json")
+        execution_hash = _verify_content_hash(execution, "seal_hash")
+        summary = _load(root / "production_summary.json")
+        summary_hash = _verify_content_hash(summary, "summary_hash")
+        production = _load(root / "production_output.json")
+        production_hash = _verify_content_hash(production, "production_output_hash")
+        counts = _load(root / "production_counts.json")
+        compiler = java_production_compiler_report_from_dict(
+            _load(root / "compiler_report.json")
+        )
+        probe = java_production_compilation_probe_from_dict(
+            _load(root / "compiler_probe.json")
+        )
+        integrity = verify_java_public_candidate_pack(root / "candidate_pack")
+        persisted_integrity = _load(root / "public_pack_integrity_receipt.json")
+        if persisted_integrity != asdict(integrity):
+            raise ValueError("persisted public-pack integrity receipt differs")
+        replay = _load(root / "sealed_source_replay_receipt.json")
+        replay_hash = _verify_content_hash(replay, "receipt_hash")
+        public_jdk = _load(root / "public_jdk_identity_receipt.json")
+        public_jdk_hash = _verify_content_hash(public_jdk, "receipt_hash")
+        expected_javac = next(
+            item.javac_sha256
+            for item in frozen_m336_jdk_provider_manifest().platforms
+            if item.platform == platform
+        )
+        if (
+            execution_hash != execution["seal_hash"]
+            or summary_hash != summary["summary_hash"]
+            or execution["r22_sha"] != args.r21_sha
+            or execution["platform"] != platform
+            or execution["status"] != "PASS"
+            or execution["qualification_mode"]
+            != (
+                "DEVELOPMENT_NON_AUTHORITATIVE"
+                if args.development
+                else "EXACT_R22_AUTHORITATIVE"
+            )
+            or production_hash != execution["production_output_hash"]
+            or production_hash != summary["production_output_hash"]
+            or execution["production_batch_hash"] != summary["production_batch_hash"]
+            or execution["compiler_identity_hash"] != compiler.compiler_identity_hash
+            or execution["compiler_identity_hash"] != probe.compiler_identity_hash
+            or public_jdk["semantic_compiler_identity_hash"]
+            != execution["compiler_identity_hash"]
+            or public_jdk["platform_role"] != platform
+            or public_jdk["verification_status"] != "PASS"
+            or public_jdk["observed_javac_binary_hash"] != expected_javac
+            or execution["public_jdk_identity_receipt_hash"] != public_jdk_hash
+            or execution["compiler_report_hash"] != compiler.report_hash
+            or execution["compiler_report_hash"] != summary["compiler_report_hash"]
+            or summary["compiler_probe_hash"] != probe.probe_hash
+            or execution["public_candidate_pack_hash"] != summary["candidate_pack_hash"]
+            or execution["public_candidate_pack_hash"]
+            != integrity.candidate_pack_content_hash
+            or execution["public_candidate_pack_tree_hash"]
+            != integrity.candidate_pack_tree_hash
+            or execution["public_replay_commitment_hash"]
+            != integrity.replay_commitment_hash
+            or execution["public_pack_integrity_receipt_hash"] != integrity.receipt_hash
+            or execution["sealed_source_replay_receipt_hash"] != replay_hash
+            or replay["status"] != "PASS"
+            or replay["reconstructed_pack_byte_difference_count"] != 0
+            or replay["candidate_pack_content_hash"]
+            != integrity.candidate_pack_content_hash
+            or replay["candidate_pack_tree_hash"] != integrity.candidate_pack_tree_hash
+            or execution["private_manifest_commitment_hash"]
+            != replay["private_manifest_commitment_hash"]
+            or counts["post_trust_pack_failures"]
+            != M336F_JAVA_ACCEPTANCE_THRESHOLDS.post_trust_pack_failures
+            or counts["trusted_compiler_blocked_target_count"] != 0
+            or any(
+                execution[name] != 0
+                for name in (
+                    "candidate_pack_source_bearing_entry_count",
+                    "candidate_pack_private_role_entry_count",
+                    "candidate_pack_unknown_entry_count",
+                    "reconstructed_pack_byte_difference_count",
+                    "production_evaluator_read_count",
+                    "production_golden_read_count",
+                    "production_network_access_count",
+                    "sealed_replay_evaluator_read_count",
+                    "sealed_replay_golden_read_count",
+                    "sealed_replay_network_access_count",
+                )
+            )
+        ):
+            raise ValueError("M-33.6g production seal is not eligible for evaluation")
+        values.append(execution)
+    neutral = (
+        "selected_manifest_hash",
+        "selector_receipt_hash",
+        "production_output_hash",
+        "production_batch_hash",
+        "compiler_identity_hash",
+        "compiler_report_hash",
+        "public_candidate_pack_hash",
+        "public_candidate_pack_tree_hash",
+        "public_replay_commitment_hash",
+        "public_pack_integrity_receipt_hash",
+        "sealed_source_replay_receipt_hash",
+        "private_manifest_commitment_hash",
+        "candidate_pack_source_bearing_entry_count",
+        "candidate_pack_private_role_entry_count",
+        "candidate_pack_unknown_entry_count",
+        "reconstructed_pack_byte_difference_count",
+    )
+    if len(values) == 2 and any(values[0][name] != values[1][name] for name in neutral):
+        raise ValueError("M-33.6g platform-neutral production seals differ")
 
 
 def _verify_selected_authority(authority: dict, selected_roots: set[str]) -> dict:
@@ -379,6 +531,11 @@ def main() -> None:
     parser.add_argument("--r21-sha", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
+        "--m336g-publication",
+        action="store_true",
+        help="evaluate exact-R22 source-free public packs and sealed replay receipts",
+    )
+    parser.add_argument(
         "--development",
         action="store_true",
         help="allow a dirty pre-R21 worktree and mark output non-authoritative",
@@ -414,8 +571,12 @@ def main() -> None:
     if authority["status"] != "PASS":
         raise ValueError("selected source does not have closed authority")
     replay_started = time.perf_counter()
-    replay = verify_compiled_java_production_standalone(
-        production_root / "candidate_pack"
+    replay = (
+        _load(production_root / "sealed_source_replay_receipt.json")
+        if args.m336g_publication
+        else verify_compiled_java_production_standalone(
+            production_root / "candidate_pack"
+        )
     )
     replay_seconds = time.perf_counter() - replay_started
     reconstruct_started = time.perf_counter()
@@ -426,11 +587,18 @@ def main() -> None:
         source_entry_ids=source_entry_ids,
     )
     reconstruct_seconds = time.perf_counter() - reconstruct_started
-    jdk = verify_m336_jdk_provider(
-        platform=args.platform,
-        java=args.java,
-        javac=args.javac,
-    )
+    if args.m336g_publication:
+        _private_jdk, jdk = verify_m336_jdk_provider_evidence(
+            platform=args.platform,
+            java=args.java,
+            javac=args.javac,
+        )
+    else:
+        jdk = verify_m336_jdk_provider(
+            platform=args.platform,
+            java=args.java,
+            javac=args.javac,
+        )
     args.output.mkdir(parents=True)
     oracle_root = args.output / "oracle"
     tracemalloc.start()
@@ -493,8 +661,16 @@ def main() -> None:
         else None
     )
     contracts_started = time.perf_counter()
-    contracts = run_m336f_producer_contract_gate(
-        _load(repository / "evaluation/m336d_final_java/h19/acquisition_receipts.json")
+    legacy_acquisition = _load(
+        repository / "evaluation/m336d_final_java/h19/acquisition_receipts.json"
+    )
+    contracts = (
+        run_java_public_pack_contract_validation(
+            legacy_acquisition,
+            production_root / "candidate_pack",
+        )
+        if args.m336g_publication
+        else run_m336f_producer_contract_gate(legacy_acquisition)
     )
     contracts_seconds = time.perf_counter() - contracts_started
     trust = build_m336f_trust_metrics(
@@ -508,7 +684,14 @@ def main() -> None:
         incorrect_withheld=evaluation.trust.incorrect_withheld,
     )
     production_summary = _load(production_root / "production_summary.json")
-    production_execution = _load(production_root / "m336f_production_execution.json")
+    production_execution = _load(
+        production_root
+        / (
+            "m336g_production_execution.json"
+            if args.m336g_publication
+            else "m336f_production_execution.json"
+        )
+    )
     production_counts = _load(production_root / "production_counts.json")
     pack = load_pack(production_root / "candidate_pack")
     runtime = {"status": "NOT_RUN", "report_hash": content_hash("NOT_RUN")}
@@ -670,7 +853,15 @@ def main() -> None:
             "runtime_network_accesses": 0,
         },
     )
-    _write(args.output / "jdk_provider_receipt.json", asdict(jdk))
+    _write(
+        args.output
+        / (
+            "public_jdk_identity_receipt.json"
+            if args.m336g_publication
+            else "jdk_provider_receipt.json"
+        ),
+        asdict(jdk),
+    )
     _write(args.output / "evaluation_report.json", asdict(evaluation))
     _write(args.output / "field_evidence_conformance.json", asdict(field_report))
     _write(args.output / "diagnostic_correspondence.json", correspondence)
@@ -687,7 +878,7 @@ def main() -> None:
         _write(args.output / "development_approval.json", asdict(approval))
         _write(args.output / "installation.json", asdict(installed))
     if readiness != "PASS":
-        raise SystemExit("M-33.6f disclosed independent evaluation failed")
+        raise SystemExit("disclosed independent Java evaluation failed")
 
 
 if __name__ == "__main__":

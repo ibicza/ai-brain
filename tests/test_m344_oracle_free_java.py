@@ -35,10 +35,6 @@ from ai_brain.stage3.acquisition.java_production import (
     seal_java_production_output,
     verify_java_production_batch,
 )
-from ai_brain.stage3.acquisition.java_production_replay import (
-    JAVA_PRODUCTION_REPLAY_FILENAME,
-    verify_compiled_java_production_standalone,
-)
 from ai_brain.stage3.acquisition.java_release import (
     evaluate_java_release_consistency,
     frozen_java_release_identity,
@@ -46,6 +42,10 @@ from ai_brain.stage3.acquisition.java_release import (
 )
 from ai_brain.stage3.acquisition.java_source_selector import (
     _contains_real_callable_type,
+)
+from ai_brain.stage3.acquisition.m336g_publication import (
+    JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME,
+    verify_java_public_candidate_pack,
 )
 from ai_brain.stage3.acquisition.models import ReviewDecision
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
@@ -187,12 +187,12 @@ def test_production_authorization_pack_and_replay_need_no_goldens(tmp_path):
         production_authorizations=authorizations,
         store=store,
     )
-    artifact = json.loads((output / JAVA_PRODUCTION_REPLAY_FILENAME).read_text())
+    artifact = json.loads((output / JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME).read_text())
     text = json.dumps(artifact).casefold()
     assert "golden_manifest" not in text
     assert "expected_supported" not in text
     assert "confusion_matrix" not in text
-    assert verify_compiled_java_production_standalone(output)["status"] == "PASS"
+    assert verify_java_public_candidate_pack(output).status == "PASS"
     verify_pack_evaluation(pack)
     providers = ProviderRegistry.build(tmp_path, ())
     capabilities = CapabilityRegistry.build((), providers)

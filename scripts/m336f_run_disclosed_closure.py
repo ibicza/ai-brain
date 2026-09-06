@@ -69,6 +69,7 @@ def _verify_qualification_inputs(
     r21_sha: str,
     binding_manifest_hash: str,
     census_hash: str,
+    exact_phase: str = "R21",
 ) -> None:
     qualification_fields = {
         "schema_version",
@@ -140,7 +141,7 @@ def _verify_qualification_inputs(
         or summary_hash is None
         or content_hash(summary_body) != summary_hash
         or summary.get("schema_version") != 1
-        or summary.get("qualification_mode") != "EXACT_R21_AUTHORITATIVE"
+        or summary.get("qualification_mode") != f"EXACT_{exact_phase}_AUTHORITATIVE"
         or summary.get("r21_sha") != r21_sha
         or summary.get("candidate_count") != qualification["candidate_count"]
         or summary.get("candidate_qualification_hash") != qualification["report_hash"]
@@ -160,6 +161,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repository", type=Path, required=True)
     parser.add_argument("--r21-sha", required=True)
+    parser.add_argument("--exact-phase", choices=("R21", "R22"), default="R21")
     parser.add_argument("--vault", type=Path, required=True)
     parser.add_argument("--qualification", type=Path, required=True)
     parser.add_argument("--qualification-summary", type=Path, required=True)
@@ -196,6 +198,7 @@ def main() -> None:
         r21_sha=args.r21_sha,
         binding_manifest_hash=bindings.manifest_hash,
         census_hash=census.census_hash,
+        exact_phase=args.exact_phase,
     )
     eligible = {
         f"{item.candidate_root}/{item.canonical_path}": item
@@ -273,7 +276,7 @@ def main() -> None:
             "qualification_mode": (
                 "DEVELOPMENT_NON_AUTHORITATIVE"
                 if args.development
-                else "EXACT_R21_AUTHORITATIVE"
+                else f"EXACT_{args.exact_phase}_AUTHORITATIVE"
             ),
             "analysis_eligible_file_count": len(eligible),
             "analysis_eligible_root_count": len(reports),

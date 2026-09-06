@@ -41,6 +41,7 @@ _INTERNAL_PACK_DEPENDENCY_PREFIXES = (
     "alias-semantics.",
     "java-evidence-closure.",
     "java-production-closure.",
+    "java-production-replay-commitment.",
 )
 
 

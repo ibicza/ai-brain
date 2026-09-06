@@ -18,6 +18,9 @@ from ai_brain.stage3.domains.pack import *
 from ai_brain.stage3.domains.validation import validate_pack
 from ai_brain.stage3.knowledge_ir.serialization import load_record
 
+_JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME = "java_replay_commitment.json"
+_JAVA_PUBLIC_REPLAY_COMMITMENT_PREFIX = "java-production-replay-commitment."
+
 _FILES = {
     "manifest.json",
     "knowledge.jsonl",
@@ -51,6 +54,7 @@ def load_pack(root: Path) -> DomainPack:
             "approval.json",
             "java_evidence_closure.json",
             "java_production_closure.json",
+            _JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME,
             ALIAS_SEMANTICS_FILENAME,
         }
     )
@@ -79,11 +83,21 @@ def load_pack(root: Path) -> DomainPack:
     java_dependencies = tuple(
         item
         for item in manifest.dependency_packs
-        if item.startswith(("java-evidence-closure.", "java-production-closure."))
+        if item.startswith(
+            (
+                "java-evidence-closure.",
+                "java-production-closure.",
+                _JAVA_PUBLIC_REPLAY_COMMITMENT_PREFIX,
+            )
+        )
     )
     java_artifacts = sum(
         (root / name).is_file()
-        for name in ("java_evidence_closure.json", "java_production_closure.json")
+        for name in (
+            "java_evidence_closure.json",
+            "java_production_closure.json",
+            _JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME,
+        )
     )
     if java_artifacts != len(java_dependencies) or len(java_dependencies) > 1:
         raise ValueError("Java evidence closure dependency mismatch")
@@ -192,12 +206,33 @@ def load_pack(root: Path) -> DomainPack:
     )
     validate_pack(value)
     pack_manifest = _read(root / "pack_manifest.json")
-    if pack_manifest != {
+    legacy_pack_manifest = {
         "domain_id": manifest.domain_id,
         "pack_content_hash": manifest.pack_content_hash,
         "pack_version": manifest.pack_version,
         "schema_version": manifest.schema_version,
-    }:
+    }
+    public_pack_manifest = (
+        isinstance(pack_manifest, dict)
+        and pack_manifest.get("schema_version") == 2
+        and pack_manifest.get("domain_id") == manifest.domain_id
+        and pack_manifest.get("pack_content_hash") == manifest.pack_content_hash
+        and pack_manifest.get("pack_version") == manifest.pack_version
+        and isinstance(pack_manifest.get("entry_hashes"), list)
+        and isinstance(pack_manifest.get("candidate_pack_tree_hash"), str)
+        and isinstance(pack_manifest.get("entry_contract_registry_hash"), str)
+        and isinstance(pack_manifest.get("public_replay_commitment_hash"), str)
+        and tuple(
+            item
+            for item in manifest.dependency_packs
+            if item.startswith(_JAVA_PUBLIC_REPLAY_COMMITMENT_PREFIX)
+        )
+        == (
+            _JAVA_PUBLIC_REPLAY_COMMITMENT_PREFIX
+            + pack_manifest.get("public_replay_commitment_hash", ""),
+        )
+    )
+    if pack_manifest != legacy_pack_manifest and not public_pack_manifest:
         raise ValueError("outer pack manifest mismatch")
     return value
 

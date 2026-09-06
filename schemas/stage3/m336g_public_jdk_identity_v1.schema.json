@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ai-brain:m336g:public-jdk-identity:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract_role", "provider_manifest_hash", "provider_id", "platform_role", "target_java_release", "invocation_policy_hash", "semantic_compiler_identity_hash", "expected_vendor", "expected_version", "expected_build", "observed_java_binary_hash", "observed_javac_binary_hash", "observed_release_file_hash", "normalized_version_banner_hash", "verification_status", "receipt_hash"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract_role": {"const": "PUBLIC_PLATFORM_TELEMETRY"},
+    "provider_manifest_hash": {"$ref": "#/$defs/sha256"},
+    "provider_id": {"type": "string", "minLength": 1},
+    "platform_role": {"enum": ["windows", "karina"]},
+    "target_java_release": {"const": 21},
+    "invocation_policy_hash": {"$ref": "#/$defs/sha256"},
+    "semantic_compiler_identity_hash": {"$ref": "#/$defs/sha256"},
+    "expected_vendor": {"type": "string", "minLength": 1},
+    "expected_version": {"type": "string", "minLength": 1},
+    "expected_build": {"type": "string", "minLength": 1},
+    "observed_java_binary_hash": {"$ref": "#/$defs/sha256"},
+    "observed_javac_binary_hash": {"$ref": "#/$defs/sha256"},
+    "observed_release_file_hash": {"$ref": "#/$defs/sha256"},
+    "normalized_version_banner_hash": {"$ref": "#/$defs/sha256"},
+    "verification_status": {"const": "PASS"},
+    "receipt_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

@@ -45,7 +45,10 @@ from ai_brain.stage3.acquisition.m336d_final_pipeline import (
 from ai_brain.stage3.acquisition.m336d_h17_mapping import (
     build_h17_occurrence_mapping,
 )
-from ai_brain.stage3.acquisition.m336d_leak_scan import scan_fresh_source_leaks
+from ai_brain.stage3.acquisition.m336d_leak_scan import (
+    _matching_anchor_offsets,
+    scan_fresh_source_leaks,
+)
 from ai_brain.stage3.acquisition.m336d_legal_inventory import (
     LegalDocumentContainer,
     inventory_legal_documents,
@@ -329,6 +332,15 @@ def test_leak_scan_checks_all_fresh_java_with_bounded_exact_windows(tmp_path):
         ]
         == 1
     )
+
+
+def test_vectorized_anchor_values_cover_every_byte_alignment():
+    raw = bytes(range(256)) * 5
+    offsets = (0, 1, 15, 16, 127, 128, 257, len(raw) - 16)
+    expected = {raw[offset : offset + 16] for offset in offsets}
+    observed = dict(_matching_anchor_offsets(raw, expected))
+    assert set(offsets) <= set(observed)
+    assert all(observed[offset] == raw[offset : offset + 16] for offset in offsets)
 
 
 def test_disclosure_append_denominator_is_downloaded_source_jars_only():

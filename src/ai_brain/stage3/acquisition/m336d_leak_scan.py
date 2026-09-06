@@ -12,14 +12,28 @@ import time
 import tracemalloc
 from pathlib import Path
 
+import numpy as np
+
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
+from ai_brain.stage3.acquisition.m336g_publication import (
+    JAVA_PUBLIC_PACK_ENTRY_CONTRACTS,
+    _count_private_roles,
+    _decoded_source_payload_count,
+    public_path_count,
+)
+
+_SOURCE_WINDOW_BYTES = 256
+_ANCHOR_BYTES = 16
+_ANCHOR_STRIDE = 128
 
 
 def scan_fresh_source_leaks(vault: Path, public: Path | tuple[Path, ...]) -> dict:
     """Reject exact source bodies, encodings, paths, and 256-byte windows.
 
-    The exact window join is disk-backed.  The rolling hash is only an index:
-    every joined candidate is compared byte-for-byte before it counts as a leak.
+    The exact window join uses a disk-backed 16-byte anchor index. Every
+    256-byte source window contains an anchor on the frozen 128-byte grid.
+    Rolling hashes only select candidates; surrounding bytes are compared
+    exactly before a leak counts.
     """
 
     owns_tracemalloc = not tracemalloc.is_tracing()
@@ -55,7 +69,8 @@ def scan_fresh_source_leaks(vault: Path, public: Path | tuple[Path, ...]) -> dic
     legal_identities = _file_identities(legal_files, minimum_bytes=256)
     exact_source_jar = exact_scm = exact_java = encoded = legal = 0
     absolute = 0
-    vault_text = str(vault.resolve())
+    private_roles = 0
+    reversible = 0
     for path in public_files:
         raw = path.read_bytes()
         identity = (len(raw), bytes_hash(raw))
@@ -66,11 +81,26 @@ def scan_fresh_source_leaks(vault: Path, public: Path | tuple[Path, ...]) -> dic
         legal += int(identity in legal_identities)
         if path.suffix.casefold() in {".json", ".md", ".txt", ".log"}:
             text = raw.decode("utf-8", errors="ignore")
-            absolute += int(
-                vault_text in text
-                or bool(re.search(r"(?:[A-Za-z]:\\|/home/|/tmp/)", text))
-            )
+            try:
+                value = json.loads(text) if path.suffix.casefold() == ".json" else text
+            except json.JSONDecodeError:
+                value = text
+            absolute += public_path_count(value)
+            private_roles += _count_private_roles(value)
+            reversible += _decoded_source_payload_count(value)
     source_window = _source_window_leak_count(java_files, public_files)
+    allowed_pack_entries = {
+        item.entry_name for item in JAVA_PUBLIC_PACK_ENTRY_CONTRACTS
+    }
+    pack_roots = {
+        path.parent
+        for path in public_files
+        if path.name == "manifest.json" and (path.parent / "knowledge.jsonl").is_file()
+    }
+    unknown_pack_entries = sum(
+        len({item.name for item in root.iterdir()} - allowed_pack_entries)
+        for root in pack_roots
+    )
     counts = {
         "exact_source_jar_body_count": exact_source_jar,
         "exact_scm_archive_body_count": exact_scm,
@@ -80,8 +110,23 @@ def scan_fresh_source_leaks(vault: Path, public: Path | tuple[Path, ...]) -> dic
         "local_vault_absolute_path_count": absolute,
         "raw_license_document_body_count": legal,
         "source_excerpt_publication_receipt_count": 0,
+        "private_artifact_role_count": private_roles,
+        "unknown_public_pack_entry_count": unknown_pack_entries,
+        "public_absolute_path_count": absolute,
+        "public_reversible_source_payload_count": reversible,
+        "public_source_window_count": source_window,
     }
-    total = sum(counts.values())
+    total = (
+        exact_source_jar
+        + exact_scm
+        + exact_java
+        + source_window
+        + max(encoded, reversible)
+        + absolute
+        + legal
+        + private_roles
+        + unknown_pack_entries
+    )
     elapsed = time.perf_counter() - started
     _current_python_bytes, peak_python_bytes = tracemalloc.get_traced_memory()
     if owns_tracemalloc:
@@ -174,52 +219,60 @@ def _source_window_leak_count(
             connection.execute("PRAGMA synchronous=OFF")
             connection.execute("PRAGMA temp_store=FILE")
             connection.execute(
-                "CREATE TABLE source_window "
-                "(rolling_hash BLOB NOT NULL, source_index INTEGER NOT NULL, "
+                "CREATE TABLE source_anchor "
+                "(anchor_bytes BLOB NOT NULL, source_index INTEGER NOT NULL, "
                 "source_offset INTEGER NOT NULL)"
             )
             for source_index, path in enumerate(source_paths):
-                _insert_windows(
-                    connection,
-                    "source_window",
-                    path.read_bytes(),
-                    source_index,
+                _insert_source_anchors(
+                    connection, path.read_bytes(), source_index=source_index
                 )
             connection.execute(
-                "CREATE INDEX source_window_hash ON source_window(rolling_hash)"
+                "CREATE INDEX source_anchor_bytes ON source_anchor(anchor_bytes)"
             )
-            connection.execute(
-                "CREATE TEMP TABLE public_window "
-                "(rolling_hash BLOB NOT NULL, public_offset INTEGER NOT NULL)"
+            anchor_blobs = {
+                row[0]
+                for row in connection.execute(
+                    "SELECT DISTINCT anchor_bytes FROM source_anchor"
+                )
+            }
+            anchor_values = np.frombuffer(b"".join(anchor_blobs), dtype="<u8").reshape(
+                (-1, 2)
             )
-            connection.execute(
-                "CREATE INDEX public_window_hash ON public_window(rolling_hash)"
-            )
+            anchor_filters = _build_anchor_filters(anchor_values)
             source_cache: dict[int, bytes] = {}
             leaked_public_files = 0
             for path in public_paths:
                 public_raw = path.read_bytes()
                 if len(public_raw) < 256:
                     continue
-                connection.execute("DELETE FROM public_window")
-                _insert_windows(connection, "public_window", public_raw)
-                cursor = connection.execute(
-                    "SELECT p.public_offset, s.source_index, s.source_offset "
-                    "FROM public_window AS p JOIN source_window AS s "
-                    "ON p.rolling_hash = s.rolling_hash"
-                )
                 leaked = False
-                for public_offset, source_index, source_offset in cursor:
-                    source_raw = source_cache.get(source_index)
-                    if source_raw is None:
-                        source_raw = source_paths[source_index].read_bytes()
-                        source_cache.clear()
-                        source_cache[source_index] = source_raw
-                    if (
-                        public_raw[public_offset : public_offset + 256]
-                        == source_raw[source_offset : source_offset + 256]
+                for public_offset, anchor_bytes in _matching_anchor_offsets(
+                    public_raw, anchor_filters
+                ):
+                    for source_index, source_offset in connection.execute(
+                        "SELECT source_index, source_offset FROM source_anchor "
+                        "WHERE anchor_bytes = ?",
+                        (anchor_bytes,),
                     ):
-                        leaked = True
+                        source_raw = source_cache.get(source_index)
+                        if source_raw is None:
+                            source_raw = source_paths[source_index].read_bytes()
+                            source_cache.clear()
+                            source_cache[source_index] = source_raw
+                        if public_raw[
+                            public_offset : public_offset + _ANCHOR_BYTES
+                        ] == source_raw[
+                            source_offset : source_offset + _ANCHOR_BYTES
+                        ] and _anchor_closes_256_bytes(
+                            public_raw,
+                            public_offset,
+                            source_raw,
+                            source_offset,
+                        ):
+                            leaked = True
+                            break
+                    if leaked:
                         break
                 if leaked:
                     leaked_public_files += 1
@@ -228,44 +281,111 @@ def _source_window_leak_count(
             connection.close()
 
 
-def _insert_windows(
-    connection: sqlite3.Connection,
-    table: str,
+def _matching_anchor_offsets(
     raw: bytes,
-    item_index: int | None = None,
+    anchor_hashes: set[bytes] | tuple[np.ndarray, ...],
+):
+    if len(raw) < _ANCHOR_BYTES or len(anchor_hashes) == 0:
+        return
+    if isinstance(anchor_hashes, tuple):
+        filters = anchor_hashes
+    else:
+        anchors = np.frombuffer(b"".join(anchor_hashes), dtype="<u8").reshape((-1, 2))
+        filters = _build_anchor_filters(anchors)
+    chunk_size = 1024 * 1024
+    final_start = len(raw) - _ANCHOR_BYTES + 1
+    for chunk_start in range(0, final_start, chunk_size):
+        chunk_starts = min(chunk_size, final_start - chunk_start)
+        for phase in range(_ANCHOR_BYTES):
+            if phase >= chunk_starts:
+                break
+            count = (chunk_starts - phase + _ANCHOR_BYTES - 1) // _ANCHOR_BYTES
+            words = np.frombuffer(
+                raw,
+                dtype="<u8",
+                count=count * 2,
+                offset=chunk_start + phase,
+            )
+            first = words[::2]
+            second = words[1::2]
+            mask = np.uint64((1 << 22) - 1)
+            matches = np.flatnonzero(
+                filters[0][(first & mask).astype(np.intp)]
+                & filters[1][(first >> np.uint64(42)).astype(np.intp)]
+                & filters[2][(second & mask).astype(np.intp)]
+                & filters[3][(second >> np.uint64(42)).astype(np.intp)]
+            )
+            for value_index in matches.tolist():
+                offset = chunk_start + phase + value_index * _ANCHOR_BYTES
+                yield offset, raw[offset : offset + _ANCHOR_BYTES]
+
+
+def _build_anchor_filters(
+    anchors: np.ndarray,
+) -> tuple[np.ndarray, ...]:
+    filters = tuple(np.zeros(1 << 22, dtype=np.bool_) for _index in range(4))
+    mask = np.uint64((1 << 22) - 1)
+    filters[0][(anchors[:, 0] & mask).astype(np.intp)] = True
+    filters[1][(anchors[:, 0] >> np.uint64(42)).astype(np.intp)] = True
+    filters[2][(anchors[:, 1] & mask).astype(np.intp)] = True
+    filters[3][(anchors[:, 1] >> np.uint64(42)).astype(np.intp)] = True
+    return filters
+
+
+def _insert_source_anchors(
+    connection: sqlite3.Connection, raw: bytes, *, source_index: int
 ) -> None:
-    if len(raw) < 256:
+    if len(raw) < _ANCHOR_BYTES:
         return
     batch = []
-    for offset, value in _rolling_windows(raw):
-        digest = value.to_bytes(8, "big")
-        batch.append(
-            (digest, item_index, offset) if item_index is not None else (digest, offset)
-        )
+    for offset in range(0, len(raw) - _ANCHOR_BYTES + 1, _ANCHOR_STRIDE):
+        digest = raw[offset : offset + _ANCHOR_BYTES]
+        batch.append((digest, source_index, offset))
         if len(batch) == 8192:
-            _insert_window_batch(connection, table, batch, item_index is not None)
+            connection.executemany("INSERT INTO source_anchor VALUES (?,?,?)", batch)
             batch.clear()
     if batch:
-        _insert_window_batch(connection, table, batch, item_index is not None)
+        connection.executemany("INSERT INTO source_anchor VALUES (?,?,?)", batch)
 
 
-def _insert_window_batch(
-    connection, table: str, rows: list[tuple], source: bool
-) -> None:
-    if table not in {"source_window", "public_window"}:
-        raise ValueError("invalid leak-index table")
-    placeholders = "?,?,?" if source else "?,?"
-    connection.executemany(f"INSERT INTO {table} VALUES ({placeholders})", rows)
+def _anchor_closes_256_bytes(
+    public_raw: bytes,
+    public_offset: int,
+    source_raw: bytes,
+    source_offset: int,
+) -> bool:
+    left = 0
+    while (
+        left < _SOURCE_WINDOW_BYTES - _ANCHOR_BYTES
+        and public_offset - left > 0
+        and source_offset - left > 0
+        and public_raw[public_offset - left - 1] == source_raw[source_offset - left - 1]
+    ):
+        left += 1
+    required_right = _SOURCE_WINDOW_BYTES - _ANCHOR_BYTES - left
+    public_right = public_raw[
+        public_offset + _ANCHOR_BYTES : public_offset + _ANCHOR_BYTES + required_right
+    ]
+    source_right = source_raw[
+        source_offset + _ANCHOR_BYTES : source_offset + _ANCHOR_BYTES + required_right
+    ]
+    return len(public_right) == required_right and public_right == source_right
 
 
 def _rolling_windows(raw: bytes):
+    yield from _rolling_windows_sized(raw, 256)
+
+
+def _rolling_windows_sized(raw: bytes, size: int):
     modulus = 1 << 64
     base = 257
-    power = pow(base, 255, modulus)
-    value = _rolling_seed(raw[:256])
+    power = pow(base, size - 1, modulus)
+    value = _rolling_seed(raw[:size])
     yield 0, value
-    for index in range(1, len(raw) - 255):
-        value = ((value - raw[index - 1] * power) * base + raw[index + 255]) % modulus
+    for index in range(1, len(raw) - size + 1):
+        value = (
+            (value - raw[index - 1] * power) * base + raw[index + size - 1]
+        ) % modulus
         yield index, value
 
 

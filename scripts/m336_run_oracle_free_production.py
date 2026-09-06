@@ -34,9 +34,6 @@ from ai_brain.stage3.acquisition.java_production_compiler import (
     build_java_production_compilation_probe,
     java_production_compiler_command,
 )
-from ai_brain.stage3.acquisition.java_production_replay import (
-    verify_compiled_java_production_standalone,
-)
 from ai_brain.stage3.acquisition.java_state_audit import (
     EnforcedJavaProductionStateAudit,
 )
@@ -45,6 +42,12 @@ from ai_brain.stage3.acquisition.m336e_identity import (
 )
 from ai_brain.stage3.acquisition.m336f_selection import (
     m336f_selected_source_manifest_from_dict,
+)
+from ai_brain.stage3.acquisition.m336g_publication import (
+    build_java_public_replay_context,
+    build_sealed_java_replay_input_manifest,
+    verify_java_public_candidate_pack,
+    write_sealed_java_replay_input_manifest,
 )
 from ai_brain.stage3.acquisition.models import ReviewDecision
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
@@ -234,6 +237,8 @@ def main() -> None:
     parser.add_argument("--javac", type=Path)
     parser.add_argument("--source-entry-bindings", type=Path)
     parser.add_argument("--selected-manifest", type=Path)
+    parser.add_argument("--sealed-vault", type=Path)
+    parser.add_argument("--private-replay-root", type=Path)
     args = parser.parse_args()
     source_root = args.source_root.resolve(strict=True)
     if args.output.exists():
@@ -254,6 +259,11 @@ def main() -> None:
     )
     if any(compiler_inputs) and not all(compiler_inputs):
         raise ValueError("compiler-aware production inputs must be supplied together")
+    private_inputs = (args.sealed_vault, args.private_replay_root)
+    if any(private_inputs) and not all(private_inputs):
+        raise ValueError("sealed replay inputs must be supplied together")
+    if all(private_inputs) and not all(compiler_inputs):
+        raise ValueError("sealed replay requires compiler-aware production inputs")
     project = Path(__file__).resolve().parents[1]
     dependency_count = _production_evaluator_dependency_count(project)
     if dependency_count:
@@ -276,6 +286,9 @@ def main() -> None:
         timings["ingestion"] = time.perf_counter() - ingestion_started
         compilation_probe = None
         source_entry_ids = None
+        selected_source_bindings = ()
+        selected = None
+        bindings = None
         process_policies = ()
         compilation_work_root = None
         if args.javac is not None:
@@ -302,6 +315,9 @@ def main() -> None:
                     "selected source bytes differ from the sealed manifest"
                 )
             binding_by_unit = {item.selected_path: item for item in bindings.bindings}
+            selected_source_bindings = tuple(
+                binding_by_unit[unit] for unit in sorted(selected_units)
+            )
             source_entry_ids = {
                 unit: binding_by_unit[unit].source_entry_id.identity_hash
                 for unit in sorted(selected_units)
@@ -397,14 +413,25 @@ def main() -> None:
                 domain_id="m336-final-java",
                 production_trust_batch=batch,
                 production_authorizations=authorizations,
+                java_publication_context=(
+                    build_java_public_replay_context(
+                        batch=batch,
+                        source_entry_bindings=selected_source_bindings,
+                        selected_source_manifest_hash=selected.manifest_hash,
+                        source_entry_binding_manifest_hash=bindings.manifest_hash,
+                    )
+                    if compilation_probe is not None
+                    else None
+                ),
+                java_source_entry_bindings=selected_source_bindings,
                 store=store,
             )
             timings["candidate_pack_compilation"] = (
                 time.perf_counter() - compilation_started
             )
-            replay_started = time.perf_counter()
-            replay = verify_compiled_java_production_standalone(pack_root)
-            timings["replay"] = time.perf_counter() - replay_started
+            integrity_started = time.perf_counter()
+            replay = verify_java_public_candidate_pack(pack_root)
+            timings["public_pack_integrity"] = time.perf_counter() - integrity_started
         sealed = seal_java_production_output(batch)
         component = build_java_production_component_manifest(batch, pack)
         process_report = process_audit.report()
@@ -496,7 +523,7 @@ def main() -> None:
                 ("proposal_production", "proposal_generation"),
                 ("trust_closure", "trust_closure_total"),
                 ("candidate_pack_construction", "candidate_pack_compilation"),
-                ("replay", "replay"),
+                ("public_pack_integrity", "public_pack_integrity"),
             )
         ),
     }
@@ -508,8 +535,9 @@ def main() -> None:
         "component_manifest_hash": component.manifest_hash,
         "candidate_pack_hash": pack.manifest.pack_content_hash,
         "candidate_tree_hash": _tree_hash(args.output / "candidate_pack"),
-        "candidate_replay_hash": replay["artifact_hash"],
-        "candidate_replay_status": replay["status"],
+        "public_pack_integrity_receipt_hash": replay.receipt_hash,
+        "public_pack_integrity_status": replay.status,
+        "public_replay_commitment_hash": replay.replay_commitment_hash,
         "production_evaluator_dependency_count": dependency_count,
         "production_golden_read_count": file_report.forbidden_read_count,
         "torch_imported": "torch" in sys.modules,
@@ -530,12 +558,19 @@ def main() -> None:
     _write(args.output / "packability_report.json", asdict(batch.packability_report))
     _write(args.output / "trust_closure.json", asdict(batch.closure))
     _write(args.output / "production_counts.json", counts)
-    _write(args.output / "candidate_replay.json", replay)
+    _write(args.output / "public_pack_integrity_receipt.json", asdict(replay))
     _write(
         args.output / "production_process_audit.json",
         _public_process_audit(process_report),
     )
-    _write(args.output / "production_file_access_audit.json", asdict(file_report))
+    _write(
+        args.output / "production_file_access_audit.json",
+        (
+            _public_file_access_audit(file_report)
+            if args.sealed_vault is not None
+            else asdict(file_report)
+        ),
+    )
     _write(args.output / "production_state_audit.json", asdict(state_report))
     _write(args.output / "production_performance.json", performance)
     _write(
@@ -548,6 +583,28 @@ def main() -> None:
         _write(
             args.output / "compilation_trust_gate.json",
             asdict(batch.compilation_trust_gate),
+        )
+    if args.sealed_vault is not None:
+        private_root = args.private_replay_root.resolve(strict=False)
+        if private_root.exists():
+            raise FileExistsError("private replay output root already exists")
+        private_root.parent.resolve(strict=True)
+        private_root.mkdir()
+        private_manifest = build_sealed_java_replay_input_manifest(
+            bindings=selected_source_bindings,
+            selected_paths=tuple(item.selected_path for item in selected.files),
+            vault_root=args.sealed_vault,
+            selected_source_manifest_hash=selected.manifest_hash,
+            source_entry_binding_manifest_hash=bindings.manifest_hash,
+            compiler_semantic_identity_hash=(
+                batch.compiler_report.compiler_identity_hash
+            ),
+        )
+        write_sealed_java_replay_input_manifest(
+            private_root / "sealed_java_replay_input_manifest.json",
+            private_manifest,
+            git_worktrees=(project,),
+            public_roots=(args.output.resolve(strict=True),),
         )
 
 
@@ -567,6 +624,22 @@ def _public_process_audit(report):
             report.annotation_processor_invocation_count
         ),
         "generated_class_execution_count": report.generated_class_execution_count,
+    }
+    return {**body, "report_hash": content_hash(body)}
+
+
+def _public_file_access_audit(report):
+    """Publish isolation counts without serializing host-local read paths."""
+
+    body = {
+        "schema_version": 1,
+        "contract_role": "PUBLIC_SAFE_RECEIPT",
+        "read_count": report.read_count,
+        "unique_read_identity_count": len(report.unique_read_paths),
+        "forbidden_read_count": report.forbidden_read_count,
+        "blocked_read_count": len(report.blocked_paths),
+        "host_path_field_count": 0,
+        "status": "PASS" if report.forbidden_read_count == 0 else "FAIL",
     }
     return {**body, "report_hash": content_hash(body)}
 

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ai-brain:m336g:private-replay-manifest:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract_role", "selected_source_manifest_hash", "source_entry_binding_manifest_hash", "compiler_semantic_identity_hash", "entries", "source_count", "aggregate_source_closure_manifest_hash", "manifest_hash"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract_role": {"const": "PRIVATE_SOURCE_INPUT"},
+    "selected_source_manifest_hash": {"$ref": "#/$defs/sha256"},
+    "source_entry_binding_manifest_hash": {"$ref": "#/$defs/sha256"},
+    "compiler_semantic_identity_hash": {"$ref": "#/$defs/sha256"},
+    "source_count": {"type": "integer", "minimum": 1},
+    "aggregate_source_closure_manifest_hash": {"$ref": "#/$defs/sha256"},
+    "manifest_hash": {"$ref": "#/$defs/sha256"},
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_entry_identity_hash", "candidate_family_id", "vault_relative_path", "selected_relative_path", "raw_source_content_hash", "canonical_source_content_hash", "byte_length", "production_document_identity", "row_hash"],
+        "properties": {
+          "source_entry_identity_hash": {"$ref": "#/$defs/sha256"},
+          "candidate_family_id": {"type": "string", "minLength": 1},
+          "vault_relative_path": {"$ref": "#/$defs/relativePath"},
+          "selected_relative_path": {"$ref": "#/$defs/relativePath"},
+          "raw_source_content_hash": {"$ref": "#/$defs/sha256"},
+          "canonical_source_content_hash": {"$ref": "#/$defs/sha256"},
+          "byte_length": {"type": "integer", "minimum": 1},
+          "production_document_identity": {"type": "string", "minLength": 1},
+          "row_hash": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "relativePath": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?![A-Za-z]:)[^\\\\]+$"}
+  }
+}

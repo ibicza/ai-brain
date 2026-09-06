@@ -46,6 +46,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repository", type=Path, required=True)
     parser.add_argument("--r21-sha", required=True)
+    parser.add_argument("--exact-phase", choices=("R21", "R22"), default="R21")
     parser.add_argument("--pool", type=Path, required=True)
     parser.add_argument("--vault", type=Path, required=True)
     parser.add_argument("--authority", type=Path, required=True)
@@ -110,7 +111,7 @@ def main() -> None:
     )
     summary_body = {
         "schema_version": 1,
-        "qualification_mode": "EXACT_R21_AUTHORITATIVE",
+        "qualification_mode": f"EXACT_{args.exact_phase}_AUTHORITATIVE",
         "r21_sha": args.r21_sha,
         "preflight_report_hash": preflight.report_hash,
         "candidate_count": len(preflight.candidates),

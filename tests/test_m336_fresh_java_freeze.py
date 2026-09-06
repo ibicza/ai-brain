@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import pytest
 
 from ai_brain.stage2.education.models import ActorIdentityType
-from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
+from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage3.acquisition.compiler import (
     compile_provisional_pack,
     resolve_applicability_references,
@@ -60,15 +60,15 @@ from ai_brain.stage3.acquisition.java_production import (
     verify_java_production_batch,
 )
 from ai_brain.stage3.acquisition.java_production_replay import (
-    JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX,
     JAVA_PRODUCTION_REPLAY_FILENAME,
-    verify_compiled_java_production_standalone,
-)
-from ai_brain.stage3.acquisition.java_replay_mutations import (
-    run_m336_replay_mutation_battery,
 )
 from ai_brain.stage3.acquisition.java_source_selector import (
     frozen_m336_final_source_selector_policy,
+)
+from ai_brain.stage3.acquisition.m336g_publication import (
+    JAVA_PUBLIC_REPLAY_COMMITMENT_DEPENDENCY_PREFIX,
+    JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME,
+    verify_java_public_candidate_pack,
 )
 from ai_brain.stage3.acquisition.models import ReviewDecision
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
@@ -305,47 +305,25 @@ def test_java_candidate_pack_is_wall_clock_independent(tmp_path):
 
 
 def test_production_replay_binds_the_exact_java_release(tmp_path):
-    _bundle, _batch, _pack, _tree = _compile_trusted(
+    _bundle, batch, pack, _tree = _compile_trusted(
         tmp_path,
         "package demo; public class A { public void call(int value) {} }\n",
         stamp=STAMP,
     )
     pack_root = tmp_path / "pack"
-    assert verify_compiled_java_production_standalone(pack_root)["status"] == "PASS"
-    replay_path = pack_root / JAVA_PRODUCTION_REPLAY_FILENAME
-    replay = json.loads(replay_path.read_text(encoding="utf-8"))
-    replay["release_identity"]["policy_version"] = "forged.release"
-    replay.pop("artifact_hash")
-    replay_hash = content_hash(replay)
-    replay_path.write_text(
-        canonical_json({**replay, "artifact_hash": replay_hash}) + "\n",
-        encoding="utf-8",
-        newline="\n",
+    receipt = verify_java_public_candidate_pack(pack_root)
+    commitment = json.loads(
+        (pack_root / JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME).read_text(encoding="utf-8")
     )
-    manifest_path = pack_root / "manifest.json"
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    manifest["dependency_packs"] = [
-        JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX + replay_hash
-        if item.startswith(JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX)
-        else item
-        for item in manifest["dependency_packs"]
-    ]
-    manifest.pop("pack_content_hash")
-    pack_hash = content_hash(manifest)
-    manifest_path.write_text(
-        canonical_json({**manifest, "pack_content_hash": pack_hash}) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
-    outer_path = pack_root / "pack_manifest.json"
-    outer = json.loads(outer_path.read_text(encoding="utf-8"))
-    outer["pack_content_hash"] = pack_hash
-    outer_path.write_text(canonical_json(outer) + "\n", encoding="utf-8", newline="\n")
-    with pytest.raises(ValueError, match="release"):
-        verify_compiled_java_production_standalone(pack_root)
+    assert receipt.status == "PASS"
+    assert commitment["release_identity_hash"] == batch.release_identity.identity_hash
+    assert not (pack_root / JAVA_PRODUCTION_REPLAY_FILENAME).exists()
+    assert (
+        JAVA_PUBLIC_REPLAY_COMMITMENT_DEPENDENCY_PREFIX + commitment["commitment_hash"]
+    ) in pack.manifest.dependency_packs
 
 
-def test_all_twenty_replay_authority_mutations_fail_closed(tmp_path):
+def test_public_pack_installs_without_private_replay_inputs(tmp_path):
     _bundle, _batch, pack, _tree = _compile_trusted(
         tmp_path,
         "package demo; public class A { public void call(int value) {} }\n",
@@ -375,13 +353,11 @@ def test_all_twenty_replay_authority_mutations_fail_closed(tmp_path):
         created_at=STAMP,
     )
     registry.install(pack, approval, (), installed_at=STAMP)
-    report = run_m336_replay_mutation_battery(
-        tmp_path / "pack",
-        installed_pack_root=registry.root,
-        provider_registry=providers,
+    assert verify_java_public_candidate_pack(tmp_path / "pack").status == "PASS"
+    installed_pack = registry.load_installed_pack(
+        pack.manifest.domain_id, pack.manifest.pack_version
     )
-    assert report["status"] == "PASS"
-    assert report["mutation_count"] == report["rejected_count"] == 20
+    assert installed_pack.manifest.pack_content_hash == pack.manifest.pack_content_hash
 
 
 def test_final_roles_fail_closed_and_disclosure_tokens_are_derived():

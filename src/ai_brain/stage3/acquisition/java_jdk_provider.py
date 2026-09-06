@@ -17,6 +17,7 @@ M336_JAVAC_INVOCATION_POLICY = (
     "--release",
     str(JAVA_TARGET_RELEASE),
 )
+M336_PUBLIC_COMPILER_DIAGNOSTIC_POLICY = "m336f.production-javac-diagnostics.v2"
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,38 @@ class M336JdkVerificationReceipt:
     release_path: str
     observed_version_banner: tuple[str, ...]
     status: str
+    receipt_hash: str
+
+
+@dataclass(frozen=True)
+class M336PrivateJdkObservation:
+    contract_role: str
+    platform: str
+    java_executable: Path
+    javac_executable: Path
+    release_file: Path
+    provider_installation_root: Path
+    observed_version_banner: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class M336PublicJdkIdentityReceipt:
+    schema_version: int
+    contract_role: str
+    provider_manifest_hash: str
+    provider_id: str
+    platform_role: str
+    target_java_release: int
+    invocation_policy_hash: str
+    semantic_compiler_identity_hash: str
+    expected_vendor: str
+    expected_version: str
+    expected_build: str
+    observed_java_binary_hash: str
+    observed_javac_binary_hash: str
+    observed_release_file_hash: str
+    normalized_version_banner_hash: str
+    verification_status: str
     receipt_hash: str
 
 
@@ -104,21 +137,45 @@ def frozen_m336_jdk_provider_manifest() -> M336JdkProviderManifest:
     return M336JdkProviderManifest(**body, manifest_hash=content_hash(body))
 
 
-def verify_m336_jdk_provider(
+def m336_public_compiler_semantic_identity_hash() -> str:
+    """Bind compiler semantics without binding any one host filesystem path."""
+
+    manifest = frozen_m336_jdk_provider_manifest()
+    versions = {item.version for item in manifest.platforms}
+    if len(versions) != 1:
+        raise ValueError("accepted JDK platforms do not share compiler semantics")
+    version = next(iter(versions))
+    return content_hash(
+        {
+            "policy_version": M336_PUBLIC_COMPILER_DIAGNOSTIC_POLICY,
+            "provider_manifest_hash": manifest.manifest_hash,
+            "javac_version": f"javac {version}",
+            "release": manifest.target_release,
+            "encoding": "UTF-8",
+            "annotation_processing": False,
+            "locale_policy": "JAVAC_XDRAWDIAGNOSTICS_EN_US",
+            "classpath_manifest_hash": content_hash(()),
+        }
+    )
+
+
+def verify_m336_jdk_provider_evidence(
     *, platform: str, java: Path, javac: Path
-) -> M336JdkVerificationReceipt:
+) -> tuple[M336PrivateJdkObservation, M336PublicJdkIdentityReceipt]:
+    """Return private paths separately from a path-free public identity receipt."""
+
     manifest = frozen_m336_jdk_provider_manifest()
     expected = next(
         (item for item in manifest.platforms if item.platform == platform), None
     )
     if expected is None:
         raise ValueError("unknown M-33.6 JDK platform")
-    java = java.resolve(strict=True)
-    javac = javac.resolve(strict=True)
-    release = (java.parent.parent / "release").resolve(strict=True)
+    resolved_java = java.resolve(strict=True)
+    resolved_javac = javac.resolve(strict=True)
+    release = (resolved_java.parent.parent / "release").resolve(strict=True)
     observed = (
-        bytes_hash(java.read_bytes()),
-        bytes_hash(javac.read_bytes()),
+        bytes_hash(resolved_java.read_bytes()),
+        bytes_hash(resolved_javac.read_bytes()),
         bytes_hash(release.read_bytes()),
     )
     required = (
@@ -129,7 +186,7 @@ def verify_m336_jdk_provider(
     if observed != required:
         raise ValueError("JDK executable/release identity differs from frozen provider")
     result = subprocess.run(
-        (str(java), "-version"),
+        (str(resolved_java), "-version"),
         check=True,
         capture_output=True,
         text=True,
@@ -143,13 +200,52 @@ def verify_m336_jdk_provider(
     joined = "\n".join(banner)
     if expected.version not in joined or expected.build.split("/")[0] not in joined:
         raise ValueError("JDK version banner differs from frozen provider")
+    private = M336PrivateJdkObservation(
+        contract_role="PRIVATE_HOST_OBSERVATION",
+        platform=platform,
+        java_executable=resolved_java,
+        javac_executable=resolved_javac,
+        release_file=release,
+        provider_installation_root=resolved_java.parent.parent,
+        observed_version_banner=banner,
+    )
     body = {
+        "schema_version": 1,
+        "contract_role": "PUBLIC_PLATFORM_TELEMETRY",
         "provider_manifest_hash": manifest.manifest_hash,
+        "provider_id": manifest.provider_id,
+        "platform_role": platform,
+        "target_java_release": manifest.target_release,
+        "invocation_policy_hash": content_hash(manifest.javac_invocation_policy),
+        "semantic_compiler_identity_hash": (
+            m336_public_compiler_semantic_identity_hash()
+        ),
+        "expected_vendor": expected.vendor,
+        "expected_version": expected.version,
+        "expected_build": expected.build,
+        "observed_java_binary_hash": observed[0],
+        "observed_javac_binary_hash": observed[1],
+        "observed_release_file_hash": observed[2],
+        "normalized_version_banner_hash": content_hash(banner),
+        "verification_status": "PASS",
+    }
+    public = M336PublicJdkIdentityReceipt(**body, receipt_hash=content_hash(body))
+    return private, public
+
+
+def verify_m336_jdk_provider(
+    *, platform: str, java: Path, javac: Path
+) -> M336JdkVerificationReceipt:
+    private, public = verify_m336_jdk_provider_evidence(
+        platform=platform, java=java, javac=javac
+    )
+    body = {
+        "provider_manifest_hash": public.provider_manifest_hash,
         "platform": platform,
-        "java_path": str(java),
-        "javac_path": str(javac),
-        "release_path": str(release),
-        "observed_version_banner": banner,
+        "java_path": str(private.java_executable),
+        "javac_path": str(private.javac_executable),
+        "release_path": str(private.release_file),
+        "observed_version_banner": private.observed_version_banner,
         "status": "PASS",
     }
     return M336JdkVerificationReceipt(**body, receipt_hash=content_hash(body))

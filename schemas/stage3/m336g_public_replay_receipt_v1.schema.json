@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ai-brain:m336g:public-replay-receipt:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract_role", "public_replay_commitment_hash", "private_manifest_commitment_hash", "candidate_pack_content_hash", "candidate_pack_tree_hash", "reconstructed_production_output_hash", "reconstructed_trust_closure_hash", "reconstructed_compiler_report_hash", "reconstructed_field_evidence_hash", "reconstructed_pack_tree_hash", "reconstructed_pack_byte_difference_count", "source_count", "proposal_count", "trusted_count", "withheld_count", "evaluator_read_count", "golden_read_count", "network_access_count", "status", "receipt_hash"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract_role": {"const": "PUBLIC_SAFE_RECEIPT"},
+    "status": {"const": "PASS"},
+    "reconstructed_pack_byte_difference_count": {"const": 0},
+    "evaluator_read_count": {"const": 0},
+    "golden_read_count": {"const": 0},
+    "network_access_count": {"const": 0},
+    "source_count": {"type": "integer", "minimum": 1},
+    "proposal_count": {"type": "integer", "minimum": 1},
+    "trusted_count": {"type": "integer", "minimum": 1},
+    "withheld_count": {"type": "integer", "minimum": 0},
+    "public_replay_commitment_hash": {"$ref": "#/$defs/sha256"},
+    "private_manifest_commitment_hash": {"$ref": "#/$defs/sha256"},
+    "candidate_pack_content_hash": {"$ref": "#/$defs/sha256"},
+    "candidate_pack_tree_hash": {"$ref": "#/$defs/sha256"},
+    "reconstructed_production_output_hash": {"$ref": "#/$defs/sha256"},
+    "reconstructed_trust_closure_hash": {"$ref": "#/$defs/sha256"},
+    "reconstructed_compiler_report_hash": {"$ref": "#/$defs/sha256"},
+    "reconstructed_field_evidence_hash": {"$ref": "#/$defs/sha256"},
+    "reconstructed_pack_tree_hash": {"$ref": "#/$defs/sha256"},
+    "receipt_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

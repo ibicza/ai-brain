@@ -201,6 +201,14 @@ def _expected_artifacts(batch: JavaProductionTrustBatch) -> dict[str, object]:
     }
 
 
+def java_production_expected_artifacts(
+    batch: JavaProductionTrustBatch,
+) -> dict[str, object]:
+    """Return the source-free deterministic replay comparison surface."""
+
+    return _expected_artifacts(batch)
+
+
 def _verify_source_closure(row) -> None:
     paths = sorted(
         (item["relative_path"], item["bytes_hash"], item["canonical_text_hash"])

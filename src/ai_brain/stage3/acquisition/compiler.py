@@ -22,9 +22,7 @@ from ai_brain.stage3.acquisition.java_production import (
     verify_java_production_batch,
 )
 from ai_brain.stage3.acquisition.java_production_replay import (
-    JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX,
-    JAVA_PRODUCTION_REPLAY_FILENAME,
-    build_java_production_replay_artifact,
+    java_production_expected_artifacts,
 )
 from ai_brain.stage3.acquisition.java_replay import (
     JAVA_REPLAY_DEPENDENCY_PREFIX,
@@ -32,6 +30,14 @@ from ai_brain.stage3.acquisition.java_replay import (
     build_java_replay_artifact,
 )
 from ai_brain.stage3.acquisition.java_source_index import bundle_requires_java_policy
+from ai_brain.stage3.acquisition.m336g_publication import (
+    JAVA_PUBLIC_REPLAY_COMMITMENT_DEPENDENCY_PREFIX,
+    JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME,
+    JavaPublicReplayContext,
+    build_java_public_pack_manifest,
+    build_java_public_replay_commitment,
+    build_java_public_replay_context,
+)
 from ai_brain.stage3.acquisition.models import (
     KnowledgeProposal,
     ProposalApproval,
@@ -87,6 +93,8 @@ def compile_provisional_pack(
     trust_bound_batch: TrustBoundProposalBatch | None = None,
     production_trust_batch: JavaProductionTrustBatch | None = None,
     production_authorizations: tuple[VerifiedJavaProductionAuthorization, ...] = (),
+    java_publication_context: JavaPublicReplayContext | None = None,
+    java_source_entry_bindings=(),
     store=None,
 ):
     if output.exists():
@@ -319,11 +327,19 @@ def compile_provisional_pack(
     replay_filename = None
     replay_prefix = None
     if java_domain and production_trust_batch is not None:
-        replay_artifact = build_java_production_replay_artifact(
-            production_trust_batch, store, tuple(sources)
+        context = java_publication_context or build_java_public_replay_context(
+            batch=production_trust_batch,
+            source_entry_bindings=tuple(java_source_entry_bindings),
         )
-        replay_filename = JAVA_PRODUCTION_REPLAY_FILENAME
-        replay_prefix = JAVA_PRODUCTION_REPLAY_DEPENDENCY_PREFIX
+        replay_artifact = asdict(
+            build_java_public_replay_commitment(
+                production_trust_batch,
+                context,
+                java_production_expected_artifacts(production_trust_batch),
+            )
+        )
+        replay_filename = JAVA_PUBLIC_REPLAY_COMMITMENT_FILENAME
+        replay_prefix = JAVA_PUBLIC_REPLAY_COMMITMENT_DEPENDENCY_PREFIX
     elif java_domain:
         replay_artifact = build_java_replay_artifact(
             trust_bound_batch, store, tuple(sources)
@@ -334,7 +350,10 @@ def compile_provisional_pack(
         item
         for item in (
             (
-                replay_prefix + replay_artifact["artifact_hash"]
+                replay_prefix
+                + replay_artifact.get(
+                    "commitment_hash", replay_artifact.get("artifact_hash")
+                )
                 if replay_artifact
                 else None
             ),
@@ -394,15 +413,21 @@ def compile_provisional_pack(
         _write(output / replay_filename, replay_artifact)
     if alias_semantics is not None:
         _write(output / ALIAS_SEMANTICS_FILENAME, asdict(alias_semantics))
-    _write(
-        output / "pack_manifest.json",
-        {
-            "domain_id": domain_id,
-            "pack_content_hash": manifest.pack_content_hash,
-            "pack_version": pack_version,
-            "schema_version": DOMAIN_PACK_SCHEMA_VERSION,
-        },
-    )
+    if production_trust_batch is not None:
+        _write(
+            output / "pack_manifest.json",
+            build_java_public_pack_manifest(output, manifest=manifest),
+        )
+    else:
+        _write(
+            output / "pack_manifest.json",
+            {
+                "domain_id": domain_id,
+                "pack_content_hash": manifest.pack_content_hash,
+                "pack_version": pack_version,
+                "schema_version": DOMAIN_PACK_SCHEMA_VERSION,
+            },
+        )
     pack = load_pack(output)
     if java_domain:
         verify_compiled_java_evidence(
