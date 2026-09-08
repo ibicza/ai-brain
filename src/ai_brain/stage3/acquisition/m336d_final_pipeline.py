@@ -1286,7 +1286,8 @@ def _acquire_one(policy, *, vault_root: Path, maven, scm):
                         else _zip_root_prefix(archive)
                     )
                     for relative in sorted(wanted):
-                        raw = archive.read(prefix + relative)
+                        archive_path = _legal_archive_entry_path(relative, prefix)
+                        raw = archive.read(archive_path)
                         destination = (
                             legal_root / container_id / PurePosixPath(relative)
                         )
@@ -2083,6 +2084,12 @@ def _performance_summary(samples: list[float]) -> dict:
 
 def _relative(root: Path, path: Path) -> str:
     return path.relative_to(root).as_posix()
+
+
+def _legal_archive_entry_path(relative: str, root_prefix: str) -> str:
+    """Keep inventory paths that already contain the SCM archive root exact."""
+
+    return relative if relative.startswith(root_prefix) else root_prefix + relative
 
 
 def _zip_root_prefix(archive: zipfile.ZipFile) -> str:

@@ -112,10 +112,14 @@ def run_fresh_acquisition_and_preflight(
     maven_provider=None,
     scm_provider=None,
     acquire_one=_acquire_one,
+    validate_pool=None,
+    record_protocol: bool = True,
+    perform_selector: bool = True,
+    acquisition_run_id: str = M336E_FINAL_ACQUISITION_RUN_ID,
 ) -> FreshAcquisitionPreflight:
     """Execute the sole source-body acquisition and one guarded selector."""
 
-    candidates = validate_metadata_pool_v4(pool)
+    candidates = (validate_pool or validate_metadata_pool_v4)(pool)
     if len(f20_sha) != 40 or any(
         character not in "0123456789abcdef" for character in f20_sha
     ):
@@ -135,11 +139,12 @@ def run_fresh_acquisition_and_preflight(
     )
     context = {
         "f20_sha": f20_sha,
-        "acquisition_run_id": M336E_FINAL_ACQUISITION_RUN_ID,
+        "acquisition_run_id": acquisition_run_id,
         "candidate_pool_hash": pool["pool_hash"],
     }
-    ledger.append("FREEZE_VERIFIED", **context)
-    ledger.append("ACQUISITION_RESERVED", **context)
+    if record_protocol:
+        ledger.append("FREEZE_VERIFIED", **context)
+        ledger.append("ACQUISITION_RESERVED", **context)
 
     tracemalloc.start()
     started = time.perf_counter()
@@ -154,7 +159,8 @@ def run_fresh_acquisition_and_preflight(
             timings.setdefault(name, []).append(seconds)
         item.pop("_vault_files")
         acquired.append(item)
-    ledger.append("ACQUISITION_COMPLETED", **context)
+    if record_protocol:
+        ledger.append("ACQUISITION_COMPLETED", **context)
 
     vault_started = time.perf_counter()
     portable = build_portable_vault_manifest(vault_root)
@@ -162,7 +168,8 @@ def run_fresh_acquisition_and_preflight(
     verify_portable_vault_manifest(vault_root, portable)
     timings["portable_vault_seal"] = [time.perf_counter() - vault_started]
     sealed_context = {**context, "vault_tree_hash": portable.portable_tree_hash}
-    ledger.append("VAULT_SEALED", **sealed_context)
+    if record_protocol:
+        ledger.append("VAULT_SEALED", **sealed_context)
 
     authority = load_m336e_authority_registry(
         authority_statement,
@@ -173,7 +180,7 @@ def run_fresh_acquisition_and_preflight(
     for item in acquired:
         binding = M336ESourceAuthorizationBinding(
             f20_sha=f20_sha,
-            acquisition_run_id=M336E_FINAL_ACQUISITION_RUN_ID,
+            acquisition_run_id=acquisition_run_id,
             candidate_family_id=item["family_id"],
             maven_coordinate=item["coordinate"],
             source_repository_url=item["source_url"],
@@ -215,7 +222,8 @@ def run_fresh_acquisition_and_preflight(
         **sealed_context,
         "qualification_manifest_hash": qualification["report_hash"],
     }
-    ledger.append("QUALIFICATION_COMPLETED", **qualified_context)
+    if record_protocol:
+        ledger.append("QUALIFICATION_COMPLETED", **qualified_context)
 
     evidence_policy = load_production_java_evidence_policy()
     verify_java_evidence_policy(evidence_policy)
@@ -323,11 +331,12 @@ def run_fresh_acquisition_and_preflight(
         **qualified_context,
         "selectability_census_hash": census.census_hash,
     }
-    ledger.append("SELECTABILITY_CENSUS_COMPLETED", **census_context)
+    if record_protocol:
+        ledger.append("SELECTABILITY_CENSUS_COMPLETED", **census_context)
 
     selected = None
     selector = None
-    if proof.hard_requirements_satisfied:
+    if proof.hard_requirements_satisfied and perform_selector:
         selector_started = time.perf_counter()
         selected, selector = select_final_sources_once(
             census,
@@ -359,7 +368,12 @@ def run_fresh_acquisition_and_preflight(
     }
     overlap = _fresh_overlap_report(acquired, compatible_selected, disclosed)
     disclosure_append = _fresh_disclosure_append(acquired, compatible_selected)
-    acquisition = _fresh_acquisition_report(acquired, f20_sha=f20_sha, host=host)
+    acquisition = _fresh_acquisition_report(
+        acquired,
+        f20_sha=f20_sha,
+        host=host,
+        acquisition_run_id=acquisition_run_id,
+    )
     elapsed = time.perf_counter() - started
     _current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -382,8 +396,10 @@ def run_fresh_acquisition_and_preflight(
     status = (
         "PASS"
         if proof.hard_requirements_satisfied
-        and selected is not None
-        and selected.file_count == M336E_FINAL_TARGET
+        and (
+            not perform_selector
+            or (selected is not None and selected.file_count == M336E_FINAL_TARGET)
+        )
         and overlap["status"] == "PASS"
         else "BLOCKED"
     )
@@ -673,7 +689,9 @@ def _fresh_qualification_report(acquired) -> dict:
     return {**body, "report_hash": content_hash(body)}
 
 
-def _fresh_acquisition_report(acquired, *, f20_sha: str, host: str) -> dict:
+def _fresh_acquisition_report(
+    acquired, *, f20_sha: str, host: str, acquisition_run_id: str
+) -> dict:
     receipts = tuple(
         {
             "family_id": item["family_id"],
@@ -693,7 +711,7 @@ def _fresh_acquisition_report(acquired, *, f20_sha: str, host: str) -> dict:
     body = {
         "schema_version": 2,
         "f20_sha": f20_sha,
-        "acquisition_run_id": M336E_FINAL_ACQUISITION_RUN_ID,
+        "acquisition_run_id": acquisition_run_id,
         "global_acquisition_count": 1,
         "candidate_count": len(receipts),
         "host_audit_hash": content_hash(host),

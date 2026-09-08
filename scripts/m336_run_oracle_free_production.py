@@ -388,6 +388,19 @@ def main() -> None:
             authorization_by_id = {
                 item.trusted_proposal_id: item for item in authorizations
             }
+            authorization_rows = tuple(
+                sorted(
+                    (
+                        {
+                            "trusted_proposal_id": item.trusted_proposal_id,
+                            "trusted_proposal_hash": item.trusted_proposal_hash,
+                            "authorization_hash": item.authorization_hash,
+                        }
+                        for item in authorizations
+                    ),
+                    key=lambda item: item["trusted_proposal_id"],
+                )
+            )
             reviewed = []
             approvals = []
             for proposal in batch.trusted_proposals:
@@ -554,10 +567,23 @@ def main() -> None:
         ),
     }
     _write(args.output / "production_output.json", sealed)
+    _write(args.output / "field_evidence_manifest.json", asdict(batch.field_evidence))
     _write(args.output / "component_manifest.json", asdict(component))
     _write(args.output / "packability_report.json", asdict(batch.packability_report))
     _write(args.output / "trust_closure.json", asdict(batch.closure))
     _write(args.output / "production_counts.json", counts)
+    authorization_body = {
+        "schema_version": 1,
+        "authorization_count": len(authorization_rows),
+        "authorizations": authorization_rows,
+    }
+    _write(
+        args.output / "production_authorization_manifest.json",
+        {
+            **authorization_body,
+            "manifest_hash": content_hash(authorization_body),
+        },
+    )
     _write(args.output / "public_pack_integrity_receipt.json", asdict(replay))
     _write(
         args.output / "production_process_audit.json",

@@ -39,21 +39,7 @@ def _binding_evidence(pack: Path) -> tuple[str, str]:
 
 def _metrics(semantic: Path | None) -> tuple[dict[str, str], int, int, str]:
     if semantic is None:
-        return (
-            {
-                "trust_precision": "1.000000",
-                "trust_coverage": "1.000000",
-                "location_precision": "1.000000",
-                "location_recall": "1.000000",
-                "semantic_precision": "1.000000",
-                "semantic_recall": "1.000000",
-                "field_evidence_exactness": "1.000000",
-                "spdx_agreement": "1.000000",
-            },
-            0,
-            0,
-            "PASS",
-        )
+        raise ValueError("M336I requires a real semantic evaluation")
     value = _object(semantic)
     ratios = dict(value["ratios"])
     counts = dict(value["counts"])
@@ -84,7 +70,7 @@ def main() -> None:
     parser.add_argument("--candidate-pack", type=Path, required=True)
     parser.add_argument("--windows-replay", type=Path, required=True)
     parser.add_argument("--karina-replay", type=Path, required=True)
-    parser.add_argument("--semantic-evaluation", type=Path)
+    parser.add_argument("--semantic-evaluation", type=Path, required=True)
     parser.add_argument("--evaluator-ledger", type=Path, required=True)
     parser.add_argument("--reference-output", type=Path, required=True)
     parser.add_argument("--request-output", type=Path, required=True)
