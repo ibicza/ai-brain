@@ -36,11 +36,21 @@ from ai_brain.stage3.acquisition.m336j_freeze import (
     build_m336j_final_acquisition_authorization,
     m336j_final_acquisition_authorization_from_dict,
 )
+from ai_brain.stage3.acquisition.m336j_future import (
+    build_m336j_future_orchestration_manifest,
+)
 from ai_brain.stage3.acquisition.m336j_mutations import (
+    M336J_MUTATION_VALIDATOR_CLASSES,
     M336J_MUTATIONS,
     M336J_ROBUST_PASS_MUTATIONS,
     build_mutation_report,
     mutation_result,
+)
+from ai_brain.stage3.acquisition.m336j_receipts import (
+    M336J_TRANSCRIPT_ORDER,
+    build_receipt_binding,
+    build_remote_route_transcript,
+    build_typed_receipt,
 )
 from ai_brain.stage3.acquisition.m336j_registry import (
     M336J_REMOTE_COMPONENT_ROLES,
@@ -48,11 +58,30 @@ from ai_brain.stage3.acquisition.m336j_registry import (
     build_m336j_route_registry,
     command_renderer_identity_hash,
 )
+from ai_brain.stage3.acquisition.m336j_schemas import (
+    M336J_SCHEMAS,
+    M336JStrictCodec,
+    roundtrip_strict_object,
+)
+from ai_brain.stage3.acquisition.m336j_storage import (
+    GIB,
+    M336J_MINIMUM_FREE_INODES,
+    M336J_QUALIFICATION_FREE_BYTES,
+    KarinaPrivateStorageCapacityReceipt,
+    build_private_storage_plan,
+    verify_capacity_receipt,
+)
 from ai_brain.stage3.acquisition.m336j_transport import (
+    M336J_SMALL_IN_MEMORY_LIMIT,
+    M336JTreeTransferLimits,
     canonical_tree_archive,
     extract_canonical_tree_archive,
+    extract_canonical_tree_archive_file,
     parse_bound_json_response,
     parse_framed_tree_response,
+    parse_framed_tree_response_file,
+    stream_stdin_to_private_file,
+    write_canonical_tree_archive,
 )
 
 HASH = "a" * 64
@@ -293,6 +322,14 @@ def test_registry_contains_every_remote_component() -> None:
     assert registry.unresolved_remote_component_count == 0
     assert registry.incompatible_remote_schema_edge_count == 0
     assert registry.unregistered_remote_command_call_site_count == 0
+    schema_hashes = {schema.schema_hash for schema in M336J_SCHEMAS}
+    for component in registry.components:
+        if component.route_role in M336J_REMOTE_COMPONENT_ROLES:
+            assert component.request_schema_hash in schema_hashes
+            assert component.response_schema_hash in schema_hashes
+            assert component.request_schema_hash != content_hash(
+                (component.route_role, "request", component.component_id, 1)
+            )
 
 
 def test_route_manifest_binds_capsule_renderer_dependencies_and_environment() -> None:
@@ -622,7 +659,7 @@ def test_complete_mutation_report_accepts_no_mutation() -> None:
     rows = tuple(
         mutation_result(
             mutation_id,
-            validator_class="REAL_TEST_VALIDATOR",
+            validator_class=M336J_MUTATION_VALIDATOR_CLASSES[mutation_id],
             failure=(
                 None
                 if mutation_id in M336J_ROBUST_PASS_MUTATIONS
@@ -632,11 +669,319 @@ def test_complete_mutation_report_accepts_no_mutation() -> None:
         for mutation_id in M336J_MUTATIONS
     )
     report = build_mutation_report(rows, final_acquisition_reservation_count=0)
-    assert report.executed_mutation_count == 40
-    assert report.rejected_mutation_count == 40
+    assert report.executed_mutation_count == len(M336J_MUTATIONS)
+    assert report.rejected_mutation_count == len(M336J_MUTATIONS)
     assert report.accepted_mutation_count == 0
+    assert report.wrong_rejection_layer_count == 0
 
 
 def test_incomplete_mutation_report_fails_closed() -> None:
     with pytest.raises(ValueError):
         build_mutation_report((), final_acquisition_reservation_count=0)
+
+
+def _schema_field_value(field):
+    if field.enum:
+        return field.enum[0]
+    if field.value_type == "string":
+        if field.pattern == r"[0-9a-f]{40}":
+            return "b" * 40
+        if field.pattern == r"[0-9a-f]{64}":
+            return "a" * 64
+        return "value"
+    if field.value_type == "integer":
+        return field.minimum or 0
+    if field.value_type == "boolean":
+        return False
+    if field.value_type == "object":
+        return {
+            nested.name: _schema_field_value(nested)
+            for nested in field.nested_fields
+            if nested.required
+        }
+    if field.value_type == "array":
+        return []
+    if field.value_type == "null":
+        return None
+    raise AssertionError(field.value_type)
+
+
+def test_real_schema_registry_roundtrips_all_request_response_types() -> None:
+    assert len(M336J_SCHEMAS) == 22
+    for schema in M336J_SCHEMAS:
+        value = {
+            field.name: _schema_field_value(field)
+            for field in schema.fields
+            if field.required
+        }
+        first = roundtrip_strict_object(schema.schema_id, value)
+        assert first == canonical_json(value).encode()
+
+
+def test_schema_codec_rejects_rehashed_schema_mutation() -> None:
+    schema = replace(M336J_SCHEMAS[0], schema_hash=HASH)
+    with pytest.raises(ValueError):
+        M336JStrictCodec(schema).serialize(
+            {
+                field.name: _schema_field_value(field)
+                for field in schema.fields
+                if field.required
+            }
+        )
+
+
+def test_qualification_storage_formula_retains_twelve_gib_margin(
+    tmp_path: Path,
+) -> None:
+    plan = build_private_storage_plan(
+        (tmp_path.resolve(),),
+        maximum_expected_transfer_bytes=GIB,
+        qualification_margin=True,
+    )
+    assert plan.required_free_bytes == M336J_QUALIFICATION_FREE_BYTES
+    assert plan.safety_reserve_bytes == 8 * GIB
+
+
+def test_storage_receipt_rejects_insufficient_free_space(tmp_path: Path) -> None:
+    plan = build_private_storage_plan(
+        (tmp_path.resolve(),),
+        maximum_expected_transfer_bytes=GIB,
+        qualification_margin=True,
+    )
+    body = {
+        "schema_version": 1,
+        "contract_role": "PUBLIC_M336J_KARINA_STORAGE_CAPACITY_RECEIPT",
+        "capacity_class": "AT_LEAST_8_GIB",
+        "required_free_bytes": plan.required_free_bytes,
+        "available_free_bytes": plan.required_free_bytes - 1,
+        "available_free_inodes": M336J_MINIMUM_FREE_INODES,
+        "filesystem_identity_hash": HASH,
+        "writable": True,
+        "atomic_rename": True,
+        "fsync": True,
+        "root_outside_worktrees": True,
+        "root_not_symlinked_into_worktree": True,
+        "maximum_path_length": plan.maximum_path_length,
+        "selected_snapshot_capacity_bytes": plan.selected_snapshot_capacity_bytes,
+        "vault_capacity_bytes": plan.vault_capacity_bytes,
+        "private_replay_capacity_bytes": plan.private_replay_capacity_bytes,
+        "compiler_temporary_capacity_bytes": plan.compiler_temporary_capacity_bytes,
+        "public_production_temporary_capacity_bytes": (
+            plan.public_production_temporary_capacity_bytes
+        ),
+        "safety_reserve_bytes": plan.safety_reserve_bytes,
+        "selected_storage_plan_hash": plan.plan_hash,
+        "status": "FAIL",
+    }
+    receipt = KarinaPrivateStorageCapacityReceipt(
+        **body, receipt_hash=content_hash(body)
+    )
+    with pytest.raises(ValueError):
+        verify_capacity_receipt(receipt, expected_plan_hash=plan.plan_hash)
+
+
+def test_file_backed_archive_is_repeatable_and_atomically_extracts(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "one.bin").write_bytes(b"one" * 100_000)
+    limits = M336JTreeTransferLimits(
+        maximum_archive_bytes=2 * 1024 * 1024,
+        maximum_unpacked_bytes=2 * 1024 * 1024,
+        maximum_file_count=2,
+        chunk_bytes=64 * 1024,
+    )
+    first = write_canonical_tree_archive(
+        source, tmp_path / "first.zip", prefix="payload", limits=limits
+    )
+    second = write_canonical_tree_archive(
+        source, tmp_path / "second.zip", prefix="payload", limits=limits
+    )
+    assert first.archive_hash == second.archive_hash
+    destination = tmp_path / "destination"
+    count, tree_hash = extract_canonical_tree_archive_file(
+        first.private_path,
+        destination=destination,
+        expected_payload_hash=first.archive_hash,
+        limits=limits,
+    )
+    assert (count, tree_hash) == (first.file_count, first.portable_tree_hash)
+
+
+def test_file_backed_archive_rejects_duplicate_members(tmp_path: Path) -> None:
+    archive_path = tmp_path / "duplicate.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        info = zipfile.ZipInfo("payload/item")
+        info.create_system = 3
+        info.external_attr = 0o100600 << 16
+        archive.writestr(info, b"one")
+        archive.writestr(info, b"two")
+    with pytest.raises(ValueError):
+        extract_canonical_tree_archive_file(
+            archive_path,
+            destination=tmp_path / "destination",
+            expected_payload_hash=bytes_hash(archive_path.read_bytes()),
+        )
+    assert not (tmp_path / "destination").exists()
+
+
+def test_file_backed_archive_removes_output_above_bound(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "large.bin").write_bytes(b"x" * 1024)
+    output = tmp_path / "too-large.zip"
+    limits = M336JTreeTransferLimits(
+        maximum_archive_bytes=128,
+        maximum_unpacked_bytes=2048,
+        maximum_file_count=1,
+        chunk_bytes=64 * 1024,
+    )
+    with pytest.raises(ValueError):
+        write_canonical_tree_archive(source, output, prefix="payload", limits=limits)
+    assert not output.exists()
+
+
+def test_streamed_stdin_hash_mismatch_removes_partial_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        m336j_transport.sys, "stdin", SimpleNamespace(buffer=io.BytesIO(b"payload"))
+    )
+    destination = tmp_path / "incoming.zip"
+    with pytest.raises(ValueError):
+        stream_stdin_to_private_file(
+            destination,
+            expected_hash=HASH,
+            expected_size=7,
+        )
+    assert not destination.exists()
+
+
+def test_streamed_frame_rejects_truncation_and_removes_partial_payload(
+    tmp_path: Path,
+) -> None:
+    payload = b"tree"
+    response = tmp_path / "response.bin"
+    response.write_bytes(
+        _bound_response(payload_hash=bytes_hash(payload), payload_size=len(payload))
+        + payload[:2]
+    )
+    destination = tmp_path / "payload.zip"
+    with pytest.raises(ValueError):
+        parse_framed_tree_response_file(
+            response,
+            payload_path=destination,
+            request_hash="1" * 64,
+            component_binding_hash="2" * 64,
+            host_identity_hash="3" * 64,
+        )
+    assert not destination.exists()
+
+
+def test_large_in_memory_helper_rejects_above_explicit_limit(tmp_path: Path) -> None:
+    with pytest.raises(ValueError):
+        extract_canonical_tree_archive(
+            b"x" * (M336J_SMALL_IN_MEMORY_LIMIT + 1),
+            destination=tmp_path / "destination",
+            expected_payload_hash=HASH,
+        )
+
+
+def test_active_large_tree_route_uses_only_file_backed_transport() -> None:
+    controller = Path("scripts/m336i_java_final_route.py").read_text(encoding="utf-8")
+    worker = Path("scripts/m336j_karina_execution.py").read_text(encoding="utf-8")
+    assert "write_canonical_tree_archive(" in controller
+    assert "invoke_karina_command_streaming(" in controller
+    assert "parse_framed_tree_response_file(" in controller
+    assert "stream_stdin_to_private_file(" in worker
+    assert "write_canonical_tree_export(" in worker
+    assert (
+        "payload = sys.stdin.buffer.read()"
+        not in worker.split("def _receive_tree", 1)[1].split("def _export_tree", 1)[0]
+    )
+
+
+def _route_operations(*, route_run_id: str = "route-one", host_hash: str = HASH):
+    operations = []
+    predecessor = None
+    production_index = M336J_TRANSCRIPT_ORDER.index("PRODUCTION")
+    for index, receipt_type in enumerate(M336J_TRANSCRIPT_ORDER):
+        binding = build_receipt_binding(
+            route_run_id=route_run_id,
+            exact_sha="b" * 40,
+            host_identity_hash=host_hash,
+            capsule_receipt_hash="1" * 64,
+            dependency_manifest_hash="2" * 64,
+            command_renderer_hash="3" * 64,
+            route_manifest_hash="4" * 64,
+            component_binding_hash="5" * 64,
+            request_schema_hash="6" * 64,
+            response_schema_hash="7" * 64,
+            selected_manifest_hash="8" * 64,
+            binding_manifest_hash="9" * 64,
+            candidate_pack_hash="c" * 64 if index >= production_index else None,
+        )
+        receipt = build_typed_receipt(
+            receipt_type,
+            operation_index=index,
+            binding=binding,
+            predecessor_receipt_hash=predecessor,
+            payload_hash=content_hash((receipt_type, index)),
+        )
+        operations.append(receipt)
+        predecessor = receipt.receipt_hash
+    return tuple(operations)
+
+
+def test_route_transcript_cross_binds_order_run_host_sha_and_pack() -> None:
+    transcript = build_remote_route_transcript(_route_operations())
+    assert transcript.operation_count == len(M336J_TRANSCRIPT_ORDER)
+    assert transcript.status == "PASS"
+
+
+def test_future_f25_h25_e25_orchestration_is_implementation_closed() -> None:
+    manifest = build_m336j_future_orchestration_manifest()
+    assert manifest.entrypoint_count == 8
+    assert manifest.unresolved_entrypoint_count == 0
+    assert manifest.post_q25_implementation_file_count == 0
+
+
+@pytest.mark.parametrize("mutation", ("route", "host", "pack", "order"))
+def test_route_transcript_mutations_fail_at_real_verifier(mutation: str) -> None:
+    operations = list(_route_operations())
+    index = M336J_TRANSCRIPT_ORDER.index("INDEPENDENT_EVALUATION")
+    if mutation in {"route", "host"}:
+        original = operations[index]
+        values = asdict(original.binding)
+        values.pop("binding_hash")
+        values["route_run_id" if mutation == "route" else "host_identity_hash"] = (
+            "route-two" if mutation == "route" else "d" * 64
+        )
+        changed_binding = build_receipt_binding(**values)
+        operations[index] = build_typed_receipt(
+            original.receipt_type,
+            operation_index=original.operation_index,
+            binding=changed_binding,
+            predecessor_receipt_hash=original.predecessor_receipt_hash,
+            payload_hash=original.payload_hash,
+        )
+    elif mutation == "pack":
+        original = operations[index]
+        values = asdict(original.binding)
+        values.pop("binding_hash")
+        values["candidate_pack_hash"] = "d" * 64
+        operations[index] = build_typed_receipt(
+            original.receipt_type,
+            operation_index=original.operation_index,
+            binding=build_receipt_binding(**values),
+            predecessor_receipt_hash=original.predecessor_receipt_hash,
+            payload_hash=original.payload_hash,
+        )
+    else:
+        operations[index - 1], operations[index] = (
+            operations[index],
+            operations[index - 1],
+        )
+    with pytest.raises(ValueError):
+        build_remote_route_transcript(tuple(operations))

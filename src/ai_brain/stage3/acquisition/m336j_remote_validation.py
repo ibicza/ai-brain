@@ -93,3 +93,36 @@ def run_m336j_installed_runtime(pack_root: Path) -> dict:
     if runtime_status != "PASS":
         raise ValueError("M336J installed runtime failed")
     return {**body, "receipt_hash": content_hash(body)}
+
+
+def run_m336j_remote_replay_and_pack_verification(
+    pack_root: Path, replay_receipt: Path
+) -> dict:
+    """Independently bind sealed replay to the exact source-free public pack."""
+
+    pack = verify_java_public_candidate_pack(pack_root.resolve(strict=True))
+    replay = strict_json_file(replay_receipt.resolve(strict=True))
+    if not isinstance(replay, dict):
+        raise TypeError("M336J replay receipt must be an object")
+    body = dict(replay)
+    claimed = body.pop("receipt_hash", None)
+    candidate_hash = replay.get(
+        "candidate_pack_content_hash", replay.get("public_candidate_pack_content_hash")
+    )
+    if (
+        content_hash(body) != claimed
+        or replay.get("status") != "PASS"
+        or candidate_hash != pack.candidate_pack_content_hash
+    ):
+        raise ValueError("M336J sealed replay/public pack binding changed")
+    result = {
+        "schema_version": 1,
+        "contract_role": "PUBLIC_SAFE_M336J_REPLAY_AND_PACK_VERIFICATION",
+        "candidate_pack_content_hash": pack.candidate_pack_content_hash,
+        "candidate_pack_tree_hash": pack.candidate_pack_tree_hash,
+        "sealed_replay_receipt_hash": claimed,
+        "source_input_count": 0,
+        "source_leak_count": 0,
+        "status": "PASS",
+    }
+    return {**result, "receipt_hash": content_hash(result)}

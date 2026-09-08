@@ -19,17 +19,23 @@ from ai_brain.stage3.acquisition.m336j_execution import (
     public_value_has_private_path,
     python_environment_identity_from_dict,
 )
+from ai_brain.stage3.acquisition.m336j_future import (
+    build_m336j_future_orchestration_manifest,
+)
 from ai_brain.stage3.acquisition.m336j_mutations import (
     M336J_MUTATIONS,
     M336J_ROBUST_PASS_MUTATIONS,
 )
+from ai_brain.stage3.acquisition.m336j_receipts import transcript_from_dict
 from ai_brain.stage3.acquisition.m336j_registry import (
     build_m336j_route_manifest,
     build_m336j_route_registry,
     command_renderer_identity_hash,
 )
+from ai_brain.stage3.acquisition.m336j_schemas import build_public_schema_registry
 
 M336J_EXACT_F24_SHA = "4891de1c3a0f6ba2d5d012ab5189dbb5222ba6bd"
+M336J_EXACT_R25A_SHA = "b05ac235b291acbb514cb8256302610964042d3f"
 M336J_READINESS_STATUS = "READY_FOR_HERMETIC_FINAL_ACQUISITION"
 
 
@@ -44,11 +50,19 @@ class M336JReadinessRequest:
     python_environment_manifest: Path
     executable_dependency_manifest: Path
     host_preflight_receipt: Path
+    storage_capacity_receipt: Path
+    remote_vault_transfer_receipt: Path
+    remote_inputs_transfer_receipt: Path
     remote_materialization_receipt: Path
     remote_production_receipt: Path
+    remote_download_receipt: Path
     remote_replay_receipt: Path
     remote_evaluation_receipt: Path
     remote_runtime_receipt: Path
+    schema_registry: Path
+    route_transcript: Path
+    streaming_transfer_receipt: Path
+    future_orchestration_manifest: Path
     mutation_report: Path
     windows_quality_receipt: Path
     karina_quality_receipt: Path
@@ -75,15 +89,28 @@ class M336JReadinessResult:
     acquisition_provider_source_hash: str
     acquisition_provider_callable_signature_hash: str
     host_preflight_receipt_hash: str
+    storage_capacity_receipt_hash: str
+    remote_vault_transfer_receipt_hash: str
+    remote_inputs_transfer_receipt_hash: str
     remote_materialization_receipt_hash: str
     remote_production_receipt_hash: str
+    remote_download_receipt_hash: str
     remote_replay_receipt_hash: str
     remote_evaluation_receipt_hash: str
     remote_runtime_receipt_hash: str
+    schema_registry_hash: str
+    route_transcript_hash: str
+    streaming_transfer_receipt_hash: str
+    future_orchestration_manifest_hash: str
     mutation_report_hash: str
     windows_quality_receipt_hash: str
     karina_quality_receipt_hash: str
     executable_dependency_count: int
+    remote_schema_count: int
+    synthetic_schema_hash_count: int
+    measured_streaming_payload_bytes: int
+    measured_peak_python_memory_bytes: int
+    missing_future_orchestration_entrypoint_count: int
     rejected_mutation_count: int
     bare_remote_executable_lookup_count: int
     profile_dependent_command_count: int
@@ -145,6 +172,7 @@ def verify_m336j_ready_for_final_freeze(
     git = request.git_executable.resolve(strict=True)
     head = _git(git, repository, "rev-parse", "HEAD^{commit}")
     parent = _git(git, repository, "rev-parse", "HEAD^1")
+    grandparent = _git(git, repository, "rev-parse", "HEAD^2")
     status = _git(git, repository, "status", "--porcelain=v1")
     merge_count = int(
         _git(
@@ -158,7 +186,8 @@ def verify_m336j_ready_for_final_freeze(
     )
     if (
         head != request.exact_r25_sha
-        or parent != M336J_EXACT_F24_SHA
+        or parent != M336J_EXACT_R25A_SHA
+        or grandparent != M336J_EXACT_F24_SHA
         or status
         or merge_count
     ):
@@ -192,11 +221,55 @@ def verify_m336j_ready_for_final_freeze(
         raise ValueError("M336J readiness route/capsule binding changed")
 
     host = _verified(request.host_preflight_receipt, "receipt_hash")
+    storage = _verified(request.storage_capacity_receipt, "receipt_hash")
+    vault_transfer = _verified(request.remote_vault_transfer_receipt, "receipt_hash")
+    inputs_transfer = _verified(request.remote_inputs_transfer_receipt, "receipt_hash")
     materialization = _verified(request.remote_materialization_receipt, "receipt_hash")
     production = _verified(request.remote_production_receipt, "receipt_hash")
+    download = _verified(request.remote_download_receipt, "receipt_hash")
     replay = _verified(request.remote_replay_receipt, "receipt_hash")
     evaluation = _verified(request.remote_evaluation_receipt, "receipt_hash")
     runtime = _verified(request.remote_runtime_receipt, "receipt_hash")
+    schema_registry = _verified(request.schema_registry, "registry_hash")
+    future = _verified(request.future_orchestration_manifest, "manifest_hash")
+    streaming = _verified(request.streaming_transfer_receipt, "receipt_hash")
+    transcript = transcript_from_dict(_object(request.route_transcript))
+    expected_schemas = json.loads(canonical_json(build_public_schema_registry()))
+    expected_future = json.loads(
+        canonical_json(build_m336j_future_orchestration_manifest())
+    )
+    raw_operations = (
+        host,
+        storage,
+        vault_transfer,
+        inputs_transfer,
+        materialization,
+        production,
+        download,
+        replay,
+        evaluation,
+        runtime,
+    )
+    if (
+        schema_registry != expected_schemas
+        or future != expected_future
+        or transcript.exact_sha != head
+        or transcript.host_identity_hash != capsule.host_identity_receipt_hash
+        or transcript.capsule_receipt_hash != capsule.receipt_hash
+        or transcript.dependency_manifest_hash != dependencies.manifest_hash
+        or transcript.command_renderer_hash != command_renderer_identity_hash()
+        or transcript.route_manifest_hash != manifest.manifest_hash
+        or tuple(item.payload_hash for item in transcript.operations)
+        != tuple(item["receipt_hash"] for item in raw_operations)
+        or storage.get("required_free_bytes") != 12 * 1024**3
+        or storage.get("available_free_bytes", 0)
+        < storage.get("required_free_bytes", 1)
+        or storage.get("available_free_inodes", 0) < 100_000
+        or streaming.get("payload_size_bytes", 0) < 256 * 1024**2
+        or streaming.get("peak_python_memory_above_baseline_bytes", 1)
+        >= streaming.get("payload_size_bytes", 0) // 4
+    ):
+        raise ValueError("M336J readiness schema/transcript/capacity binding changed")
     mutation = _mutation_report(request.mutation_report)
     windows_quality = _quality(request.windows_quality_receipt, "WINDOWS", head)
     karina_quality = _quality(request.karina_quality_receipt, "KARINA", head)
@@ -208,11 +281,19 @@ def verify_m336j_ready_for_final_freeze(
         json.loads(canonical_json(registry)),
         json.loads(canonical_json(manifest)),
         host,
+        storage,
+        vault_transfer,
+        inputs_transfer,
         materialization,
         production,
+        download,
         replay,
         evaluation,
         runtime,
+        schema_registry,
+        future,
+        streaming,
+        asdict(transcript),
         mutation,
         windows_quality,
         karina_quality,
@@ -240,15 +321,34 @@ def verify_m336j_ready_for_final_freeze(
         "acquisition_provider_source_hash": provider_source,
         "acquisition_provider_callable_signature_hash": provider_signature,
         "host_preflight_receipt_hash": host["receipt_hash"],
+        "storage_capacity_receipt_hash": storage["receipt_hash"],
+        "remote_vault_transfer_receipt_hash": vault_transfer["receipt_hash"],
+        "remote_inputs_transfer_receipt_hash": inputs_transfer["receipt_hash"],
         "remote_materialization_receipt_hash": materialization["receipt_hash"],
         "remote_production_receipt_hash": production["receipt_hash"],
+        "remote_download_receipt_hash": download["receipt_hash"],
         "remote_replay_receipt_hash": replay["receipt_hash"],
         "remote_evaluation_receipt_hash": evaluation["receipt_hash"],
         "remote_runtime_receipt_hash": runtime["receipt_hash"],
+        "schema_registry_hash": schema_registry["registry_hash"],
+        "route_transcript_hash": transcript.transcript_hash,
+        "streaming_transfer_receipt_hash": streaming["receipt_hash"],
+        "future_orchestration_manifest_hash": future["manifest_hash"],
         "mutation_report_hash": mutation["report_hash"],
         "windows_quality_receipt_hash": windows_quality["receipt_hash"],
         "karina_quality_receipt_hash": karina_quality["receipt_hash"],
         "executable_dependency_count": dependencies.dependency_count,
+        "remote_schema_count": schema_registry["schema_count"],
+        "synthetic_schema_hash_count": schema_registry[
+            "synthetic_tuple_schema_hash_count"
+        ],
+        "measured_streaming_payload_bytes": streaming["payload_size_bytes"],
+        "measured_peak_python_memory_bytes": streaming[
+            "peak_python_memory_above_baseline_bytes"
+        ],
+        "missing_future_orchestration_entrypoint_count": future[
+            "unresolved_entrypoint_count"
+        ],
         "rejected_mutation_count": mutation.get("rejected_mutation_count", -1),
         "bare_remote_executable_lookup_count": (
             dependencies.bare_executable_lookup_count
@@ -261,7 +361,18 @@ def verify_m336j_ready_for_final_freeze(
         ),
         "remote_rehearsal_failure_count": sum(
             item.get("status") != "PASS"
-            for item in (host, materialization, production, replay, evaluation, runtime)
+            for item in (
+                host,
+                storage,
+                vault_transfer,
+                inputs_transfer,
+                materialization,
+                production,
+                download,
+                replay,
+                evaluation,
+                runtime,
+            )
         ),
         "platform_neutral_difference_count": evaluation.get(
             "platform_neutral_difference_count", -1
@@ -298,6 +409,8 @@ def verify_m336j_ready_for_final_freeze(
         "bare_remote_executable_lookup_count",
         "profile_dependent_command_count",
         "unregistered_ssh_command_count",
+        "synthetic_schema_hash_count",
+        "missing_future_orchestration_entrypoint_count",
         "remote_rehearsal_failure_count",
         "platform_neutral_difference_count",
         "source_leak_count",
@@ -312,7 +425,23 @@ def verify_m336j_ready_for_final_freeze(
     )
     if (
         any(body[name] for name in zero_fields)
-        or body["rejected_mutation_count"] < 40
+        or body["rejected_mutation_count"] != len(M336J_MUTATIONS)
+        or body["remote_schema_count"] != 22
+        or streaming.get("payload_size_bytes", 0) < 256 * 1024 * 1024
+        or streaming.get("peak_python_memory_above_baseline_bytes", 0)
+        >= streaming.get("payload_size_bytes", 0) // 4
+        or streaming.get("whole_payload_bytesio_count") != 0
+        or streaming.get("whole_file_set_read_bytes_aggregation_count") != 0
+        or storage.get("required_free_bytes", 0) < 12 * 1024**3
+        or storage.get("available_free_bytes", 0)
+        < storage.get("required_free_bytes", 1)
+        or tuple(item.payload_hash for item in transcript.operations)
+        != tuple(item["receipt_hash"] for item in raw_operations)
+        or transcript.host_identity_hash != capsule.host_identity_receipt_hash
+        or transcript.capsule_receipt_hash != capsule.receipt_hash
+        or transcript.dependency_manifest_hash != dependencies.manifest_hash
+        or transcript.command_renderer_hash != command_renderer_identity_hash()
+        or transcript.route_manifest_hash != manifest.manifest_hash
         or dependencies.dependency_count < 5
         or capsule.verification_status != "PASS"
         or not python.user_site_loading_disabled
@@ -360,7 +489,8 @@ def _mutation_report(path: Path) -> dict:
         or value.get("executed_mutation_count") != len(rows)
         or value.get("rejected_mutation_count") != len(rows)
         or value.get("accepted_mutation_count") != 0
-        or len(rows) < 40
+        or value.get("wrong_rejection_layer_count") != 0
+        or len(rows) != len(M336J_MUTATIONS)
         or identifiers != M336J_MUTATIONS
         or any(
             set(item)

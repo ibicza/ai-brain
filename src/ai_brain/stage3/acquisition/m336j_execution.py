@@ -203,6 +203,7 @@ class KarinaRemoteCommandPlan:
     argv: tuple[KarinaRemoteCommandToken, ...]
     expected_capsule_receipt_hash: str
     stdin_payload_hash: str
+    stdin_payload_size: int
     command_plan_hash: str
 
 
@@ -216,6 +217,7 @@ class KarinaRemoteCommandReceipt:
     environment_policy_hash: str
     exit_code: int
     response_hash: str
+    response_size: int
     status: str
     receipt_hash: str
 
@@ -452,12 +454,24 @@ def build_remote_command_plan(
     capsule: KarinaPrivateExecutionCapsule,
     arguments: Sequence[tuple[KarinaRemoteTokenClass, str | Path | PurePosixPath]],
     stdin_payload: bytes = b"",
+    stdin_payload_hash: str | None = None,
+    stdin_payload_size: int | None = None,
     expected_capsule_receipt_hash: str,
 ) -> KarinaRemoteCommandPlan:
     """Build a typed direct-Python plan; values remain unrendered until SSH."""
 
     if not component_id or _SHA256.fullmatch(expected_capsule_receipt_hash) is None:
         raise ValueError("M336J command plan identity is invalid")
+    if stdin_payload_hash is None:
+        payload_hash = bytes_hash(stdin_payload)
+        payload_size = len(stdin_payload)
+    else:
+        if stdin_payload or _SHA256.fullmatch(stdin_payload_hash) is None:
+            raise ValueError("M336J file-backed stdin identity is invalid")
+        if stdin_payload_size is None or stdin_payload_size < 0:
+            raise ValueError("M336J file-backed stdin size is invalid")
+        payload_hash = stdin_payload_hash
+        payload_size = stdin_payload_size
     argv = (
         KarinaRemoteCommandToken(
             KarinaRemoteTokenClass.EXECUTABLE,
@@ -472,7 +486,8 @@ def build_remote_command_plan(
         "environment": minimal_environment(),
         "argv": argv,
         "expected_capsule_receipt_hash": expected_capsule_receipt_hash,
-        "stdin_payload_hash": bytes_hash(stdin_payload),
+        "stdin_payload_hash": payload_hash,
+        "stdin_payload_size": payload_size,
     }
     return KarinaRemoteCommandPlan(**body, command_plan_hash=content_hash(body))
 
@@ -507,8 +522,18 @@ def command_receipt(
     plan: KarinaRemoteCommandPlan,
     dependency_manifest: RemoteExecutableDependencyManifest,
     exit_code: int,
-    response: bytes,
+    response: bytes | None = None,
+    response_hash: str | None = None,
+    response_size: int | None = None,
 ) -> KarinaRemoteCommandReceipt:
+    if response_hash is None:
+        raw = response if response is not None else b""
+        response_hash = bytes_hash(raw)
+        response_size = len(raw)
+    elif response is not None or _SHA256.fullmatch(response_hash) is None:
+        raise ValueError("M336J streamed response identity is invalid")
+    if response_size is None or response_size < 0:
+        raise ValueError("M336J streamed response size is invalid")
     counts = tuple(
         sorted(
             (
@@ -528,7 +553,8 @@ def command_receipt(
         ),
         "environment_policy_hash": minimal_environment_policy().policy_hash,
         "exit_code": exit_code,
-        "response_hash": bytes_hash(response),
+        "response_hash": response_hash,
+        "response_size": response_size,
         "status": "PASS" if exit_code == 0 else "FAIL",
     }
     return KarinaRemoteCommandReceipt(**body, receipt_hash=content_hash(body))

@@ -11,14 +11,22 @@ from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage3.acquisition.m336i_registry import (
     build_m336i_final_java_route_registry,
 )
+from ai_brain.stage3.acquisition.m336j_schemas import (
+    schema_pair_for_route_role,
+    validate_schema_registry,
+)
 
-M336J_ROUTE_VERSION = "m336j.hermetic-karina-final-java-route.v1"
+M336J_ROUTE_VERSION = "m336j.hermetic-karina-final-java-route.v2"
 M336J_REMOTE_COMPONENT_ROLES = (
     "REMOTE_EXECUTION_CAPSULE_VERIFIER",
     "REMOTE_COMMAND_PLAN_BUILDER",
     "REMOTE_HOST_PREFLIGHT",
+    "REMOTE_STORAGE_PREFLIGHT",
+    "REMOTE_TREE_UPLOAD",
+    "REMOTE_TREE_DOWNLOAD",
     "REMOTE_SELECTED_SOURCE_MATERIALIZER",
     "REMOTE_COMPILER_AWARE_PRODUCTION_WORKER",
+    "REMOTE_REPLAY_AND_PACK_VERIFIER",
     "REMOTE_INDEPENDENT_EVALUATOR",
     "REMOTE_INSTALLED_RUNTIME",
     "REMOTE_RESPONSE_VERIFIER",
@@ -101,12 +109,36 @@ _REMOTE_SPECS = (
         "PUBLIC_SAFE_RECEIPT",
     ),
     (
+        "REMOTE_STORAGE_PREFLIGHT",
+        "m336j.remote-storage-preflight.v1",
+        "ai_brain.stage3.acquisition.m336j_storage",
+        "preflight_private_storage",
+        ("m336j.remote-host-preflight.v2",),
+        "PRIVATE_STORAGE_TO_PUBLIC_RECEIPT",
+    ),
+    (
+        "REMOTE_TREE_UPLOAD",
+        "m336j.remote-tree-upload.v1",
+        "ai_brain.stage3.acquisition.m336j_transport",
+        "extract_canonical_tree_archive_file",
+        ("m336j.remote-storage-preflight.v1",),
+        "PRIVATE_SOURCE_REQUIRED",
+    ),
+    (
+        "REMOTE_TREE_DOWNLOAD",
+        "m336j.remote-tree-download.v1",
+        "ai_brain.stage3.acquisition.m336j_transport",
+        "write_canonical_tree_export",
+        ("m336j.remote-storage-preflight.v1",),
+        "PUBLIC_PACK_STREAM",
+    ),
+    (
         "REMOTE_SELECTED_SOURCE_MATERIALIZER",
         "m336j.remote-selected-source-materializer.v1",
         "ai_brain.stage3.acquisition.m336h_materialization",
         "materialize_m336f_selected_source_snapshot",
         (
-            "m336j.remote-host-preflight.v2",
+            "m336j.remote-tree-upload.v1",
             "m336i.m336f-source-materializer.v1",
         ),
         "PRIVATE_SOURCE_REQUIRED",
@@ -120,11 +152,19 @@ _REMOTE_SPECS = (
         "PRIVATE_SOURCE_TO_PUBLIC_DERIVATION",
     ),
     (
+        "REMOTE_REPLAY_AND_PACK_VERIFIER",
+        "m336j.remote-replay-and-pack-verifier.v1",
+        "ai_brain.stage3.acquisition.m336j_remote_validation",
+        "run_m336j_remote_replay_and_pack_verification",
+        ("m336j.remote-compiler-aware-production-worker.v1",),
+        "PUBLIC_PACK_RUNTIME_ONLY",
+    ),
+    (
         "REMOTE_INDEPENDENT_EVALUATOR",
         "m336j.remote-independent-evaluator.v1",
         "ai_brain.stage3.acquisition.m336j_remote_validation",
         "run_m336j_remote_independent_evaluation",
-        ("m336j.remote-compiler-aware-production-worker.v1",),
+        ("m336j.remote-replay-and-pack-verifier.v1",),
         "PRIVATE_AUTHORITY_TO_PUBLIC_EVALUATION",
     ),
     (
@@ -132,7 +172,7 @@ _REMOTE_SPECS = (
         "m336j.remote-installed-runtime.v1",
         "ai_brain.stage3.acquisition.m336j_remote_validation",
         "run_m336j_installed_runtime",
-        ("m336j.remote-independent-evaluator.v1",),
+        ("m336j.remote-replay-and-pack-verifier.v1",),
         "PUBLIC_PACK_RUNTIME_ONLY",
     ),
     (
@@ -142,6 +182,7 @@ _REMOTE_SPECS = (
         "parse_bound_json_response",
         (
             "m336j.remote-compiler-aware-production-worker.v1",
+            "m336j.remote-replay-and-pack-verifier.v1",
             "m336j.remote-independent-evaluator.v1",
             "m336j.remote-installed-runtime.v1",
         ),
@@ -151,6 +192,7 @@ _REMOTE_SPECS = (
 
 
 def build_m336j_route_registry() -> M336JRouteRegistry:
+    validate_schema_registry()
     inherited = build_m336i_final_java_route_registry()
     components = [_copy_inherited_binding(item) for item in inherited.components]
     components.extend(_binding(spec) for spec in _REMOTE_SPECS)
@@ -191,6 +233,7 @@ def build_m336j_route_manifest(
     worker_roles = (
         "REMOTE_SELECTED_SOURCE_MATERIALIZER",
         "REMOTE_COMPILER_AWARE_PRODUCTION_WORKER",
+        "REMOTE_REPLAY_AND_PACK_VERIFIER",
         "REMOTE_INDEPENDENT_EVALUATOR",
         "REMOTE_INSTALLED_RUNTIME",
         "REMOTE_RESPONSE_VERIFIER",
@@ -293,6 +336,7 @@ def _copy_inherited_binding(item) -> M336JRouteComponentBinding:
 def _binding(spec) -> M336JRouteComponentBinding:
     role, component_id, module, name, dependencies, confidentiality = spec
     callable_value = _resolve(module, name)
+    request_schema, response_schema = schema_pair_for_route_role(role)
     body = {
         "route_role": role,
         "component_id": component_id,
@@ -300,8 +344,8 @@ def _binding(spec) -> M336JRouteComponentBinding:
         "qualified_callable_name": name,
         "source_file_content_hash": _source_hash(callable_value),
         "callable_signature_hash": content_hash(str(inspect.signature(callable_value))),
-        "request_schema_hash": content_hash((role, "request", name, 1)),
-        "response_schema_hash": content_hash((role, "response", name, 1)),
+        "request_schema_hash": request_schema.schema_hash,
+        "response_schema_hash": response_schema.schema_hash,
         "dependency_component_ids": tuple(dependencies),
         "execution_environment": "KARINA_HERMETIC_DIRECT_PROJECT_PYTHON",
         "artifact_confidentiality_role": confidentiality,

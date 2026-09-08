@@ -10,6 +10,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+from dataclasses import asdict
 from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
@@ -90,13 +91,16 @@ from ai_brain.stage3.acquisition.m336j_registry import (
     command_renderer_identity_hash,
 )
 from ai_brain.stage3.acquisition.m336j_transport import (
+    M336J_DEFAULT_TREE_TRANSFER_LIMITS,
     KarinaPrivateSshTransport,
     canonical_json_bytes,
-    canonical_tree_archive,
-    extract_canonical_tree_export,
+    extract_canonical_tree_export_file,
+    hash_file,
     invoke_karina_command,
+    invoke_karina_command_streaming,
     parse_bound_json_response,
-    parse_framed_tree_response,
+    parse_framed_tree_response_file,
+    write_canonical_tree_archive,
 )
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
 from ai_brain.stage3.acquisition.sources import ingest_bundle
@@ -880,6 +884,43 @@ def _m336j_private_route(args):
     return capsule, public, dependencies, transport, build_m336j_route_registry()
 
 
+def _run_karina_storage_preflight(args):
+    _capsule, public, _dependencies, _transport, registry = _m336j_private_route(args)
+    component = next(
+        item
+        for item in registry.components
+        if item.route_role == "REMOTE_STORAGE_PREFLIGHT"
+    )
+    maximum = M336J_DEFAULT_TREE_TRANSFER_LIMITS.maximum_archive_bytes
+    request_hash = content_hash(
+        (maximum, "QUALIFICATION_12_GIB", public.receipt_hash, component.binding_hash)
+    )
+    receipt, _component, _public = _invoke_m336j_remote(
+        args,
+        component_role="REMOTE_STORAGE_PREFLIGHT",
+        subcommand="storage-preflight",
+        receipt_name="karina-storage-preflight-command.json",
+        expected_request_hash=request_hash,
+        options=(
+            (KarinaRemoteTokenClass.FLAG, "--maximum-transfer-bytes"),
+            (KarinaRemoteTokenClass.OPAQUE_ARGUMENT, str(maximum)),
+            (KarinaRemoteTokenClass.FLAG, "--qualification-margin"),
+            (KarinaRemoteTokenClass.FLAG, "--request-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
+            (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
+        ),
+    )
+    if (
+        receipt.get("required_free_bytes") != 12 * 1024**3
+        or receipt.get("available_free_bytes", 0) < receipt["required_free_bytes"]
+        or receipt.get("available_free_inodes", 0) < 100_000
+    ):
+        raise ValueError("M336J Karina storage qualification failed")
+    write_canonical_json(args.karina_storage_preflight_receipt, receipt)
+    return receipt
+
+
 def _invoke_m336j_remote(
     args,
     *,
@@ -888,6 +929,8 @@ def _invoke_m336j_remote(
     receipt_name,
     expected_request_hash,
     payload=b"",
+    payload_path=None,
+    response_path=None,
     options=(),
     framed=False,
 ):
@@ -909,33 +952,77 @@ def _invoke_m336j_remote(
         ),
         *options,
     )
-    plan = build_remote_command_plan(
-        component_id=component.component_id,
-        capsule=capsule,
-        arguments=arguments,
-        stdin_payload=payload,
-        expected_capsule_receipt_hash=public.receipt_hash,
+    if payload_path is not None and payload:
+        raise ValueError("M336J remote remote input must be bytes or a file")
+    source = (
+        Path(payload_path).resolve(strict=True) if payload_path is not None else None
     )
-    result = invoke_karina_command(
-        transport=transport,
-        capsule=capsule,
-        plan=plan,
-        dependency_manifest=dependencies,
-        stdin_payload=payload,
-    )
+    plan_arguments = {
+        "component_id": component.component_id,
+        "capsule": capsule,
+        "arguments": arguments,
+        "expected_capsule_receipt_hash": public.receipt_hash,
+    }
+    if source is None:
+        plan = build_remote_command_plan(**plan_arguments, stdin_payload=payload)
+    else:
+        plan = build_remote_command_plan(
+            **plan_arguments,
+            stdin_payload_hash=hash_file(source),
+            stdin_payload_size=source.stat().st_size,
+        )
+    streaming = source is not None or framed
+    if streaming:
+        with tempfile.TemporaryDirectory(
+            prefix="m336j-ssh-stream-", dir=args.private_acquisition_output.parent
+        ) as raw:
+            temporary = Path(raw)
+            if source is None:
+                source = temporary / "empty.stdin"
+                source.write_bytes(b"")
+            output = (
+                Path(response_path).resolve(strict=False)
+                if response_path is not None
+                else temporary / "response.stdout"
+            )
+            result = invoke_karina_command_streaming(
+                transport=transport,
+                capsule=capsule,
+                plan=plan,
+                dependency_manifest=dependencies,
+                stdin_path=source,
+                stdout_path=output,
+            )
+            if not framed:
+                response = parse_bound_json_response(
+                    result.stdout_path.read_bytes(),
+                    request_hash=expected_request_hash,
+                    component_binding_hash=component.binding_hash,
+                    host_identity_hash=public.host_identity_receipt_hash,
+                )
+    else:
+        result = invoke_karina_command(
+            transport=transport,
+            capsule=capsule,
+            plan=plan,
+            dependency_manifest=dependencies,
+            stdin_payload=payload,
+        )
+        response = parse_bound_json_response(
+            result.stdout,
+            request_hash=expected_request_hash,
+            component_binding_hash=component.binding_hash,
+            host_identity_hash=public.host_identity_receipt_hash,
+        )
     args.karina_command_receipt_root.mkdir(parents=True, exist_ok=True)
     write_canonical_json(
         args.karina_command_receipt_root / receipt_name,
         result.command_receipt,
     )
     if framed:
+        if response_path is None:
+            raise ValueError("M336J streamed response needs an external destination")
         return result, component, public
-    response = parse_bound_json_response(
-        result.stdout,
-        request_hash=expected_request_hash,
-        component_binding_hash=component.binding_hash,
-        host_identity_hash=public.host_identity_receipt_hash,
-    )
     return response, component, public
 
 
@@ -1008,43 +1095,83 @@ def _prepare_karina(args, authorization):
         raise ValueError("M336J Karina run root is outside private capsule")
     relative = remote.removeprefix(prefix)
     component = next(
-        item
-        for item in registry.components
-        if item.route_role == "REMOTE_SELECTED_SOURCE_MATERIALIZER"
+        item for item in registry.components if item.route_role == "REMOTE_TREE_UPLOAD"
     )
-    for label, source in (("vault", args.windows_vault), ("inputs", inputs)):
-        payload = canonical_tree_archive(source, prefix=label)
-        request_hash = content_hash((label, bytes_hash(payload), public.receipt_hash))
-        response, _binding, _receipt = _invoke_m336j_remote(
-            args,
-            component_role="REMOTE_SELECTED_SOURCE_MATERIALIZER",
-            subcommand="receive-tree",
-            receipt_name=f"karina-{label}-transfer-command.json",
-            expected_request_hash=request_hash,
-            payload=payload,
-            options=(
-                (KarinaRemoteTokenClass.FLAG, "--relative-destination"),
+    limits = M336J_DEFAULT_TREE_TRANSFER_LIMITS
+    limit_hash = content_hash(asdict(limits))
+    with tempfile.TemporaryDirectory(
+        prefix="m336j-tree-upload-", dir=args.private_acquisition_output.parent
+    ) as raw:
+        transfer_root = Path(raw)
+        for label, source in (("vault", args.windows_vault), ("inputs", inputs)):
+            artifact = write_canonical_tree_archive(
+                source,
+                transfer_root / f"{label}.zip",
+                prefix=label,
+                limits=limits,
+            )
+            request_hash = content_hash(
                 (
-                    KarinaRemoteTokenClass.PRIVATE_PATH,
-                    f"{relative}/{label}-upload",
+                    label,
+                    artifact.archive_hash,
+                    artifact.archive_size,
+                    artifact.file_count,
+                    artifact.portable_tree_hash,
+                    limit_hash,
+                    public.receipt_hash,
+                )
+            )
+            response, _binding, _receipt = _invoke_m336j_remote(
+                args,
+                component_role="REMOTE_TREE_UPLOAD",
+                subcommand="receive-tree",
+                receipt_name=f"karina-{label}-transfer-command.json",
+                expected_request_hash=request_hash,
+                payload_path=artifact.private_path,
+                options=(
+                    (KarinaRemoteTokenClass.FLAG, "--relative-destination"),
+                    (
+                        KarinaRemoteTokenClass.PRIVATE_PATH,
+                        f"{relative}/{label}-upload",
+                    ),
+                    (KarinaRemoteTokenClass.FLAG, "--payload-hash"),
+                    (
+                        KarinaRemoteTokenClass.PUBLIC_IDENTITY,
+                        artifact.archive_hash,
+                    ),
+                    (KarinaRemoteTokenClass.FLAG, "--payload-size"),
+                    (
+                        KarinaRemoteTokenClass.OPAQUE_ARGUMENT,
+                        str(artifact.archive_size),
+                    ),
+                    (KarinaRemoteTokenClass.FLAG, "--file-count"),
+                    (
+                        KarinaRemoteTokenClass.OPAQUE_ARGUMENT,
+                        str(artifact.file_count),
+                    ),
+                    (KarinaRemoteTokenClass.FLAG, "--portable-tree-hash"),
+                    (
+                        KarinaRemoteTokenClass.PUBLIC_IDENTITY,
+                        artifact.portable_tree_hash,
+                    ),
+                    (KarinaRemoteTokenClass.FLAG, "--transfer-limit-hash"),
+                    (KarinaRemoteTokenClass.PUBLIC_IDENTITY, limit_hash),
+                    (
+                        KarinaRemoteTokenClass.FLAG,
+                        "--expected-capsule-receipt-hash",
+                    ),
+                    (KarinaRemoteTokenClass.PUBLIC_IDENTITY, public.receipt_hash),
+                    (KarinaRemoteTokenClass.FLAG, "--request-hash"),
+                    (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
+                    (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
+                    (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
                 ),
-                (KarinaRemoteTokenClass.FLAG, "--payload-hash"),
-                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, bytes_hash(payload)),
-                (
-                    KarinaRemoteTokenClass.FLAG,
-                    "--expected-capsule-receipt-hash",
-                ),
-                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, public.receipt_hash),
-                (KarinaRemoteTokenClass.FLAG, "--request-hash"),
-                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
-                (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
-                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
-            ),
-        )
-        write_canonical_json(
-            args.private_acquisition_output / f"karina-{label}-transfer-receipt.json",
-            response,
-        )
+            )
+            write_canonical_json(
+                args.private_acquisition_output
+                / f"karina-{label}-transfer-receipt.json",
+                response,
+            )
     request = _karina_request(args, authorization, action="MATERIALIZE")
     return _invoke_karina_worker(args, request, "karina-materialize-request.json")
 
@@ -1070,43 +1197,132 @@ def _run_karina_production(args, authorization, materialization):
     component = next(
         item
         for item in registry.components
-        if item.route_role == "REMOTE_RESPONSE_VERIFIER"
+        if item.route_role == "REMOTE_TREE_DOWNLOAD"
     )
     request_hash = content_hash((relative, public.receipt_hash, worker["receipt_hash"]))
-    result, _binding, _receipt = _invoke_m336j_remote(
+    limits = M336J_DEFAULT_TREE_TRANSFER_LIMITS
+    limit_hash = content_hash(asdict(limits))
+    with tempfile.TemporaryDirectory(
+        prefix="m336j-tree-download-", dir=local_parent
+    ) as raw:
+        temporary = Path(raw)
+        response_path = temporary / "framed-response.bin"
+        result, _binding, _receipt = _invoke_m336j_remote(
+            args,
+            component_role="REMOTE_TREE_DOWNLOAD",
+            subcommand="export-tree",
+            receipt_name="karina-production-export-command.json",
+            expected_request_hash=request_hash,
+            response_path=response_path,
+            options=(
+                (KarinaRemoteTokenClass.FLAG, "--relative-source"),
+                (
+                    KarinaRemoteTokenClass.PRIVATE_PATH,
+                    f"{relative}/public-production",
+                ),
+                (KarinaRemoteTokenClass.FLAG, "--transfer-limit-hash"),
+                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, limit_hash),
+                (
+                    KarinaRemoteTokenClass.FLAG,
+                    "--expected-capsule-receipt-hash",
+                ),
+                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, public.receipt_hash),
+                (KarinaRemoteTokenClass.FLAG, "--request-hash"),
+                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
+                (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
+                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
+            ),
+            framed=True,
+        )
+        archive = temporary / "production.zip"
+        header = parse_framed_tree_response_file(
+            result.stdout_path,
+            payload_path=archive,
+            request_hash=request_hash,
+            component_binding_hash=component.binding_hash,
+            host_identity_hash=public.host_identity_receipt_hash,
+            limits=limits,
+        )
+        if header.get("transfer_limit_hash") != limit_hash:
+            raise ValueError("M336J production export limit binding changed")
+        write_canonical_json(
+            args.private_acquisition_output / "karina-production-export-receipt.json",
+            header,
+        )
+        extract_canonical_tree_export_file(
+            archive,
+            destination=args.karina_public_production_root,
+            expected_payload_hash=header["payload_hash"],
+            limits=limits,
+        )
+    replay_component = next(
+        item
+        for item in registry.components
+        if item.route_role == "REMOTE_REPLAY_AND_PACK_VERIFIER"
+    )
+    replay_request_hash = content_hash(
+        (relative, worker["receipt_hash"], replay_component.binding_hash)
+    )
+    replay, _binding, _receipt = _invoke_m336j_remote(
         args,
-        component_role="REMOTE_RESPONSE_VERIFIER",
-        subcommand="export-tree",
-        receipt_name="karina-production-export-command.json",
-        expected_request_hash=request_hash,
+        component_role="REMOTE_REPLAY_AND_PACK_VERIFIER",
+        subcommand="replay-and-pack-verification",
+        receipt_name="karina-replay-command.json",
+        expected_request_hash=replay_request_hash,
         options=(
-            (KarinaRemoteTokenClass.FLAG, "--relative-source"),
+            (KarinaRemoteTokenClass.FLAG, "--relative-pack"),
             (
                 KarinaRemoteTokenClass.PRIVATE_PATH,
-                f"{relative}/public-production",
+                f"{relative}/public-production/candidate_pack",
             ),
+            (KarinaRemoteTokenClass.FLAG, "--relative-replay-receipt"),
             (
-                KarinaRemoteTokenClass.FLAG,
-                "--expected-capsule-receipt-hash",
+                KarinaRemoteTokenClass.PRIVATE_PATH,
+                f"{relative}/public-production/sealed_source_replay_receipt.json",
             ),
-            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, public.receipt_hash),
             (KarinaRemoteTokenClass.FLAG, "--request-hash"),
-            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, replay_request_hash),
             (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
-            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
+            (
+                KarinaRemoteTokenClass.PUBLIC_IDENTITY,
+                replay_component.binding_hash,
+            ),
         ),
-        framed=True,
     )
-    header, payload = parse_framed_tree_response(
-        result.stdout,
-        request_hash=request_hash,
-        component_binding_hash=component.binding_hash,
-        host_identity_hash=public.host_identity_receipt_hash,
+    write_canonical_json(
+        args.private_acquisition_output / "karina-replay-receipt.json", replay
     )
-    extract_canonical_tree_export(
-        payload,
-        destination=args.karina_public_production_root,
-        expected_payload_hash=header["payload_hash"],
+    runtime_component = next(
+        item
+        for item in registry.components
+        if item.route_role == "REMOTE_INSTALLED_RUNTIME"
+    )
+    runtime_request_hash = content_hash(
+        (relative, replay["receipt_hash"], runtime_component.binding_hash)
+    )
+    runtime, _binding, _receipt = _invoke_m336j_remote(
+        args,
+        component_role="REMOTE_INSTALLED_RUNTIME",
+        subcommand="installed-runtime",
+        receipt_name="karina-runtime-command.json",
+        expected_request_hash=runtime_request_hash,
+        options=(
+            (KarinaRemoteTokenClass.FLAG, "--relative-pack"),
+            (
+                KarinaRemoteTokenClass.PRIVATE_PATH,
+                f"{relative}/public-production/candidate_pack",
+            ),
+            (KarinaRemoteTokenClass.FLAG, "--request-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, runtime_request_hash),
+            (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
+            (
+                KarinaRemoteTokenClass.PUBLIC_IDENTITY,
+                runtime_component.binding_hash,
+            ),
+        ),
+    )
+    write_canonical_json(
+        args.private_acquisition_output / "karina-runtime-receipt.json", runtime
     )
     return worker
 
@@ -1954,6 +2170,7 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         args.public_staging_root,
         args.karina_command_receipt_root,
         args.karina_host_preflight_receipt,
+        args.karina_storage_preflight_receipt,
         args.final_receipt,
     )
     if any(path.exists() for path in outputs):
@@ -2012,6 +2229,7 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         != freeze_manifest.get("python_environment_manifest_hash")
     ):
         raise ValueError("M336I Karina preflight differs from frozen authority")
+    _run_karina_storage_preflight(args)
 
 
 def _host_preflight(args) -> None:
@@ -2090,6 +2308,7 @@ def _add_final_arguments(parser) -> None:
         "karina_executable_dependency_manifest",
         "karina_command_receipt_root",
         "karina_host_preflight_receipt",
+        "karina_storage_preflight_receipt",
         "final_receipt",
     )
     for name in paths:
