@@ -77,6 +77,27 @@ from ai_brain.stage3.acquisition.m336i_registry import (
     build_m336i_final_java_route_registry,
 )
 from ai_brain.stage3.acquisition.m336i_route import M336IRouteStateLedger
+from ai_brain.stage3.acquisition.m336j_execution import (
+    KarinaRemoteTokenClass,
+    build_remote_command_plan,
+    dependency_manifest_from_dict,
+    load_private_execution_capsule,
+    public_execution_capsule_receipt_from_dict,
+)
+from ai_brain.stage3.acquisition.m336j_registry import (
+    build_m336j_route_manifest,
+    build_m336j_route_registry,
+    command_renderer_identity_hash,
+)
+from ai_brain.stage3.acquisition.m336j_transport import (
+    KarinaPrivateSshTransport,
+    canonical_json_bytes,
+    canonical_tree_archive,
+    extract_canonical_tree_export,
+    invoke_karina_command,
+    parse_bound_json_response,
+    parse_framed_tree_response,
+)
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
 from ai_brain.stage3.acquisition.sources import ingest_bundle
 
@@ -156,8 +177,8 @@ def _rehearse_existing(args) -> None:
         "selector_seed",
         "implementation_identity",
     }
-    optional = {"acquisition_rehearsal_receipt"}
-    if frozenset(config) not in {frozenset(required), frozenset(required | optional)}:
+    optional = {"acquisition_rehearsal_receipt", "route_manifest"}
+    if not required <= set(config) <= required | optional:
         raise ValueError("M336I existing-source rehearsal config fields changed")
     acquisition_rehearsal = None
     if args.command == "rehearse-authorized":
@@ -195,11 +216,31 @@ def _rehearse_existing(args) -> None:
     if any(path.exists() for path in destinations):
         raise FileExistsError("M336I rehearsal destinations must be fresh")
     preflight = Path(config["preflight_root"]).resolve(strict=True)
-    registry = build_m336i_final_java_route_registry()
-    manifest = build_m336i_final_java_route_manifest(registry)
-    if _object(preflight / "route_manifest.json") != json.loads(
-        canonical_json(manifest)
-    ):
+    route_manifest_path = (
+        Path(config["route_manifest"])
+        if "route_manifest" in config
+        else preflight / "route_manifest.json"
+    )
+    frozen_route = _object(route_manifest_path)
+    if "route_manifest" in config:
+        registry = build_m336j_route_registry()
+        manifest = build_m336j_route_manifest(
+            registry,
+            execution_capsule_public_receipt_hash=frozen_route[
+                "execution_capsule_public_receipt_hash"
+            ],
+            remote_command_renderer_hash=frozen_route["remote_command_renderer_hash"],
+            executable_dependency_manifest_hash=frozen_route[
+                "executable_dependency_manifest_hash"
+            ],
+            minimal_environment_policy_hash=frozen_route[
+                "minimal_environment_policy_hash"
+            ],
+        )
+    else:
+        registry = build_m336i_final_java_route_registry()
+        manifest = build_m336i_final_java_route_manifest(registry)
+    if frozen_route != json.loads(canonical_json(manifest)):
         raise ValueError("M336I rehearsal route manifest differs from live code")
     bindings = source_entry_binding_manifest_from_dict(
         _object(Path(config["bindings"]))
@@ -274,7 +315,7 @@ def _rehearse_existing(args) -> None:
     response, seal = run_m336i_compiler_aware_production(
         M336ICompilerAwareProductionRequest(
             production_request=base,
-            frozen_route_manifest=preflight / "route_manifest.json",
+            frozen_route_manifest=route_manifest_path,
             frozen_implementation_identity=config["implementation_identity"],
             frozen_publication_boundary_hash=config[
                 "publication_boundary_contract_hash"
@@ -758,28 +799,48 @@ def _production_request(
 
 def _karina_request(args, authorization, *, action, materialization_hash=None):
     remote = args.karina_private_root.rstrip("/")
-    registry = build_m336i_final_java_route_registry()
-    role = (
-        "M336F_SELECTED_SOURCE_MATERIALIZER"
-        if action == "MATERIALIZE"
-        else "COMPILER_AWARE_PRODUCTION"
-    )
+    if hasattr(args, "karina_private_capsule"):
+        registry = build_m336j_route_registry()
+        role = (
+            "REMOTE_SELECTED_SOURCE_MATERIALIZER"
+            if action == "MATERIALIZE"
+            else "REMOTE_COMPILER_AWARE_PRODUCTION_WORKER"
+        )
+    else:
+        registry = build_m336i_final_java_route_registry()
+        role = (
+            "M336F_SELECTED_SOURCE_MATERIALIZER"
+            if action == "MATERIALIZE"
+            else "COMPILER_AWARE_PRODUCTION"
+        )
     component = next(item for item in registry.components if item.route_role == role)
     return {
         "schema_version": 1,
         "action": action,
         "expected_head": args.supplied_f24_sha,
         "repository": args.karina_repository,
-        "vault": f"{remote}/vault",
-        "bindings": f"{remote}/inputs/source_entry_binding_manifest.json",
-        "selected_manifest": f"{remote}/inputs/selected_source_manifest.json",
-        "selector_receipt": f"{remote}/inputs/selector_receipt.json",
-        "closure_manifest": f"{remote}/inputs/compilation_closure_manifest.json",
-        "closure_proof": f"{remote}/inputs/compilation_closure_feasibility.json",
-        "route_manifest": f"{remote}/inputs/route_manifest.json",
-        "threshold_manifest": f"{remote}/inputs/threshold_manifest.json",
-        "portable_vault_manifest": f"{remote}/inputs/portable_vault_manifest.json",
-        "karina_host_identity_receipt": f"{remote}/inputs/karina_host_identity_receipt.json",
+        "vault": f"{remote}/vault-upload/vault",
+        "bindings": (
+            f"{remote}/inputs-upload/inputs/source_entry_binding_manifest.json"
+        ),
+        "selected_manifest": (
+            f"{remote}/inputs-upload/inputs/selected_source_manifest.json"
+        ),
+        "selector_receipt": f"{remote}/inputs-upload/inputs/selector_receipt.json",
+        "closure_manifest": (
+            f"{remote}/inputs-upload/inputs/compilation_closure_manifest.json"
+        ),
+        "closure_proof": (
+            f"{remote}/inputs-upload/inputs/compilation_closure_feasibility.json"
+        ),
+        "route_manifest": f"{remote}/inputs-upload/inputs/route_manifest.json",
+        "threshold_manifest": f"{remote}/inputs-upload/inputs/threshold_manifest.json",
+        "portable_vault_manifest": (
+            f"{remote}/inputs-upload/inputs/portable_vault_manifest.json"
+        ),
+        "karina_host_identity_receipt": (
+            f"{remote}/inputs-upload/inputs/karina_host_identity_receipt.json"
+        ),
         "snapshot": f"{remote}/selected-snapshot",
         "replay_root": f"{remote}/private-replay",
         "production_root": f"{remote}/public-production",
@@ -797,69 +858,126 @@ def _karina_request(args, authorization, *, action, materialization_hash=None):
     }
 
 
-def _invoke_karina_worker(args, request, request_name):
-    host = args.karina_worker_endpoint
-    remote = args.karina_private_root.rstrip("/")
-    request_path = args.private_acquisition_output / request_name
-    write_canonical_json(
-        request_path, {**request, "request_hash": content_hash(request)}
+def _m336j_private_route(args):
+    capsule = load_private_execution_capsule(args.karina_private_capsule)
+    public = public_execution_capsule_receipt_from_dict(
+        _object(args.karina_public_capsule_receipt)
     )
-    _run(
+    dependencies = dependency_manifest_from_dict(
+        _object(args.karina_executable_dependency_manifest)
+    )
+    if (
+        capsule.expected_public_receipt_hash != public.receipt_hash
+        or public.executable_dependency_manifest_hash != dependencies.manifest_hash
+    ):
+        raise ValueError("M336J private/public execution capsule binding changed")
+    transport = KarinaPrivateSshTransport(
+        ssh_executable=args.ssh_executable,
+        endpoint=args.karina_worker_endpoint,
+        identity_file=args.ssh_key,
+        known_hosts_file=args.known_hosts_file,
+    )
+    return capsule, public, dependencies, transport, build_m336j_route_registry()
+
+
+def _invoke_m336j_remote(
+    args,
+    *,
+    component_role,
+    subcommand,
+    receipt_name,
+    expected_request_hash,
+    payload=b"",
+    options=(),
+    framed=False,
+):
+    capsule, public, dependencies, transport, registry = _m336j_private_route(args)
+    component = next(
+        item for item in registry.components if item.route_role == component_role
+    )
+    remote_script = (
+        capsule.repository_checkout / "scripts" / "m336j_karina_execution.py"
+    )
+    arguments = (
+        (KarinaRemoteTokenClass.FLAG, "-B"),
+        (KarinaRemoteTokenClass.PRIVATE_PATH, remote_script),
+        (KarinaRemoteTokenClass.SUBCOMMAND, subcommand),
+        (KarinaRemoteTokenClass.FLAG, "--private-capsule"),
         (
-            "scp",
-            "-i",
-            str(args.ssh_key),
-            str(request_path),
-            f"{host}:{remote}/worker-request.json",
-        )
+            KarinaRemoteTokenClass.PRIVATE_PATH,
+            args.karina_private_capsule_remote,
+        ),
+        *options,
     )
-    command = (
-        f"cd {args.karina_repository} && uv run python "
-        f"scripts/m336i_java_final_route.py produce-worker "
-        f"--request {remote}/worker-request.json"
+    plan = build_remote_command_plan(
+        component_id=component.component_id,
+        capsule=capsule,
+        arguments=arguments,
+        stdin_payload=payload,
+        expected_capsule_receipt_hash=public.receipt_hash,
     )
-    _run(("ssh", "-i", str(args.ssh_key), host, command))
+    result = invoke_karina_command(
+        transport=transport,
+        capsule=capsule,
+        plan=plan,
+        dependency_manifest=dependencies,
+        stdin_payload=payload,
+    )
+    args.karina_command_receipt_root.mkdir(parents=True, exist_ok=True)
+    write_canonical_json(
+        args.karina_command_receipt_root / receipt_name,
+        result.command_receipt,
+    )
+    if framed:
+        return result, component, public
+    response = parse_bound_json_response(
+        result.stdout,
+        request_hash=expected_request_hash,
+        component_binding_hash=component.binding_hash,
+        host_identity_hash=public.host_identity_receipt_hash,
+    )
+    return response, component, public
+
+
+def _invoke_karina_worker(args, request, request_name):
+    request_path = args.private_acquisition_output / request_name
+    role = (
+        "REMOTE_SELECTED_SOURCE_MATERIALIZER"
+        if request["action"] == "MATERIALIZE"
+        else "REMOTE_COMPILER_AWARE_PRODUCTION_WORKER"
+    )
+    _capsule, public, _dependencies, _transport, registry = _m336j_private_route(args)
+    component = next(item for item in registry.components if item.route_role == role)
+    body = {
+        **request,
+        "m336j_execution_capsule_receipt_hash": public.receipt_hash,
+        "m336j_component_binding_hash": component.binding_hash,
+    }
+    request_hash = content_hash(body)
+    request_value = {**body, "request_hash": request_hash}
+    write_canonical_json(request_path, request_value)
+    response, _component, _public = _invoke_m336j_remote(
+        args,
+        component_role=role,
+        subcommand="produce-worker",
+        receipt_name=request_name.removesuffix(".json") + "-command.json",
+        expected_request_hash=request_hash,
+        payload=canonical_json_bytes(request_value),
+        options=(
+            (KarinaRemoteTokenClass.FLAG, "--request-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
+            (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
+        ),
+    )
     worker_receipt = args.private_acquisition_output / (
         request_name.removesuffix(".json") + "-receipt.json"
     )
-    _run(
-        (
-            "scp",
-            "-i",
-            str(args.ssh_key),
-            f"{host}:{remote}/worker-receipt.json",
-            str(worker_receipt),
-        )
-    )
-    response = _object(worker_receipt)
-    response_body = dict(response)
-    claimed = response_body.pop("receipt_hash", None)
-    if (
-        content_hash(response_body) != claimed
-        or response.get("route_component_binding_hash")
-        != request["route_component_binding_hash"]
-        or response.get("response_schema_hash") != request["response_schema_hash"]
-        or response.get("host_identity_hash") != request["host_identity_hash"]
-    ):
-        raise ValueError("M336I Karina worker response binding changed")
+    write_canonical_json(worker_receipt, response)
     return response
 
 
 def _prepare_karina(args, authorization):
-    host = args.karina_worker_endpoint
-    remote = args.karina_private_root.rstrip("/")
-    _run(("ssh", "-i", str(args.ssh_key), host, "test", "!", "-e", remote))
-    _run(("ssh", "-i", str(args.ssh_key), host, "mkdir", "-p", remote))
-    _run(
-        (
-            "scp",
-            "-i",
-            str(args.ssh_key),
-            "-r",
-            str(args.windows_vault),
-            f"{host}:{remote}/vault",
-        )
-    )
     inputs = args.private_acquisition_output / "karina-inputs"
     inputs.mkdir()
     copies = {
@@ -883,22 +1001,55 @@ def _prepare_karina(args, authorization):
         shutil.copy2(source, inputs / name)
     vault_manifest = args.private_acquisition_output / "portable_vault_manifest.json"
     shutil.copy2(vault_manifest, inputs / "portable_vault_manifest.json")
-    _run(
-        (
-            "scp",
-            "-i",
-            str(args.ssh_key),
-            "-r",
-            str(inputs),
-            f"{host}:{remote}/inputs",
-        )
+    capsule, public, _dependencies, _transport, registry = _m336j_private_route(args)
+    remote = args.karina_private_root.rstrip("/")
+    prefix = capsule.private_root.as_posix().rstrip("/") + "/"
+    if not remote.startswith(prefix):
+        raise ValueError("M336J Karina run root is outside private capsule")
+    relative = remote.removeprefix(prefix)
+    component = next(
+        item
+        for item in registry.components
+        if item.route_role == "REMOTE_SELECTED_SOURCE_MATERIALIZER"
     )
+    for label, source in (("vault", args.windows_vault), ("inputs", inputs)):
+        payload = canonical_tree_archive(source, prefix=label)
+        request_hash = content_hash((label, bytes_hash(payload), public.receipt_hash))
+        response, _binding, _receipt = _invoke_m336j_remote(
+            args,
+            component_role="REMOTE_SELECTED_SOURCE_MATERIALIZER",
+            subcommand="receive-tree",
+            receipt_name=f"karina-{label}-transfer-command.json",
+            expected_request_hash=request_hash,
+            payload=payload,
+            options=(
+                (KarinaRemoteTokenClass.FLAG, "--relative-destination"),
+                (
+                    KarinaRemoteTokenClass.PRIVATE_PATH,
+                    f"{relative}/{label}-upload",
+                ),
+                (KarinaRemoteTokenClass.FLAG, "--payload-hash"),
+                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, bytes_hash(payload)),
+                (
+                    KarinaRemoteTokenClass.FLAG,
+                    "--expected-capsule-receipt-hash",
+                ),
+                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, public.receipt_hash),
+                (KarinaRemoteTokenClass.FLAG, "--request-hash"),
+                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
+                (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
+                (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
+            ),
+        )
+        write_canonical_json(
+            args.private_acquisition_output / f"karina-{label}-transfer-receipt.json",
+            response,
+        )
     request = _karina_request(args, authorization, action="MATERIALIZE")
     return _invoke_karina_worker(args, request, "karina-materialize-request.json")
 
 
 def _run_karina_production(args, authorization, materialization):
-    host = args.karina_worker_endpoint
     remote = args.karina_private_root.rstrip("/")
     request = _karina_request(
         args,
@@ -911,15 +1062,51 @@ def _run_karina_production(args, authorization, materialization):
     local_parent.mkdir(parents=True, exist_ok=True)
     if args.karina_public_production_root.exists():
         raise FileExistsError("M336I Karina production copy must be fresh")
-    _run(
-        (
-            "scp",
-            "-i",
-            str(args.ssh_key),
-            "-r",
-            f"{host}:{remote}/public-production",
-            str(args.karina_public_production_root),
-        )
+    capsule, public, _dependencies, _transport, registry = _m336j_private_route(args)
+    prefix = capsule.private_root.as_posix().rstrip("/") + "/"
+    if not remote.startswith(prefix):
+        raise ValueError("M336J Karina run root is outside private capsule")
+    relative = remote.removeprefix(prefix)
+    component = next(
+        item
+        for item in registry.components
+        if item.route_role == "REMOTE_RESPONSE_VERIFIER"
+    )
+    request_hash = content_hash((relative, public.receipt_hash, worker["receipt_hash"]))
+    result, _binding, _receipt = _invoke_m336j_remote(
+        args,
+        component_role="REMOTE_RESPONSE_VERIFIER",
+        subcommand="export-tree",
+        receipt_name="karina-production-export-command.json",
+        expected_request_hash=request_hash,
+        options=(
+            (KarinaRemoteTokenClass.FLAG, "--relative-source"),
+            (
+                KarinaRemoteTokenClass.PRIVATE_PATH,
+                f"{relative}/public-production",
+            ),
+            (
+                KarinaRemoteTokenClass.FLAG,
+                "--expected-capsule-receipt-hash",
+            ),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, public.receipt_hash),
+            (KarinaRemoteTokenClass.FLAG, "--request-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
+            (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
+        ),
+        framed=True,
+    )
+    header, payload = parse_framed_tree_response(
+        result.stdout,
+        request_hash=request_hash,
+        component_binding_hash=component.binding_hash,
+        host_identity_hash=public.host_identity_receipt_hash,
+    )
+    extract_canonical_tree_export(
+        payload,
+        destination=args.karina_public_production_root,
+        expected_payload_hash=header["payload_hash"],
     )
     return worker
 
@@ -963,11 +1150,34 @@ def _produce_worker(args) -> None:
     registry = build_m336i_final_java_route_registry()
     route_manifest = build_m336i_final_java_route_manifest(registry)
     frozen_route = _object(Path(request["route_manifest"]))
-    role = (
-        "M336F_SELECTED_SOURCE_MATERIALIZER"
-        if request["action"] == "MATERIALIZE"
-        else "COMPILER_AWARE_PRODUCTION"
-    )
+    if getattr(args, "m336j_mode", False):
+        m336j_registry = build_m336j_route_registry()
+        registry = m336j_registry
+        route_manifest = build_m336j_route_manifest(
+            m336j_registry,
+            execution_capsule_public_receipt_hash=frozen_route[
+                "execution_capsule_public_receipt_hash"
+            ],
+            remote_command_renderer_hash=frozen_route["remote_command_renderer_hash"],
+            executable_dependency_manifest_hash=frozen_route[
+                "executable_dependency_manifest_hash"
+            ],
+            minimal_environment_policy_hash=frozen_route[
+                "minimal_environment_policy_hash"
+            ],
+        )
+    if getattr(args, "m336j_mode", False):
+        role = (
+            "REMOTE_SELECTED_SOURCE_MATERIALIZER"
+            if request["action"] == "MATERIALIZE"
+            else "REMOTE_COMPILER_AWARE_PRODUCTION_WORKER"
+        )
+    else:
+        role = (
+            "M336F_SELECTED_SOURCE_MATERIALIZER"
+            if request["action"] == "MATERIALIZE"
+            else "COMPILER_AWARE_PRODUCTION"
+        )
     component = next(item for item in registry.components if item.route_role == role)
     host_identity = _object(Path(request["karina_host_identity_receipt"]))
     host_body = dict(host_identity)
@@ -984,8 +1194,11 @@ def _produce_worker(args) -> None:
     ):
         raise ValueError("M336I Karina worker authority binding changed")
     repository = Path(request["repository"]).resolve(strict=True)
-    head = _run(("git", "rev-parse", "HEAD^{commit}"), cwd=repository).strip()
-    status = _run(("git", "status", "--porcelain=v1"), cwd=repository)
+    git_executable = Path(args.git_executable).resolve(strict=True)
+    head = _run(
+        (str(git_executable), "rev-parse", "HEAD^{commit}"), cwd=repository
+    ).strip()
+    status = _run((str(git_executable), "status", "--porcelain=v1"), cwd=repository)
     if head != request["expected_head"] or status:
         raise ValueError("M336I Karina worker is not clean exact-F24")
     vault = Path(request["vault"])
@@ -1252,6 +1465,15 @@ def _final(args) -> None:
     authorization = final_acquisition_authorization_from_dict(
         _object(args.frozen_authorization)
     )
+    is_m336j = authorization.branch_ref.endswith(
+        "/exp/stage3-m336j-hermetic-karina-final-java-v9"
+    )
+    if is_m336j:
+        from ai_brain.stage3.acquisition.m336j_freeze import (
+            verify_m336j_final_acquisition_authorization,
+        )
+
+        verify_m336j_final_acquisition_authorization(authorization)
     _validate_final_controller_inputs(args, authorization, worktrees)
     context = content_hash((authorization.authorization_hash, args.supplied_f24_sha))
     state = M336IRouteStateLedger(args.route_state_ledger, git_worktrees=worktrees)
@@ -1260,8 +1482,25 @@ def _final(args) -> None:
         context_hash=context,
         operation_receipt_hash=authorization.authorization_hash,
     )
-    registry = build_m336i_final_java_route_registry()
-    manifest = build_m336i_final_java_route_manifest(registry)
+    if is_m336j:
+        frozen_route = _object(args.frozen_route_manifest)
+        registry = build_m336j_route_registry()
+        manifest = build_m336j_route_manifest(
+            registry,
+            execution_capsule_public_receipt_hash=frozen_route[
+                "execution_capsule_public_receipt_hash"
+            ],
+            remote_command_renderer_hash=frozen_route["remote_command_renderer_hash"],
+            executable_dependency_manifest_hash=frozen_route[
+                "executable_dependency_manifest_hash"
+            ],
+            minimal_environment_policy_hash=frozen_route[
+                "minimal_environment_policy_hash"
+            ],
+        )
+    else:
+        registry = build_m336i_final_java_route_registry()
+        manifest = build_m336i_final_java_route_manifest(registry)
     state.advance(
         "PREFLIGHT_PASSED",
         context_hash=context,
@@ -1620,6 +1859,11 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         args.compiler_jdk_identities,
         args.karina_host_identity_receipt,
         args.frozen_spdx_reference,
+        args.karina_private_capsule,
+        args.karina_public_capsule_receipt,
+        args.karina_executable_dependency_manifest,
+        args.ssh_executable,
+        args.known_hosts_file,
         spdx_binding_path,
         freeze_manifest_path,
         args.windows_javac,
@@ -1648,6 +1892,52 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         != spdx_reference.get("license_list_version")
     ):
         raise ValueError("M336I frozen SPDX reference differs from F24 binding")
+    if authorization.branch_ref.endswith(
+        "/exp/stage3-m336j-hermetic-karina-final-java-v9"
+    ):
+        from ai_brain.stage3.acquisition.m336j_freeze import (
+            verify_m336j_final_acquisition_authorization,
+        )
+
+        verify_m336j_final_acquisition_authorization(authorization)
+        _capsule, public, dependencies, _transport, registry = _m336j_private_route(
+            args
+        )
+        route_manifest = build_m336j_route_manifest(
+            registry,
+            execution_capsule_public_receipt_hash=public.receipt_hash,
+            remote_command_renderer_hash=command_renderer_identity_hash(),
+            executable_dependency_manifest_hash=dependencies.manifest_hash,
+            minimal_environment_policy_hash=public.minimal_environment_policy_hash,
+        )
+        frozen_registry = _object(args.frozen_route_registry)
+        frozen_route = _object(args.frozen_route_manifest)
+        required_freeze_bindings = {
+            "execution_capsule_public_receipt_hash": public.receipt_hash,
+            "python_environment_manifest_hash": freeze_manifest.get(
+                "python_environment_manifest_hash"
+            ),
+            "executable_dependency_manifest_hash": dependencies.manifest_hash,
+            "remote_command_renderer_hash": command_renderer_identity_hash(),
+            "minimal_environment_policy_hash": (public.minimal_environment_policy_hash),
+            "route_registry_hash": registry.registry_hash,
+            "route_manifest_hash": route_manifest.manifest_hash,
+        }
+        if (
+            frozen_registry != json.loads(canonical_json(registry))
+            or frozen_route != json.loads(canonical_json(route_manifest))
+            or authorization.route_registry_hash != registry.registry_hash
+            or authorization.route_manifest_hash != route_manifest.manifest_hash
+            or any(
+                freeze_manifest.get(name) != value
+                for name, value in required_freeze_bindings.items()
+                if name != "python_environment_manifest_hash"
+            )
+            or not isinstance(
+                required_freeze_bindings["python_environment_manifest_hash"], str
+            )
+        ):
+            raise ValueError("M336J frozen execution route binding changed")
     outputs = (
         args.acquisition_ledger,
         args.route_state_ledger,
@@ -1662,6 +1952,8 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         args.karina_public_production_root,
         args.independent_evaluator_root,
         args.public_staging_root,
+        args.karina_command_receipt_root,
+        args.karina_host_preflight_receipt,
         args.final_receipt,
     )
     if any(path.exists() for path in outputs):
@@ -1688,43 +1980,45 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         != authorization.windows_public_jdk_identity_receipt_hash
     ):
         raise ValueError("M336I Windows JDK differs from frozen authority")
-    relative_host_receipt = args.karina_host_identity_receipt.resolve(
-        strict=True
-    ).relative_to(args.repository.resolve(strict=True))
-    remote_command = (
-        f"cd {args.karina_repository} && uv run python "
-        f"scripts/m336i_java_final_route.py host-preflight "
-        f"--repository {args.karina_repository} "
-        f"--expected-head {args.supplied_f24_sha} "
-        f"--javac {args.karina_javac} "
-        f"--expected-jdk-hash {authorization.karina_public_jdk_identity_receipt_hash} "
-        f"--host-receipt {relative_host_receipt.as_posix()}"
+    _capsule, public, _dependencies, _transport, registry = _m336j_private_route(args)
+    component = next(
+        item
+        for item in registry.components
+        if item.route_role == "REMOTE_HOST_PREFLIGHT"
     )
-    remote = _run(
-        (
-            "ssh",
-            "-i",
-            str(args.ssh_key),
-            args.karina_worker_endpoint,
-            remote_command,
-        )
+    request_hash = content_hash(
+        (args.supplied_f24_sha, public.receipt_hash, component.binding_hash)
     )
-    receipt = json.loads(remote)
-    receipt_body = dict(receipt)
-    claimed = receipt_body.pop("receipt_hash", None)
+    receipt, _binding, _public = _invoke_m336j_remote(
+        args,
+        component_role="REMOTE_HOST_PREFLIGHT",
+        subcommand="host-preflight",
+        receipt_name="post-freeze-host-preflight-command.json",
+        expected_request_hash=request_hash,
+        options=(
+            (KarinaRemoteTokenClass.FLAG, "--request-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, request_hash),
+            (KarinaRemoteTokenClass.FLAG, "--component-binding-hash"),
+            (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
+        ),
+    )
+    write_canonical_json(args.karina_host_preflight_receipt, receipt)
     if (
-        content_hash(receipt_body) != claimed
-        or receipt.get("status") != "PASS"
+        receipt.get("status") != "PASS"
         or receipt.get("host_identity_hash")
         != authorization.karina_stable_host_identity_receipt_hash
+        or receipt.get("execution_capsule_receipt_hash") != public.receipt_hash
+        or receipt.get("python_environment_manifest_hash")
+        != freeze_manifest.get("python_environment_manifest_hash")
     ):
         raise ValueError("M336I Karina preflight differs from frozen authority")
 
 
 def _host_preflight(args) -> None:
     repository = args.repository.resolve(strict=True)
-    head = _run(("git", "rev-parse", "HEAD^{commit}"), cwd=repository)
-    status = _run(("git", "status", "--porcelain=v1"), cwd=repository)
+    git_executable = args.git_executable.resolve(strict=True)
+    head = _run((str(git_executable), "rev-parse", "HEAD^{commit}"), cwd=repository)
+    status = _run((str(git_executable), "status", "--porcelain=v1"), cwd=repository)
     host = _object(args.host_receipt)
     host_body = dict(host)
     host_hash = host_body.pop("receipt_hash", None)
@@ -1789,6 +2083,13 @@ def _add_final_arguments(parser) -> None:
         "public_staging_root",
         "windows_javac",
         "ssh_key",
+        "ssh_executable",
+        "known_hosts_file",
+        "karina_private_capsule",
+        "karina_public_capsule_receipt",
+        "karina_executable_dependency_manifest",
+        "karina_command_receipt_root",
+        "karina_host_preflight_receipt",
         "final_receipt",
     )
     for name in paths:
@@ -1797,6 +2098,7 @@ def _add_final_arguments(parser) -> None:
     parser.add_argument("--karina-worker-endpoint", required=True)
     parser.add_argument("--karina-repository", required=True)
     parser.add_argument("--karina-private-root", required=True)
+    parser.add_argument("--karina-private-capsule-remote", required=True)
     parser.add_argument("--karina-javac", required=True)
 
 
@@ -1848,12 +2150,14 @@ def main() -> None:
     _add_final_arguments(final)
     worker = commands.add_parser("produce-worker")
     worker.add_argument("--request", type=Path, required=True)
+    worker.add_argument("--git-executable", type=Path, required=True)
     host = commands.add_parser("host-preflight")
     host.add_argument("--repository", type=Path, required=True)
     host.add_argument("--expected-head", required=True)
     host.add_argument("--javac", type=Path, required=True)
     host.add_argument("--expected-jdk-hash", required=True)
     host.add_argument("--host-receipt", type=Path, required=True)
+    host.add_argument("--git-executable", type=Path, required=True)
     args = parser.parse_args()
     command = {
         "preflight": _preflight,

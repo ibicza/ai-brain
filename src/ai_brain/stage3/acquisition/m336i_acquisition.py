@@ -605,7 +605,17 @@ def _validate_request_before_side_effects(request):
     if not isinstance(request, M336IFinalAcquisitionRequest):
         raise TypeError("M336I acquisition request must be typed")
     authorization = request.authorization
-    verify_m336i_final_acquisition_authorization(authorization)
+    is_m336j = authorization.branch_ref.endswith(
+        "/exp/stage3-m336j-hermetic-karina-final-java-v9"
+    )
+    if is_m336j:
+        from ai_brain.stage3.acquisition.m336j_freeze import (
+            verify_m336j_final_acquisition_authorization,
+        )
+
+        verify_m336j_final_acquisition_authorization(authorization)
+    else:
+        verify_m336i_final_acquisition_authorization(authorization)
     if request.platform_role != "WINDOWS":
         raise ValueError("M336I source acquisition is Windows-only")
     repository = request.repository.resolve(strict=True)
@@ -648,8 +658,8 @@ def _validate_request_before_side_effects(request):
     head = _git(repository, "rev-parse", "HEAD^{commit}").strip()
     status = _git(repository, "status", "--porcelain=v1")
     parent = _git(repository, "rev-parse", "HEAD^1").strip()
-    r24 = _git(repository, "rev-parse", "HEAD~2").strip()
-    q23 = _git(repository, "rev-parse", "HEAD~3").strip()
+    implementation_commit = _git(repository, "rev-parse", "HEAD~2").strip()
+    historical_anchor = _git(repository, "rev-parse", "HEAD~3").strip()
     merge_count = int(
         _git(
             repository,
@@ -661,24 +671,38 @@ def _validate_request_before_side_effects(request):
     )
     upstream = _git(repository, "rev-parse", "@{upstream}^{commit}").strip()
     remote = _remote_branch_sha(repository, authorization.branch_ref)
+    if is_m336j:
+        from ai_brain.stage3.acquisition.m336j_freeze import (
+            M336J_EXACT_F24_SHA,
+            M336J_FREEZE_MANIFEST_PATH,
+            M336J_FROZEN_AUTHORIZATION_PATH,
+            compute_m336j_freeze_tree_identity,
+        )
+
+        freeze_identity = compute_m336j_freeze_tree_identity(repository)
+        authorization_path = M336J_FROZEN_AUTHORIZATION_PATH
+        freeze_manifest_path = M336J_FREEZE_MANIFEST_PATH
+        anchor_matches = historical_anchor == M336J_EXACT_F24_SHA
+    else:
+        freeze_identity = compute_m336i_freeze_tree_identity(repository)
+        authorization_path = Path(M336I_FROZEN_AUTHORIZATION_PATH)
+        freeze_manifest_path = Path(M336I_FREEZE_MANIFEST_PATH)
+        anchor_matches = historical_anchor == authorization.exact_q23_sha
     if (
         head != request.supplied_f24_sha
         or status
         or parent != authorization.f24_parent_sha
-        or q23 != authorization.exact_q23_sha
-        or compute_m336i_commit_tree_identity(repository, r24)
+        or not anchor_matches
+        or compute_m336i_commit_tree_identity(repository, implementation_commit)
         != authorization.r24_implementation_tree_identity
         or merge_count != 0
         or upstream != head
         or remote != head
-        or compute_m336i_freeze_tree_identity(repository)
-        != authorization.f24_freeze_tree_identity
+        or freeze_identity != authorization.f24_freeze_tree_identity
     ):
-        raise ValueError("M336I exact-F24 Git precondition failed")
-    frozen_authorization = strict_json_file(
-        repository / M336I_FROZEN_AUTHORIZATION_PATH
-    )
-    freeze_manifest = strict_json_file(repository / M336I_FREEZE_MANIFEST_PATH)
+        raise ValueError("M336I/M336J exact-F24 freeze Git precondition failed")
+    frozen_authorization = strict_json_file(repository / authorization_path)
+    freeze_manifest = strict_json_file(repository / freeze_manifest_path)
     freeze_body = dict(freeze_manifest)
     freeze_hash = freeze_body.pop("manifest_hash", None)
     if (
@@ -698,15 +722,38 @@ def _validate_request_before_side_effects(request):
     policy = strict_json_file(request.acquisition_policy)
     validate_m336i_candidate_pool(pool)
     validate_m336i_acquisition_policy(policy)
-    from ai_brain.stage3.acquisition.m336i_registry import (
-        build_m336i_final_java_route_manifest,
-        build_m336i_final_java_route_registry,
-    )
-
-    live_registry = build_m336i_final_java_route_registry()
-    live_manifest = build_m336i_final_java_route_manifest(live_registry)
     frozen_registry = strict_json_file(request.frozen_route_registry)
     frozen_manifest = strict_json_file(request.frozen_route_manifest)
+    if is_m336j:
+        from ai_brain.stage3.acquisition.m336j_registry import (
+            build_m336j_route_manifest,
+            build_m336j_route_registry,
+        )
+
+        live_registry = build_m336j_route_registry()
+        live_manifest = build_m336j_route_manifest(
+            live_registry,
+            execution_capsule_public_receipt_hash=frozen_manifest[
+                "execution_capsule_public_receipt_hash"
+            ],
+            remote_command_renderer_hash=frozen_manifest[
+                "remote_command_renderer_hash"
+            ],
+            executable_dependency_manifest_hash=frozen_manifest[
+                "executable_dependency_manifest_hash"
+            ],
+            minimal_environment_policy_hash=frozen_manifest[
+                "minimal_environment_policy_hash"
+            ],
+        )
+    else:
+        from ai_brain.stage3.acquisition.m336i_registry import (
+            build_m336i_final_java_route_manifest,
+            build_m336i_final_java_route_registry,
+        )
+
+        live_registry = build_m336i_final_java_route_registry()
+        live_manifest = build_m336i_final_java_route_manifest(live_registry)
     selector_policy = strict_json_file(request.selector_policy)
     threshold_manifest = strict_json_file(request.threshold_manifest)
     publication_boundary = strict_json_file(request.publication_boundary_contract)
