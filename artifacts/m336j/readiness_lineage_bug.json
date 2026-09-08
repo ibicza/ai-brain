@@ -1,0 +1,14 @@
+{
+  "contract_role": "PUBLIC_SAFE_M336J_READINESS_LINEAGE_BUG_FORENSICS",
+  "durable_repair": "EXPLICIT_GIT_OBJECT_LINEAGE",
+  "exact_r25b_parent_sha": "b05ac235b291acbb514cb8256302610964042d3f",
+  "exact_r25b_sha": "40b8a306ef6f8cf0f2f70a8cc3e272ef11846a42",
+  "historical_second_parent_command_exit_code": 128,
+  "historical_second_parent_resolved": false,
+  "naive_first_parent_depth_at_r25b_sha": "4891de1c3a0f6ba2d5d012ab5189dbb5222ba6bd",
+  "naive_first_parent_depth_at_r25c_role": "R25A_NOT_F24",
+  "private_path_count": 0,
+  "receipt_hash": "b7b9a24635917b2325c15ad4f09eaec035303b1e80a48376b2ac502261daa296",
+  "schema_version": 1,
+  "status": "PASS"
+}

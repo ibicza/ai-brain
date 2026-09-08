@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import importlib
+import importlib.util
 import inspect
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -174,7 +176,7 @@ def verify_m336j_commit_transition(
 def _entrypoint(
     phase: str, module_name: str, callable_name: str
 ) -> M336JFutureEntrypoint:
-    module = importlib.import_module(module_name)
+    module = _import_entrypoint_module(module_name)
     value = module
     for part in callable_name.split("."):
         value = getattr(value, part)
@@ -189,6 +191,25 @@ def _entrypoint(
         "callable_signature_hash": content_hash(str(inspect.signature(value))),
     }
     return M336JFutureEntrypoint(**body, entrypoint_hash=content_hash(body))
+
+
+def _import_entrypoint_module(module_name: str):
+    try:
+        return importlib.import_module(module_name)
+    except ModuleNotFoundError as error:
+        if not module_name.startswith("scripts.") or error.name != "scripts":
+            raise
+    repository = Path(__file__).resolve().parents[4]
+    source = repository.joinpath(*module_name.split(".")).with_suffix(".py")
+    if not source.is_file():
+        raise ValueError("M336J script entrypoint source is unavailable")
+    spec = importlib.util.spec_from_file_location(module_name, source)
+    if spec is None or spec.loader is None:
+        raise ValueError("M336J script entrypoint cannot be loaded")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def _git(repository: Path, *arguments: str) -> str:

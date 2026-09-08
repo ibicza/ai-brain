@@ -30,6 +30,10 @@ from ai_brain.stage3.acquisition.m336j_freeze import (
 from ai_brain.stage3.acquisition.m336j_future import (
     build_m336j_future_orchestration_manifest,
 )
+from ai_brain.stage3.acquisition.m336j_lineage import (
+    M336J_EXACT_R25A_SHA,
+    M336J_EXACT_R25B_SHA,
+)
 from ai_brain.stage3.acquisition.m336j_readiness import readiness_result_from_dict
 from ai_brain.stage3.acquisition.m336j_registry import (
     build_m336j_route_manifest,
@@ -41,7 +45,8 @@ from ai_brain.stage3.acquisition.m336j_schemas import build_public_schema_regist
 _REQUEST_FIELDS = {
     "repository",
     "exact_q25_sha",
-    "exact_r25b_sha",
+    "exact_r25c_sha",
+    "q25_staging_tree_hash",
     "readiness",
     "public_capsule_receipt",
     "executable_dependency_manifest",
@@ -59,13 +64,40 @@ def main() -> None:
         raise ValueError("M336J F25 request fields changed")
     repository = Path(request["repository"]).resolve(strict=True)
     q25 = request["exact_q25_sha"]
-    r25b = request["exact_r25b_sha"]
+    r25c = request["exact_r25c_sha"]
+    q25_parents = _git(repository, "rev-list", "--parents", "-n", "1", q25).split()
+    implementation_sequence = tuple(
+        _git(
+            repository,
+            "rev-list",
+            "--first-parent",
+            "--reverse",
+            f"{M336J_EXACT_F24_SHA}..{r25c}",
+        ).splitlines()
+    )
+    expected_sequence = (M336J_EXACT_R25A_SHA, M336J_EXACT_R25B_SHA, r25c)
+    expected_parents = (
+        M336J_EXACT_F24_SHA,
+        M336J_EXACT_R25A_SHA,
+        M336J_EXACT_R25B_SHA,
+    )
+    implementation_parent_rows = tuple(
+        _git(repository, "rev-list", "--parents", "-n", "1", commit).split()
+        for commit in implementation_sequence
+    )
     if (
         _git(repository, "rev-parse", "HEAD^{commit}") != q25
-        or _git(repository, "rev-parse", "HEAD^1") != r25b
-        or _git(repository, "rev-parse", "HEAD^2")
-        != "b05ac235b291acbb514cb8256302610964042d3f"
-        or _git(repository, "rev-parse", "HEAD^3") != M336J_EXACT_F24_SHA
+        or q25_parents != [q25, r25c]
+        or implementation_sequence != expected_sequence
+        or any(
+            row != [commit, parent]
+            for row, commit, parent in zip(
+                implementation_parent_rows,
+                expected_sequence,
+                expected_parents,
+                strict=True,
+            )
+        )
         or _git(repository, "status", "--porcelain=v1")
         or int(
             _git(
@@ -73,14 +105,14 @@ def main() -> None:
                 "rev-list",
                 "--count",
                 "--merges",
-                f"{M336J_EXACT_F24_SHA}..HEAD",
+                f"{M336J_EXACT_F24_SHA}..{q25}",
             )
         )
     ):
         raise ValueError("M336J F25 requires clean exact Q25 linear ancestry")
     readiness = readiness_result_from_dict(_object(Path(request["readiness"])))
-    if readiness.exact_r25_sha != r25b:
-        raise ValueError("M336J F25 readiness is not bound to exact R25b")
+    if readiness.exact_r25_sha != r25c:
+        raise ValueError("M336J F25 readiness is not bound to exact R25c")
     output = repository / M336J_FREEZE_ROOT
     if output.exists():
         raise FileExistsError("M336J F25 freeze root must be fresh")
@@ -133,7 +165,7 @@ def main() -> None:
             "r24_implementation_tree_identity": (
                 readiness.r25_implementation_tree_identity
             ),
-            "q24_evidence_identity": readiness.q25_evidence_identity,
+            "q24_evidence_identity": request["q25_staging_tree_hash"],
             "f24_parent_sha": q25,
             "f24_freeze_tree_identity": freeze_identity,
             "route_registry_hash": registry.registry_hash,
@@ -147,7 +179,8 @@ def main() -> None:
         "schema_version": 1,
         "contract_role": "M336J_IMMUTABLE_FINAL_FREEZE",
         "exact_q25_sha": q25,
-        "exact_r25b_sha": r25b,
+        "exact_r25c_sha": r25c,
+        "q25_staging_tree_hash": request["q25_staging_tree_hash"],
         "freeze_tree_identity": freeze_identity,
         "authorization_hash": authorization.authorization_hash,
         "route_registry_hash": registry.registry_hash,

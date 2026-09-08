@@ -7,13 +7,15 @@ import subprocess
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 
-from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
+from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336h_contracts import strict_json_file
 from ai_brain.stage3.acquisition.m336i_acquisition import (
     acquisition_provider_identity,
     compute_m336i_commit_tree_identity,
 )
+from ai_brain.stage3.acquisition.m336j_evidence import qualification_input_tree_hash
 from ai_brain.stage3.acquisition.m336j_execution import (
+    compute_m336j_project_source_identity,
     dependency_manifest_from_dict,
     public_execution_capsule_receipt_from_dict,
     public_value_has_private_path,
@@ -21,6 +23,12 @@ from ai_brain.stage3.acquisition.m336j_execution import (
 )
 from ai_brain.stage3.acquisition.m336j_future import (
     build_m336j_future_orchestration_manifest,
+)
+from ai_brain.stage3.acquisition.m336j_lineage import (
+    M336J_EXACT_F24_SHA,
+    build_m336j_implementation_lineage_policy,
+    implementation_lineage_receipt_from_dict,
+    verify_supplied_implementation_lineage_receipt,
 )
 from ai_brain.stage3.acquisition.m336j_mutations import (
     M336J_MUTATIONS,
@@ -34,8 +42,6 @@ from ai_brain.stage3.acquisition.m336j_registry import (
 )
 from ai_brain.stage3.acquisition.m336j_schemas import build_public_schema_registry
 
-M336J_EXACT_F24_SHA = "4891de1c3a0f6ba2d5d012ab5189dbb5222ba6bd"
-M336J_EXACT_R25A_SHA = "b05ac235b291acbb514cb8256302610964042d3f"
 M336J_READINESS_STATUS = "READY_FOR_HERMETIC_FINAL_ACQUISITION"
 
 
@@ -66,8 +72,11 @@ class M336JReadinessRequest:
     mutation_report: Path
     windows_quality_receipt: Path
     karina_quality_receipt: Path
+    windows_lineage_mutation_report: Path
+    karina_lineage_mutation_report: Path
     final_unspent_receipt: Path
-    q25_evidence_staging_root: Path
+    implementation_lineage_receipt: Path
+    qualification_input_staging_root: Path
     git_worktrees: tuple[Path, ...]
 
 
@@ -78,7 +87,11 @@ class M336JReadinessResult:
     exact_f24_sha: str
     exact_r25_sha: str
     r25_implementation_tree_identity: str
-    q25_evidence_identity: str
+    project_source_identity: str
+    implementation_lineage_policy_hash: str
+    implementation_lineage_receipt_hash: str
+    implementation_commit_sequence: tuple[str, ...]
+    qualification_input_tree_hash: str
     route_registry_hash: str
     route_manifest_hash: str
     execution_capsule_public_receipt_hash: str
@@ -105,6 +118,8 @@ class M336JReadinessResult:
     mutation_report_hash: str
     windows_quality_receipt_hash: str
     karina_quality_receipt_hash: str
+    windows_lineage_mutation_report_hash: str
+    karina_lineage_mutation_report_hash: str
     executable_dependency_count: int
     remote_schema_count: int
     synthetic_schema_hash_count: int
@@ -134,6 +149,36 @@ def readiness_request_from_dict(value: dict) -> M336JReadinessRequest:
     expected = {item.name for item in fields(M336JReadinessRequest)}
     if not isinstance(value, dict) or set(value) != expected:
         raise ValueError("M336J readiness request fields changed")
+    worktrees = value.get("git_worktrees")
+    exact_sha = value.get("exact_r25_sha")
+    if (
+        not isinstance(worktrees, list)
+        or not worktrees
+        or any(not isinstance(item, str) or not item for item in worktrees)
+    ):
+        raise TypeError("M336J readiness worktree list changed")
+    if (
+        not isinstance(exact_sha, str)
+        or len(exact_sha) != 40
+        or any(item not in "0123456789abcdef" for item in exact_sha)
+    ):
+        raise ValueError("M336J readiness exact SHA changed")
+    path_fields = expected - {"git_worktrees", "exact_r25_sha"}
+    if any(not isinstance(value[name], str) or not value[name] for name in path_fields):
+        raise TypeError("M336J readiness path field changed")
+    worktrees = value.get("git_worktrees")
+    if (
+        not isinstance(value.get("exact_r25_sha"), str)
+        or not isinstance(worktrees, list)
+        or not worktrees
+        or any(not isinstance(item, str) or not item for item in worktrees)
+        or any(
+            not isinstance(item_value, str) or not item_value
+            for key, item_value in value.items()
+            if key not in {"exact_r25_sha", "git_worktrees"}
+        )
+    ):
+        raise TypeError("M336J readiness request field types changed")
     converted = {
         key: tuple(Path(item) for item in item_value)
         if key == "git_worktrees"
@@ -145,24 +190,6 @@ def readiness_request_from_dict(value: dict) -> M336JReadinessRequest:
     return M336JReadinessRequest(**converted)
 
 
-def compute_m336j_evidence_tree_identity(root: Path) -> str:
-    resolved = root.resolve(strict=True)
-    rows = tuple(
-        (
-            path.relative_to(resolved).as_posix(),
-            path.stat().st_size,
-            bytes_hash(path.read_bytes()),
-        )
-        for path in sorted(
-            (item for item in resolved.rglob("*") if item.is_file()),
-            key=lambda item: item.relative_to(resolved).as_posix().encode(),
-        )
-    )
-    if not rows:
-        raise ValueError("M336J Q25 evidence staging is empty")
-    return content_hash(rows)
-
-
 def verify_m336j_ready_for_final_freeze(
     request: M336JReadinessRequest,
 ) -> M336JReadinessResult:
@@ -170,28 +197,18 @@ def verify_m336j_ready_for_final_freeze(
         raise TypeError("M336J readiness request must be typed")
     repository = request.repository.resolve(strict=True)
     git = request.git_executable.resolve(strict=True)
-    head = _git(git, repository, "rev-parse", "HEAD^{commit}")
-    parent = _git(git, repository, "rev-parse", "HEAD^1")
-    grandparent = _git(git, repository, "rev-parse", "HEAD^2")
-    status = _git(git, repository, "status", "--porcelain=v1")
-    merge_count = int(
-        _git(
-            git,
-            repository,
-            "rev-list",
-            "--count",
-            "--merges",
-            f"{M336J_EXACT_F24_SHA}..HEAD",
-        )
+    policy = build_m336j_implementation_lineage_policy(request.exact_r25_sha)
+    supplied_lineage = implementation_lineage_receipt_from_dict(
+        _object(request.implementation_lineage_receipt)
     )
-    if (
-        head != request.exact_r25_sha
-        or parent != M336J_EXACT_R25A_SHA
-        or grandparent != M336J_EXACT_F24_SHA
-        or status
-        or merge_count
-    ):
-        raise ValueError("M336J readiness requires clean exact linear R25")
+    lineage = verify_supplied_implementation_lineage_receipt(
+        repository, git, policy, supplied_lineage
+    )
+    head = policy.current_implementation_head_sha
+    project_source_identity = compute_m336j_project_source_identity(repository, git)
+    for worktree in request.git_worktrees:
+        if _git(git, worktree.resolve(strict=True), "status", "--porcelain=v1"):
+            raise ValueError("M336J readiness requires every supplied worktree clean")
 
     capsule = public_execution_capsule_receipt_from_dict(
         _object(request.public_capsule_receipt)
@@ -271,8 +288,18 @@ def verify_m336j_ready_for_final_freeze(
     ):
         raise ValueError("M336J readiness schema/transcript/capacity binding changed")
     mutation = _mutation_report(request.mutation_report)
-    windows_quality = _quality(request.windows_quality_receipt, "WINDOWS", head)
-    karina_quality = _quality(request.karina_quality_receipt, "KARINA", head)
+    windows_quality = _quality(
+        request.windows_quality_receipt, "WINDOWS", head, project_source_identity
+    )
+    karina_quality = _quality(
+        request.karina_quality_receipt, "KARINA", head, project_source_identity
+    )
+    windows_lineage_mutations = _lineage_mutations(
+        request.windows_lineage_mutation_report, "WINDOWS", head
+    )
+    karina_lineage_mutations = _lineage_mutations(
+        request.karina_lineage_mutation_report, "KARINA", head
+    )
     unspent = _verified(request.final_unspent_receipt, "receipt_hash")
     public_values = (
         asdict(capsule),
@@ -297,7 +324,10 @@ def verify_m336j_ready_for_final_freeze(
         mutation,
         windows_quality,
         karina_quality,
+        windows_lineage_mutations,
+        karina_lineage_mutations,
         unspent,
+        asdict(lineage),
     )
     provider_source, provider_signature = acquisition_provider_identity()
     body = {
@@ -308,8 +338,12 @@ def verify_m336j_ready_for_final_freeze(
         "r25_implementation_tree_identity": compute_m336i_commit_tree_identity(
             repository, head
         ),
-        "q25_evidence_identity": compute_m336j_evidence_tree_identity(
-            request.q25_evidence_staging_root
+        "project_source_identity": project_source_identity,
+        "implementation_lineage_policy_hash": policy.policy_hash,
+        "implementation_lineage_receipt_hash": lineage.receipt_hash,
+        "implementation_commit_sequence": lineage.ordered_implementation_shas,
+        "qualification_input_tree_hash": qualification_input_tree_hash(
+            request.qualification_input_staging_root
         ),
         "route_registry_hash": registry.registry_hash,
         "route_manifest_hash": manifest.manifest_hash,
@@ -337,6 +371,10 @@ def verify_m336j_ready_for_final_freeze(
         "mutation_report_hash": mutation["report_hash"],
         "windows_quality_receipt_hash": windows_quality["receipt_hash"],
         "karina_quality_receipt_hash": karina_quality["receipt_hash"],
+        "windows_lineage_mutation_report_hash": windows_lineage_mutations[
+            "report_hash"
+        ],
+        "karina_lineage_mutation_report_hash": karina_lineage_mutations["report_hash"],
         "executable_dependency_count": dependencies.dependency_count,
         "remote_schema_count": schema_registry["schema_count"],
         "synthetic_schema_hash_count": schema_registry[
@@ -457,7 +495,12 @@ def readiness_result_from_dict(value: dict) -> M336JReadinessResult:
         M336JReadinessResult.__dataclass_fields__
     ):
         raise ValueError("M336J readiness result fields changed")
-    result = M336JReadinessResult(**value)
+    converted = dict(value)
+    sequence = converted.get("implementation_commit_sequence")
+    if not isinstance(sequence, list):
+        raise TypeError("M336J readiness implementation sequence changed")
+    converted["implementation_commit_sequence"] = tuple(sequence)
+    result = M336JReadinessResult(**converted)
     body = asdict(result)
     claimed = body.pop("readiness_hash")
     if content_hash(body) != claimed or result.status != M336J_READINESS_STATUS:
@@ -465,18 +508,49 @@ def readiness_result_from_dict(value: dict) -> M336JReadinessResult:
     return result
 
 
-def _quality(path: Path, platform_role: str, exact_sha: str) -> dict:
+def _quality(
+    path: Path,
+    platform_role: str,
+    exact_sha: str,
+    project_source_identity: str,
+) -> dict:
     value = _verified(path, "receipt_hash")
     if (
         value.get("contract_role") != "PUBLIC_SAFE_M336J_QUALITY_RECEIPT"
         or value.get("platform_role") != platform_role
         or value.get("exact_sha") != exact_sha
+        or value.get("project_source_identity") != project_source_identity
         or value.get("post_check_exact_sha") != exact_sha
+        or value.get("post_check_project_source_identity") != project_source_identity
         or not value.get("post_check_worktree_clean")
         or value.get("status") != "PASS"
         or any(item.get("exit_code") for item in value.get("checks", ()))
     ):
         raise ValueError("M336J exact quality receipt is invalid")
+    return value
+
+
+def _lineage_mutations(path: Path, platform_role: str, exact_sha: str) -> dict:
+    value = _object(path)
+    body = dict(value)
+    claimed = body.pop("report_hash", None)
+    if (
+        content_hash(body) != claimed
+        or value.get("contract_role") != "PUBLIC_SAFE_M336J_GIT_LINEAGE_MUTATION_REPORT"
+        or value.get("platform_role") != platform_role
+        or value.get("exact_sha") != exact_sha
+        or value.get("post_check_exact_sha") != exact_sha
+        or not value.get("post_check_worktree_clean")
+        or value.get("executed_scenario_count") != 20
+        or value.get("invalid_lineage_case_count") != 17
+        or value.get("rejected_at_git_lineage_verification_count") != 17
+        or value.get("accepted_invalid_case_count") != 0
+        or value.get("wrong_rejection_layer_count") != 0
+        or value.get("pytest_exit_code") != 0
+        or value.get("passed_test_count") != 20
+        or value.get("status") != "PASS"
+    ):
+        raise ValueError("M336J Git lineage mutation report is invalid")
     return value
 
 

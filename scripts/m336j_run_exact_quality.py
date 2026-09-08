@@ -11,6 +11,9 @@ from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage3.acquisition.m336h_contracts import write_canonical_json
+from ai_brain.stage3.acquisition.m336j_execution import (
+    compute_m336j_project_source_identity,
+)
 
 
 def _run(command: tuple[str, ...], repository: Path) -> tuple[int, bytes]:
@@ -63,10 +66,13 @@ def main() -> None:
     status = _git(git, repository, "status", "--porcelain=v1")
     if head != args.expected_sha or status:
         raise ValueError("M336J quality requires a clean exact commit")
+    project_source_identity = compute_m336j_project_source_identity(repository, git)
     logs.mkdir(parents=True)
     python = str(Path(sys.executable).absolute())
     targeted_files = (
         "tests/test_m336j_hermetic_karina_execution.py",
+        "tests/test_m336j_lineage.py",
+        "tests/test_m336j_evidence.py",
         "tests/test_m336i_authorized_final_java_route.py",
         "tests/test_m336h_native_fresh_java_route.py",
         "tests/test_m336g_public_pack_private_replay.py",
@@ -158,20 +164,26 @@ def main() -> None:
     )
     post_head = _git(git, repository, "rev-parse", "HEAD^{commit}")
     post_status = _git(git, repository, "status", "--porcelain=v1")
+    post_project_source_identity = compute_m336j_project_source_identity(
+        repository, git
+    )
     body = {
         "schema_version": 1,
         "contract_role": "PUBLIC_SAFE_M336J_QUALITY_RECEIPT",
         "platform_role": args.platform,
         "exact_sha": head,
+        "project_source_identity": project_source_identity,
         "checks": checks,
         "check_count": len(checks),
         "post_check_exact_sha": post_head,
+        "post_check_project_source_identity": post_project_source_identity,
         "post_check_worktree_clean": not post_status,
         "receipt_hash": "",
         "status": (
             "PASS"
             if all(item["exit_code"] == 0 for item in checks)
             and post_head == head
+            and post_project_source_identity == project_source_identity
             and not post_status
             else "FAIL"
         ),
