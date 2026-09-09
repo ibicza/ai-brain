@@ -253,11 +253,31 @@ def prove_java_compilation_closure_feasibility(
     decisions = {
         f"{item.candidate_root}/{item.canonical_path}": item
         for item in census.decisions
-        if item.analysis_eligible
     }
-    if set(files) != set(decisions):
-        raise ValueError("closure manifest and selectable census have different files")
-    selected = set()
+    selectable_units = {
+        source_unit_id
+        for source_unit_id, decision in decisions.items()
+        if decision.selectable
+    }
+    if not set(files) <= set(decisions):
+        raise ValueError("closure manifest contains files outside selectable census")
+    if not selectable_units <= set(files):
+        raise ValueError("closure manifest omits selectable census files")
+    if any(
+        not decisions[source_unit_id].analysis_eligible
+        or decisions[source_unit_id].parser_status != "PASS"
+        for source_unit_id in files
+    ):
+        raise ValueError("closure manifest contains ineligible compiler input")
+    selected = _whole_root_witness(
+        files,
+        decisions,
+        target_file_count=target_file_count,
+        minimum_root_count=minimum_root_count,
+        maximum_files_per_root=maximum_files_per_root,
+        construct_quotas=construct_quotas,
+        trust_capacity_target=trust_capacity_target,
+    )
 
     def add(source_unit_id: str) -> bool:
         additions = set(files[source_unit_id].closure_source_units) - selected
@@ -372,6 +392,78 @@ def prove_java_compilation_closure_feasibility(
         "failure_reasons": tuple(failures),
     }
     return JavaCompilationClosureFeasibilityProof(**body, proof_hash=content_hash(body))
+
+
+def _whole_root_witness(
+    files,
+    decisions,
+    *,
+    target_file_count,
+    minimum_root_count,
+    maximum_files_per_root,
+    construct_quotas,
+    trust_capacity_target,
+):
+    """Prefer complete compiler roots when they exactly fill the selection.
+
+    The compiler census is intentionally performed per candidate root.  Keeping
+    a root whole therefore preserves the measured compilation context and avoids
+    manufacturing new missing-peer diagnostics by selecting an arbitrary slice
+    of an otherwise compiler-clean library.  The bounded subset search uses only
+    pre-selector census and compiler data; it never observes evaluator or golden
+    output.
+    """
+
+    by_root = defaultdict(list)
+    for item in files.values():
+        by_root[item.candidate_root].append(item)
+    roots = []
+    for root, values in sorted(by_root.items()):
+        units = tuple(sorted(item.source_unit_id for item in values))
+        unit_set = set(units)
+        if (
+            len(units) > maximum_files_per_root
+            or not any(
+                item.at_least_one_declaration_can_be_trusted
+                and decisions[item.source_unit_id].selectable
+                for item in values
+            )
+            or any(not set(item.closure_source_units) <= unit_set for item in values)
+        ):
+            continue
+        roots.append(
+            (
+                root,
+                units,
+                sum(item.compiler_clean_supported_declaration_count for item in values),
+            )
+        )
+    states = {0: (0, ())}
+    for root, units, capacity in roots:
+        for count, (total_capacity, chosen) in tuple(states.items()):
+            new_count = count + len(units)
+            if new_count > target_file_count:
+                continue
+            candidate = (total_capacity + capacity, (*chosen, root))
+            current = states.get(new_count)
+            if (
+                current is None
+                or candidate[0] > current[0]
+                or (candidate[0] == current[0] and candidate[1] < current[1])
+            ):
+                states[new_count] = candidate
+    exact = states.get(target_file_count)
+    if exact is None or len(exact[1]) < minimum_root_count:
+        return set()
+    selected = {item.source_unit_id for root in exact[1] for item in by_root[root]}
+    if sum(
+        files[unit].compiler_clean_supported_declaration_count for unit in selected
+    ) < trust_capacity_target or any(
+        _construct_count(selected, decisions, name) < required
+        for name, required in construct_quotas
+    ):
+        return set()
+    return selected
 
 
 def combine_java_compilation_closure_manifests(

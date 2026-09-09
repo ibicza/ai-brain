@@ -74,6 +74,10 @@ def _load(path: Path):
     return json.loads(path.resolve(strict=True).read_text(encoding="utf-8"))
 
 
+def _uses_source_free_publication(args) -> bool:
+    return args.m336g_publication or args.exact_phase == "R27"
+
+
 def _write(path: Path, value) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(canonical_json(value) + "\n", encoding="utf-8", newline="\n")
@@ -95,11 +99,11 @@ def _require_clean_exact(repository: Path, expected: str) -> None:
         text=True,
     ).stdout
     if head != expected or len(head) != 40 or status:
-        raise ValueError("evaluation requires a clean exact-R21 worktree")
+        raise ValueError("evaluation requires a clean exact worktree")
 
 
 def _verify_production_seals(args) -> None:
-    if args.m336g_publication:
+    if _uses_source_free_publication(args):
         _verify_m336g_production_seals(args)
         return
     if args.development and (
@@ -199,7 +203,8 @@ def _verify_production_seals(args) -> None:
             )
             or (
                 not args.development
-                and execution["qualification_mode"] != "EXACT_R21_AUTHORITATIVE"
+                and execution["qualification_mode"]
+                != f"EXACT_{args.exact_phase}_AUTHORITATIVE"
             )
         ):
             raise ValueError("production seal is not eligible for evaluation")
@@ -257,7 +262,14 @@ def _verify_m336g_production_seals(args) -> None:
     values = []
     for platform, root in platform_roots:
         root = root.resolve(strict=True)
-        execution = _load(root / "m336g_production_execution.json")
+        execution = _load(
+            root
+            / (
+                "m336f_production_execution.json"
+                if args.exact_phase == "R27"
+                else "m336g_production_execution.json"
+            )
+        )
         execution_hash = _verify_content_hash(execution, "seal_hash")
         summary = _load(root / "production_summary.json")
         summary_hash = _verify_content_hash(summary, "summary_hash")
@@ -286,14 +298,15 @@ def _verify_m336g_production_seals(args) -> None:
         if (
             execution_hash != execution["seal_hash"]
             or summary_hash != summary["summary_hash"]
-            or execution["r22_sha"] != args.r21_sha
+            or execution["r21_sha" if args.exact_phase == "R27" else "r22_sha"]
+            != args.r21_sha
             or execution["platform"] != platform
             or execution["status"] != "PASS"
             or execution["qualification_mode"]
             != (
                 "DEVELOPMENT_NON_AUTHORITATIVE"
                 if args.development
-                else "EXACT_R22_AUTHORITATIVE"
+                else f"EXACT_{args.exact_phase}_AUTHORITATIVE"
             )
             or production_hash != execution["production_output_hash"]
             or production_hash != summary["production_output_hash"]
@@ -529,6 +542,7 @@ def main() -> None:
     parser.add_argument("--javac", type=Path, required=True)
     parser.add_argument("--platform", choices=("windows", "karina"), required=True)
     parser.add_argument("--r21-sha", required=True)
+    parser.add_argument("--exact-phase", choices=("R21", "R27"), default="R21")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--m336g-publication",
@@ -538,7 +552,7 @@ def main() -> None:
     parser.add_argument(
         "--development",
         action="store_true",
-        help="allow a dirty pre-R21 worktree and mark output non-authoritative",
+        help="allow a dirty worktree and mark output non-authoritative",
     )
     args = parser.parse_args()
     if args.output.exists():
@@ -573,7 +587,7 @@ def main() -> None:
     replay_started = time.perf_counter()
     replay = (
         _load(production_root / "sealed_source_replay_receipt.json")
-        if args.m336g_publication
+        if _uses_source_free_publication(args)
         else verify_compiled_java_production_standalone(
             production_root / "candidate_pack"
         )
@@ -587,7 +601,7 @@ def main() -> None:
         source_entry_ids=source_entry_ids,
     )
     reconstruct_seconds = time.perf_counter() - reconstruct_started
-    if args.m336g_publication:
+    if _uses_source_free_publication(args):
         _private_jdk, jdk = verify_m336_jdk_provider_evidence(
             platform=args.platform,
             java=args.java,
@@ -669,7 +683,7 @@ def main() -> None:
             legacy_acquisition,
             production_root / "candidate_pack",
         )
-        if args.m336g_publication
+        if _uses_source_free_publication(args)
         else run_m336f_producer_contract_gate(legacy_acquisition)
     )
     contracts_seconds = time.perf_counter() - contracts_started
@@ -687,9 +701,9 @@ def main() -> None:
     production_execution = _load(
         production_root
         / (
-            "m336g_production_execution.json"
-            if args.m336g_publication
-            else "m336f_production_execution.json"
+            "m336f_production_execution.json"
+            if args.exact_phase == "R27" or not args.m336g_publication
+            else "m336g_production_execution.json"
         )
     )
     production_counts = _load(production_root / "production_counts.json")
@@ -857,7 +871,7 @@ def main() -> None:
         args.output
         / (
             "public_jdk_identity_receipt.json"
-            if args.m336g_publication
+            if _uses_source_free_publication(args)
             else "jdk_provider_receipt.json"
         ),
         asdict(jdk),

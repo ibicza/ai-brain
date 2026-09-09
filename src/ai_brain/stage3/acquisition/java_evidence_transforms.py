@@ -285,7 +285,12 @@ def _constant(value):
 
 
 def _normalize_type(value: str) -> str:
-    return re.sub(r",\s+", ",", " ".join(value.split()).replace(" []", "[]"))
+    # Keep the token boundary before array dimensions.  It is insignificant to
+    # javac, but it can carry the exact source spelling of a type-use annotation
+    # (for example ``E @Nullable []``).  Claim construction and the independent
+    # javac oracle both preserve that spelling, so removing the boundary here
+    # made otherwise exact field evidence disagree with both authorities.
+    return re.sub(r",\s+", ",", " ".join(value.split()))
 
 
 def _base_type(value: str) -> str:

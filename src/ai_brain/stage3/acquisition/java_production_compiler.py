@@ -495,7 +495,10 @@ def build_java_compilation_trust_gate(
                 for identifier in binding.declaration_ids
                 if declarations[identifier].member_kind in _CALLABLE_KINDS
             )
-        elif binding.diagnostic_scope is JavaDiagnosticScope.ENCLOSING_TYPE_BLOCKING:
+        elif (
+            binding.diagnostic_scope is JavaDiagnosticScope.ENCLOSING_TYPE_BLOCKING
+            and binding.normalized_category != "UNRESOLVED_TYPE"
+        ):
             for identifier in binding.declaration_ids:
                 affected.update(
                     by_receiver.get(declarations[identifier].receiver_type, ())
@@ -511,6 +514,7 @@ def build_java_compilation_trust_gate(
         "version": M336F_DIAGNOSTIC_BINDING_VERSION,
         "header_blocks": True,
         "enclosing_type_blocks": True,
+        "enclosing_unresolved_type_blocks": False,
         "body_only_blocks": False,
         "unrelated_blocks": False,
         "ambient_blocking_categories": tuple(sorted(_AMBIENT_BLOCKING_CATEGORIES)),
@@ -802,18 +806,24 @@ def _canonical_reported_path(
     normalized = value.replace("\\", "/")
     if normalized in documents:
         return normalized
-    matches = tuple(path for path in documents if path.endswith("/" + normalized))
+    matches = tuple(
+        path
+        for path in documents
+        if path.endswith("/" + normalized) or normalized.endswith("/" + path)
+    )
     if len(matches) == 1:
         return matches[0]
     if not matches or raw_by_unit is None or line is None:
         return None
+    payload_tokens = {
+        token
+        for token in re.findall(r"[A-Za-z_$][\w.$]*", diagnostic_payload)
+        if token not in {"class", "interface", "kindname", "location"}
+    }
     tokens = tuple(
         sorted(
-            {
-                token
-                for token in re.findall(r"[A-Za-z_$][\w.$]*", diagnostic_payload)
-                if token not in {"class", "interface", "kindname", "location"}
-            },
+            payload_tokens
+            | {token.rsplit(".", 1)[-1] for token in payload_tokens if "." in token},
             key=lambda item: (-len(item), item),
         )
     )
@@ -860,11 +870,19 @@ def _utf16_line_column_to_utf8_span(
     consumed_units = 0
     character_index = 0
     for character_index, character in enumerate(current):
-        units = len(character.encode("utf-16-le")) // 2
+        units = (
+            8 - (consumed_units % 8)
+            if character == "\t"
+            else len(character.encode("utf-16-le")) // 2
+        )
         if consumed_units == wanted_units:
             break
         if consumed_units + units > wanted_units:
-            raise ValueError("compiler column bisects a non-BMP character")
+            raise ValueError(
+                "compiler column bisects tab expansion"
+                if character == "\t"
+                else "compiler column bisects a non-BMP character"
+            )
         consumed_units += units
     else:
         character_index = len(current)

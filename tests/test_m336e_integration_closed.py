@@ -714,6 +714,35 @@ def test_fresh_scoped_license_does_not_poison_unrelated_source_paths():
     )
 
 
+def test_fresh_scoped_license_never_reenables_terminally_rejected_candidate():
+    policy = {
+        "pom_license_declarations": (("Apache-2.0", "Apache License 2.0", "1" * 64),),
+        "metadata_receipt_hashes": ("2" * 64,),
+    }
+    item = {
+        "correspondence": {
+            "entries": (
+                {
+                    "artifact_path": "org/example/A.java",
+                    "scm_path": "src/main/java/org/example/A.java",
+                    "complete": True,
+                },
+            )
+        },
+        "_archive_java_paths": ("org/example/A.java",),
+        "_legal_inventory_rows": (),
+        "qualification_errors": (),
+        "source_jar_sha256": "5" * 64,
+        "pom_sha256": "6" * 64,
+        "scm_archive_sha256": "7" * 64,
+        "immutable_scm_commit": "8" * 40,
+        "candidate_terminal_receipt": SimpleNamespace(eligible=False),
+    }
+    _apply_fresh_scoped_qualification(policy, item)
+    assert item["candidate_eligible_source_entry_count"] == 0
+    assert item["analysis_eligible"] is False
+
+
 def test_fresh_infeasible_preflight_persists_zero_selector_invocations(
     tmp_path, monkeypatch
 ):

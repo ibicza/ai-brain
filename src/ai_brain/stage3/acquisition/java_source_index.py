@@ -212,12 +212,26 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
     )
     if not documents:
         raise ValueError("Java source index requires JAVA_SOURCE documents")
+    materialized = tuple(
+        (document, store.get_blob(document.bytes_hash))
+        for document in sorted(
+            documents, key=lambda item: item.relative_path.encode("utf-8")
+        )
+    )
+    module_context = _bundle_module_context(materialized)
     declarations = []
-    for document in sorted(
-        documents, key=lambda item: item.relative_path.encode("utf-8")
-    ):
-        raw = store.get_blob(document.bytes_hash)
+    for document, raw in materialized:
         declarations.extend(_index_document(document, raw))
+    if module_context is not None:
+        module_name, exported_packages = module_context
+        declarations = [
+            replace(
+                declaration,
+                module_name=module_name,
+                package_exported=declaration.package_name in exported_packages,
+            )
+            for declaration in declarations
+        ]
     source_symbols = tuple(
         source_symbol_metadata(
             item.receiver_type,
@@ -279,6 +293,54 @@ def index_java_bundle(bundle: SourceBundle, store) -> JavaSourceIndex:
         "unsupported_declaration_count": sum(not item.supported for item in ordered),
     }
     return JavaSourceIndex(**body, index_hash=content_hash(body))
+
+
+def _bundle_module_context(
+    materialized: tuple[tuple[SourceDocument, bytes], ...],
+) -> tuple[str, frozenset[str]] | None:
+    """Return javac's single-module context for one compilation bundle.
+
+    A javac invocation containing one ``module-info.java`` places every source
+    unit in that named module, even when files originated in different archive
+    roots.  Deriving this from the parsed descriptor keeps production proposal
+    fields aligned with that compiler-visible authority without consulting the
+    evaluator.  Multiple descriptors are unsupported by the route's single
+    module compilation mode and therefore fail closed.
+    """
+
+    descriptors = []
+    for document, raw in materialized:
+        normalized = document.relative_path.replace("\\", "/")
+        if normalized.rsplit("/", 1)[-1] != "module-info.java":
+            continue
+        if bytes_hash(raw) != document.bytes_hash:
+            raise ValueError("Java module descriptor hash mismatch")
+        try:
+            raw.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as error:
+            raise ValueError("Java module descriptor is not UTF-8") from error
+        tree = Parser(Language(tree_sitter_java.language())).parse(raw, encoding="utf8")
+        if tree.root_node.has_error:
+            raise ValueError(f"Java grammar parse failure: {document.relative_path}")
+        modules = tuple(
+            child
+            for child in tree.root_node.named_children
+            if child.type == "module_declaration"
+        )
+        if len(modules) != 1:
+            raise ValueError("module-info.java requires one module declaration")
+        module = modules[0]
+        module_name = _text(_required_field(module, "name"), raw)
+        body = _required_field(module, "body")
+        exports = frozenset(
+            _text(_required_field(child, "package"), raw)
+            for child in body.named_children
+            if child.type == "exports_module_directive"
+        )
+        descriptors.append((module_name, exports))
+    if len(descriptors) > 1:
+        raise ValueError("single-module Java bundle contains multiple descriptors")
+    return descriptors[0] if descriptors else None
 
 
 def verify_java_source_index(

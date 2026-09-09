@@ -32,6 +32,7 @@ from ai_brain.stage3.acquisition.m336f_selection import (
 )
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
 from ai_brain.stage3.acquisition.sources import ingest_bundle
+from ai_brain.stage3.acquisition.version import MAX_DOCUMENTS
 
 
 def _load(path: Path):
@@ -120,6 +121,8 @@ def _verify_qualification_inputs(
         "status",
         "summary_hash",
     }
+    if exact_phase == "R27":
+        summary_fields.remove("preflight_report_hash")
     if set(qualification) != qualification_fields or not isinstance(
         qualification.get("candidates"), list
     ):
@@ -161,7 +164,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repository", type=Path, required=True)
     parser.add_argument("--r21-sha", required=True)
-    parser.add_argument("--exact-phase", choices=("R21", "R22"), default="R21")
+    parser.add_argument("--exact-phase", choices=("R21", "R22", "R27"), default="R21")
     parser.add_argument("--vault", type=Path, required=True)
     parser.add_argument("--qualification", type=Path, required=True)
     parser.add_argument("--qualification-summary", type=Path, required=True)
@@ -200,18 +203,23 @@ def main() -> None:
         census_hash=census.census_hash,
         exact_phase=args.exact_phase,
     )
-    eligible = {
+    compiler_inputs = {
         f"{item.candidate_root}/{item.canonical_path}": item
         for item in census.decisions
         if item.analysis_eligible
+        and item.publication_allowed
+        and item.source_use_receipt_valid
+        and item.scoped_license_resolved
+        and item.scm_correspondence_complete
+        and item.parser_status == "PASS"
     }
     binding_by_unit = {
         item.selected_path: item
         for item in bindings.bindings
-        if item.selected_path in eligible
+        if item.selected_path in compiler_inputs
     }
-    if set(eligible) != set(binding_by_unit):
-        raise ValueError("analysis-eligible census lacks exact source bindings")
+    if set(compiler_inputs) != set(binding_by_unit):
+        raise ValueError("compiler-input census lacks exact source bindings")
     probe = build_java_production_compilation_probe(args.javac.resolve(strict=True))
     args.output.mkdir(parents=True)
     with tempfile.TemporaryDirectory(prefix="m336f-disclosed-census-") as temporary:
@@ -225,7 +233,10 @@ def main() -> None:
             target.write_bytes((vault / binding.vault_path).read_bytes())
         manifests = []
         reports = []
-        for family in sorted({item.candidate_root for item in eligible.values()}):
+        oversized_roots = []
+        for family in sorted(
+            {item.candidate_root for item in compiler_inputs.values()}
+        ):
             paths = tuple(
                 sorted(
                     (source_root / family).rglob("*.java"),
@@ -234,6 +245,9 @@ def main() -> None:
                     ),
                 )
             )
+            if len(paths) > MAX_DOCUMENTS:
+                oversized_roots.append((family, len(paths)))
+                continue
             bundle = ingest_bundle(
                 paths,
                 bundle_id=f"m336f-disclosed-census-{family}",
@@ -278,8 +292,20 @@ def main() -> None:
                 if args.development
                 else f"EXACT_{args.exact_phase}_AUTHORITATIVE"
             ),
-            "analysis_eligible_file_count": len(eligible),
-            "analysis_eligible_root_count": len(reports),
+            "analysis_eligible_file_count": sum(
+                item.analysis_eligible for item in census.decisions
+            ),
+            "analysis_eligible_root_count": len(
+                {
+                    item.candidate_root
+                    for item in census.decisions
+                    if item.analysis_eligible
+                }
+            ),
+            "compiler_input_file_count": combined.source_file_count,
+            "compiler_input_root_count": len(reports),
+            "oversized_root_count": len(oversized_roots),
+            "oversized_root_file_counts": tuple(oversized_roots),
             "qualification_report_hash": qualification["report_hash"],
             "qualification_summary_hash": qualification_summary["summary_hash"],
             "compiler_probe_hash": probe.probe_hash,

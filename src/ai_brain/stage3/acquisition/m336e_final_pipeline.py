@@ -21,7 +21,6 @@ from ai_brain.stage3.acquisition.m336d_contracts import (
     LOCAL_SOURCE_VAULT_CONTRACT_REGISTRY,
 )
 from ai_brain.stage3.acquisition.m336d_final_pipeline import (
-    _acquire_one,
     _candidate_overlap_counts,
     _set_read_only,
 )
@@ -59,10 +58,11 @@ from ai_brain.stage3.acquisition.m336e_selectability import (
     prove_selector_feasibility,
     select_final_sources_once,
 )
+from ai_brain.stage3.acquisition.m336k_acquisition import acquire_candidate_v2
+from ai_brain.stage3.acquisition.m336k_archive import archive_decision_is_accepted
 from ai_brain.stage3.acquisition.maven_provenance import (
     MavenCentralProvenanceProvider,
     canonical_source_bytes,
-    inspect_source_archive,
 )
 from ai_brain.stage3.acquisition.scm_revision import ScmRevisionProvider
 from ai_brain.stage3.acquisition.source_authority import (
@@ -111,11 +111,13 @@ def run_fresh_acquisition_and_preflight(
     git_worktrees: tuple[Path, ...],
     maven_provider=None,
     scm_provider=None,
-    acquire_one=_acquire_one,
+    acquire_one=None,
     validate_pool=None,
     record_protocol: bool = True,
     perform_selector: bool = True,
     acquisition_run_id: str = M336E_FINAL_ACQUISITION_RUN_ID,
+    candidate_outcome_callback=None,
+    all_candidates_terminal_callback=None,
 ) -> FreshAcquisitionPreflight:
     """Execute the sole source-body acquisition and one guarded selector."""
 
@@ -153,12 +155,26 @@ def run_fresh_acquisition_and_preflight(
     acquired = []
     timings: dict[str, list[float]] = {}
     for policy in candidates:
-        item = acquire_one(policy, vault_root=vault_root, maven=maven, scm=scm)
+        if acquire_one is None:
+            outcome = acquire_candidate_v2(
+                policy,
+                vault_root=vault_root,
+                acquisition_run_id=acquisition_run_id,
+                maven=maven,
+                scm=scm,
+            )
+            item = outcome.pipeline_item
+            if candidate_outcome_callback is not None:
+                candidate_outcome_callback(outcome)
+        else:
+            item = acquire_one(policy, vault_root=vault_root, maven=maven, scm=scm)
         _apply_fresh_scoped_qualification(policy, item)
         for name, seconds in item.pop("_performance_seconds").items():
             timings.setdefault(name, []).append(seconds)
         item.pop("_vault_files")
         acquired.append(item)
+    if all_candidates_terminal_callback is not None:
+        all_candidates_terminal_callback()
     if record_protocol:
         ledger.append("ACQUISITION_COMPLETED", **context)
 
@@ -231,10 +247,19 @@ def run_fresh_acquisition_and_preflight(
     decisions = []
     path_bindings = []
     for item in acquired:
-        source_path = vault_root / "candidates" / item["family_id"] / "source.jar"
-        if not source_path.is_file() or item["source_jar_sha256"] == "0" * 64:
+        terminal = item.get("candidate_terminal_receipt")
+        if terminal is not None and not terminal.eligible:
             continue
-        inspection = inspect_source_archive(source_path.read_bytes())
+        if item["source_jar_sha256"] == "0" * 64:
+            continue
+        inspection_result = item.get("_archive_inspection_result")
+        if inspection_result is None:
+            raise RuntimeError(
+                "candidate with retained source bytes lacks a sealed archive inspection"
+            )
+        if not archive_decision_is_accepted(inspection_result.receipt.decision):
+            continue
+        inspection = inspection_result
         declarations, evidence_nodes, parser_status_by_path = (
             _production_index_candidate(vault_root, item, inspection, evidence_policy)
         )
@@ -526,9 +551,13 @@ def _apply_fresh_scoped_qualification(policy: dict, item: dict) -> None:
     item["complete_correspondence_paths"] = tuple(
         sorted(path for path, row in correspondence.items() if row.get("complete"))
     )
-    item["candidate_eligible_source_entry_count"] = len(eligible_paths)
+    terminal = item.get("candidate_terminal_receipt")
+    terminal_eligible = terminal is None or terminal.eligible
+    item["candidate_eligible_source_entry_count"] = (
+        len(eligible_paths) if terminal_eligible else 0
+    )
     item["analysis_eligible"] = bool(
-        authentic and eligible_paths and not non_license_errors
+        terminal_eligible and authentic and eligible_paths and not non_license_errors
     )
     item["qualification_errors"] = non_license_errors
     item["qualification_review_findings"] = tuple(

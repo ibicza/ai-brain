@@ -42,6 +42,7 @@ from ai_brain.stage3.acquisition.m336e_selectability import (
     build_selectable_source_decision,
 )
 from ai_brain.stage3.acquisition.m336f_compilation_closure import (
+    _whole_root_witness,
     build_java_compilation_closure_manifest,
     prove_java_compilation_closure_feasibility,
 )
@@ -101,7 +102,15 @@ def _bundle(tmp_path: Path, sources: dict[str, bytes]):
     return store, bundle, index_java_bundle(bundle, store)
 
 
-def _diagnostic(unit: str | None, raw: bytes, line: int, column: int):
+def _diagnostic(
+    unit: str | None,
+    raw: bytes,
+    line: int,
+    column: int,
+    *,
+    code: str = "compiler.err.cant.resolve.location",
+    category: str = "UNRESOLVED_TYPE",
+):
     if unit is None:
         position = start = end = None
     else:
@@ -110,8 +119,8 @@ def _diagnostic(unit: str | None, raw: bytes, line: int, column: int):
         "source_entry_id": "1" * 64 if unit else None,
         "source_unit_id": unit,
         "source_unit_identity": content_hash((unit, bytes_hash(raw))) if unit else None,
-        "diagnostic_code": "compiler.err.cant.resolve.location",
-        "normalized_category": "UNRESOLVED_TYPE",
+        "diagnostic_code": code,
+        "normalized_category": category,
         "diagnostic_kind": "ERROR",
         "line": line if unit else None,
         "column": column if unit else None,
@@ -120,6 +129,58 @@ def _diagnostic(unit: str | None, raw: bytes, line: int, column: int):
         "canonical_byte_end": end,
     }
     return JavaCompilerDiagnostic(**body, diagnostic_hash=content_hash(body))
+
+
+def test_single_module_descriptor_applies_to_the_complete_compilation_bundle(
+    tmp_path: Path,
+) -> None:
+    _store, _bundle_value, index = _bundle(
+        tmp_path,
+        {
+            "module-info.java": b"module demo.mod { exports demo.api; }\n",
+            "first/demo/api/PublicApi.java": (
+                b"package demo.api; public class PublicApi { public void ok() {} }\n"
+            ),
+            "second/demo/internal/HiddenApi.java": (
+                b"package demo.internal; public class HiddenApi { public void no() {} }\n"
+            ),
+        },
+    )
+    callables = {
+        item.receiver_type: item
+        for item in index.declarations
+        if item.member_kind == "method"
+    }
+    assert callables["demo.api.PublicApi"].module_name == "demo.mod"
+    assert callables["demo.api.PublicApi"].package_exported is True
+    assert callables["demo.internal.HiddenApi"].module_name == "demo.mod"
+    assert callables["demo.internal.HiddenApi"].package_exported is False
+
+
+def test_multiple_module_descriptors_fail_closed(tmp_path: Path) -> None:
+    root = tmp_path / "sources"
+    paths = []
+    for relative, raw in {
+        "one/module-info.java": b"module one {}\n",
+        "one/A.java": b"class A {}\n",
+        "two/module-info.java": b"module two {}\n",
+        "two/B.java": b"class B {}\n",
+    }.items():
+        path = root.joinpath(*relative.split("/"))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        paths.append(path)
+    store = AcquisitionStore.open_or_initialize(tmp_path / "store")
+    bundle = ingest_bundle(
+        tuple(paths),
+        bundle_id="multiple-modules",
+        domain_tags=("java-api",),
+        imported_at="1970-01-01T00:00:00Z",
+        source_root=root,
+        store=store,
+    )
+    with pytest.raises(ValueError, match="multiple descriptors"):
+        index_java_bundle(bundle, store)
 
 
 def _report(index, diagnostics, bindings, *, malformed=()):
@@ -276,9 +337,16 @@ def test_utf16_position_maps_unicode_and_canonicalizes_crlf():
     raw = "a\r\nб😀e\u0301\tz\r\n".encode()
     assert utf16_line_column_to_utf8_span(raw, 2, 4) == (4, 8, 9)
     assert utf16_line_column_to_utf8_span(raw, 2, 5) == (5, 9, 11)
-    assert utf16_line_column_to_utf8_span(raw, 2, 7) == (7, 12, 13)
+    assert utf16_line_column_to_utf8_span(raw, 2, 9) == (7, 12, 13)
     with pytest.raises(ValueError, match="bisects"):
         utf16_line_column_to_utf8_span(raw, 2, 3)
+    with pytest.raises(ValueError, match="tab expansion"):
+        utf16_line_column_to_utf8_span(raw, 2, 7)
+
+
+def test_javac_tab_expanded_column_maps_to_exact_source_byte():
+    raw = b"\t\tinEdges = new LinkedHashSet<Edge<T>>();\n"
+    assert utf16_line_column_to_utf8_span(raw, 1, 45) == (30, 30, 31)
 
 
 def test_duplicate_javac_basenames_bind_by_stable_payload_and_occurrence():
@@ -314,6 +382,34 @@ def test_duplicate_javac_basenames_bind_by_stable_payload_and_occurrence():
             "package-info.java", documents, occurrence_index=2, **kwargs
         )
         is None
+    )
+
+
+def test_qualified_diagnostic_payload_and_absolute_path_bind_exact_source():
+    documents = {
+        "first/p/TypeResolver.java": object(),
+        "second/q/TypeResolver.java": object(),
+    }
+    raw = {
+        "first/p/TypeResolver.java": b"public class TypeResolver {}\n",
+        "second/q/TypeResolver.java": b"Unsafe value;\n",
+    }
+    assert (
+        _canonical_reported_path(
+            "TypeResolver.java",
+            documents,
+            raw_by_unit=raw,
+            line=1,
+            diagnostic_payload="sun.misc.Unsafe",
+        )
+        == "second/q/TypeResolver.java"
+    )
+    assert (
+        _canonical_reported_path(
+            "C:/private/sources/second/q/TypeResolver.java",
+            documents,
+        )
+        == "second/q/TypeResolver.java"
     )
 
 
@@ -492,6 +588,27 @@ def test_compiler_gate_is_declaration_scoped_and_fails_closed(tmp_path: Path):
         verify_java_production_compiler_report(missing_binding)
 
 
+def test_unresolved_enclosing_type_does_not_block_independent_callable_semantics(
+    tmp_path: Path,
+) -> None:
+    raw = b"package p; public class A extends MissingBase { public void exact() {} }\n"
+    _store, _bundle_value, index = _bundle(tmp_path, {"p/A.java": raw})
+    diagnostic = _diagnostic("p/A.java", raw, 1, raw.index(b"MissingBase") + 1)
+    binding = _bind_diagnostic(
+        diagnostic,
+        compilation_run_hash="3" * 64,
+        source_index=index,
+        raw_by_unit={"p/A.java": raw},
+    )
+    method = next(item for item in index.declarations if item.member_name == "exact")
+    assert binding.diagnostic_scope is JavaDiagnosticScope.ENCLOSING_TYPE_BLOCKING
+    assert method.supported is True
+    gate = build_java_compilation_trust_gate(
+        _report(index, (diagnostic,), (binding,)), index
+    )
+    assert gate.blocked_declaration_ids == ()
+
+
 def test_internal_compilation_closure_counts_support_files(tmp_path: Path):
     sources = {
         "roota/p/A.java": b"package p; public class A extends B { public void a() {} }\n",
@@ -514,7 +631,14 @@ def test_internal_compilation_closure_counts_support_files(tmp_path: Path):
     assert by_unit["roota/p/B.java"].supported_declaration_count == 0
 
     raw = sources["roota/p/A.java"]
-    diagnostic = _diagnostic("roota/p/A.java", raw, 1, raw.index(b"A") + 1)
+    diagnostic = _diagnostic(
+        "roota/p/A.java",
+        raw,
+        1,
+        raw.index(b"A") + 1,
+        code="compiler.err.cyclic.inheritance",
+        category="COMPILER_ERROR",
+    )
     binding = _bind_diagnostic(
         diagnostic,
         compilation_run_hash="3" * 64,
@@ -637,6 +761,77 @@ def test_internal_compilation_closure_counts_support_files(tmp_path: Path):
     assert not infeasible.hard_requirements_satisfied
     assert "TARGET_FILE_COUNT" in infeasible.failure_reasons
 
+    parser_failed_source_id = build_source_entry_id(
+        candidate_family_id="failed",
+        source_jar_sha256="9" * 64,
+        archive_relative_path="p/Failed.java",
+        raw_source_sha256="a" * 64,
+        canonical_source_sha256="b" * 64,
+    )
+    parser_failed = build_selectable_source_decision(
+        source_entry_id=parser_failed_source_id,
+        candidate_root="failed",
+        canonical_path="p/Failed.java",
+        analysis_eligible=True,
+        publication_allowed=True,
+        source_use_receipt_valid=True,
+        scoped_license_resolved=True,
+        scm_correspondence_complete=True,
+        parser_status="FAIL",
+        declaration_count=0,
+        callable_declaration_count=0,
+        supported_callable_declaration_count=0,
+        construct_classes=(),
+        evidence_policy_path_declared=False,
+    )
+    census_with_parser_failure = build_selectable_source_census(
+        (*decisions, parser_failed)
+    )
+    proof_with_parser_failure = prove_java_compilation_closure_feasibility(
+        manifest,
+        census_with_parser_failure,
+        target_file_count=3,
+        minimum_root_count=1,
+        maximum_files_per_root=3,
+        construct_quotas=(("constructor", 1), ("method", 1)),
+        trust_capacity_target=2,
+    )
+    assert proof_with_parser_failure.hard_requirements_satisfied
+    assert proof_with_parser_failure.witness_source_units == tuple(sorted(sources))
+
+
+def test_whole_root_witness_uses_only_preselector_compiler_capacity() -> None:
+    files = {}
+    decisions = {}
+    for root, capacity in (("a", 9), ("b", 8), ("c", 7), ("d", 1)):
+        for index in range(2):
+            unit = f"{root}/p/{index}.java"
+            files[unit] = SimpleNamespace(
+                source_unit_id=unit,
+                candidate_root=root,
+                compiler_clean_supported_declaration_count=capacity,
+                at_least_one_declaration_can_be_trusted=True,
+                closure_source_units=(unit,),
+            )
+            decisions[unit] = SimpleNamespace(selectable=True, construct_classes=())
+    selected = _whole_root_witness(
+        files,
+        decisions,
+        target_file_count=6,
+        minimum_root_count=3,
+        maximum_files_per_root=2,
+        construct_quotas=(),
+        trust_capacity_target=1,
+    )
+    assert selected == {
+        "a/p/0.java",
+        "a/p/1.java",
+        "b/p/0.java",
+        "b/p/1.java",
+        "c/p/0.java",
+        "c/p/1.java",
+    }
+
 
 def test_method_generic_evidence_uses_callable_owner(tmp_path: Path):
     raw = (
@@ -664,6 +859,36 @@ def test_method_generic_evidence_uses_callable_owner(tmp_path: Path):
         if item.field_path == "content.generic_constraints[0]"
     )
     assert row.normalized_output == '"F extends Throwable"'
+    assert row.normalized_output == expected[(row.proposal_id, row.field_path)]
+    assert batch.field_evidence.wrong_count == 0
+
+
+def test_parameter_evidence_preserves_annotated_array_token_boundary(tmp_path: Path):
+    raw = (
+        b"package p; public class Arrays { @interface Nullable {} "
+        b"public <E> void accept(E @Nullable [] values) {} }\n"
+    )
+    store, bundle, _index = _bundle(tmp_path, {"p/Arrays.java": raw})
+    batch = run_java_acquisition_pipeline(
+        bundle,
+        store,
+        deterministic_run_id="m336f-annotated-array-evidence",
+    )
+    requirements = enumerate_java_evidence_requirements(
+        batch.proposal_batch,
+        batch.source_index,
+        batch.evidence_policy,
+    )
+    expected = {
+        (item.proposal_id, item.field_path): item.expected_output
+        for item in requirements
+    }
+    row = next(
+        item
+        for item in batch.field_evidence.evidence
+        if item.field_path == "content.parameters[0].type"
+    )
+    assert row.normalized_output == '"E @Nullable []"'
     assert row.normalized_output == expected[(row.proposal_id, row.field_path)]
     assert batch.field_evidence.wrong_count == 0
 
