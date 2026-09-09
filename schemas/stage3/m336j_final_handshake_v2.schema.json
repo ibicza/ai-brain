@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.invalid/schemas/stage3/m336j_final_handshake_v2.schema.json",
+  "title": "M-33.6j.3 final freeze handshake V2",
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "gitSha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "hostname": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 253,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$"
+    },
+    "authorizationFields": {
+      "type": "object",
+      "properties": {
+        "acquisition_mode": {"enum": ["FINAL", "REHEARSAL"]},
+        "exact_q26_sha": {"$ref": "#/$defs/gitSha"},
+        "exact_r26_sha": {"$ref": "#/$defs/gitSha"},
+        "q26_staging_tree_hash": {"$ref": "#/$defs/sha256"},
+        "prospective_f26_freeze_identity": {"$ref": "#/$defs/sha256"},
+        "route_registry_hash": {"$ref": "#/$defs/sha256"},
+        "route_manifest_hash": {"$ref": "#/$defs/sha256"},
+        "acquisition_provider_source_hash": {"$ref": "#/$defs/sha256"},
+        "acquisition_provider_callable_signature_hash": {"$ref": "#/$defs/sha256"},
+        "candidate_pool_hash": {"$ref": "#/$defs/sha256"},
+        "acquisition_policy_hash": {"$ref": "#/$defs/sha256"},
+        "denylist_hash": {"$ref": "#/$defs/sha256"},
+        "authority_root_hash": {"$ref": "#/$defs/sha256"},
+        "selector_policy_hash": {"$ref": "#/$defs/sha256"},
+        "threshold_manifest_hash": {"$ref": "#/$defs/sha256"},
+        "publication_boundary_hash": {"$ref": "#/$defs/sha256"},
+        "public_artifact_contract_hash": {"$ref": "#/$defs/sha256"},
+        "spdx_reference_binding_hash": {"$ref": "#/$defs/sha256"},
+        "execution_capsule_public_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "python_environment_manifest_hash": {"$ref": "#/$defs/sha256"},
+        "executable_dependency_manifest_hash": {"$ref": "#/$defs/sha256"},
+        "remote_command_renderer_hash": {"$ref": "#/$defs/sha256"},
+        "minimal_environment_policy_hash": {"$ref": "#/$defs/sha256"},
+        "windows_public_jdk_identity_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "karina_public_jdk_identity_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "karina_stable_host_identity_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "acquisition_run_id": {"const": "m336i.final-java.global-acquisition.v1"},
+        "branch_ref": {"const": "refs/heads/exp/stage3-m336j3-final-freeze-handshake-v10"},
+        "allowed_network_hosts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/hostname"}
+        },
+        "expected_global_acquisition_count": {"const": 1},
+        "expected_windows_acquisition_count": {"const": 1},
+        "expected_karina_acquisition_count": {"const": 0}
+      },
+      "required": [
+        "acquisition_mode", "exact_q26_sha", "exact_r26_sha",
+        "q26_staging_tree_hash", "prospective_f26_freeze_identity",
+        "route_registry_hash", "route_manifest_hash",
+        "acquisition_provider_source_hash",
+        "acquisition_provider_callable_signature_hash", "candidate_pool_hash",
+        "acquisition_policy_hash", "denylist_hash", "authority_root_hash",
+        "selector_policy_hash", "threshold_manifest_hash",
+        "publication_boundary_hash", "public_artifact_contract_hash",
+        "spdx_reference_binding_hash", "execution_capsule_public_receipt_hash",
+        "python_environment_manifest_hash", "executable_dependency_manifest_hash",
+        "remote_command_renderer_hash", "minimal_environment_policy_hash",
+        "windows_public_jdk_identity_receipt_hash",
+        "karina_public_jdk_identity_receipt_hash",
+        "karina_stable_host_identity_receipt_hash", "acquisition_run_id",
+        "branch_ref", "allowed_network_hosts",
+        "expected_global_acquisition_count", "expected_windows_acquisition_count",
+        "expected_karina_acquisition_count"
+      ]
+    },
+    "authorizationInput": {
+      "allOf": [{"$ref": "#/$defs/authorizationFields"}],
+      "unevaluatedProperties": false
+    },
+    "authorization": {
+      "allOf": [
+        {"$ref": "#/$defs/authorizationFields"},
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {"const": 2},
+            "contract_role": {"const": "M336J_FINAL_ACQUISITION_AUTHORIZATION_V2"},
+            "authorization_hash": {"$ref": "#/$defs/sha256"}
+          },
+          "required": ["schema_version", "contract_role", "authorization_hash"]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "freezeManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"const": 2},
+        "contract_role": {"const": "M336J_FINAL_FREEZE_MANIFEST_V2"},
+        "exact_q26_sha": {"$ref": "#/$defs/gitSha"},
+        "exact_r26_sha": {"$ref": "#/$defs/gitSha"},
+        "q26_staging_tree_hash": {"$ref": "#/$defs/sha256"},
+        "freeze_tree_identity": {"$ref": "#/$defs/sha256"},
+        "authorization_hash": {"$ref": "#/$defs/sha256"},
+        "route_registry_hash": {"$ref": "#/$defs/sha256"},
+        "route_manifest_hash": {"$ref": "#/$defs/sha256"},
+        "spdx_reference_binding_hash": {"$ref": "#/$defs/sha256"},
+        "execution_capsule_public_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "python_environment_manifest_hash": {"$ref": "#/$defs/sha256"},
+        "executable_dependency_manifest_hash": {"$ref": "#/$defs/sha256"},
+        "remote_command_renderer_hash": {"$ref": "#/$defs/sha256"},
+        "minimal_environment_policy_hash": {"$ref": "#/$defs/sha256"},
+        "candidate_pool_hash": {"$ref": "#/$defs/sha256"},
+        "acquisition_policy_hash": {"$ref": "#/$defs/sha256"},
+        "denylist_hash": {"$ref": "#/$defs/sha256"},
+        "authority_root_hash": {"$ref": "#/$defs/sha256"},
+        "selector_policy_hash": {"$ref": "#/$defs/sha256"},
+        "threshold_manifest_hash": {"$ref": "#/$defs/sha256"},
+        "publication_boundary_hash": {"$ref": "#/$defs/sha256"},
+        "public_artifact_contract_hash": {"$ref": "#/$defs/sha256"},
+        "windows_public_jdk_identity_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "karina_public_jdk_identity_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "karina_stable_host_identity_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "final_acquisition_reservation_count": {"const": 0},
+        "final_acquisition_invocation_count": {"const": 0},
+        "status": {"const": "F26_READY_TO_COMMIT"},
+        "manifest_hash": {"$ref": "#/$defs/sha256"}
+      },
+      "required": [
+        "schema_version", "contract_role", "exact_q26_sha", "exact_r26_sha",
+        "q26_staging_tree_hash", "freeze_tree_identity", "authorization_hash",
+        "route_registry_hash", "route_manifest_hash",
+        "spdx_reference_binding_hash", "execution_capsule_public_receipt_hash",
+        "python_environment_manifest_hash", "executable_dependency_manifest_hash",
+        "remote_command_renderer_hash", "minimal_environment_policy_hash",
+        "candidate_pool_hash", "acquisition_policy_hash", "denylist_hash",
+        "authority_root_hash", "selector_policy_hash", "threshold_manifest_hash",
+        "publication_boundary_hash", "public_artifact_contract_hash",
+        "windows_public_jdk_identity_receipt_hash",
+        "karina_public_jdk_identity_receipt_hash",
+        "karina_stable_host_identity_receipt_hash",
+        "final_acquisition_reservation_count", "final_acquisition_invocation_count",
+        "status", "manifest_hash"
+      ]
+    },
+    "frozenFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "destination_path": {"type": "string", "minLength": 1},
+        "source_artifact_role": {"type": "string", "minLength": 1},
+        "bytes_hash": {"$ref": "#/$defs/sha256"}
+      },
+      "required": ["destination_path", "source_artifact_role", "bytes_hash"]
+    },
+    "frozenFileManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"const": 2},
+        "contract_role": {"const": "M336J_F26_FROZEN_FILE_MANIFEST"},
+        "acquisition_mode": {"enum": ["FINAL", "REHEARSAL"]},
+        "files": {
+          "type": "array",
+          "minItems": 20,
+          "maxItems": 20,
+          "items": {"$ref": "#/$defs/frozenFile"}
+        },
+        "file_count": {"const": 20},
+        "manifest_hash": {"$ref": "#/$defs/sha256"}
+      },
+      "required": [
+        "schema_version", "contract_role", "acquisition_mode", "files",
+        "file_count", "manifest_hash"
+      ]
+    }
+  },
+  "oneOf": [
+    {"$ref": "#/$defs/authorizationInput"},
+    {"$ref": "#/$defs/authorization"},
+    {"$ref": "#/$defs/freezeManifest"},
+    {"$ref": "#/$defs/frozenFileManifest"}
+  ]
+}

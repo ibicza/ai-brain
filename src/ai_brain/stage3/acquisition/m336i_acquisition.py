@@ -110,6 +110,11 @@ class M336IFinalAcquisitionRequest:
     public_staging_root: Path
     unused_selected_source_output: Path
     platform_role: str
+    git_executable: Path | None = None
+    v2_authorization: object | None = None
+    v2_freeze_manifest: object | None = None
+    v2_lineage_policy: object | None = None
+    v2_git_receipt: object | None = None
 
 
 @dataclass(frozen=True)
@@ -499,6 +504,7 @@ def run_m336i_frozen_final_acquisition(
     """Validate the frozen authority, spend once, and acquire the entire pool."""
 
     context, pool, policy, worktrees = _validate_request_before_side_effects(request)
+    active_authorization = request.v2_authorization or request.authorization
     ledger = M336IFinalAcquisitionLedger(
         request.acquisition_ledger, git_worktrees=worktrees
     )
@@ -507,7 +513,7 @@ def run_m336i_frozen_final_acquisition(
     ledger.append(
         "AUTHORIZATION_VALIDATED",
         context_hash=context,
-        operation_hash=request.authorization.authorization_hash,
+        operation_hash=active_authorization.authorization_hash,
     )
     _notify(event_callback, "AUTHORIZATION_VALIDATED", ledger.events()[-1].event_hash)
     _maybe_crash(crash_after, "AUTHORIZATION_VALIDATED")
@@ -581,9 +587,9 @@ def run_m336i_frozen_final_acquisition(
                 failure_body = {
                     "schema_version": 1,
                     "contract_role": "PUBLIC_SAFE_ACQUISITION_FAILURE_RECEIPT",
-                    "acquisition_mode": request.authorization.acquisition_mode,
+                    "acquisition_mode": active_authorization.acquisition_mode,
                     "exact_f24_sha": request.supplied_f24_sha,
-                    "authorization_hash": request.authorization.authorization_hash,
+                    "authorization_hash": active_authorization.authorization_hash,
                     "candidate_pool_hash": pool["pool_hash"],
                     "acquisition_policy_hash": policy["acquisition_policy_hash"],
                     "failure_class": type(error).__name__,
@@ -601,14 +607,36 @@ def run_m336i_frozen_final_acquisition(
         raise
 
 
+def validate_m336i_final_acquisition_request_before_side_effects(
+    request: M336IFinalAcquisitionRequest,
+) -> str:
+    """Run the complete provider preflight without spending one-shot capacity."""
+
+    context, _pool, _policy, _worktrees = _validate_request_before_side_effects(request)
+    return context
+
+
 def _validate_request_before_side_effects(request):
     if not isinstance(request, M336IFinalAcquisitionRequest):
         raise TypeError("M336I acquisition request must be typed")
     authorization = request.authorization
+    is_m336j_v2 = request.v2_authorization is not None
     is_m336j = authorization.branch_ref.endswith(
         "/exp/stage3-m336j-hermetic-karina-final-java-v9"
     )
-    if is_m336j:
+    if is_m336j_v2:
+        from ai_brain.stage3.acquisition.m336j_final_v2 import (
+            m336j_final_authorization_v2_to_legacy,
+            verify_m336j_final_authorization_v2,
+        )
+
+        verify_m336j_final_authorization_v2(request.v2_authorization)
+        if m336j_final_authorization_v2_to_legacy(request.v2_authorization) != (
+            authorization
+        ):
+            raise ValueError("M336J V2 legacy acquisition adapter changed")
+        authorization = request.v2_authorization
+    elif is_m336j:
         from ai_brain.stage3.acquisition.m336j_freeze import (
             verify_m336j_final_acquisition_authorization,
         )
@@ -619,7 +647,12 @@ def _validate_request_before_side_effects(request):
     if request.platform_role != "WINDOWS":
         raise ValueError("M336I source acquisition is Windows-only")
     repository = request.repository.resolve(strict=True)
-    worktrees = _git_worktrees(repository)
+    if is_m336j_v2:
+        if request.git_executable is None:
+            raise ValueError("M336J V2 acquisition requires an exact Git executable")
+        worktrees = _git_worktrees(repository, request.git_executable)
+    else:
+        worktrees = _git_worktrees(repository)
     paths = (
         request.candidate_pool,
         request.acquisition_policy,
@@ -655,76 +688,80 @@ def _validate_request_before_side_effects(request):
             )
     if any(Path(path).exists() for path in external):
         raise FileExistsError("M336I final acquisition destinations must be fresh")
-    head = _git(repository, "rev-parse", "HEAD^{commit}").strip()
-    status = _git(repository, "status", "--porcelain=v1")
-    parent = _git(repository, "rev-parse", "HEAD^1").strip()
-    implementation_commit = _git(repository, "rev-parse", "HEAD~2").strip()
-    historical_anchor = _git(repository, "rev-parse", "HEAD~3").strip()
-    merge_count = int(
-        _git(
-            repository,
-            "rev-list",
-            "--count",
-            "--merges",
-            f"{authorization.exact_q23_sha}..HEAD",
-        ).strip()
-    )
-    upstream = _git(repository, "rev-parse", "@{upstream}^{commit}").strip()
-    remote = _remote_branch_sha(repository, authorization.branch_ref)
-    if is_m336j:
-        from ai_brain.stage3.acquisition.m336j_freeze import (
-            M336J_EXACT_F24_SHA,
-            M336J_FREEZE_MANIFEST_PATH,
-            M336J_FROZEN_AUTHORIZATION_PATH,
-            compute_m336j_freeze_tree_identity,
-        )
-
-        freeze_identity = compute_m336j_freeze_tree_identity(repository)
-        authorization_path = M336J_FROZEN_AUTHORIZATION_PATH
-        freeze_manifest_path = M336J_FREEZE_MANIFEST_PATH
-        anchor_matches = historical_anchor == M336J_EXACT_F24_SHA
+    if is_m336j_v2:
+        _validate_m336j_v2_git_preconditions(request, repository)
     else:
-        freeze_identity = compute_m336i_freeze_tree_identity(repository)
-        authorization_path = Path(M336I_FROZEN_AUTHORIZATION_PATH)
-        freeze_manifest_path = Path(M336I_FREEZE_MANIFEST_PATH)
-        anchor_matches = historical_anchor == authorization.exact_q23_sha
-    if (
-        head != request.supplied_f24_sha
-        or status
-        or parent != authorization.f24_parent_sha
-        or not anchor_matches
-        or compute_m336i_commit_tree_identity(repository, implementation_commit)
-        != authorization.r24_implementation_tree_identity
-        or merge_count != 0
-        or upstream != head
-        or remote != head
-        or freeze_identity != authorization.f24_freeze_tree_identity
-    ):
-        raise ValueError("M336I/M336J exact-F24 freeze Git precondition failed")
-    frozen_authorization = strict_json_file(repository / authorization_path)
-    freeze_manifest = strict_json_file(repository / freeze_manifest_path)
-    freeze_body = dict(freeze_manifest)
-    freeze_hash = freeze_body.pop("manifest_hash", None)
-    if (
-        frozen_authorization != json.loads(canonical_json(authorization))
-        or content_hash(freeze_body) != freeze_hash
-        or freeze_manifest.get("authorization_hash") != authorization.authorization_hash
-        or freeze_manifest.get("f24_freeze_tree_identity")
-        != authorization.f24_freeze_tree_identity
-        or freeze_manifest.get("f24_parent_sha") != authorization.f24_parent_sha
-        or freeze_manifest.get("q24_evidence_identity")
-        != authorization.q24_evidence_identity
-        or freeze_manifest.get("r24_implementation_tree_identity")
-        != authorization.r24_implementation_tree_identity
-    ):
-        raise ValueError("M336I frozen authorization object is not exact")
+        head = _git(repository, "rev-parse", "HEAD^{commit}").strip()
+        status = _git(repository, "status", "--porcelain=v1")
+        parent = _git(repository, "rev-parse", "HEAD^1").strip()
+        implementation_commit = _git(repository, "rev-parse", "HEAD~2").strip()
+        historical_anchor = _git(repository, "rev-parse", "HEAD~3").strip()
+        merge_count = int(
+            _git(
+                repository,
+                "rev-list",
+                "--count",
+                "--merges",
+                f"{authorization.exact_q23_sha}..HEAD",
+            ).strip()
+        )
+        upstream = _git(repository, "rev-parse", "@{upstream}^{commit}").strip()
+        remote = _remote_branch_sha(repository, authorization.branch_ref)
+        if is_m336j:
+            from ai_brain.stage3.acquisition.m336j_freeze import (
+                M336J_EXACT_F24_SHA,
+                M336J_FREEZE_MANIFEST_PATH,
+                M336J_FROZEN_AUTHORIZATION_PATH,
+                compute_m336j_freeze_tree_identity,
+            )
+
+            freeze_identity = compute_m336j_freeze_tree_identity(repository)
+            authorization_path = M336J_FROZEN_AUTHORIZATION_PATH
+            freeze_manifest_path = M336J_FREEZE_MANIFEST_PATH
+            anchor_matches = historical_anchor == M336J_EXACT_F24_SHA
+        else:
+            freeze_identity = compute_m336i_freeze_tree_identity(repository)
+            authorization_path = Path(M336I_FROZEN_AUTHORIZATION_PATH)
+            freeze_manifest_path = Path(M336I_FREEZE_MANIFEST_PATH)
+            anchor_matches = historical_anchor == authorization.exact_q23_sha
+        if (
+            head != request.supplied_f24_sha
+            or status
+            or parent != authorization.f24_parent_sha
+            or not anchor_matches
+            or compute_m336i_commit_tree_identity(repository, implementation_commit)
+            != authorization.r24_implementation_tree_identity
+            or merge_count != 0
+            or upstream != head
+            or remote != head
+            or freeze_identity != authorization.f24_freeze_tree_identity
+        ):
+            raise ValueError("M336I/M336J exact-F24 freeze Git precondition failed")
+        frozen_authorization = strict_json_file(repository / authorization_path)
+        freeze_manifest = strict_json_file(repository / freeze_manifest_path)
+        freeze_body = dict(freeze_manifest)
+        freeze_hash = freeze_body.pop("manifest_hash", None)
+        if (
+            frozen_authorization != json.loads(canonical_json(authorization))
+            or content_hash(freeze_body) != freeze_hash
+            or freeze_manifest.get("authorization_hash")
+            != authorization.authorization_hash
+            or freeze_manifest.get("f24_freeze_tree_identity")
+            != authorization.f24_freeze_tree_identity
+            or freeze_manifest.get("f24_parent_sha") != authorization.f24_parent_sha
+            or freeze_manifest.get("q24_evidence_identity")
+            != authorization.q24_evidence_identity
+            or freeze_manifest.get("r24_implementation_tree_identity")
+            != authorization.r24_implementation_tree_identity
+        ):
+            raise ValueError("M336I frozen authorization object is not exact")
     pool = strict_json_file(request.candidate_pool)
     policy = strict_json_file(request.acquisition_policy)
     validate_m336i_candidate_pool(pool)
     validate_m336i_acquisition_policy(policy)
     frozen_registry = strict_json_file(request.frozen_route_registry)
     frozen_manifest = strict_json_file(request.frozen_route_manifest)
-    if is_m336j:
+    if is_m336j or is_m336j_v2:
         from ai_brain.stage3.acquisition.m336j_registry import (
             build_m336j_route_manifest,
             build_m336j_route_registry,
@@ -804,6 +841,8 @@ def _validate_request_before_side_effects(request):
         getattr(authorization, name) != value for name, value in artifact_checks.items()
     ):
         raise ValueError("M336I live/frozen authorization binding changed")
+    if is_m336j_v2:
+        _validate_m336j_v2_manifest_artifacts(request, authorization, artifact_checks)
     if frozen_registry != json.loads(
         canonical_json(live_registry)
     ) or frozen_manifest != json.loads(canonical_json(live_manifest)):
@@ -812,17 +851,135 @@ def _validate_request_before_side_effects(request):
     if (
         hosts - set(authorization.allowed_network_hosts)
         or tuple(policy["allowed_network_hosts"]) != authorization.allowed_network_hosts
+        or (
+            is_m336j_v2
+            and policy["acquisition_run_id"] != authorization.acquisition_run_id
+        )
     ):
         raise ValueError("M336I frozen network allowlist does not cover the pool")
-    context = content_hash(
-        (
-            authorization.authorization_hash,
-            request.supplied_f24_sha,
-            pool["pool_hash"],
-            policy["acquisition_policy_hash"],
-        )
+    context_values = (
+        authorization.authorization_hash,
+        request.supplied_f24_sha,
+        pool["pool_hash"],
+        policy["acquisition_policy_hash"],
     )
+    if is_m336j_v2:
+        context_values += (authorization.acquisition_run_id,)
+    context = content_hash(context_values)
     return context, pool, policy, worktrees
+
+
+def _validate_m336j_v2_git_preconditions(request, repository: Path) -> None:
+    from ai_brain.stage3.acquisition.m336j_final_v2 import (
+        M336J3_AUTHORIZATION_PATH,
+        M336J3_FREEZE_MANIFEST_PATH,
+        build_m336j_git_executable_receipt_v2,
+        compute_m336j_freeze_tree_identity_v2,
+        compute_m336j_q26_staging_tree_hash,
+        load_m336j_final_authorization_v2,
+        load_m336j_final_freeze_manifest_v2,
+        verify_m336j_authorization_manifest_cross_bindings_v2,
+        verify_m336j_final_freeze_lineage_v2,
+    )
+
+    if any(
+        item is None
+        for item in (
+            request.git_executable,
+            request.v2_authorization,
+            request.v2_freeze_manifest,
+            request.v2_lineage_policy,
+            request.v2_git_receipt,
+        )
+    ):
+        raise ValueError("M336J V2 acquisition preflight is incomplete")
+    authorization = request.v2_authorization
+    manifest = request.v2_freeze_manifest
+    policy = request.v2_lineage_policy
+    verify_m336j_authorization_manifest_cross_bindings_v2(authorization, manifest)
+    live_git_receipt = build_m336j_git_executable_receipt_v2(
+        request.git_executable,
+        execution_capsule_public_receipt_hash=(
+            authorization.execution_capsule_public_receipt_hash
+        ),
+        environment_identity_hash=authorization.python_environment_manifest_hash,
+    )
+    if live_git_receipt != request.v2_git_receipt:
+        raise ValueError("M336J V2 Git executable differs from frozen receipt")
+    verify_m336j_final_freeze_lineage_v2(
+        repository,
+        request.git_executable,
+        policy,
+        live_git_receipt,
+    )
+    if (
+        request.supplied_f24_sha != policy.exact_f26_sha
+        or policy.exact_q26_sha != authorization.exact_q26_sha
+        or policy.exact_r26_sha != authorization.exact_r26_sha
+        or compute_m336j_q26_staging_tree_hash(
+            repository,
+            request.git_executable,
+            exact_r26_sha=authorization.exact_r26_sha,
+            exact_q26_sha=authorization.exact_q26_sha,
+        )
+        != authorization.q26_staging_tree_hash
+        or compute_m336j_freeze_tree_identity_v2(repository, request.git_executable)
+        != authorization.prospective_f26_freeze_identity
+    ):
+        raise ValueError("M336J V2 exact F26 Git precondition failed")
+    committed_authorization = load_m336j_final_authorization_v2(
+        repository / M336J3_AUTHORIZATION_PATH
+    )
+    committed_manifest = load_m336j_final_freeze_manifest_v2(
+        repository / M336J3_FREEZE_MANIFEST_PATH
+    )
+    if committed_authorization != authorization or committed_manifest != manifest:
+        raise ValueError("M336J V2 committed freeze bytes changed")
+
+
+def _validate_m336j_v2_manifest_artifacts(
+    request, authorization, artifact_checks: dict
+) -> None:
+    from ai_brain.stage3.acquisition.m336j_execution import (
+        dependency_manifest_from_dict,
+        public_execution_capsule_receipt_from_dict,
+    )
+    from ai_brain.stage3.acquisition.m336j_registry import (
+        command_renderer_identity_hash,
+    )
+
+    manifest = request.v2_freeze_manifest
+    root = request.candidate_pool.resolve(strict=True).parent
+    spdx = strict_json_file(root / "spdx_reference_binding.json")
+    python_environment = strict_json_file(
+        root / "q25" / "python_environment_manifest.json"
+    )
+    capsule = public_execution_capsule_receipt_from_dict(
+        strict_json_file(root / "q25" / "public_execution_capsule_receipt.json")
+    )
+    dependencies = dependency_manifest_from_dict(
+        strict_json_file(root / "q25" / "executable_dependency_manifest.json")
+    )
+    _verify_object_hash(spdx, "spdx_reference_binding_hash")
+    _verify_object_hash(python_environment, "identity_hash")
+    expected = {
+        **artifact_checks,
+        "spdx_reference_binding_hash": spdx["spdx_reference_binding_hash"],
+        "execution_capsule_public_receipt_hash": capsule.receipt_hash,
+        "python_environment_manifest_hash": python_environment[
+            "environment_manifest_hash"
+        ],
+        "executable_dependency_manifest_hash": dependencies.manifest_hash,
+        "remote_command_renderer_hash": command_renderer_identity_hash(),
+        "minimal_environment_policy_hash": capsule.minimal_environment_policy_hash,
+    }
+    manifest_fields = manifest.__dataclass_fields__
+    if any(
+        getattr(authorization, name) != value
+        or (name in manifest_fields and getattr(manifest, name) != value)
+        for name, value in expected.items()
+    ):
+        raise ValueError("M336J V2 manifest artifact binding changed")
 
 
 def _verify_object_hash(value: dict, hash_field: str) -> None:
@@ -835,6 +992,7 @@ def _verify_object_hash(value: dict, hash_field: str) -> None:
 
 
 def _build_public_receipt(request, preflight, pool, policy, ledger):
+    active_authorization = request.v2_authorization or request.authorization
     acquisition = preflight.acquisition_report
     acquired = sum(
         item["source_jar_sha256"] != "0" * 64 for item in acquisition["receipts"]
@@ -847,9 +1005,9 @@ def _build_public_receipt(request, preflight, pool, policy, ledger):
     body = {
         "schema_version": 1,
         "contract_role": "PUBLIC_SAFE_ACQUISITION_RECEIPT",
-        "acquisition_mode": request.authorization.acquisition_mode,
+        "acquisition_mode": active_authorization.acquisition_mode,
         "exact_f24_sha": request.supplied_f24_sha,
-        "authorization_hash": request.authorization.authorization_hash,
+        "authorization_hash": active_authorization.authorization_hash,
         "candidate_pool_hash": pool["pool_hash"],
         "acquisition_policy_hash": policy["acquisition_policy_hash"],
         "acquired_candidate_count": acquired,
@@ -925,8 +1083,20 @@ def _notify(callback, event: str, event_hash: str) -> None:
         callback(event, event_hash)
 
 
-def _git(root: Path, *args: str, binary: bool = False):
-    result = subprocess.run(("git", *args), cwd=root, check=True, capture_output=True)
+def _git(
+    root: Path,
+    *args: str,
+    binary: bool = False,
+    git_executable: Path | None = None,
+):
+    executable = (
+        str(git_executable.resolve(strict=True))
+        if git_executable is not None
+        else "git"
+    )
+    result = subprocess.run(
+        (executable, *args), cwd=root, check=True, capture_output=True
+    )
     return (
         result.stdout
         if binary
@@ -934,8 +1104,16 @@ def _git(root: Path, *args: str, binary: bool = False):
     )
 
 
-def _git_worktrees(repository: Path) -> tuple[Path, ...]:
-    value = _git(repository, "worktree", "list", "--porcelain")
+def _git_worktrees(
+    repository: Path, git_executable: Path | None = None
+) -> tuple[Path, ...]:
+    value = _git(
+        repository,
+        "worktree",
+        "list",
+        "--porcelain",
+        git_executable=git_executable,
+    )
     return tuple(
         Path(line.removeprefix("worktree ")).resolve(strict=True)
         for line in value.splitlines()

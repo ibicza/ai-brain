@@ -64,9 +64,11 @@ from ai_brain.stage3.acquisition.m336i_acquisition import (
     M336IFinalAcquisitionRequest,
     final_acquisition_authorization_from_dict,
     run_m336i_frozen_final_acquisition,
+    validate_m336i_final_acquisition_request_before_side_effects,
 )
 from ai_brain.stage3.acquisition.m336i_evaluation import (
     M336IIndependentEvaluationRequest,
+    independent_evaluator_identity,
     run_m336i_independent_java_evaluation,
 )
 from ai_brain.stage3.acquisition.m336i_production import (
@@ -78,12 +80,27 @@ from ai_brain.stage3.acquisition.m336i_registry import (
     build_m336i_final_java_route_registry,
 )
 from ai_brain.stage3.acquisition.m336i_route import M336IRouteStateLedger
+from ai_brain.stage3.acquisition.m336j_evaluator_v2 import (
+    M336JEvaluatorLedgerV2,
+    M336JEvaluatorReservationInputV2,
+    advance_m336j_evaluator_v2,
+    reserve_m336j_evaluator_v2,
+)
 from ai_brain.stage3.acquisition.m336j_execution import (
     KarinaRemoteTokenClass,
     build_remote_command_plan,
     dependency_manifest_from_dict,
     load_private_execution_capsule,
     public_execution_capsule_receipt_from_dict,
+)
+from ai_brain.stage3.acquisition.m336j_final_v2 import (
+    build_m336j_final_freeze_lineage_policy_v2,
+    build_m336j_git_executable_receipt_v2,
+    load_m336j_final_authorization_v2,
+    load_m336j_final_freeze_manifest_v2,
+    m336j_final_authorization_v2_to_legacy,
+    verify_m336j_authorization_manifest_cross_bindings_v2,
+    verify_m336j_final_freeze_lineage_v2,
 )
 from ai_brain.stage3.acquisition.m336j_registry import (
     build_m336j_route_manifest,
@@ -113,9 +130,16 @@ def _object(path: Path) -> dict:
     return value
 
 
-def _worktrees(repository: Path) -> tuple[Path, ...]:
+def _worktrees(
+    repository: Path, git_executable: Path | None = None
+) -> tuple[Path, ...]:
+    git = (
+        git_executable.resolve(strict=True)
+        if git_executable is not None
+        else Path(shutil.which("git") or "").resolve(strict=True)
+    )
     output = subprocess.run(
-        ("git", "worktree", "list", "--porcelain"),
+        (str(git), "worktree", "list", "--porcelain"),
         cwd=repository,
         check=True,
         capture_output=True,
@@ -762,10 +786,8 @@ def _production_request(
     output,
     public_staging,
     worktrees,
+    authorization,
 ):
-    authorization = final_acquisition_authorization_from_dict(
-        _object(args.frozen_authorization)
-    )
     base = M336HCompilerAwareProductionRequest(
         route_manifest_hash=authorization.route_manifest_hash,
         implementation_identity=authorization.r24_implementation_tree_identity,
@@ -1675,54 +1697,17 @@ def _stage_public(args, evaluation, route_receipt, acquisition_receipt):
     )
 
 
-def _final(args) -> None:
-    repository = args.repository.resolve(strict=True)
-    worktrees = _worktrees(repository)
-    authorization = final_acquisition_authorization_from_dict(
-        _object(args.frozen_authorization)
-    )
-    is_m336j = authorization.branch_ref.endswith(
-        "/exp/stage3-m336j-hermetic-karina-final-java-v9"
-    )
-    if is_m336j:
-        from ai_brain.stage3.acquisition.m336j_freeze import (
-            verify_m336j_final_acquisition_authorization,
-        )
-
-        verify_m336j_final_acquisition_authorization(authorization)
-    _validate_final_controller_inputs(args, authorization, worktrees)
-    context = content_hash((authorization.authorization_hash, args.supplied_f24_sha))
-    state = M336IRouteStateLedger(args.route_state_ledger, git_worktrees=worktrees)
-    state.advance(
-        "INITIAL",
-        context_hash=context,
-        operation_receipt_hash=authorization.authorization_hash,
-    )
-    if is_m336j:
-        frozen_route = _object(args.frozen_route_manifest)
-        registry = build_m336j_route_registry()
-        manifest = build_m336j_route_manifest(
-            registry,
-            execution_capsule_public_receipt_hash=frozen_route[
-                "execution_capsule_public_receipt_hash"
-            ],
-            remote_command_renderer_hash=frozen_route["remote_command_renderer_hash"],
-            executable_dependency_manifest_hash=frozen_route[
-                "executable_dependency_manifest_hash"
-            ],
-            minimal_environment_policy_hash=frozen_route[
-                "minimal_environment_policy_hash"
-            ],
-        )
-    else:
-        registry = build_m336i_final_java_route_registry()
-        manifest = build_m336i_final_java_route_manifest(registry)
-    state.advance(
-        "PREFLIGHT_PASSED",
-        context_hash=context,
-        operation_receipt_hash=manifest.manifest_hash,
-    )
-    acquisition_request = M336IFinalAcquisitionRequest(
+def _build_final_acquisition_request(
+    *,
+    args,
+    repository: Path,
+    authorization,
+    v2_authorization,
+    v2_freeze_manifest,
+    v2_lineage_policy,
+    v2_git_receipt,
+) -> M336IFinalAcquisitionRequest:
+    return M336IFinalAcquisitionRequest(
         repository=repository,
         supplied_f24_sha=args.supplied_f24_sha,
         authorization=authorization,
@@ -1747,7 +1732,132 @@ def _final(args) -> None:
         unused_selected_source_output=args.private_acquisition_output.parent
         / "unused-m336e-selection",
         platform_role="WINDOWS",
+        git_executable=args.git_executable,
+        v2_authorization=v2_authorization,
+        v2_freeze_manifest=v2_freeze_manifest,
+        v2_lineage_policy=v2_lineage_policy,
+        v2_git_receipt=v2_git_receipt,
     )
+
+
+def _final(args, *, rehearsal_acquisition_provider=None) -> None:
+    repository = args.repository.resolve(strict=True)
+    worktrees = _worktrees(repository, args.git_executable)
+    raw_authorization = _object(args.frozen_authorization)
+    is_m336j_v2 = raw_authorization.get("contract_role") == (
+        "M336J_FINAL_ACQUISITION_AUTHORIZATION_V2"
+    )
+    if is_m336j_v2:
+        v2_authorization = load_m336j_final_authorization_v2(raw_authorization)
+        authorization = m336j_final_authorization_v2_to_legacy(v2_authorization)
+        v2_freeze_manifest = load_m336j_final_freeze_manifest_v2(
+            args.frozen_authorization.with_name("freeze_manifest_v2.json")
+        )
+        verify_m336j_authorization_manifest_cross_bindings_v2(
+            v2_authorization, v2_freeze_manifest
+        )
+        v2_git_receipt = build_m336j_git_executable_receipt_v2(
+            args.git_executable,
+            execution_capsule_public_receipt_hash=(
+                v2_authorization.execution_capsule_public_receipt_hash
+            ),
+            environment_identity_hash=(
+                v2_authorization.python_environment_manifest_hash
+            ),
+        )
+        v2_lineage_policy = build_m336j_final_freeze_lineage_policy_v2(
+            exact_r26_sha=v2_authorization.exact_r26_sha,
+            exact_q26_sha=v2_authorization.exact_q26_sha,
+            exact_f26_sha=args.supplied_f24_sha,
+        )
+        verify_m336j_final_freeze_lineage_v2(
+            repository,
+            args.git_executable,
+            v2_lineage_policy,
+            v2_git_receipt,
+        )
+    else:
+        v2_authorization = None
+        v2_freeze_manifest = None
+        v2_git_receipt = None
+        v2_lineage_policy = None
+        authorization = final_acquisition_authorization_from_dict(raw_authorization)
+    is_m336j = authorization.branch_ref.endswith(
+        "/exp/stage3-m336j-hermetic-karina-final-java-v9"
+    )
+    if rehearsal_acquisition_provider is not None and (
+        not is_m336j_v2 or authorization.acquisition_mode != "REHEARSAL"
+    ):
+        raise ValueError(
+            "M336J rehearsal provider is restricted to V2 REHEARSAL authorization"
+        )
+    if is_m336j:
+        from ai_brain.stage3.acquisition.m336j_freeze import (
+            verify_m336j_final_acquisition_authorization,
+        )
+
+        verify_m336j_final_acquisition_authorization(authorization)
+    _validate_final_controller_inputs(
+        args,
+        authorization,
+        worktrees,
+        v2_freeze_manifest=v2_freeze_manifest,
+        expected_acquisition_mode=(
+            "REHEARSAL" if rehearsal_acquisition_provider is not None else "FINAL"
+        ),
+    )
+    acquisition_request = _build_final_acquisition_request(
+        args=args,
+        repository=repository,
+        authorization=authorization,
+        v2_authorization=v2_authorization,
+        v2_freeze_manifest=v2_freeze_manifest,
+        v2_lineage_policy=v2_lineage_policy,
+        v2_git_receipt=v2_git_receipt,
+    )
+    acquisition_context = validate_m336i_final_acquisition_request_before_side_effects(
+        acquisition_request
+    )
+    active_authorization = v2_authorization or authorization
+    context_values = (
+        active_authorization.authorization_hash,
+        args.supplied_f24_sha,
+    )
+    if is_m336j_v2:
+        context_values += (active_authorization.acquisition_run_id,)
+    context = acquisition_context if is_m336j_v2 else content_hash(context_values)
+    state = M336IRouteStateLedger(args.route_state_ledger, git_worktrees=worktrees)
+    state.advance(
+        "INITIAL",
+        context_hash=context,
+        operation_receipt_hash=active_authorization.authorization_hash,
+    )
+    if is_m336j or is_m336j_v2:
+        frozen_route = _object(args.frozen_route_manifest)
+        registry = build_m336j_route_registry()
+        manifest = build_m336j_route_manifest(
+            registry,
+            execution_capsule_public_receipt_hash=frozen_route[
+                "execution_capsule_public_receipt_hash"
+            ],
+            remote_command_renderer_hash=frozen_route["remote_command_renderer_hash"],
+            executable_dependency_manifest_hash=frozen_route[
+                "executable_dependency_manifest_hash"
+            ],
+            minimal_environment_policy_hash=frozen_route[
+                "minimal_environment_policy_hash"
+            ],
+        )
+    else:
+        registry = build_m336i_final_java_route_registry()
+        manifest = build_m336i_final_java_route_manifest(registry)
+    state.advance(
+        "PREFLIGHT_PASSED",
+        context_hash=context,
+        operation_receipt_hash=manifest.manifest_hash,
+    )
+    if is_m336j_v2 and not acquisition_context:
+        raise ValueError("M336J V2 acquisition preflight context is missing")
     acquisition_state_names = {
         "AUTHORIZATION_VALIDATED": "AUTHORIZATION_VALIDATED",
         "ACQUISITION_RESERVED": "ACQUISITION_RESERVED",
@@ -1763,8 +1873,19 @@ def _final(args) -> None:
                 operation_receipt_hash=event_hash,
             )
 
+    provider_options = (
+        {}
+        if rehearsal_acquisition_provider is None
+        else {
+            "maven_provider": rehearsal_acquisition_provider.maven_provider,
+            "scm_provider": rehearsal_acquisition_provider.scm_provider,
+            "acquire_one": rehearsal_acquisition_provider.acquire_one,
+        }
+    )
     acquisition = run_m336i_frozen_final_acquisition(
-        acquisition_request, event_callback=advance_acquisition_state
+        acquisition_request,
+        event_callback=advance_acquisition_state,
+        **provider_options,
     )
     acquisition_ledger = M336IFinalAcquisitionLedger(
         args.acquisition_ledger, git_worktrees=worktrees
@@ -1846,6 +1967,7 @@ def _final(args) -> None:
         output=args.windows_public_production_root,
         public_staging=args.public_staging_root,
         worktrees=worktrees,
+        authorization=authorization,
     )
     windows_response, windows_seal = run_m336i_compiler_aware_production(
         windows_request
@@ -1901,12 +2023,60 @@ def _final(args) -> None:
             context_hash=context,
             operation_receipt_hash=replay["receipt_hash"],
         )
-    goldens = _author_goldens(args)
-    state.advance(
-        "EVALUATOR_RESERVED",
-        context_hash=context,
-        operation_receipt_hash=content_hash(goldens.read_bytes()),
-    )
+    if is_m336j_v2:
+        evaluator_ledger = M336JEvaluatorLedgerV2(
+            args.evaluator_ledger, git_worktrees=worktrees
+        )
+        evaluator_reservation = reserve_m336j_evaluator_v2(
+            M336JEvaluatorReservationInputV2(
+                windows_production_seal=(
+                    args.windows_public_production_root / "m336i_production_seal.json"
+                ),
+                karina_production_seal=(
+                    args.karina_public_production_root / "m336i_production_seal.json"
+                ),
+                selected_manifest=(
+                    args.private_acquisition_output / "selected_source_manifest.json"
+                ),
+                sealed_vault=args.windows_vault,
+                evaluator_implementation_hash=independent_evaluator_identity(),
+                evaluator_jdk_identity_hash=(
+                    active_authorization.windows_public_jdk_identity_receipt_hash
+                ),
+                golden_output_destination=(
+                    args.independent_evaluator_root / "semantic_goldens.json"
+                ),
+                evaluation_run_id="m336j3.final-java.independent-evaluation.v2",
+            ),
+            evaluator_ledger,
+        )
+        state.advance(
+            "EVALUATOR_RESERVED",
+            context_hash=context,
+            operation_receipt_hash=evaluator_reservation.receipt_hash,
+        )
+        advance_m336j_evaluator_v2(
+            evaluator_ledger,
+            "INDEPENDENT_GOLDEN_GENERATION_STARTED",
+            context_hash=evaluator_reservation.context_hash,
+            operation_hash=evaluator_reservation.receipt_hash,
+        )
+        goldens = _author_goldens(args)
+        advance_m336j_evaluator_v2(
+            evaluator_ledger,
+            "INDEPENDENT_GOLDEN_GENERATION_COMPLETED",
+            context_hash=evaluator_reservation.context_hash,
+            operation_hash=bytes_hash(goldens.read_bytes()),
+        )
+        evaluator_context_hash = evaluator_reservation.context_hash
+    else:
+        goldens = _author_goldens(args)
+        state.advance(
+            "EVALUATOR_RESERVED",
+            context_hash=context,
+            operation_receipt_hash=content_hash(goldens.read_bytes()),
+        )
+        evaluator_context_hash = None
     evaluation = run_m336i_independent_java_evaluation(
         M336IIndependentEvaluationRequest(
             route_manifest=args.frozen_route_manifest,
@@ -1941,6 +2111,8 @@ def _final(args) -> None:
             frozen_spdx_reference=args.frozen_spdx_reference,
             evaluator_ledger=args.evaluator_ledger,
             git_worktrees=worktrees,
+            evaluator_context_hash=evaluator_context_hash,
+            evaluator_pre_reserved=is_m336j_v2,
         )
     )
     evaluation_path = (
@@ -2000,7 +2172,7 @@ def _final(args) -> None:
 def _write_final_failure_receipt(args, error: Exception) -> None:
     if args.final_receipt.exists():
         return
-    worktrees = _worktrees(args.repository.resolve(strict=True))
+    worktrees = _worktrees(args.repository.resolve(strict=True), args.git_executable)
     acquisition = M336IFinalAcquisitionLedger(
         args.acquisition_ledger, git_worktrees=worktrees
     ).receipt()
@@ -2010,9 +2182,25 @@ def _write_final_failure_receipt(args, error: Exception) -> None:
     selector = M336FSelectorLedger(
         args.selector_ledger, git_worktrees=worktrees
     ).receipt()
-    evaluator_events = M336HEvaluatorLedger(
-        args.evaluator_ledger, git_worktrees=worktrees
-    ).events()
+    raw_authorization = _object(args.frozen_authorization)
+    if raw_authorization.get("contract_role") == (
+        "M336J_FINAL_ACQUISITION_AUTHORIZATION_V2"
+    ):
+        evaluator_event_names = tuple(
+            item.event
+            for item in M336JEvaluatorLedgerV2(
+                args.evaluator_ledger, git_worktrees=worktrees
+            ).events()
+        )
+        evaluator_completion_name = "INDEPENDENT_EVALUATION_COMPLETED"
+    else:
+        evaluator_event_names = tuple(
+            item["event"]
+            for item in M336HEvaluatorLedger(
+                args.evaluator_ledger, git_worktrees=worktrees
+            ).events()
+        )
+        evaluator_completion_name = "EVALUATOR_COMPLETED"
     body = {
         "schema_version": 1,
         "contract_role": "PUBLIC_SAFE_M336I_OUTCOME_C_RECEIPT",
@@ -2029,10 +2217,10 @@ def _write_final_failure_receipt(args, error: Exception) -> None:
         "selector_invocation_count": selector["selector_invocation_count"],
         "selector_rerun_count": selector["selector_rerun_count"],
         "evaluator_reservation_count": sum(
-            item["event"] == "EVALUATOR_RESERVED" for item in evaluator_events
+            item == "EVALUATOR_RESERVED" for item in evaluator_event_names
         ),
         "evaluator_invocation_count": sum(
-            item["event"] == "EVALUATOR_COMPLETED" for item in evaluator_events
+            item == evaluator_completion_name for item in evaluator_event_names
         ),
     }
     args.final_receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -2052,13 +2240,30 @@ def _run(command, *, cwd: Path | None = None) -> str:
     return result.stdout.strip()
 
 
-def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
-    if authorization.acquisition_mode != "FINAL":
-        raise ValueError("M336I final controller requires FINAL authorization")
+def _validate_final_controller_inputs(
+    args,
+    authorization,
+    worktrees,
+    *,
+    v2_freeze_manifest=None,
+    expected_acquisition_mode: str = "FINAL",
+) -> None:
+    if authorization.acquisition_mode != expected_acquisition_mode:
+        raise ValueError(
+            "M336I final controller authorization mode differs from execution mode"
+        )
+    is_m336j_legacy = authorization.branch_ref.endswith(
+        "/exp/stage3-m336j-hermetic-karina-final-java-v9"
+    )
+    is_m336j_v2 = authorization.branch_ref.endswith(
+        "/exp/stage3-m336j3-final-freeze-handshake-v10"
+    )
     spdx_binding_path = args.frozen_authorization.with_name(
         "spdx_reference_binding.json"
     )
-    freeze_manifest_path = args.frozen_authorization.with_name("freeze_manifest.json")
+    freeze_manifest_path = args.frozen_authorization.with_name(
+        "freeze_manifest_v2.json" if is_m336j_v2 else "freeze_manifest.json"
+    )
     required_inputs = (
         args.frozen_authorization,
         args.candidate_pool,
@@ -2089,18 +2294,27 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         raise ValueError("M336I final controller input is missing")
     spdx_reference = _object(args.frozen_spdx_reference)
     spdx_binding = _object(spdx_binding_path)
-    freeze_manifest = _object(freeze_manifest_path)
+    if is_m336j_v2:
+        if v2_freeze_manifest is None:
+            raise ValueError("M336J V2 typed freeze manifest is missing")
+        freeze_manifest = v2_freeze_manifest
+        freeze_spdx_hash = freeze_manifest.spdx_reference_binding_hash
+        freeze_manifest_hash_valid = True
+    else:
+        freeze_manifest = _object(freeze_manifest_path)
+        freeze_spdx_hash = freeze_manifest.get("spdx_reference_binding_hash")
+        freeze_body = dict(freeze_manifest)
+        freeze_hash = freeze_body.pop("manifest_hash", None)
+        freeze_manifest_hash_valid = content_hash(freeze_body) == freeze_hash
     reference_body = dict(spdx_reference)
     reference_hash = reference_body.pop("snapshot_manifest_hash", None)
     binding_body = dict(spdx_binding)
     binding_hash = binding_body.pop("spdx_reference_binding_hash", None)
-    freeze_body = dict(freeze_manifest)
-    freeze_hash = freeze_body.pop("manifest_hash", None)
     if (
         content_hash(reference_body) != reference_hash
         or content_hash(binding_body) != binding_hash
-        or content_hash(freeze_body) != freeze_hash
-        or freeze_manifest.get("spdx_reference_binding_hash") != binding_hash
+        or not freeze_manifest_hash_valid
+        or freeze_spdx_hash != binding_hash
         or spdx_binding.get("snapshot_manifest_hash") != reference_hash
         or spdx_binding.get("snapshot_bytes_hash")
         != bytes_hash(args.frozen_spdx_reference.read_bytes())
@@ -2108,14 +2322,13 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         != spdx_reference.get("license_list_version")
     ):
         raise ValueError("M336I frozen SPDX reference differs from F24 binding")
-    if authorization.branch_ref.endswith(
-        "/exp/stage3-m336j-hermetic-karina-final-java-v9"
-    ):
-        from ai_brain.stage3.acquisition.m336j_freeze import (
-            verify_m336j_final_acquisition_authorization,
-        )
+    if is_m336j_legacy or is_m336j_v2:
+        if is_m336j_legacy:
+            from ai_brain.stage3.acquisition.m336j_freeze import (
+                verify_m336j_final_acquisition_authorization,
+            )
 
-        verify_m336j_final_acquisition_authorization(authorization)
+            verify_m336j_final_acquisition_authorization(authorization)
         _capsule, public, dependencies, _transport, registry = _m336j_private_route(
             args
         )
@@ -2128,11 +2341,14 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         )
         frozen_registry = _object(args.frozen_route_registry)
         frozen_route = _object(args.frozen_route_manifest)
+        frozen_python_environment_hash = (
+            freeze_manifest.python_environment_manifest_hash
+            if is_m336j_v2
+            else freeze_manifest.get("python_environment_manifest_hash")
+        )
         required_freeze_bindings = {
             "execution_capsule_public_receipt_hash": public.receipt_hash,
-            "python_environment_manifest_hash": freeze_manifest.get(
-                "python_environment_manifest_hash"
-            ),
+            "python_environment_manifest_hash": frozen_python_environment_hash,
             "executable_dependency_manifest_hash": dependencies.manifest_hash,
             "remote_command_renderer_hash": command_renderer_identity_hash(),
             "minimal_environment_policy_hash": (public.minimal_environment_policy_hash),
@@ -2145,7 +2361,12 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
             or authorization.route_registry_hash != registry.registry_hash
             or authorization.route_manifest_hash != route_manifest.manifest_hash
             or any(
-                freeze_manifest.get(name) != value
+                (
+                    getattr(freeze_manifest, name)
+                    if is_m336j_v2
+                    else freeze_manifest.get(name)
+                )
+                != value
                 for name, value in required_freeze_bindings.items()
                 if name != "python_environment_manifest_hash"
             )
@@ -2226,7 +2447,7 @@ def _validate_final_controller_inputs(args, authorization, worktrees) -> None:
         != authorization.karina_stable_host_identity_receipt_hash
         or receipt.get("execution_capsule_receipt_hash") != public.receipt_hash
         or receipt.get("python_environment_manifest_hash")
-        != freeze_manifest.get("python_environment_manifest_hash")
+        != frozen_python_environment_hash
     ):
         raise ValueError("M336I Karina preflight differs from frozen authority")
     _run_karina_storage_preflight(args)
@@ -2300,6 +2521,7 @@ def _add_final_arguments(parser) -> None:
         "independent_evaluator_root",
         "public_staging_root",
         "windows_javac",
+        "git_executable",
         "ssh_key",
         "ssh_executable",
         "known_hosts_file",

@@ -52,6 +52,8 @@ class M336IIndependentEvaluationRequest:
     frozen_spdx_reference: Path
     evaluator_ledger: Path
     git_worktrees: tuple[Path, ...]
+    evaluator_context_hash: str | None = None
+    evaluator_pre_reserved: bool = False
 
 
 @dataclass(frozen=True)
@@ -116,15 +118,35 @@ def run_m336i_independent_java_evaluation(
     _validate_independent_authority_paths(request)
     for item in fields(request):
         value = getattr(request, item.name)
-        if item.name in {"git_worktrees", "evaluator_ledger"}:
+        if item.name in {
+            "git_worktrees",
+            "evaluator_ledger",
+            "evaluator_context_hash",
+            "evaluator_pre_reserved",
+        }:
             continue
         if not isinstance(value, Path) or not value.exists():
             raise ValueError(f"M336I evaluator input is missing: {item.name}")
-    ledger = M336HEvaluatorLedger(
-        request.evaluator_ledger, git_worktrees=request.git_worktrees
-    )
-    if ledger.events():
-        raise ValueError("M336I evaluator one-shot capacity is already used")
+    if request.evaluator_pre_reserved:
+        from ai_brain.stage3.acquisition.m336j_evaluator_v2 import (
+            M336JEvaluatorLedgerV2,
+            verify_m336j_evaluator_ready_for_evaluation_v2,
+        )
+
+        if request.evaluator_context_hash is None:
+            raise ValueError("M336J V2 evaluator context is missing")
+        ledger = M336JEvaluatorLedgerV2(
+            request.evaluator_ledger, git_worktrees=request.git_worktrees
+        )
+        verify_m336j_evaluator_ready_for_evaluation_v2(
+            ledger, context_hash=request.evaluator_context_hash
+        )
+    else:
+        ledger = M336HEvaluatorLedger(
+            request.evaluator_ledger, git_worktrees=request.git_worktrees
+        )
+        if ledger.events():
+            raise ValueError("M336I evaluator one-shot capacity is already used")
     route = _object(request.route_manifest)
     thresholds = _object(request.threshold_manifest)
     _verify_hash(route, "manifest_hash")
@@ -139,9 +161,10 @@ def run_m336i_independent_java_evaluation(
             karina_seal["seal_hash"],
         )
     )
-    ledger.append("WINDOWS_PRODUCTION_SEALED", context_hash=context)
-    ledger.append("KARINA_PRODUCTION_SEALED", context_hash=context)
-    ledger.append("EVALUATOR_RESERVED", context_hash=context)
+    if not request.evaluator_pre_reserved:
+        ledger.append("WINDOWS_PRODUCTION_SEALED", context_hash=context)
+        ledger.append("KARINA_PRODUCTION_SEALED", context_hash=context)
+        ledger.append("EVALUATOR_RESERVED", context_hash=context)
 
     windows_output = _object(request.windows_production_output)
     karina_output = _object(request.karina_production_output)
@@ -256,7 +279,19 @@ def run_m336i_independent_java_evaluation(
     result = M336IIndependentEvaluationResult(**body, result_hash=content_hash(body))
     if result.status != "PASS":
         raise ValueError("M336I independent Outcome A thresholds failed")
-    ledger.append("EVALUATOR_COMPLETED", context_hash=context)
+    if request.evaluator_pre_reserved:
+        from ai_brain.stage3.acquisition.m336j_evaluator_v2 import (
+            advance_m336j_evaluator_v2,
+        )
+
+        advance_m336j_evaluator_v2(
+            ledger,
+            "INDEPENDENT_EVALUATION_COMPLETED",
+            context_hash=request.evaluator_context_hash,
+            operation_hash=result.result_hash,
+        )
+    else:
+        ledger.append("EVALUATOR_COMPLETED", context_hash=context)
     return result
 
 
