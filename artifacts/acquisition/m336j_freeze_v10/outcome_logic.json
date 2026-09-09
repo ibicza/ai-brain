@@ -1,0 +1,1 @@
+{"acquisition_retry_allowed":false,"outcome_logic_hash":"722ca9e131930fe5a4441230489487586f7ed1fe3efd696ec77d66035a047ae5","post_freeze_failure":"OUTCOME C — BLOCKED","pre_freeze_failure":"PRE_FREEZE_BLOCKED","schema_version":1,"selector_retry_allowed":false,"success":"OUTCOME A","threshold_tuning_after_final_corpus_allowed":false}
