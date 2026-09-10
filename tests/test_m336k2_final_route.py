@@ -14,6 +14,7 @@ from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_
 from ai_brain.stage3.acquisition import m336k2_execution
 from ai_brain.stage3.acquisition.m336k2_acquisition import (
     M336K2_FINAL_ACQUISITION_RUN_ID,
+    _construct_quota_pairs,
     build_m336k2_final_authorization,
     validate_m336k2_candidate_pool,
 )
@@ -219,6 +220,15 @@ def test_hermetic_command_worker_preserves_private_failure_diagnostics(
 
     assert receipt.with_name("ACQUISITION_RESERVED.stdout.log").read_bytes() == b"out"
     assert receipt.with_name("ACQUISITION_RESERVED.stderr.log").read_bytes() == b"err"
+
+
+def test_m336k2_construct_quotas_remain_ordered_pairs() -> None:
+    assert _construct_quota_pairs([["constructor", 30], ["method", 120]]) == (
+        ("constructor", 30),
+        ("method", 120),
+    )
+    with pytest.raises(M336K2ProtocolError, match="construct quotas"):
+        _construct_quota_pairs(["constructor"])
 
 
 def test_schema_registry_covers_all_twenty_eight_route_stages() -> None:

@@ -352,7 +352,9 @@ def run_m336k2_frozen_acquisition(
                 "maximum_selected_files_per_root"
             ],
             minimum_root_count=acquisition_policy["minimum_selected_root_count"],
-            construct_quotas=dict(acquisition_policy["construct_quotas"]),
+            construct_quotas=_construct_quota_pairs(
+                acquisition_policy["construct_quotas"]
+            ),
             selector_seed=acquisition_policy["selector_seed"],
             selector_version=acquisition_policy["selector_version"],
         )
@@ -429,6 +431,23 @@ def run_m336k2_frozen_acquisition(
         ledger_receipt=ledger_receipt,
         public_receipt=public,
     )
+
+
+def _construct_quota_pairs(value: object) -> tuple[tuple[str, int], ...]:
+    if not isinstance(value, list):
+        raise M336K2ProtocolError("M336K2 construct quotas are invalid")
+    rows = []
+    for item in value:
+        if (
+            not isinstance(item, list)
+            or len(item) != 2
+            or not isinstance(item[0], str)
+            or not isinstance(item[1], int)
+            or isinstance(item[1], bool)
+        ):
+            raise M336K2ProtocolError("M336K2 construct quotas are invalid")
+        rows.append((item[0], item[1]))
+    return tuple(rows)
 
 
 def _verify_attestation(
