@@ -64,6 +64,7 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _verify_request,
     _write_private_state,
 )
+from ai_brain.stage3.acquisition.m336k_acquisition import acquire_candidate_v2
 from scripts.m336k2_qualify_disposable_protocol import _commit as disposable_commit
 
 
@@ -134,6 +135,26 @@ def test_rehearsal_provider_uses_candidate_isolated_acquisition(
 
     assert set(provider) == {"maven_provider", "scm_provider"}
     assert _rehearsal_provider({"execution_mode": "FINAL"}) == {}
+
+
+def test_rehearsal_provider_supplies_candidate_isolation_receipts(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    from m336i_build_authorized_rehearsal_fixture import _policy
+
+    provider = _rehearsal_provider({"execution_mode": "REHEARSAL"})
+    outcome = acquire_candidate_v2(
+        _policy("fixture-alpha"),
+        vault_root=tmp_path,
+        acquisition_run_id="m336k2-fixture-test",
+        maven=provider["maven_provider"],
+        scm=provider["scm_provider"],
+    )
+
+    assert outcome.terminal_receipt.source_receipt_hash is not None
+    assert outcome.terminal_receipt.pom_receipt_hash is not None
+    assert outcome.terminal_receipt.scm_receipt_hash is not None
 
 
 def test_schema_registry_covers_all_twenty_eight_route_stages() -> None:

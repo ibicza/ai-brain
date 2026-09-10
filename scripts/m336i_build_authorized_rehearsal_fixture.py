@@ -160,10 +160,33 @@ class _FixtureMaven:
             sidecar_verified=False,
             detached_signature_url=None,
         )
-        return SimpleNamespace(payload=raw, digest=digest)
+        repository = SimpleNamespace(
+            network_receipt_hash=content_hash(
+                (
+                    "M336I_FIXTURE_SOURCE",
+                    coordinate.namespace,
+                    coordinate.name,
+                    coordinate.version,
+                    bytes_hash(raw),
+                )
+            )
+        )
+        return SimpleNamespace(payload=raw, digest=digest, repository=repository)
 
     def fetch_pom(self, coordinate):
-        return SimpleNamespace(payload=_pom(coordinate.name))
+        raw = _pom(coordinate.name)
+        repository = SimpleNamespace(
+            network_receipt_hash=content_hash(
+                (
+                    "M336I_FIXTURE_POM",
+                    coordinate.namespace,
+                    coordinate.name,
+                    coordinate.version,
+                    bytes_hash(raw),
+                )
+            )
+        )
+        return SimpleNamespace(payload=raw, repository=repository)
 
 
 class _FixtureScm:
@@ -179,6 +202,9 @@ class _FixtureScm:
                         (path, bytes_hash(value))
                         for path, value in _java_entries(family)
                     )
+                ),
+                receipt_hash=content_hash(
+                    ("M336I_FIXTURE_SCM", family, FIXTURE_COMMIT, bytes_hash(raw))
                 ),
             ),
             java_entries=tuple(
