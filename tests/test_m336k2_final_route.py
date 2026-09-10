@@ -60,6 +60,7 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _append_evaluator_event,
     _evaluator_receipt,
     _karina_expected_head,
+    _rehearsal_provider,
     _verify_request,
     _write_private_state,
 )
@@ -123,6 +124,16 @@ def test_private_stage_state_is_durably_replaced(tmp_path: Path) -> None:
 
     assert state.read_text(encoding="utf-8") == canonical_json(value) + "\n"
     assert not state.with_name(state.name + ".next").exists()
+
+
+def test_rehearsal_provider_uses_candidate_isolated_acquisition(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    provider = _rehearsal_provider({"execution_mode": "REHEARSAL"})
+
+    assert set(provider) == {"maven_provider", "scm_provider"}
+    assert _rehearsal_provider({"execution_mode": "FINAL"}) == {}
 
 
 def test_schema_registry_covers_all_twenty_eight_route_stages() -> None:

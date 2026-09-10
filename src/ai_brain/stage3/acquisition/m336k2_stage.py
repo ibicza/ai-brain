@@ -1283,7 +1283,6 @@ def _rehearsal_provider(request: dict) -> dict:
     if request["execution_mode"] != "REHEARSAL":
         return {}
     from m336i_build_authorized_rehearsal_fixture import (
-        _acquire_fixture,
         _FixtureMaven,
         _FixtureScm,
     )
@@ -1291,7 +1290,6 @@ def _rehearsal_provider(request: dict) -> dict:
     return {
         "maven_provider": _FixtureMaven(),
         "scm_provider": _FixtureScm(),
-        "acquire_one": _acquire_fixture,
     }
 
 
