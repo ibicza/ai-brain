@@ -137,7 +137,7 @@ def main() -> None:
     q_manifest_path = q_destination / "evidence_manifest.json"
     _write_q_manifest(q_destination, q_manifest_path)
     _reject_source_tree(q_destination)
-    q28 = _commit(git, repository, contract.q_subject)
+    q28 = _commit(git, repository, contract.q_subject, q_relative)
     _git(git, repository, "push", "-u", "origin", branch)
     if _git(git, repository, "rev-parse", f"{q28}^") != implementation:
         raise M336K2ProtocolError("M336K2 disposable Q-like parent changed")
@@ -178,7 +178,7 @@ def main() -> None:
         expected_branch=branch,
         freeze_relative_root=freeze_relative,
     )
-    f28 = _commit(git, repository, contract.f_subject)
+    f28 = _commit(git, repository, contract.f_subject, freeze_relative)
     _git(git, repository, "push", "origin", branch)
     freeze = _freeze(freeze_root / "freeze_manifest.json")
     attestation = attest_committed_f28(
@@ -322,8 +322,9 @@ def _git(git: Path, repository: Path | None, *arguments: str) -> str:
     ).stdout.strip()
 
 
-def _commit(git: Path, repository: Path, subject: str) -> str:
-    _git(git, repository, "add", "-A")
+def _commit(git: Path, repository: Path, subject: str, relative_root: str) -> str:
+    _safe_repository_destination(repository, relative_root)
+    _git(git, repository, "add", "-f", "--", relative_root)
     _git(git, repository, "commit", "-m", subject)
     return _git(git, repository, "rev-parse", "HEAD^{commit}")
 

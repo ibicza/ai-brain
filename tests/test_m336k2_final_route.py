@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import base64
 import os
+import shutil
+import subprocess
 from dataclasses import asdict
 from pathlib import Path
 
@@ -59,6 +61,7 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _karina_expected_head,
     _verify_request,
 )
+from scripts.m336k2_qualify_disposable_protocol import _commit as disposable_commit
 
 
 def test_route_ledger_enforces_complete_exact_order_and_one_shot_counts(
@@ -530,6 +533,50 @@ def test_exact_quality_preflight_passes_explicit_repository() -> None:
     assert (
         "executable_directories = (git.parent, javac.parent, python.parent)" in source
     )
+
+
+def test_disposable_commit_force_adds_only_the_validated_ignored_root(
+    tmp_path: Path,
+) -> None:
+    discovered = shutil.which("git")
+    assert discovered is not None
+    git = Path(discovered).resolve(strict=True)
+    repository = tmp_path / "repository"
+    repository.mkdir()
+
+    def run(*arguments: str) -> str:
+        return subprocess.run(
+            (str(git), *arguments),
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).stdout.strip()
+
+    run("init", "-q", "-b", "main")
+    run("config", "user.name", "M336K2 Test")
+    run("config", "user.email", "m336k2@example.invalid")
+    (repository / ".gitignore").write_text("artifacts/\n", encoding="utf-8")
+    (repository / "base.txt").write_text("base\n", encoding="utf-8")
+    run("add", ".gitignore", "base.txt")
+    run("commit", "-q", "-m", "base")
+    evidence = repository / "artifacts/m336k2/disposable/q-like/evidence.json"
+    evidence.parent.mkdir(parents=True)
+    evidence.write_text("{}\n", encoding="utf-8")
+
+    commit = disposable_commit(
+        git,
+        repository,
+        "M-33.6k.2 disposable Q-like",
+        "artifacts/m336k2/disposable/q-like",
+    )
+
+    assert (
+        run("show", f"{commit}:artifacts/m336k2/disposable/q-like/evidence.json")
+        == "{}"
+    )
+    assert not run("status", "--porcelain=v1")
 
 
 def test_minimal_environment_disables_network_install_and_user_site() -> None:
