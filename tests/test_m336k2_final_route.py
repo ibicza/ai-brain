@@ -518,6 +518,30 @@ def _load_metadata_pool_script(name: str):
     return module
 
 
+def _load_exact_quality_script(name: str):
+    from importlib.util import module_from_spec, spec_from_file_location
+
+    script = Path(__file__).parents[1] / "scripts" / "m336k2_run_exact_quality.py"
+    spec = spec_from_file_location(name, script)
+    assert spec is not None and spec.loader is not None
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_exact_quality_children_run_with_minimal_offline_environment(
+    tmp_path: Path,
+) -> None:
+    module = _load_exact_quality_script("m336k2_exact_quality")
+    (tmp_path / "src").mkdir()
+    environment = module._environment(tmp_path)
+    assert environment["PATH"] == ""
+    assert environment["PIP_NO_INDEX"] == "1"
+    assert environment["UV_OFFLINE"] == "1"
+    assert environment["PYTHONNOUSERSITE"] == "1"
+    assert environment["PYTHONPATH"] == str((tmp_path / "src").resolve())
+
+
 def test_metadata_guard_rejects_source_and_scm_archive_body_gets() -> None:
     module = _load_metadata_pool_script("m336k2_metadata_pool")
     for url in (
