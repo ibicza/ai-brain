@@ -124,7 +124,7 @@ def test_schema_registry_covers_all_twenty_eight_route_stages() -> None:
 
 
 def test_one_controller_executes_complete_rehearsal_route(tmp_path: Path) -> None:
-    registry = build_m336k2_schema_registry()
+    route_registry_hash = content_hash("route-registry")
     exact_f28 = "a" * 40
 
     def guard():
@@ -133,7 +133,7 @@ def test_one_controller_executes_complete_rehearsal_route(tmp_path: Path) -> Non
             freeze_receipt_hash="2" * 64,
             authorization_receipt_hash="3" * 64,
             exact_f28_sha=exact_f28,
-            route_registry_hash=registry.registry_hash,
+            route_registry_hash=route_registry_hash,
         )
 
     calls = []
@@ -154,6 +154,7 @@ def test_one_controller_executes_complete_rehearsal_route(tmp_path: Path) -> Non
         route_run_id="m336k2.disposable.rehearsal.01",
         execution_mode="REHEARSAL",
         exact_f28_sha=exact_f28,
+        route_registry_hash=route_registry_hash,
         ledger=ledger,
         preledger_guard=guard,
         worker=worker,
@@ -165,10 +166,11 @@ def test_one_controller_executes_complete_rehearsal_route(tmp_path: Path) -> Non
     assert result.selector_count == 1
     assert result.evaluator_reservation_count == 1
     assert result.retry_count == 0
+    assert result.route_registry_hash == route_registry_hash
 
 
 def test_controller_failure_is_terminal_and_not_retryable(tmp_path: Path) -> None:
-    registry = build_m336k2_schema_registry()
+    route_registry_hash = content_hash("route-registry")
     exact_f28 = "b" * 40
 
     def guard():
@@ -177,7 +179,7 @@ def test_controller_failure_is_terminal_and_not_retryable(tmp_path: Path) -> Non
             freeze_receipt_hash="2" * 64,
             authorization_receipt_hash="3" * 64,
             exact_f28_sha=exact_f28,
-            route_registry_hash=registry.registry_hash,
+            route_registry_hash=route_registry_hash,
         )
 
     def worker(request):
@@ -189,6 +191,7 @@ def test_controller_failure_is_terminal_and_not_retryable(tmp_path: Path) -> Non
             route_run_id="m336k2.disposable.failure.01",
             execution_mode="REHEARSAL",
             exact_f28_sha=exact_f28,
+            route_registry_hash=route_registry_hash,
             ledger=ledger,
             preledger_guard=guard,
             worker=worker,
@@ -200,6 +203,7 @@ def test_controller_failure_is_terminal_and_not_retryable(tmp_path: Path) -> Non
             route_run_id="m336k2.disposable.failure.01",
             execution_mode="REHEARSAL",
             exact_f28_sha=exact_f28,
+            route_registry_hash=route_registry_hash,
             ledger=ledger,
             preledger_guard=guard,
             worker=worker,
@@ -219,6 +223,7 @@ def test_final_run_identity_cannot_be_spent_in_wrong_mode(
             route_run_id=route_run_id,
             execution_mode=mode,
             exact_f28_sha="c" * 40,
+            route_registry_hash=content_hash("route-registry"),
             ledger=M336K2RouteLedger(tmp_path / "route.jsonl"),
             preledger_guard=lambda: pytest.fail("guard must not run"),
             worker=lambda request: pytest.fail("worker must not run"),

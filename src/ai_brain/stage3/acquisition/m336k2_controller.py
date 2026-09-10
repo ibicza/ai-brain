@@ -197,6 +197,7 @@ def run_m336k2_final_controller(
     route_run_id: str,
     execution_mode: str,
     exact_f28_sha: str,
+    route_registry_hash: str,
     ledger: M336K2RouteLedger,
     preledger_guard: Callable[[], M336K2PreLedgerProof],
     worker: M336K2StageWorker,
@@ -212,12 +213,13 @@ def run_m336k2_final_controller(
         raise M336K2ProtocolError("M336K2 execution mode is invalid")
     if (execution_mode == "FINAL") != (route_run_id == M336K2_FINAL_RUN_ID):
         raise M336K2ProtocolError("M336K2 final run identity is reserved")
-    registry = build_m336k2_schema_registry()
+    schema_registry = build_m336k2_schema_registry()
     proof = preledger_guard()
     _verify_preledger_proof(proof)
     if (
         proof.exact_f28_sha != exact_f28_sha
-        or proof.route_registry_hash != registry.registry_hash
+        or proof.route_registry_hash != route_registry_hash
+        or schema_registry.incompatible_edge_count != 0
     ):
         raise M336K2ProtocolError("M336K2 pre-ledger proof binding changed")
     context = content_hash(
@@ -225,7 +227,7 @@ def run_m336k2_final_controller(
             route_run_id,
             execution_mode,
             exact_f28_sha,
-            registry.registry_hash,
+            route_registry_hash,
             proof.proof_hash,
         )
     )
@@ -278,7 +280,7 @@ def run_m336k2_final_controller(
         "route_run_id": route_run_id,
         "execution_mode": execution_mode,
         "exact_f28_sha": exact_f28_sha,
-        "route_registry_hash": registry.registry_hash,
+        "route_registry_hash": route_registry_hash,
         "route_ledger_receipt_hash": receipt.receipt_hash,
         "final_event": receipt.final_event,
         "acquisition_count": receipt.acquisition_invocation_count,

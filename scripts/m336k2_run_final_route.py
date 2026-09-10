@@ -170,6 +170,7 @@ def main() -> None:
         route_run_id=request["route_run_id"],
         execution_mode=request["execution_mode"],
         exact_f28_sha=exact_f28,
+        route_registry_hash=route_registry.registry_hash,
         ledger=ledger,
         preledger_guard=preledger_guard,
         worker=M336K2HermeticCommandWorker(plan),
