@@ -920,8 +920,11 @@ def _run_karina_evaluation(request: dict) -> dict:
     local.mkdir()
     shutil.copytree(destinations["windows_production"], local / "windows-production")
     shutil.copytree(destinations["evaluator_root"] / "oracle", local / "oracle")
-    frozen_spdx = Path(request["frozen_spdx_reference"]).resolve(strict=True)
-    shutil.copy2(frozen_spdx, local / "frozen-spdx-reference.json")
+    remote_spdx_reference = _stage_karina_evaluation_spdx(
+        frozen_spdx=Path(request["frozen_spdx_reference"]),
+        local_root=local,
+        remote_root=remote_evaluation,
+    )
     shutil.copy2(
         _component_path(request, "candidate_pool"), local / "candidate-pool.json"
     )
@@ -938,7 +941,7 @@ def _run_karina_evaluation(request: dict) -> dict:
         "candidate_pool": f"{remote_evaluation}/candidate-pool.json",
         "qualification_report": f"{remote_inputs}/candidate_qualification.json",
         "selected_manifest": f"{remote_inputs}/selected_source_manifest.json",
-        "frozen_spdx_reference": f"{remote_evaluation}/frozen-spdx-reference.json",
+        "frozen_spdx_reference": remote_spdx_reference,
         "evaluator_ledger": f"{capsule_root}/unused-evaluator-ledger.jsonl",
         "repository": remote_repo,
         "external_reservation_hash": events[0]["event_hash"],
@@ -1002,6 +1005,17 @@ def _run_karina_evaluation(request: dict) -> dict:
         "evaluator_event_hash": event["event_hash"],
         "status": "PASS",
     }
+
+
+def _stage_karina_evaluation_spdx(
+    *, frozen_spdx: Path, local_root: Path, remote_root: str
+) -> str:
+    """Stage the frozen SPDX snapshot together with its referenced texts."""
+
+    reference = frozen_spdx.resolve(strict=True)
+    destination = local_root / "spdx-reference"
+    shutil.copytree(reference.parent, destination)
+    return f"{remote_root.rstrip('/')}/spdx-reference/{reference.name}"
 
 
 def _compare_evaluation(request: dict) -> dict:

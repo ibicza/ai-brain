@@ -68,6 +68,7 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _evaluator_receipt,
     _karina_expected_head,
     _rehearsal_provider,
+    _stage_karina_evaluation_spdx,
     _verify_karina_vault,
     _verify_request,
     _write_private_state,
@@ -130,6 +131,30 @@ def test_m336j_worker_preserves_m336k2_frozen_route_identity() -> None:
     )
 
     assert rebuilt == frozen
+
+
+def test_karina_evaluation_stages_spdx_companion_files(tmp_path: Path) -> None:
+    frozen = tmp_path / "frozen" / "snapshot.json"
+    frozen.parent.mkdir()
+    frozen.write_text('{"licenses":["Apache-2.0.txt"]}\n', encoding="utf-8")
+    companion = frozen.with_name("Apache-2.0.txt")
+    companion.write_text("frozen license text\n", encoding="utf-8")
+    local = tmp_path / "staging"
+    local.mkdir()
+
+    remote = _stage_karina_evaluation_spdx(
+        frozen_spdx=frozen,
+        local_root=local,
+        remote_root="/private/evaluation-inputs",
+    )
+
+    assert remote == "/private/evaluation-inputs/spdx-reference/snapshot.json"
+    assert (local / "spdx-reference" / "snapshot.json").read_bytes() == (
+        frozen.read_bytes()
+    )
+    assert (local / "spdx-reference" / "Apache-2.0.txt").read_bytes() == (
+        companion.read_bytes()
+    )
 
 
 def test_native_evaluator_ledger_reserves_once_and_coordinates_both_platforms(
