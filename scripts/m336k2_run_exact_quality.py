@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import tempfile
@@ -21,10 +22,16 @@ from ai_brain.stage3.acquisition.m336k2_execution import (
 from ai_brain.stage3.acquisition.m336k2_protocol import m336k2_minimal_environment
 
 
-def _environment(repository: Path) -> dict[str, str]:
+def _environment(
+    repository: Path, *, executable_directories: tuple[Path, ...] = ()
+) -> dict[str, str]:
     environment = m336k2_minimal_environment()
     environment.update(
         {
+            "PATH": os.pathsep.join(
+                str(directory.resolve(strict=True))
+                for directory in executable_directories
+            ),
             "PYTHONIOENCODING": "utf-8",
             "PYTHONPATH": str((repository / "src").resolve(strict=True)),
             "PYTHONUTF8": "1",
@@ -38,6 +45,7 @@ def _check(
     command: tuple[str, ...],
     repository: Path,
     logs: Path,
+    executable_directories: tuple[Path, ...],
 ) -> dict:
     started = time.perf_counter_ns()
     result = subprocess.run(
@@ -45,7 +53,7 @@ def _check(
         cwd=repository,
         capture_output=True,
         check=False,
-        env=_environment(repository),
+        env=_environment(repository, executable_directories=executable_directories),
     )
     elapsed = (time.perf_counter_ns() - started) // 1_000_000
     output = result.stdout + result.stderr
@@ -89,6 +97,7 @@ def main() -> None:
     javac = args.javac.resolve(strict=True)
     python = m336k2_python_invocation_handle()
     python.resolve(strict=True)
+    executable_directories = (git.parent, javac.parent, python.parent)
     output = args.output.resolve(strict=False)
     logs = output.with_name(output.stem + "-logs")
     if output.exists() or logs.exists():
@@ -127,28 +136,34 @@ def main() -> None:
             (str(python), "-B", "-m", "pytest", "-q", *targeted),
             repository,
             logs,
+            executable_directories,
         ),
         _check(
             "stage3_java_regressions",
             (str(python), "-B", "-m", "pytest", "-q", *stage3_java_tests),
             repository,
             logs,
+            executable_directories,
         ),
         _check(
             "ruff_format",
             (str(python), "-B", "-m", "ruff", "format", "--check", "."),
             repository,
             logs,
+            executable_directories,
         ),
         _check(
             "ruff_lint",
             (str(python), "-B", "-m", "ruff", "check", "."),
             repository,
             logs,
+            executable_directories,
         ),
     ]
     with tempfile.TemporaryDirectory(prefix="m336k2-compile-") as pycache:
-        compile_environment = _environment(repository)
+        compile_environment = _environment(
+            repository, executable_directories=executable_directories
+        )
         compile_environment["PYTHONPYCACHEPREFIX"] = pycache
         started = time.perf_counter_ns()
         result = subprocess.run(
@@ -186,6 +201,7 @@ def main() -> None:
                 ),
                 repository,
                 logs,
+                executable_directories,
             ),
             _check(
                 "no_torch",
@@ -200,6 +216,7 @@ def main() -> None:
                 ),
                 repository,
                 logs,
+                executable_directories,
             ),
             _check(
                 "route_preflight",
@@ -217,6 +234,7 @@ def main() -> None:
                 ),
                 repository,
                 logs,
+                executable_directories,
             ),
         )
     )
@@ -235,11 +253,16 @@ def main() -> None:
                 ),
                 repository,
                 logs,
+                executable_directories,
             )
         )
     checks.append(
         _check(
-            "full_suite", (str(python), "-B", "-m", "pytest", "-q"), repository, logs
+            "full_suite",
+            (str(python), "-B", "-m", "pytest", "-q"),
+            repository,
+            logs,
+            executable_directories,
         )
     )
     post_head = _git(git, repository, "rev-parse", "HEAD^{commit}")

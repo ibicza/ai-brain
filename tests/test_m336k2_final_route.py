@@ -526,6 +526,10 @@ def test_exact_quality_preflight_passes_explicit_repository() -> None:
     source = Path("scripts/m336k2_run_exact_quality.py").read_text(encoding="utf-8")
     assert "build_m336k2_route_registry(__import__('pathlib').Path('.'))" in source
     assert "build_m336k2_route_registry()" not in source
+    assert '"PATH": os.pathsep.join(' in source
+    assert (
+        "executable_directories = (git.parent, javac.parent, python.parent)" in source
+    )
 
 
 def test_minimal_environment_disables_network_install_and_user_site() -> None:
