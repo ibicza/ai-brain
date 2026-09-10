@@ -4,6 +4,7 @@ import base64
 import os
 import shutil
 import subprocess
+import sys
 from dataclasses import asdict
 from pathlib import Path
 
@@ -20,12 +21,16 @@ from ai_brain.stage3.acquisition.m336k2_controller import (
     M336K2_FINAL_RUN_ID,
     M336K2_ROUTE_STAGES,
     M336K2StageReceipt,
+    M336K2StageRequest,
     build_m336k2_schema_registry,
     build_preledger_proof,
     run_m336k2_final_controller,
 )
 from ai_brain.stage3.acquisition.m336k2_execution import (
     M336K2_REQUIRED_EXECUTABLE_ROLES,
+    M336K2HermeticCommandWorker,
+    M336K2PrivateExecutionPlan,
+    build_command_spec,
     m336k2_python_invocation_handle,
     verify_m336k2_executable_handles,
     verify_m336k2_python_environment_manifest,
@@ -170,6 +175,50 @@ def test_disposable_controller_diagnostics_remain_private(tmp_path: Path) -> Non
 
     assert (private / "controller.stdout.log").read_bytes() == b"stdout\n"
     assert (private / "controller.stderr.log").read_bytes() == b"stderr\n"
+
+
+def test_hermetic_command_worker_preserves_private_failure_diagnostics(
+    tmp_path: Path,
+) -> None:
+    receipt = tmp_path / "receipts" / "ACQUISITION_RESERVED.json"
+    command = build_command_spec(
+        event="ACQUISITION_RESERVED",
+        executable=Path(sys.executable),
+        arguments=(
+            "-c",
+            "import sys;sys.stdout.write('out');sys.stderr.write('err');raise SystemExit(3)",
+        ),
+        working_directory=tmp_path,
+        receipt_path=receipt,
+        receipt_hash_field="receipt_hash",
+        expected_status="PASS",
+    )
+    plan = M336K2PrivateExecutionPlan(
+        schema_version=1,
+        route_run_id="disposable-m336k2-test",
+        exact_f28_sha="1" * 40,
+        route_registry_hash="2" * 64,
+        commands=(command,),
+        plan_hash=content_hash("test-plan"),
+    )
+    request_body = {
+        "schema_version": 1,
+        "event": "ACQUISITION_RESERVED",
+        "route_run_id": plan.route_run_id,
+        "execution_mode": "REHEARSAL",
+        "exact_f28_sha": plan.exact_f28_sha,
+        "context_hash": "3" * 64,
+        "previous_operation_hash": "4" * 64,
+    }
+    request = M336K2StageRequest(
+        **request_body, request_hash=content_hash(request_body)
+    )
+
+    with pytest.raises(M336K2ProtocolError, match="stage command failed"):
+        M336K2HermeticCommandWorker(plan)(request)
+
+    assert receipt.with_name("ACQUISITION_RESERVED.stdout.log").read_bytes() == b"out"
+    assert receipt.with_name("ACQUISITION_RESERVED.stderr.log").read_bytes() == b"err"
 
 
 def test_schema_registry_covers_all_twenty_eight_route_stages() -> None:

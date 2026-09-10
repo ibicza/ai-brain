@@ -538,7 +538,9 @@ class M336K2HermeticCommandWorker:
             raise M336K2ProtocolError("M336K2 command worker context changed")
         command = self._commands[request.event]
         receipt_path = Path(command.receipt_path)
-        if receipt_path.exists():
+        stdout_path = receipt_path.with_name(f"{receipt_path.stem}.stdout.log")
+        stderr_path = receipt_path.with_name(f"{receipt_path.stem}.stderr.log")
+        if receipt_path.exists() or stdout_path.exists() or stderr_path.exists():
             raise M336K2ProtocolError("M336K2 command receipt destination is stale")
         environment = m336k2_minimal_environment()
         source_root = Path(command.working_directory) / "src"
@@ -557,6 +559,9 @@ class M336K2HermeticCommandWorker:
             capture_output=True,
             env=environment,
         )
+        receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        stdout_path.write_bytes(result.stdout)
+        stderr_path.write_bytes(result.stderr)
         if result.returncode != 0:
             raise M336K2ProtocolError(f"M336K2 stage command failed: {request.event}")
         receipt = _load_receipt(receipt_path)
