@@ -137,7 +137,7 @@ def _search_page(page: int) -> tuple[dict, ...]:
         _BROWSE,
         {
             "page": page,
-            "size": 200,
+            "size": 20,
             "searchTerm": "",
             "sortField": "publishedDate",
             "sortDirection": "desc",

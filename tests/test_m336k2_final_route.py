@@ -650,6 +650,7 @@ def test_metadata_discovery_uses_body_free_central_browse_api(monkeypatch) -> No
     )
     assert observed["url"] == module._BROWSE
     assert observed["payload"]["page"] == 4
+    assert observed["payload"]["size"] == 20
 
 
 def _freeze(tmp_path: Path) -> M336K2FreezeManifest:
