@@ -40,7 +40,11 @@ def run_m336j_remote_independent_evaluation(config_path: Path, output: Path) -> 
     """Run the existing independent evaluator from a strict private config."""
 
     config = strict_json_file(config_path.resolve(strict=True))
-    if not isinstance(config, dict) or set(config) != _EVALUATION_CONFIG_FIELDS:
+    fields = set(config) if isinstance(config, dict) else set()
+    if fields not in (
+        _EVALUATION_CONFIG_FIELDS,
+        _EVALUATION_CONFIG_FIELDS | {"external_reservation_hash"},
+    ):
         raise ValueError("M336J remote evaluation config fields changed")
     repository = Path(config["repository"]).resolve(strict=True)
     windows = Path(config["windows_production_root"]).resolve(strict=True)
@@ -66,6 +70,7 @@ def run_m336j_remote_independent_evaluation(config_path: Path, output: Path) -> 
         frozen_spdx_reference=Path(config["frozen_spdx_reference"]),
         evaluator_ledger=Path(config["evaluator_ledger"]),
         git_worktrees=(repository,),
+        external_reservation_hash=config.get("external_reservation_hash"),
     )
     result = run_m336i_independent_java_evaluation(request)
     if result.status != "PASS":

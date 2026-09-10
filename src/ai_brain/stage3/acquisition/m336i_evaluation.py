@@ -54,6 +54,7 @@ class M336IIndependentEvaluationRequest:
     git_worktrees: tuple[Path, ...]
     evaluator_context_hash: str | None = None
     evaluator_pre_reserved: bool = False
+    external_reservation_hash: str | None = None
 
 
 @dataclass(frozen=True)
@@ -123,11 +124,24 @@ def run_m336i_independent_java_evaluation(
             "evaluator_ledger",
             "evaluator_context_hash",
             "evaluator_pre_reserved",
+            "external_reservation_hash",
         }:
             continue
         if not isinstance(value, Path) or not value.exists():
             raise ValueError(f"M336I evaluator input is missing: {item.name}")
-    if request.evaluator_pre_reserved:
+    if request.external_reservation_hash is not None:
+        if (
+            request.evaluator_pre_reserved
+            or request.evaluator_context_hash is not None
+            or len(request.external_reservation_hash) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in request.external_reservation_hash
+            )
+        ):
+            raise ValueError("external evaluator reservation binding is invalid")
+        ledger = None
+    elif request.evaluator_pre_reserved:
         from ai_brain.stage3.acquisition.m336j_evaluator_v2 import (
             M336JEvaluatorLedgerV2,
             verify_m336j_evaluator_ready_for_evaluation_v2,
@@ -161,7 +175,7 @@ def run_m336i_independent_java_evaluation(
             karina_seal["seal_hash"],
         )
     )
-    if not request.evaluator_pre_reserved:
+    if ledger is not None and not request.evaluator_pre_reserved:
         ledger.append("WINDOWS_PRODUCTION_SEALED", context_hash=context)
         ledger.append("KARINA_PRODUCTION_SEALED", context_hash=context)
         ledger.append("EVALUATOR_RESERVED", context_hash=context)
@@ -279,7 +293,9 @@ def run_m336i_independent_java_evaluation(
     result = M336IIndependentEvaluationResult(**body, result_hash=content_hash(body))
     if result.status != "PASS":
         raise ValueError("M336I independent Outcome A thresholds failed")
-    if request.evaluator_pre_reserved:
+    if request.external_reservation_hash is not None:
+        pass
+    elif request.evaluator_pre_reserved:
         from ai_brain.stage3.acquisition.m336j_evaluator_v2 import (
             advance_m336j_evaluator_v2,
         )

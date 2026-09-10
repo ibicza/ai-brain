@@ -708,6 +708,24 @@ def test_mutation_18_evaluator_reference_copied_from_candidate_pack(
     assert not mutated.evaluator_ledger.exists()
 
 
+def test_external_evaluator_reservation_must_be_one_exact_hash(
+    tmp_path: Path,
+) -> None:
+    baseline = _evaluation_request(tmp_path, copied_reference=False)
+    for mutated in (
+        replace(baseline, external_reservation_hash="bad"),
+        replace(
+            baseline,
+            external_reservation_hash="a" * 64,
+            evaluator_pre_reserved=True,
+            evaluator_context_hash="b" * 64,
+        ),
+    ):
+        with pytest.raises(ValueError, match="external evaluator reservation"):
+            run_m336i_independent_java_evaluation(mutated)
+    assert not baseline.evaluator_ledger.exists()
+
+
 def test_independent_metrics_count_extra_trusted_locations_as_wrong() -> None:
     semantics = SimpleNamespace(
         expected_claim_payload='{"value":1}', receiver_source_identity="alpha.A"

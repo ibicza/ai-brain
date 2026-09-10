@@ -118,6 +118,12 @@ def run_fresh_acquisition_and_preflight(
     acquisition_run_id: str = M336E_FINAL_ACQUISITION_RUN_ID,
     candidate_outcome_callback=None,
     all_candidates_terminal_callback=None,
+    target_file_count: int = M336E_FINAL_TARGET,
+    maximum_files_per_root: int = M336E_FINAL_ROOT_CAP,
+    minimum_root_count: int = 3,
+    construct_quotas: dict[str, int] | None = None,
+    selector_seed: str = M336E_FINAL_SELECTOR_SEED,
+    selector_version: str = M336E_FINAL_SELECTOR_VERSION,
 ) -> FreshAcquisitionPreflight:
     """Execute the sole source-body acquisition and one guarded selector."""
 
@@ -346,10 +352,14 @@ def run_fresh_acquisition_and_preflight(
     census = build_selectable_source_census(decisions)
     proof = prove_selector_feasibility(
         census,
-        target_file_count=M336E_FINAL_TARGET,
-        maximum_files_per_root=M336E_FINAL_ROOT_CAP,
-        minimum_root_count=3,
-        construct_quotas=M336E_DISCLOSED_CONSTRUCT_QUOTAS,
+        target_file_count=target_file_count,
+        maximum_files_per_root=maximum_files_per_root,
+        minimum_root_count=minimum_root_count,
+        construct_quotas=(
+            M336E_DISCLOSED_CONSTRUCT_QUOTAS
+            if construct_quotas is None
+            else construct_quotas
+        ),
     )
     timings["selectability_census_and_proof"] = [time.perf_counter() - census_started]
     census_context = {
@@ -368,8 +378,8 @@ def run_fresh_acquisition_and_preflight(
             proof,
             binding_manifest,
             ledger,
-            selector_seed=M336E_FINAL_SELECTOR_SEED,
-            selector_version=M336E_FINAL_SELECTOR_VERSION,
+            selector_seed=selector_seed,
+            selector_version=selector_version,
             **census_context,
         )
         materialize_selected_source_snapshot(
@@ -423,7 +433,7 @@ def run_fresh_acquisition_and_preflight(
         if proof.hard_requirements_satisfied
         and (
             not perform_selector
-            or (selected is not None and selected.file_count == M336E_FINAL_TARGET)
+            or (selected is not None and selected.file_count == target_file_count)
         )
         and overlap["status"] == "PASS"
         else "BLOCKED"
