@@ -53,15 +53,22 @@ M336K2_REQUIRED_EXECUTABLE_ROLES = frozenset(
 )
 
 
+def m336k2_python_invocation_handle() -> Path:
+    """Preserve a venv launcher/symlink while separately hashing its target."""
+
+    return Path(sys.executable).absolute()
+
+
 def build_m336k2_python_environment_manifest(
     *, repository: Path, python_executable: Path, git_executable: Path
 ) -> dict:
     """Capture the exact live local Python environment and project source identity."""
 
     root = repository.resolve(strict=True)
-    python = python_executable.resolve(strict=True)
+    python_handle = python_executable.absolute()
+    python = python_handle.resolve(strict=True)
     git = git_executable.resolve(strict=True)
-    if Path(sys.executable).resolve(strict=True) != python:
+    if m336k2_python_invocation_handle() != python_handle:
         raise M336K2ProtocolError("M336K2 environment capture used a different Python")
     if os.environ.get("PYTHONNOUSERSITE") != "1" or site.ENABLE_USER_SITE is not False:
         raise M336K2ProtocolError("M336K2 user-site loading is not disabled")

@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
-import sys
 import tempfile
 import time
 from pathlib import Path
@@ -17,6 +16,7 @@ from ai_brain.stage3.acquisition.m336j_execution import (
 )
 from ai_brain.stage3.acquisition.m336k2_execution import (
     build_m336k2_python_environment_manifest,
+    m336k2_python_invocation_handle,
 )
 from ai_brain.stage3.acquisition.m336k2_protocol import m336k2_minimal_environment
 
@@ -87,7 +87,8 @@ def main() -> None:
     repository = args.repository.resolve(strict=True)
     git = args.git_executable.resolve(strict=True)
     javac = args.javac.resolve(strict=True)
-    python = Path(sys.executable).resolve(strict=True)
+    python = m336k2_python_invocation_handle()
+    python.resolve(strict=True)
     output = args.output.resolve(strict=False)
     logs = output.with_name(output.stem + "-logs")
     if output.exists() or logs.exists():

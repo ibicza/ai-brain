@@ -21,6 +21,7 @@ from ai_brain.stage3.acquisition.m336k2_controller import (
     run_m336k2_final_controller,
 )
 from ai_brain.stage3.acquisition.m336k2_execution import (
+    m336k2_python_invocation_handle,
     verify_m336k2_python_environment_manifest,
 )
 from ai_brain.stage3.acquisition.m336k2_protocol import (
@@ -505,6 +506,16 @@ def test_live_python_environment_must_equal_frozen_manifest(monkeypatch) -> None
             python_executable=Path("python"),
             git_executable=Path("git"),
         )
+
+
+def test_python_invocation_handle_is_not_resolved_away_from_venv(
+    monkeypatch, tmp_path: Path
+) -> None:
+    handle = tmp_path / "venv" / "bin" / "python"
+    monkeypatch.setattr(
+        "ai_brain.stage3.acquisition.m336k2_execution.sys.executable", str(handle)
+    )
+    assert m336k2_python_invocation_handle() == handle.absolute()
 
 
 def _load_metadata_pool_script(name: str):
