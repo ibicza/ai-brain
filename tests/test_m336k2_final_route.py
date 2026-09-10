@@ -61,6 +61,7 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _evaluator_receipt,
     _karina_expected_head,
     _verify_request,
+    _write_private_state,
 )
 from scripts.m336k2_qualify_disposable_protocol import _commit as disposable_commit
 
@@ -112,6 +113,16 @@ def test_native_evaluator_ledger_reserves_once_and_coordinates_both_platforms(
         _append_evaluator_event(
             ledger, "EVALUATOR_RESERVED", content_hash("second reservation")
         )
+
+
+def test_private_stage_state_is_durably_replaced(tmp_path: Path) -> None:
+    state = tmp_path / "state.json"
+    value = {"schema_version": 1, "status": "PASS"}
+
+    _write_private_state(state, value)
+
+    assert state.read_text(encoding="utf-8") == canonical_json(value) + "\n"
+    assert not state.with_name(state.name + ".next").exists()
 
 
 def test_schema_registry_covers_all_twenty_eight_route_stages() -> None:

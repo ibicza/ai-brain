@@ -1471,7 +1471,10 @@ def _write_private_state(path: Path, value: dict) -> None:
     if temporary.exists():
         raise M336K2ProtocolError("M336K2 interrupted stage state exists")
     temporary.write_text(canonical_json(value) + "\n", encoding="utf-8", newline="\n")
-    with temporary.open("rb") as stream:
+    # Windows rejects fsync() on a read-only file descriptor (WinError 9).
+    # Reopen the fully-written temporary state read/write so the durable
+    # flush has the same semantics on Windows and POSIX.
+    with temporary.open("r+b") as stream:
         os.fsync(stream.fileno())
     os.replace(temporary, path)
 
