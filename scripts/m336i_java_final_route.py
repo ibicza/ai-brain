@@ -1454,18 +1454,10 @@ def _produce_worker(args) -> None:
     if getattr(args, "m336j_mode", False):
         m336j_registry = build_m336j_route_registry()
         registry = m336j_registry
-        route_manifest = build_m336j_route_manifest(
-            m336j_registry,
-            execution_capsule_public_receipt_hash=frozen_route[
-                "execution_capsule_public_receipt_hash"
-            ],
-            remote_command_renderer_hash=frozen_route["remote_command_renderer_hash"],
-            executable_dependency_manifest_hash=frozen_route[
-                "executable_dependency_manifest_hash"
-            ],
-            minimal_environment_policy_hash=frozen_route[
-                "minimal_environment_policy_hash"
-            ],
+        route_manifest = _m336j_worker_route_manifest(
+            repository=Path(request["repository"]),
+            frozen_route=frozen_route,
+            m336j_registry=m336j_registry,
         )
     if getattr(args, "m336j_mode", False):
         role = (
@@ -1602,6 +1594,51 @@ def _produce_worker(args) -> None:
     }
     write_canonical_json(
         Path(request["output"]), {**body, "receipt_hash": content_hash(body)}
+    )
+
+
+def _m336j_worker_route_manifest(*, repository, frozen_route, m336j_registry):
+    """Rebuild the caller's frozen route while keeping M336J command authority.
+
+    M-33.6k.2 deliberately reuses the M336J remote command registry and capsule,
+    but its production/evaluation artifacts remain bound to the M336K2 route
+    manifest.  Treating that manifest as an M336J manifest loses the K2 route
+    identity before the remote worker can validate it.
+    """
+
+    if frozen_route.get("route_version") == (
+        "m336k2.candidate-isolated-java-final-route.v1"
+    ):
+        from ai_brain.stage3.acquisition.m336k2_registry import (
+            build_m336k2_route_manifest,
+            build_m336k2_route_registry,
+        )
+
+        return build_m336k2_route_manifest(
+            registry=build_m336k2_route_registry(Path(repository)),
+            executable_dependency_manifest_hash=frozen_route[
+                "executable_dependency_manifest_hash"
+            ],
+            python_environment_manifest_hash=frozen_route[
+                "python_environment_manifest_hash"
+            ],
+            command_renderer_hash=frozen_route["command_renderer_hash"],
+            minimal_environment_policy_hash=frozen_route[
+                "minimal_environment_policy_hash"
+            ],
+        )
+    return build_m336j_route_manifest(
+        m336j_registry,
+        execution_capsule_public_receipt_hash=frozen_route[
+            "execution_capsule_public_receipt_hash"
+        ],
+        remote_command_renderer_hash=frozen_route["remote_command_renderer_hash"],
+        executable_dependency_manifest_hash=frozen_route[
+            "executable_dependency_manifest_hash"
+        ],
+        minimal_environment_policy_hash=frozen_route[
+            "minimal_environment_policy_hash"
+        ],
     )
 
 

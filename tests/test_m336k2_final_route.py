@@ -73,6 +73,7 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _write_private_state,
 )
 from ai_brain.stage3.acquisition.m336k_acquisition import acquire_candidate_v2
+from scripts.m336i_java_final_route import _m336j_worker_route_manifest
 from scripts.m336k2_qualify_disposable_protocol import (
     _commit as disposable_commit,
 )
@@ -104,6 +105,31 @@ def test_route_ledger_enforces_complete_exact_order_and_one_shot_counts(
             context_hash=context,
             operation_hash=content_hash("again"),
         )
+
+
+def test_m336j_worker_preserves_m336k2_frozen_route_identity() -> None:
+    from ai_brain.stage3.acquisition.m336j_registry import build_m336j_route_registry
+    from ai_brain.stage3.acquisition.m336k2_registry import (
+        build_m336k2_route_manifest,
+        build_m336k2_route_registry,
+    )
+
+    repository = Path(__file__).resolve().parents[1]
+    frozen = build_m336k2_route_manifest(
+        registry=build_m336k2_route_registry(repository),
+        executable_dependency_manifest_hash="1" * 64,
+        python_environment_manifest_hash="2" * 64,
+        command_renderer_hash="3" * 64,
+        minimal_environment_policy_hash="4" * 64,
+    )
+
+    rebuilt = _m336j_worker_route_manifest(
+        repository=repository,
+        frozen_route=asdict(frozen),
+        m336j_registry=build_m336j_route_registry(),
+    )
+
+    assert rebuilt == frozen
 
 
 def test_native_evaluator_ledger_reserves_once_and_coordinates_both_platforms(
