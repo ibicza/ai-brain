@@ -994,48 +994,54 @@ def _invoke_m336j_remote(
             stdin_payload_size=source.stat().st_size,
         )
     streaming = source is not None or framed
-    if streaming:
-        with tempfile.TemporaryDirectory(
-            prefix="m336j-ssh-stream-", dir=args.private_acquisition_output.parent
-        ) as raw:
-            temporary = Path(raw)
-            if source is None:
-                source = temporary / "empty.stdin"
-                source.write_bytes(b"")
-            output = (
-                Path(response_path).resolve(strict=False)
-                if response_path is not None
-                else temporary / "response.stdout"
-            )
-            result = invoke_karina_command_streaming(
+    try:
+        if streaming:
+            with tempfile.TemporaryDirectory(
+                prefix="m336j-ssh-stream-", dir=args.private_acquisition_output.parent
+            ) as raw:
+                temporary = Path(raw)
+                if source is None:
+                    source = temporary / "empty.stdin"
+                    source.write_bytes(b"")
+                output = (
+                    Path(response_path).resolve(strict=False)
+                    if response_path is not None
+                    else temporary / "response.stdout"
+                )
+                result = invoke_karina_command_streaming(
+                    transport=transport,
+                    capsule=capsule,
+                    plan=plan,
+                    dependency_manifest=dependencies,
+                    stdin_path=source,
+                    stdout_path=output,
+                )
+                if not framed:
+                    response = parse_bound_json_response(
+                        result.stdout_path.read_bytes(),
+                        request_hash=expected_request_hash,
+                        component_binding_hash=component.binding_hash,
+                        host_identity_hash=public.host_identity_receipt_hash,
+                    )
+        else:
+            result = invoke_karina_command(
                 transport=transport,
                 capsule=capsule,
                 plan=plan,
                 dependency_manifest=dependencies,
-                stdin_path=source,
-                stdout_path=output,
+                stdin_payload=payload,
             )
-            if not framed:
-                response = parse_bound_json_response(
-                    result.stdout_path.read_bytes(),
-                    request_hash=expected_request_hash,
-                    component_binding_hash=component.binding_hash,
-                    host_identity_hash=public.host_identity_receipt_hash,
-                )
-    else:
-        result = invoke_karina_command(
-            transport=transport,
-            capsule=capsule,
-            plan=plan,
-            dependency_manifest=dependencies,
-            stdin_payload=payload,
+            response = parse_bound_json_response(
+                result.stdout,
+                request_hash=expected_request_hash,
+                component_binding_hash=component.binding_hash,
+                host_identity_hash=public.host_identity_receipt_hash,
+            )
+    except subprocess.CalledProcessError as error:
+        _write_karina_command_failure_diagnostics(
+            args.karina_command_receipt_root, receipt_name, error
         )
-        response = parse_bound_json_response(
-            result.stdout,
-            request_hash=expected_request_hash,
-            component_binding_hash=component.binding_hash,
-            host_identity_hash=public.host_identity_receipt_hash,
-        )
+        raise
     args.karina_command_receipt_root.mkdir(parents=True, exist_ok=True)
     write_canonical_json(
         args.karina_command_receipt_root / receipt_name,
@@ -1046,6 +1052,19 @@ def _invoke_m336j_remote(
             raise ValueError("M336J streamed response needs an external destination")
         return result, component, public
     return response, component, public
+
+
+def _write_karina_command_failure_diagnostics(
+    root: Path, receipt_name: str, error: subprocess.CalledProcessError
+) -> None:
+    """Persist bounded SSH response bytes under the declared private root."""
+
+    root.mkdir(parents=True, exist_ok=True)
+    stem = Path(receipt_name).stem
+    stdout = error.stdout if error.stdout is not None else error.output
+    for suffix, value in (("stdout", stdout), ("stderr", error.stderr)):
+        raw = value if isinstance(value, bytes) else str(value or "").encode("utf-8")
+        (root / f"{stem}.{suffix}.log").write_bytes(raw)
 
 
 def _invoke_karina_worker(args, request, request_name):

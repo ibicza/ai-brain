@@ -129,6 +129,7 @@ class KarinaRemoteEnvironmentPolicy:
     login_shell_allowed: bool
     profile_startup_allowed: bool
     network_allowed: bool
+    project_source_import_path_bound: bool
     policy_hash: str
 
 
@@ -268,8 +269,8 @@ def load_private_execution_capsule(path: Path) -> KarinaPrivateExecutionCapsule:
 
 def minimal_environment_policy() -> KarinaRemoteEnvironmentPolicy:
     body = {
-        "schema_version": 1,
-        "policy_id": "m336j.karina-minimal-environment.v1",
+        "schema_version": 2,
+        "policy_id": "m336j.karina-minimal-environment.v2",
         "path_entry_count": 2,
         "uv_directory_present": False,
         "python_no_user_site": True,
@@ -279,17 +280,30 @@ def minimal_environment_policy() -> KarinaRemoteEnvironmentPolicy:
         "login_shell_allowed": False,
         "profile_startup_allowed": False,
         "network_allowed": False,
+        "project_source_import_path_bound": True,
     }
     return KarinaRemoteEnvironmentPolicy(**body, policy_hash=content_hash(body))
 
 
-def minimal_environment() -> tuple[tuple[str, str], ...]:
+def minimal_environment(
+    repository_checkout: str | Path | PurePosixPath,
+) -> tuple[tuple[str, str], ...]:
+    if isinstance(repository_checkout, Path):
+        if not repository_checkout.is_absolute():
+            raise ValueError("M336J project source import root must be absolute")
+        project_source = str(repository_checkout / "src")
+    else:
+        repository = PurePosixPath(str(repository_checkout))
+        if not repository.is_absolute():
+            raise ValueError("M336J project source import root must be absolute")
+        project_source = (repository / "src").as_posix()
     return (
         ("LC_ALL", "C.UTF-8"),
         ("PATH", M336J_MINIMAL_PATH),
         ("PIP_NO_INDEX", "1"),
         ("PYTHONDONTWRITEBYTECODE", "1"),
         ("PYTHONNOUSERSITE", "1"),
+        ("PYTHONPATH", project_source),
         ("TZ", "UTC"),
         ("UV_OFFLINE", "1"),
     )
@@ -330,7 +344,10 @@ def verify_execution_capsule(
             raise ValueError("M336J capsule executable is not a regular file")
     if site.ENABLE_USER_SITE is not False or os.environ.get("PYTHONNOUSERSITE") != "1":
         raise ValueError("M336J user-site loading is not disabled")
-    if any(os.environ.get(name) != value for name, value in minimal_environment()):
+    if any(
+        os.environ.get(name) != value
+        for name, value in minimal_environment(capsule.repository_checkout)
+    ):
         raise ValueError("M336J worker environment differs from the minimal policy")
     if "torch" in sys.modules:
         raise ValueError("M336J execution capsule imported torch")
@@ -483,7 +500,7 @@ def build_remote_command_plan(
     body = {
         "schema_version": M336J_COMMAND_PLAN_SCHEMA_VERSION,
         "component_id": component_id,
-        "environment": minimal_environment(),
+        "environment": minimal_environment(capsule.repository_checkout),
         "argv": argv,
         "expected_capsule_receipt_hash": expected_capsule_receipt_hash,
         "stdin_payload_hash": payload_hash,
@@ -496,10 +513,11 @@ def render_remote_command(
     plan: KarinaRemoteCommandPlan,
     *,
     shell_executable: str | Path | PurePosixPath,
+    repository_checkout: str | Path | PurePosixPath,
 ) -> str:
     """Render a deterministic POSIX command with no profile or PATH lookup."""
 
-    _verify_command_plan(plan)
+    _verify_command_plan(plan, repository_checkout=repository_checkout)
     resolved_shell = PurePosixPath(str(shell_executable))
     if not resolved_shell.is_absolute():
         raise ValueError("M336J shell executable handle must be absolute")
@@ -710,7 +728,7 @@ def compute_m336j_project_source_identity(
         ),
         check=True,
         capture_output=True,
-        env=dict(minimal_environment()),
+        env=dict(minimal_environment(root)),
     )
     paths = tuple(
         sorted(
@@ -849,14 +867,18 @@ def _validate_tokens(tokens: Sequence[KarinaRemoteCommandToken]) -> None:
                 raise ValueError("M336J executable token requires an absolute handle")
 
 
-def _verify_command_plan(plan: KarinaRemoteCommandPlan) -> None:
+def _verify_command_plan(
+    plan: KarinaRemoteCommandPlan,
+    *,
+    repository_checkout: str | Path | PurePosixPath,
+) -> None:
     body = asdict(plan)
     claimed = body.pop("command_plan_hash")
     if (
         plan.schema_version != M336J_COMMAND_PLAN_SCHEMA_VERSION
         or content_hash(body) != claimed
         or tuple(sorted(plan.environment)) != plan.environment
-        or tuple(plan.environment) != minimal_environment()
+        or tuple(plan.environment) != minimal_environment(repository_checkout)
     ):
         raise ValueError("M336J command plan changed")
     for name, value in plan.environment:

@@ -204,13 +204,15 @@ def test_private_capsule_identity_mutations_fail(
 
 
 def test_minimal_environment_omits_uv_and_profiles() -> None:
-    environment = dict(minimal_environment())
+    environment = dict(minimal_environment("/private repo/checkout"))
     policy = minimal_environment_policy()
     assert environment["PATH"] == "/usr/bin:/bin"
+    assert environment["PYTHONPATH"] == "/private repo/checkout/src"
     assert ".local" not in environment["PATH"]
     assert policy.uv_directory_present is False
     assert policy.profile_startup_allowed is False
     assert policy.login_shell_allowed is False
+    assert policy.project_source_import_path_bound is True
 
 
 @pytest.mark.parametrize("argument", ("with space", "a'b", "a;b", "$(id)"))
@@ -218,7 +220,11 @@ def test_renderer_quotes_shell_metacharacters_without_interpreting_them(
     tmp_path: Path, argument: str
 ) -> None:
     capsule, plan = _plan(tmp_path, argument)
-    rendered = render_remote_command(plan, shell_executable=capsule.shell_executable)
+    rendered = render_remote_command(
+        plan,
+        shell_executable=capsule.shell_executable,
+        repository_checkout=capsule.repository_checkout,
+    )
     assert argument not in rendered or "'" in rendered
     assert ".profile" not in rendered
     assert ".bashrc" not in rendered
@@ -252,7 +258,32 @@ def test_renderer_rejects_rehashed_plan_mutation(tmp_path: Path) -> None:
     capsule, plan = _plan(tmp_path)
     changed = replace(plan, component_id="mutated")
     with pytest.raises(ValueError):
-        render_remote_command(changed, shell_executable=capsule.shell_executable)
+        render_remote_command(
+            changed,
+            shell_executable=capsule.shell_executable,
+            repository_checkout=capsule.repository_checkout,
+        )
+
+
+def test_renderer_rejects_rehashed_project_source_path_mutation(
+    tmp_path: Path,
+) -> None:
+    capsule, plan = _plan(tmp_path)
+    mutated_environment = tuple(
+        (name, "/different/checkout/src") if name == "PYTHONPATH" else (name, value)
+        for name, value in plan.environment
+    )
+    changed = replace(plan, environment=mutated_environment, command_plan_hash="")
+    body = asdict(changed)
+    body.pop("command_plan_hash")
+    changed = replace(changed, command_plan_hash=content_hash(body))
+
+    with pytest.raises(ValueError, match="command plan changed"):
+        render_remote_command(
+            changed,
+            shell_executable=capsule.shell_executable,
+            repository_checkout=capsule.repository_checkout,
+        )
 
 
 def test_dependency_manifest_round_trip_and_audit() -> None:
@@ -544,12 +575,35 @@ def test_private_capsule_rejects_overlapping_reverse_root(tmp_path: Path) -> Non
 def test_renderer_rejects_relative_shell_handle(tmp_path: Path) -> None:
     _capsule_value, plan = _plan(tmp_path)
     with pytest.raises(ValueError):
-        render_remote_command(plan, shell_executable="sh")
+        render_remote_command(
+            plan,
+            shell_executable="sh",
+            repository_checkout="/private repo/checkout",
+        )
 
 
 def test_transport_failure_preserves_nonzero_exit_class() -> None:
     error = subprocess.CalledProcessError(127, ("ssh",))
     assert error.returncode == 127
+
+
+def test_remote_command_failure_diagnostics_remain_private(tmp_path: Path) -> None:
+    route = runpy.run_path("scripts/m336i_java_final_route.py")
+    root = tmp_path / "private-command-receipts"
+    error = subprocess.CalledProcessError(
+        1, ("ssh",), output=b"remote stdout", stderr=b"remote stderr"
+    )
+
+    route["_write_karina_command_failure_diagnostics"](
+        root, "karina-vault-transfer-command.json", error
+    )
+
+    assert (root / "karina-vault-transfer-command.stdout.log").read_bytes() == (
+        b"remote stdout"
+    )
+    assert (root / "karina-vault-transfer-command.stderr.log").read_bytes() == (
+        b"remote stderr"
+    )
 
 
 def test_windows_ssh_environment_keeps_system_crypto_root(

@@ -682,7 +682,11 @@ def _ssh_command(
         or not 1 <= transport.connect_timeout_seconds <= 60
     ):
         raise ValueError("M336J private SSH transport is invalid")
-    rendered = render_remote_command(plan, shell_executable=capsule.shell_executable)
+    rendered = render_remote_command(
+        plan,
+        shell_executable=capsule.shell_executable,
+        repository_checkout=capsule.repository_checkout,
+    )
     return (
         str(ssh),
         "-T",
