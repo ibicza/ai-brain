@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import os
 from dataclasses import asdict
 from pathlib import Path
 
@@ -485,6 +486,18 @@ def test_bare_executable_is_rejected_before_subprocess() -> None:
         )
 
 
+def test_executable_without_version_api_uses_explicit_content_identity(
+    tmp_path: Path,
+) -> None:
+    executable = tmp_path / "scp.exe"
+    executable.write_bytes(b"frozen executable")
+    binding = build_executable_binding(
+        executable.resolve(), role="scp", version_arguments=()
+    )
+    assert binding.version_arguments == ()
+    assert binding.semantic_version == f"CONTENT_IDENTITY_ONLY:{binding.file_sha256}"
+
+
 def test_minimal_environment_disables_network_install_and_user_site() -> None:
     environment = m336k2_minimal_environment()
     assert environment["PATH"] == ""
@@ -492,6 +505,8 @@ def test_minimal_environment_disables_network_install_and_user_site() -> None:
     assert environment["UV_OFFLINE"] == "1"
     assert environment["PYTHONNOUSERSITE"] == "1"
     assert environment["PYTHONDONTWRITEBYTECODE"] == "1"
+    if "PROGRAMDATA" in os.environ:
+        assert environment["PROGRAMDATA"] == os.environ["PROGRAMDATA"]
 
 
 def test_live_python_environment_must_equal_frozen_manifest(monkeypatch) -> None:
@@ -538,6 +553,47 @@ def _load_exact_quality_script(name: str):
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def _load_component_bundle_script(name: str):
+    from importlib.util import module_from_spec, spec_from_file_location
+
+    script = Path(__file__).parents[1] / "scripts" / "m336k2_build_component_bundle.py"
+    spec = spec_from_file_location(name, script)
+    assert spec is not None and spec.loader is not None
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_evidence_binding_script(name: str):
+    from importlib.util import module_from_spec, spec_from_file_location
+
+    script = Path(__file__).parents[1] / "scripts" / "m336k2_build_evidence_bindings.py"
+    spec = spec_from_file_location(name, script)
+    assert spec is not None and spec.loader is not None
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_evidence_binding_loader_rejects_non_object_json(tmp_path: Path) -> None:
+    module = _load_evidence_binding_script("m336k2_evidence_bindings")
+    path = tmp_path / "source.json"
+    path.write_text("[]\n", encoding="utf-8")
+    with pytest.raises(M336K2ProtocolError, match="not an object"):
+        module._object(path)
+
+
+def test_component_bundle_wraps_legacy_boundary_with_native_hash(
+    tmp_path: Path,
+) -> None:
+    module = _load_component_bundle_script("m336k2_component_bundle")
+    path = tmp_path / "boundary.json"
+    path.write_text('{"schema_version":1,"raw_source_publication":false}\n')
+    value = module._publication_boundary_component(path)
+    claimed = value.pop("publication_boundary_hash")
+    assert claimed == content_hash(value)
 
 
 def test_exact_quality_children_run_with_minimal_offline_environment(

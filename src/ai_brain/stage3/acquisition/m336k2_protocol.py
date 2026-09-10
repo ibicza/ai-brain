@@ -364,6 +364,7 @@ class M336K2ExecutableBinding:
     role: str
     path_identity_hash: str
     file_sha256: str
+    version_arguments: tuple[str, ...]
     semantic_version: str
     semantic_version_hash: str
     binding_hash: str
@@ -379,23 +380,28 @@ def build_executable_binding(
     resolved = path.resolve(strict=True)
     if not resolved.is_file():
         raise M336K2ProtocolError(f"executable is not a file for {role}")
-    result = subprocess.run(
-        (str(resolved), *version_arguments),
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="strict",
-        env=m336k2_minimal_environment(),
-    )
-    version = (result.stdout + result.stderr).strip()
-    if not version:
-        raise M336K2ProtocolError(f"executable version is empty for {role}")
+    file_hash = bytes_hash(resolved.read_bytes())
+    if version_arguments:
+        result = subprocess.run(
+            (str(resolved), *version_arguments),
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="strict",
+            env=m336k2_minimal_environment(),
+        )
+        version = (result.stdout + result.stderr).strip()
+        if result.returncode != 0 or not version:
+            raise M336K2ProtocolError(f"executable version failed for {role}")
+    else:
+        version = f"CONTENT_IDENTITY_ONLY:{file_hash}"
     body = {
         "schema_version": 1,
         "role": role,
         "path_identity_hash": content_hash(resolved.as_posix()),
-        "file_sha256": bytes_hash(resolved.read_bytes()),
+        "file_sha256": file_hash,
+        "version_arguments": version_arguments,
         "semantic_version": version,
         "semantic_version_hash": content_hash(version),
     }
@@ -406,7 +412,7 @@ def verify_executable_binding(path: Path, binding: M336K2ExecutableBinding) -> N
     rebuilt = build_executable_binding(
         path,
         role=binding.role,
-        version_arguments=_version_arguments(binding.role),
+        version_arguments=binding.version_arguments,
     )
     if rebuilt != binding:
         raise M336K2ProtocolError(f"executable binding changed for {binding.role}")
@@ -782,6 +788,7 @@ def m336k2_minimal_environment() -> dict[str, str]:
         "LANG",
         "LC_ALL",
         "PATHEXT",
+        "PROGRAMDATA",
         "SYSTEMROOT",
         "TEMP",
         "TMP",

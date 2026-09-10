@@ -338,7 +338,9 @@ def main() -> None:
         "threshold_manifest": _object(Path(request["threshold_manifest"])),
         "disclosure_registry_manifest": _object(disclosure),
         "denylist": _object(Path(request["denylist"])),
-        "publication_boundary": _object(Path(request["publication_boundary"])),
+        "publication_boundary": _publication_boundary_component(
+            Path(request["publication_boundary"])
+        ),
         "public_pack_contract": _object(Path(request["public_pack_contract"])),
         "h28_publication_contract": asdict(publication),
         "e28_publication_contract": asdict(publication),
@@ -381,6 +383,18 @@ def _verified_object(path: Path, hash_field: str) -> dict:
     claimed = body.pop(hash_field, None)
     if not isinstance(claimed, str) or content_hash(body) != claimed:
         raise M336K2ProtocolError("M336K2 component input hash changed")
+    return value
+
+
+def _publication_boundary_component(path: Path) -> dict:
+    value = _object(path)
+    claimed = value.get("publication_boundary_hash")
+    if claimed is None:
+        return {**value, "publication_boundary_hash": content_hash(value)}
+    body = dict(value)
+    body.pop("publication_boundary_hash")
+    if content_hash(body) != claimed:
+        raise M336K2ProtocolError("M336K2 publication boundary hash changed")
     return value
 
 
