@@ -65,7 +65,12 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _write_private_state,
 )
 from ai_brain.stage3.acquisition.m336k_acquisition import acquire_candidate_v2
-from scripts.m336k2_qualify_disposable_protocol import _commit as disposable_commit
+from scripts.m336k2_qualify_disposable_protocol import (
+    _commit as disposable_commit,
+)
+from scripts.m336k2_qualify_disposable_protocol import (
+    _write_private_controller_diagnostics,
+)
 
 
 def test_route_ledger_enforces_complete_exact_order_and_one_shot_counts(
@@ -155,6 +160,16 @@ def test_rehearsal_provider_supplies_candidate_isolation_receipts(
     assert outcome.terminal_receipt.source_receipt_hash is not None
     assert outcome.terminal_receipt.pom_receipt_hash is not None
     assert outcome.terminal_receipt.scm_receipt_hash is not None
+
+
+def test_disposable_controller_diagnostics_remain_private(tmp_path: Path) -> None:
+    private = tmp_path / "private"
+    private.mkdir()
+
+    _write_private_controller_diagnostics(private, "stdout\n", "stderr\n")
+
+    assert (private / "controller.stdout.log").read_bytes() == b"stdout\n"
+    assert (private / "controller.stderr.log").read_bytes() == b"stderr\n"
 
 
 def test_schema_registry_covers_all_twenty_eight_route_stages() -> None:

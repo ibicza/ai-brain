@@ -253,6 +253,7 @@ def main() -> None:
         errors="strict",
         env=environment,
     )
+    _write_private_controller_diagnostics(private, result.stdout, result.stderr)
     if result.returncode:
         raise M336K2ProtocolError("M336K2 disposable typed controller failed")
     route_receipt = _object((runtime / "route-receipt.json").resolve(strict=True))
@@ -327,6 +328,19 @@ def _commit(git: Path, repository: Path, subject: str, relative_root: str) -> st
     _git(git, repository, "add", "-f", "--", relative_root)
     _git(git, repository, "commit", "-m", subject)
     return _git(git, repository, "rev-parse", "HEAD^{commit}")
+
+
+def _write_private_controller_diagnostics(
+    private: Path, stdout: str, stderr: str
+) -> None:
+    for name, value in (
+        ("controller.stdout.log", stdout),
+        ("controller.stderr.log", stderr),
+    ):
+        target = private / name
+        if target.exists():
+            raise M336K2ProtocolError("M336K2 controller diagnostic is stale")
+        target.write_bytes(value.encode("utf-8"))
 
 
 def _require_clean_head(git: Path, repository: Path, expected: str) -> None:
