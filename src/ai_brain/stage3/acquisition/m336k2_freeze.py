@@ -140,7 +140,12 @@ def materialize_m336k2_f28(
         )
         prospective_rows = _tree_rows(destination)
         prospective = content_hash(prospective_rows)
-        component_by_name = {item.name: item for item in components}
+        authorization_hash = _semantic_component_hash(
+            component_sources["final_authorization"], "authorization_hash"
+        )
+        route_hash = _semantic_component_hash(
+            component_sources["route_manifest"], "manifest_hash"
+        )
         manifest_body = {
             "schema_version": 1,
             "contract_role": "M336K2_F28_FREEZE",
@@ -149,8 +154,8 @@ def materialize_m336k2_f28(
             "exact_f28_sha": "0" * 40,
             "committed_f28_tree": "0" * 40,
             "readiness_hash": readiness_value.readiness_hash,
-            "authorization_hash": component_by_name["final_authorization"].bytes_hash,
-            "route_hash": component_by_name["route_manifest"].bytes_hash,
+            "authorization_hash": authorization_hash,
+            "route_hash": route_hash,
             "components": tuple(components),
             "self_reference_safe_exclusions": (
                 f"{relative_output}/freeze_manifest.json",
@@ -245,6 +250,20 @@ def _reject_source_body(path: Path) -> None:
         json.loads(raw)
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise M336K2ProtocolError("M336K2 F28 component is not strict JSON") from error
+
+
+def _semantic_component_hash(path: Path, field: str) -> str:
+    value = _object(path.resolve(strict=True))
+    claimed = value.get(field)
+    body = dict(value)
+    body.pop(field, None)
+    if (
+        not isinstance(claimed, str)
+        or len(claimed) != 64
+        or content_hash(body) != claimed
+    ):
+        raise M336K2ProtocolError("M336K2 F28 semantic component hash changed")
+    return claimed
 
 
 def _tree_rows(root: Path) -> tuple[tuple[str, int, str], ...]:

@@ -30,6 +30,7 @@ from ai_brain.stage3.acquisition.m336k2_execution import (
     verify_m336k2_executable_handles,
     verify_m336k2_python_environment_manifest,
 )
+from ai_brain.stage3.acquisition.m336k2_freeze import _semantic_component_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import (
     M336K2_MUTATION_MATRIX,
     M336K2_READY_STATUS,
@@ -577,6 +578,29 @@ def test_disposable_commit_force_adds_only_the_validated_ignored_root(
         == "{}"
     )
     assert not run("status", "--porcelain=v1")
+
+
+def test_freeze_uses_verified_semantic_component_hash(tmp_path: Path) -> None:
+    body = {
+        "schema_version": 1,
+        "contract_role": "M336K2_TEST_AUTHORIZATION",
+    }
+    semantic_hash = content_hash(body)
+    path = tmp_path / "authorization.json"
+    path.write_text(
+        canonical_json({**body, "authorization_hash": semantic_hash}) + "\n",
+        encoding="utf-8",
+    )
+
+    assert _semantic_component_hash(path, "authorization_hash") == semantic_hash
+    assert bytes_hash(path.read_bytes()) != semantic_hash
+
+    path.write_text(
+        canonical_json({**body, "authorization_hash": "0" * 64}) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(M336K2ProtocolError, match="semantic component hash"):
+        _semantic_component_hash(path, "authorization_hash")
 
 
 def test_minimal_environment_disables_network_install_and_user_site() -> None:
