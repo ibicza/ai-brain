@@ -117,6 +117,7 @@ from ai_brain.stage3.acquisition.m336j_transport import (
     invoke_karina_command_streaming,
     parse_bound_json_response,
     parse_framed_tree_response_file,
+    portable_tree_content_identity,
     write_canonical_tree_archive,
 )
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
@@ -1127,6 +1128,9 @@ def _upload_karina_tree(args, *, label, source):
             prefix=label,
             limits=limits,
         )
+        content_file_count, content_tree_hash = portable_tree_content_identity(source)
+        if content_file_count != artifact.file_count:
+            raise ValueError("M336J upload content accounting changed")
         request_hash = content_hash(
             (
                 label,
@@ -1134,6 +1138,8 @@ def _upload_karina_tree(args, *, label, source):
                 artifact.archive_size,
                 artifact.file_count,
                 artifact.portable_tree_hash,
+                content_file_count,
+                content_tree_hash,
                 limit_hash,
                 public.receipt_hash,
             )
@@ -1165,6 +1171,18 @@ def _upload_karina_tree(args, *, label, source):
                     KarinaRemoteTokenClass.PUBLIC_IDENTITY,
                     artifact.portable_tree_hash,
                 ),
+                (KarinaRemoteTokenClass.FLAG, "--content-root"),
+                (KarinaRemoteTokenClass.PRIVATE_PATH, label),
+                (KarinaRemoteTokenClass.FLAG, "--expected-content-file-count"),
+                (
+                    KarinaRemoteTokenClass.OPAQUE_ARGUMENT,
+                    str(content_file_count),
+                ),
+                (KarinaRemoteTokenClass.FLAG, "--expected-content-tree-hash"),
+                (
+                    KarinaRemoteTokenClass.PUBLIC_IDENTITY,
+                    content_tree_hash,
+                ),
                 (KarinaRemoteTokenClass.FLAG, "--transfer-limit-hash"),
                 (KarinaRemoteTokenClass.PUBLIC_IDENTITY, limit_hash),
                 (KarinaRemoteTokenClass.FLAG, "--expected-capsule-receipt-hash"),
@@ -1175,6 +1193,16 @@ def _upload_karina_tree(args, *, label, source):
                 (KarinaRemoteTokenClass.PUBLIC_IDENTITY, component.binding_hash),
             ),
         )
+        if (
+            response.get("status") != "PASS"
+            or response.get("payload_hash") != artifact.archive_hash
+            or response.get("payload_size") != artifact.archive_size
+            or response.get("file_count") != artifact.file_count
+            or response.get("portable_tree_hash") != artifact.portable_tree_hash
+            or response.get("content_file_count") != content_file_count
+            or response.get("content_tree_hash") != content_tree_hash
+        ):
+            raise ValueError("M336J remote tree upload receipt changed")
         write_canonical_json(
             args.private_acquisition_output / f"karina-{label}-transfer-receipt.json",
             response,

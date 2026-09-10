@@ -12,6 +12,7 @@ import pytest
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 from ai_brain.stage3.acquisition import m336k2_execution
+from ai_brain.stage3.acquisition.m336e_identity import build_portable_vault_manifest
 from ai_brain.stage3.acquisition.m336k2_acquisition import (
     M336K2_FINAL_ACQUISITION_RUN_ID,
     _construct_quota_pairs,
@@ -67,6 +68,7 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _evaluator_receipt,
     _karina_expected_head,
     _rehearsal_provider,
+    _verify_karina_vault,
     _verify_request,
     _write_private_state,
 )
@@ -229,6 +231,48 @@ def test_m336k2_construct_quotas_remain_ordered_pairs() -> None:
     )
     with pytest.raises(M336K2ProtocolError, match="construct quotas"):
         _construct_quota_pairs(["constructor"])
+
+
+def test_karina_vault_verification_uses_unwrapped_content_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    (vault / "item.json").write_text("{}\n", encoding="utf-8", newline="\n")
+    private = tmp_path / "private"
+    private.mkdir()
+    manifest = build_portable_vault_manifest(vault)
+    (private / "portable_vault_manifest.json").write_text(
+        canonical_json(asdict(manifest)) + "\n", encoding="utf-8", newline="\n"
+    )
+    response = {
+        "status": "PASS",
+        "file_count": manifest.file_count,
+        "portable_tree_hash": "0" * 64,
+        "content_file_count": manifest.file_count,
+        "content_tree_hash": manifest.portable_tree_hash,
+        "receipt_hash": "1" * 64,
+    }
+    monkeypatch.setattr(
+        "ai_brain.stage3.acquisition.m336k2_stage._karina_args",
+        lambda _request: object(),
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "m336i_java_final_route",
+        type(
+            "Route",
+            (),
+            {"_upload_karina_tree": staticmethod(lambda *_args, **_kwargs: response)},
+        ),
+    )
+
+    result = _verify_karina_vault(
+        {"private_root": str(private), "final_destinations": {"vault": str(vault)}}
+    )
+
+    assert result["portable_tree_hash"] == manifest.portable_tree_hash
+    assert result["transfer_receipt_hash"] == response["receipt_hash"]
 
 
 def test_schema_registry_covers_all_twenty_eight_route_stages() -> None:

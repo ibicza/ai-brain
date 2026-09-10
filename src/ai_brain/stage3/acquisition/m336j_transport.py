@@ -666,6 +666,17 @@ def hash_file(path: Path, *, chunk_bytes: int = M336J_STREAM_CHUNK_BYTES) -> str
     return digest.hexdigest()
 
 
+def portable_tree_content_identity(root: Path) -> tuple[int, str]:
+    """Return the wrapper-independent canonical identity used by vault manifests."""
+
+    from ai_brain.stage3.acquisition.m336e_identity import (
+        build_portable_vault_manifest,
+    )
+
+    manifest = build_portable_vault_manifest(root)
+    return manifest.file_count, manifest.portable_tree_hash
+
+
 def _ssh_command(
     *,
     transport: KarinaPrivateSshTransport,

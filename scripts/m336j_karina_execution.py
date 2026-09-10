@@ -35,6 +35,7 @@ from ai_brain.stage3.acquisition.m336j_storage import (
 from ai_brain.stage3.acquisition.m336j_transport import (
     M336J_DEFAULT_TREE_TRANSFER_LIMITS,
     extract_canonical_tree_archive_file,
+    portable_tree_content_identity,
     stream_file_to_stdout,
     stream_stdin_to_private_file,
     write_canonical_tree_export,
@@ -98,6 +99,15 @@ def _receive_tree(args) -> None:
         temporary.unlink(missing_ok=True)
     if count != args.file_count or tree_hash != args.portable_tree_hash:
         raise ValueError("M336J receive-tree content declaration changed")
+    content_root = _private_existing(
+        PurePosixPath(destination.as_posix()), args.content_root
+    )
+    content_count, content_tree_hash = portable_tree_content_identity(content_root)
+    if (
+        content_count != args.expected_content_file_count
+        or content_tree_hash != args.expected_content_tree_hash
+    ):
+        raise ValueError("M336J receive-tree unwrapped content identity changed")
     body = {
         "schema_version": 1,
         "contract_role": "PUBLIC_M336J_PRIVATE_TREE_TRANSFER_RECEIPT",
@@ -108,6 +118,8 @@ def _receive_tree(args) -> None:
         "payload_size": args.payload_size,
         "file_count": count,
         "portable_tree_hash": tree_hash,
+        "content_file_count": content_count,
+        "content_tree_hash": content_tree_hash,
         "transfer_limit_hash": limit_hash,
         "status": "PASS",
     }
@@ -393,6 +405,11 @@ def main() -> None:
             transfer.add_argument("--payload-size", type=int, required=True)
             transfer.add_argument("--file-count", type=int, required=True)
             transfer.add_argument("--portable-tree-hash", required=True)
+            transfer.add_argument("--content-root", required=True)
+            transfer.add_argument(
+                "--expected-content-file-count", type=int, required=True
+            )
+            transfer.add_argument("--expected-content-tree-hash", required=True)
             transfer.add_argument("--transfer-limit-hash", required=True)
         else:
             transfer.add_argument("--relative-source", required=True)

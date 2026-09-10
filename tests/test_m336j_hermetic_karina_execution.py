@@ -80,6 +80,7 @@ from ai_brain.stage3.acquisition.m336j_transport import (
     parse_bound_json_response,
     parse_framed_tree_response,
     parse_framed_tree_response_file,
+    portable_tree_content_identity,
     stream_stdin_to_private_file,
     write_canonical_tree_archive,
 )
@@ -861,6 +862,10 @@ def test_file_backed_archive_is_repeatable_and_atomically_extracts(
         limits=limits,
     )
     assert (count, tree_hash) == (first.file_count, first.portable_tree_hash)
+    source_identity = portable_tree_content_identity(source)
+    extracted_identity = portable_tree_content_identity(destination / "payload")
+    assert source_identity == extracted_identity
+    assert source_identity[0] == first.file_count
 
 
 def test_file_backed_archive_rejects_duplicate_members(tmp_path: Path) -> None:

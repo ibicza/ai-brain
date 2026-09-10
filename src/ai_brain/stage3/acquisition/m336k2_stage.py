@@ -331,8 +331,8 @@ def _verify_karina_vault(request: dict) -> dict:
     )
     if (
         response.get("status") != "PASS"
-        or response.get("portable_tree_hash") != manifest.portable_tree_hash
-        or response.get("file_count") != manifest.file_count
+        or response.get("content_tree_hash") != manifest.portable_tree_hash
+        or response.get("content_file_count") != manifest.file_count
     ):
         raise M336K2ProtocolError("M336K2 Karina vault verification changed")
     return {
