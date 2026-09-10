@@ -25,7 +25,7 @@ from ai_brain.stage3.acquisition.m336k2_acquisition import (
 )
 
 _MAVEN = "https://repo.maven.apache.org/maven2"
-_SEARCH = "https://search.maven.org/solrsearch/select"
+_BROWSE = "https://central.sonatype.com/api/internal/browse/components"
 _USER_AGENT = "ai-brain-m336k2-metadata-only/1"
 
 
@@ -133,18 +133,31 @@ _request_counters = Counter()
 
 
 def _search_page(page: int) -> tuple[dict, ...]:
-    query = urllib.parse.urlencode(
+    value = _metadata_json_post(
+        _BROWSE,
         {
-            "q": "p:jar",
-            "core": "gav",
-            "rows": 200,
-            "start": page * 200,
-            "sort": "timestamp desc",
-            "wt": "json",
-        }
+            "page": page,
+            "size": 200,
+            "searchTerm": "",
+            "sortField": "publishedDate",
+            "sortDirection": "desc",
+            "filter": [],
+        },
     )
-    value = _metadata_json(f"{_SEARCH}?{query}")
-    return tuple(value.get("response", {}).get("docs", ()))
+    documents = []
+    for component in value.get("components", ()):
+        latest = component.get("latestVersionInfo") or {}
+        documents.append(
+            {
+                "g": component.get("namespace"),
+                "a": component.get("name"),
+                "v": latest.get("version"),
+                "p": component.get("packaging"),
+                "ec": component.get("ec") or (),
+                "timestamp": latest.get("timestampUnixWithMS"),
+            }
+        )
+    return tuple(documents)
 
 
 def _candidate_from_metadata(doc: dict, git: Path) -> dict | None:
@@ -415,6 +428,36 @@ def _head(url: str) -> dict[str, str]:
 
 def _metadata_json(url: str) -> dict:
     return json.loads(_metadata_bytes(url, maximum=10_000_000))
+
+
+def _metadata_json_post(url: str, payload: dict) -> dict:
+    encoded = canonical_json(payload).encode("utf-8")
+    for attempt in range(3):
+        request = urllib.request.Request(
+            url,
+            data=encoded,
+            method="POST",
+            headers={
+                "User-Agent": _USER_AGENT,
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+        )
+        _request_counters["metadata"] += 1
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                raw = response.read(10_000_001)
+            if len(raw) > 10_000_000:
+                raise ValueError("metadata response exceeds bound")
+            value = json.loads(raw)
+            if not isinstance(value, dict):
+                raise TypeError("metadata response is not an object")
+            return value
+        except (OSError, json.JSONDecodeError):
+            if attempt == 2:
+                raise
+            time.sleep(attempt + 1)
+    raise AssertionError("unreachable metadata POST retry state")
 
 
 def _metadata_bytes(url: str, *, maximum: int) -> bytes:

@@ -616,6 +616,42 @@ def test_metadata_read_retries_transient_timeout_twice(monkeypatch) -> None:
     assert attempts == [60, 60, 60]
 
 
+def test_metadata_discovery_uses_body_free_central_browse_api(monkeypatch) -> None:
+    module = _load_metadata_pool_script("m336k2_metadata_pool_browse")
+    observed = {}
+
+    def fake_post(url, payload):
+        observed.update({"url": url, "payload": payload})
+        return {
+            "components": [
+                {
+                    "namespace": "org.example",
+                    "name": "example-core",
+                    "packaging": "jar",
+                    "ec": [".pom", "-sources.jar", ".jar"],
+                    "latestVersionInfo": {
+                        "version": "1.2.3",
+                        "timestampUnixWithMS": 123,
+                    },
+                }
+            ]
+        }
+
+    monkeypatch.setattr(module, "_metadata_json_post", fake_post)
+    assert module._search_page(4) == (
+        {
+            "g": "org.example",
+            "a": "example-core",
+            "v": "1.2.3",
+            "p": "jar",
+            "ec": [".pom", "-sources.jar", ".jar"],
+            "timestamp": 123,
+        },
+    )
+    assert observed["url"] == module._BROWSE
+    assert observed["payload"]["page"] == 4
+
+
 def _freeze(tmp_path: Path) -> M336K2FreezeManifest:
     components = []
     for index, name in enumerate(sorted(M336K2_REQUIRED_FREEZE_COMPONENTS)):
