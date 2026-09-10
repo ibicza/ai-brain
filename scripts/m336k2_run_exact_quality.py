@@ -210,7 +210,8 @@ def main() -> None:
                     (
                         "from ai_brain.stage3.acquisition.m336k2_controller import build_m336k2_schema_registry; "
                         "from ai_brain.stage3.acquisition.m336k2_registry import build_m336k2_route_registry; "
-                        "r=build_m336k2_route_registry(); s=build_m336k2_schema_registry(); "
+                        "r=build_m336k2_route_registry(__import__('pathlib').Path('.')); "
+                        "s=build_m336k2_schema_registry(); "
                         "raise SystemExit(0 if len(r.components)>=1 and s.incompatible_edge_count==0 else 1)"
                     ),
                 ),

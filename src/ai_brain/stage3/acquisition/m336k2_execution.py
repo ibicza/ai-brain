@@ -35,6 +35,7 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
     M336K2ProtocolError,
     build_executable_binding,
     m336k2_minimal_environment,
+    verify_executable_binding,
 )
 
 M336K2_COMMAND_EVENTS = M336K2_ROUTE_EVENTS[3:]
@@ -390,7 +391,13 @@ def executable_dependency_manifest_from_dict(
         **{
             **value,
             "bindings": tuple(
-                M336K2ExecutableBinding(**item) for item in value["bindings"]
+                M336K2ExecutableBinding(
+                    **{
+                        **item,
+                        "version_arguments": tuple(item["version_arguments"]),
+                    }
+                )
+                for item in value["bindings"]
             ),
         }
     )
@@ -418,13 +425,8 @@ def verify_m336k2_executable_handles(
     if M336K2_REQUIRED_EXECUTABLE_ROLES - set(bindings):
         raise M336K2ProtocolError("M336K2 executable bindings are incomplete")
     for role, handle in handles.items():
-        resolved = handle.resolve(strict=True)
         binding = bindings[role]
-        if (
-            bytes_hash(resolved.read_bytes()) != binding.file_sha256
-            or content_hash(resolved.as_posix()) != binding.path_identity_hash
-        ):
-            raise M336K2ProtocolError(f"M336K2 executable handle changed: {role}")
+        verify_executable_binding(handle, binding)
 
 
 def build_m336k2_private_execution_plan(

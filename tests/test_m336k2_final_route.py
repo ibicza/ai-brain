@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
+from ai_brain.stage3.acquisition import m336k2_execution
 from ai_brain.stage3.acquisition.m336k2_acquisition import (
     M336K2_FINAL_ACQUISITION_RUN_ID,
     build_m336k2_final_authorization,
@@ -22,7 +23,9 @@ from ai_brain.stage3.acquisition.m336k2_controller import (
     run_m336k2_final_controller,
 )
 from ai_brain.stage3.acquisition.m336k2_execution import (
+    M336K2_REQUIRED_EXECUTABLE_ROLES,
     m336k2_python_invocation_handle,
+    verify_m336k2_executable_handles,
     verify_m336k2_python_environment_manifest,
 )
 from ai_brain.stage3.acquisition.m336k2_protocol import (
@@ -496,6 +499,33 @@ def test_executable_without_version_api_uses_explicit_content_identity(
     )
     assert binding.version_arguments == ()
     assert binding.semantic_version == f"CONTENT_IDENTITY_ONLY:{binding.file_sha256}"
+
+
+def test_executable_handle_verification_replays_every_frozen_binding(
+    monkeypatch, tmp_path: Path
+) -> None:
+    bindings = tuple(
+        type("Binding", (), {"role": role})()
+        for role in sorted(M336K2_REQUIRED_EXECUTABLE_ROLES)
+    )
+    manifest = type("Manifest", (), {"bindings": bindings})()
+    handles = {role: tmp_path / role for role in M336K2_REQUIRED_EXECUTABLE_ROLES}
+    calls = []
+    monkeypatch.setattr(
+        m336k2_execution,
+        "verify_executable_binding",
+        lambda path, binding: calls.append((path, binding.role)),
+    )
+
+    verify_m336k2_executable_handles(manifest, handles)
+
+    assert set(calls) == {(handles[role], role) for role in handles}
+
+
+def test_exact_quality_preflight_passes_explicit_repository() -> None:
+    source = Path("scripts/m336k2_run_exact_quality.py").read_text(encoding="utf-8")
+    assert "build_m336k2_route_registry(__import__('pathlib').Path('.'))" in source
+    assert "build_m336k2_route_registry()" not in source
 
 
 def test_minimal_environment_disables_network_install_and_user_site() -> None:
