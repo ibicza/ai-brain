@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -55,7 +56,10 @@ def _check(
     environment = _environment(
         repository, executable_directories=executable_directories
     )
-    environment["PYTEST_ADDOPTS"] = f"-p no:cacheprovider --basetemp={pytest_basetemp}"
+    basetemp_argument = shlex.quote(pytest_basetemp.as_posix())
+    environment["PYTEST_ADDOPTS"] = (
+        f"-p no:cacheprovider --basetemp={basetemp_argument}"
+    )
     started = time.perf_counter_ns()
     result = subprocess.run(
         command,

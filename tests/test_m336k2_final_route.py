@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -892,7 +893,14 @@ def test_exact_quality_reclaims_pytest_temp_before_writing_log(
     observed: dict[str, Path] = {}
 
     def fake_run(*_args, env, **_kwargs):
-        basetemp = Path(env["PYTEST_ADDOPTS"].split("--basetemp=", 1)[1])
+        options = shlex.split(env["PYTEST_ADDOPTS"])
+        basetemp = Path(
+            next(
+                option.removeprefix("--basetemp=")
+                for option in options
+                if option.startswith("--basetemp=")
+            )
+        )
         basetemp.mkdir(parents=True)
         (basetemp / "large-test-artifact").write_bytes(b"temporary")
         observed["basetemp"] = basetemp
@@ -906,6 +914,8 @@ def test_exact_quality_reclaims_pytest_temp_before_writing_log(
 
     assert receipt["exit_code"] == 0
     assert receipt["passed_test_count"] == 1
+    assert observed["basetemp"].is_absolute()
+    assert not observed["basetemp"].is_relative_to(repository)
     assert not observed["basetemp"].exists()
     assert (logs / "targeted.log").read_bytes() == b"1 passed\n"
 
