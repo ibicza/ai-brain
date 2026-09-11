@@ -32,6 +32,7 @@ def _environment(
                 str(directory.resolve(strict=True))
                 for directory in executable_directories
             ),
+            "PYTEST_ADDOPTS": "-p no:cacheprovider",
             "PYTHONIOENCODING": "utf-8",
             "PYTHONPATH": str((repository / "src").resolve(strict=True)),
             "PYTHONUTF8": "1",

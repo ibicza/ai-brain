@@ -82,6 +82,7 @@ from scripts.m336k2_qualify_disposable_protocol import (
 from scripts.m336k2_qualify_disposable_protocol import (
     _commit as disposable_commit,
 )
+from scripts.m336k2_run_exact_quality import _environment as exact_quality_environment
 
 
 def test_route_ledger_enforces_complete_exact_order_and_one_shot_counts(
@@ -863,6 +864,19 @@ def test_minimal_environment_disables_network_install_and_user_site() -> None:
     assert environment["PYTHONDONTWRITEBYTECODE"] == "1"
     if "PROGRAMDATA" in os.environ:
         assert environment["PROGRAMDATA"] == os.environ["PROGRAMDATA"]
+
+
+def test_exact_quality_disables_nonessential_pytest_cache(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    executable = tmp_path / "bin"
+    (repository / "src").mkdir(parents=True)
+    executable.mkdir()
+
+    environment = exact_quality_environment(
+        repository, executable_directories=(executable,)
+    )
+
+    assert environment["PYTEST_ADDOPTS"] == "-p no:cacheprovider"
 
 
 def test_live_python_environment_must_equal_frozen_manifest(monkeypatch) -> None:
