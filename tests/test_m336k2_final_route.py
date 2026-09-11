@@ -76,10 +76,11 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
 from ai_brain.stage3.acquisition.m336k_acquisition import acquire_candidate_v2
 from scripts.m336i_java_final_route import _m336j_worker_route_manifest
 from scripts.m336k2_qualify_disposable_protocol import (
-    _commit as disposable_commit,
+    _clone_disposable_repository,
+    _write_private_controller_diagnostics,
 )
 from scripts.m336k2_qualify_disposable_protocol import (
-    _write_private_controller_diagnostics,
+    _commit as disposable_commit,
 )
 
 
@@ -229,6 +230,39 @@ def test_disposable_controller_diagnostics_remain_private(tmp_path: Path) -> Non
 
     assert (private / "controller.stdout.log").read_bytes() == b"stdout\x97\n"
     assert (private / "controller.stderr.log").read_bytes() == b"stderr\xff\n"
+
+
+def test_disposable_clone_forces_lf_before_checkout(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    calls = []
+
+    def fake_git(git, repository, *arguments):
+        calls.append((git, repository, arguments))
+        return ""
+
+    monkeypatch.setattr("scripts.m336k2_qualify_disposable_protocol._git", fake_git)
+    git = tmp_path / "git"
+    source = tmp_path / "source"
+    repository = tmp_path / "repository"
+
+    _clone_disposable_repository(git, source, repository)
+
+    assert calls == [
+        (
+            git,
+            None,
+            (
+                "-c",
+                "core.autocrlf=false",
+                "clone",
+                "--no-local",
+                str(source),
+                str(repository),
+            ),
+        ),
+        (git, repository, ("config", "core.autocrlf", "false")),
+    ]
 
 
 def test_hermetic_command_worker_preserves_private_failure_diagnostics(

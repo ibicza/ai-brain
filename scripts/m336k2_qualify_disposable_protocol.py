@@ -77,7 +77,7 @@ def main() -> None:
     private.mkdir()
     public.mkdir()
     _git(git, None, "init", "--bare", str(remote))
-    _git(git, None, "clone", "--no-local", str(source), str(repository))
+    _clone_disposable_repository(git, source, repository)
     _git(git, repository, "config", "user.email", "m336k2@example.invalid")
     _git(git, repository, "config", "user.name", "M336K2 Disposable Proof")
     _git(git, repository, "remote", "set-url", "origin", str(remote))
@@ -318,6 +318,20 @@ def _git(git: Path, repository: Path | None, *arguments: str) -> str:
         errors="strict",
         env=m336k2_minimal_environment(),
     ).stdout.strip()
+
+
+def _clone_disposable_repository(git: Path, source: Path, repository: Path) -> None:
+    _git(
+        git,
+        None,
+        "-c",
+        "core.autocrlf=false",
+        "clone",
+        "--no-local",
+        str(source),
+        str(repository),
+    )
+    _git(git, repository, "config", "core.autocrlf", "false")
 
 
 def _commit(git: Path, repository: Path, subject: str, relative_root: str) -> str:
