@@ -105,6 +105,9 @@ def authorization_from_dict(value: dict) -> M336K2FinalAuthorization:
 
 
 def verify_m336k2_final_authorization(value: M336K2FinalAuthorization) -> None:
+    if getattr(value, "contract_role", None) == "M336K4_TYPED_FINAL_AUTHORIZATION_V2":
+        value.verify()
+        return
     body = asdict(value)
     claimed = body.pop("authorization_hash")
     hashes = (
@@ -287,9 +290,14 @@ def run_m336k2_frozen_acquisition(
     )
     if ledger.events() or vault_root.exists() or private_preflight_path.exists():
         raise M336K2ProtocolError("M336K2 acquisition destinations are not fresh")
-    context_hash = content_hash(
-        (exact_f28_sha, authorization.authorization_hash, pool["pool_hash"])
+    context_values = (
+        exact_f28_sha,
+        authorization.authorization_hash,
+        pool["pool_hash"],
     )
+    if getattr(authorization, "route_identity_bundle_hash", None) is not None:
+        context_values += (authorization.route_identity_bundle_hash,)
+    context_hash = content_hash(context_values)
     outcomes: list[CandidateAcquisitionOutcome] = []
     ledger.append(
         "AUTHORIZATION_VALIDATED",
@@ -423,6 +431,17 @@ def run_m336k2_frozen_acquisition(
         "ledger_receipt_hash": ledger_receipt.receipt_hash,
         "status": "ACQUISITION_COMPLETED",
     }
+    if (
+        getattr(authorization, "contract_role", None)
+        == "M336K4_TYPED_FINAL_AUTHORIZATION_V2"
+    ):
+        body.update(
+            {
+                "protocol_run_id": authorization.protocol_run_id_typed.canonical_object(),
+                "acquisition_run_id_typed": authorization.acquisition_run_id_typed.canonical_object(),
+                "route_identity_bundle_hash": authorization.route_identity_bundle_hash,
+            }
+        )
     public = {**body, "receipt_hash": content_hash(body)}
     return M336K2AcquisitionResult(
         preflight=preflight,
@@ -509,7 +528,10 @@ def _verify_inputs(
         content_hash(policy_body) != claimed
         or claimed != authorization.acquisition_policy_hash
         or acquisition_policy.get("policy_version")
-        != "m336k2.candidate-isolated-final.v1"
+        not in {
+            "m336k2.candidate-isolated-final.v1",
+            "m336k4.candidate-isolated-final.v1",
+        }
         or acquisition_policy.get("acquisition_run_id")
         != authorization.acquisition_run_id
         or acquisition_policy.get("candidate_pool_hash") != pool["pool_hash"]

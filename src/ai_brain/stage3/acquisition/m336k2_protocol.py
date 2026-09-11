@@ -507,6 +507,16 @@ def verify_complete_freeze(
 ) -> None:
     """Verify the complete frozen component closure before any ledger write."""
 
+    if getattr(manifest, "contract_role", None) == "M336K4_F29_TYPED_FREEZE_V2":
+        from ai_brain.stage3.acquisition.m336k4_freeze import (
+            verify_complete_m336k4_freeze,
+        )
+
+        verify_complete_m336k4_freeze(
+            root, manifest, allow_prospective_f29=allow_prospective_f28
+        )
+        return
+
     if manifest.schema_version != 1 or manifest.contract_role != "M336K2_F28_FREEZE":
         raise M336K2ProtocolError("M336K2 freeze role/schema changed")
     names = {item.name for item in manifest.components}

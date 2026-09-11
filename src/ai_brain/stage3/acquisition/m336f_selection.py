@@ -168,6 +168,7 @@ def select_compilation_closed_sources_once(
     ledger: M336FSelectorLedger,
     qualification_report_hash: str,
     qualification_summary_hash: str,
+    route_identity_bundle_hash: str | None = None,
 ) -> tuple[M336FSelectedSourceManifest, M336FSelectorReceipt]:
     if any(
         len(value) != 64
@@ -175,6 +176,14 @@ def select_compilation_closed_sources_once(
         for value in (qualification_report_hash, qualification_summary_hash)
     ):
         raise ValueError("selector qualification bindings must be SHA-256 hashes")
+    if route_identity_bundle_hash is not None and (
+        len(route_identity_bundle_hash) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in route_identity_bundle_hash
+        )
+    ):
+        raise ValueError("selector route identity bundle hash is invalid")
     verify_java_compilation_closure_feasibility_proof(proof, closure_manifest, census)
     verify_source_entry_binding_manifest(bindings)
     if not proof.hard_requirements_satisfied:
@@ -191,16 +200,17 @@ def select_compilation_closed_sources_once(
     }
     if set(proof.witness_source_units) - set(binding_by_unit):
         raise ValueError("closure witness lacks SourceEntryId bindings")
-    context_hash = content_hash(
-        (
-            qualification_report_hash,
-            qualification_summary_hash,
-            census.census_hash,
-            closure_manifest.manifest_hash,
-            proof.proof_hash,
-            bindings.manifest_hash,
-        )
+    context_values = (
+        qualification_report_hash,
+        qualification_summary_hash,
+        census.census_hash,
+        closure_manifest.manifest_hash,
+        proof.proof_hash,
+        bindings.manifest_hash,
     )
+    if route_identity_bundle_hash is not None:
+        context_values += (route_identity_bundle_hash,)
+    context_hash = content_hash(context_values)
     ledger.append("CENSUS_SEALED", context_hash=context_hash)
     ledger.append("SELECTOR_RESERVED", context_hash=context_hash)
     rows = []

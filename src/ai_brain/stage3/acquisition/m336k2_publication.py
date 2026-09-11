@@ -49,6 +49,7 @@ _E_SOURCE_FILES = frozenset(
         "source_leak_report.json",
     }
 )
+_M336K4_IDENTITY_FILE = "route_identity_observation.json"
 _FORBIDDEN_SUFFIXES = frozenset(
     {".java", ".class", ".jar", ".zip", ".tar", ".gz", ".tgz", ".7z"}
 )
@@ -181,7 +182,8 @@ def stage_m336k2_h28_publication(
     if destination != expected or destination.exists() or source.is_relative_to(root):
         raise M336K2ProtocolError("M336K2 H28 publication paths are invalid")
     source_names = {item.name for item in source.iterdir()}
-    expected_names = _H_ROOT_FILES | {"candidate_pack"}
+    h_files = _h_source_files(contract)
+    expected_names = h_files | {"candidate_pack"}
     missing = expected_names - source_names
     if missing:
         raise M336K2ProtocolError(
@@ -189,7 +191,7 @@ def stage_m336k2_h28_publication(
         )
     destination.mkdir(parents=True)
     shutil.copytree(source / "candidate_pack", destination / "candidate_pack")
-    for name in sorted(_H_ROOT_FILES):
+    for name in sorted(h_files):
         shutil.copyfile(source / name, destination / name)
     pack = verify_java_public_candidate_pack(destination / "candidate_pack")
     safety = scan_m336k2_public_tree(destination, allowed_root_files=expected_names)
@@ -230,17 +232,16 @@ def stage_m336k2_e28_publication(
     if destination != expected or destination.exists() or source.is_relative_to(root):
         raise M336K2ProtocolError("M336K2 E28 publication paths are invalid")
     source_names = {item.name for item in source.iterdir() if item.is_file()}
-    if source_names != _E_SOURCE_FILES or any(
-        item.is_dir() for item in source.iterdir()
-    ):
+    e_files = _e_source_files(contract)
+    if source_names != e_files or any(item.is_dir() for item in source.iterdir()):
         raise M336K2ProtocolError("M336K2 E28 evidence source contract changed")
     h_pack = root / contract.h_root / "candidate_pack"
     before = verify_java_public_candidate_pack(h_pack)
     destination.mkdir(parents=True)
-    for name in sorted(_E_SOURCE_FILES):
+    for name in sorted(e_files):
         _load_public_json(source / name)
         shutil.copyfile(source / name, destination / name)
-    safety = scan_m336k2_public_tree(destination, allowed_root_files=_E_SOURCE_FILES)
+    safety = scan_m336k2_public_tree(destination, allowed_root_files=e_files)
     after = verify_java_public_candidate_pack(h_pack)
     if before != after:
         raise M336K2ProtocolError("M336K2 E28 changed the H28 candidate pack")
@@ -288,12 +289,22 @@ def verify_m336k2_commit_protocol(
     e_paths = _diff_paths(git, root, exact_h28_sha, exact_e28_sha)
     q_paths = _diff_paths(git, root, f"{exact_q28_sha}^", exact_q28_sha)
     f_paths = _diff_paths(git, root, exact_q28_sha, exact_f28_sha)
+    run_q_root = (
+        "runs/m336k4/q29/"
+        if contract.q_root.startswith("artifacts/m336k4/")
+        else "runs/m336k2/q28/"
+    )
+    docs_prefix = (
+        "docs/m336k4_"
+        if contract.q_root.startswith("artifacts/m336k4/")
+        else "docs/m336k2_"
+    )
     unauthorized_q = tuple(
         path
         for path in q_paths
         if not (
-            path.startswith((contract.q_root + "/", "runs/m336k2/q28/"))
-            or (path.startswith("docs/m336k2_") and path.casefold().endswith(".md"))
+            path.startswith((contract.q_root + "/", run_q_root))
+            or (path.startswith(docs_prefix) and path.casefold().endswith(".md"))
         )
     )
     unauthorized_f = tuple(
@@ -325,14 +336,15 @@ def verify_m336k2_commit_protocol(
             f"{exact_q28_sha}..{exact_e28_sha}",
         )
     )
+    h_files = _h_source_files(contract)
+    e_files = _e_source_files(contract)
     h_safety = scan_m336k2_public_tree(
         root / h_root,
-        allowed_root_files=_H_ROOT_FILES
-        | {"candidate_pack", "h28_publication_report.json"},
+        allowed_root_files=h_files | {"candidate_pack", "h28_publication_report.json"},
     )
     e_safety = scan_m336k2_public_tree(
         root / e_root,
-        allowed_root_files=_E_SOURCE_FILES | {"e28_publication_report.json"},
+        allowed_root_files=e_files | {"e28_publication_report.json"},
     )
     q_safety = scan_m336k2_public_tree(
         root / contract.q_root,
@@ -346,11 +358,11 @@ def verify_m336k2_commit_protocol(
             item.name for item in (root / contract.f_root).iterdir()
         ),
     )
-    expected_h_names = _H_ROOT_FILES | {
+    expected_h_names = h_files | {
         "candidate_pack",
         "h28_publication_report.json",
     }
-    expected_e_names = _E_SOURCE_FILES | {"e28_publication_report.json"}
+    expected_e_names = e_files | {"e28_publication_report.json"}
     actual_h_names = {item.name for item in (root / h_root).iterdir()}
     actual_e_names = {item.name for item in (root / e_root).iterdir()}
     pack = verify_java_public_candidate_pack(root / h_root / "candidate_pack")
@@ -605,3 +617,15 @@ def _safe_public_root(value: str) -> bool:
         and "\\" not in value
         and path.parts[0] == "artifacts"
     )
+
+
+def _h_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
+    if contract.h_root.startswith("artifacts/m336k4/"):
+        return _H_ROOT_FILES | {_M336K4_IDENTITY_FILE}
+    return _H_ROOT_FILES
+
+
+def _e_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
+    if contract.e_root.startswith("artifacts/m336k4/"):
+        return _E_SOURCE_FILES | {_M336K4_IDENTITY_FILE}
+    return _E_SOURCE_FILES

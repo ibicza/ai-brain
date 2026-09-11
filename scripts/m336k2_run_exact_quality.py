@@ -146,6 +146,11 @@ def main() -> None:
         for path in sorted((repository / "tests").glob("test_m336*.py"))
     )
     targeted = (
+        *(
+            ("tests/test_m336k4_typed_final_identity.py",)
+            if (repository / "tests/test_m336k4_typed_final_identity.py").is_file()
+            else ()
+        ),
         "tests/test_m336k2_final_route.py",
         "tests/test_m336k_candidate_isolation.py",
         "tests/test_m336i_authorized_final_java_route.py",
