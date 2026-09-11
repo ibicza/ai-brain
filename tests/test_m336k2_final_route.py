@@ -1132,6 +1132,28 @@ def test_publication_scan_rejects_uncontracted_json(tmp_path: Path) -> None:
     assert report["uncontracted_artifact_count"] == 1
 
 
+def test_publication_scan_does_not_treat_public_urls_as_windows_paths(
+    tmp_path: Path,
+) -> None:
+    name = "metadata.json"
+    (tmp_path / name).write_text(
+        '{"pom":"https://repo.example/a.pom",'
+        '"scm":"git+https://github.example/o/r.git"}\n',
+        encoding="utf-8",
+    )
+
+    report = scan_m336k2_public_tree(
+        tmp_path, allowed_root_files=frozenset({name})
+    )
+
+    assert report == {
+        "source_leak_count": 0,
+        "absolute_path_count": 0,
+        "private_artifact_count": 0,
+        "uncontracted_artifact_count": 0,
+    }
+
+
 def test_same_native_publication_contract_supports_disposable_roots() -> None:
     contract = build_m336k2_publication_contract(
         branch_ref="refs/heads/disposable/m336k2-proof",

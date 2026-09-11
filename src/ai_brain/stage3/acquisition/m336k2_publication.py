@@ -53,7 +53,9 @@ _FORBIDDEN_SUFFIXES = frozenset(
     {".java", ".class", ".jar", ".zip", ".tar", ".gz", ".tgz", ".7z"}
 )
 _ABSOLUTE_PATH = re.compile(
-    rb"(?:[A-Za-z]:[\\/]|\\\\[^\\\s]+[\\/]|/(?:home|Users|tmp|var|opt)/)"
+    rb"(?:(?<![A-Za-z0-9+.-])[A-Za-z]:[\\/]"
+    rb"|\\\\[^\\\s]+[\\/]"
+    rb"|/(?:home|Users|tmp|var|opt)/)"
 )
 _JAVA_WINDOW = re.compile(
     rb"(?:package\s+[A-Za-z_]|import\s+[A-Za-z_]|(?:public|private|protected)\s+(?:class|interface|enum|record)\s+)"
