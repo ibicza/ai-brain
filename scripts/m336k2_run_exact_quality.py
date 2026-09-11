@@ -58,7 +58,8 @@ def _check(
     )
     basetemp_argument = shlex.quote(pytest_basetemp.as_posix())
     environment["PYTEST_ADDOPTS"] = (
-        f"-p no:cacheprovider --basetemp={basetemp_argument}"
+        "-p no:cacheprovider -o tmp_path_retention_policy=failed "
+        f"--basetemp={basetemp_argument}"
     )
     started = time.perf_counter_ns()
     result = subprocess.run(

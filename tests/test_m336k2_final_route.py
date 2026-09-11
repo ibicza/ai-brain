@@ -894,6 +894,12 @@ def test_exact_quality_reclaims_pytest_temp_before_writing_log(
 
     def fake_run(*_args, env, **_kwargs):
         options = shlex.split(env["PYTEST_ADDOPTS"])
+        assert options[:4] == [
+            "-p",
+            "no:cacheprovider",
+            "-o",
+            "tmp_path_retention_policy=failed",
+        ]
         basetemp = Path(
             next(
                 option.removeprefix("--basetemp=")
