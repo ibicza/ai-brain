@@ -248,9 +248,6 @@ def main() -> None:
         cwd=repository,
         check=False,
         capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="strict",
         env=environment,
     )
     _write_private_controller_diagnostics(private, result.stdout, result.stderr)
@@ -331,7 +328,7 @@ def _commit(git: Path, repository: Path, subject: str, relative_root: str) -> st
 
 
 def _write_private_controller_diagnostics(
-    private: Path, stdout: str, stderr: str
+    private: Path, stdout: bytes, stderr: bytes
 ) -> None:
     for name, value in (
         ("controller.stdout.log", stdout),
@@ -340,7 +337,7 @@ def _write_private_controller_diagnostics(
         target = private / name
         if target.exists():
             raise M336K2ProtocolError("M336K2 controller diagnostic is stale")
-        target.write_bytes(value.encode("utf-8"))
+        target.write_bytes(value)
 
 
 def _require_clean_head(git: Path, repository: Path, expected: str) -> None:

@@ -225,10 +225,12 @@ def test_disposable_controller_diagnostics_remain_private(tmp_path: Path) -> Non
     private = tmp_path / "private"
     private.mkdir()
 
-    _write_private_controller_diagnostics(private, "stdout\n", "stderr\n")
+    _write_private_controller_diagnostics(
+        private, b"stdout\x97\n", b"stderr\xff\n"
+    )
 
-    assert (private / "controller.stdout.log").read_bytes() == b"stdout\n"
-    assert (private / "controller.stderr.log").read_bytes() == b"stderr\n"
+    assert (private / "controller.stdout.log").read_bytes() == b"stdout\x97\n"
+    assert (private / "controller.stderr.log").read_bytes() == b"stderr\xff\n"
 
 
 def test_hermetic_command_worker_preserves_private_failure_diagnostics(
