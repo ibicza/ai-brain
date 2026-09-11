@@ -7,6 +7,7 @@ import os
 import re
 import shlex
 import shutil
+import stat
 import subprocess
 import tempfile
 import time
@@ -22,6 +23,15 @@ from ai_brain.stage3.acquisition.m336k2_execution import (
     m336k2_python_invocation_handle,
 )
 from ai_brain.stage3.acquisition.m336k2_protocol import m336k2_minimal_environment
+
+
+def _retry_readonly_removal(function, path: str, _error) -> None:
+    mode = os.lstat(path).st_mode
+    if stat.S_ISLNK(mode):
+        function(path)
+        return
+    os.chmod(path, mode | stat.S_IWUSR)
+    function(path)
 
 
 def _environment(
@@ -72,7 +82,7 @@ def _check(
     elapsed = (time.perf_counter_ns() - started) // 1_000_000
     output = result.stdout + result.stderr
     if pytest_basetemp.exists():
-        shutil.rmtree(pytest_basetemp)
+        shutil.rmtree(pytest_basetemp, onexc=_retry_readonly_removal)
     (logs / f"{name}.log").write_bytes(output)
     match = re.search(rb"(\d+) passed", output)
     body = {

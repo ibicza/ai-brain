@@ -4,6 +4,7 @@ import base64
 import os
 import shlex
 import shutil
+import stat
 import subprocess
 import sys
 from dataclasses import asdict
@@ -908,7 +909,9 @@ def test_exact_quality_reclaims_pytest_temp_before_writing_log(
             )
         )
         basetemp.mkdir(parents=True)
-        (basetemp / "large-test-artifact").write_bytes(b"temporary")
+        artifact = basetemp / "read-only-test-artifact"
+        artifact.write_bytes(b"temporary")
+        artifact.chmod(stat.S_IREAD)
         observed["basetemp"] = basetemp
         return subprocess.CompletedProcess((), 0, b"1 passed\n", b"")
 
