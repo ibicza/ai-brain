@@ -1636,9 +1636,7 @@ def _m336j_worker_route_manifest(*, repository, frozen_route, m336j_registry):
         executable_dependency_manifest_hash=frozen_route[
             "executable_dependency_manifest_hash"
         ],
-        minimal_environment_policy_hash=frozen_route[
-            "minimal_environment_policy_hash"
-        ],
+        minimal_environment_policy_hash=frozen_route["minimal_environment_policy_hash"],
     )
 
 

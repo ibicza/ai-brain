@@ -225,9 +225,7 @@ def test_disposable_controller_diagnostics_remain_private(tmp_path: Path) -> Non
     private = tmp_path / "private"
     private.mkdir()
 
-    _write_private_controller_diagnostics(
-        private, b"stdout\x97\n", b"stderr\xff\n"
-    )
+    _write_private_controller_diagnostics(private, b"stdout\x97\n", b"stderr\xff\n")
 
     assert (private / "controller.stdout.log").read_bytes() == b"stdout\x97\n"
     assert (private / "controller.stderr.log").read_bytes() == b"stderr\xff\n"
@@ -1144,9 +1142,7 @@ def test_publication_scan_does_not_treat_public_urls_as_windows_paths(
         encoding="utf-8",
     )
 
-    report = scan_m336k2_public_tree(
-        tmp_path, allowed_root_files=frozenset({name})
-    )
+    report = scan_m336k2_public_tree(tmp_path, allowed_root_files=frozenset({name}))
 
     assert report == {
         "source_leak_count": 0,
