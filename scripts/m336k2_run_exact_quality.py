@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -48,16 +49,25 @@ def _check(
     logs: Path,
     executable_directories: tuple[Path, ...],
 ) -> dict:
+    pytest_basetemp = (logs.parent / "temp" / f"pytest-{name}").resolve(strict=False)
+    if pytest_basetemp.is_relative_to(repository):
+        raise ValueError("M336K2 pytest temp must remain outside Git")
+    environment = _environment(
+        repository, executable_directories=executable_directories
+    )
+    environment["PYTEST_ADDOPTS"] = f"-p no:cacheprovider --basetemp={pytest_basetemp}"
     started = time.perf_counter_ns()
     result = subprocess.run(
         command,
         cwd=repository,
         capture_output=True,
         check=False,
-        env=_environment(repository, executable_directories=executable_directories),
+        env=environment,
     )
     elapsed = (time.perf_counter_ns() - started) // 1_000_000
     output = result.stdout + result.stderr
+    if pytest_basetemp.exists():
+        shutil.rmtree(pytest_basetemp)
     (logs / f"{name}.log").write_bytes(output)
     match = re.search(rb"(\d+) passed", output)
     body = {

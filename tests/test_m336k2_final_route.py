@@ -82,6 +82,7 @@ from scripts.m336k2_qualify_disposable_protocol import (
 from scripts.m336k2_qualify_disposable_protocol import (
     _commit as disposable_commit,
 )
+from scripts.m336k2_run_exact_quality import _check as exact_quality_check
 from scripts.m336k2_run_exact_quality import _environment as exact_quality_environment
 
 
@@ -877,6 +878,36 @@ def test_exact_quality_disables_nonessential_pytest_cache(tmp_path: Path) -> Non
     )
 
     assert environment["PYTEST_ADDOPTS"] == "-p no:cacheprovider"
+
+
+def test_exact_quality_reclaims_pytest_temp_before_writing_log(
+    monkeypatch, tmp_path: Path
+) -> None:
+    repository = tmp_path / "repository"
+    executable = tmp_path / "bin"
+    logs = tmp_path / "quality" / "exact-quality-receipt-logs"
+    (repository / "src").mkdir(parents=True)
+    executable.mkdir()
+    logs.mkdir(parents=True)
+    observed: dict[str, Path] = {}
+
+    def fake_run(*_args, env, **_kwargs):
+        basetemp = Path(env["PYTEST_ADDOPTS"].split("--basetemp=", 1)[1])
+        basetemp.mkdir(parents=True)
+        (basetemp / "large-test-artifact").write_bytes(b"temporary")
+        observed["basetemp"] = basetemp
+        return subprocess.CompletedProcess((), 0, b"1 passed\n", b"")
+
+    monkeypatch.setattr("scripts.m336k2_run_exact_quality.subprocess.run", fake_run)
+
+    receipt = exact_quality_check(
+        "targeted", ("python", "-m", "pytest"), repository, logs, (executable,)
+    )
+
+    assert receipt["exit_code"] == 0
+    assert receipt["passed_test_count"] == 1
+    assert not observed["basetemp"].exists()
+    assert (logs / "targeted.log").read_bytes() == b"1 passed\n"
 
 
 def test_live_python_environment_must_equal_frozen_manifest(monkeypatch) -> None:
