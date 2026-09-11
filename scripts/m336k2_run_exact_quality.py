@@ -63,6 +63,7 @@ def _check(
     pytest_basetemp = (logs.parent / "temp" / f"pytest-{name}").resolve(strict=False)
     if pytest_basetemp.is_relative_to(repository):
         raise ValueError("M336K2 pytest temp must remain outside Git")
+    pytest_basetemp.parent.mkdir(parents=True, exist_ok=True)
     environment = _environment(
         repository, executable_directories=executable_directories
     )

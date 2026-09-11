@@ -908,7 +908,7 @@ def test_exact_quality_reclaims_pytest_temp_before_writing_log(
                 if option.startswith("--basetemp=")
             )
         )
-        basetemp.mkdir(parents=True)
+        basetemp.mkdir()
         artifact = basetemp / "read-only-test-artifact"
         artifact.write_bytes(b"temporary")
         artifact.chmod(stat.S_IREAD)
