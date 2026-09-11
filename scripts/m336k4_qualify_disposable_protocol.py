@@ -89,7 +89,7 @@ def main() -> None:
     _git(git, repository, "config", "user.name", "M336K4 Disposable Proof")
     _git(git, repository, "remote", "set-url", "origin", str(remote))
     _git(git, repository, "checkout", "-B", branch, request["base_sha"])
-    _apply_working_tree(source, repository, git)
+    _apply_working_tree(source, repository, git, request["base_sha"])
     _git(git, repository, "add", "--all")
     _git(
         git, repository, "commit", "-m", "M-33.6k.4 disposable implementation snapshot"
@@ -417,9 +417,11 @@ def main() -> None:
     print(canonical_json(receipt))
 
 
-def _apply_working_tree(source: Path, repository: Path, git: Path) -> None:
+def _apply_working_tree(
+    source: Path, repository: Path, git: Path, base_sha: str
+) -> None:
     patch = subprocess.run(
-        (str(git), "diff", "--binary", "HEAD"),
+        (str(git), "diff", "--binary", base_sha),
         cwd=source,
         check=True,
         capture_output=True,
