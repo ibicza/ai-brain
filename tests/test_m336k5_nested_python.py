@@ -52,16 +52,3 @@ def test_k5_quality_classifies_every_nested_python_check() -> None:
     assert '"hermetic_python_invocation_count"' in source
     assert "_pytest_probe_arguments(" in source
     assert 'target_kind="SCRIPT"' in source
-
-
-def test_disposable_route_rebinds_the_exact_f29_candidate_pool() -> None:
-    source = (
-        __import__("pathlib")
-        .Path("scripts/m336k5_qualify_disposable_protocol.py")
-        .read_text(encoding="utf-8")
-    )
-    assert 'legacy_request["candidate_pool"] = str(' in source
-    assert "_exact_f29_candidate_pool(repository)" in source
-    assert "b48ee354dc710a6c0ac0ed2cfceb1385c0d12cc8efb6b8fbef00e8d2f6ab572e" in source
-    assert "78cfb85fc59687186f0e420d410bf648816bce6ae2539acb445f8da74d77a0fa" in source
-    assert "_F29_CANDIDATE_COUNT = 96" in source

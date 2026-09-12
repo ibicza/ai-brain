@@ -66,16 +66,6 @@ _LAUNCH_GIT: Path | None = None
 _LAUNCH_POWERSHELL: Path | None = None
 _LAUNCH_RECEIPTS: Path | None = None
 _LAUNCH_SEQUENCE = 0
-_F29_CANDIDATE_POOL_RELATIVE = Path(
-    "artifacts/m336k4/f29-freeze/components/02-candidate_pool.json"
-)
-_F29_CANDIDATE_POOL_HASH = (
-    "b48ee354dc710a6c0ac0ed2cfceb1385c0d12cc8efb6b8fbef00e8d2f6ab572e"
-)
-_F29_CANDIDATE_POOL_BYTES_HASH = (
-    "78cfb85fc59687186f0e420d410bf648816bce6ae2539acb445f8da74d77a0fa"
-)
-_F29_CANDIDATE_COUNT = 96
 
 
 def main() -> None:
@@ -200,7 +190,6 @@ def main() -> None:
     legacy_request = _object(
         Path(request["legacy_component_request_template"]).resolve(strict=True)
     )
-    legacy_request["candidate_pool"] = str(_exact_f29_candidate_pool(repository))
     legacy_output = private / "legacy-components"
     legacy_request.update(
         {
@@ -737,18 +726,6 @@ def _frozen_component(repository: Path, freeze, name: str) -> Path:
     if len(rows) != 1:
         raise M336K2ProtocolError("M336K5 disposable frozen component lookup failed")
     return repository.joinpath(*Path(rows[0].relative_path).parts).resolve(strict=True)
-
-
-def _exact_f29_candidate_pool(repository: Path) -> Path:
-    path = (repository / _F29_CANDIDATE_POOL_RELATIVE).resolve(strict=True)
-    value = _object(path)
-    if (
-        bytes_hash(path.read_bytes()) != _F29_CANDIDATE_POOL_BYTES_HASH
-        or value.get("pool_hash") != _F29_CANDIDATE_POOL_HASH
-        or len(value.get("candidates", ())) != _F29_CANDIDATE_COUNT
-    ):
-        raise M336K2ProtocolError("M336K5 disposable candidate pool changed")
-    return path
 
 
 def _q_manifest(root: Path) -> dict:
