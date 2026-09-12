@@ -797,6 +797,8 @@ def _run(python: Path, repository: Path, script: str, *arguments: str) -> None:
     write_m336k5_python_invocation_plan(plan, plan_path)
     result = run_m336k5_python_invocation(plan_path=plan_path, operation="execute")
     if result.returncode:
+        (root / "failure.stdout.log").write_bytes(result.stdout)
+        (root / "failure.stderr.log").write_bytes(result.stderr)
         raise subprocess.CalledProcessError(
             result.returncode,
             (script, *arguments),

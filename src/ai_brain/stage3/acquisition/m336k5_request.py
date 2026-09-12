@@ -44,6 +44,7 @@ from ai_brain.stage3.acquisition.m336k5_freeze import (
 from ai_brain.stage3.acquisition.m336k5_identity import M336K5RouteIdentityBundle
 from ai_brain.stage3.acquisition.m336k5_registry import build_m336k5_route_registry
 from ai_brain.stage3.acquisition.m336k5_startup import (
+    M336K5PythonStartupPolicy,
     M336K5PythonStartupReceipt,
     build_m336k5_karina_invocation,
     build_m336k5_python_startup_policy,
@@ -439,6 +440,7 @@ def _verify_executables_and_environment(
         root, components, "python_startup_policy", "policy_hash"
     )
     canonical_policy = build_m336k5_python_startup_policy()
+    frozen_policy = M336K5PythonStartupPolicy.from_dict(policy)
     sanitized = _verified_component_object(
         root, components, "sanitized_environment_policy", "receipt_hash"
     )
@@ -473,7 +475,7 @@ def _verify_executables_and_environment(
         environment.get("startup_policy_hash") != canonical_policy.policy_hash
         or environment.get("project_source_identity_hash")
         != startup.project_source_identity
-        or policy != canonical_policy.canonical_object()
+        or frozen_policy != canonical_policy
         or startup.startup_policy_hash != canonical_policy.policy_hash
         or startup.startup_policy_hash != authorization.python_startup_policy_hash
         or environment.get("environment_manifest_hash")

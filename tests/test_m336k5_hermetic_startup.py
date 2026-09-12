@@ -8,8 +8,10 @@ from pathlib import Path
 
 import pytest
 
+from ai_brain.stage2.facts.canonical import canonical_json
 from ai_brain.stage3.acquisition.m336k5_startup import (
     M336K5_FORBIDDEN_ENVIRONMENT,
+    M336K5PythonStartupPolicy,
     build_m336k5_python_invocation,
     build_m336k5_python_startup_policy,
     build_m336k5_sanitized_environment,
@@ -59,6 +61,12 @@ def test_startup_policy_is_fail_closed() -> None:
     assert values["PYTHONNOUSERSITE"] == "1"
     assert values["PATH"] == ""
     assert not set(M336K5_FORBIDDEN_ENVIRONMENT) & set(values)
+
+
+def test_startup_policy_round_trips_through_canonical_json() -> None:
+    policy = build_m336k5_python_startup_policy()
+    value = json.loads(canonical_json(policy.canonical_object()))
+    assert M336K5PythonStartupPolicy.from_dict(value) == policy
 
 
 @pytest.mark.parametrize(
