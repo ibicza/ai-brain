@@ -105,10 +105,11 @@ def main() -> None:
     startup = startup_receipt_from_path(args.startup_receipt.resolve(strict=True))
     git = Path(request["git_executable"]).resolve(strict=True)
     python = Path(request["python_executable"]).resolve(strict=True)
+    powershell = Path(request["powershell_executable"]).resolve(strict=True)
     source = Path(request["source_repository"]).resolve(strict=True)
     _configure_launcher(
         git,
-        Path(request["powershell_executable"]).resolve(strict=True),
+        powershell,
         output / "launcher-receipts",
     )
     branch = request["disposable_branch"]
@@ -212,6 +213,7 @@ def main() -> None:
         }
     )
     legacy_request["executables"]["python"]["path"] = str(python)
+    legacy_request["executables"]["powershell"]["path"] = str(powershell)
     legacy_request["karina_public_execution_capsule_receipt"] = karina_overlay[
         "public_execution_capsule_receipt"
     ]
@@ -345,6 +347,7 @@ def main() -> None:
         repository=repository,
         git=git,
         python=python,
+        powershell=powershell,
         implementation=implementation,
         f_like=f_like,
         freeze_root=f_root,
@@ -556,6 +559,7 @@ def _render_stage_template(
     repository: Path,
     git: Path,
     python: Path,
+    powershell: Path,
     implementation: str,
     f_like: str,
     freeze_root: Path,
@@ -595,6 +599,7 @@ def _render_stage_template(
     result["git_executable"] = str(git)
     result["executable_handles"]["python"] = str(python)
     result["executable_handles"]["git"] = str(git)
+    result["executable_handles"]["powershell"] = str(powershell)
     return result
 
 
