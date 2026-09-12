@@ -67,6 +67,7 @@ from ai_brain.stage3.acquisition.m336k2_readiness import (
 )
 from ai_brain.stage3.acquisition.m336k2_stage import (
     _append_evaluator_event,
+    _compare_evaluation,
     _evaluator_receipt,
     _karina_expected_head,
     _rehearsal_provider,
@@ -184,6 +185,51 @@ def test_native_evaluator_ledger_reserves_once_and_coordinates_both_platforms(
         _append_evaluator_event(
             ledger, "EVALUATOR_RESERVED", content_hash("second reservation")
         )
+
+
+def test_k5_evaluation_comparison_neutralizes_verified_startup_envelope(
+    tmp_path: Path,
+) -> None:
+    private = tmp_path / "private"
+    private.mkdir()
+    ledger = tmp_path / "evaluator.jsonl"
+    for event in (
+        "EVALUATOR_RESERVED",
+        "GOLDENS_CREATED",
+        "WINDOWS_EVALUATION_COMPLETED",
+        "KARINA_EVALUATION_COMPLETED",
+    ):
+        _append_evaluator_event(ledger, event, content_hash(event))
+    result_hash = content_hash("shared-evaluation")
+    windows = {"schema_version": 1, "status": "PASS", "result_hash": result_hash}
+    karina = {
+        "schema_version": 1,
+        "status": "PASS",
+        "request_hash": "a" * 64,
+        "component_binding_hash": "b" * 64,
+        "host_identity_hash": "c" * 64,
+        "independent_evaluation_result_hash": result_hash,
+        "receipt_hash": "d" * 64,
+        "startup_receipt_hash": "e" * 64,
+    }
+    (private / "windows_evaluation.json").write_text(
+        canonical_json(windows) + "\n", encoding="utf-8", newline="\n"
+    )
+    (private / "karina_evaluation.json").write_text(
+        canonical_json(karina) + "\n", encoding="utf-8", newline="\n"
+    )
+    request = {
+        "schema_version": 3,
+        "startup_receipt_hash": "f" * 64,
+        "private_root": str(private),
+        "final_destinations": {"evaluator_ledger": str(ledger)},
+    }
+
+    with pytest.raises(M336K2ProtocolError, match="startup binding changed"):
+        _compare_evaluation(request)
+
+    request["startup_receipt_hash"] = "e" * 64
+    assert _compare_evaluation(request)["status"] == "PASS"
 
 
 def test_private_stage_state_is_durably_replaced(tmp_path: Path) -> None:

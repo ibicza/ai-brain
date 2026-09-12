@@ -1164,17 +1164,21 @@ def _compare_evaluation(request: dict) -> dict:
         raise M336K2ProtocolError("M336K2 evaluation comparison order changed")
     windows = _object(private / "windows_evaluation.json")
     karina = _object(private / "karina_evaluation.json")
+    transport_fields = {
+        "request_hash",
+        "component_binding_hash",
+        "host_identity_hash",
+        "independent_evaluation_result_hash",
+        "receipt_hash",
+    }
+    if request.get("schema_version") == 3:
+        if karina.get("startup_receipt_hash") != request["startup_receipt_hash"]:
+            raise M336K2ProtocolError(
+                "M336K5 Karina evaluation startup binding changed"
+            )
+        transport_fields.add("startup_receipt_hash")
     neutral = {
-        key: value
-        for key, value in karina.items()
-        if key
-        not in {
-            "request_hash",
-            "component_binding_hash",
-            "host_identity_hash",
-            "independent_evaluation_result_hash",
-            "receipt_hash",
-        }
+        key: value for key, value in karina.items() if key not in transport_fields
     }
     windows_body = dict(windows)
     windows_hash = windows_body.pop("result_hash", None)
