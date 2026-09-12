@@ -3,6 +3,11 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 from ai_brain.stage3.acquisition import m336i_production
+from ai_brain.stage3.acquisition.m336k5_startup import M336K5_PROCESS_ROLES
+
+
+def test_nested_production_roles_are_frozen_startup_roles() -> None:
+    assert {"WINDOWS_PRODUCTION", "KARINA_PRODUCTION"} <= M336K5_PROCESS_ROLES
 
 
 def test_m336i_forwards_the_bound_python_worker(monkeypatch) -> None:
