@@ -397,10 +397,16 @@ def _allocated_size(path: Path) -> int:
     if os.name != "nt":
         return stat.st_size
     high = ctypes.c_ulong(0)
-    low = ctypes.windll.kernel32.GetCompressedFileSizeW(str(path), ctypes.byref(high))
-    if low == 0xFFFFFFFF and ctypes.GetLastError() != 0:
+    low = int(
+        ctypes.windll.kernel32.GetCompressedFileSizeW(str(path), ctypes.byref(high))
+    )
+    if (low & 0xFFFFFFFF) == 0xFFFFFFFF and ctypes.GetLastError() != 0:
         raise OSError(ctypes.GetLastError(), "GetCompressedFileSizeW failed")
-    return (int(high.value) << 32) | int(low)
+    return _windows_size_words(low, int(high.value))
+
+
+def _windows_size_words(low: int, high: int) -> int:
+    return ((high & 0xFFFFFFFF) << 32) | (low & 0xFFFFFFFF)
 
 
 def _system_memory() -> tuple[int, int, int]:

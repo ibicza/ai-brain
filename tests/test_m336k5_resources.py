@@ -2,12 +2,17 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from ai_brain.stage3.acquisition import m336k5_resources as resources
 from ai_brain.stage3.acquisition.m336k5_resources import (
     M336K5ResourceMonitor,
     allocate_m336k5_storage_reservation,
     build_m336k5_resource_budget_receipt,
     release_m336k5_storage_reservation,
 )
+
+
+def test_windows_allocated_size_preserves_unsigned_low_word() -> None:
+    assert resources._windows_size_words(-0x80000000, 0) == 0x80000000
 
 
 def test_resource_monitor_is_hash_chained(tmp_path: Path) -> None:
