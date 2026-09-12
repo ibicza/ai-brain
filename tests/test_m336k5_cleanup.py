@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import stat
 from pathlib import Path
 
 import pytest
@@ -36,6 +38,23 @@ def test_marked_terminal_root_can_be_deleted(tmp_path: Path) -> None:
     assert receipt.status == "PASS"
     assert receipt.target_absent
     assert receipt.reclaimed_bytes > 0
+
+
+def test_marked_terminal_root_with_readonly_file_can_be_deleted(
+    tmp_path: Path,
+) -> None:
+    root = _generated_root(tmp_path)
+    protected = root / "readonly.pack"
+    protected.write_bytes(b"immutable disposable pack")
+    os.chmod(protected, stat.S_IREAD)
+    assessment = assess_m336k5_cleanup_candidate(
+        root,
+        category="DISPOSABLE_PROTOCOL_CLONE",
+        allowed_base_roots=(tmp_path,),
+    )
+    receipt = delete_m336k5_cleanup_candidate(root, assessment)
+    assert receipt.status == "PASS"
+    assert not root.exists()
 
 
 @pytest.mark.parametrize(

@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shutil
+import stat
 from collections.abc import Iterable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -290,7 +291,7 @@ def delete_m336k5_cleanup_candidate(
         or reparse_points
     ):
         raise M336K2ProtocolError("M336K5 cleanup target changed after assessment")
-    shutil.rmtree(target)
+    shutil.rmtree(target, onexc=_remove_readonly)
     absent = not target.exists()
     body = {
         "schema_version": 1,
@@ -305,3 +306,10 @@ def delete_m336k5_cleanup_candidate(
         "status": "PASS" if absent else "FAIL",
     }
     return M336K5CleanupReceipt(**body, receipt_hash=content_hash(body))
+
+
+def _remove_readonly(function, path: str, error: BaseException) -> None:
+    if not isinstance(error, PermissionError):
+        raise error
+    os.chmod(path, stat.S_IWRITE)
+    function(path)
