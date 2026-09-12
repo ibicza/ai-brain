@@ -91,9 +91,12 @@ def test_k5_quality_uses_fresh_output_specific_temp_root(tmp_path, monkeypatch) 
         executable_directories=(),
     )
 
-    expected_root = tmp_path / "quality-logs-temp"
+    expected_root = m336k2_run_exact_quality._quality_temp_root(logs)
     assert len(checks) == 10
     assert observed_cleanup_roots
+    assert expected_root.parent == tmp_path.resolve()
+    assert expected_root.name.startswith("m336k5-qtmp-")
+    assert len(expected_root.name) <= 32
     assert all(path.is_relative_to(expected_root) for path in observed_cleanup_roots)
     assert not expected_root.exists()
 
