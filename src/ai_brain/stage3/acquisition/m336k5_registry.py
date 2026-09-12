@@ -33,6 +33,8 @@ M336K5_ROUTE_COMPONENTS = (
     ("component-builder-cli", "scripts/m336k5_build_component_bundle.py"),
     ("startup-component-builder-cli", "scripts/m336k5_build_startup_components.py"),
     ("resource-manager-cli", "scripts/m336k5_manage_resources.py"),
+    ("recovery-manager-cli", "scripts/m336k5_manage_recovery.py"),
+    ("cleanup-manager-cli", "scripts/m336k5_cleanup_root.py"),
     ("disposable-qualifier", "scripts/m336k5_qualify_disposable_protocol.py"),
     ("exact-quality", "scripts/m336k5_run_exact_quality.py"),
     ("identity-mutations", "scripts/m336k5_run_identity_mutations.py"),

@@ -12,8 +12,8 @@ from ai_brain.stage3.acquisition.m336k5_recovery import M336K5RecoveryLedger
 
 def _append(ledger: M336K5RecoveryLedger, phase: str) -> None:
     ledger.append(
-        branch="exp-stage3-m336k5-hermetic-python-final-v14",
-        head_sha="a" * 64,
+        branch="exp/stage3-m336k5-hermetic-python-final-v14",
+        head_sha="a" * 40,
         phase=phase,
         worktree_status="DIRTY_IMPLEMENTATION",
         worktree_status_hash=content_hash(("status", phase)),
@@ -56,9 +56,9 @@ def test_recovery_checkpoint_rejects_private_path(tmp_path: Path) -> None:
     ledger = M336K5RecoveryLedger(tmp_path / "recovery.jsonl")
     with pytest.raises(M336K2ProtocolError):
         ledger.append(
-            branch="exp/stage3/m336k5",
-            head_sha="a" * 64,
-            phase="PHASE_09",
+            branch="exp/stage3-m336k5-hermetic-python-final-v14",
+            head_sha="a" * 40,
+            phase="C:/private/phase",
             worktree_status="CLEAN",
             worktree_status_hash="b" * 64,
             completed_receipt_hashes=(),
