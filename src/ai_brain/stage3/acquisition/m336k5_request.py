@@ -161,6 +161,7 @@ class M336K5PreLedgerInvocationReceipt:
     route_hash: str
     destination_set_hash: str
     startup_receipt_hash: str
+    karina_startup_receipt_hash: str
     acquisition_reservations: int
     acquisition_invocations: int
     selector_reservations: int
@@ -332,6 +333,7 @@ def validate_m336k5_final_invocation(
         "route_hash": bundle.route_manifest_hash,
         "destination_set_hash": destination_hash,
         "startup_receipt_hash": startup.receipt_hash,
+        "karina_startup_receipt_hash": host["startup_receipt_hash"],
         "acquisition_reservations": 0,
         "acquisition_invocations": 0,
         "selector_reservations": 0,
@@ -377,6 +379,7 @@ def build_m336k5_internal_stage_request(
         "route_identity_bundle": request.route_identity_bundle,
         "route_identity_bundle_hash": bundle.bundle_hash,
         "startup_receipt_hash": validated.receipt.startup_receipt_hash,
+        "karina_startup_receipt_hash": (validated.receipt.karina_startup_receipt_hash),
         "stage_state": request.stage_state,
         "stage_receipt_root": request.stage_receipt_root,
         "private_root": request.private_root,
@@ -737,6 +740,7 @@ def _verify_karina_host_and_storage(*, request, bundle, freeze, root, components
         host.get("execution_capsule_receipt_hash") != public.receipt_hash
         or host.get("host_identity_hash") != public.host_identity_receipt_hash
         or not isinstance(host.get("startup_receipt_hash"), str)
+        or _HASH.fullmatch(host["startup_receipt_hash"]) is None
         or host.get("startup_receipt_hash") != storage.get("startup_receipt_hash")
         or storage.get("required_free_bytes") != 12 * 1024**3
         or storage.get("available_free_bytes", 0) < storage["required_free_bytes"]

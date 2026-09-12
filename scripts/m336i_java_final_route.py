@@ -1069,12 +1069,7 @@ def _invoke_m336j_remote(
                         component_binding_hash=component.binding_hash,
                         host_identity_hash=public.host_identity_receipt_hash,
                     )
-                    if getattr(args, "m336k5_enabled", False) and not isinstance(
-                        response.get("startup_receipt_hash"), str
-                    ):
-                        raise ValueError(
-                            "M336K5 remote startup receipt binding is absent"
-                        )
+                    _verify_m336k5_remote_startup_binding(args, response)
         else:
             result = invoke_karina_command(
                 transport=transport,
@@ -1089,10 +1084,7 @@ def _invoke_m336j_remote(
                 component_binding_hash=component.binding_hash,
                 host_identity_hash=public.host_identity_receipt_hash,
             )
-            if getattr(args, "m336k5_enabled", False) and not isinstance(
-                response.get("startup_receipt_hash"), str
-            ):
-                raise ValueError("M336K5 remote startup receipt binding is absent")
+            _verify_m336k5_remote_startup_binding(args, response)
     except subprocess.CalledProcessError as error:
         _write_karina_command_failure_diagnostics(
             args.karina_command_receipt_root, receipt_name, error
@@ -1108,6 +1100,23 @@ def _invoke_m336j_remote(
             raise ValueError("M336J streamed response needs an external destination")
         return result, component, public
     return response, component, public
+
+
+def _verify_m336k5_remote_startup_binding(args, response):
+    if not getattr(args, "m336k5_enabled", False):
+        return
+    observed = response.get("startup_receipt_hash")
+    if not isinstance(observed, str):
+        raise TypeError("M336K5 remote startup receipt binding is absent")
+    expected = getattr(args, "m336k5_expected_karina_startup_receipt_hash", None)
+    if (
+        not isinstance(expected, str)
+        or len(expected) != 64
+        or any(character not in "0123456789abcdef" for character in expected)
+    ):
+        raise TypeError("M336K5 expected Karina startup receipt is absent")
+    if observed != expected:
+        raise ValueError("M336K5 remote startup receipt binding changed")
 
 
 def _write_karina_command_failure_diagnostics(
@@ -1365,10 +1374,7 @@ def _run_karina_production(args, authorization, materialization, *, run_runtime=
             host_identity_hash=public.host_identity_receipt_hash,
             limits=limits,
         )
-        if getattr(args, "m336k5_enabled", False) and not isinstance(
-            header.get("startup_receipt_hash"), str
-        ):
-            raise ValueError("M336K5 remote startup receipt binding is absent")
+        _verify_m336k5_remote_startup_binding(args, header)
         if header.get("transfer_limit_hash") != limit_hash:
             raise ValueError("M336J production export limit binding changed")
         write_canonical_json(

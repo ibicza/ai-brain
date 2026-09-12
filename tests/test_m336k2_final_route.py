@@ -9,6 +9,7 @@ import subprocess
 import sys
 from dataclasses import asdict
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -77,7 +78,10 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _write_private_state,
 )
 from ai_brain.stage3.acquisition.m336k_acquisition import acquire_candidate_v2
-from scripts.m336i_java_final_route import _m336j_worker_route_manifest
+from scripts.m336i_java_final_route import (
+    _m336j_worker_route_manifest,
+    _verify_m336k5_remote_startup_binding,
+)
 from scripts.m336k2_qualify_disposable_protocol import (
     _clone_disposable_repository,
     _write_private_controller_diagnostics,
@@ -221,6 +225,7 @@ def test_k5_evaluation_comparison_neutralizes_verified_startup_envelope(
     request = {
         "schema_version": 3,
         "startup_receipt_hash": "f" * 64,
+        "karina_startup_receipt_hash": "0" * 64,
         "private_root": str(private),
         "final_destinations": {"evaluator_ledger": str(ledger)},
     }
@@ -228,8 +233,23 @@ def test_k5_evaluation_comparison_neutralizes_verified_startup_envelope(
     with pytest.raises(M336K2ProtocolError, match="startup binding changed"):
         _compare_evaluation(request)
 
-    request["startup_receipt_hash"] = "e" * 64
+    request["karina_startup_receipt_hash"] = "e" * 64
+    assert request["startup_receipt_hash"] != request["karina_startup_receipt_hash"]
     assert _compare_evaluation(request)["status"] == "PASS"
+
+
+def test_k5_remote_response_requires_preledger_karina_startup_binding() -> None:
+    expected = "a" * 64
+    args = SimpleNamespace(
+        m336k5_enabled=True,
+        m336k5_expected_karina_startup_receipt_hash=expected,
+    )
+
+    _verify_m336k5_remote_startup_binding(args, {"startup_receipt_hash": expected})
+    with pytest.raises(TypeError, match="binding is absent"):
+        _verify_m336k5_remote_startup_binding(args, {})
+    with pytest.raises(ValueError, match="binding changed"):
+        _verify_m336k5_remote_startup_binding(args, {"startup_receipt_hash": "b" * 64})
 
 
 def test_private_stage_state_is_durably_replaced(tmp_path: Path) -> None:

@@ -131,7 +131,10 @@ _M336K4_REQUEST_FIELDS = _REQUEST_FIELDS | {
     "route_identity_bundle",
     "route_identity_bundle_hash",
 }
-_M336K5_REQUEST_FIELDS = _M336K4_REQUEST_FIELDS | {"startup_receipt_hash"}
+_M336K5_REQUEST_FIELDS = _M336K4_REQUEST_FIELDS | {
+    "startup_receipt_hash",
+    "karina_startup_receipt_hash",
+}
 _DESTINATION_FIELDS = {
     "acquisition_ledger",
     "selector_ledger",
@@ -199,6 +202,9 @@ def run_m336k2_stage(
         state_body["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
     if request["schema_version"] == 3:
         state_body["startup_receipt_hash"] = request["startup_receipt_hash"]
+        state_body["karina_startup_receipt_hash"] = request[
+            "karina_startup_receipt_hash"
+        ]
     next_state = {**state_body, "state_hash": content_hash(state_body)}
     _write_private_state(state_path, next_state)
     body = {
@@ -216,6 +222,7 @@ def run_m336k2_stage(
         body["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
     if request["schema_version"] == 3:
         body["startup_receipt_hash"] = request["startup_receipt_hash"]
+        body["karina_startup_receipt_hash"] = request["karina_startup_receipt_hash"]
     receipt = {**body, "receipt_hash": content_hash(body)}
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.write_text(
@@ -1172,7 +1179,7 @@ def _compare_evaluation(request: dict) -> dict:
         "receipt_hash",
     }
     if request.get("schema_version") == 3:
-        if karina.get("startup_receipt_hash") != request["startup_receipt_hash"]:
+        if karina.get("startup_receipt_hash") != request["karina_startup_receipt_hash"]:
             raise M336K2ProtocolError(
                 "M336K5 Karina evaluation startup binding changed"
             )
@@ -1526,6 +1533,12 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
             or request["execution_mode"] != bundle.execution_mode.value
             or request["route_identity_bundle_hash"] != bundle.bundle_hash
             or request["startup_receipt_hash"] != startup.receipt_hash
+            or not isinstance(request["karina_startup_receipt_hash"], str)
+            or len(request["karina_startup_receipt_hash"]) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in request["karina_startup_receipt_hash"]
+            )
             or freeze.route_identity_bundle_hash != bundle.bundle_hash
             or authorization.route_identity_bundle_hash != bundle.bundle_hash
         ):
@@ -1624,6 +1637,11 @@ def _karina_args(request: dict):
         m336k5_project_source_identity=compute_m336j_project_source_identity(
             repository, git
         ),
+        m336k5_expected_karina_startup_receipt_hash=(
+            request["karina_startup_receipt_hash"]
+            if request["schema_version"] == 3
+            else None
+        ),
     )
 
 
@@ -1680,6 +1698,9 @@ def _load_state(path: Path, request: dict) -> dict:
             value["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
         if request["schema_version"] == 3:
             value["startup_receipt_hash"] = request["startup_receipt_hash"]
+            value["karina_startup_receipt_hash"] = request[
+                "karina_startup_receipt_hash"
+            ]
         return value
     value = _object(path)
     body = dict(value)
@@ -1697,6 +1718,7 @@ def _load_state(path: Path, request: dict) -> dict:
         expected_fields.add("route_identity_bundle_hash")
     if request["schema_version"] == 3:
         expected_fields.add("startup_receipt_hash")
+        expected_fields.add("karina_startup_receipt_hash")
     if (
         set(value) != expected_fields
         or value["route_run_id"] != request["route_run_id"]
@@ -1704,6 +1726,8 @@ def _load_state(path: Path, request: dict) -> dict:
         or value.get("route_identity_bundle_hash")
         != request.get("route_identity_bundle_hash")
         or value.get("startup_receipt_hash") != request.get("startup_receipt_hash")
+        or value.get("karina_startup_receipt_hash")
+        != request.get("karina_startup_receipt_hash")
         or tuple(value["completed_events"])
         != _STAGE_EVENTS[: len(value["completed_events"])]
         or content_hash(body) != claimed
