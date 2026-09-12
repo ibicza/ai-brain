@@ -257,14 +257,14 @@ def verify_m336k5_evaluator_ledger_identity(
     path: Path,
     *,
     bundle: M336K5RouteIdentityBundle,
-    exact_h29_sha: str,
+    exact_h30_sha: str,
     windows_production_seal_hash: str,
     karina_production_seal_hash: str,
 ) -> str:
     events = _evaluator_events(path)
     expected = content_hash(
         (
-            exact_h29_sha,
+            exact_h30_sha,
             windows_production_seal_hash,
             karina_production_seal_hash,
             bundle.bundle_hash,
