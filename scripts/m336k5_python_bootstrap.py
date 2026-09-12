@@ -100,7 +100,7 @@ def _source_identity(repository: Path, git: Path, environment: dict[str, str]) -
 
 
 def _normalized(path: str | Path) -> str:
-    return os.path.normcase(os.path.abspath(os.fspath(path)))
+    return os.path.normcase(os.path.realpath(os.path.abspath(os.fspath(path))))
 
 
 def _user_site_paths() -> tuple[str, ...]:
@@ -140,11 +140,23 @@ def _verify_and_receipt(plan: dict) -> dict:
     repository = Path(plan["repository"]).resolve(strict=True)
     git = Path(plan["git_executable"]).resolve(strict=True)
     project_source = _normalized(repository / "src")
-    # A frozen external environment may contain an editable-install .pth file.
-    # Remove that path before the first project import, then add it back only
-    # after every startup invariant and source identity have been verified.
+    bootstrap_parent = _normalized(bootstrap.parent)
+    standard_roots = tuple(
+        _normalized(row)
+        for row in (sys.base_prefix, sys.prefix, bootstrap_parent)
+        if row
+    )
+    # A frozen interpreter may contain stale editable-install .pth entries or a
+    # current-working-directory entry. Remove every path outside the exact
+    # interpreter/bootstrap roots before the first project import, then add the
+    # declared project source only after all startup invariants are verified.
     sys.path[:] = [
-        row for row in sys.path if _normalized(row or os.curdir) != project_source
+        row
+        for row in sys.path
+        if _normalized(row or os.curdir) != project_source
+        and any(
+            _is_under(_normalized(row or os.curdir), root) for root in standard_roots
+        )
     ]
     target_kind = plan["target_kind"]
     target = plan["target"]
@@ -170,12 +182,6 @@ def _verify_and_receipt(plan: dict) -> dict:
     path_rows = tuple(_normalized(row or os.curdir) for row in sys.path)
     user_site_membership = any(
         _is_under(row, user_site) for row in path_rows for user_site in user_sites
-    )
-    bootstrap_parent = _normalized(bootstrap.parent)
-    standard_roots = tuple(
-        _normalized(row)
-        for row in (sys.base_prefix, sys.prefix, bootstrap_parent)
-        if row
     )
     unsafe_paths = tuple(
         row
