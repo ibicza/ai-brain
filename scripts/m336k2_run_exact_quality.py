@@ -256,9 +256,7 @@ def _run_hermetic_checks(
     targeted_arguments, targeted_temp = _pytest_arguments(
         temp_root / "pytest-targeted", targeted
     )
-    stage_arguments, stage_temp = _pytest_arguments(
-        temp_root / "pytest-stage3-java-regressions", stage3_java_tests
-    )
+    stage_arguments, stage_temp = _pytest_arguments(temp_root / "s", stage3_java_tests)
     checks = [
         python_check(
             "targeted",
