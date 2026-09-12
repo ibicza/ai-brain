@@ -47,6 +47,9 @@ from ai_brain.stage3.acquisition.m336i_evaluation import (
 from ai_brain.stage3.acquisition.m336i_production import (
     run_m336i_compiler_aware_production,
 )
+from ai_brain.stage3.acquisition.m336j_execution import (
+    compute_m336j_project_source_identity,
+)
 from ai_brain.stage3.acquisition.m336k2_acquisition import (
     authorization_from_dict,
     run_m336k2_frozen_acquisition,
@@ -75,6 +78,20 @@ from ai_brain.stage3.acquisition.m336k4_freeze import (
     M336K4FreezeManifest,
 )
 from ai_brain.stage3.acquisition.m336k4_identity import M336K4RouteIdentityBundle
+from ai_brain.stage3.acquisition.m336k5_authorization import (
+    M336K5FinalAuthorization,
+)
+from ai_brain.stage3.acquisition.m336k5_freeze import (
+    M336K5CommittedFreezeAttestation,
+    M336K5FreezeManifest,
+)
+from ai_brain.stage3.acquisition.m336k5_identity import M336K5RouteIdentityBundle
+from ai_brain.stage3.acquisition.m336k5_startup import (
+    build_m336k5_python_invocation,
+    run_m336k5_python_invocation,
+    startup_receipt_from_path,
+    write_m336k5_python_invocation_plan,
+)
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
 _STAGE_EVENTS = M336K2_ROUTE_EVENTS[3:]
@@ -113,6 +130,7 @@ _M336K4_REQUEST_FIELDS = _REQUEST_FIELDS | {
     "route_identity_bundle",
     "route_identity_bundle_hash",
 }
+_M336K5_REQUEST_FIELDS = _M336K4_REQUEST_FIELDS | {"startup_receipt_hash"}
 _DESTINATION_FIELDS = {
     "acquisition_ledger",
     "selector_ledger",
@@ -139,9 +157,15 @@ _KARINA_FIELDS = {
 }
 
 
-def run_m336k2_stage(*, request_path: Path, event: str, receipt_path: Path) -> dict:
+def run_m336k2_stage(
+    *,
+    request_path: Path,
+    event: str,
+    receipt_path: Path,
+    startup_receipt_path: Path | None = None,
+) -> dict:
     request = _object(request_path)
-    _verify_request(request)
+    _verify_request(request, startup_receipt_path=startup_receipt_path)
     if event not in _STAGE_EVENTS:
         raise M336K2ProtocolError("M336K2 stage event is not registered")
     expected_receipt = Path(request["stage_receipt_root"]).resolve(strict=False) / (
@@ -169,9 +193,11 @@ def run_m336k2_stage(*, request_path: Path, event: str, receipt_path: Path) -> d
         "previous_state_hash": state.get("state_hash"),
         "last_operation_hash": operation_hash,
     }
-    if request["schema_version"] == 2:
-        state_body["schema_version"] = 2
+    if _typed(request):
+        state_body["schema_version"] = request["schema_version"]
         state_body["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
+    if request["schema_version"] == 3:
+        state_body["startup_receipt_hash"] = request["startup_receipt_hash"]
     next_state = {**state_body, "state_hash": content_hash(state_body)}
     _write_private_state(state_path, next_state)
     body = {
@@ -184,9 +210,11 @@ def run_m336k2_stage(*, request_path: Path, event: str, receipt_path: Path) -> d
         "state_hash": next_state["state_hash"],
         "status": "PASS",
     }
-    if request["schema_version"] == 2:
-        body["schema_version"] = 2
+    if _typed(request):
+        body["schema_version"] = request["schema_version"]
         body["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
+    if request["schema_version"] == 3:
+        body["startup_receipt_hash"] = request["startup_receipt_hash"]
     receipt = {**body, "receipt_hash": content_hash(body)}
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.write_text(
@@ -237,7 +265,7 @@ def _reserve_acquisition(request: dict) -> dict:
         "authorization_hash": _authorization(request).authorization_hash,
         "status": "PASS",
     }
-    if request["schema_version"] == 2:
+    if _typed(request):
         result.update(_identity_observation_fields(request))
     return result
 
@@ -404,7 +432,7 @@ def _reserve_selector(request: dict) -> dict:
         "closure_proof_hash": proof["proof_hash"],
         "status": "PASS",
     }
-    if request["schema_version"] == 2:
+    if _typed(request):
         result.update(_identity_observation_fields(request))
     return result
 
@@ -440,9 +468,7 @@ def _invoke_selector(request: dict) -> dict:
         qualification_report_hash=qualification["report_hash"],
         qualification_summary_hash=summary["summary_hash"],
         route_identity_bundle_hash=(
-            request["route_identity_bundle_hash"]
-            if request["schema_version"] == 2
-            else None
+            request["route_identity_bundle_hash"] if _typed(request) else None
         ),
     )
     write_canonical_json(private / "selected_source_manifest.json", selected)
@@ -679,10 +705,15 @@ def _publish_h28(request: dict) -> dict:
     shutil.copyfile(
         private / "production_comparison.json", source / "production_comparison.json"
     )
-    if request["schema_version"] == 2:
+    if _typed(request):
         write_canonical_json(
             source / "route_identity_observation.json",
-            _identity_observation_receipt(request, "H29_PRODUCTION"),
+            _identity_observation_receipt(
+                request,
+                "H30_PRODUCTION"
+                if request["schema_version"] == 3
+                else "H29_PRODUCTION",
+            ),
         )
     _write_h_staging_receipts(source)
     report = stage_m336k2_h28_publication(
@@ -712,7 +743,7 @@ def _publish_h28(request: dict) -> dict:
         "publication_report_hash": report.report_hash,
         "status": "PASS",
     }
-    if request["schema_version"] == 2:
+    if _typed(request):
         body.update(_identity_observation_fields(request))
     result = {**body, "receipt_hash": content_hash(body)}
     write_canonical_json(private / "h28_commit_receipt.json", result)
@@ -784,7 +815,7 @@ def _reserve_evaluator(request: dict) -> dict:
             _destinations(request)["karina_production"] / "m336i_production_seal.json"
         )["seal_hash"],
     )
-    if request["schema_version"] == 2:
+    if _typed(request):
         operation_values += (request["route_identity_bundle_hash"],)
     operation = content_hash(operation_values)
     event = _append_evaluator_event(ledger, "EVALUATOR_RESERVED", operation)
@@ -793,7 +824,7 @@ def _reserve_evaluator(request: dict) -> dict:
         "evaluator_reservation_hash": event["event_hash"],
         "status": "PASS",
     }
-    if request["schema_version"] == 2:
+    if _typed(request):
         result.update(_identity_observation_fields(request))
     return result
 
@@ -866,18 +897,52 @@ def _create_goldens(request: dict) -> dict:
             "PYTHONUTF8": "1",
         }
     )
-    subprocess.run(command, cwd=repository, check=True, env=environment)
+    golden_startup_hash = None
+    if request["schema_version"] == 3:
+        launch_root = private / "golden-author-startup"
+        invocation = build_m336k5_python_invocation(
+            platform_role="WINDOWS",
+            process_role="GOLDEN_AUTHOR",
+            python_executable=Path(request["python_executable"]),
+            git_executable=Path(request["git_executable"]),
+            powershell_executable=Path(request["executable_handles"]["powershell"]),
+            repository=repository,
+            working_directory=repository,
+            bootstrap_script=repository / "scripts/m336k5_python_bootstrap.py",
+            target=Path(command[2]),
+            execute_arguments=tuple(command[3:]),
+            validate_arguments=tuple(command[3:]),
+            execute_startup_receipt=launch_root / "startup.json",
+            validate_startup_receipt=launch_root / "startup-validate.json",
+        )
+        plan_path = launch_root / "invocation-plan.json"
+        write_m336k5_python_invocation_plan(invocation, plan_path)
+        launched = run_m336k5_python_invocation(
+            plan_path=plan_path, operation="execute"
+        )
+        if launched.returncode:
+            raise M336K2ProtocolError("M336K5 golden author process failed")
+        golden_startup_hash = startup_receipt_from_path(
+            launch_root / "startup.json"
+        ).receipt_hash
+        if golden_startup_hash != request["startup_receipt_hash"]:
+            raise M336K2ProtocolError("M336K5 golden startup receipt changed")
+    else:
+        subprocess.run(command, cwd=repository, check=True, env=environment)
     golden = oracle / "semantic_goldens.json"
     operation = bytes_hash(golden.resolve(strict=True).read_bytes())
     event = _append_evaluator_event(
         destinations["evaluator_ledger"], "GOLDENS_CREATED", operation
     )
-    return {
+    result = {
         "event": "GOLDENS_CREATED",
         "golden_bytes_hash": operation,
         "evaluator_event_hash": event["event_hash"],
         "status": "PASS",
     }
+    if golden_startup_hash is not None:
+        result["startup_receipt_hash"] = golden_startup_hash
+    return result
 
 
 def _evaluation_request(request: dict) -> M336IIndependentEvaluationRequest:
@@ -1158,10 +1223,15 @@ def _publish_e28(request: dict) -> dict:
         "runtime_receipt.json",
     ):
         shutil.copyfile(private / name, source / name)
-    if request["schema_version"] == 2:
+    if _typed(request):
         write_canonical_json(
             source / "route_identity_observation.json",
-            _identity_observation_receipt(request, "E29_EVALUATION"),
+            _identity_observation_receipt(
+                request,
+                "E30_EVALUATION"
+                if request["schema_version"] == 3
+                else "E29_EVALUATION",
+            ),
         )
     route = M336K2RouteLedger(
         _destinations(request)["route_state_ledger"], git_worktrees=(repository,)
@@ -1209,7 +1279,7 @@ def _publish_e28(request: dict) -> dict:
         "publication_report_hash": report.report_hash,
         "status": "PASS",
     }
-    if request["schema_version"] == 2:
+    if _typed(request):
         body.update(_identity_observation_fields(request))
     result = {**body, "receipt_hash": content_hash(body)}
     write_canonical_json(private / "e28_commit_receipt.json", result)
@@ -1356,15 +1426,22 @@ def _rehearsal_provider(request: dict) -> dict:
     }
 
 
-def _verify_request(request: dict) -> None:
+def _typed(request: dict) -> bool:
+    return request.get("schema_version") in {2, 3}
+
+
+def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) -> None:
     destinations = request.get("final_destinations")
     karina = request.get("karina")
     legacy = set(request) == _REQUEST_FIELDS and request.get("schema_version") == 1
-    typed = (
+    typed_k4 = (
         set(request) == _M336K4_REQUEST_FIELDS and request.get("schema_version") == 2
     )
+    typed_k5 = (
+        set(request) == _M336K5_REQUEST_FIELDS and request.get("schema_version") == 3
+    )
     if (
-        not (legacy or typed)
+        not (legacy or typed_k4 or typed_k5)
         or request.get("execution_mode") not in {"REHEARSAL", "FINAL"}
         or not isinstance(destinations, dict)
         or set(destinations) != _DESTINATION_FIELDS
@@ -1375,7 +1452,7 @@ def _verify_request(request: dict) -> None:
         != {"git", "python", "java", "javac", "ssh", "scp", "tar", "powershell", "cmd"}
     ):
         raise M336K2ProtocolError("M336K2 native stage request fields changed")
-    if typed:
+    if typed_k4:
         bundle = M336K4RouteIdentityBundle.from_dict(
             _object(Path(request["route_identity_bundle"]).resolve(strict=True))
         )
@@ -1393,6 +1470,28 @@ def _verify_request(request: dict) -> None:
             or authorization.route_identity_bundle_hash != bundle.bundle_hash
         ):
             raise M336K2ProtocolError("M336K4 native stage identity binding changed")
+    if typed_k5:
+        if startup_receipt_path is None:
+            raise M336K2ProtocolError("M336K5 stage startup receipt is absent")
+        startup = startup_receipt_from_path(startup_receipt_path)
+        bundle = M336K5RouteIdentityBundle.from_dict(
+            _object(Path(request["route_identity_bundle"]).resolve(strict=True))
+        )
+        authorization = M336K5FinalAuthorization.from_dict(
+            _object(Path(request["final_authorization"]).resolve(strict=True))
+        )
+        authorization.verify(bundle)
+        freeze = _freeze(Path(request["freeze_manifest"]).resolve(strict=True))
+        if (
+            not isinstance(freeze, M336K5FreezeManifest)
+            or request["route_run_id"] != bundle.protocol_run_id.value
+            or request["execution_mode"] != bundle.execution_mode.value
+            or request["route_identity_bundle_hash"] != bundle.bundle_hash
+            or request["startup_receipt_hash"] != startup.receipt_hash
+            or freeze.route_identity_bundle_hash != bundle.bundle_hash
+            or authorization.route_identity_bundle_hash != bundle.bundle_hash
+        ):
+            raise M336K2ProtocolError("M336K5 native stage identity binding changed")
     repository = Path(request["repository"]).resolve(strict=True)
     state = Path(request["stage_state"]).resolve(strict=False)
     receipts = Path(request["stage_receipt_root"]).resolve(strict=False)
@@ -1445,6 +1544,8 @@ def _karina_args(request: dict):
     ):
         raise M336K2ProtocolError("M336K2 Karina execution capsule changed")
     private = Path(request["private_root"]).resolve(strict=True)
+    repository = Path(request["repository"]).resolve(strict=True)
+    git = Path(request["git_executable"]).resolve(strict=True)
     return SimpleNamespace(
         private_acquisition_output=private,
         karina_private_capsule=Path(karina["private_execution_capsule"]),
@@ -1471,6 +1572,20 @@ def _karina_args(request: dict):
             request, "karina_stable_host_identity"
         ),
         supplied_f24_sha=_karina_expected_head(request),
+        m336k5_enabled=request["schema_version"] == 3,
+        m336k5_bootstrap_source_hash=(
+            _component_object(request, "python_startup_bootstrap").get(
+                "source_bytes_hash"
+            )
+            if request["schema_version"] == 3
+            else None
+        ),
+        m336k5_target_source_hash=bytes_hash(
+            (repository / "scripts" / "m336j_karina_execution.py").read_bytes()
+        ),
+        m336k5_project_source_identity=compute_m336j_project_source_identity(
+            repository, git
+        ),
     )
 
 
@@ -1522,9 +1637,11 @@ def _load_state(path: Path, request: dict) -> dict:
             "exact_f28_sha": request["exact_f28_sha"],
             "completed_events": (),
         }
-        if request["schema_version"] == 2:
-            value["schema_version"] = 2
+        if _typed(request):
+            value["schema_version"] = request["schema_version"]
             value["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
+        if request["schema_version"] == 3:
+            value["startup_receipt_hash"] = request["startup_receipt_hash"]
         return value
     value = _object(path)
     body = dict(value)
@@ -1538,14 +1655,17 @@ def _load_state(path: Path, request: dict) -> dict:
         "last_operation_hash",
         "state_hash",
     }
-    if request["schema_version"] == 2:
+    if _typed(request):
         expected_fields.add("route_identity_bundle_hash")
+    if request["schema_version"] == 3:
+        expected_fields.add("startup_receipt_hash")
     if (
         set(value) != expected_fields
         or value["route_run_id"] != request["route_run_id"]
         or value["exact_f28_sha"] != request["exact_f28_sha"]
         or value.get("route_identity_bundle_hash")
         != request.get("route_identity_bundle_hash")
+        or value.get("startup_receipt_hash") != request.get("startup_receipt_hash")
         or tuple(value["completed_events"])
         != _STAGE_EVENTS[: len(value["completed_events"])]
         or content_hash(body) != claimed
@@ -1576,14 +1696,20 @@ def _destinations(request: dict) -> dict[str, Path]:
     }
 
 
-def _freeze_manifest(request: dict) -> M336K2FreezeManifest | M336K4FreezeManifest:
+def _freeze_manifest(
+    request: dict,
+) -> M336K2FreezeManifest | M336K4FreezeManifest | M336K5FreezeManifest:
     return _freeze(Path(request["freeze_manifest"]).resolve(strict=True))
 
 
-def _freeze(path: Path) -> M336K2FreezeManifest | M336K4FreezeManifest:
+def _freeze(
+    path: Path,
+) -> M336K2FreezeManifest | M336K4FreezeManifest | M336K5FreezeManifest:
     value = _object(path)
     if value.get("contract_role") == "M336K4_F29_TYPED_FREEZE_V2":
         return M336K4FreezeManifest.from_dict(value)
+    if value.get("contract_role") == "M336K5_F30_TYPED_FREEZE_V2":
+        return M336K5FreezeManifest.from_dict(value)
     value["components"] = tuple(
         M336K2FrozenComponent(**item) for item in value["components"]
     )
@@ -1595,8 +1721,14 @@ def _freeze(path: Path) -> M336K2FreezeManifest | M336K4FreezeManifest:
 
 def _attestation(
     request: dict,
-) -> M336K2CommittedFreezeAttestation | M336K4CommittedFreezeAttestation:
+) -> (
+    M336K2CommittedFreezeAttestation
+    | M336K4CommittedFreezeAttestation
+    | M336K5CommittedFreezeAttestation
+):
     value = _object(Path(request["f28_attestation"]).resolve(strict=True))
+    if value.get("schema_version") == 2 and "exact_f30_sha" in value:
+        return M336K5CommittedFreezeAttestation(**value)
     if value.get("schema_version") == 2 and "exact_f29_sha" in value:
         return M336K4CommittedFreezeAttestation(**value)
     value["self_reference_safe_exclusions"] = tuple(
@@ -1607,6 +1739,8 @@ def _attestation(
 
 def _authorization(request: dict):
     value = _object(Path(request["final_authorization"]).resolve(strict=True))
+    if value.get("contract_role") == "M336K5_TYPED_FINAL_AUTHORIZATION_V2":
+        return M336K5FinalAuthorization.from_dict(value)
     if value.get("contract_role") == "M336K4_TYPED_FINAL_AUTHORIZATION_V2":
         return M336K4FinalAuthorization.from_dict(value)
     return authorization_from_dict(value)
@@ -1627,9 +1761,7 @@ def _component_object(request: dict, name: str) -> dict:
 
 
 def _identity_observation_fields(request: dict) -> dict:
-    bundle = M336K4RouteIdentityBundle.from_dict(
-        _object(Path(request["route_identity_bundle"]).resolve(strict=True))
-    )
+    bundle = _route_identity_bundle(request)
     return {
         "protocol_run_id": bundle.protocol_run_id.canonical_object(),
         "route_identity_bundle_hash": bundle.bundle_hash,
@@ -1637,12 +1769,14 @@ def _identity_observation_fields(request: dict) -> dict:
 
 
 def _identity_observation_receipt(request: dict, observer: str) -> dict:
-    bundle = M336K4RouteIdentityBundle.from_dict(
-        _object(Path(request["route_identity_bundle"]).resolve(strict=True))
-    )
+    bundle = _route_identity_bundle(request)
     body = {
         "schema_version": 1,
-        "contract_role": "PUBLIC_SAFE_M336K4_ROUTE_IDENTITY_OBSERVATION",
+        "contract_role": (
+            "PUBLIC_SAFE_M336K5_ROUTE_IDENTITY_OBSERVATION"
+            if request["schema_version"] == 3
+            else "PUBLIC_SAFE_M336K4_ROUTE_IDENTITY_OBSERVATION"
+        ),
         "observer": observer,
         "route_version": bundle.route_version.canonical_object(),
         "protocol_run_id": bundle.protocol_run_id.canonical_object(),
@@ -1654,6 +1788,13 @@ def _identity_observation_receipt(request: dict, observer: str) -> dict:
         "status": "PASS",
     }
     return {**body, "receipt_hash": content_hash(body)}
+
+
+def _route_identity_bundle(request: dict):
+    value = _object(Path(request["route_identity_bundle"]).resolve(strict=True))
+    if request["schema_version"] == 3:
+        return M336K5RouteIdentityBundle.from_dict(value)
+    return M336K4RouteIdentityBundle.from_dict(value)
 
 
 def _required_hash(value: dict, field: str) -> str:

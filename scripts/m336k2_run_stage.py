@@ -13,11 +13,17 @@ def main() -> None:
     parser.add_argument("--request", type=Path, required=True)
     parser.add_argument("--event", required=True)
     parser.add_argument("--receipt", type=Path, required=True)
+    parser.add_argument("--startup-receipt", type=Path)
     args = parser.parse_args()
     run_m336k2_stage(
         request_path=args.request.resolve(strict=True),
         event=args.event,
         receipt_path=args.receipt.resolve(strict=False),
+        startup_receipt_path=(
+            args.startup_receipt.resolve(strict=True)
+            if args.startup_receipt is not None
+            else None
+        ),
     )
 
 

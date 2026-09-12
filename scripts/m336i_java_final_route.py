@@ -120,6 +120,9 @@ from ai_brain.stage3.acquisition.m336j_transport import (
     portable_tree_content_identity,
     write_canonical_tree_archive,
 )
+from ai_brain.stage3.acquisition.m336k5_startup import (
+    build_m336k5_karina_invocation,
+)
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
 from ai_brain.stage3.acquisition.sources import ingest_bundle
 
@@ -964,9 +967,7 @@ def _invoke_m336j_remote(
     remote_script = (
         capsule.repository_checkout / "scripts" / "m336j_karina_execution.py"
     )
-    arguments = (
-        (KarinaRemoteTokenClass.FLAG, "-B"),
-        (KarinaRemoteTokenClass.PRIVATE_PATH, remote_script),
+    target_arguments = (
         (KarinaRemoteTokenClass.SUBCOMMAND, subcommand),
         (KarinaRemoteTokenClass.FLAG, "--private-capsule"),
         (
@@ -980,20 +981,64 @@ def _invoke_m336j_remote(
     source = (
         Path(payload_path).resolve(strict=True) if payload_path is not None else None
     )
-    plan_arguments = {
-        "component_id": component.component_id,
-        "capsule": capsule,
-        "arguments": arguments,
-        "expected_capsule_receipt_hash": public.receipt_hash,
-    }
-    if source is None:
-        plan = build_remote_command_plan(**plan_arguments, stdin_payload=payload)
+    if getattr(args, "m336k5_enabled", False):
+        process_role = {
+            "REMOTE_HOST_PREFLIGHT": "KARINA_HOST_PREFLIGHT",
+            "REMOTE_STORAGE_PREFLIGHT": "KARINA_STORAGE_PREFLIGHT",
+            "REMOTE_REPLAY_AND_PACK_VERIFIER": "KARINA_REPLAY",
+            "REMOTE_INDEPENDENT_EVALUATOR": "KARINA_EVALUATOR",
+            "REMOTE_INSTALLED_RUNTIME": "KARINA_RUNTIME",
+        }.get(component_role, "KARINA_PRODUCTION")
+        startup_receipt = capsule.private_root / "m336k5-startup-receipt.json"
+        if source is None:
+            plan, _inline = build_m336k5_karina_invocation(
+                component_id=component.component_id,
+                capsule=capsule,
+                public_capsule=public,
+                process_role=process_role,
+                target=remote_script,
+                target_arguments=target_arguments,
+                bootstrap_source_hash=args.m336k5_bootstrap_source_hash,
+                target_source_hash=args.m336k5_target_source_hash,
+                project_source_identity=args.m336k5_project_source_identity,
+                startup_receipt=startup_receipt,
+                stdin_payload=payload,
+            )
+        else:
+            plan, _inline = build_m336k5_karina_invocation(
+                component_id=component.component_id,
+                capsule=capsule,
+                public_capsule=public,
+                process_role=process_role,
+                target=remote_script,
+                target_arguments=target_arguments,
+                bootstrap_source_hash=args.m336k5_bootstrap_source_hash,
+                target_source_hash=args.m336k5_target_source_hash,
+                project_source_identity=args.m336k5_project_source_identity,
+                startup_receipt=startup_receipt,
+                stdin_payload_hash=hash_file(source),
+                stdin_payload_size=source.stat().st_size,
+            )
     else:
-        plan = build_remote_command_plan(
-            **plan_arguments,
-            stdin_payload_hash=hash_file(source),
-            stdin_payload_size=source.stat().st_size,
+        arguments = (
+            (KarinaRemoteTokenClass.FLAG, "-B"),
+            (KarinaRemoteTokenClass.PRIVATE_PATH, remote_script),
+            *target_arguments,
         )
+        plan_arguments = {
+            "component_id": component.component_id,
+            "capsule": capsule,
+            "arguments": arguments,
+            "expected_capsule_receipt_hash": public.receipt_hash,
+        }
+        if source is None:
+            plan = build_remote_command_plan(**plan_arguments, stdin_payload=payload)
+        else:
+            plan = build_remote_command_plan(
+                **plan_arguments,
+                stdin_payload_hash=hash_file(source),
+                stdin_payload_size=source.stat().st_size,
+            )
     streaming = source is not None or framed
     try:
         if streaming:
@@ -1024,6 +1069,12 @@ def _invoke_m336j_remote(
                         component_binding_hash=component.binding_hash,
                         host_identity_hash=public.host_identity_receipt_hash,
                     )
+                    if getattr(args, "m336k5_enabled", False) and not isinstance(
+                        response.get("startup_receipt_hash"), str
+                    ):
+                        raise ValueError(
+                            "M336K5 remote startup receipt binding is absent"
+                        )
         else:
             result = invoke_karina_command(
                 transport=transport,
@@ -1038,6 +1089,10 @@ def _invoke_m336j_remote(
                 component_binding_hash=component.binding_hash,
                 host_identity_hash=public.host_identity_receipt_hash,
             )
+            if getattr(args, "m336k5_enabled", False) and not isinstance(
+                response.get("startup_receipt_hash"), str
+            ):
+                raise ValueError("M336K5 remote startup receipt binding is absent")
     except subprocess.CalledProcessError as error:
         _write_karina_command_failure_diagnostics(
             args.karina_command_receipt_root, receipt_name, error
@@ -1310,6 +1365,10 @@ def _run_karina_production(args, authorization, materialization, *, run_runtime=
             host_identity_hash=public.host_identity_receipt_hash,
             limits=limits,
         )
+        if getattr(args, "m336k5_enabled", False) and not isinstance(
+            header.get("startup_receipt_hash"), str
+        ):
+            raise ValueError("M336K5 remote startup receipt binding is absent")
         if header.get("transfer_limit_hash") != limit_hash:
             raise ValueError("M336J production export limit binding changed")
         write_canonical_json(

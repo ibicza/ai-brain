@@ -42,6 +42,29 @@ from ai_brain.stage3.acquisition.m336j_transport import (
 )
 
 
+def _emit(args, body: dict) -> None:
+    if args.startup_receipt is not None:
+        from ai_brain.stage3.acquisition.m336k5_startup import (
+            startup_receipt_from_path,
+        )
+
+        startup = startup_receipt_from_path(args.startup_receipt)
+        body = {**body, "startup_receipt_hash": startup.receipt_hash}
+    value = {**body, "receipt_hash": content_hash(body)}
+    print(canonical_json(value))
+
+
+def _bind_startup(args, body: dict) -> dict:
+    if args.startup_receipt is None:
+        return body
+    from ai_brain.stage3.acquisition.m336k5_startup import (
+        startup_receipt_from_path,
+    )
+
+    startup = startup_receipt_from_path(args.startup_receipt)
+    return {**body, "startup_receipt_hash": startup.receipt_hash}
+
+
 def _capsule_receipt(args) -> None:
     receipt, python, dependencies, audit = verify_execution_capsule(
         args.private_capsule
@@ -55,7 +78,7 @@ def _capsule_receipt(args) -> None:
         "executable_dependency_audit": public_dataclass(audit),
         "status": "PASS",
     }
-    print(canonical_json({**body, "receipt_hash": content_hash(body)}))
+    _emit(args, body)
 
 
 def _host_preflight(args) -> None:
@@ -66,7 +89,7 @@ def _host_preflight(args) -> None:
         "component_binding_hash": args.component_binding_hash,
     }
     body.pop("receipt_hash")
-    print(canonical_json({**body, "receipt_hash": content_hash(body)}))
+    _emit(args, body)
 
 
 def _receive_tree(args) -> None:
@@ -123,7 +146,7 @@ def _receive_tree(args) -> None:
         "transfer_limit_hash": limit_hash,
         "status": "PASS",
     }
-    print(canonical_json({**body, "receipt_hash": content_hash(body)}))
+    _emit(args, body)
 
 
 def _export_tree(args) -> None:
@@ -154,6 +177,7 @@ def _export_tree(args) -> None:
             "transfer_limit_hash": limit_hash,
             "status": "PASS",
         }
+        header_body = _bind_startup(args, header_body)
         header = {**header_body, "receipt_hash": content_hash(header_body)}
         sys.stdout.buffer.write((canonical_json(header) + "\n").encode("utf-8"))
         stream_file_to_stdout(temporary, chunk_bytes=limits.chunk_bytes)
@@ -182,7 +206,7 @@ def _storage_preflight(args) -> None:
         "host_identity_hash": receipt.host_identity_receipt_hash,
     }
     body.pop("receipt_hash")
-    print(canonical_json({**body, "receipt_hash": content_hash(body)}))
+    _emit(args, body)
 
 
 def _independent_evaluation(args) -> None:
@@ -201,7 +225,7 @@ def _independent_evaluation(args) -> None:
         "host_identity_hash": receipt.host_identity_receipt_hash,
         "independent_evaluation_result_hash": legacy_hash,
     }
-    print(canonical_json({**body, "receipt_hash": content_hash(body)}))
+    _emit(args, body)
 
 
 def _installed_runtime(args) -> None:
@@ -219,7 +243,7 @@ def _installed_runtime(args) -> None:
         "host_identity_hash": receipt.host_identity_receipt_hash,
         "runtime_check_receipt_hash": runtime_hash,
     }
-    print(canonical_json({**body, "receipt_hash": content_hash(body)}))
+    _emit(args, body)
 
 
 def _replay_and_pack_verification(args) -> None:
@@ -238,7 +262,7 @@ def _replay_and_pack_verification(args) -> None:
         "host_identity_hash": receipt.host_identity_receipt_hash,
         "replay_and_pack_verification_hash": replay_hash,
     }
-    print(canonical_json({**body, "receipt_hash": content_hash(body)}))
+    _emit(args, body)
 
 
 def _produce_worker(args) -> None:
@@ -305,7 +329,7 @@ def _produce_worker(args) -> None:
         "component_binding_hash": component_hash,
         "legacy_response_hash": legacy_hash,
     }
-    print(canonical_json({**body, "receipt_hash": content_hash(body)}))
+    _emit(args, body)
 
 
 def _load_legacy_worker(repository: PurePosixPath):
@@ -361,33 +385,40 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     commands = parser.add_subparsers(dest="command", required=True)
     capsule = commands.add_parser("capsule-receipt")
+    command_parsers = [capsule]
     capsule.add_argument("--private-capsule", type=Path, required=True)
     host = commands.add_parser("host-preflight")
+    command_parsers.append(host)
     host.add_argument("--private-capsule", type=Path, required=True)
     host.add_argument("--request-hash", required=True)
     host.add_argument("--component-binding-hash", required=True)
     storage = commands.add_parser("storage-preflight")
+    command_parsers.append(storage)
     storage.add_argument("--private-capsule", type=Path, required=True)
     storage.add_argument("--request-hash", required=True)
     storage.add_argument("--component-binding-hash", required=True)
     storage.add_argument("--maximum-transfer-bytes", type=int, required=True)
     storage.add_argument("--qualification-margin", action="store_true")
     worker = commands.add_parser("produce-worker")
+    command_parsers.append(worker)
     worker.add_argument("--private-capsule", type=Path, required=True)
     worker.add_argument("--request-hash", required=True)
     worker.add_argument("--component-binding-hash", required=True)
     evaluation = commands.add_parser("independent-evaluation")
+    command_parsers.append(evaluation)
     evaluation.add_argument("--private-capsule", type=Path, required=True)
     evaluation.add_argument("--request-hash", required=True)
     evaluation.add_argument("--component-binding-hash", required=True)
     evaluation.add_argument("--relative-config", required=True)
     evaluation.add_argument("--relative-output", required=True)
     runtime = commands.add_parser("installed-runtime")
+    command_parsers.append(runtime)
     runtime.add_argument("--private-capsule", type=Path, required=True)
     runtime.add_argument("--request-hash", required=True)
     runtime.add_argument("--component-binding-hash", required=True)
     runtime.add_argument("--relative-pack", required=True)
     replay = commands.add_parser("replay-and-pack-verification")
+    command_parsers.append(replay)
     replay.add_argument("--private-capsule", type=Path, required=True)
     replay.add_argument("--request-hash", required=True)
     replay.add_argument("--component-binding-hash", required=True)
@@ -395,6 +426,7 @@ def main() -> None:
     replay.add_argument("--relative-replay-receipt", required=True)
     for name in ("receive-tree", "export-tree"):
         transfer = commands.add_parser(name)
+        command_parsers.append(transfer)
         transfer.add_argument("--private-capsule", type=Path, required=True)
         transfer.add_argument("--expected-capsule-receipt-hash", required=True)
         transfer.add_argument("--request-hash", required=True)
@@ -414,6 +446,8 @@ def main() -> None:
         else:
             transfer.add_argument("--relative-source", required=True)
             transfer.add_argument("--transfer-limit-hash", required=True)
+    for command_parser in command_parsers:
+        command_parser.add_argument("--startup-receipt", type=Path)
     args = parser.parse_args()
     command = {
         "capsule-receipt": _capsule_receipt,

@@ -309,6 +309,29 @@ def minimal_environment(
     )
 
 
+def m336k5_karina_environment() -> tuple[tuple[str, str], ...]:
+    """Path-free environment used before the M336K5 stdlib bootstrap."""
+
+    return tuple(
+        sorted(
+            (
+                ("GIT_CONFIG_NOSYSTEM", "1"),
+                ("GIT_TERMINAL_PROMPT", "0"),
+                ("LC_ALL", "C.UTF-8"),
+                ("PATH", M336J_MINIMAL_PATH),
+                ("PIP_NO_INDEX", "1"),
+                ("PYTHONDONTWRITEBYTECODE", "1"),
+                ("PYTHONHASHSEED", "0"),
+                ("PYTHONIOENCODING", "utf-8"),
+                ("PYTHONNOUSERSITE", "1"),
+                ("PYTHONUTF8", "1"),
+                ("TZ", "UTC"),
+                ("UV_OFFLINE", "1"),
+            )
+        )
+    )
+
+
 def verify_execution_capsule(
     capsule_path: Path,
 ) -> tuple[
@@ -344,10 +367,9 @@ def verify_execution_capsule(
             raise ValueError("M336J capsule executable is not a regular file")
     if site.ENABLE_USER_SITE is not False or os.environ.get("PYTHONNOUSERSITE") != "1":
         raise ValueError("M336J user-site loading is not disabled")
-    if any(
-        os.environ.get(name) != value
-        for name, value in minimal_environment(capsule.repository_checkout)
-    ):
+    legacy_environment = dict(minimal_environment(capsule.repository_checkout))
+    k5_environment = dict(m336k5_karina_environment())
+    if dict(os.environ) not in (legacy_environment, k5_environment):
         raise ValueError("M336J worker environment differs from the minimal policy")
     if "torch" in sys.modules:
         raise ValueError("M336J execution capsule imported torch")
@@ -525,7 +547,11 @@ def render_remote_command(
         f"{name}={shlex.quote(value)}" for name, value in plan.environment
     )
     argv = shlex.join(tuple(token.value for token in plan.argv))
-    inner = f"{environment} exec {argv}"
+    inner = (
+        f"exec /usr/bin/env -i {environment} {argv}"
+        if plan.environment == m336k5_karina_environment()
+        else f"{environment} exec {argv}"
+    )
     rendered = shlex.join((str(resolved_shell), "-c", inner))
     if any(
         forbidden in rendered
@@ -569,7 +595,11 @@ def command_receipt(
         "executable_identity_hashes": tuple(
             sorted(item.identity_hash for item in dependency_manifest.dependencies)
         ),
-        "environment_policy_hash": minimal_environment_policy().policy_hash,
+        "environment_policy_hash": (
+            content_hash(("m336k5.karina-startup-environment.v1", plan.environment))
+            if plan.environment == m336k5_karina_environment()
+            else minimal_environment_policy().policy_hash
+        ),
         "exit_code": exit_code,
         "response_hash": response_hash,
         "response_size": response_size,
@@ -878,7 +908,11 @@ def _verify_command_plan(
         plan.schema_version != M336J_COMMAND_PLAN_SCHEMA_VERSION
         or content_hash(body) != claimed
         or tuple(sorted(plan.environment)) != plan.environment
-        or tuple(plan.environment) != minimal_environment(repository_checkout)
+        or tuple(plan.environment)
+        not in {
+            minimal_environment(repository_checkout),
+            m336k5_karina_environment(),
+        }
     ):
         raise ValueError("M336J command plan changed")
     for name, value in plan.environment:
