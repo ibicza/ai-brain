@@ -49,6 +49,7 @@ from ai_brain.stage3.acquisition.m336g_publication import (
     verify_java_public_candidate_pack,
     write_sealed_java_replay_input_manifest,
 )
+from ai_brain.stage3.acquisition.m336k5_startup import startup_receipt_from_path
 from ai_brain.stage3.acquisition.models import ReviewDecision
 from ai_brain.stage3.acquisition.persistence import AcquisitionStore
 from ai_brain.stage3.acquisition.review import review_proposal
@@ -239,7 +240,15 @@ def main() -> None:
     parser.add_argument("--selected-manifest", type=Path)
     parser.add_argument("--sealed-vault", type=Path)
     parser.add_argument("--private-replay-root", type=Path)
+    parser.add_argument("--startup-receipt", type=Path)
     args = parser.parse_args()
+    startup_receipt_hash = (
+        startup_receipt_from_path(
+            args.startup_receipt.resolve(strict=True)
+        ).receipt_hash
+        if args.startup_receipt is not None
+        else None
+    )
     source_root = args.source_root.resolve(strict=True)
     if args.output.exists():
         raise FileExistsError("fresh production output already exists")
@@ -555,6 +564,11 @@ def main() -> None:
         "production_golden_read_count": file_report.forbidden_read_count,
         "torch_imported": "torch" in sys.modules,
         "status": "PASS",
+        **(
+            {"startup_receipt_hash": startup_receipt_hash}
+            if startup_receipt_hash is not None
+            else {}
+        ),
         **(
             {
                 "compiler_probe_hash": compilation_probe.probe_hash,

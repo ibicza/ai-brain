@@ -65,6 +65,16 @@ def main() -> None:
             str(args.git_executable.resolve(strict=True)),
             "--javac",
             str(args.javac.resolve(strict=True)),
+            "--startup-receipt",
+            str(args.startup_receipt.resolve(strict=True)),
+            *(
+                (
+                    "--powershell-executable",
+                    str(args.powershell_executable.resolve(strict=True)),
+                )
+                if args.powershell_executable is not None
+                else ()
+            ),
             "--output",
             str(base),
         ),
@@ -90,6 +100,9 @@ def main() -> None:
         and base_receipt.get("exact_sha") == args.expected_sha
         and base_receipt.get("post_check_exact_sha") == args.expected_sha
         and base_receipt.get("post_check_worktree_clean") is True
+        and base_receipt.get("startup_receipt_hash") == inner_startup.receipt_hash
+        and base_receipt.get("hermetic_python_invocation_count") == 9
+        and base_receipt.get("unclassified_python_process_launch_count") == 0
         and checks
         and all(item.get("exit_code") == 0 for item in checks)
         and disposable.get("status") == "PASS"

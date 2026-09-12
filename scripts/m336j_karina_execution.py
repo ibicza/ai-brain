@@ -308,12 +308,50 @@ def _produce_worker(args) -> None:
     write_canonical_json(
         request_path, {**request, "request_hash": content_hash(request)}
     )
+    production_python_worker = None
+    expected_startup_receipt_hash = None
+    if args.startup_receipt is not None:
+        from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+        from ai_brain.stage3.acquisition.m336k5_startup import (
+            run_m336k5_bound_python_target,
+            startup_receipt_from_path,
+        )
+
+        expected_startup_receipt_hash = startup_receipt_from_path(
+            args.startup_receipt.resolve(strict=True)
+        ).receipt_hash
+        repository = Path(str(capsule.repository_checkout)).resolve(strict=True)
+        launch_root = Path(str(capsule.private_root)) / (
+            f"m336k5-production-worker-{supplied_hash}"
+        )
+
+        def production_python_worker(
+            target: Path, arguments: tuple[str, ...], working_directory: Path
+        ) -> None:
+            _invocation, result, _startup = run_m336k5_bound_python_target(
+                platform_role="KARINA",
+                process_role="KARINA_PRODUCTION",
+                python_executable=Path(str(capsule.python_executable)),
+                git_executable=Path(str(capsule.git_executable)),
+                repository=repository,
+                working_directory=working_directory,
+                bootstrap_script=repository / "scripts/m336k5_python_bootstrap.py",
+                target=target,
+                arguments=arguments,
+                launch_root=launch_root,
+                expected_startup_receipt_hash=expected_startup_receipt_hash,
+            )
+            if result.returncode:
+                raise M336K2ProtocolError("M336K5 Karina production worker failed")
+
     module = _load_legacy_worker(capsule.repository_checkout)
     module._produce_worker(
         SimpleNamespace(
             request=request_path,
             git_executable=capsule.git_executable.as_posix(),
             m336j_mode=True,
+            production_python_worker=production_python_worker,
+            expected_startup_receipt_hash=expected_startup_receipt_hash,
         )
     )
     legacy = strict_json_file(Path(request["output"]))

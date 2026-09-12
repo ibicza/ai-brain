@@ -5,6 +5,7 @@ from __future__ import annotations
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 
@@ -36,6 +37,8 @@ from ai_brain.stage3.acquisition.m336h_contracts import (
     strict_json_file,
     write_canonical_json,
 )
+
+M336HPythonWorker = Callable[[Path, tuple[str, ...], Path], None]
 
 
 @dataclass(frozen=True)
@@ -226,6 +229,8 @@ def validate_m336h_compiler_aware_production_request(
 
 def run_m336h_compiler_aware_production(
     request: M336HCompilerAwareProductionRequest,
+    *,
+    python_worker: M336HPythonWorker | None = None,
 ) -> M336HCompilerAwareProductionResponse:
     """Run the strict production worker and sealed replay with no legacy fallback."""
 
@@ -260,30 +265,32 @@ def run_m336h_compiler_aware_production(
         write_canonical_json(private_request, request_body)
         if content_hash(_load(private_request)) != request_hash:
             raise ValueError("M336H private production request serialization changed")
-        subprocess.run(
-            (
-                sys.executable,
-                str(worker),
-                "--source-root",
-                str(request.source_snapshot_private_handle.resolve(strict=True)),
-                "--output",
-                str(request.public_production_destination),
-                "--platform",
-                request.platform_role.casefold(),
-                "--javac",
-                str(request.javac_private_handle.resolve(strict=True)),
-                "--source-entry-bindings",
-                str(request.source_entry_bindings.resolve(strict=True)),
-                "--selected-manifest",
-                str(request.selected_manifest.resolve(strict=True)),
-                "--sealed-vault",
-                str(request.sealed_vault.resolve(strict=True)),
-                "--private-replay-root",
-                str(request.private_replay_root),
-            ),
-            cwd=repository,
-            check=True,
+        worker_arguments = (
+            "--source-root",
+            str(request.source_snapshot_private_handle.resolve(strict=True)),
+            "--output",
+            str(request.public_production_destination),
+            "--platform",
+            request.platform_role.casefold(),
+            "--javac",
+            str(request.javac_private_handle.resolve(strict=True)),
+            "--source-entry-bindings",
+            str(request.source_entry_bindings.resolve(strict=True)),
+            "--selected-manifest",
+            str(request.selected_manifest.resolve(strict=True)),
+            "--sealed-vault",
+            str(request.sealed_vault.resolve(strict=True)),
+            "--private-replay-root",
+            str(request.private_replay_root),
         )
+        if python_worker is None:
+            subprocess.run(
+                (sys.executable, str(worker), *worker_arguments),
+                cwd=repository,
+                check=True,
+            )
+        else:
+            python_worker(worker, worker_arguments, repository)
 
     java_name = (
         "java.exe"

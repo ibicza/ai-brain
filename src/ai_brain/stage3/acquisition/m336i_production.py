@@ -26,6 +26,7 @@ from ai_brain.stage3.acquisition.m336h_contracts import strict_json_file
 from ai_brain.stage3.acquisition.m336h_production import (
     M336HCompilerAwareProductionRequest,
     M336HCompilerAwareProductionResponse,
+    M336HPythonWorker,
     production_response_from_dict,
     run_m336h_compiler_aware_production,
     validate_m336h_compiler_aware_production_request,
@@ -88,9 +89,16 @@ class M336IProductionSeal:
 
 def run_m336i_compiler_aware_production(
     request: M336ICompilerAwareProductionRequest,
+    *,
+    python_worker: M336HPythonWorker | None = None,
 ) -> tuple[M336HCompilerAwareProductionResponse, M336IProductionSeal]:
     validate_m336i_production_request(request)
-    response = run_m336h_compiler_aware_production(request.production_request)
+    if python_worker is None:
+        response = run_m336h_compiler_aware_production(request.production_request)
+    else:
+        response = run_m336h_compiler_aware_production(
+            request.production_request, python_worker=python_worker
+        )
     seal = build_m336i_production_seal(
         production_root=request.production_request.public_production_destination,
         response=response,

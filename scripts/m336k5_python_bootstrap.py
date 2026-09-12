@@ -288,8 +288,9 @@ def main() -> None:
     receipt = _verify_and_receipt(plan)
     receipt_path = Path(plan[f"{args.operation}_startup_receipt"])
     _write_receipt(receipt_path, receipt)
-    source_root = Path(plan["repository"]).resolve(strict=True) / "src"
-    sys.path.insert(0, str(source_root))
+    repository = Path(plan["repository"]).resolve(strict=True)
+    source_root = repository / "src"
+    sys.path[:0] = [str(source_root), str(repository)]
     arguments = list(plan[f"{args.operation}_arguments"])
     if plan["process_role"] not in {
         "BUILD_HELPER",

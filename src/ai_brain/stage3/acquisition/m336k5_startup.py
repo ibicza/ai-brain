@@ -273,7 +273,7 @@ def build_m336k5_python_startup_policy() -> M336K5PythonStartupPolicy:
         "windows_fixed_environment": M336K5_WINDOWS_FIXED_ENVIRONMENT,
         "karina_fixed_environment": M336K5_KARINA_FIXED_ENVIRONMENT,
         "project_import_mechanism": (
-            "BOOTSTRAP_INSERT_EXACT_REPOSITORY_SRC_AFTER_STDLIB_VERIFICATION"
+            "BOOTSTRAP_INSERT_EXACT_REPOSITORY_SRC_AND_ROOT_AFTER_STDLIB_VERIFICATION"
         ),
         "user_site_effective_state_required": True,
         "caller_environment_map_allowed": False,
@@ -561,6 +561,64 @@ def run_m336k5_python_invocation(
         capture_output=capture_output,
         env=_powershell_boot_environment(plan.sanitized_environment),
     )
+
+
+def run_m336k5_bound_python_target(
+    *,
+    platform_role: str,
+    process_role: str,
+    python_executable: Path,
+    git_executable: Path,
+    repository: Path,
+    working_directory: Path,
+    bootstrap_script: Path,
+    target: Path | str,
+    arguments: tuple[str, ...],
+    launch_root: Path,
+    expected_startup_receipt_hash: str,
+    powershell_executable: Path | None = None,
+    target_kind: str = "SCRIPT",
+) -> tuple[
+    M336K5PythonInvocationPlan,
+    subprocess.CompletedProcess[bytes],
+    M336K5PythonStartupReceipt,
+]:
+    """Run one nested Python target through the canonical K5 startup boundary."""
+
+    root = launch_root.resolve(strict=False)
+    if root.exists() or not expected_startup_receipt_hash:
+        raise M336K2ProtocolError("M336K5 bound Python target destination is stale")
+    startup_path = root / "startup.json"
+    plan_path = root / "invocation-plan.json"
+    invocation = build_m336k5_python_invocation(
+        platform_role=platform_role,
+        process_role=process_role,
+        python_executable=python_executable,
+        git_executable=git_executable,
+        powershell_executable=powershell_executable,
+        repository=repository,
+        working_directory=working_directory,
+        bootstrap_script=bootstrap_script,
+        target=target,
+        target_kind=target_kind,
+        execute_arguments=arguments,
+        validate_arguments=arguments,
+        execute_startup_receipt=startup_path,
+        validate_startup_receipt=root / "startup-validate.json",
+    )
+    write_m336k5_python_invocation_plan(invocation, plan_path)
+    result = run_m336k5_python_invocation(
+        plan_path=plan_path, operation="execute", capture_output=True
+    )
+    for name, payload in (("stdout.log", result.stdout), ("stderr.log", result.stderr)):
+        with (root / name).open("xb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+    startup = startup_receipt_from_path(startup_path)
+    if startup.receipt_hash != expected_startup_receipt_hash:
+        raise M336K2ProtocolError("M336K5 bound Python startup receipt changed")
+    return invocation, result, startup
 
 
 def build_m336k5_karina_invocation(

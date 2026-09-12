@@ -1634,7 +1634,19 @@ def _produce_worker(args) -> None:
         public_staging_root=Path(request["public_staging_root"]),
         git_worktrees=(repository,),
     )
-    response, seal = run_m336i_compiler_aware_production(wrapped)
+    python_worker = getattr(args, "production_python_worker", None)
+    response, seal = run_m336i_compiler_aware_production(
+        wrapped, python_worker=python_worker
+    )
+    expected_startup = getattr(args, "expected_startup_receipt_hash", None)
+    if (
+        expected_startup is not None
+        and _object(Path(request["production_root"]) / "production_summary.json").get(
+            "startup_receipt_hash"
+        )
+        != expected_startup
+    ):
+        raise ValueError("M336K5 Karina production startup binding changed")
     write_canonical_json(
         Path(request["production_root"]) / "m336i_production_seal.json", seal
     )

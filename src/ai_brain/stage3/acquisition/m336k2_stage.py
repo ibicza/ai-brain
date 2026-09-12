@@ -88,6 +88,7 @@ from ai_brain.stage3.acquisition.m336k5_freeze import (
 from ai_brain.stage3.acquisition.m336k5_identity import M336K5RouteIdentityBundle
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_invocation,
+    run_m336k5_bound_python_target,
     run_m336k5_python_invocation,
     startup_receipt_from_path,
     write_m336k5_python_invocation_plan,
@@ -571,7 +572,40 @@ def _run_windows_production(request: dict) -> dict:
         worktrees=(repository,),
         authorization=authorization,
     )
-    response, seal = run_m336i_compiler_aware_production(production_request)
+    python_worker = None
+    if request["schema_version"] == 3:
+
+        def python_worker(
+            target: Path, arguments: tuple[str, ...], working_directory: Path
+        ) -> None:
+            _invocation, result, _startup = run_m336k5_bound_python_target(
+                platform_role="WINDOWS",
+                process_role="WINDOWS_PRODUCTION",
+                python_executable=Path(request["python_executable"]),
+                git_executable=Path(request["git_executable"]),
+                powershell_executable=Path(request["executable_handles"]["powershell"]),
+                repository=repository,
+                working_directory=working_directory,
+                bootstrap_script=repository / "scripts/m336k5_python_bootstrap.py",
+                target=target,
+                arguments=arguments,
+                launch_root=private / "windows-production-worker-startup",
+                expected_startup_receipt_hash=request["startup_receipt_hash"],
+            )
+            if result.returncode:
+                raise M336K2ProtocolError("M336K5 Windows production worker failed")
+
+    response, seal = run_m336i_compiler_aware_production(
+        production_request, python_worker=python_worker
+    )
+    if (
+        request["schema_version"] == 3
+        and _object(destinations["windows_production"] / "production_summary.json").get(
+            "startup_receipt_hash"
+        )
+        != request["startup_receipt_hash"]
+    ):
+        raise M336K2ProtocolError("M336K5 Windows production startup binding changed")
     write_canonical_json(
         destinations["windows_production"] / "m336i_production_seal.json", seal
     )
