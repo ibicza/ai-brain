@@ -218,7 +218,10 @@ def _run_hermetic_checks(
     stage3_java_tests: tuple[str, ...],
     executable_directories: tuple[Path, ...],
 ) -> list[dict]:
-    temp_root = logs.parent / "temp"
+    temp_root = logs.with_name(logs.name + "-temp")
+    if temp_root.exists() or temp_root.is_relative_to(repository):
+        raise ValueError("M336K5 quality temp root must be fresh and outside Git")
+    temp_root.mkdir(parents=True)
 
     def python_check(
         name: str,
@@ -373,6 +376,7 @@ def _run_hermetic_checks(
             cleanup_root=full_temp,
         )
     )
+    temp_root.rmdir()
     return checks
 
 

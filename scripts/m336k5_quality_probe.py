@@ -32,6 +32,7 @@ def _bind_exact_tool_path(args: argparse.Namespace) -> None:
         if directory not in directories:
             directories.append(directory)
     os.environ["PATH"] = os.pathsep.join(directories)
+    os.environ["PYTHONPATH"] = str((Path.cwd() / "src").resolve(strict=True))
 
 
 def main() -> None:
