@@ -116,8 +116,10 @@ def test_k5_quality_probe_binds_subprocess_import_root_after_bootstrap(
         powershell_executable=handles[3],
     )
     monkeypatch.chdir(repository)
+    monkeypatch.setenv("PATH", "hostile")
     monkeypatch.delenv("PYTHONPATH", raising=False)
 
     m336k5_quality_probe._bind_exact_tool_path(args)
 
+    assert __import__("os").environ["PATH"] == str(tmp_path.resolve())
     assert __import__("os").environ["PYTHONPATH"] == str(source.resolve())
