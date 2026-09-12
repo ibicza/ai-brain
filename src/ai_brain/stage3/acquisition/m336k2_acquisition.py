@@ -105,7 +105,10 @@ def authorization_from_dict(value: dict) -> M336K2FinalAuthorization:
 
 
 def verify_m336k2_final_authorization(value: M336K2FinalAuthorization) -> None:
-    if getattr(value, "contract_role", None) == "M336K4_TYPED_FINAL_AUTHORIZATION_V2":
+    if getattr(value, "contract_role", None) in {
+        "M336K4_TYPED_FINAL_AUTHORIZATION_V2",
+        "M336K5_TYPED_FINAL_AUTHORIZATION_V2",
+    }:
         value.verify()
         return
     body = asdict(value)
@@ -431,10 +434,10 @@ def run_m336k2_frozen_acquisition(
         "ledger_receipt_hash": ledger_receipt.receipt_hash,
         "status": "ACQUISITION_COMPLETED",
     }
-    if (
-        getattr(authorization, "contract_role", None)
-        == "M336K4_TYPED_FINAL_AUTHORIZATION_V2"
-    ):
+    if getattr(authorization, "contract_role", None) in {
+        "M336K4_TYPED_FINAL_AUTHORIZATION_V2",
+        "M336K5_TYPED_FINAL_AUTHORIZATION_V2",
+    }:
         body.update(
             {
                 "protocol_run_id": authorization.protocol_run_id_typed.canonical_object(),
@@ -531,6 +534,7 @@ def _verify_inputs(
         not in {
             "m336k2.candidate-isolated-final.v1",
             "m336k4.candidate-isolated-final.v1",
+            "m336k5.candidate-isolated-final.v1",
         }
         or acquisition_policy.get("acquisition_run_id")
         != authorization.acquisition_run_id

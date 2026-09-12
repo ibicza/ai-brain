@@ -289,16 +289,15 @@ def verify_m336k2_commit_protocol(
     e_paths = _diff_paths(git, root, exact_h28_sha, exact_e28_sha)
     q_paths = _diff_paths(git, root, f"{exact_q28_sha}^", exact_q28_sha)
     f_paths = _diff_paths(git, root, exact_q28_sha, exact_f28_sha)
-    run_q_root = (
-        "runs/m336k4/q29/"
-        if contract.q_root.startswith("artifacts/m336k4/")
-        else "runs/m336k2/q28/"
-    )
-    docs_prefix = (
-        "docs/m336k4_"
-        if contract.q_root.startswith("artifacts/m336k4/")
-        else "docs/m336k2_"
-    )
+    if contract.q_root.startswith("artifacts/m336k5/"):
+        run_q_root = "runs/m336k5/q30/"
+        docs_prefix = "docs/m336k5_"
+    elif contract.q_root.startswith("artifacts/m336k4/"):
+        run_q_root = "runs/m336k4/q29/"
+        docs_prefix = "docs/m336k4_"
+    else:
+        run_q_root = "runs/m336k2/q28/"
+        docs_prefix = "docs/m336k2_"
     unauthorized_q = tuple(
         path
         for path in q_paths
@@ -620,12 +619,12 @@ def _safe_public_root(value: str) -> bool:
 
 
 def _h_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
-    if contract.h_root.startswith("artifacts/m336k4/"):
+    if contract.h_root.startswith(("artifacts/m336k4/", "artifacts/m336k5/")):
         return _H_ROOT_FILES | {_M336K4_IDENTITY_FILE}
     return _H_ROOT_FILES
 
 
 def _e_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
-    if contract.e_root.startswith("artifacts/m336k4/"):
+    if contract.e_root.startswith(("artifacts/m336k4/", "artifacts/m336k5/")):
         return _E_SOURCE_FILES | {_M336K4_IDENTITY_FILE}
     return _E_SOURCE_FILES

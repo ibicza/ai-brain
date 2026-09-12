@@ -507,6 +507,15 @@ def verify_complete_freeze(
 ) -> None:
     """Verify the complete frozen component closure before any ledger write."""
 
+    if getattr(manifest, "contract_role", None) == "M336K5_F30_TYPED_FREEZE_V2":
+        from ai_brain.stage3.acquisition.m336k5_freeze import (
+            verify_complete_m336k5_freeze,
+        )
+
+        verify_complete_m336k5_freeze(
+            root, manifest, allow_prospective_f30=allow_prospective_f28
+        )
+        return
     if getattr(manifest, "contract_role", None) == "M336K4_F29_TYPED_FREEZE_V2":
         from ai_brain.stage3.acquisition.m336k4_freeze import (
             verify_complete_m336k4_freeze,
