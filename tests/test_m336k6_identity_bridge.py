@@ -24,6 +24,7 @@ from ai_brain.stage3.acquisition.m336k5_registry import (
     build_m336k5_route_registry,
     build_m336k5_schema_registry,
 )
+from ai_brain.stage3.acquisition.m336k5_startup import M336K5_PROCESS_ROLES
 
 
 def _hashes() -> dict[str, str]:
@@ -78,3 +79,7 @@ def test_m336k6_freeze_extension_preserves_all_f30_components() -> None:
         M336K6_REQUIRED_FREEZE_COMPONENTS - M336K5_REQUIRED_FREEZE_COMPONENTS
         == M336K6_LIFECYCLE_FREEZE_COMPONENTS
     )
+
+
+def test_persistent_capsule_liveness_has_a_hermetic_process_role() -> None:
+    assert "PERSISTENT_CAPSULE_LIVENESS" in M336K5_PROCESS_ROLES
