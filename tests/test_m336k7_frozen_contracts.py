@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from ai_brain.stage2.facts.canonical import canonical_json, content_hash
+from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
+from ai_brain.stage3.acquisition import m336k7_contracts
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k2_publication import (
     _e_source_files,
@@ -42,6 +43,7 @@ from ai_brain.stage3.acquisition.m336k7_contracts import (
     verify_m336k7_capsule_compatibility_binding,
     verify_m336k7_persistent_capsule_route_binding,
     verify_m336k7_resource_gate_binding,
+    verify_m336k7_unchanged_candidate_pool,
 )
 from ai_brain.stage3.acquisition.m336k7_freeze import (
     M336K7CommittedFreezeAttestation,
@@ -49,6 +51,36 @@ from ai_brain.stage3.acquisition.m336k7_freeze import (
 
 H = "1" * 64
 H2 = "2" * 64
+
+
+def test_m336k7_candidate_pool_requires_exact_frozen_bytes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    body = {
+        "candidate_count": 2,
+        "candidates": [{"candidate_id": "a"}, {"candidate_id": "b"}],
+        "organization_count": 1,
+        "maximum_candidates_per_organization": 2,
+        "pre_freeze_source_body_bytes": 0,
+    }
+    pool = {**body, "pool_hash": content_hash(body)}
+    raw = (canonical_json(pool) + "\n").encode()
+    path = tmp_path / "candidate_pool.json"
+    path.write_bytes(raw)
+    monkeypatch.setattr(
+        m336k7_contracts, "M336K7_FINAL_CANDIDATE_POOL_HASH", pool["pool_hash"]
+    )
+    monkeypatch.setattr(
+        m336k7_contracts, "M336K7_FINAL_CANDIDATE_POOL_BYTES_HASH", bytes_hash(raw)
+    )
+    monkeypatch.setattr(m336k7_contracts, "M336K7_FINAL_CANDIDATE_COUNT", 2)
+    monkeypatch.setattr(m336k7_contracts, "M336K7_FINAL_ORGANIZATION_COUNT", 1)
+
+    assert verify_m336k7_unchanged_candidate_pool(path) == pool
+
+    path.write_bytes(raw + b"\n")
+    with pytest.raises(M336K2ProtocolError, match="candidate-pool bytes changed"):
+        verify_m336k7_unchanged_candidate_pool(path)
 
 
 def test_m336k7_publication_requires_typed_identity_observation() -> None:

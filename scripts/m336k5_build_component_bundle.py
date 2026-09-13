@@ -54,6 +54,7 @@ from ai_brain.stage3.acquisition.m336k7_contracts import (
     verify_m336k7_capsule_compatibility_binding,
     verify_m336k7_persistent_capsule_route_binding,
     verify_m336k7_resource_gate_binding,
+    verify_m336k7_unchanged_candidate_pool,
 )
 from ai_brain.stage3.acquisition.m336k7_freeze import (
     M336K7_FREEZE_MANIFEST_CONTRACT,
@@ -122,13 +123,15 @@ def main() -> None:
     if identity_namespace != "m336k5":
         expected |= {"identity_namespace"} | lifecycle_components
     if identity_namespace == "m336k7":
-        expected |= frozen_contract_components
+        expected |= frozen_contract_components | {"candidate_pool"}
     if set(request) != expected:
         raise M336K2ProtocolError("M336K5 component bundle request fields changed")
     if identity_namespace not in {"m336k5", "m336k6", "m336k7"}:
         raise M336K2ProtocolError("M336K5 component identity namespace is invalid")
     repository = Path(request["repository"]).resolve(strict=True)
     legacy = Path(request["legacy_bundle"]).resolve(strict=True)
+    if identity_namespace == "m336k7":
+        verify_m336k7_unchanged_candidate_pool(Path(request["candidate_pool"]))
     output = Path(request["output"]).resolve(strict=False)
     if output.exists() or output.is_relative_to(repository):
         raise M336K2ProtocolError("M336K5 component bundle output is stale or public")
@@ -155,6 +158,7 @@ def main() -> None:
         "resource_monitor",
         "cleanup_policy",
         "recovery_checkpoint_policy",
+        *(("candidate_pool",) if identity_namespace == "m336k7" else ()),
         *sorted(lifecycle_components if identity_namespace != "m336k5" else ()),
         *sorted(frozen_contract_components if identity_namespace == "m336k7" else ()),
     ):
@@ -173,6 +177,7 @@ def main() -> None:
     if identity_namespace == "m336k7":
         _write_m336k7_legacy_bindings(output, request)
         _write_m336k7_persistent_capsule_route(output)
+        verify_m336k7_unchanged_candidate_pool(output / "candidate_pool.json")
     for name, source in (
         ("q28_readiness", request["q_readiness"]),
         ("q28_evidence_manifest", request["q_evidence_manifest"]),
@@ -261,6 +266,12 @@ def main() -> None:
             evaluator_policy_hash=evaluator["policy_hash"],
         )
     legacy_authorization = _object(output / "final_authorization.json")
+    if (
+        identity_namespace == "m336k7"
+        and legacy_authorization["candidate_pool_hash"]
+        != _object(output / "candidate_pool.json")["pool_hash"]
+    ):
+        raise M336K2ProtocolError("M336K7 candidate-pool authorization changed")
     python_environment = _object(output / "python_environment_manifest.json")
     startup_policy = _object(output / "python_startup_policy.json")
     bootstrap = _object(output / "python_startup_bootstrap.json")

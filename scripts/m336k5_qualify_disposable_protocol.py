@@ -60,6 +60,9 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     startup_receipt_from_path,
     write_m336k5_python_invocation_plan,
 )
+from ai_brain.stage3.acquisition.m336k7_contracts import (
+    verify_m336k7_unchanged_candidate_pool,
+)
 from ai_brain.stage3.acquisition.m336k7_freeze import (
     M336K7FreezeManifest,
     attest_committed_m336k7_f32,
@@ -118,6 +121,7 @@ def main() -> None:
         "preservation_set",
         "cleanup_plan",
         "cleanup_cutoff_state",
+        "candidate_pool",
     }
     if namespace == "m336k7":
         expected = (expected - {"resource_budget"}) | m336k7_inputs
@@ -128,6 +132,8 @@ def main() -> None:
         {"persistent_karina_overlay"} if persistent else set()
     ):
         raise M336K2ProtocolError("M336K5 disposable request fields changed")
+    if namespace == "m336k7":
+        verify_m336k7_unchanged_candidate_pool(Path(request["candidate_pool"]))
     output = Path(request["output"]).resolve(strict=False)
     if output.exists():
         raise FileExistsError("M336K5 disposable output must be fresh")
@@ -301,6 +307,8 @@ def main() -> None:
             ),
         }
     )
+    if namespace == "m336k7":
+        legacy_request["candidate_pool"] = request["candidate_pool"]
     legacy_request["executables"]["python"]["path"] = str(python)
     legacy_request["executables"]["powershell"]["path"] = str(powershell)
     legacy_request["karina_public_execution_capsule_receipt"] = karina_overlay[
@@ -412,6 +420,7 @@ def main() -> None:
                 "preservation_set": request["preservation_set"],
                 "cleanup_plan": request["cleanup_plan"],
                 "cleanup_cutoff_state": request["cleanup_cutoff_state"],
+                "candidate_pool": request["candidate_pool"],
             }
         )
     else:

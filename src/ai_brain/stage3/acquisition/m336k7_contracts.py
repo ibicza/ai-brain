@@ -7,13 +7,14 @@ strict objects defined here.
 
 from __future__ import annotations
 
+import json
 import os
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, ClassVar, Self
 
-from ai_brain.stage2.facts.canonical import canonical_json, content_hash
+from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k2_registry import (
     M336K2_ROUTE_COMPONENTS,
@@ -40,6 +41,15 @@ M336K7_REQUIRED_AVAILABLE_RAM_BYTES = 2_924_400_640
 M336K7_MAXIMUM_ALLOWED_SWAP_BYTES = 8 * GIB
 M336K7_LONG_PHASE_SAMPLE_INTERVAL_SECONDS = 60
 M336K7_PHASE_TOKENS = ("f30", "f31", "f32", "pre_f", "post_f")
+M336K7_FINAL_CANDIDATE_POOL_HASH = (
+    "b48ee354dc710a6c0ac0ed2cfceb1385c0d12cc8efb6b8fbef00e8d2f6ab572e"
+)
+M336K7_FINAL_CANDIDATE_POOL_BYTES_HASH = (
+    "78cfb85fc59687186f0e420d410bf648816bce6ae2539acb445f8da74d77a0fa"
+)
+M336K7_FINAL_CANDIDATE_COUNT = 96
+M336K7_FINAL_ORGANIZATION_COUNT = 64
+M336K7_FINAL_MAXIMUM_CANDIDATES_PER_ORGANIZATION = 2
 _HASH_LENGTH = 64
 
 
@@ -69,6 +79,37 @@ def _hash_body(value: object, hash_field: str) -> tuple[dict[str, Any], str]:
     if not _is_hash(claimed) or content_hash(body) != claimed:
         raise M336K2ProtocolError("M336K7 object semantic hash changed")
     return body, claimed
+
+
+def verify_m336k7_unchanged_candidate_pool(path: Path) -> dict[str, Any]:
+    """Require the exact metadata-only pool authorized for the one-shot route."""
+    raw = path.resolve(strict=True).read_bytes()
+    if bytes_hash(raw) != M336K7_FINAL_CANDIDATE_POOL_BYTES_HASH:
+        raise M336K2ProtocolError("M336K7 candidate-pool bytes changed")
+    try:
+        value = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise M336K2ProtocolError(
+            "M336K7 candidate pool is not canonical JSON"
+        ) from error
+    _body, claimed = _hash_body(value, "pool_hash")
+    if claimed != M336K7_FINAL_CANDIDATE_POOL_HASH:
+        raise M336K2ProtocolError("M336K7 candidate-pool semantic hash changed")
+    expected = (
+        M336K7_FINAL_CANDIDATE_COUNT,
+        M336K7_FINAL_ORGANIZATION_COUNT,
+        M336K7_FINAL_MAXIMUM_CANDIDATES_PER_ORGANIZATION,
+    )
+    observed = (
+        value.get("candidate_count"),
+        value.get("organization_count"),
+        value.get("maximum_candidates_per_organization"),
+    )
+    if observed != expected or len(value.get("candidates", ())) != expected[0]:
+        raise M336K2ProtocolError("M336K7 candidate-pool population changed")
+    if value.get("pre_freeze_source_body_bytes") != 0:
+        raise M336K2ProtocolError("M336K7 candidate pool contains source bodies")
+    return value
 
 
 @dataclass(frozen=True)
