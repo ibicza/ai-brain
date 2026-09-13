@@ -120,7 +120,7 @@ def prepare_m336k5_karina_capsule(request: dict) -> dict:
     _write(private_capsule, capsule)
     ssh_options = _ssh_options(key, known_hosts)
     try:
-        _run((git, "bundle", "create", str(bundle), "HEAD"), repository)
+        _create_repository_bundle(git=git, bundle=bundle, repository=repository)
         _ssh(
             ssh,
             ssh_options,
@@ -297,6 +297,12 @@ def _remote_metadata(
     ):
         raise M336K2ProtocolError("M336K5 Karina metadata failed verification")
     return value
+
+
+def _create_repository_bundle(*, git: Path, bundle: Path, repository: Path) -> None:
+    """Preserve every local ref needed by exact cross-platform quality checks."""
+
+    _run((git, "bundle", "create", str(bundle), "HEAD", "--all"), repository)
 
 
 def _remote_workspace(value: object) -> PurePosixPath:
