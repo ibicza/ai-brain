@@ -15,6 +15,11 @@ M336K5_PROTOCOL_RUN_ID = "m336k5.final-java.outcome-a.v1"
 M336K5_ACQUISITION_RUN_ID = "m336k5.final-java.global-acquisition.v1"
 M336K5_SELECTOR_RUN_ID = "m336k5.final-java.selector.v1"
 M336K5_EVALUATOR_RUN_ID = "m336k5.final-java.evaluator.v1"
+M336K6_ROUTE_VERSION = "m336k6.candidate-isolated-java-final-route.v1"
+M336K6_PROTOCOL_RUN_ID = "m336k6.final-java.outcome-a.v1"
+M336K6_ACQUISITION_RUN_ID = "m336k6.final-java.global-acquisition.v1"
+M336K6_SELECTOR_RUN_ID = "m336k6.final-java.selector.v1"
+M336K6_EVALUATOR_RUN_ID = "m336k6.final-java.evaluator.v1"
 
 _HASH = re.compile(r"[0-9a-f]{64}")
 
@@ -28,7 +33,7 @@ class _M336K5Identity:
 
     identity_kind: ClassVar[str]
     namespace: ClassVar[re.Pattern[str]]
-    official_value: ClassVar[str | None] = None
+    official_values: ClassVar[frozenset[str]] = frozenset()
 
     def __post_init__(self) -> None:
         if type(self.schema_version) is not int or self.schema_version != 1:
@@ -46,7 +51,9 @@ class _M336K5Identity:
             raise M336K2ProtocolError(
                 f"M336K5 {self.identity_kind} namespace is invalid"
             )
-        if ".final-java." in self.value and self.official_value != self.value:
+        if (
+            ".final-java." in self.value or "-final-route." in self.value
+        ) and self.value not in self.official_values:
             raise M336K2ProtocolError(
                 f"M336K5 {self.identity_kind} final identity is not canonical"
             )
@@ -102,52 +109,62 @@ class _M336K5Identity:
 class M336K5RouteVersion(_M336K5Identity):
     identity_kind: ClassVar[str] = "ROUTE_VERSION"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k5\.candidate-isolated-java-(?:final|disposable)-route\.v[1-9][0-9]*"
+        r"m336k[56]\.candidate-isolated-java-(?:final|disposable)-route\.v[1-9][0-9]*"
     )
-    official_value: ClassVar[str] = M336K5_ROUTE_VERSION
+    official_values: ClassVar[frozenset[str]] = frozenset(
+        {M336K5_ROUTE_VERSION, M336K6_ROUTE_VERSION}
+    )
 
 
 @dataclass(frozen=True, eq=False)
 class M336K5ProtocolRunId(_M336K5Identity):
     identity_kind: ClassVar[str] = "PROTOCOL_RUN_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k5\.(?:final-java\.outcome-a|disposable\.[a-z0-9-]+)\.v[1-9][0-9]*"
+        r"m336k[56]\.(?:final-java\.outcome-a|disposable\.[a-z0-9-]+)\.v[1-9][0-9]*"
     )
-    official_value: ClassVar[str] = M336K5_PROTOCOL_RUN_ID
+    official_values: ClassVar[frozenset[str]] = frozenset(
+        {M336K5_PROTOCOL_RUN_ID, M336K6_PROTOCOL_RUN_ID}
+    )
 
 
 @dataclass(frozen=True, eq=False)
 class M336K5AcquisitionRunId(_M336K5Identity):
     identity_kind: ClassVar[str] = "ACQUISITION_RUN_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k5\.(?:final-java\.global-acquisition|disposable\.[a-z0-9-]+\.acquisition)\.v[1-9][0-9]*"
+        r"m336k[56]\.(?:final-java\.global-acquisition|disposable\.[a-z0-9-]+\.acquisition)\.v[1-9][0-9]*"
     )
-    official_value: ClassVar[str] = M336K5_ACQUISITION_RUN_ID
+    official_values: ClassVar[frozenset[str]] = frozenset(
+        {M336K5_ACQUISITION_RUN_ID, M336K6_ACQUISITION_RUN_ID}
+    )
 
 
 @dataclass(frozen=True, eq=False)
 class M336K5SelectorRunId(_M336K5Identity):
     identity_kind: ClassVar[str] = "SELECTOR_RUN_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k5\.(?:final-java\.selector|disposable\.[a-z0-9-]+\.selector)\.v[1-9][0-9]*"
+        r"m336k[56]\.(?:final-java\.selector|disposable\.[a-z0-9-]+\.selector)\.v[1-9][0-9]*"
     )
-    official_value: ClassVar[str] = M336K5_SELECTOR_RUN_ID
+    official_values: ClassVar[frozenset[str]] = frozenset(
+        {M336K5_SELECTOR_RUN_ID, M336K6_SELECTOR_RUN_ID}
+    )
 
 
 @dataclass(frozen=True, eq=False)
 class M336K5EvaluatorRunId(_M336K5Identity):
     identity_kind: ClassVar[str] = "EVALUATOR_RUN_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k5\.(?:final-java\.evaluator|disposable\.[a-z0-9-]+\.evaluator)\.v[1-9][0-9]*"
+        r"m336k[56]\.(?:final-java\.evaluator|disposable\.[a-z0-9-]+\.evaluator)\.v[1-9][0-9]*"
     )
-    official_value: ClassVar[str] = M336K5_EVALUATOR_RUN_ID
+    official_values: ClassVar[frozenset[str]] = frozenset(
+        {M336K5_EVALUATOR_RUN_ID, M336K6_EVALUATOR_RUN_ID}
+    )
 
 
 @dataclass(frozen=True, eq=False)
 class M336K5RouteComponentId(_M336K5Identity):
     identity_kind: ClassVar[str] = "ROUTE_COMPONENT_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k5\.route-component\.[a-z][a-z0-9-]*\.v[1-9][0-9]*"
+        r"m336k[56]\.route-component\.[a-z][a-z0-9-]*\.v[1-9][0-9]*"
     )
 
 
@@ -155,7 +172,7 @@ class M336K5RouteComponentId(_M336K5Identity):
 class M336K5ExecutionMode(_M336K5Identity):
     identity_kind: ClassVar[str] = "EXECUTION_MODE"
     namespace: ClassVar[re.Pattern[str]] = re.compile(r"FINAL")
-    official_value: ClassVar[str] = "FINAL"
+    official_values: ClassVar[frozenset[str]] = frozenset({"FINAL"})
 
 
 @dataclass(frozen=True)
@@ -263,11 +280,22 @@ class M336K5RouteIdentityBundle:
             self.evaluator_policy_hash,
             self.bundle_hash,
         )
+        route_namespace = self.route_version.value.split(".", 1)[0]
+        routed_identities = (
+            self.protocol_run_id,
+            self.acquisition_run_id,
+            self.selector_run_id,
+            self.evaluator_run_id,
+        )
         if (
             self.schema_version != 1
             or any(
                 type(value) is not str or _HASH.fullmatch(value) is None
                 for value in hashes
+            )
+            or any(
+                not identity.value.startswith(f"{route_namespace}.")
+                for identity in routed_identities
             )
             or self.bundle_hash != content_hash(self._body())
         ):
@@ -281,6 +309,20 @@ def build_m336k5_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityB
         acquisition_run_id=M336K5AcquisitionRunId(M336K5_ACQUISITION_RUN_ID),
         selector_run_id=M336K5SelectorRunId(M336K5_SELECTOR_RUN_ID),
         evaluator_run_id=M336K5EvaluatorRunId(M336K5_EVALUATOR_RUN_ID),
+        execution_mode=M336K5ExecutionMode("FINAL"),
+        **hashes,
+    )
+
+
+def build_m336k6_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityBundle:
+    """Build the exact M-33.6k.6 identities without changing route semantics."""
+
+    return M336K5RouteIdentityBundle.build(
+        route_version=M336K5RouteVersion(M336K6_ROUTE_VERSION),
+        protocol_run_id=M336K5ProtocolRunId(M336K6_PROTOCOL_RUN_ID),
+        acquisition_run_id=M336K5AcquisitionRunId(M336K6_ACQUISITION_RUN_ID),
+        selector_run_id=M336K5SelectorRunId(M336K6_SELECTOR_RUN_ID),
+        evaluator_run_id=M336K5EvaluatorRunId(M336K6_EVALUATOR_RUN_ID),
         execution_mode=M336K5ExecutionMode("FINAL"),
         **hashes,
     )

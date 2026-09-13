@@ -10,6 +10,7 @@ from ai_brain.stage3.acquisition.m336k2_controller import M336K2_ROUTE_STAGES
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5_ROUTE_VERSION,
+    M336K6_ROUTE_VERSION,
     M336K5RouteComponentId,
     M336K5RouteVersion,
 )
@@ -52,6 +53,24 @@ M336K5_ROUTE_COMPONENTS = (
     ("selector", "src/ai_brain/stage3/acquisition/m336f_selection.py"),
     ("evaluator", "src/ai_brain/stage3/acquisition/m336i_evaluation.py"),
 )
+M336K6_ROUTE_COMPONENTS = M336K5_ROUTE_COMPONENTS + (
+    ("persistent-capsule", "src/ai_brain/stage3/acquisition/m336k6_capsule.py"),
+    ("preservation-cleanup", "src/ai_brain/stage3/acquisition/m336k6_cleanup.py"),
+    (
+        "extended-resource-monitor",
+        "src/ai_brain/stage3/acquisition/m336k6_resources.py",
+    ),
+    ("persistent-capsule-preparer", "scripts/m336k6_prepare_karina_capsule.py"),
+    ("persistent-capsule-verifier", "scripts/m336k6_verify_persistent_capsule.py"),
+)
+
+
+def _namespace_values(namespace: str) -> tuple[str, tuple[tuple[str, str], ...]]:
+    if namespace == "m336k5":
+        return M336K5_ROUTE_VERSION, M336K5_ROUTE_COMPONENTS
+    if namespace == "m336k6":
+        return M336K6_ROUTE_VERSION, M336K6_ROUTE_COMPONENTS
+    raise M336K2ProtocolError("M336K5 route registry namespace is invalid")
 
 
 @dataclass(frozen=True)
@@ -146,8 +165,9 @@ class M336K5RouteManifest:
         return {**self._body(), "manifest_hash": self.manifest_hash}
 
 
-def build_m336k5_schema_registry() -> M336K5SchemaRegistry:
-    route = M336K5RouteVersion(M336K5_ROUTE_VERSION)
+def build_m336k5_schema_registry(namespace: str = "m336k5") -> M336K5SchemaRegistry:
+    route_value, _components = _namespace_values(namespace)
+    route = M336K5RouteVersion(route_value)
     bindings = []
     for stage in M336K2_ROUTE_STAGES:
         body = {
@@ -180,16 +200,19 @@ def build_m336k5_schema_registry() -> M336K5SchemaRegistry:
     )
 
 
-def build_m336k5_route_registry(repository: Path) -> M336K5RouteRegistry:
+def build_m336k5_route_registry(
+    repository: Path, namespace: str = "m336k5"
+) -> M336K5RouteRegistry:
     root = repository.resolve(strict=True)
+    route_value, route_components = _namespace_values(namespace)
     components = []
     missing = []
-    for name, relative in M336K5_ROUTE_COMPONENTS:
+    for name, relative in route_components:
         path = root.joinpath(*relative.split("/"))
         if not path.is_file():
             missing.append(relative)
             continue
-        component_id = M336K5RouteComponentId(f"m336k5.route-component.{name}.v1")
+        component_id = M336K5RouteComponentId(f"{namespace}.route-component.{name}.v1")
         body = {
             "component_id": component_id.canonical_object(),
             "repository_path": relative,
@@ -207,13 +230,13 @@ def build_m336k5_route_registry(repository: Path) -> M336K5RouteRegistry:
         )
     body = {
         "schema_version": 1,
-        "route_version": M336K5RouteVersion(M336K5_ROUTE_VERSION).canonical_object(),
+        "route_version": M336K5RouteVersion(route_value).canonical_object(),
         "components": tuple(item.canonical_object() for item in components),
         "missing_component_count": len(missing),
     }
     result = M336K5RouteRegistry(
         schema_version=1,
-        route_version=M336K5RouteVersion(M336K5_ROUTE_VERSION),
+        route_version=M336K5RouteVersion(route_value),
         components=tuple(components),
         missing_component_count=len(missing),
         registry_hash=content_hash(body),
@@ -231,22 +254,23 @@ def build_m336k5_route_manifest(
 ) -> M336K5RouteManifest:
     if registry.route_version != schemas.route_version:
         raise M336K2ProtocolError("M336K5 route/schema version type binding changed")
+    namespace = registry.route_version.value.split(".", 1)[0]
     values = {
         "schema_version": 1,
         "route_version": registry.route_version,
         "route_registry_hash": registry.registry_hash,
         "schema_registry_hash": schemas.registry_hash,
         "controller_component_id": M336K5RouteComponentId(
-            "m336k5.route-component.typed-controller.v1"
+            f"{namespace}.route-component.typed-controller.v1"
         ),
         "acquisition_component_id": M336K5RouteComponentId(
-            "m336k5.route-component.acquisition.v1"
+            f"{namespace}.route-component.acquisition.v1"
         ),
         "selector_component_id": M336K5RouteComponentId(
-            "m336k5.route-component.selector.v1"
+            f"{namespace}.route-component.selector.v1"
         ),
         "evaluator_component_id": M336K5RouteComponentId(
-            "m336k5.route-component.evaluator.v1"
+            f"{namespace}.route-component.evaluator.v1"
         ),
         "candidate_failure_isolation": True,
         "unexpected_failure_is_global": True,

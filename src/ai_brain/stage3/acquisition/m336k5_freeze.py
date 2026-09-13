@@ -43,6 +43,23 @@ M336K5_REQUIRED_FREEZE_COMPONENTS = frozenset(
         "recovery_checkpoint_policy",
     }
 )
+M336K6_READY_STATUS = "READY_FOR_PERSISTENT_CAPSULE_FINAL_JAVA_EXECUTION_V6"
+M336K6_BRANCH = "exp/stage3-m336k6-persistent-capsule-final-v15"
+M336K6_F31_ROOT = Path("artifacts/m336k6/f31-freeze")
+M336K6_LIFECYCLE_FREEZE_COMPONENTS = frozenset(
+    {
+        "persistent_capsule_receipt",
+        "capsule_content_manifest",
+        "capsule_lifecycle_policy",
+        "capsule_liveness",
+        "preservation_set",
+        "cleanup_plan",
+        "cleanup_cutoff_state",
+    }
+)
+M336K6_REQUIRED_FREEZE_COMPONENTS = frozenset(
+    M336K5_REQUIRED_FREEZE_COMPONENTS | M336K6_LIFECYCLE_FREEZE_COMPONENTS
+)
 _SHA = re.compile(r"[0-9a-f]{40}")
 _HASH = re.compile(r"[0-9a-f]{64}")
 
@@ -164,12 +181,15 @@ def verify_complete_m336k5_freeze(
     *,
     allow_prospective_f30: bool = False,
 ) -> None:
+    required_components = {
+        "M336K5_F30_TYPED_FREEZE_V2": M336K5_REQUIRED_FREEZE_COMPONENTS,
+        "M336K6_F31_TYPED_FREEZE_V1": M336K6_REQUIRED_FREEZE_COMPONENTS,
+    }.get(manifest.contract_role)
     if (
         manifest.schema_version != 2
-        or manifest.contract_role != "M336K5_F30_TYPED_FREEZE_V2"
-        or {item.name for item in manifest.components}
-        != M336K5_REQUIRED_FREEZE_COMPONENTS
-        or len(manifest.components) != len(M336K5_REQUIRED_FREEZE_COMPONENTS)
+        or required_components is None
+        or {item.name for item in manifest.components} != required_components
+        or len(manifest.components) != len(required_components)
     ):
         raise M336K2ProtocolError("M336K5 frozen component closure changed")
     for item in manifest.components:
@@ -216,13 +236,18 @@ def materialize_m336k5_f30(
     output: Path,
     expected_branch: str = M336K5_BRANCH,
     freeze_relative_root: str = M336K5_F30_ROOT.as_posix(),
+    required_freeze_components: frozenset[str] = M336K5_REQUIRED_FREEZE_COMPONENTS,
+    ready_status: str = M336K5_READY_STATUS,
+    freeze_contract_role: str = "M336K5_F30_TYPED_FREEZE_V2",
+    frozen_file_contract_role: str = "M336K5_F30_FROZEN_FILE_MANIFEST",
+    build_receipt_contract_role: str = "PUBLIC_SAFE_M336K5_F30_BUILD_RECEIPT",
 ) -> dict:
     root = repository.resolve(strict=True)
     git = git_executable.resolve(strict=True)
     destination = output.resolve(strict=False)
     if (
         destination.exists()
-        or set(component_sources) != M336K5_REQUIRED_FREEZE_COMPONENTS
+        or set(component_sources) != required_freeze_components
         or destination.relative_to(root).as_posix() != freeze_relative_root
     ):
         raise M336K2ProtocolError("M336K5 F30 destination/component set changed")
@@ -231,7 +256,7 @@ def materialize_m336k5_f30(
     )
     readiness_value = _verified_object(readiness, "readiness_hash")
     if (
-        readiness_value.get("status") != M336K5_READY_STATUS
+        readiness_value.get("status") != ready_status
         or readiness_value.get("exact_implementation_tip") != exact_implementation_tip
         or readiness_value.get("official_one_shot_counter_count") != 0
         or readiness_value.get("new_final_source_body_bytes") != 0
@@ -261,7 +286,7 @@ def materialize_m336k5_f30(
         )
         frozen_body = {
             "schema_version": 2,
-            "contract_role": "M336K5_F30_FROZEN_FILE_MANIFEST",
+            "contract_role": frozen_file_contract_role,
             "files": rows,
             "file_count": len(rows),
         }
@@ -288,7 +313,7 @@ def materialize_m336k5_f30(
         )
         values = {
             "schema_version": 2,
-            "contract_role": "M336K5_F30_TYPED_FREEZE_V2",
+            "contract_role": freeze_contract_role,
             "implementation_tip": exact_implementation_tip,
             "exact_q30_sha": exact_q30_sha,
             "exact_f30_sha": "0" * 40,
@@ -327,7 +352,7 @@ def materialize_m336k5_f30(
         raise
     body = {
         "schema_version": 2,
-        "contract_role": "PUBLIC_SAFE_M336K5_F30_BUILD_RECEIPT",
+        "contract_role": build_receipt_contract_role,
         "exact_implementation_tip": exact_implementation_tip,
         "exact_q30_sha": exact_q30_sha,
         "component_count": len(components),
@@ -343,6 +368,36 @@ def materialize_m336k5_f30(
         canonical_json(receipt) + "\n", encoding="utf-8", newline="\n"
     )
     return receipt
+
+
+def materialize_m336k6_f31(
+    *,
+    repository: Path,
+    git_executable: Path,
+    exact_implementation_tip: str,
+    exact_q31_sha: str,
+    readiness: Path,
+    component_sources: dict[str, Path],
+    output: Path,
+) -> dict:
+    """Materialize the F31 freeze while retaining the proven F30 wire codec."""
+
+    return materialize_m336k5_f30(
+        repository=repository,
+        git_executable=git_executable,
+        exact_implementation_tip=exact_implementation_tip,
+        exact_q30_sha=exact_q31_sha,
+        readiness=readiness,
+        component_sources=component_sources,
+        output=output,
+        expected_branch=M336K6_BRANCH,
+        freeze_relative_root=M336K6_F31_ROOT.as_posix(),
+        required_freeze_components=M336K6_REQUIRED_FREEZE_COMPONENTS,
+        ready_status=M336K6_READY_STATUS,
+        freeze_contract_role="M336K6_F31_TYPED_FREEZE_V1",
+        frozen_file_contract_role="M336K6_F31_FROZEN_FILE_MANIFEST",
+        build_receipt_contract_role="PUBLIC_SAFE_M336K6_F31_BUILD_RECEIPT",
+    )
 
 
 def attest_committed_m336k5_f30(

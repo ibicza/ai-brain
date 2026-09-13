@@ -41,7 +41,11 @@ from ai_brain.stage3.acquisition.m336k5_freeze import (
     M336K5FreezeManifest,
     verify_complete_m336k5_freeze,
 )
-from ai_brain.stage3.acquisition.m336k5_identity import M336K5RouteIdentityBundle
+from ai_brain.stage3.acquisition.m336k5_identity import (
+    M336K5_PROTOCOL_RUN_ID,
+    M336K6_PROTOCOL_RUN_ID,
+    M336K5RouteIdentityBundle,
+)
 from ai_brain.stage3.acquisition.m336k5_registry import build_m336k5_route_registry
 from ai_brain.stage3.acquisition.m336k5_startup import (
     M336K5PythonStartupPolicy,
@@ -268,17 +272,20 @@ def validate_m336k5_final_invocation(
         or authorization.exact_q30_sha != freeze.exact_q30_sha
         or (
             request.purpose == "DISPOSABLE"
-            and bundle.protocol_run_id.value == "m336k5.final-java.outcome-a.v1"
+            and bundle.protocol_run_id.value
+            in {M336K5_PROTOCOL_RUN_ID, M336K6_PROTOCOL_RUN_ID}
         )
         or (
             request.purpose == "OFFICIAL"
-            and bundle.protocol_run_id.value != "m336k5.final-java.outcome-a.v1"
+            and bundle.protocol_run_id.value
+            not in {M336K5_PROTOCOL_RUN_ID, M336K6_PROTOCOL_RUN_ID}
         )
     ):
         raise M336K2ProtocolError(
             "M336K5 request/freeze/authorization cross-binding changed"
         )
-    registry = build_m336k5_route_registry(root)
+    identity_namespace = bundle.route_version.value.split(".", 1)[0]
+    registry = build_m336k5_route_registry(root, identity_namespace)
     if registry.registry_hash != bundle.route_registry_hash:
         raise M336K2ProtocolError(
             "M336K5 frozen route registry differs from executable source"

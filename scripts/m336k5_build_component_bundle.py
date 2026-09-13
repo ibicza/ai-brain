@@ -21,6 +21,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5RouteIdentityBundle,
     M336K5SelectorRunId,
     build_m336k5_official_identity_bundle,
+    build_m336k6_official_identity_bundle,
 )
 from ai_brain.stage3.acquisition.m336k5_registry import (
     build_m336k5_route_manifest,
@@ -40,7 +41,7 @@ def main() -> None:
     parser.add_argument("--request", type=Path, required=True)
     args = parser.parse_args()
     request = _object(args.request.resolve(strict=True))
-    expected = {
+    base_expected = {
         "repository",
         "legacy_bundle",
         "exact_implementation_tip",
@@ -65,8 +66,25 @@ def main() -> None:
         "cleanup_policy",
         "recovery_checkpoint_policy",
     }
+    lifecycle_components = {
+        "persistent_capsule_receipt",
+        "capsule_content_manifest",
+        "capsule_lifecycle_policy",
+        "capsule_liveness",
+        "preservation_set",
+        "cleanup_plan",
+        "cleanup_cutoff_state",
+    }
+    identity_namespace = request.get("identity_namespace", "m336k5")
+    expected = (
+        base_expected
+        if identity_namespace == "m336k5"
+        else base_expected | {"identity_namespace"} | lifecycle_components
+    )
     if set(request) != expected:
         raise M336K2ProtocolError("M336K5 component bundle request fields changed")
+    if identity_namespace not in {"m336k5", "m336k6"}:
+        raise M336K2ProtocolError("M336K5 component identity namespace is invalid")
     repository = Path(request["repository"]).resolve(strict=True)
     legacy = Path(request["legacy_bundle"]).resolve(strict=True)
     output = Path(request["output"]).resolve(strict=False)
@@ -95,6 +113,7 @@ def main() -> None:
         "resource_monitor",
         "cleanup_policy",
         "recovery_checkpoint_policy",
+        *sorted(lifecycle_components if identity_namespace == "m336k6" else ()),
     ):
         shutil.copyfile(
             Path(request[name]).resolve(strict=True), output / f"{name}.json"
@@ -116,8 +135,8 @@ def main() -> None:
         (output / f"{name}.json").write_text(
             canonical_json(value) + "\n", encoding="utf-8", newline="\n"
         )
-    registry = build_m336k5_route_registry(repository)
-    schemas = build_m336k5_schema_registry()
+    registry = build_m336k5_route_registry(repository, identity_namespace)
+    schemas = build_m336k5_schema_registry(identity_namespace)
     route = build_m336k5_route_manifest(registry, schemas)
     acquisition = _object(output / "acquisition_policy.json")
     acquisition.pop("acquisition_policy_hash", None)
@@ -127,13 +146,13 @@ def main() -> None:
     mode = request["identity_mode"]
     label = request["disposable_label"]
     if mode == "OFFICIAL":
-        acquisition_id = "m336k5.final-java.global-acquisition.v1"
-        selector_id = "m336k5.final-java.selector.v1"
-        evaluator_id = "m336k5.final-java.evaluator.v1"
+        acquisition_id = f"{identity_namespace}.final-java.global-acquisition.v1"
+        selector_id = f"{identity_namespace}.final-java.selector.v1"
+        evaluator_id = f"{identity_namespace}.final-java.evaluator.v1"
     elif mode == "DISPOSABLE" and isinstance(label, str) and _LABEL.fullmatch(label):
-        acquisition_id = f"m336k5.disposable.{label}.acquisition.v1"
-        selector_id = f"m336k5.disposable.{label}.selector.v1"
-        evaluator_id = f"m336k5.disposable.{label}.evaluator.v1"
+        acquisition_id = f"{identity_namespace}.disposable.{label}.acquisition.v1"
+        selector_id = f"{identity_namespace}.disposable.{label}.selector.v1"
+        evaluator_id = f"{identity_namespace}.disposable.{label}.evaluator.v1"
     else:
         raise M336K2ProtocolError("M336K5 component identity mode is invalid")
     acquisition.update(
@@ -166,7 +185,12 @@ def main() -> None:
     }
     evaluator = {**evaluator_body, "policy_hash": content_hash(evaluator_body)}
     if mode == "OFFICIAL":
-        bundle = build_m336k5_official_identity_bundle(
+        official_builder = (
+            build_m336k5_official_identity_bundle
+            if identity_namespace == "m336k5"
+            else build_m336k6_official_identity_bundle
+        )
+        bundle = official_builder(
             route_registry_hash=registry.registry_hash,
             route_manifest_hash=route.manifest_hash,
             acquisition_policy_hash=acquisition["acquisition_policy_hash"],
@@ -176,7 +200,9 @@ def main() -> None:
     else:
         bundle = M336K5RouteIdentityBundle.build(
             route_version=registry.route_version,
-            protocol_run_id=M336K5ProtocolRunId(f"m336k5.disposable.{label}.v1"),
+            protocol_run_id=M336K5ProtocolRunId(
+                f"{identity_namespace}.disposable.{label}.v1"
+            ),
             acquisition_run_id=M336K5AcquisitionRunId(acquisition_id),
             selector_run_id=M336K5SelectorRunId(selector_id),
             evaluator_run_id=M336K5EvaluatorRunId(evaluator_id),
@@ -276,7 +302,11 @@ def main() -> None:
     pool = _object(output / "candidate_pool.json")
     body = {
         "schema_version": 1,
-        "contract_role": "PUBLIC_SAFE_M336K5_COMPONENT_BUNDLE_RECEIPT",
+        "contract_role": (
+            "PUBLIC_SAFE_M336K5_COMPONENT_BUNDLE_RECEIPT"
+            if identity_namespace == "m336k5"
+            else "PUBLIC_SAFE_M336K6_COMPONENT_BUNDLE_RECEIPT"
+        ),
         "component_count": len(tuple(output.glob("*.json"))),
         "candidate_pool_hash": pool["pool_hash"],
         "route_registry_hash": registry.registry_hash,

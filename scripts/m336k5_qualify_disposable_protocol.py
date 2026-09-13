@@ -89,7 +89,10 @@ def main() -> None:
         "storage_reservation",
         "storage_reservation_file",
     }
-    if set(request) != expected:
+    persistent = "persistent_karina_overlay" in request
+    if set(request) != expected | (
+        {"persistent_karina_overlay"} if persistent else set()
+    ):
         raise M336K2ProtocolError("M336K5 disposable request fields changed")
     output = Path(request["output"]).resolve(strict=False)
     if output.exists():
@@ -153,27 +156,59 @@ def main() -> None:
     if not isinstance(label, str) or re.fullmatch(r"[a-z0-9-]+", label) is None:
         raise M336K2ProtocolError("M336K5 disposable label is invalid")
     base_karina = stage_template["karina"]
-    karina_preparation = prepare_m336k5_karina_capsule(
-        {
-            "repository": str(repository),
-            "exact_head": implementation,
-            "git_executable": str(git),
-            "base_private_capsule": base_karina["private_execution_capsule"],
-            "base_public_execution_capsule_receipt": base_karina[
-                "public_execution_capsule_receipt"
-            ],
-            "ssh_executable": base_karina["ssh_executable"],
-            "scp_executable": stage_template["executable_handles"]["scp"],
-            "ssh_key": base_karina["ssh_key"],
-            "known_hosts_file": base_karina["known_hosts_file"],
-            "worker_endpoint": base_karina["worker_endpoint"],
-            "remote_workspace": (
-                f"/home/ibicza/m336k5-disposable-{label}-{implementation[:12]}"
-            ),
-            "output": str(private / "karina-capsule"),
+    if persistent:
+        persistent_overlay = _object(
+            Path(request["persistent_karina_overlay"]).resolve(strict=True)
+        )
+        required_overlay = {
+            "private_execution_capsule",
+            "public_execution_capsule_receipt",
+            "executable_dependency_manifest",
+            "private_capsule_remote",
+            "repository",
+            "private_root",
+            "m336k6_private_capsule_remote",
+            "m336k6_public_capsule_receipt",
+            "project_source_identity",
         }
-    )
-    karina_overlay = karina_preparation["karina_overlay"]
+        if set(persistent_overlay) != required_overlay:
+            raise M336K2ProtocolError("M336K6 persistent overlay fields changed")
+        karina_overlay = {
+            name: persistent_overlay[name]
+            for name in (
+                "private_execution_capsule",
+                "public_execution_capsule_receipt",
+                "executable_dependency_manifest",
+                "private_capsule_remote",
+                "repository",
+                "private_root",
+            )
+        }
+        karina_preparation = {
+            "project_source_identity": persistent_overlay["project_source_identity"]
+        }
+    else:
+        karina_preparation = prepare_m336k5_karina_capsule(
+            {
+                "repository": str(repository),
+                "exact_head": implementation,
+                "git_executable": str(git),
+                "base_private_capsule": base_karina["private_execution_capsule"],
+                "base_public_execution_capsule_receipt": base_karina[
+                    "public_execution_capsule_receipt"
+                ],
+                "ssh_executable": base_karina["ssh_executable"],
+                "scp_executable": stage_template["executable_handles"]["scp"],
+                "ssh_key": base_karina["ssh_key"],
+                "known_hosts_file": base_karina["known_hosts_file"],
+                "worker_endpoint": base_karina["worker_endpoint"],
+                "remote_workspace": (
+                    f"/home/ibicza/m336k5-disposable-{label}-{implementation[:12]}"
+                ),
+                "output": str(private / "karina-capsule"),
+            }
+        )
+        karina_overlay = karina_preparation["karina_overlay"]
     startup_components = private / "startup-components"
     _run(
         python,

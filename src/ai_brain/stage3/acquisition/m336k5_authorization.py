@@ -9,6 +9,8 @@ from typing import Self
 from ai_brain.stage2.facts.canonical import content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_identity import (
+    M336K5_PROTOCOL_RUN_ID,
+    M336K6_PROTOCOL_RUN_ID,
     M336K5AcquisitionRunId,
     M336K5EvaluatorRunId,
     M336K5ExecutionMode,
@@ -159,11 +161,21 @@ class M336K5FinalAuthorization:
         hashes = tuple(
             value for name, value in self._body().items() if name.endswith("_hash")
         ) + (self.authorization_hash,)
-        official = self.protocol_run_id_typed.value == "m336k5.final-java.outcome-a.v1"
+        official_branches = {
+            M336K5_PROTOCOL_RUN_ID: (
+                "refs/heads/exp/stage3-m336k5-hermetic-python-final-v14"
+            ),
+            M336K6_PROTOCOL_RUN_ID: (
+                "refs/heads/exp/stage3-m336k6-persistent-capsule-final-v15"
+            ),
+        }
+        protocol = self.protocol_run_id_typed.value
         branch_valid = (
-            self.branch_ref == "refs/heads/exp/stage3-m336k5-hermetic-python-final-v14"
-            if official
-            else self.branch_ref.startswith("refs/heads/disposable/m336k5-")
+            self.branch_ref == official_branches[protocol]
+            if protocol in official_branches
+            else self.branch_ref.startswith(
+                f"refs/heads/disposable/{protocol.split('.', 1)[0]}-"
+            )
         )
         if (
             self.schema_version != 2
