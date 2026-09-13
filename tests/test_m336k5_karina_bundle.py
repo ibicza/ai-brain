@@ -26,11 +26,13 @@ def test_karina_bundle_preserves_complete_local_ref_closure(
 
 
 def test_karina_clone_restores_remote_tracking_refs_as_local_branches() -> None:
-    fetch, promote = preparation._repository_ref_restore_commands(
+    detach, fetch, promote = preparation._repository_ref_restore_commands(
         remote_repository=PurePosixPath("/home/worker/m336k5-run/repository"),
         remote_bundle=PurePosixPath("/home/worker/m336k5-run/repository.bundle"),
+        exact_head="a" * 40,
     )
 
+    assert "checkout --quiet --detach " + "a" * 40 in detach
     assert "+refs/heads/*:refs/heads/*" in fetch
     assert "+refs/remotes/origin/*:refs/remotes/origin/*" in fetch
     assert "+refs/tags/*:refs/tags/*" in fetch

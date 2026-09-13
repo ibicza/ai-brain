@@ -148,11 +148,8 @@ def prepare_m336k5_karina_capsule(request: dict) -> dict:
                 *_repository_ref_restore_commands(
                     remote_repository=remote_repository,
                     remote_bundle=remote_bundle,
+                    exact_head=exact_head,
                 ),
-                "/usr/bin/git -C "
-                + shlex.quote(remote_repository.as_posix())
-                + " checkout --quiet --detach "
-                + exact_head,
                 "/usr/bin/git -C "
                 + shlex.quote(remote_repository.as_posix())
                 + " config core.autocrlf false",
@@ -310,10 +307,16 @@ def _create_repository_bundle(*, git: Path, bundle: Path, repository: Path) -> N
 
 
 def _repository_ref_restore_commands(
-    *, remote_repository: PurePosixPath, remote_bundle: PurePosixPath
-) -> tuple[str, str]:
+    *,
+    remote_repository: PurePosixPath,
+    remote_bundle: PurePosixPath,
+    exact_head: str,
+) -> tuple[str, str, str]:
     repository = shlex.quote(remote_repository.as_posix())
     bundle = shlex.quote(remote_bundle.as_posix())
+    detach = (
+        "/usr/bin/git -C " + repository + " checkout --quiet --detach " + exact_head
+    )
     fetch = " ".join(
         (
             "/usr/bin/git",
@@ -339,7 +342,7 @@ def _repository_ref_restore_commands(
             "done",
         )
     )
-    return fetch, promote
+    return detach, fetch, promote
 
 
 def _remote_workspace(value: object) -> PurePosixPath:
