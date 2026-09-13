@@ -863,14 +863,14 @@ def verify_m336k7_persistent_capsule_route_binding(
     """Reject a committed legacy route that differs from preserved capsule bytes."""
 
     expected_registry = build_m336k7_persistent_capsule_route_registry(content_value)
-    if registry_value != asdict(expected_registry):
+    if canonical_json(registry_value) != canonical_json(expected_registry):
         raise M336K2ProtocolError(
             "M336K7 frozen route registry differs from persistent capsule"
         )
     expected_route = build_m336k7_persistent_capsule_route_manifest(
         route_value, expected_registry
     )
-    if route_value != asdict(expected_route):
+    if canonical_json(route_value) != canonical_json(expected_route):
         raise M336K2ProtocolError(
             "M336K7 frozen route manifest differs from persistent capsule"
         )

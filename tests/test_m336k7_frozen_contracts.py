@@ -544,11 +544,11 @@ def test_persistent_capsule_route_is_derived_from_frozen_source_bytes() -> None:
     route = build_m336k7_persistent_capsule_route_manifest(asdict(template), derived)
     verify_m336k7_persistent_capsule_route_binding(
         content_value=manifest_value,
-        registry_value=asdict(derived),
-        route_value=asdict(route),
+        registry_value=json.loads(canonical_json(derived)),
+        route_value=json.loads(canonical_json(route)),
     )
 
-    changed_registry = asdict(derived)
+    changed_registry = json.loads(canonical_json(derived))
     changed_registry["registry_hash"] = H2
     _reject(
         lambda: verify_m336k7_persistent_capsule_route_binding(
