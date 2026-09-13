@@ -15,7 +15,12 @@ from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 
 _HASH = re.compile(r"[0-9a-f]{64}\Z")
 _REF = re.compile(r"(?:[0-9a-f]{40}|NOT_CREATED|ABSENT|PRESENT)\Z")
-_BRANCH = "exp/stage3-m336k5-hermetic-python-final-v14"
+_BRANCHES = frozenset(
+    {
+        "exp/stage3-m336k5-hermetic-python-final-v14",
+        "exp/stage3-m336k7-frozen-contract-final-v16",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -99,7 +104,7 @@ def verify_m336k5_recovery_checkpoint(
         or checkpoint.sequence < 1
         or any(_HASH.fullmatch(value) is None for value in hashes)
         or _REF.fullmatch(checkpoint.head_sha) is None
-        or checkpoint.branch != _BRANCH
+        or checkpoint.branch not in _BRANCHES
         or any(_is_private_text(value) for value in labels)
         or tuple(sorted(checkpoint.completed_receipt_hashes))
         != checkpoint.completed_receipt_hashes

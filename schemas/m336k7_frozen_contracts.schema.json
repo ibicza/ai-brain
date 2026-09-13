@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ibicza.github.io/ai-brain/schemas/m336k7_frozen_contracts.schema.json",
+  "title": "M-33.6k.7 frozen resource and capsule contracts",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/resourceBudgetPolicy" },
+    { "$ref": "#/$defs/resourceObservation" },
+    { "$ref": "#/$defs/resourceGate" },
+    { "$ref": "#/$defs/storageReservationRelease" },
+    { "$ref": "#/$defs/capsuleBindingSet" },
+    { "$ref": "#/$defs/legacyCompatibility" },
+    { "$ref": "#/$defs/postFreezeInputBundle" }
+  ],
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "sha1": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "nonnegative": { "type": "integer", "minimum": 0 },
+    "positive": { "type": "integer", "minimum": 1 },
+    "resourceBudgetPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "contract_role", "required_private_storage_bytes", "required_free_after_reservation_bytes", "required_free_inodes", "required_available_ram_bytes", "maximum_allowed_swap_bytes", "storage_reservation_bytes", "long_phase_sample_interval_seconds", "policy_hash"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "contract_role": { "const": "M336K7_RESOURCE_BUDGET_POLICY" },
+        "required_private_storage_bytes": { "$ref": "#/$defs/positive" },
+        "required_free_after_reservation_bytes": { "$ref": "#/$defs/positive" },
+        "required_free_inodes": { "$ref": "#/$defs/positive" },
+        "required_available_ram_bytes": { "$ref": "#/$defs/positive" },
+        "maximum_allowed_swap_bytes": { "$ref": "#/$defs/nonnegative" },
+        "storage_reservation_bytes": { "$ref": "#/$defs/positive" },
+        "long_phase_sample_interval_seconds": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "policy_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "resourceObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "contract_role", "sample_count", "sample_chain_hash", "minimum_available_ram_bytes", "maximum_process_tree_peak_rss_bytes", "maximum_swap_used_bytes", "minimum_filesystem_free_bytes", "minimum_filesystem_free_inodes", "maximum_capsule_size_bytes", "maximum_official_vault_size_bytes", "maximum_selected_snapshot_size_bytes", "maximum_production_roots_size_bytes", "maximum_evaluator_root_size_bytes", "maximum_active_task_process_count", "observation_hash"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "contract_role": { "const": "PUBLIC_SAFE_M336K7_RESOURCE_OBSERVATION_RECEIPT" },
+        "sample_count": { "$ref": "#/$defs/positive" },
+        "sample_chain_hash": { "$ref": "#/$defs/sha256" },
+        "minimum_available_ram_bytes": { "$ref": "#/$defs/nonnegative" },
+        "maximum_process_tree_peak_rss_bytes": { "$ref": "#/$defs/nonnegative" },
+        "maximum_swap_used_bytes": { "$ref": "#/$defs/nonnegative" },
+        "minimum_filesystem_free_bytes": { "$ref": "#/$defs/nonnegative" },
+        "minimum_filesystem_free_inodes": { "$ref": "#/$defs/nonnegative" },
+        "maximum_capsule_size_bytes": { "$ref": "#/$defs/nonnegative" },
+        "maximum_official_vault_size_bytes": { "$ref": "#/$defs/nonnegative" },
+        "maximum_selected_snapshot_size_bytes": { "$ref": "#/$defs/nonnegative" },
+        "maximum_production_roots_size_bytes": { "$ref": "#/$defs/nonnegative" },
+        "maximum_evaluator_root_size_bytes": { "$ref": "#/$defs/nonnegative" },
+        "maximum_active_task_process_count": { "$ref": "#/$defs/nonnegative" },
+        "observation_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "resourceGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "contract_role", "resource_budget_policy_hash", "resource_observation_hash", "storage_reservation_receipt_hash", "filesystem_identity_hash", "storage_pass", "inode_pass", "ram_pass", "swap_pass", "reservation_pass", "status", "receipt_hash"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "contract_role": { "const": "PUBLIC_SAFE_M336K7_RESOURCE_GATE_RECEIPT" },
+        "resource_budget_policy_hash": { "$ref": "#/$defs/sha256" },
+        "resource_observation_hash": { "$ref": "#/$defs/sha256" },
+        "storage_reservation_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "filesystem_identity_hash": { "$ref": "#/$defs/sha256" },
+        "storage_pass": { "type": "boolean" },
+        "inode_pass": { "type": "boolean" },
+        "ram_pass": { "type": "boolean" },
+        "swap_pass": { "type": "boolean" },
+        "reservation_pass": { "type": "boolean" },
+        "status": { "enum": ["PASS", "FAIL"] },
+        "receipt_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "storageReservationRelease": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "contract_role", "storage_reservation_receipt_hash", "reservation_file_identity_hash", "released_bytes", "free_bytes_before_release", "free_bytes_after_release", "status", "receipt_hash"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "contract_role": { "const": "PUBLIC_SAFE_M336K7_STORAGE_RESERVATION_RELEASE" },
+        "storage_reservation_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "reservation_file_identity_hash": { "$ref": "#/$defs/sha256" },
+        "released_bytes": { "$ref": "#/$defs/positive" },
+        "free_bytes_before_release": { "$ref": "#/$defs/nonnegative" },
+        "free_bytes_after_release": { "$ref": "#/$defs/nonnegative" },
+        "status": { "const": "PASS" },
+        "receipt_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "capsuleBindingSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "contract_role", "implementation_tip", "capsule_identity_hash", "capsule_root_identity_hash", "capsule_content_manifest_hash", "capsule_lifecycle_policy_hash", "capsule_liveness_receipt_hash", "persistent_capsule_public_receipt_hash", "legacy_public_capsule_receipt_hash", "python_environment_manifest_hash", "executable_dependency_manifest_hash", "startup_policy_hash", "bootstrap_source_hash", "launcher_source_hash", "stable_karina_host_identity_hash", "preservation_set_hash", "cleanup_cutoff_receipt_hash", "binding_set_hash"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "contract_role": { "const": "M336K7_PERSISTENT_CAPSULE_BINDING_SET" },
+        "implementation_tip": { "$ref": "#/$defs/sha1" },
+        "capsule_identity_hash": { "$ref": "#/$defs/sha256" },
+        "capsule_root_identity_hash": { "$ref": "#/$defs/sha256" },
+        "capsule_content_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "capsule_lifecycle_policy_hash": { "$ref": "#/$defs/sha256" },
+        "capsule_liveness_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "persistent_capsule_public_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "legacy_public_capsule_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "python_environment_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "executable_dependency_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "startup_policy_hash": { "$ref": "#/$defs/sha256" },
+        "bootstrap_source_hash": { "$ref": "#/$defs/sha256" },
+        "launcher_source_hash": { "$ref": "#/$defs/sha256" },
+        "stable_karina_host_identity_hash": { "$ref": "#/$defs/sha256" },
+        "preservation_set_hash": { "$ref": "#/$defs/sha256" },
+        "cleanup_cutoff_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "binding_set_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "legacyCompatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "contract_role", "persistent_public_receipt_hash", "legacy_public_receipt_hash", "executable_dependency_manifest_hash", "host_identity_hash", "python_environment_manifest_hash", "compatibility_status", "receipt_hash"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "contract_role": { "const": "PUBLIC_SAFE_M336K7_LEGACY_CAPSULE_COMPATIBILITY_RECEIPT" },
+        "persistent_public_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "legacy_public_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "executable_dependency_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "host_identity_hash": { "$ref": "#/$defs/sha256" },
+        "python_environment_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "compatibility_status": { "const": "PASS" },
+        "receipt_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "postFreezeInputBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "contract_role", "freeze_manifest_contract_hash", "final_authorization_hash", "route_identity_bundle_hash", "route_registry_hash", "route_manifest_hash", "resource_budget_policy_hash", "resource_observation_hash", "storage_reservation_receipt_hash", "resource_gate_receipt_hash", "capsule_binding_set_hash", "legacy_compatibility_receipt_hash", "liveness_receipt_hash", "startup_policy_hash", "executable_dependency_manifest_hash", "windows_jdk_identity_hash", "karina_jdk_identity_hash", "karina_host_identity_hash", "candidate_pool_hash", "acquisition_policy_hash", "archive_policy_hash", "terminal_policy_hash", "selector_policy_hash", "evaluator_policy_hash", "threshold_manifest_hash", "publication_contract_hash", "bundle_hash"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "contract_role": { "const": "M336K7_POST_FREEZE_INPUT_BUNDLE" },
+        "freeze_manifest_contract_hash": { "$ref": "#/$defs/sha256" },
+        "final_authorization_hash": { "$ref": "#/$defs/sha256" },
+        "route_identity_bundle_hash": { "$ref": "#/$defs/sha256" },
+        "route_registry_hash": { "$ref": "#/$defs/sha256" },
+        "route_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "resource_budget_policy_hash": { "$ref": "#/$defs/sha256" },
+        "resource_observation_hash": { "$ref": "#/$defs/sha256" },
+        "storage_reservation_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "resource_gate_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "capsule_binding_set_hash": { "$ref": "#/$defs/sha256" },
+        "legacy_compatibility_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "liveness_receipt_hash": { "$ref": "#/$defs/sha256" },
+        "startup_policy_hash": { "$ref": "#/$defs/sha256" },
+        "executable_dependency_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "windows_jdk_identity_hash": { "$ref": "#/$defs/sha256" },
+        "karina_jdk_identity_hash": { "$ref": "#/$defs/sha256" },
+        "karina_host_identity_hash": { "$ref": "#/$defs/sha256" },
+        "candidate_pool_hash": { "$ref": "#/$defs/sha256" },
+        "acquisition_policy_hash": { "$ref": "#/$defs/sha256" },
+        "archive_policy_hash": { "$ref": "#/$defs/sha256" },
+        "terminal_policy_hash": { "$ref": "#/$defs/sha256" },
+        "selector_policy_hash": { "$ref": "#/$defs/sha256" },
+        "evaluator_policy_hash": { "$ref": "#/$defs/sha256" },
+        "threshold_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "publication_contract_hash": { "$ref": "#/$defs/sha256" },
+        "bundle_hash": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

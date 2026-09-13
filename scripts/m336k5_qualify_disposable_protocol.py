@@ -60,6 +60,15 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     startup_receipt_from_path,
     write_m336k5_python_invocation_plan,
 )
+from ai_brain.stage3.acquisition.m336k7_freeze import (
+    M336K7FreezeManifest,
+    attest_committed_m336k7_f32,
+    materialize_m336k7_f32,
+)
+from ai_brain.stage3.acquisition.m336k7_request import (
+    build_m336k7_final_route_request,
+    write_m336k7_final_route_request,
+)
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
 _LAUNCH_GIT: Path | None = None
@@ -74,6 +83,9 @@ def main() -> None:
     parser.add_argument("--startup-receipt", type=Path, required=True)
     args = parser.parse_args()
     request = _object(args.request.resolve(strict=True))
+    namespace = request.get("protocol_namespace", "m336k5")
+    if namespace not in {"m336k5", "m336k7"}:
+        raise M336K2ProtocolError("M336K disposable protocol namespace changed")
     expected = {
         "source_repository",
         "git_executable",
@@ -89,7 +101,29 @@ def main() -> None:
         "storage_reservation",
         "storage_reservation_file",
     }
+    m336k7_inputs = {
+        "protocol_namespace",
+        "resource_budget_policy",
+        "resource_observation",
+        "resource_gate",
+        "capsule_binding_set",
+        "legacy_capsule_compatibility",
+        "persistent_private_capsule",
+        "persistent_public_capsule_receipt",
+        "legacy_public_capsule_receipt",
+        "persistent_python_environment_manifest",
+        "capsule_content_manifest",
+        "capsule_lifecycle_policy",
+        "capsule_liveness",
+        "preservation_set",
+        "cleanup_plan",
+        "cleanup_cutoff_state",
+    }
+    if namespace == "m336k7":
+        expected = (expected - {"resource_budget"}) | m336k7_inputs
     persistent = "persistent_karina_overlay" in request
+    if namespace == "m336k7" and not persistent:
+        raise M336K2ProtocolError("M336K7 rehearsal requires the persistent capsule")
     if set(request) != expected | (
         {"persistent_karina_overlay"} if persistent else set()
     ):
@@ -116,7 +150,7 @@ def main() -> None:
         output / "launcher-receipts",
     )
     branch = request["disposable_branch"]
-    if not branch.startswith("disposable/m336k5-"):
+    if not branch.startswith(f"disposable/{namespace}-"):
         raise M336K2ProtocolError("M336K5 disposable branch namespace changed")
     remote = output / "origin.git"
     repository = output / "repository"
@@ -142,11 +176,16 @@ def main() -> None:
     _git(git, repository, "config", "user.name", "M336K5 Disposable Proof")
     _git(git, repository, "remote", "set-url", "origin", str(remote))
     _git(git, repository, "checkout", "-B", branch, request["base_sha"])
-    _apply_working_tree(source, repository, git, request["base_sha"])
-    _git(git, repository, "add", "--all")
-    _git(
-        git, repository, "commit", "-m", "M-33.6k.5 disposable implementation snapshot"
-    )
+    if namespace == "m336k5":
+        _apply_working_tree(source, repository, git, request["base_sha"])
+        _git(git, repository, "add", "--all")
+        _git(
+            git,
+            repository,
+            "commit",
+            "-m",
+            "M-33.6k.5 disposable implementation snapshot",
+        )
     implementation = _git(git, repository, "rev-parse", "HEAD^{commit}")
     _git(git, repository, "push", "-u", "origin", branch)
     stage_template = _object(
@@ -226,13 +265,19 @@ def main() -> None:
         Path(request["legacy_component_request_template"]).resolve(strict=True)
     )
     legacy_output = private / "legacy-components"
-    legacy_request.update(
-        {
-            "repository": str(repository),
-            "python_executable": str(python),
-            "python_environment_manifest": str(environment_path),
-            "output": str(legacy_output),
-            "branch_ref": f"refs/heads/{branch}",
+    if namespace == "m336k7":
+        publication_values = {
+            "q_root": "artifacts/m336k7/q32",
+            "f_root": "artifacts/m336k7/f32-freeze",
+            "h_root": "artifacts/m336k7/h32",
+            "e_root": "artifacts/m336k7/e32",
+            "q_subject": "M-33.6k.7 qualify exact committed freeze inputs",
+            "f_subject": "M-33.6k.7 freeze final Java execution",
+            "h_subject": "M-33.6k.7 publish sealed Java production",
+            "e_subject": "M-33.6k.7 publish independent Java evidence",
+        }
+    else:
+        publication_values = {
             "q_root": "artifacts/m336k5/disposable/q-like",
             "f_root": "artifacts/m336k5/disposable/f-like",
             "h_root": "artifacts/m336k5/disposable/h-like",
@@ -241,9 +286,18 @@ def main() -> None:
             "f_subject": "M-33.6k.5 disposable F-like",
             "h_subject": "M-33.6k.5 disposable H-like",
             "e_subject": "M-33.6k.5 disposable E-like",
+        }
+    legacy_request.update(
+        {
+            "repository": str(repository),
+            "python_executable": str(python),
+            "python_environment_manifest": str(environment_path),
+            "output": str(legacy_output),
+            "branch_ref": f"refs/heads/{branch}",
+            **publication_values,
             "execution_mode": "FINAL",
             "acquisition_run_id": (
-                f"m336k5.disposable.{request['disposable_label']}.acquisition.v1"
+                f"{namespace}.disposable.{request['disposable_label']}.acquisition.v1"
             ),
         }
     )
@@ -264,15 +318,19 @@ def main() -> None:
         "--request",
         str(legacy_request_path),
     )
-    q_root = repository / "artifacts" / "m336k5" / "disposable" / "q-like"
+    q_root = repository.joinpath(*Path(legacy_request["q_root"]).parts)
     q_root.mkdir(parents=True)
     _write(
         q_root / "identity_qualification.json",
         _hashed(
             "receipt_hash",
             schema_version=1,
-            contract_role="PUBLIC_SAFE_M336K5_DISPOSABLE_IDENTITY_QUALIFICATION",
-            required_mutation_case_count=25,
+            contract_role=(
+                "PUBLIC_SAFE_M336K7_COMMITTED_FREEZE_REHEARSAL_QUALIFICATION"
+                if namespace == "m336k7"
+                else "PUBLIC_SAFE_M336K5_DISPOSABLE_IDENTITY_QUALIFICATION"
+            ),
+            required_mutation_case_count=32 if namespace == "m336k7" else 25,
             mutation_execution_phase="POST_F_LIKE_PRE_CONTROLLER",
             canonical_request_builder_present=True,
             external_route_run_id_absent=True,
@@ -285,11 +343,19 @@ def main() -> None:
     _write(q_manifest_path, q_manifest)
     readiness_body = {
         "schema_version": 1,
-        "contract_role": "PUBLIC_SAFE_M336K5_DISPOSABLE_Q_LIKE_READINESS",
+        "contract_role": (
+            "PUBLIC_SAFE_M336K7_DISPOSABLE_Q_LIKE_READINESS"
+            if namespace == "m336k7"
+            else "PUBLIC_SAFE_M336K5_DISPOSABLE_Q_LIKE_READINESS"
+        ),
         "exact_implementation_tip": implementation,
         "official_one_shot_counter_count": 0,
         "new_final_source_body_bytes": 0,
-        "status": "READY_FOR_HERMETIC_FINAL_JAVA_EXECUTION_V5",
+        "status": (
+            "READY_FOR_FROZEN_RESOURCE_BOUND_FINAL_JAVA_EXECUTION_V7"
+            if namespace == "m336k7"
+            else "READY_FOR_HERMETIC_FINAL_JAVA_EXECUTION_V5"
+        ),
     }
     readiness = {**readiness_body, "readiness_hash": content_hash(readiness_body)}
     readiness_path = q_root / "readiness.json"
@@ -326,9 +392,30 @@ def main() -> None:
                 "recovery_checkpoint_policy",
             )
         },
-        "resource_budget": request["resource_budget"],
         "storage_reservation": request["storage_reservation"],
     }
+    if namespace == "m336k7":
+        typed_request.update(
+            {
+                "identity_namespace": "m336k7",
+                "resource_budget_policy": request["resource_budget_policy"],
+                "resource_observation": request["resource_observation"],
+                "resource_gate": request["resource_gate"],
+                "capsule_binding_set": request["capsule_binding_set"],
+                "legacy_capsule_compatibility": request["legacy_capsule_compatibility"],
+                "persistent_capsule_receipt": request[
+                    "persistent_public_capsule_receipt"
+                ],
+                "capsule_content_manifest": request["capsule_content_manifest"],
+                "capsule_lifecycle_policy": request["capsule_lifecycle_policy"],
+                "capsule_liveness": request["capsule_liveness"],
+                "preservation_set": request["preservation_set"],
+                "cleanup_plan": request["cleanup_plan"],
+                "cleanup_cutoff_state": request["cleanup_cutoff_state"],
+            }
+        )
+    else:
+        typed_request["resource_budget"] = request["resource_budget"]
     typed_request_path = private / "typed-component-request.json"
     _write(typed_request_path, typed_request)
     _run(
@@ -343,12 +430,19 @@ def main() -> None:
         for path in typed_output.glob("*.json")
         if path.name != "bundle_receipt.json"
     }
-    f_root = repository / "artifacts" / "m336k5" / "disposable" / "f-like"
-    build = materialize_m336k5_f30(
+    f_root = repository.joinpath(*Path(legacy_request["f_root"]).parts)
+    freeze_builder = (
+        materialize_m336k7_f32 if namespace == "m336k7" else materialize_m336k5_f30
+    )
+    build = freeze_builder(
         repository=repository,
         git_executable=git,
         exact_implementation_tip=implementation,
-        exact_q30_sha=q_like,
+        **(
+            {"exact_q32_sha": q_like}
+            if namespace == "m336k7"
+            else {"exact_q30_sha": q_like}
+        ),
         readiness=readiness_path,
         component_sources=components,
         output=f_root,
@@ -359,11 +453,18 @@ def main() -> None:
         git, repository, legacy_request["f_subject"], legacy_request["f_root"]
     )
     _git(git, repository, "push", "origin", branch)
-    freeze = M336K5FreezeManifest.from_dict(_object(f_root / "freeze_manifest.json"))
-    attestation = attest_committed_m336k5_f30(
-        repository, git, freeze_manifest=freeze, exact_f30_sha=f_like
+    freeze = _load_freeze(f_root / "freeze_manifest.json")
+    if namespace == "m336k7":
+        attestation = attest_committed_m336k7_f32(
+            repository, git, freeze_manifest=freeze, exact_f32_sha=f_like
+        )
+    else:
+        attestation = attest_committed_m336k5_f30(
+            repository, git, freeze_manifest=freeze, exact_f30_sha=f_like
+        )
+    attestation_path = private / (
+        "f32-attestation.json" if namespace == "m336k7" else "f30-attestation.json"
     )
-    attestation_path = private / "f30-attestation.json"
     _write(attestation_path, asdict(attestation))
     runtime = output / "runtime"
     destinations = {
@@ -394,58 +495,149 @@ def main() -> None:
     bundle_path = _frozen_component(repository, freeze, "route_identity_bundle")
     authorization_path = _frozen_component(repository, freeze, "final_authorization")
     contract_path = _frozen_component(repository, freeze, "h28_publication_contract")
-    final_request = build_m336k5_final_route_request(
-        purpose="DISPOSABLE",
-        repository=str(repository),
-        git_executable=str(git),
-        python_executable=str(python),
-        exact_implementation_sha=implementation,
-        exact_f30_sha=f_like,
-        freeze_manifest=str(f_root / "freeze_manifest.json"),
-        f30_attestation=str(attestation_path),
-        final_authorization=str(authorization_path),
-        route_identity_bundle=str(bundle_path),
-        publication_contract=str(contract_path),
-        route_ledger=destinations["route_state_ledger"],
-        route_receipt=str(runtime / "route-receipt.json"),
-        stage_state=str(runtime / "stage-state.json"),
-        stage_receipt_root=str(runtime / "stage-receipts"),
-        private_root=str(runtime / "private"),
-        authority_statement=stage["authority_statement"],
-        frozen_spdx_reference=stage["frozen_spdx_reference"],
-        windows_java=stage["windows_java"],
-        windows_javac=stage["windows_javac"],
-        final_destinations=destinations,
-        karina=stage["karina"],
-        executable_handles=stage["executable_handles"],
-    )
+    common_request = {
+        "purpose": "DISPOSABLE",
+        "repository": str(repository),
+        "git_executable": str(git),
+        "python_executable": str(python),
+        "exact_implementation_sha": implementation,
+        "freeze_manifest": str(f_root / "freeze_manifest.json"),
+        "final_authorization": str(authorization_path),
+        "route_identity_bundle": str(bundle_path),
+        "publication_contract": str(contract_path),
+        "route_ledger": destinations["route_state_ledger"],
+        "route_receipt": str(runtime / "route-receipt.json"),
+        "stage_state": str(runtime / "stage-state.json"),
+        "stage_receipt_root": str(runtime / "stage-receipts"),
+        "private_root": str(runtime / "private"),
+        "authority_statement": stage["authority_statement"],
+        "frozen_spdx_reference": stage["frozen_spdx_reference"],
+        "windows_java": stage["windows_java"],
+        "windows_javac": stage["windows_javac"],
+        "final_destinations": destinations,
+        "executable_handles": stage["executable_handles"],
+    }
+    if namespace == "m336k7":
+        persistent_overlay = _object(
+            Path(request["persistent_karina_overlay"]).resolve(strict=True)
+        )
+        component_paths = {
+            name: _frozen_component(repository, freeze, name)
+            for name in (
+                "post_freeze_input_bundle",
+                "resource_budget_policy",
+                "resource_observation",
+                "storage_reservation",
+                "resource_gate",
+                "capsule_binding_set",
+                "legacy_capsule_compatibility",
+                "capsule_liveness",
+            )
+        }
+        legacy_karina = stage["karina"]
+        current_karina = {
+            "persistent_private_capsule": request["persistent_private_capsule"],
+            "private_execution_capsule": persistent_overlay[
+                "private_execution_capsule"
+            ],
+            "persistent_public_capsule_receipt": request[
+                "persistent_public_capsule_receipt"
+            ],
+            "legacy_public_capsule_receipt": request["legacy_public_capsule_receipt"],
+            "executable_dependency_manifest": persistent_overlay[
+                "executable_dependency_manifest"
+            ],
+            "python_environment_manifest": request[
+                "persistent_python_environment_manifest"
+            ],
+            "capsule_liveness_receipt": str(component_paths["capsule_liveness"]),
+            **{
+                name: legacy_karina[name]
+                for name in (
+                    "ssh_executable",
+                    "ssh_key",
+                    "known_hosts_file",
+                    "worker_endpoint",
+                    "repository",
+                    "private_root",
+                    "private_capsule_remote",
+                    "javac",
+                )
+            },
+        }
+        final_request = build_m336k7_final_route_request(
+            **common_request,
+            exact_f32_sha=f_like,
+            f32_attestation=str(attestation_path),
+            post_freeze_input_bundle=str(component_paths["post_freeze_input_bundle"]),
+            resource_budget_policy=str(component_paths["resource_budget_policy"]),
+            resource_observation_receipt=str(component_paths["resource_observation"]),
+            storage_reservation_receipt=str(component_paths["storage_reservation"]),
+            storage_reservation_file=str(reservation_path),
+            resource_gate_receipt=str(component_paths["resource_gate"]),
+            capsule_binding_set=str(component_paths["capsule_binding_set"]),
+            legacy_compatibility_receipt=str(
+                component_paths["legacy_capsule_compatibility"]
+            ),
+            capsule_liveness_receipt=str(component_paths["capsule_liveness"]),
+            karina=current_karina,
+        )
+    else:
+        final_request = build_m336k5_final_route_request(
+            **common_request,
+            exact_f30_sha=f_like,
+            f30_attestation=str(attestation_path),
+            karina=stage["karina"],
+        )
     final_request_path = private / "canonical-final-request.json"
-    write_m336k5_final_route_request(final_request, final_request_path)
-    mutation_path = public / "identity_mutation_receipt.json"
-    _run(
-        python,
-        repository,
-        "scripts/m336k5_run_identity_mutations.py",
-        "--request",
-        str(final_request_path),
-        "--workspace",
-        str(private / "identity-mutation-workspace"),
-        "--output",
-        str(mutation_path),
+    request_writer = (
+        write_m336k7_final_route_request
+        if namespace == "m336k7"
+        else write_m336k5_final_route_request
     )
+    request_writer(final_request, final_request_path)
+    mutation_path = public / "identity_mutation_receipt.json"
+    if namespace == "m336k7":
+        _run(
+            python,
+            repository,
+            "scripts/m336k7_run_contract_mutations.py",
+            "--repository",
+            str(repository),
+            "--output",
+            str(mutation_path),
+        )
+    else:
+        _run(
+            python,
+            repository,
+            "scripts/m336k5_run_identity_mutations.py",
+            "--request",
+            str(final_request_path),
+            "--workspace",
+            str(private / "identity-mutation-workspace"),
+            "--output",
+            str(mutation_path),
+        )
     mutation = _object(mutation_path)
     if (
-        mutation.get("case_count") != 25
+        mutation.get("mutation_case_count" if namespace == "m336k7" else "case_count")
+        != (32 if namespace == "m336k7" else 25)
         or mutation.get("accepted_invalid_case_count") != 0
         or mutation.get("wrong_rejection_layer_count") != 0
         or mutation.get("status") != "PASS"
     ):
         raise M336K2ProtocolError("M336K5 disposable mutation matrix failed")
     validation_path = private / "preledger-invocation.json"
+    final_route_script = (
+        "scripts/m336k7_run_final_route.py"
+        if namespace == "m336k7"
+        else "scripts/m336k5_run_final_route.py"
+    )
     _run(
         python,
         repository,
-        "scripts/m336k5_run_final_route.py",
+        final_route_script,
         "--request",
         str(final_request_path),
         "--validate-only",
@@ -453,31 +645,38 @@ def main() -> None:
         str(validation_path),
     )
     monitor.sample("DISPOSABLE_POST_FREEZE_VALIDATION")
-    free_before_release = shutil.disk_usage(reservation_path.parent).free
-    release_m336k5_storage_reservation(reservation_path)
-    free_after_release = shutil.disk_usage(output).free
-    release_body = {
-        "schema_version": 1,
-        "contract_role": "PUBLIC_SAFE_M336K5_DISPOSABLE_RESERVATION_RELEASE",
-        "storage_reservation_receipt_hash": reservation_receipt["receipt_hash"],
-        "released_bytes": reservation_receipt["reservation_bytes"],
-        "free_bytes_before_release": free_before_release,
-        "free_bytes_after_release": free_after_release,
-        "status": "PASS",
-    }
-    release_receipt = {
-        **release_body,
-        "receipt_hash": content_hash(release_body),
-    }
-    _write(public / "reservation_release_receipt.json", release_receipt)
-    monitor.sample("DISPOSABLE_RESERVATION_RELEASED")
-    _run(
-        python,
-        repository,
-        "scripts/m336k5_run_final_route.py",
-        "--request",
-        str(final_request_path),
-    )
+    release_receipt_path = public / "reservation_release_receipt.json"
+    if namespace == "m336k5":
+        free_before_release = shutil.disk_usage(reservation_path.parent).free
+        release_m336k5_storage_reservation(reservation_path)
+        free_after_release = shutil.disk_usage(reservation_path.parent).free
+        release_body = {
+            "schema_version": 1,
+            "contract_role": "PUBLIC_SAFE_M336K5_DISPOSABLE_RESERVATION_RELEASE",
+            "storage_reservation_receipt_hash": reservation_receipt["receipt_hash"],
+            "released_bytes": reservation_receipt["reservation_bytes"],
+            "free_bytes_before_release": free_before_release,
+            "free_bytes_after_release": free_after_release,
+            "status": "PASS",
+        }
+        release_receipt = {
+            **release_body,
+            "receipt_hash": content_hash(release_body),
+        }
+        _write(release_receipt_path, release_receipt)
+    execution_arguments = ["--request", str(final_request_path)]
+    if namespace == "m336k7":
+        execution_arguments.extend(
+            (
+                "--post-freeze-validation-receipt",
+                str(validation_path),
+                "--reservation-release-receipt",
+                str(release_receipt_path),
+            )
+        )
+    _run(python, repository, final_route_script, *execution_arguments)
+    release_receipt = _object(release_receipt_path)
+    monitor.sample("DISPOSABLE_FINAL_ROUTE_COMPLETE")
     e_like = _git(git, repository, "rev-parse", "HEAD^{commit}")
     h_like = _git(git, repository, "rev-parse", f"{e_like}^")
     contract = publication_contract_from_dict(_object(contract_path))
@@ -500,9 +699,23 @@ def main() -> None:
         final_request,
         _object(validation_path),
     )
-    windows_source_identity = compute_m336j_project_source_identity(repository, git)
-    karina_source_identity = karina_preparation["project_source_identity"]
-    if windows_source_identity != karina_source_identity:
+    current_full_source_identity = compute_m336j_project_source_identity(
+        repository, git
+    )
+    persistent_full_source_identity = karina_preparation["project_source_identity"]
+    if namespace == "m336k7":
+        windows_source_identity, karina_source_identity = (
+            _persistent_execution_source_identities(
+                repository, Path(request["capsule_content_manifest"])
+            )
+        )
+    else:
+        windows_source_identity = current_full_source_identity
+        karina_source_identity = persistent_full_source_identity
+    source_identity_difference_count = int(
+        windows_source_identity != karina_source_identity
+    )
+    if source_identity_difference_count:
         raise M336K2ProtocolError("M336K5 disposable platform source identity differs")
     monitor.stop("DISPOSABLE_FULL_CHAIN")
     maximum_private_bytes = max(
@@ -518,7 +731,11 @@ def main() -> None:
         raise M336K2ProtocolError("M336K5 disposable resource budget failed")
     body = {
         "schema_version": 1,
-        "contract_role": "PUBLIC_SAFE_M336K5_DISPOSABLE_FINAL_MODE_PROOF",
+        "contract_role": (
+            "PUBLIC_SAFE_M336K7_EXACT_COMMITTED_FREEZE_REHEARSAL"
+            if namespace == "m336k7"
+            else "PUBLIC_SAFE_M336K5_DISPOSABLE_FINAL_MODE_PROOF"
+        ),
         "implementation_tip": implementation,
         "q_like_sha": q_like,
         "f_like_sha": f_like,
@@ -533,7 +750,9 @@ def main() -> None:
         "reservation_release_receipt_hash": release_receipt["receipt_hash"],
         "preledger_invocation_receipt_hash": _object(validation_path)["receipt_hash"],
         "identity_mutation_receipt_hash": mutation["receipt_hash"],
-        "identity_mutation_case_count": mutation["case_count"],
+        "identity_mutation_case_count": mutation[
+            "mutation_case_count" if namespace == "m336k7" else "case_count"
+        ],
         "accepted_invalid_case_count": mutation["accepted_invalid_case_count"],
         "wrong_rejection_layer_count": mutation["wrong_rejection_layer_count"],
         "route_identity_bundle_hash": bundle.bundle_hash,
@@ -544,7 +763,12 @@ def main() -> None:
         "identity_observer_count": observed,
         "windows_project_source_identity": windows_source_identity,
         "karina_project_source_identity": karina_source_identity,
-        "platform_source_identity_difference_count": 0,
+        "platform_source_identity_difference_count": source_identity_difference_count,
+        "persistent_capsule_source_identity_is_explicit": namespace == "m336k7",
+        "current_full_project_source_identity": current_full_source_identity,
+        "persistent_capsule_full_project_source_identity": (
+            persistent_full_source_identity
+        ),
         "route_receipt_hash": route_receipt["receipt_hash"],
         "commit_protocol_receipt_hash": protocol["receipt_hash"],
         "source_leak_count": protocol["source_leak_count"],
@@ -588,6 +812,34 @@ def _apply_working_tree(
         shutil.copyfile(source_path, target)
 
 
+def _persistent_execution_source_identities(
+    repository: Path, content_manifest_path: Path
+) -> tuple[str, str]:
+    """Compare only source bytes that the preserved Karina capsule executes."""
+
+    relative_paths = (
+        "scripts/m336k5_python_bootstrap.py",
+        "scripts/m336j_karina_execution.py",
+    )
+    manifest = _verified_receipt(
+        content_manifest_path.resolve(strict=True), "manifest_hash"
+    )
+    entries = {
+        item["relative_path"]: item["bytes_hash"] for item in manifest["entries"]
+    }
+    capsule_rows = tuple((name, entries[name]) for name in relative_paths)
+    current_rows = tuple(
+        (
+            name,
+            bytes_hash(repository.joinpath(*Path(name).parts).read_bytes()),
+        )
+        for name in relative_paths
+    )
+    if current_rows != capsule_rows:
+        raise M336K2ProtocolError("M336K7 preserved capsule executable source changed")
+    return content_hash(current_rows), content_hash(capsule_rows)
+
+
 def _render_stage_template(
     value: dict,
     *,
@@ -622,9 +874,7 @@ def _render_stage_template(
         "@KARINA_PRODUCTION@": destinations["karina_production"],
         "@EVALUATOR_ROOT@": destinations["evaluator_root"],
     }
-    freeze = M336K5FreezeManifest.from_dict(
-        _object(freeze_root / "freeze_manifest.json")
-    )
+    freeze = _load_freeze(freeze_root / "freeze_manifest.json")
     for component in freeze.components:
         replacements[f"@COMPONENT_{component.name.upper()}@"] = str(
             repository.joinpath(*Path(component.relative_path).parts)
@@ -661,9 +911,7 @@ def _identity_observations(
     authorization = M336K5FinalAuthorization.from_dict(
         _object(Path(final_request.final_authorization))
     )
-    freeze = M336K5FreezeManifest.from_dict(
-        _object(Path(final_request.freeze_manifest))
-    )
+    freeze = _load_freeze(Path(final_request.freeze_manifest))
     pool = _object(_frozen_component(repository, freeze, "candidate_pool"))
     acquisition_receipt = _object(private / "acquisition_public_receipt.json")
     if (
@@ -763,6 +1011,13 @@ def _frozen_component(repository: Path, freeze, name: str) -> Path:
     return repository.joinpath(*Path(rows[0].relative_path).parts).resolve(strict=True)
 
 
+def _load_freeze(path: Path):
+    value = _object(path)
+    if value.get("contract_role") == "M336K7_F32_TYPED_FREEZE_V1":
+        return M336K7FreezeManifest.from_dict(value)
+    return M336K5FreezeManifest.from_dict(value)
+
+
 def _q_manifest(root: Path) -> dict:
     rows = tuple(
         (
@@ -808,14 +1063,21 @@ def _run(python: Path, repository: Path, script: str, *arguments: str) -> None:
     _LAUNCH_SEQUENCE += 1
     root = _LAUNCH_RECEIPTS / f"{_LAUNCH_SEQUENCE:03d}"
     target = repository / script
-    final_cli = script == "scripts/m336k5_run_final_route.py"
+    final_cli = script in {
+        "scripts/m336k5_run_final_route.py",
+        "scripts/m336k7_run_final_route.py",
+    }
     role = (
         "VALIDATE_ONLY"
         if final_cli and "--validate-only" in arguments
         else "FINAL_CONTROLLER"
         if final_cli
         else "DISPOSABLE_CONTROLLER"
-        if script == "scripts/m336k5_run_identity_mutations.py"
+        if script
+        in {
+            "scripts/m336k5_run_identity_mutations.py",
+            "scripts/m336k7_run_contract_mutations.py",
+        }
         else "BUILD_HELPER"
     )
     plan = build_m336k5_python_invocation(

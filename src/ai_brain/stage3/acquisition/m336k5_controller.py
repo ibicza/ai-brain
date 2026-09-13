@@ -22,6 +22,7 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
 from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5_PROTOCOL_RUN_ID,
     M336K6_PROTOCOL_RUN_ID,
+    M336K7_PROTOCOL_RUN_ID,
     M336K5RouteIdentityBundle,
 )
 from ai_brain.stage3.acquisition.m336k5_request import M336K5ValidatedInvocation
@@ -333,6 +334,7 @@ def _verify_final_identity(purpose: str, bundle: M336K5RouteIdentityBundle) -> N
     if purpose == "OFFICIAL" and bundle.protocol_run_id.value not in {
         M336K5_PROTOCOL_RUN_ID,
         M336K6_PROTOCOL_RUN_ID,
+        M336K7_PROTOCOL_RUN_ID,
     }:
         raise M336K2ProtocolError("M336K5 official protocol run ID is not canonical")
 

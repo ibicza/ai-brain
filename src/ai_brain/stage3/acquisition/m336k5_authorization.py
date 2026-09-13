@@ -11,6 +11,7 @@ from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5_PROTOCOL_RUN_ID,
     M336K6_PROTOCOL_RUN_ID,
+    M336K7_PROTOCOL_RUN_ID,
     M336K5AcquisitionRunId,
     M336K5EvaluatorRunId,
     M336K5ExecutionMode,
@@ -167,6 +168,9 @@ class M336K5FinalAuthorization:
             ),
             M336K6_PROTOCOL_RUN_ID: (
                 "refs/heads/exp/stage3-m336k6-persistent-capsule-final-v15"
+            ),
+            M336K7_PROTOCOL_RUN_ID: (
+                "refs/heads/exp/stage3-m336k7-frozen-contract-final-v16"
             ),
         }
         protocol = self.protocol_run_id_typed.value

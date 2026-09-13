@@ -11,6 +11,7 @@ from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5_ROUTE_VERSION,
     M336K6_ROUTE_VERSION,
+    M336K7_ROUTE_VERSION,
     M336K5RouteComponentId,
     M336K5RouteVersion,
 )
@@ -63,6 +64,16 @@ M336K6_ROUTE_COMPONENTS = M336K5_ROUTE_COMPONENTS + (
     ("persistent-capsule-preparer", "scripts/m336k6_prepare_karina_capsule.py"),
     ("persistent-capsule-verifier", "scripts/m336k6_verify_persistent_capsule.py"),
 )
+M336K7_ROUTE_COMPONENTS = M336K6_ROUTE_COMPONENTS + (
+    ("frozen-contracts", "src/ai_brain/stage3/acquisition/m336k7_contracts.py"),
+    ("current-final-request", "src/ai_brain/stage3/acquisition/m336k7_request.py"),
+    ("current-freeze", "src/ai_brain/stage3/acquisition/m336k7_freeze.py"),
+    ("current-final-cli", "scripts/m336k7_run_final_route.py"),
+    ("current-request-builder", "scripts/m336k7_build_final_route_request.py"),
+    ("frozen-contract-builder", "scripts/m336k7_build_frozen_contracts.py"),
+    ("current-freeze-builder", "scripts/m336k7_materialize_f32.py"),
+    ("frozen-contract-mutations", "scripts/m336k7_run_contract_mutations.py"),
+)
 
 
 def _namespace_values(namespace: str) -> tuple[str, tuple[tuple[str, str], ...]]:
@@ -70,6 +81,8 @@ def _namespace_values(namespace: str) -> tuple[str, tuple[tuple[str, str], ...]]
         return M336K5_ROUTE_VERSION, M336K5_ROUTE_COMPONENTS
     if namespace == "m336k6":
         return M336K6_ROUTE_VERSION, M336K6_ROUTE_COMPONENTS
+    if namespace == "m336k7":
+        return M336K7_ROUTE_VERSION, M336K7_ROUTE_COMPONENTS
     raise M336K2ProtocolError("M336K5 route registry namespace is invalid")
 
 

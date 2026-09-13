@@ -11,6 +11,7 @@ from pathlib import Path
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_authorization import (
+    M336K5FinalAuthorization,
     build_m336k5_final_authorization,
 )
 from ai_brain.stage3.acquisition.m336k5_identity import (
@@ -22,6 +23,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5SelectorRunId,
     build_m336k5_official_identity_bundle,
     build_m336k6_official_identity_bundle,
+    build_m336k7_official_identity_bundle,
 )
 from ai_brain.stage3.acquisition.m336k5_registry import (
     build_m336k5_route_manifest,
@@ -31,6 +33,28 @@ from ai_brain.stage3.acquisition.m336k5_registry import (
 from ai_brain.stage3.acquisition.m336k5_request import (
     M336K5_FINAL_REQUEST_BUILDER_HASH,
     M336K5_FINAL_REQUEST_CONTRACT,
+)
+from ai_brain.stage3.acquisition.m336k5_startup import M336K5PythonStartupPolicy
+from ai_brain.stage3.acquisition.m336k7_contracts import (
+    M336K7FrozenContractCompatibilityGate,
+    M336K7LegacyCapsuleCompatibilityReceipt,
+    M336K7PersistentCapsuleBindingSet,
+    M336K7PostFreezeInputBundle,
+    M336K7ResourceBudgetPolicy,
+    M336K7ResourceGateReceipt,
+    M336K7ResourceObservationReceipt,
+    M336K7StrictArtifact,
+    storage_reservation_from_dict,
+    verify_m336k7_capsule_compatibility_binding,
+    verify_m336k7_resource_gate_binding,
+)
+from ai_brain.stage3.acquisition.m336k7_freeze import (
+    M336K7_FREEZE_MANIFEST_CONTRACT,
+    M336K7_FREEZE_MANIFEST_CONTRACT_HASH,
+)
+from ai_brain.stage3.acquisition.m336k7_request import (
+    M336K7_FINAL_REQUEST_BUILDER_HASH,
+    M336K7_FINAL_REQUEST_CONTRACT,
 )
 
 _LABEL = re.compile(r"[a-z0-9][a-z0-9-]{3,63}")
@@ -75,15 +99,26 @@ def main() -> None:
         "cleanup_plan",
         "cleanup_cutoff_state",
     }
+    frozen_contract_components = {
+        "resource_budget_policy",
+        "resource_observation",
+        "resource_gate",
+        "capsule_binding_set",
+        "legacy_capsule_compatibility",
+    }
     identity_namespace = request.get("identity_namespace", "m336k5")
     expected = (
-        base_expected
-        if identity_namespace == "m336k5"
-        else base_expected | {"identity_namespace"} | lifecycle_components
+        base_expected - {"resource_budget"}
+        if identity_namespace == "m336k7"
+        else base_expected
     )
+    if identity_namespace != "m336k5":
+        expected |= {"identity_namespace"} | lifecycle_components
+    if identity_namespace == "m336k7":
+        expected |= frozen_contract_components
     if set(request) != expected:
         raise M336K2ProtocolError("M336K5 component bundle request fields changed")
-    if identity_namespace not in {"m336k5", "m336k6"}:
+    if identity_namespace not in {"m336k5", "m336k6", "m336k7"}:
         raise M336K2ProtocolError("M336K5 component identity namespace is invalid")
     repository = Path(request["repository"]).resolve(strict=True)
     legacy = Path(request["legacy_bundle"]).resolve(strict=True)
@@ -108,12 +143,13 @@ def main() -> None:
         "karina_python_launcher",
         "sanitized_environment_policy",
         "startup_receipt_schema",
-        "resource_budget",
+        *(("resource_budget",) if identity_namespace != "m336k7" else ()),
         "storage_reservation",
         "resource_monitor",
         "cleanup_policy",
         "recovery_checkpoint_policy",
-        *sorted(lifecycle_components if identity_namespace == "m336k6" else ()),
+        *sorted(lifecycle_components if identity_namespace != "m336k5" else ()),
+        *sorted(frozen_contract_components if identity_namespace == "m336k7" else ()),
     ):
         shutil.copyfile(
             Path(request[name]).resolve(strict=True), output / f"{name}.json"
@@ -127,6 +163,8 @@ def main() -> None:
     for path in output.glob("*.json"):
         value = _rehash_top_level(_replace(_object(path), replacements))
         path.write_text(canonical_json(value) + "\n", encoding="utf-8", newline="\n")
+    if identity_namespace == "m336k7":
+        _write_m336k7_legacy_bindings(output, request)
     for name, source in (
         ("q28_readiness", request["q_readiness"]),
         ("q28_evidence_manifest", request["q_evidence_manifest"]),
@@ -185,11 +223,12 @@ def main() -> None:
     }
     evaluator = {**evaluator_body, "policy_hash": content_hash(evaluator_body)}
     if mode == "OFFICIAL":
-        official_builder = (
-            build_m336k5_official_identity_bundle
-            if identity_namespace == "m336k5"
-            else build_m336k6_official_identity_bundle
-        )
+        official_builders = {
+            "m336k5": build_m336k5_official_identity_bundle,
+            "m336k6": build_m336k6_official_identity_bundle,
+            "m336k7": build_m336k7_official_identity_bundle,
+        }
+        official_builder = official_builders[identity_namespace]
         bundle = official_builder(
             route_registry_hash=registry.registry_hash,
             route_manifest_hash=route.manifest_hash,
@@ -221,7 +260,14 @@ def main() -> None:
     karina_launcher = _object(output / "karina_python_launcher.json")
     sanitized = _object(output / "sanitized_environment_policy.json")
     startup_schema = _object(output / "startup_receipt_schema.json")
-    resource_budget = _object(output / "resource_budget.json")
+    resource_budget = _object(
+        output
+        / (
+            "resource_budget_policy.json"
+            if identity_namespace == "m336k7"
+            else "resource_budget.json"
+        )
+    )
     reservation = _object(output / "storage_reservation.json")
     resource_monitor = _object(output / "resource_monitor.json")
     cleanup = _object(output / "cleanup_policy.json")
@@ -256,7 +302,9 @@ def main() -> None:
         karina_launcher_hash=karina_launcher["launcher_hash"],
         sanitized_environment_hash=sanitized["receipt_hash"],
         startup_receipt_schema_hash=startup_schema["schema_hash"],
-        resource_budget_hash=resource_budget["receipt_hash"],
+        resource_budget_hash=resource_budget[
+            "policy_hash" if identity_namespace == "m336k7" else "receipt_hash"
+        ],
         storage_reservation_receipt_hash=reservation["receipt_hash"],
         resource_monitor_hash=resource_monitor["source_bytes_hash"],
         cleanup_policy_hash=cleanup["source_bytes_hash"],
@@ -280,10 +328,16 @@ def main() -> None:
         candidate_replacement_limit=0,
         pre_freeze_source_body_bytes=0,
     )
-    builder = {
-        **M336K5_FINAL_REQUEST_CONTRACT,
-        "builder_hash": M336K5_FINAL_REQUEST_BUILDER_HASH,
-    }
+    if identity_namespace == "m336k7":
+        builder = {
+            **M336K7_FINAL_REQUEST_CONTRACT,
+            "builder_hash": M336K7_FINAL_REQUEST_BUILDER_HASH,
+        }
+    else:
+        builder = {
+            **M336K5_FINAL_REQUEST_CONTRACT,
+            "builder_hash": M336K5_FINAL_REQUEST_BUILDER_HASH,
+        }
     values = {
         "acquisition_policy": acquisition,
         "selector_policy": selector,
@@ -299,14 +353,152 @@ def main() -> None:
         (output / f"{name}.json").write_text(
             canonical_json(value) + "\n", encoding="utf-8", newline="\n"
         )
+    if identity_namespace == "m336k7":
+        execution_capsule = _object(output / "execution_capsule_receipt.json")
+        binding = _object(output / "capsule_binding_set.json")
+        execution_capsule["karina_public_execution_capsule_receipt_hash"] = binding[
+            "legacy_public_capsule_receipt_hash"
+        ]
+        execution_capsule["karina_executable_dependency_manifest_hash"] = binding[
+            "executable_dependency_manifest_hash"
+        ]
+        execution_capsule = _rehash_top_level(execution_capsule)
+        (output / "execution_capsule_receipt.json").write_text(
+            canonical_json(execution_capsule) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        post_freeze = M336K7PostFreezeInputBundle.build(
+            freeze_manifest_contract_hash=M336K7_FREEZE_MANIFEST_CONTRACT_HASH,
+            final_authorization_hash=authorization.authorization_hash,
+            route_identity_bundle_hash=bundle.bundle_hash,
+            route_registry_hash=registry.registry_hash,
+            route_manifest_hash=route.manifest_hash,
+            resource_budget_policy_hash=resource_budget["policy_hash"],
+            resource_observation_hash=_object(output / "resource_observation.json")[
+                "observation_hash"
+            ],
+            storage_reservation_receipt_hash=reservation["receipt_hash"],
+            resource_gate_receipt_hash=_object(output / "resource_gate.json")[
+                "receipt_hash"
+            ],
+            capsule_binding_set_hash=binding["binding_set_hash"],
+            legacy_compatibility_receipt_hash=_object(
+                output / "legacy_capsule_compatibility.json"
+            )["receipt_hash"],
+            liveness_receipt_hash=_object(output / "capsule_liveness.json")[
+                "receipt_hash"
+            ],
+            startup_policy_hash=startup_policy["policy_hash"],
+            executable_dependency_manifest_hash=_object(
+                output / "executable_dependency_manifest.json"
+            )["manifest_hash"],
+            windows_jdk_identity_hash=_object(output / "windows_jdk_identity.json")[
+                "receipt_hash"
+            ],
+            karina_jdk_identity_hash=_object(output / "karina_jdk_identity.json")[
+                "receipt_hash"
+            ],
+            karina_host_identity_hash=_object(
+                output / "karina_stable_host_identity.json"
+            )["receipt_hash"],
+            candidate_pool_hash=_object(output / "candidate_pool.json")["pool_hash"],
+            acquisition_policy_hash=acquisition["acquisition_policy_hash"],
+            archive_policy_hash=_object(output / "archive_policy.json")["policy_hash"],
+            terminal_policy_hash=_object(output / "candidate_terminal_policy.json")[
+                "policy_hash"
+            ],
+            selector_policy_hash=selector["policy_hash"],
+            evaluator_policy_hash=evaluator["policy_hash"],
+            threshold_manifest_hash=_object(output / "threshold_manifest.json")[
+                "threshold_manifest_hash"
+            ],
+            publication_contract_hash=content_hash(
+                (
+                    _object(output / "h28_publication_contract.json")["contract_hash"],
+                    _object(output / "e28_publication_contract.json")["contract_hash"],
+                )
+            ),
+        )
+        (output / "post_freeze_input_bundle.json").write_text(
+            canonical_json(post_freeze.canonical_object()) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        compatibility_inputs = {
+            "freeze_manifest_contract": {
+                **M336K7_FREEZE_MANIFEST_CONTRACT,
+                "contract_hash": M336K7_FREEZE_MANIFEST_CONTRACT_HASH,
+            },
+            "post_freeze_input_bundle": post_freeze.canonical_object(),
+            **{
+                name: _object(output / f"{name}.json")
+                for name in (
+                    "final_authorization",
+                    "route_identity_bundle",
+                    "typed_route_registry",
+                    "typed_route_manifest",
+                    "resource_budget_policy",
+                    "resource_observation",
+                    "storage_reservation",
+                    "resource_gate",
+                    "capsule_binding_set",
+                    "legacy_capsule_compatibility",
+                    "capsule_liveness",
+                    "python_startup_policy",
+                    "executable_dependency_manifest",
+                    "windows_jdk_identity",
+                    "karina_jdk_identity",
+                    "karina_stable_host_identity",
+                    "candidate_pool",
+                    "acquisition_policy",
+                    "archive_policy",
+                    "candidate_terminal_policy",
+                    "selector_policy",
+                    "evaluator_policy",
+                    "threshold_manifest",
+                    "h28_publication_contract",
+                    "e28_publication_contract",
+                )
+            },
+        }
+        artifacts = {
+            name: (
+                value,
+                _current_consumer(
+                    name,
+                    value,
+                    hash_field=_artifact_hash_field(name),
+                    all_inputs=compatibility_inputs,
+                    expected_post_freeze=post_freeze,
+                ),
+            )
+            for name, value in compatibility_inputs.items()
+        }
+        compatibility_gate = M336K7FrozenContractCompatibilityGate.run(
+            artifacts,
+            current_route_sources=(
+                repository
+                / "src"
+                / "ai_brain"
+                / "stage3"
+                / "acquisition"
+                / "m336k7_request.py",
+            ),
+        )
+        (output / "frozen_contract_compatibility.json").write_text(
+            canonical_json(compatibility_gate.canonical_object()) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
     pool = _object(output / "candidate_pool.json")
     body = {
         "schema_version": 1,
-        "contract_role": (
-            "PUBLIC_SAFE_M336K5_COMPONENT_BUNDLE_RECEIPT"
-            if identity_namespace == "m336k5"
-            else "PUBLIC_SAFE_M336K6_COMPONENT_BUNDLE_RECEIPT"
-        ),
+        "contract_role": {
+            "m336k5": "PUBLIC_SAFE_M336K5_COMPONENT_BUNDLE_RECEIPT",
+            "m336k6": "PUBLIC_SAFE_M336K6_COMPONENT_BUNDLE_RECEIPT",
+            "m336k7": "PUBLIC_SAFE_M336K7_COMPONENT_BUNDLE_RECEIPT",
+        }[identity_namespace],
         "component_count": len(tuple(output.glob("*.json"))),
         "candidate_pool_hash": pool["pool_hash"],
         "route_registry_hash": registry.registry_hash,
@@ -314,7 +506,11 @@ def main() -> None:
         "schema_registry_hash": schemas.registry_hash,
         "route_identity_bundle_hash": bundle.bundle_hash,
         "final_authorization_hash": authorization.authorization_hash,
-        "canonical_request_builder_hash": M336K5_FINAL_REQUEST_BUILDER_HASH,
+        "canonical_request_builder_hash": (
+            M336K7_FINAL_REQUEST_BUILDER_HASH
+            if identity_namespace == "m336k7"
+            else M336K5_FINAL_REQUEST_BUILDER_HASH
+        ),
         "status": "PASS",
     }
     receipt = {**body, "receipt_hash": content_hash(body)}
@@ -365,6 +561,181 @@ def _rehash_top_level(value: dict) -> dict:
         body.pop(field)
         return {**body, field: content_hash(body)}
     return value
+
+
+def _artifact_hash_field(name: str) -> str:
+    return {
+        "freeze_manifest_contract": "contract_hash",
+        "post_freeze_input_bundle": "bundle_hash",
+        "final_authorization": "authorization_hash",
+        "route_identity_bundle": "bundle_hash",
+        "typed_route_registry": "registry_hash",
+        "typed_route_manifest": "manifest_hash",
+        "resource_budget_policy": "policy_hash",
+        "resource_observation": "observation_hash",
+        "storage_reservation": "receipt_hash",
+        "resource_gate": "receipt_hash",
+        "capsule_binding_set": "binding_set_hash",
+        "legacy_capsule_compatibility": "receipt_hash",
+        "capsule_liveness": "receipt_hash",
+        "python_startup_policy": "policy_hash",
+        "executable_dependency_manifest": "manifest_hash",
+        "windows_jdk_identity": "receipt_hash",
+        "karina_jdk_identity": "receipt_hash",
+        "karina_stable_host_identity": "receipt_hash",
+        "candidate_pool": "pool_hash",
+        "acquisition_policy": "acquisition_policy_hash",
+        "archive_policy": "policy_hash",
+        "candidate_terminal_policy": "policy_hash",
+        "selector_policy": "policy_hash",
+        "evaluator_policy": "policy_hash",
+        "threshold_manifest": "threshold_manifest_hash",
+        "h28_publication_contract": "contract_hash",
+        "e28_publication_contract": "contract_hash",
+    }[name]
+
+
+def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
+    """Retarget unchanged native publication consumers to the current chain."""
+
+    implementation = _object(output / "implementation_tip.json")
+    implementation["exact_implementation_tip"] = request["exact_implementation_tip"]
+    _write_rehashed(output / "implementation_tip.json", implementation)
+
+    q_commit = _object(output / "q28_commit.json")
+    q_commit["exact_q28_sha"] = request["exact_q30_sha"]
+    _write_rehashed(output / "q28_commit.json", q_commit)
+
+    publication_values = {
+        "branch_ref": request["branch_ref"],
+        "q_root": "artifacts/m336k7/q32",
+        "f_root": "artifacts/m336k7/f32-freeze",
+        "h_root": "artifacts/m336k7/h32",
+        "e_root": "artifacts/m336k7/e32",
+        "q_subject": "M-33.6k.7 qualify exact committed freeze inputs",
+        "f_subject": "M-33.6k.7 freeze final Java execution",
+        "h_subject": "M-33.6k.7 publish sealed Java production",
+        "e_subject": "M-33.6k.7 publish independent Java evidence",
+    }
+    for name in ("h28_publication_contract", "e28_publication_contract"):
+        value = _object(output / f"{name}.json")
+        value.update(publication_values)
+        _write_rehashed(output / f"{name}.json", value)
+
+    protocol = _object(output / "commit_protocol.json")
+    protocol.update(
+        {
+            name: value
+            for name, value in publication_values.items()
+            if name == "branch_ref" or name.endswith("_subject")
+        }
+    )
+    _write_rehashed(output / "commit_protocol.json", protocol)
+
+
+def _write_rehashed(path: Path, value: dict) -> None:
+    path.write_text(
+        canonical_json(_rehash_top_level(value)) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
+def _strict_consumer(value: dict, *, hash_field: str):
+    expected_fields = frozenset(value)
+    semantic_role = value.get("contract_role")
+
+    def consume(candidate: dict):
+        return M336K7StrictArtifact.consume(
+            candidate,
+            expected_fields=expected_fields,
+            semantic_role=semantic_role,
+            hash_field=hash_field,
+        )
+
+    return consume
+
+
+def _current_consumer(
+    name: str,
+    value: dict,
+    *,
+    hash_field: str,
+    all_inputs: dict[str, dict],
+    expected_post_freeze: M336K7PostFreezeInputBundle,
+):
+    typed = {
+        "final_authorization": lambda candidate: _consume_authorization(
+            candidate, all_inputs
+        ),
+        "route_identity_bundle": M336K5RouteIdentityBundle.from_dict,
+        "resource_budget_policy": M336K7ResourceBudgetPolicy.from_dict,
+        "resource_observation": M336K7ResourceObservationReceipt.from_dict,
+        "storage_reservation": _consume_storage_reservation,
+        "resource_gate": lambda candidate: _consume_resource_gate(
+            candidate, all_inputs
+        ),
+        "capsule_binding_set": M336K7PersistentCapsuleBindingSet.from_dict,
+        "legacy_capsule_compatibility": lambda candidate: _consume_compatibility(
+            candidate, all_inputs
+        ),
+        "post_freeze_input_bundle": lambda candidate: _consume_post_freeze(
+            candidate, expected_post_freeze
+        ),
+        "python_startup_policy": M336K5PythonStartupPolicy.from_dict,
+    }
+    consumer = typed.get(name)
+    if consumer is not None:
+        return consumer
+    return _strict_consumer(value, hash_field=hash_field)
+
+
+def _consume_storage_reservation(value: dict) -> M336K7StrictArtifact:
+    storage_reservation_from_dict(value)
+    return M336K7StrictArtifact(dict(value))
+
+
+def _consume_authorization(
+    value: dict, all_inputs: dict[str, dict]
+) -> M336K5FinalAuthorization:
+    authorization = M336K5FinalAuthorization.from_dict(value)
+    authorization.verify(
+        M336K5RouteIdentityBundle.from_dict(all_inputs["route_identity_bundle"])
+    )
+    return authorization
+
+
+def _consume_resource_gate(
+    value: dict, all_inputs: dict[str, dict]
+) -> M336K7ResourceGateReceipt:
+    gate = M336K7ResourceGateReceipt.from_dict(value)
+    verify_m336k7_resource_gate_binding(
+        M336K7ResourceBudgetPolicy.from_dict(all_inputs["resource_budget_policy"]),
+        M336K7ResourceObservationReceipt.from_dict(all_inputs["resource_observation"]),
+        storage_reservation_from_dict(all_inputs["storage_reservation"]),
+        gate,
+    )
+    return gate
+
+
+def _consume_compatibility(
+    value: dict, all_inputs: dict[str, dict]
+) -> M336K7LegacyCapsuleCompatibilityReceipt:
+    compatibility = M336K7LegacyCapsuleCompatibilityReceipt.from_dict(value)
+    verify_m336k7_capsule_compatibility_binding(
+        M336K7PersistentCapsuleBindingSet.from_dict(all_inputs["capsule_binding_set"]),
+        compatibility,
+    )
+    return compatibility
+
+
+def _consume_post_freeze(
+    value: dict, expected: M336K7PostFreezeInputBundle
+) -> M336K7PostFreezeInputBundle:
+    consumed = M336K7PostFreezeInputBundle.from_dict(value)
+    if consumed != expected:
+        raise M336K2ProtocolError("M336K7 post-freeze bundle cross-binding changed")
+    return consumed
 
 
 if __name__ == "__main__":

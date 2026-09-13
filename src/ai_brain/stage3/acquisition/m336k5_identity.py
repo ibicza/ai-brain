@@ -20,6 +20,11 @@ M336K6_PROTOCOL_RUN_ID = "m336k6.final-java.outcome-a.v1"
 M336K6_ACQUISITION_RUN_ID = "m336k6.final-java.global-acquisition.v1"
 M336K6_SELECTOR_RUN_ID = "m336k6.final-java.selector.v1"
 M336K6_EVALUATOR_RUN_ID = "m336k6.final-java.evaluator.v1"
+M336K7_ROUTE_VERSION = "m336k7.candidate-isolated-java-final-route.v1"
+M336K7_PROTOCOL_RUN_ID = "m336k7.final-java.outcome-a.v1"
+M336K7_ACQUISITION_RUN_ID = "m336k7.final-java.global-acquisition.v1"
+M336K7_SELECTOR_RUN_ID = "m336k7.final-java.selector.v1"
+M336K7_EVALUATOR_RUN_ID = "m336k7.final-java.evaluator.v1"
 
 _HASH = re.compile(r"[0-9a-f]{64}")
 
@@ -109,10 +114,10 @@ class _M336K5Identity:
 class M336K5RouteVersion(_M336K5Identity):
     identity_kind: ClassVar[str] = "ROUTE_VERSION"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k[56]\.candidate-isolated-java-(?:final|disposable)-route\.v[1-9][0-9]*"
+        r"m336k[567]\.candidate-isolated-java-(?:final|disposable)-route\.v[1-9][0-9]*"
     )
     official_values: ClassVar[frozenset[str]] = frozenset(
-        {M336K5_ROUTE_VERSION, M336K6_ROUTE_VERSION}
+        {M336K5_ROUTE_VERSION, M336K6_ROUTE_VERSION, M336K7_ROUTE_VERSION}
     )
 
 
@@ -120,10 +125,10 @@ class M336K5RouteVersion(_M336K5Identity):
 class M336K5ProtocolRunId(_M336K5Identity):
     identity_kind: ClassVar[str] = "PROTOCOL_RUN_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k[56]\.(?:final-java\.outcome-a|disposable\.[a-z0-9-]+)\.v[1-9][0-9]*"
+        r"m336k[567]\.(?:final-java\.outcome-a|disposable\.[a-z0-9-]+)\.v[1-9][0-9]*"
     )
     official_values: ClassVar[frozenset[str]] = frozenset(
-        {M336K5_PROTOCOL_RUN_ID, M336K6_PROTOCOL_RUN_ID}
+        {M336K5_PROTOCOL_RUN_ID, M336K6_PROTOCOL_RUN_ID, M336K7_PROTOCOL_RUN_ID}
     )
 
 
@@ -131,10 +136,14 @@ class M336K5ProtocolRunId(_M336K5Identity):
 class M336K5AcquisitionRunId(_M336K5Identity):
     identity_kind: ClassVar[str] = "ACQUISITION_RUN_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k[56]\.(?:final-java\.global-acquisition|disposable\.[a-z0-9-]+\.acquisition)\.v[1-9][0-9]*"
+        r"m336k[567]\.(?:final-java\.global-acquisition|disposable\.[a-z0-9-]+\.acquisition)\.v[1-9][0-9]*"
     )
     official_values: ClassVar[frozenset[str]] = frozenset(
-        {M336K5_ACQUISITION_RUN_ID, M336K6_ACQUISITION_RUN_ID}
+        {
+            M336K5_ACQUISITION_RUN_ID,
+            M336K6_ACQUISITION_RUN_ID,
+            M336K7_ACQUISITION_RUN_ID,
+        }
     )
 
 
@@ -142,10 +151,10 @@ class M336K5AcquisitionRunId(_M336K5Identity):
 class M336K5SelectorRunId(_M336K5Identity):
     identity_kind: ClassVar[str] = "SELECTOR_RUN_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k[56]\.(?:final-java\.selector|disposable\.[a-z0-9-]+\.selector)\.v[1-9][0-9]*"
+        r"m336k[567]\.(?:final-java\.selector|disposable\.[a-z0-9-]+\.selector)\.v[1-9][0-9]*"
     )
     official_values: ClassVar[frozenset[str]] = frozenset(
-        {M336K5_SELECTOR_RUN_ID, M336K6_SELECTOR_RUN_ID}
+        {M336K5_SELECTOR_RUN_ID, M336K6_SELECTOR_RUN_ID, M336K7_SELECTOR_RUN_ID}
     )
 
 
@@ -153,10 +162,10 @@ class M336K5SelectorRunId(_M336K5Identity):
 class M336K5EvaluatorRunId(_M336K5Identity):
     identity_kind: ClassVar[str] = "EVALUATOR_RUN_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k[56]\.(?:final-java\.evaluator|disposable\.[a-z0-9-]+\.evaluator)\.v[1-9][0-9]*"
+        r"m336k[567]\.(?:final-java\.evaluator|disposable\.[a-z0-9-]+\.evaluator)\.v[1-9][0-9]*"
     )
     official_values: ClassVar[frozenset[str]] = frozenset(
-        {M336K5_EVALUATOR_RUN_ID, M336K6_EVALUATOR_RUN_ID}
+        {M336K5_EVALUATOR_RUN_ID, M336K6_EVALUATOR_RUN_ID, M336K7_EVALUATOR_RUN_ID}
     )
 
 
@@ -164,7 +173,7 @@ class M336K5EvaluatorRunId(_M336K5Identity):
 class M336K5RouteComponentId(_M336K5Identity):
     identity_kind: ClassVar[str] = "ROUTE_COMPONENT_ID"
     namespace: ClassVar[re.Pattern[str]] = re.compile(
-        r"m336k[56]\.route-component\.[a-z][a-z0-9-]*\.v[1-9][0-9]*"
+        r"m336k[567]\.route-component\.[a-z][a-z0-9-]*\.v[1-9][0-9]*"
     )
 
 
@@ -323,6 +332,20 @@ def build_m336k6_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityB
         acquisition_run_id=M336K5AcquisitionRunId(M336K6_ACQUISITION_RUN_ID),
         selector_run_id=M336K5SelectorRunId(M336K6_SELECTOR_RUN_ID),
         evaluator_run_id=M336K5EvaluatorRunId(M336K6_EVALUATOR_RUN_ID),
+        execution_mode=M336K5ExecutionMode("FINAL"),
+        **hashes,
+    )
+
+
+def build_m336k7_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityBundle:
+    """Build the exact M-33.6k.7 identities for the current final route."""
+
+    return M336K5RouteIdentityBundle.build(
+        route_version=M336K5RouteVersion(M336K7_ROUTE_VERSION),
+        protocol_run_id=M336K5ProtocolRunId(M336K7_PROTOCOL_RUN_ID),
+        acquisition_run_id=M336K5AcquisitionRunId(M336K7_ACQUISITION_RUN_ID),
+        selector_run_id=M336K5SelectorRunId(M336K7_SELECTOR_RUN_ID),
+        evaluator_run_id=M336K5EvaluatorRunId(M336K7_EVALUATOR_RUN_ID),
         execution_mode=M336K5ExecutionMode("FINAL"),
         **hashes,
     )
