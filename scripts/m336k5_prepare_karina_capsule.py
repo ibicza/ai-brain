@@ -145,6 +145,10 @@ def prepare_m336k5_karina_capsule(request: dict) -> dict:
                 + shlex.quote(remote_bundle.as_posix())
                 + " "
                 + shlex.quote(remote_repository.as_posix()),
+                *_repository_ref_restore_commands(
+                    remote_repository=remote_repository,
+                    remote_bundle=remote_bundle,
+                ),
                 "/usr/bin/git -C "
                 + shlex.quote(remote_repository.as_posix())
                 + " checkout --quiet --detach "
@@ -303,6 +307,39 @@ def _create_repository_bundle(*, git: Path, bundle: Path, repository: Path) -> N
     """Preserve every local ref needed by exact cross-platform quality checks."""
 
     _run((git, "bundle", "create", str(bundle), "HEAD", "--all"), repository)
+
+
+def _repository_ref_restore_commands(
+    *, remote_repository: PurePosixPath, remote_bundle: PurePosixPath
+) -> tuple[str, str]:
+    repository = shlex.quote(remote_repository.as_posix())
+    bundle = shlex.quote(remote_bundle.as_posix())
+    fetch = " ".join(
+        (
+            "/usr/bin/git",
+            "-C",
+            repository,
+            "fetch",
+            "--quiet",
+            bundle,
+            shlex.quote("+refs/heads/*:refs/heads/*"),
+            shlex.quote("+refs/remotes/origin/*:refs/remotes/origin/*"),
+            shlex.quote("+refs/tags/*:refs/tags/*"),
+        )
+    )
+    promote = "; ".join(
+        (
+            "for ref in $(/usr/bin/git -C "
+            + repository
+            + " for-each-ref --format='%(refname)' refs/remotes/origin)",
+            'do case "$ref" in */HEAD) continue ;; esac',
+            'name="${ref#refs/remotes/origin/}"',
+            "sha=$(/usr/bin/git -C " + repository + ' rev-parse "$ref^{commit}")',
+            "/usr/bin/git -C " + repository + ' update-ref "refs/heads/$name" "$sha"',
+            "done",
+        )
+    )
+    return fetch, promote
 
 
 def _remote_workspace(value: object) -> PurePosixPath:

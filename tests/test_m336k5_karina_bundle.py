@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from scripts import m336k5_prepare_karina_capsule as preparation
 
@@ -23,3 +23,17 @@ def test_karina_bundle_preserves_complete_local_ref_closure(
     assert observed == [
         ((git, "bundle", "create", str(bundle), "HEAD", "--all"), source)
     ]
+
+
+def test_karina_clone_restores_remote_tracking_refs_as_local_branches() -> None:
+    fetch, promote = preparation._repository_ref_restore_commands(
+        remote_repository=PurePosixPath("/home/worker/m336k5-run/repository"),
+        remote_bundle=PurePosixPath("/home/worker/m336k5-run/repository.bundle"),
+    )
+
+    assert "+refs/heads/*:refs/heads/*" in fetch
+    assert "+refs/remotes/origin/*:refs/remotes/origin/*" in fetch
+    assert "+refs/tags/*:refs/tags/*" in fetch
+    assert "refs/remotes/origin" in promote
+    assert "*/HEAD) continue" in promote
+    assert 'update-ref "refs/heads/$name" "$sha"' in promote
