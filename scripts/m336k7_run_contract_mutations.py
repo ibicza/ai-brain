@@ -10,15 +10,18 @@ from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k5_startup import startup_receipt_from_path
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repository", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--startup-receipt", type=Path, required=True)
     args = parser.parse_args()
     repository = args.repository.resolve(strict=True)
     output = args.output.resolve(strict=False)
+    startup = startup_receipt_from_path(args.startup_receipt.resolve(strict=True))
     if output.exists():
         raise M336K2ProtocolError("M336K7 mutation report output is stale")
     environment = dict(os.environ)
@@ -47,6 +50,7 @@ def main() -> None:
         "wrong_rejection_layer_count": 0,
         "test_process_exit_code": process.returncode,
         "test_output_bytes_hash": bytes_hash(combined),
+        "startup_receipt_hash": startup.receipt_hash,
         "status": "PASS",
     }
     receipt = {**body, "receipt_hash": content_hash(body)}
