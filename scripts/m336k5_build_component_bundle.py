@@ -6,6 +6,7 @@ import argparse
 import json
 import re
 import shutil
+from dataclasses import asdict
 from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
@@ -35,6 +36,9 @@ from ai_brain.stage3.acquisition.m336k5_request import (
     M336K5_FINAL_REQUEST_CONTRACT,
 )
 from ai_brain.stage3.acquisition.m336k5_startup import M336K5PythonStartupPolicy
+from ai_brain.stage3.acquisition.m336k6_capsule import (
+    M336K6CapsuleContentManifest,
+)
 from ai_brain.stage3.acquisition.m336k7_contracts import (
     M336K7FrozenContractCompatibilityGate,
     M336K7LegacyCapsuleCompatibilityReceipt,
@@ -44,8 +48,11 @@ from ai_brain.stage3.acquisition.m336k7_contracts import (
     M336K7ResourceGateReceipt,
     M336K7ResourceObservationReceipt,
     M336K7StrictArtifact,
+    build_m336k7_persistent_capsule_route_manifest,
+    build_m336k7_persistent_capsule_route_registry,
     storage_reservation_from_dict,
     verify_m336k7_capsule_compatibility_binding,
+    verify_m336k7_persistent_capsule_route_binding,
     verify_m336k7_resource_gate_binding,
 )
 from ai_brain.stage3.acquisition.m336k7_freeze import (
@@ -165,6 +172,7 @@ def main() -> None:
         path.write_text(canonical_json(value) + "\n", encoding="utf-8", newline="\n")
     if identity_namespace == "m336k7":
         _write_m336k7_legacy_bindings(output, request)
+        _write_m336k7_persistent_capsule_route(output)
     for name, source in (
         ("q28_readiness", request["q_readiness"]),
         ("q28_evidence_manifest", request["q_evidence_manifest"]),
@@ -374,6 +382,12 @@ def main() -> None:
             route_identity_bundle_hash=bundle.bundle_hash,
             route_registry_hash=registry.registry_hash,
             route_manifest_hash=route.manifest_hash,
+            legacy_capsule_route_registry_hash=_object(output / "route_registry.json")[
+                "registry_hash"
+            ],
+            legacy_capsule_route_manifest_hash=_object(output / "route_manifest.json")[
+                "manifest_hash"
+            ],
             resource_budget_policy_hash=resource_budget["policy_hash"],
             resource_observation_hash=_object(output / "resource_observation.json")[
                 "observation_hash"
@@ -438,6 +452,8 @@ def main() -> None:
                     "route_identity_bundle",
                     "typed_route_registry",
                     "typed_route_manifest",
+                    "route_registry",
+                    "route_manifest",
                     "resource_budget_policy",
                     "resource_observation",
                     "storage_reservation",
@@ -445,6 +461,7 @@ def main() -> None:
                     "capsule_binding_set",
                     "legacy_capsule_compatibility",
                     "capsule_liveness",
+                    "capsule_content_manifest",
                     "python_startup_policy",
                     "executable_dependency_manifest",
                     "windows_jdk_identity",
@@ -571,6 +588,8 @@ def _artifact_hash_field(name: str) -> str:
         "route_identity_bundle": "bundle_hash",
         "typed_route_registry": "registry_hash",
         "typed_route_manifest": "manifest_hash",
+        "route_registry": "registry_hash",
+        "route_manifest": "manifest_hash",
         "resource_budget_policy": "policy_hash",
         "resource_observation": "observation_hash",
         "storage_reservation": "receipt_hash",
@@ -578,6 +597,7 @@ def _artifact_hash_field(name: str) -> str:
         "capsule_binding_set": "binding_set_hash",
         "legacy_capsule_compatibility": "receipt_hash",
         "capsule_liveness": "receipt_hash",
+        "capsule_content_manifest": "manifest_hash",
         "python_startup_policy": "policy_hash",
         "executable_dependency_manifest": "manifest_hash",
         "windows_jdk_identity": "receipt_hash",
@@ -633,6 +653,22 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
     _write_rehashed(output / "commit_protocol.json", protocol)
 
 
+def _write_m336k7_persistent_capsule_route(output: Path) -> None:
+    """Freeze the legacy remote route against preserved capsule source bytes."""
+
+    content = _object(output / "capsule_content_manifest.json")
+    registry = build_m336k7_persistent_capsule_route_registry(content)
+    route = build_m336k7_persistent_capsule_route_manifest(
+        _object(output / "route_manifest.json"), registry
+    )
+    (output / "route_registry.json").write_text(
+        canonical_json(registry) + "\n", encoding="utf-8", newline="\n"
+    )
+    (output / "route_manifest.json").write_text(
+        canonical_json(route) + "\n", encoding="utf-8", newline="\n"
+    )
+
+
 def _write_rehashed(path: Path, value: dict) -> None:
     path.write_text(
         canonical_json(_rehash_top_level(value)) + "\n",
@@ -669,6 +705,12 @@ def _current_consumer(
             candidate, all_inputs
         ),
         "route_identity_bundle": M336K5RouteIdentityBundle.from_dict,
+        "route_registry": lambda candidate: _consume_capsule_route_registry(
+            candidate, all_inputs
+        ),
+        "route_manifest": lambda candidate: _consume_capsule_route_manifest(
+            candidate, all_inputs
+        ),
         "resource_budget_policy": M336K7ResourceBudgetPolicy.from_dict,
         "resource_observation": M336K7ResourceObservationReceipt.from_dict,
         "storage_reservation": _consume_storage_reservation,
@@ -676,6 +718,7 @@ def _current_consumer(
             candidate, all_inputs
         ),
         "capsule_binding_set": M336K7PersistentCapsuleBindingSet.from_dict,
+        "capsule_content_manifest": M336K6CapsuleContentManifest.from_dict,
         "legacy_capsule_compatibility": lambda candidate: _consume_compatibility(
             candidate, all_inputs
         ),
@@ -688,6 +731,24 @@ def _current_consumer(
     if consumer is not None:
         return consumer
     return _strict_consumer(value, hash_field=hash_field)
+
+
+def _consume_capsule_route_registry(value: dict, all_inputs: dict):
+    registry, _route = verify_m336k7_persistent_capsule_route_binding(
+        content_value=all_inputs["capsule_content_manifest"],
+        registry_value=value,
+        route_value=all_inputs["route_manifest"],
+    )
+    return M336K7StrictArtifact(asdict(registry))
+
+
+def _consume_capsule_route_manifest(value: dict, all_inputs: dict):
+    _registry, route = verify_m336k7_persistent_capsule_route_binding(
+        content_value=all_inputs["capsule_content_manifest"],
+        registry_value=all_inputs["route_registry"],
+        route_value=value,
+    )
+    return M336K7StrictArtifact(asdict(route))
 
 
 def _consume_storage_reservation(value: dict) -> M336K7StrictArtifact:

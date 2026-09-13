@@ -138,7 +138,7 @@
     "postFreezeInputBundle": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schema_version", "contract_role", "freeze_manifest_contract_hash", "final_authorization_hash", "route_identity_bundle_hash", "route_registry_hash", "route_manifest_hash", "resource_budget_policy_hash", "resource_observation_hash", "storage_reservation_receipt_hash", "resource_gate_receipt_hash", "capsule_binding_set_hash", "legacy_compatibility_receipt_hash", "liveness_receipt_hash", "startup_policy_hash", "executable_dependency_manifest_hash", "windows_jdk_identity_hash", "karina_jdk_identity_hash", "karina_host_identity_hash", "candidate_pool_hash", "acquisition_policy_hash", "archive_policy_hash", "terminal_policy_hash", "selector_policy_hash", "evaluator_policy_hash", "threshold_manifest_hash", "publication_contract_hash", "bundle_hash"],
+      "required": ["schema_version", "contract_role", "freeze_manifest_contract_hash", "final_authorization_hash", "route_identity_bundle_hash", "route_registry_hash", "route_manifest_hash", "legacy_capsule_route_registry_hash", "legacy_capsule_route_manifest_hash", "resource_budget_policy_hash", "resource_observation_hash", "storage_reservation_receipt_hash", "resource_gate_receipt_hash", "capsule_binding_set_hash", "legacy_compatibility_receipt_hash", "liveness_receipt_hash", "startup_policy_hash", "executable_dependency_manifest_hash", "windows_jdk_identity_hash", "karina_jdk_identity_hash", "karina_host_identity_hash", "candidate_pool_hash", "acquisition_policy_hash", "archive_policy_hash", "terminal_policy_hash", "selector_policy_hash", "evaluator_policy_hash", "threshold_manifest_hash", "publication_contract_hash", "bundle_hash"],
       "properties": {
         "schema_version": { "const": 1 },
         "contract_role": { "const": "M336K7_POST_FREEZE_INPUT_BUNDLE" },
@@ -147,6 +147,8 @@
         "route_identity_bundle_hash": { "$ref": "#/$defs/sha256" },
         "route_registry_hash": { "$ref": "#/$defs/sha256" },
         "route_manifest_hash": { "$ref": "#/$defs/sha256" },
+        "legacy_capsule_route_registry_hash": { "$ref": "#/$defs/sha256" },
+        "legacy_capsule_route_manifest_hash": { "$ref": "#/$defs/sha256" },
         "resource_budget_policy_hash": { "$ref": "#/$defs/sha256" },
         "resource_observation_hash": { "$ref": "#/$defs/sha256" },
         "storage_reservation_receipt_hash": { "$ref": "#/$defs/sha256" },

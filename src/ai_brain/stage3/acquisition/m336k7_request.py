@@ -72,6 +72,7 @@ from ai_brain.stage3.acquisition.m336k7_contracts import (
     M336K7StorageReservationReleaseReceipt,
     storage_reservation_from_dict,
     verify_m336k7_capsule_compatibility_binding,
+    verify_m336k7_persistent_capsule_route_binding,
     verify_m336k7_resource_gate_binding,
 )
 from ai_brain.stage3.acquisition.m336k7_freeze import (
@@ -535,6 +536,12 @@ def _verify_post_freeze_bundle(
         "route_manifest_hash": _component_hash(
             root, components, "typed_route_manifest", "manifest_hash"
         ),
+        "legacy_capsule_route_registry_hash": _component_hash(
+            root, components, "route_registry", "registry_hash"
+        ),
+        "legacy_capsule_route_manifest_hash": _component_hash(
+            root, components, "route_manifest", "manifest_hash"
+        ),
         "resource_budget_policy_hash": policy.policy_hash,
         "resource_observation_hash": observation.observation_hash,
         "storage_reservation_receipt_hash": reservation_hash,
@@ -801,6 +808,11 @@ def _verify_capsule_bindings(
     lifecycle = _component_object(root, components, "capsule_lifecycle_policy")
     preservation = _component_object(root, components, "preservation_set")
     cutoff = _component_object(root, components, "cleanup_cutoff_state")
+    verify_m336k7_persistent_capsule_route_binding(
+        content_value=content,
+        registry_value=_component_object(root, components, "route_registry"),
+        route_value=_component_object(root, components, "route_manifest"),
+    )
     if (
         binding.implementation_tip != private.implementation_sha
         or binding.capsule_identity_hash != private.capsule_identity_hash

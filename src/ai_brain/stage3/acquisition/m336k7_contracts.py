@@ -15,8 +15,18 @@ from typing import Any, ClassVar, Self
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k2_registry import (
+    M336K2_ROUTE_COMPONENTS,
+    M336K2RouteComponent,
+    M336K2RouteManifest,
+    M336K2RouteRegistry,
+    build_m336k2_route_manifest,
+)
 from ai_brain.stage3.acquisition.m336k5_resources import (
     M336K5StorageReservationReceipt,
+)
+from ai_brain.stage3.acquisition.m336k6_capsule import (
+    M336K6CapsuleContentManifest,
 )
 from ai_brain.stage3.acquisition.m336k6_resources import M336K6ResourceSample
 
@@ -706,6 +716,8 @@ class M336K7PostFreezeInputBundle:
     route_identity_bundle_hash: str
     route_registry_hash: str
     route_manifest_hash: str
+    legacy_capsule_route_registry_hash: str
+    legacy_capsule_route_manifest_hash: str
     resource_budget_policy_hash: str
     resource_observation_hash: str
     storage_reservation_receipt_hash: str
@@ -767,6 +779,102 @@ class M336K7PostFreezeInputBundle:
         result = cls(**strict)
         result.verify()
         return result
+
+
+def build_m336k7_persistent_capsule_route_registry(
+    content_value: dict[str, Any],
+) -> M336K2RouteRegistry:
+    """Derive legacy remote route authority from frozen capsule source bytes."""
+
+    manifest = M336K6CapsuleContentManifest.from_dict(content_value)
+    entries = {item.relative_path: item for item in manifest.entries}
+    components = []
+    for role, relative_path in M336K2_ROUTE_COMPONENTS:
+        entry = entries.get(relative_path)
+        if entry is None:
+            raise M336K2ProtocolError(
+                "M336K7 persistent capsule route component is absent"
+            )
+        body = {
+            "role": role,
+            "repository_path": relative_path,
+            "source_bytes_hash": entry.bytes_hash,
+            "source_byte_count": entry.byte_count,
+        }
+        components.append(
+            M336K2RouteComponent(**body, component_hash=content_hash(body))
+        )
+    roles = {item.role for item in components}
+    body = {
+        "schema_version": 1,
+        "route_version": "m336k2.candidate-isolated-java-final-route.v1",
+        "components": tuple(components),
+        "native_h28_publisher_registered": "H28_PUBLISHER" in roles,
+        "native_e28_publisher_registered": "E28_PUBLISHER" in roles,
+        "final_commit_verifier_registered": "COMMIT_VERIFIER" in roles,
+        "missing_component_count": 0,
+    }
+    result = M336K2RouteRegistry(**body, registry_hash=content_hash(body))
+    if not (
+        result.native_h28_publisher_registered
+        and result.native_e28_publisher_registered
+        and result.final_commit_verifier_registered
+    ):
+        raise M336K2ProtocolError(
+            "M336K7 persistent capsule route registry is incomplete"
+        )
+    return result
+
+
+def build_m336k7_persistent_capsule_route_manifest(
+    route_value: dict[str, Any],
+    registry: M336K2RouteRegistry,
+) -> M336K2RouteManifest:
+    """Retain run-specific bindings while using capsule-owned route source."""
+
+    strict = _strict_fields(
+        route_value,
+        _field_names(M336K2RouteManifest),
+        "persistent capsule route manifest",
+    )
+    route = M336K2RouteManifest(**strict)
+    body = asdict(route)
+    claimed = body.pop("manifest_hash")
+    if content_hash(body) != claimed:
+        raise M336K2ProtocolError(
+            "M336K7 persistent capsule route manifest hash changed"
+        )
+    result = build_m336k2_route_manifest(
+        registry=registry,
+        executable_dependency_manifest_hash=route.executable_dependency_manifest_hash,
+        python_environment_manifest_hash=route.python_environment_manifest_hash,
+        command_renderer_hash=route.command_renderer_hash,
+        minimal_environment_policy_hash=route.minimal_environment_policy_hash,
+    )
+    return result
+
+
+def verify_m336k7_persistent_capsule_route_binding(
+    *,
+    content_value: dict[str, Any],
+    registry_value: dict[str, Any],
+    route_value: dict[str, Any],
+) -> tuple[M336K2RouteRegistry, M336K2RouteManifest]:
+    """Reject a committed legacy route that differs from preserved capsule bytes."""
+
+    expected_registry = build_m336k7_persistent_capsule_route_registry(content_value)
+    if registry_value != asdict(expected_registry):
+        raise M336K2ProtocolError(
+            "M336K7 frozen route registry differs from persistent capsule"
+        )
+    expected_route = build_m336k7_persistent_capsule_route_manifest(
+        route_value, expected_registry
+    )
+    if route_value != asdict(expected_route):
+        raise M336K2ProtocolError(
+            "M336K7 frozen route manifest differs from persistent capsule"
+        )
+    return expected_registry, expected_route
 
 
 @dataclass(frozen=True)

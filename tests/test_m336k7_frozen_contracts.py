@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import asdict, fields
 from pathlib import Path
 
@@ -7,8 +8,16 @@ import pytest
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k2_registry import (
+    build_m336k2_route_manifest,
+    build_m336k2_route_registry,
+)
 from ai_brain.stage3.acquisition.m336k5_resources import (
     M336K5StorageReservationReceipt,
+)
+from ai_brain.stage3.acquisition.m336k6_capsule import (
+    M336K6CapsuleContentEntry,
+    M336K6CapsuleContentManifest,
 )
 from ai_brain.stage3.acquisition.m336k7_contracts import (
     M336K7FrozenContractCompatibilityGate,
@@ -20,10 +29,13 @@ from ai_brain.stage3.acquisition.m336k7_contracts import (
     M336K7ResourceObservationReceipt,
     M336K7StorageReservationReleaseReceipt,
     M336K7StrictArtifact,
+    build_m336k7_persistent_capsule_route_manifest,
+    build_m336k7_persistent_capsule_route_registry,
     forbid_m336k7_post_freeze_mutation,
     require_m336k7_frozen_bytes,
     storage_reservation_from_dict,
     verify_m336k7_capsule_compatibility_binding,
+    verify_m336k7_persistent_capsule_route_binding,
     verify_m336k7_resource_gate_binding,
 )
 from ai_brain.stage3.acquisition.m336k7_freeze import (
@@ -487,3 +499,61 @@ def test_committed_f32_attestation_distinguishes_git_and_content_hashes() -> Non
         **body, attestation_hash=content_hash(body)
     )
     receipt.verify()
+
+
+def test_persistent_capsule_route_is_derived_from_frozen_source_bytes() -> None:
+    repository = Path(__file__).parents[1]
+    current = build_m336k2_route_registry(repository)
+    entries = tuple(
+        M336K6CapsuleContentEntry(
+            relative_path=item.repository_path,
+            byte_count=item.source_byte_count,
+            bytes_hash=item.source_bytes_hash,
+        )
+        for item in sorted(
+            current.components, key=lambda item: item.repository_path.encode("utf-8")
+        )
+    )
+    manifest_body = {
+        "schema_version": 1,
+        "contract_role": "M336K6_CAPSULE_CONTENT_MANIFEST",
+        "execution_strategy": "PROTECTED_DETACHED_GIT_WORKTREE",
+        "implementation_sha": "a" * 40,
+        "entries": entries,
+        "entry_count": len(entries),
+        "byte_count": sum(item.byte_count for item in entries),
+        "source_tree_hash": content_hash(tuple(asdict(item) for item in entries)),
+        "uv_lock_hash": H,
+        "pyproject_toml_hash": H,
+    }
+    manifest = M336K6CapsuleContentManifest(
+        **manifest_body, manifest_hash=content_hash(manifest_body)
+    )
+    manifest.verify()
+    manifest_value = json.loads(canonical_json(manifest))
+    derived = build_m336k7_persistent_capsule_route_registry(manifest_value)
+    assert derived == current
+
+    template = build_m336k2_route_manifest(
+        registry=current,
+        executable_dependency_manifest_hash=H,
+        python_environment_manifest_hash=H,
+        command_renderer_hash=H,
+        minimal_environment_policy_hash=H,
+    )
+    route = build_m336k7_persistent_capsule_route_manifest(asdict(template), derived)
+    verify_m336k7_persistent_capsule_route_binding(
+        content_value=manifest_value,
+        registry_value=asdict(derived),
+        route_value=asdict(route),
+    )
+
+    changed_registry = asdict(derived)
+    changed_registry["registry_hash"] = H2
+    _reject(
+        lambda: verify_m336k7_persistent_capsule_route_binding(
+            content_value=manifest_value,
+            registry_value=changed_registry,
+            route_value=asdict(route),
+        )
+    )
