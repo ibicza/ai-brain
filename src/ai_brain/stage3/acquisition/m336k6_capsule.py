@@ -22,6 +22,7 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
 )
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_startup_policy,
+    startup_receipt_from_path,
 )
 
 M336K6_CAPSULE_STRATEGY = "PROTECTED_DETACHED_GIT_WORKTREE"
@@ -329,6 +330,7 @@ class M336K6CapsuleLivenessReceipt:
     capsule_identity_hash: str
     content_manifest_hash: str
     lifecycle_policy_hash: str
+    startup_receipt_hash: str
     legacy_public_receipt_hash: str
     verified_file_count: int
     missing_file_count: int
@@ -398,6 +400,7 @@ def verify_m336k6_persistent_capsule(
     capsule_path: Path,
     *,
     phase: str,
+    startup_receipt_path: Path,
     execution_verifier: Callable[
         [Path], tuple[KarinaPublicExecutionCapsuleReceipt, Any, Any, Any]
     ] = verify_execution_capsule,
@@ -408,6 +411,12 @@ def verify_m336k6_persistent_capsule(
         raise M336K2ProtocolError("M336K6 liveness phase is invalid")
     value = _object(capsule_path.resolve(strict=True))
     capsule = M336K6PrivateExecutionCapsule.from_dict(value)
+    startup = startup_receipt_from_path(startup_receipt_path)
+    if (
+        startup.startup_policy_hash != capsule.startup_policy_hash
+        or startup.project_source_identity != capsule.project_source_identity
+    ):
+        raise M336K2ProtocolError("M336K6 liveness startup binding changed")
     verify_m336k6_required_paths(capsule)
     root = Path(capsule.capsule_root).resolve(strict=True)
     source = Path(capsule.source_root).resolve(strict=True)
@@ -491,6 +500,7 @@ def verify_m336k6_persistent_capsule(
         "capsule_identity_hash": capsule.capsule_identity_hash,
         "content_manifest_hash": manifest.manifest_hash,
         "lifecycle_policy_hash": lifecycle.policy_hash,
+        "startup_receipt_hash": startup.receipt_hash,
         "legacy_public_receipt_hash": receipt.receipt_hash,
         "verified_file_count": len(manifest.entries),
         "missing_file_count": missing,

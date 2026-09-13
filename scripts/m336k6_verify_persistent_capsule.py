@@ -16,9 +16,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--capsule", type=Path, required=True)
     parser.add_argument("--phase", required=True)
+    parser.add_argument("--startup-receipt", type=Path, required=True)
     args = parser.parse_args()
     receipt = verify_m336k6_persistent_capsule(
-        args.capsule.resolve(strict=True), phase=args.phase
+        args.capsule.resolve(strict=True),
+        phase=args.phase,
+        startup_receipt_path=args.startup_receipt.resolve(strict=True),
     )
     print(canonical_json(asdict(receipt)))
 
