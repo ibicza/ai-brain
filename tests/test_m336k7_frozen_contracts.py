@@ -8,6 +8,11 @@ import pytest
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k2_publication import (
+    _e_source_files,
+    _h_source_files,
+    build_m336k2_publication_contract,
+)
 from ai_brain.stage3.acquisition.m336k2_registry import (
     build_m336k2_route_manifest,
     build_m336k2_route_registry,
@@ -44,6 +49,18 @@ from ai_brain.stage3.acquisition.m336k7_freeze import (
 
 H = "1" * 64
 H2 = "2" * 64
+
+
+def test_m336k7_publication_requires_typed_identity_observation() -> None:
+    contract = build_m336k2_publication_contract(
+        q_root="artifacts/m336k7/q32",
+        f_root="artifacts/m336k7/f32-freeze",
+        h_root="artifacts/m336k7/h32",
+        e_root="artifacts/m336k7/e32",
+    )
+
+    assert "route_identity_observation.json" in _h_source_files(contract)
+    assert "route_identity_observation.json" in _e_source_files(contract)
 
 
 def _policy() -> M336K7ResourceBudgetPolicy:
