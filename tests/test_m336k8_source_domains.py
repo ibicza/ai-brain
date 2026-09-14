@@ -47,7 +47,10 @@ from ai_brain.stage3.acquisition.m336k8_mutations import (
     _require_semantic_gate_rejection,
     run_m336k8_mutation_case,
 )
-from ai_brain.stage3.acquisition.m336k8_request import M336K8FinalRouteRequestV4
+from ai_brain.stage3.acquisition.m336k8_request import (
+    M336K8FinalRouteRequestV4,
+    build_m336k8_final_route_request,
+)
 
 H = "1" * 64
 H2 = "2" * 64
@@ -294,6 +297,32 @@ def test_m336k8_current_validator_has_no_phase_defaults_or_identity_equality() -
     assert _source_static_counts((request_source,)) == (0, 0, 0)
     assert "__dataclass_fields__" not in request_source.read_text(encoding="utf-8")
     assert "ROLE" not in {field.name for field in fields(M336K8FinalRouteRequestV4)}
+
+
+def test_m336k8_v4_builder_accepts_phase_neutral_post_freeze_field() -> None:
+    values: dict[str, object] = {}
+    generated = {
+        "schema_version",
+        "contract_role",
+        "builder_identity_hash",
+        "request_hash",
+    }
+    mapping_fields = {"final_destinations", "karina", "executable_handles"}
+    for field in fields(M336K8FinalRouteRequestV4):
+        if field.name in generated:
+            continue
+        if field.name == "purpose":
+            values[field.name] = "DISPOSABLE"
+        elif field.name in {"exact_implementation_tip", "exact_freeze_sha"}:
+            values[field.name] = "a" * 40
+        elif field.name in mapping_fields:
+            values[field.name] = {}
+        else:
+            values[field.name] = "/frozen/component"
+
+    request = build_m336k8_final_route_request(**values)
+
+    assert request.post_freeze_input_bundle == "/frozen/component"
 
 
 def test_m336k8_gate_executes_semantic_verifier() -> None:

@@ -202,7 +202,7 @@ class M336K8FinalRouteRequestV4:
             or not _is_sha(self.exact_implementation_tip)
             or not _is_sha(self.exact_freeze_sha)
             or any(
-                token in name.casefold()
+                f"_{token}_" in f"_{name.casefold()}_"
                 for name in field_names
                 for token in phase_tokens
             )
