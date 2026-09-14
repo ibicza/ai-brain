@@ -78,9 +78,6 @@ from ai_brain.stage3.acquisition.m336k4_freeze import (
     M336K4FreezeManifest,
 )
 from ai_brain.stage3.acquisition.m336k4_identity import M336K4RouteIdentityBundle
-from ai_brain.stage3.acquisition.m336k5_authorization import (
-    M336K5FinalAuthorization,
-)
 from ai_brain.stage3.acquisition.m336k5_freeze import (
     M336K5CommittedFreezeAttestation,
     M336K5FreezeManifest,
@@ -100,6 +97,9 @@ from ai_brain.stage3.acquisition.m336k7_freeze import (
 from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K8CommittedFreezeAttestation,
     M336K8FreezeManifest,
+)
+from ai_brain.stage3.acquisition.m336k9_authorization import (
+    m336k_current_final_authorization_from_dict,
 )
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
@@ -1530,7 +1530,7 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
         bundle = M336K5RouteIdentityBundle.from_dict(
             _object(Path(request["route_identity_bundle"]).resolve(strict=True))
         )
-        authorization = M336K5FinalAuthorization.from_dict(
+        authorization = m336k_current_final_authorization_from_dict(
             _object(Path(request["final_authorization"]).resolve(strict=True))
         )
         authorization.verify(bundle)
@@ -1850,7 +1850,7 @@ def _attestation(
 def _authorization(request: dict):
     value = _object(Path(request["final_authorization"]).resolve(strict=True))
     if value.get("contract_role") == "M336K5_TYPED_FINAL_AUTHORIZATION_V2":
-        return M336K5FinalAuthorization.from_dict(value)
+        return m336k_current_final_authorization_from_dict(value)
     if value.get("contract_role") == "M336K4_TYPED_FINAL_AUTHORIZATION_V2":
         return M336K4FinalAuthorization.from_dict(value)
     return authorization_from_dict(value)

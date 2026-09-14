@@ -26,9 +26,6 @@ from ai_brain.stage3.acquisition.m336k2_publication import (
     publication_contract_from_dict,
     verify_m336k2_commit_protocol,
 )
-from ai_brain.stage3.acquisition.m336k5_authorization import (
-    M336K5FinalAuthorization,
-)
 from ai_brain.stage3.acquisition.m336k5_cleanup import (
     write_m336k5_project_generated_marker,
 )
@@ -86,6 +83,9 @@ from ai_brain.stage3.acquisition.m336k8_freeze import (
 from ai_brain.stage3.acquisition.m336k8_request import (
     build_m336k8_final_route_request,
     write_m336k8_final_route_request,
+)
+from ai_brain.stage3.acquisition.m336k9_authorization import (
+    m336k_current_final_authorization_from_dict,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfileStatus,
@@ -1445,7 +1445,7 @@ def _identity_observations(
     )
     verified += 1
     private = Path(final_request.private_root)
-    authorization = M336K5FinalAuthorization.from_dict(
+    authorization = m336k_current_final_authorization_from_dict(
         _object(Path(final_request.final_authorization))
     )
     freeze = _load_freeze(Path(final_request.freeze_manifest))

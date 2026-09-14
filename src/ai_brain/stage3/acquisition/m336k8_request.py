@@ -77,7 +77,9 @@ from ai_brain.stage3.acquisition.m336k9_admission import (
     run_m336k_official_profile_coverage_gate,
     verify_m336k_controller_admission,
 )
-from ai_brain.stage3.acquisition.m336k9_authorization import M336K9FinalAuthorization
+from ai_brain.stage3.acquisition.m336k9_authorization import (
+    m336k_current_final_authorization_from_dict,
+)
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfile,
     M336KOfficialRouteProfileRegistry,
@@ -366,11 +368,7 @@ def validate_m336k8_final_invocation(
     authorization_value = _object(
         Path(request.final_authorization).resolve(strict=True)
     )
-    authorization = (
-        M336K9FinalAuthorization.from_dict(authorization_value)
-        if "official_profile_id" in authorization_value
-        else M336K5FinalAuthorization.from_dict(authorization_value)
-    )
+    authorization = m336k_current_final_authorization_from_dict(authorization_value)
     authorization.verify(bundle)
     post = M336K8PostFreezeInputBundleV2.from_dict(
         _object(Path(request.post_freeze_input_bundle).resolve(strict=True))
@@ -1055,7 +1053,7 @@ def _compatibility_artifacts(
         ),
         "legacy_controller_alias_receipt": M336K8LegacyControllerAliasReceipt.from_dict,
         "route_identity_bundle": M336K5RouteIdentityBundle.from_dict,
-        "final_authorization": M336K5FinalAuthorization.from_dict,
+        "final_authorization": m336k_current_final_authorization_from_dict,
         "post_freeze_input_bundle": M336K8PostFreezeInputBundleV2.from_dict,
         "freeze_assembly_plan": M336K8FreezeAssemblyPlan.from_dict,
         "freeze_assembly_receipt": M336K8FreezeAssemblyReceipt.from_dict,
@@ -1427,11 +1425,7 @@ def _verified_object(path: Path, hash_field: str) -> dict[str, Any]:
 
 def _authorization_branch_ref(request: M336K8FinalRouteRequestV4) -> str:
     value = _object(Path(request.final_authorization))
-    authorization = (
-        M336K9FinalAuthorization.from_dict(value)
-        if "official_profile_id" in value
-        else M336K5FinalAuthorization.from_dict(value)
-    )
+    authorization = m336k_current_final_authorization_from_dict(value)
     return authorization.branch_ref
 
 

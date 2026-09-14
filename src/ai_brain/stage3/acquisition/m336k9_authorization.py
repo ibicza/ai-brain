@@ -99,6 +99,16 @@ class M336K9FinalAuthorization(M336K5FinalAuthorization):
         return result
 
 
+def m336k_current_final_authorization_from_dict(
+    value: dict[str, Any],
+) -> M336K5FinalAuthorization:
+    """Read both historical K5 authorization and profile-bound K9 authority."""
+
+    if "official_profile_id" in value:
+        return M336K9FinalAuthorization.from_dict(value)
+    return M336K5FinalAuthorization.from_dict(value)
+
+
 def build_m336k9_final_authorization(
     *,
     bundle: M336K5RouteIdentityBundle,

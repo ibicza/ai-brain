@@ -32,6 +32,7 @@ from ai_brain.stage3.acquisition.m336k9_admission import (
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     M336K9FinalAuthorization,
     build_m336k9_final_authorization,
+    m336k_current_final_authorization_from_dict,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfile,
@@ -535,6 +536,17 @@ def test_m336k9_rehearsal_profile_is_admitted_only_as_disposable() -> None:
     assert receipt.purpose == "DISPOSABLE"
     assert receipt.profile_status == "REHEARSAL_ONLY"
     assert receipt.side_effect_count == 0
+
+
+def test_m336k9_current_authorization_consumer_roundtrips_profile_fields() -> None:
+    _registry, _profile, _bundle, authorization, _freeze, _purpose = _valid(
+        "m336k8-final-v2"
+    )
+    parsed = m336k_current_final_authorization_from_dict(
+        authorization.canonical_object()
+    )
+    assert parsed == authorization
+    assert isinstance(parsed, M336K9FinalAuthorization)
 
 
 def test_m336k9_official_admission_rehearsal_uses_final_pool_for_gate() -> None:
