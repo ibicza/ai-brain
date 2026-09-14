@@ -97,6 +97,7 @@ from ai_brain.stage3.acquisition.m336k7_freeze import (
 from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K8CommittedFreezeAttestation,
     M336K8FreezeManifest,
+    M336K9CommittedFreezeAttestation,
 )
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     m336k_current_final_authorization_from_dict,
@@ -1804,7 +1805,10 @@ def _freeze(
     | M336K8FreezeManifest
 ):
     value = _object(path)
-    if value.get("contract_role") == "M336K8_SOURCE_DOMAIN_BOUND_FREEZE_V1":
+    if value.get("contract_role") in {
+        M336K8FreezeManifest.ROLE,
+        M336K8FreezeManifest.ROLE_V2,
+    }:
         return M336K8FreezeManifest.from_dict(value)
     if value.get("contract_role") == "M336K4_F29_TYPED_FREEZE_V2":
         return M336K4FreezeManifest.from_dict(value)
@@ -1831,9 +1835,12 @@ def _attestation(
     | M336K5CommittedFreezeAttestation
     | M336K7CommittedFreezeAttestation
     | M336K8CommittedFreezeAttestation
+    | M336K9CommittedFreezeAttestation
 ):
     value = _object(Path(request["f28_attestation"]).resolve(strict=True))
-    if value.get("contract_role") == "M336K8_COMMITTED_FREEZE_ATTESTATION":
+    if value.get("contract_role") == M336K9CommittedFreezeAttestation.ROLE:
+        return M336K9CommittedFreezeAttestation.from_dict(value)
+    if value.get("contract_role") == M336K8CommittedFreezeAttestation.ROLE:
         return M336K8CommittedFreezeAttestation.from_dict(value)
     if value.get("contract_role") == "M336K7_COMMITTED_F32_ATTESTATION":
         return M336K7CommittedFreezeAttestation.from_dict(value)

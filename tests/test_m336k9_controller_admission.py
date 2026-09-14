@@ -9,7 +9,14 @@ from typing import Any
 import pytest
 
 from ai_brain.stage2.facts.canonical import content_hash
-from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k2_protocol import (
+    M336K2ProtocolError,
+    verify_complete_freeze,
+)
+from ai_brain.stage3.acquisition.m336k2_stage import (
+    _attestation as _stage_attestation,
+)
+from ai_brain.stage3.acquisition.m336k2_stage import _freeze as _stage_freeze
 from ai_brain.stage3.acquisition.m336k5_controller import (
     run_m336k5_final_controller,
 )
@@ -22,6 +29,10 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5RouteVersion,
     M336K5SelectorRunId,
     build_m336k_identity_bundle_for_profile,
+)
+from ai_brain.stage3.acquisition.m336k8_freeze import (
+    M336K8FreezeManifest,
+    M336K9CommittedFreezeAttestation,
 )
 from ai_brain.stage3.acquisition.m336k9_admission import (
     M336K9_ADMISSION_MUTATION_CASES,
@@ -254,6 +265,107 @@ def _controller(
 def _rehash_freeze(freeze: _Freeze, **changes: Any) -> _Freeze:
     temporary = replace(freeze, **changes, manifest_hash="0" * 64)
     return replace(temporary, manifest_hash=content_hash(temporary._body()))
+
+
+def test_m336k9_stage_routes_v2_freeze_to_current_verifier(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    value = {
+        "schema_version": 1,
+        "contract_role": M336K8FreezeManifest.ROLE_V2,
+        "implementation_tip": "1" * 40,
+        "exact_qualification_sha": "2" * 40,
+        "exact_freeze_sha": "3" * 40,
+        "committed_freeze_tree": "4" * 40,
+        **{
+            name: content_hash(name)
+            for name in (
+                "readiness_hash",
+                "authorization_hash",
+                "route_hash",
+                "route_identity_bundle_hash",
+                "canonical_request_builder_hash",
+                "post_freeze_input_bundle_hash",
+                "source_identity_receipt_hash",
+                "controller_startup_binding_hash",
+                "persistent_capsule_source_binding_hash",
+                "bridge_surface_manifest_hash",
+                "source_domain_compatibility_receipt_hash",
+                "freeze_assembly_plan_hash",
+                "freeze_assembly_receipt_hash",
+                "compatibility_gate_v2_hash",
+                "official_profile_hash",
+                "official_profile_registry_hash",
+                "profile_coverage_gate_hash",
+                "controller_admission_contract_hash",
+            )
+        },
+        "components": [],
+        "self_reference_safe_exclusions": [],
+        "prospective_freeze_tree_hash": content_hash("prospective"),
+        "manifest_hash": content_hash("manifest"),
+        "official_profile_id": "m336k8-final-v2",
+    }
+    path = tmp_path / "freeze_manifest.json"
+    path.write_text(json.dumps(value), encoding="utf-8")
+
+    freeze = _stage_freeze(path)
+    observed: list[tuple[Path, bool]] = []
+    monkeypatch.setattr(
+        M336K8FreezeManifest,
+        "verify",
+        lambda self, root, *, allow_prospective=False: observed.append(
+            (root, allow_prospective)
+        ),
+    )
+
+    verify_complete_freeze(tmp_path, freeze, allow_prospective_f28=True)
+
+    assert isinstance(freeze, M336K8FreezeManifest)
+    assert freeze.contract_role == M336K8FreezeManifest.ROLE_V2
+    assert observed == [(tmp_path.resolve(), True)]
+
+
+def test_m336k9_stage_loads_v2_freeze_attestation(tmp_path: Path) -> None:
+    body = {
+        "schema_version": 1,
+        "contract_role": M336K9CommittedFreezeAttestation.ROLE,
+        "exact_freeze_sha": "1" * 40,
+        "exact_qualification_parent": "2" * 40,
+        "committed_tree_hash": "3" * 40,
+        "prospective_freeze_tree_hash": content_hash("prospective"),
+        "prospective_tree_matches": True,
+        **{
+            name: content_hash(name)
+            for name in (
+                "route_identity_bundle_hash",
+                "authorization_hash",
+                "route_hash",
+                "post_freeze_input_bundle_hash",
+                "source_identity_receipt_hash",
+                "freeze_assembly_plan_hash",
+                "producer_origin_map_hash",
+                "official_profile_hash",
+                "official_profile_registry_hash",
+                "profile_coverage_gate_hash",
+                "controller_admission_contract_hash",
+            )
+        },
+        "implementation_change_count": 0,
+        "merge_count": 0,
+        "head_upstream_remote_equal": True,
+        "worktree_clean": True,
+        "status": "PASS",
+        "official_profile_id": "m336k8-final-v2",
+    }
+    value = {**body, "attestation_hash": content_hash(body)}
+    path = tmp_path / "freeze_attestation.json"
+    path.write_text(json.dumps(value), encoding="utf-8")
+
+    attestation = _stage_attestation({"f28_attestation": str(path)})
+
+    assert isinstance(attestation, M336K9CommittedFreezeAttestation)
+    assert attestation.contract_role == M336K9CommittedFreezeAttestation.ROLE
 
 
 @pytest.mark.parametrize("case", M336K9_ADMISSION_MUTATION_CASES)

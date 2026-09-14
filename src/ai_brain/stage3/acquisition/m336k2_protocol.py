@@ -507,10 +507,10 @@ def verify_complete_freeze(
 ) -> None:
     """Verify the complete frozen component closure before any ledger write."""
 
-    if (
-        getattr(manifest, "contract_role", None)
-        == "M336K8_SOURCE_DOMAIN_BOUND_FREEZE_V1"
-    ):
+    if getattr(manifest, "contract_role", None) in {
+        "M336K8_SOURCE_DOMAIN_BOUND_FREEZE_V1",
+        "M336K9_UNIFIED_ADMISSION_FREEZE_V2",
+    }:
         from ai_brain.stage3.acquisition.m336k8_freeze import (
             M336K8FreezeManifest,
         )
