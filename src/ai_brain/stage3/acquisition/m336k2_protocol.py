@@ -507,6 +507,18 @@ def verify_complete_freeze(
 ) -> None:
     """Verify the complete frozen component closure before any ledger write."""
 
+    if (
+        getattr(manifest, "contract_role", None)
+        == "M336K8_SOURCE_DOMAIN_BOUND_FREEZE_V1"
+    ):
+        from ai_brain.stage3.acquisition.m336k8_freeze import (
+            M336K8FreezeManifest,
+        )
+
+        if not isinstance(manifest, M336K8FreezeManifest):
+            raise M336K2ProtocolError("M336K8 freeze type changed")
+        manifest.verify(root, allow_prospective=allow_prospective_f28)
+        return
     if getattr(manifest, "contract_role", None) == "M336K7_F32_TYPED_FREEZE_V1":
         from ai_brain.stage3.acquisition.m336k7_freeze import (
             M336K7FreezeManifest,

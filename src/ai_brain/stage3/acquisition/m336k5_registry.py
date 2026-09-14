@@ -12,6 +12,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5_ROUTE_VERSION,
     M336K6_ROUTE_VERSION,
     M336K7_ROUTE_VERSION,
+    M336K8_ROUTE_VERSION,
     M336K5RouteComponentId,
     M336K5RouteVersion,
 )
@@ -74,6 +75,18 @@ M336K7_ROUTE_COMPONENTS = M336K6_ROUTE_COMPONENTS + (
     ("current-freeze-builder", "scripts/m336k7_materialize_f32.py"),
     ("frozen-contract-mutations", "scripts/m336k7_run_contract_mutations.py"),
 )
+M336K8_ROUTE_COMPONENTS = M336K7_ROUTE_COMPONENTS + (
+    ("source-domain-contracts", "src/ai_brain/stage3/acquisition/m336k8_contracts.py"),
+    ("current-final-request", "src/ai_brain/stage3/acquisition/m336k8_request.py"),
+    ("current-freeze", "src/ai_brain/stage3/acquisition/m336k8_freeze.py"),
+    ("current-final-cli", "scripts/m336k8_run_final_route.py"),
+    ("current-request-builder", "scripts/m336k8_build_final_route_request.py"),
+    ("source-domain-builder", "scripts/m336k8_build_source_domain_contracts.py"),
+    ("current-component-builder", "scripts/m336k8_build_component_bundle.py"),
+    ("current-freeze-builder", "scripts/m336k8_materialize_f33.py"),
+    ("source-domain-mutations", "scripts/m336k8_run_contract_mutations.py"),
+    ("source-domain-schema", "schemas/m336k8_source_domain_contracts.schema.json"),
+)
 
 
 def _namespace_values(namespace: str) -> tuple[str, tuple[tuple[str, str], ...]]:
@@ -83,6 +96,8 @@ def _namespace_values(namespace: str) -> tuple[str, tuple[tuple[str, str], ...]]
         return M336K6_ROUTE_VERSION, M336K6_ROUTE_COMPONENTS
     if namespace == "m336k7":
         return M336K7_ROUTE_VERSION, M336K7_ROUTE_COMPONENTS
+    if namespace == "m336k8":
+        return M336K8_ROUTE_VERSION, M336K8_ROUTE_COMPONENTS
     raise M336K2ProtocolError("M336K5 route registry namespace is invalid")
 
 

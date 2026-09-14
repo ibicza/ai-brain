@@ -97,6 +97,10 @@ from ai_brain.stage3.acquisition.m336k7_freeze import (
     M336K7CommittedFreezeAttestation,
     M336K7FreezeManifest,
 )
+from ai_brain.stage3.acquisition.m336k8_freeze import (
+    M336K8CommittedFreezeAttestation,
+    M336K8FreezeManifest,
+)
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
 _STAGE_EVENTS = M336K2_ROUTE_EVENTS[3:]
@@ -1532,7 +1536,10 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
         authorization.verify(bundle)
         freeze = _freeze(Path(request["freeze_manifest"]).resolve(strict=True))
         if (
-            not isinstance(freeze, (M336K5FreezeManifest, M336K7FreezeManifest))
+            not isinstance(
+                freeze,
+                (M336K5FreezeManifest, M336K7FreezeManifest, M336K8FreezeManifest),
+            )
             or request["route_run_id"] != bundle.protocol_run_id.value
             or request["execution_mode"] != bundle.execution_mode.value
             or request["route_identity_bundle_hash"] != bundle.bundle_hash
@@ -1603,7 +1610,9 @@ def _karina_args(request: dict):
     git = Path(request["git_executable"]).resolve(strict=True)
     persistent_capsule = (
         _component_object(request, "persistent_capsule_receipt")
-        if isinstance(_freeze_manifest(request), M336K7FreezeManifest)
+        if isinstance(
+            _freeze_manifest(request), (M336K7FreezeManifest, M336K8FreezeManifest)
+        )
         else None
     )
     return SimpleNamespace(
@@ -1665,7 +1674,7 @@ def _karina_expected_head(request: dict) -> str:
     """
 
     freeze = _freeze_manifest(request)
-    if isinstance(freeze, M336K7FreezeManifest):
+    if isinstance(freeze, (M336K7FreezeManifest, M336K8FreezeManifest)):
         persistent = _component_object(request, "persistent_capsule_receipt")
         return _required_sha(persistent, "implementation_sha")
     return freeze.implementation_tip
@@ -1780,6 +1789,7 @@ def _freeze_manifest(
     | M336K4FreezeManifest
     | M336K5FreezeManifest
     | M336K7FreezeManifest
+    | M336K8FreezeManifest
 ):
     return _freeze(Path(request["freeze_manifest"]).resolve(strict=True))
 
@@ -1791,8 +1801,11 @@ def _freeze(
     | M336K4FreezeManifest
     | M336K5FreezeManifest
     | M336K7FreezeManifest
+    | M336K8FreezeManifest
 ):
     value = _object(path)
+    if value.get("contract_role") == "M336K8_SOURCE_DOMAIN_BOUND_FREEZE_V1":
+        return M336K8FreezeManifest.from_dict(value)
     if value.get("contract_role") == "M336K4_F29_TYPED_FREEZE_V2":
         return M336K4FreezeManifest.from_dict(value)
     if value.get("contract_role") == "M336K5_F30_TYPED_FREEZE_V2":
@@ -1817,8 +1830,11 @@ def _attestation(
     | M336K4CommittedFreezeAttestation
     | M336K5CommittedFreezeAttestation
     | M336K7CommittedFreezeAttestation
+    | M336K8CommittedFreezeAttestation
 ):
     value = _object(Path(request["f28_attestation"]).resolve(strict=True))
+    if value.get("contract_role") == "M336K8_COMMITTED_FREEZE_ATTESTATION":
+        return M336K8CommittedFreezeAttestation.from_dict(value)
     if value.get("contract_role") == "M336K7_COMMITTED_F32_ATTESTATION":
         return M336K7CommittedFreezeAttestation.from_dict(value)
     if value.get("schema_version") == 2 and "exact_f30_sha" in value:

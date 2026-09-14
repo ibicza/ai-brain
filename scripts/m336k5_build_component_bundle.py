@@ -25,6 +25,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     build_m336k5_official_identity_bundle,
     build_m336k6_official_identity_bundle,
     build_m336k7_official_identity_bundle,
+    build_m336k8_official_identity_bundle,
 )
 from ai_brain.stage3.acquisition.m336k5_registry import (
     build_m336k5_route_manifest,
@@ -63,6 +64,27 @@ from ai_brain.stage3.acquisition.m336k7_freeze import (
 from ai_brain.stage3.acquisition.m336k7_request import (
     M336K7_FINAL_REQUEST_BUILDER_HASH,
     M336K7_FINAL_REQUEST_CONTRACT,
+)
+from ai_brain.stage3.acquisition.m336k8_contracts import (
+    M336K8BridgeSurfaceManifest,
+    M336K8ControllerStartupBinding,
+    M336K8FreezeAssemblyPlan,
+    M336K8FreezeInputAssembler,
+    M336K8FrozenContractCompatibilityGateV2,
+    M336K8LegacyControllerAliasReceipt,
+    M336K8PersistentCapsuleSourceBinding,
+    M336K8PostFreezeInputBundleV2,
+    M336K8ProjectSourceIdentityPolicy,
+    M336K8ProjectSourceIdentityReceipt,
+    M336K8SourceDomainCompatibilityReceipt,
+    m336k8_semantic_binding_mismatches,
+)
+from ai_brain.stage3.acquisition.m336k8_request import (
+    M336K8_FINAL_REQUEST_BUILDER_HASH,
+    M336K8_FINAL_REQUEST_CONTRACT,
+)
+from ai_brain.stage3.acquisition.m336k8_request import (
+    _compatibility_artifacts as _m336k8_compatibility_artifacts,
 )
 
 _LABEL = re.compile(r"[a-z0-9][a-z0-9-]{3,63}")
@@ -114,23 +136,42 @@ def main() -> None:
         "capsule_binding_set",
         "legacy_capsule_compatibility",
     }
+    source_domain_components = {
+        "controller_source_identity_policy",
+        "controller_source_identity_receipt",
+        "controller_python_environment_manifest",
+        "controller_executable_dependency_manifest",
+        "controller_startup_binding",
+        "persistent_capsule_source_binding",
+        "persistent_capsule_python_environment_manifest",
+        "persistent_capsule_executable_dependency_manifest",
+        "bridge_surface_manifest",
+        "source_domain_compatibility",
+        "legacy_controller_alias_receipt",
+        "freeze_assembly_plan",
+    }
     identity_namespace = request.get("identity_namespace", "m336k5")
     expected = (
         base_expected - {"resource_budget"}
-        if identity_namespace == "m336k7"
+        if identity_namespace in {"m336k7", "m336k8"}
         else base_expected
     )
     if identity_namespace != "m336k5":
         expected |= {"identity_namespace"} | lifecycle_components
-    if identity_namespace == "m336k7":
+    if identity_namespace in {"m336k7", "m336k8"}:
         expected |= frozen_contract_components | {"candidate_pool"}
+    if identity_namespace == "m336k8":
+        expected |= source_domain_components
     if set(request) != expected:
         raise M336K2ProtocolError("M336K5 component bundle request fields changed")
-    if identity_namespace not in {"m336k5", "m336k6", "m336k7"}:
+    if identity_namespace not in {"m336k5", "m336k6", "m336k7", "m336k8"}:
         raise M336K2ProtocolError("M336K5 component identity namespace is invalid")
     repository = Path(request["repository"]).resolve(strict=True)
     legacy = Path(request["legacy_bundle"]).resolve(strict=True)
-    if identity_namespace == "m336k7" and request["identity_mode"] == "OFFICIAL":
+    if (
+        identity_namespace in {"m336k7", "m336k8"}
+        and request["identity_mode"] == "OFFICIAL"
+    ):
         verify_m336k7_unchanged_candidate_pool(Path(request["candidate_pool"]))
     output = Path(request["output"]).resolve(strict=False)
     if output.exists() or output.is_relative_to(repository):
@@ -153,14 +194,23 @@ def main() -> None:
         "karina_python_launcher",
         "sanitized_environment_policy",
         "startup_receipt_schema",
-        *(("resource_budget",) if identity_namespace != "m336k7" else ()),
+        *(
+            ("resource_budget",)
+            if identity_namespace not in {"m336k7", "m336k8"}
+            else ()
+        ),
         "storage_reservation",
         "resource_monitor",
         "cleanup_policy",
         "recovery_checkpoint_policy",
-        *(("candidate_pool",) if identity_namespace == "m336k7" else ()),
+        *(("candidate_pool",) if identity_namespace in {"m336k7", "m336k8"} else ()),
         *sorted(lifecycle_components if identity_namespace != "m336k5" else ()),
-        *sorted(frozen_contract_components if identity_namespace == "m336k7" else ()),
+        *sorted(
+            frozen_contract_components
+            if identity_namespace in {"m336k7", "m336k8"}
+            else ()
+        ),
+        *sorted(source_domain_components if identity_namespace == "m336k8" else ()),
     ):
         shutil.copyfile(
             Path(request[name]).resolve(strict=True), output / f"{name}.json"
@@ -174,11 +224,24 @@ def main() -> None:
     for path in output.glob("*.json"):
         value = _rehash_top_level(_replace(_object(path), replacements))
         path.write_text(canonical_json(value) + "\n", encoding="utf-8", newline="\n")
-    if identity_namespace == "m336k7":
+    if identity_namespace in {"m336k7", "m336k8"}:
         _write_m336k7_legacy_bindings(output, request)
         _write_m336k7_persistent_capsule_route(output)
         if request["identity_mode"] == "OFFICIAL":
             verify_m336k7_unchanged_candidate_pool(output / "candidate_pool.json")
+    if identity_namespace == "m336k8":
+        shutil.copyfile(
+            Path(request["controller_python_environment_manifest"]).resolve(
+                strict=True
+            ),
+            output / "python_environment_manifest.json",
+        )
+        shutil.copyfile(
+            Path(request["controller_executable_dependency_manifest"]).resolve(
+                strict=True
+            ),
+            output / "executable_dependency_manifest.json",
+        )
     for name, source in (
         ("q28_readiness", request["q_readiness"]),
         ("q28_evidence_manifest", request["q_evidence_manifest"]),
@@ -241,6 +304,7 @@ def main() -> None:
             "m336k5": build_m336k5_official_identity_bundle,
             "m336k6": build_m336k6_official_identity_bundle,
             "m336k7": build_m336k7_official_identity_bundle,
+            "m336k8": build_m336k8_official_identity_bundle,
         }
         official_builder = official_builders[identity_namespace]
         bundle = official_builder(
@@ -268,7 +332,7 @@ def main() -> None:
         )
     legacy_authorization = _object(output / "final_authorization.json")
     if (
-        identity_namespace == "m336k7"
+        identity_namespace in {"m336k7", "m336k8"}
         and legacy_authorization["candidate_pool_hash"]
         != _object(output / "candidate_pool.json")["pool_hash"]
     ):
@@ -284,7 +348,7 @@ def main() -> None:
         output
         / (
             "resource_budget_policy.json"
-            if identity_namespace == "m336k7"
+            if identity_namespace in {"m336k7", "m336k8"}
             else "resource_budget.json"
         )
     )
@@ -310,9 +374,11 @@ def main() -> None:
         route_registry_hash=registry.registry_hash,
         schema_registry_hash=schemas.registry_hash,
         readiness_hash=request["readiness_hash"],
-        executable_dependency_manifest_hash=legacy_authorization[
-            "executable_dependency_manifest_hash"
-        ],
+        executable_dependency_manifest_hash=(
+            _object(output / "executable_dependency_manifest.json")["manifest_hash"]
+            if identity_namespace == "m336k8"
+            else legacy_authorization["executable_dependency_manifest_hash"]
+        ),
         python_environment_manifest_hash=python_environment[
             "environment_manifest_hash"
         ],
@@ -323,7 +389,9 @@ def main() -> None:
         sanitized_environment_hash=sanitized["receipt_hash"],
         startup_receipt_schema_hash=startup_schema["schema_hash"],
         resource_budget_hash=resource_budget[
-            "policy_hash" if identity_namespace == "m336k7" else "receipt_hash"
+            "policy_hash"
+            if identity_namespace in {"m336k7", "m336k8"}
+            else "receipt_hash"
         ],
         storage_reservation_receipt_hash=reservation["receipt_hash"],
         resource_monitor_hash=resource_monitor["source_bytes_hash"],
@@ -348,7 +416,12 @@ def main() -> None:
         candidate_replacement_limit=0,
         pre_freeze_source_body_bytes=0,
     )
-    if identity_namespace == "m336k7":
+    if identity_namespace == "m336k8":
+        builder = {
+            **M336K8_FINAL_REQUEST_CONTRACT,
+            "builder_hash": M336K8_FINAL_REQUEST_BUILDER_HASH,
+        }
+    elif identity_namespace == "m336k7":
         builder = {
             **M336K7_FINAL_REQUEST_CONTRACT,
             "builder_hash": M336K7_FINAL_REQUEST_BUILDER_HASH,
@@ -373,6 +446,17 @@ def main() -> None:
         (output / f"{name}.json").write_text(
             canonical_json(value) + "\n", encoding="utf-8", newline="\n"
         )
+    if identity_namespace == "m336k8":
+        execution_capsule = _object(output / "execution_capsule_receipt.json")
+        binding = _object(output / "capsule_binding_set.json")
+        execution_capsule["karina_public_execution_capsule_receipt_hash"] = binding[
+            "legacy_public_capsule_receipt_hash"
+        ]
+        execution_capsule["karina_executable_dependency_manifest_hash"] = binding[
+            "executable_dependency_manifest_hash"
+        ]
+        _write_rehashed(output / "execution_capsule_receipt.json", execution_capsule)
+        _write_m336k8_post_freeze_and_gate(repository, output, authorization, bundle)
     if identity_namespace == "m336k7":
         execution_capsule = _object(output / "execution_capsule_receipt.json")
         binding = _object(output / "capsule_binding_set.json")
@@ -527,6 +611,7 @@ def main() -> None:
             "m336k5": "PUBLIC_SAFE_M336K5_COMPONENT_BUNDLE_RECEIPT",
             "m336k6": "PUBLIC_SAFE_M336K6_COMPONENT_BUNDLE_RECEIPT",
             "m336k7": "PUBLIC_SAFE_M336K7_COMPONENT_BUNDLE_RECEIPT",
+            "m336k8": "PUBLIC_SAFE_M336K8_COMPONENT_BUNDLE_RECEIPT",
         }[identity_namespace],
         "component_count": len(tuple(output.glob("*.json"))),
         "candidate_pool_hash": pool["pool_hash"],
@@ -536,7 +621,9 @@ def main() -> None:
         "route_identity_bundle_hash": bundle.bundle_hash,
         "final_authorization_hash": authorization.authorization_hash,
         "canonical_request_builder_hash": (
-            M336K7_FINAL_REQUEST_BUILDER_HASH
+            M336K8_FINAL_REQUEST_BUILDER_HASH
+            if identity_namespace == "m336k8"
+            else M336K7_FINAL_REQUEST_BUILDER_HASH
             if identity_namespace == "m336k7"
             else M336K5_FINAL_REQUEST_BUILDER_HASH
         ),
@@ -547,6 +634,211 @@ def main() -> None:
         canonical_json(receipt) + "\n", encoding="utf-8", newline="\n"
     )
     print(canonical_json(receipt))
+
+
+def _write_m336k8_post_freeze_and_gate(
+    repository: Path,
+    output: Path,
+    authorization: M336K5FinalAuthorization,
+    bundle: M336K5RouteIdentityBundle,
+) -> None:
+    plan = M336K8FreezeAssemblyPlan.from_dict(
+        _object(output / "freeze_assembly_plan.json")
+    )
+    if plan != M336K8FreezeAssemblyPlan.build():
+        raise M336K2ProtocolError("M336K8 freeze assembly plan changed")
+    policy = M336K8ProjectSourceIdentityPolicy.from_dict(
+        _object(output / "controller_source_identity_policy.json")
+    )
+    source_identity = M336K8ProjectSourceIdentityReceipt.from_dict(
+        _object(output / "controller_source_identity_receipt.json")
+    )
+    controller_environment = _object(
+        output / "controller_python_environment_manifest.json"
+    )
+    controller_dependencies = _object(
+        output / "controller_executable_dependency_manifest.json"
+    )
+    controller_startup = M336K8ControllerStartupBinding.from_dict(
+        _object(output / "controller_startup_binding.json")
+    )
+    capsule_binding = M336K7PersistentCapsuleBindingSet.from_dict(
+        _object(output / "capsule_binding_set.json")
+    )
+    capsule_source = M336K8PersistentCapsuleSourceBinding.from_dict(
+        _object(output / "persistent_capsule_source_binding.json")
+    )
+    capsule_environment = _object(
+        output / "persistent_capsule_python_environment_manifest.json"
+    )
+    capsule_dependencies = _object(
+        output / "persistent_capsule_executable_dependency_manifest.json"
+    )
+    bridge = M336K8BridgeSurfaceManifest.from_dict(
+        _object(output / "bridge_surface_manifest.json")
+    )
+    source_compatibility = M336K8SourceDomainCompatibilityReceipt.from_dict(
+        _object(output / "source_domain_compatibility.json")
+    )
+    legacy_alias = M336K8LegacyControllerAliasReceipt.from_dict(
+        _object(output / "legacy_controller_alias_receipt.json")
+    )
+    resource_policy = M336K7ResourceBudgetPolicy.from_dict(
+        _object(output / "resource_budget_policy.json")
+    )
+    resource_observation = M336K7ResourceObservationReceipt.from_dict(
+        _object(output / "resource_observation.json")
+    )
+    reservation = storage_reservation_from_dict(
+        _object(output / "storage_reservation.json")
+    )
+    resource_gate = M336K7ResourceGateReceipt.from_dict(
+        _object(output / "resource_gate.json")
+    )
+    legacy_capsule = M336K7LegacyCapsuleCompatibilityReceipt.from_dict(
+        _object(output / "legacy_capsule_compatibility.json")
+    )
+    liveness = _object(output / "capsule_liveness.json")
+    post_values = {
+        "controller_project_source_identity_policy_hash": policy.policy_hash,
+        "controller_project_source_identity_receipt_hash": source_identity.receipt_hash,
+        "controller_python_environment_manifest_hash": controller_environment[
+            "environment_manifest_hash"
+        ],
+        "controller_executable_dependency_manifest_hash": controller_dependencies[
+            "manifest_hash"
+        ],
+        "controller_startup_binding_hash": controller_startup.binding_hash,
+        "persistent_capsule_binding_set_hash": capsule_binding.binding_set_hash,
+        "persistent_capsule_source_binding_hash": capsule_source.binding_hash,
+        "persistent_capsule_python_environment_manifest_hash": capsule_environment[
+            "identity_hash"
+        ],
+        "persistent_capsule_executable_dependency_manifest_hash": capsule_dependencies[
+            "manifest_hash"
+        ],
+        "bridge_surface_manifest_hash": bridge.manifest_hash,
+        "source_domain_compatibility_receipt_hash": source_compatibility.receipt_hash,
+        "freeze_assembly_plan_hash": plan.plan_hash,
+        "legacy_controller_alias_receipt_hash": legacy_alias.receipt_hash,
+        "startup_policy_hash": _object(output / "python_startup_policy.json")[
+            "policy_hash"
+        ],
+        "resource_budget_policy_hash": resource_policy.policy_hash,
+        "resource_observation_hash": resource_observation.observation_hash,
+        "storage_reservation_receipt_hash": reservation.receipt_hash,
+        "resource_gate_receipt_hash": resource_gate.receipt_hash,
+        "capsule_liveness_receipt_hash": liveness["receipt_hash"],
+        "capsule_content_manifest_hash": _object(
+            output / "capsule_content_manifest.json"
+        )["manifest_hash"],
+        "capsule_lifecycle_policy_hash": _object(
+            output / "capsule_lifecycle_policy.json"
+        )["policy_hash"],
+        "route_identity_bundle_hash": bundle.bundle_hash,
+        "route_registry_hash": _object(output / "typed_route_registry.json")[
+            "registry_hash"
+        ],
+        "route_manifest_hash": _object(output / "typed_route_manifest.json")[
+            "manifest_hash"
+        ],
+        "final_authorization_hash": authorization.authorization_hash,
+        "candidate_pool_hash": _object(output / "candidate_pool.json")["pool_hash"],
+        "acquisition_policy_hash": _object(output / "acquisition_policy.json")[
+            "acquisition_policy_hash"
+        ],
+        "archive_policy_hash": _object(output / "archive_policy.json")["policy_hash"],
+        "terminal_policy_hash": _object(output / "candidate_terminal_policy.json")[
+            "policy_hash"
+        ],
+        "selector_policy_hash": _object(output / "selector_policy.json")["policy_hash"],
+        "evaluator_policy_hash": _object(output / "evaluator_policy.json")[
+            "policy_hash"
+        ],
+        "threshold_manifest_hash": _object(output / "threshold_manifest.json")[
+            "threshold_manifest_hash"
+        ],
+        "publication_contract_hash": content_hash(
+            (
+                _object(output / "h28_publication_contract.json")["contract_hash"],
+                _object(output / "e28_publication_contract.json")["contract_hash"],
+            )
+        ),
+    }
+    provisional = M336K8PostFreezeInputBundleV2.build(
+        **post_values, freeze_assembly_receipt_hash="0" * 64
+    )
+    values = {
+        "controller_python_environment_manifest": controller_environment,
+        "controller_executable_dependency_manifest": controller_dependencies,
+        "controller_source_identity_policy": policy.canonical_object(),
+        "controller_source_identity_receipt": source_identity.canonical_object(),
+        "controller_startup_binding": controller_startup.canonical_object(),
+        "persistent_capsule_python_environment_manifest": capsule_environment,
+        "persistent_capsule_executable_dependency_manifest": capsule_dependencies,
+        "persistent_capsule_source_binding": capsule_source.canonical_object(),
+        "bridge_surface_manifest": bridge.canonical_object(),
+        "source_domain_compatibility": source_compatibility.canonical_object(),
+        "resource_budget_policy": resource_policy.canonical_object(),
+        "resource_observation": resource_observation.canonical_object(),
+        "storage_reservation": _object(output / "storage_reservation.json"),
+        "resource_gate": resource_gate.canonical_object(),
+        "capsule_binding_set": capsule_binding.canonical_object(),
+        "legacy_capsule_compatibility": legacy_capsule.canonical_object(),
+        "capsule_liveness": liveness,
+        "legacy_controller_alias_receipt": legacy_alias.canonical_object(),
+        "route_identity_bundle": bundle.canonical_object(),
+        "final_authorization": authorization.canonical_object(),
+        "post_freeze_input_bundle": provisional.canonical_object(),
+    }
+    origins = {item.component_name: item.source_domain for item in plan.entries}
+    assembly = M336K8FreezeInputAssembler.assemble(
+        plan=plan,
+        component_values=values,
+        component_origins=origins,
+        semantic_verifier=m336k8_semantic_binding_mismatches,
+    )
+    post = M336K8PostFreezeInputBundleV2.build(
+        **post_values, freeze_assembly_receipt_hash=assembly.receipt_hash
+    )
+    values["post_freeze_input_bundle"] = post.canonical_object()
+    repeated = M336K8FreezeInputAssembler.assemble(
+        plan=plan,
+        component_values=values,
+        component_origins=origins,
+        semantic_verifier=m336k8_semantic_binding_mismatches,
+    )
+    if repeated != assembly or assembly.status != "PASS":
+        raise M336K2ProtocolError("M336K8 assembly is not fixed-point stable")
+    (output / "post_freeze_input_bundle.json").write_text(
+        canonical_json(post.canonical_object()) + "\n", encoding="utf-8", newline="\n"
+    )
+    (output / "freeze_assembly_receipt.json").write_text(
+        canonical_json(assembly.canonical_object()) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    artifacts = _m336k8_compatibility_artifacts(
+        values, assembly_plan=plan, assembly_receipt=assembly
+    )
+    gate = M336K8FrozenContractCompatibilityGateV2.run(
+        plan=plan,
+        artifacts=artifacts,
+        semantic_verifier=m336k8_semantic_binding_mismatches,
+        current_route_sources=(
+            repository
+            / "src"
+            / "ai_brain"
+            / "stage3"
+            / "acquisition"
+            / "m336k8_request.py",
+        ),
+    )
+    (output / "frozen_contract_compatibility_v2.json").write_text(
+        canonical_json(gate.canonical_object()) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 def _object(path: Path) -> dict:
@@ -638,17 +930,31 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
     q_commit["exact_q28_sha"] = request["exact_q30_sha"]
     _write_rehashed(output / "q28_commit.json", q_commit)
 
-    publication_values = {
-        "branch_ref": request["branch_ref"],
-        "q_root": "artifacts/m336k7/q32",
-        "f_root": "artifacts/m336k7/f32-freeze",
-        "h_root": "artifacts/m336k7/h32",
-        "e_root": "artifacts/m336k7/e32",
-        "q_subject": "M-33.6k.7 qualify exact committed freeze inputs",
-        "f_subject": "M-33.6k.7 freeze final Java execution",
-        "h_subject": "M-33.6k.7 publish sealed Java production",
-        "e_subject": "M-33.6k.7 publish independent Java evidence",
-    }
+    namespace = request["identity_namespace"]
+    if namespace == "m336k8":
+        publication_values = {
+            "branch_ref": request["branch_ref"],
+            "q_root": "artifacts/m336k8/q33",
+            "f_root": "artifacts/m336k8/f33-freeze",
+            "h_root": "artifacts/m336k8/h33",
+            "e_root": "artifacts/m336k8/e33",
+            "q_subject": "M-33.6k.8 qualify exact source-domain freeze inputs",
+            "f_subject": "M-33.6k.8 freeze final Java execution",
+            "h_subject": "M-33.6k.8 publish sealed Java production",
+            "e_subject": "M-33.6k.8 publish independent Java evidence",
+        }
+    else:
+        publication_values = {
+            "branch_ref": request["branch_ref"],
+            "q_root": "artifacts/m336k7/q32",
+            "f_root": "artifacts/m336k7/f32-freeze",
+            "h_root": "artifacts/m336k7/h32",
+            "e_root": "artifacts/m336k7/e32",
+            "q_subject": "M-33.6k.7 qualify exact committed freeze inputs",
+            "f_subject": "M-33.6k.7 freeze final Java execution",
+            "h_subject": "M-33.6k.7 publish sealed Java production",
+            "e_subject": "M-33.6k.7 publish independent Java evidence",
+        }
     for name in ("h28_publication_contract", "e28_publication_contract"):
         value = _object(output / f"{name}.json")
         value.update(publication_values)
