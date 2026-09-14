@@ -8,6 +8,7 @@ from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k5_startup import startup_receipt_from_path
 from ai_brain.stage3.acquisition.m336k8_mutations import (
     M336K8_MUTATION_CASES,
     run_m336k8_mutation_suite,
@@ -20,9 +21,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repository", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--startup-receipt", type=Path, required=True)
     args = parser.parse_args()
     repository = args.repository.resolve(strict=True)
     output = args.output.resolve(strict=False)
+    startup = startup_receipt_from_path(args.startup_receipt.resolve(strict=True))
     if output.exists():
         raise M336K2ProtocolError("M336K8 mutation report output is stale")
     if not (repository / ".git").exists():
@@ -49,6 +52,7 @@ def main() -> None:
         "hash_only_cross_domain_rejection_count": 0,
         "fully_rehashed_source_domain_rejection_count": semantic_rejections,
         "source_domain_semantic_rejection_count": semantic_rejections,
+        "startup_receipt_hash": startup.receipt_hash,
         "results": tuple(asdict(item) for item in results),
         "status": "PASS",
     }

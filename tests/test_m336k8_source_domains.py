@@ -325,6 +325,16 @@ def test_m336k8_v4_builder_accepts_phase_neutral_post_freeze_field() -> None:
     assert request.post_freeze_input_bundle == "/frozen/component"
 
 
+def test_m336k8_mutation_runner_consumes_hermetic_startup_receipt() -> None:
+    source = Path("scripts/m336k8_run_contract_mutations.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'parser.add_argument("--startup-receipt"' in source
+    assert "startup_receipt_from_path" in source
+    assert '"startup_receipt_hash": startup.receipt_hash' in source
+
+
 def test_m336k8_gate_executes_semantic_verifier() -> None:
     source = inspect.getsource(M336K8FrozenContractCompatibilityGateV2.run)
     tree = ast.parse(textwrap.dedent(source))
