@@ -77,6 +77,8 @@ from ai_brain.stage3.acquisition.m336k8_contracts import (
     M336K8ProjectSourceIdentityReceipt,
 )
 from ai_brain.stage3.acquisition.m336k8_freeze import (
+    M336K9_READY_STATUS,
+    M336K9_REQUIRED_FREEZE_COMPONENTS,
     M336K8FreezeManifest,
     attest_committed_m336k8_freeze,
     materialize_m336k8_freeze,
@@ -84,6 +86,10 @@ from ai_brain.stage3.acquisition.m336k8_freeze import (
 from ai_brain.stage3.acquisition.m336k8_request import (
     build_m336k8_final_route_request,
     write_m336k8_final_route_request,
+)
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    M336KOfficialRouteProfileStatus,
+    m336k_official_profile_registry,
 )
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
@@ -100,6 +106,8 @@ def main() -> None:
     args = parser.parse_args()
     request = _object(args.request.resolve(strict=True))
     namespace = request.get("protocol_namespace", "m336k5")
+    official_profile_id = request.get("official_profile_id")
+    official_admission_only = request.get("official_admission_only", False)
     if namespace not in {"m336k5", "m336k7", "m336k8"}:
         raise M336K2ProtocolError("M336K disposable protocol namespace changed")
     expected = {
@@ -138,6 +146,10 @@ def main() -> None:
     }
     if namespace in {"m336k7", "m336k8"}:
         expected = (expected - {"resource_budget"}) | m336k7_inputs
+    if official_profile_id is not None:
+        expected |= {"official_profile_id"}
+    if "official_admission_only" in request:
+        expected |= {"official_admission_only"}
     persistent = "persistent_karina_overlay" in request
     if namespace in {"m336k7", "m336k8"} and not persistent:
         raise M336K2ProtocolError(
@@ -147,6 +159,27 @@ def main() -> None:
         {"persistent_karina_overlay"} if persistent else set()
     ):
         raise M336K2ProtocolError("M336K5 disposable request fields changed")
+    official_profile = (
+        m336k_official_profile_registry().profile(official_profile_id)
+        if official_profile_id is not None
+        else None
+    )
+    expected_profile_status = (
+        M336KOfficialRouteProfileStatus.CURRENT_ACTIVE
+        if official_admission_only
+        else M336KOfficialRouteProfileStatus.REHEARSAL_ONLY
+    )
+    if (
+        type(official_admission_only) is not bool
+        or official_admission_only
+        and official_profile is None
+        or official_profile is not None
+        and (
+            namespace != "m336k8"
+            or official_profile.profile_status is not expected_profile_status
+        )
+    ):
+        raise M336K2ProtocolError("M336K9 rehearsal profile purpose changed")
     final_candidate_pool = None
     if namespace in {"m336k7", "m336k8"}:
         final_candidate_pool = verify_m336k7_unchanged_candidate_pool(
@@ -175,7 +208,12 @@ def main() -> None:
         output / "launcher-receipts",
     )
     branch = request["disposable_branch"]
-    if not branch.startswith(f"disposable/{namespace}-"):
+    if (
+        official_admission_only
+        and f"refs/heads/{branch}" != official_profile.authorization_branch_ref
+        or not official_admission_only
+        and not branch.startswith(f"disposable/{namespace}-")
+    ):
         raise M336K2ProtocolError("M336K5 disposable branch namespace changed")
     remote = output / "origin.git"
     repository = output / "repository"
@@ -290,7 +328,18 @@ def main() -> None:
         Path(request["legacy_component_request_template"]).resolve(strict=True)
     )
     legacy_output = private / "legacy-components"
-    if namespace == "m336k8":
+    if official_profile is not None:
+        publication_values = {
+            "q_root": "artifacts/m336k9/q34",
+            "f_root": "artifacts/m336k9/f34-freeze",
+            "h_root": "artifacts/m336k9/h34",
+            "e_root": "artifacts/m336k9/e34",
+            "q_subject": "M-33.6k.9 qualify disposable admission route",
+            "f_subject": "M-33.6k.9 freeze disposable admission route",
+            "h_subject": "M-33.6k.9 publish disposable sealed production",
+            "e_subject": "M-33.6k.9 publish disposable independent evidence",
+        }
+    elif namespace == "m336k8":
         publication_values = {
             "q_root": "artifacts/m336k8/q33",
             "f_root": "artifacts/m336k8/f33-freeze",
@@ -398,14 +447,22 @@ def main() -> None:
             "receipt_hash",
             schema_version=1,
             contract_role=(
-                "PUBLIC_SAFE_M336K8_SOURCE_DOMAIN_REHEARSAL_QUALIFICATION"
+                "PUBLIC_SAFE_M336K9_CONTROLLER_ADMISSION_REHEARSAL_QUALIFICATION"
+                if official_profile is not None
+                else "PUBLIC_SAFE_M336K8_SOURCE_DOMAIN_REHEARSAL_QUALIFICATION"
                 if namespace == "m336k8"
                 else "PUBLIC_SAFE_M336K7_COMMITTED_FREEZE_REHEARSAL_QUALIFICATION"
                 if namespace == "m336k7"
                 else "PUBLIC_SAFE_M336K5_DISPOSABLE_IDENTITY_QUALIFICATION"
             ),
             required_mutation_case_count=(
-                44 if namespace == "m336k8" else 32 if namespace == "m336k7" else 25
+                71
+                if official_profile is not None
+                else 44
+                if namespace == "m336k8"
+                else 32
+                if namespace == "m336k7"
+                else 25
             ),
             mutation_execution_phase="POST_F_LIKE_PRE_CONTROLLER",
             canonical_request_builder_present=True,
@@ -420,7 +477,9 @@ def main() -> None:
     readiness_body = {
         "schema_version": 1,
         "contract_role": (
-            "PUBLIC_SAFE_M336K8_DISPOSABLE_Q_LIKE_READINESS"
+            "PUBLIC_SAFE_M336K9_DISPOSABLE_Q_LIKE_READINESS"
+            if official_profile is not None
+            else "PUBLIC_SAFE_M336K8_DISPOSABLE_Q_LIKE_READINESS"
             if namespace == "m336k8"
             else "PUBLIC_SAFE_M336K7_DISPOSABLE_Q_LIKE_READINESS"
             if namespace == "m336k7"
@@ -430,7 +489,9 @@ def main() -> None:
         "official_one_shot_counter_count": 0,
         "new_final_source_body_bytes": 0,
         "status": (
-            "READY_FOR_SOURCE_DOMAIN_BOUND_FINAL_JAVA_EXECUTION_V8"
+            M336K9_READY_STATUS
+            if official_profile is not None
+            else "READY_FOR_SOURCE_DOMAIN_BOUND_FINAL_JAVA_EXECUTION_V8"
             if namespace == "m336k8"
             else "READY_FOR_FROZEN_RESOURCE_BOUND_FINAL_JAVA_EXECUTION_V7"
             if namespace == "m336k7"
@@ -454,7 +515,7 @@ def main() -> None:
         "readiness_hash": readiness["readiness_hash"],
         "q_readiness": str(readiness_path),
         "q_evidence_manifest": str(q_manifest_path),
-        "identity_mode": "DISPOSABLE",
+        "identity_mode": "OFFICIAL" if official_admission_only else "DISPOSABLE",
         "disposable_label": request["disposable_label"],
         "output": str(typed_output),
         "python_environment_manifest": str(environment_path),
@@ -524,6 +585,8 @@ def main() -> None:
             typed_request["persistent_capsule_executable_dependency_manifest"] = (
                 persistent_overlay["executable_dependency_manifest"]
             )
+            if official_profile is not None:
+                typed_request["official_profile_id"] = official_profile.profile_id
     else:
         typed_request["resource_budget"] = request["resource_budget"]
     typed_request_path = private / "typed-component-request.json"
@@ -564,6 +627,16 @@ def main() -> None:
         output=f_root,
         expected_branch=branch,
         freeze_relative_root=legacy_request["f_root"],
+        **(
+            {
+                "readiness_status": M336K9_READY_STATUS,
+                "freeze_role": M336K8FreezeManifest.ROLE_V2,
+                "required_components": M336K9_REQUIRED_FREEZE_COMPONENTS,
+                "build_receipt_name": "f34_build_receipt.json",
+            }
+            if official_profile is not None
+            else {}
+        ),
     )
     f_like = _commit(
         git, repository, legacy_request["f_subject"], legacy_request["f_root"]
@@ -620,7 +693,7 @@ def main() -> None:
     authorization_path = _frozen_component(repository, freeze, "final_authorization")
     contract_path = _frozen_component(repository, freeze, "h28_publication_contract")
     common_request = {
-        "purpose": "DISPOSABLE",
+        "purpose": "OFFICIAL" if official_admission_only else "DISPOSABLE",
         "repository": str(repository),
         "git_executable": str(git),
         "python_executable": str(python),
@@ -857,6 +930,28 @@ def main() -> None:
         or mutation.get("status") != "PASS"
     ):
         raise M336K2ProtocolError("M336K5 disposable mutation matrix failed")
+    admission_mutation = None
+    if official_profile is not None:
+        admission_mutation_path = public / "controller_admission_mutation_report.json"
+        _run(
+            python,
+            repository,
+            "scripts/m336k9_run_admission_mutations.py",
+            "--repository",
+            str(repository),
+            "--python",
+            str(python),
+            "--output",
+            str(admission_mutation_path),
+        )
+        admission_mutation = _object(admission_mutation_path)
+        if (
+            admission_mutation.get("mutation_case_count") != 27
+            or admission_mutation.get("accepted_invalid_count") != 0
+            or admission_mutation.get("wrong_rejection_layer_count") != 0
+            or admission_mutation.get("status") != "PASS"
+        ):
+            raise M336K2ProtocolError("M336K9 admission mutation matrix failed")
     validation_path = private / "preledger-invocation.json"
     final_route_script = (
         "scripts/m336k8_run_final_route.py"
@@ -882,6 +977,80 @@ def main() -> None:
     )
     monitor.sample("DISPOSABLE_POST_FREEZE_VALIDATION")
     release_receipt_path = public / "reservation_release_receipt.json"
+    if official_admission_only:
+        preledger = _object(validation_path)
+        counters = {
+            "route_events": preledger["route_ledger_writes"],
+            "acquisition_reservations": preledger["acquisition_reservations"],
+            "source_requests": preledger["source_requests"],
+            "vault_files": preledger["vault_files"],
+        }
+        if (
+            any(counters.values())
+            or preledger.get("status") != "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER"
+            or preledger.get("official_profile_id") != official_profile.profile_id
+            or preledger.get("official_profile_hash") != official_profile.profile_hash
+            or preledger.get("official_profile_registry_hash")
+            != m336k_official_profile_registry().registry_hash
+            or not preledger.get("controller_admission_receipt_hash")
+            or any(Path(path).exists() for path in destinations.values())
+        ):
+            raise M336K2ProtocolError("M336K9 official admission rehearsal spent state")
+        free_before_release = shutil.disk_usage(reservation_path.parent).free
+        release_m336k5_storage_reservation(reservation_path)
+        free_after_release = shutil.disk_usage(reservation_path.parent).free
+        release_body = {
+            "schema_version": 1,
+            "contract_role": "PUBLIC_SAFE_M336K9_REHEARSAL_RESERVATION_RELEASE",
+            "storage_reservation_receipt_hash": reservation_receipt["receipt_hash"],
+            "released_bytes": reservation_receipt["reservation_bytes"],
+            "free_bytes_before_release": free_before_release,
+            "free_bytes_after_release": free_after_release,
+            "status": "PASS",
+        }
+        release_receipt = {
+            **release_body,
+            "receipt_hash": content_hash(release_body),
+        }
+        _write(release_receipt_path, release_receipt)
+        monitor.stop("OFFICIAL_ADMISSION_REHEARSAL")
+        body = {
+            "schema_version": 1,
+            "contract_role": "PUBLIC_SAFE_M336K9_OFFICIAL_PURPOSE_ADMISSION_REHEARSAL",
+            "implementation_tip": implementation,
+            "q_like_sha": q_like,
+            "f_like_sha": f_like,
+            "freeze_build_receipt_hash": build["receipt_hash"],
+            "f_attestation_hash": attestation.attestation_hash,
+            "canonical_final_request_hash": final_request.request_hash,
+            "preledger_invocation_receipt_hash": preledger["receipt_hash"],
+            "preledger_status": preledger["status"],
+            "official_profile_id": official_profile.profile_id,
+            "official_profile_status": official_profile.profile_status.value,
+            "official_profile_hash": official_profile.profile_hash,
+            "official_profile_registry_hash": preledger[
+                "official_profile_registry_hash"
+            ],
+            "controller_admission_receipt_hash": preledger[
+                "controller_admission_receipt_hash"
+            ],
+            "controller_admission_result": "PASS",
+            "controller_admission_receipt_bound": True,
+            "reservation_release_receipt_hash": release_receipt["receipt_hash"],
+            **counters,
+            "official_one_shot_counter_count": 0,
+            "source_body_bytes": 0,
+            "status": "PASS",
+        }
+        receipt = {**body, "receipt_hash": content_hash(body)}
+        _write(public / "official_admission_rehearsal.json", receipt)
+        write_m336k5_project_generated_marker(
+            output,
+            category="DISPOSABLE_PROTOCOL_CLONE",
+            terminal_run_id=f"{request['disposable_label']}-{f_like}",
+        )
+        print(canonical_json(receipt))
+        return
     if namespace == "m336k5":
         free_before_release = shutil.disk_usage(reservation_path.parent).free
         release_m336k5_storage_reservation(reservation_path)
@@ -1043,7 +1212,9 @@ def main() -> None:
     body = {
         "schema_version": 1,
         "contract_role": (
-            "PUBLIC_SAFE_M336K8_OFFICIAL_ISOMORPHIC_COMMITTED_FREEZE_REHEARSAL"
+            "PUBLIC_SAFE_M336K9_CONTROLLER_ADMISSION_FULL_ROUTE_REHEARSAL"
+            if official_profile is not None
+            else "PUBLIC_SAFE_M336K8_OFFICIAL_ISOMORPHIC_COMMITTED_FREEZE_REHEARSAL"
             if namespace == "m336k8"
             else "PUBLIC_SAFE_M336K7_EXACT_COMMITTED_FREEZE_REHEARSAL"
             if namespace == "m336k7"
@@ -1091,6 +1262,32 @@ def main() -> None:
         "absolute_path_count": protocol["absolute_path_count"],
         "private_public_artifact_count": protocol["private_artifact_count"],
         "official_one_shot_counter_count": 0,
+        **(
+            {
+                "official_profile_id": official_profile.profile_id,
+                "official_profile_status": official_profile.profile_status.value,
+                "official_profile_hash": official_profile.profile_hash,
+                "official_profile_registry_hash": m336k_official_profile_registry().registry_hash,
+                "controller_admission_mutation_report_hash": admission_mutation[
+                    "report_hash"
+                ],
+                "controller_admission_mutation_case_count": admission_mutation[
+                    "mutation_case_count"
+                ],
+                "controller_admission_accepted_invalid_count": admission_mutation[
+                    "accepted_invalid_count"
+                ],
+                "controller_admission_wrong_rejection_layer_count": admission_mutation[
+                    "wrong_rejection_layer_count"
+                ],
+                "controller_admission_receipt_hash": _object(validation_path)[
+                    "controller_admission_receipt_hash"
+                ],
+                "controller_admission_result": "PASS",
+            }
+            if official_profile is not None and admission_mutation is not None
+            else {}
+        ),
         **source_domain_evidence,
         **(
             {
@@ -1347,7 +1544,10 @@ def _frozen_component(repository: Path, freeze, name: str) -> Path:
 
 def _load_freeze(path: Path):
     value = _object(path)
-    if value.get("contract_role") == M336K8FreezeManifest.ROLE:
+    if value.get("contract_role") in {
+        M336K8FreezeManifest.ROLE,
+        M336K8FreezeManifest.ROLE_V2,
+    }:
         return M336K8FreezeManifest.from_dict(value)
     if value.get("contract_role") == "M336K7_F32_TYPED_FREEZE_V1":
         return M336K7FreezeManifest.from_dict(value)
@@ -1421,6 +1621,7 @@ def _run(python: Path, repository: Path, script: str, *arguments: str) -> None:
             "scripts/m336k5_run_identity_mutations.py",
             "scripts/m336k7_run_contract_mutations.py",
             "scripts/m336k8_run_contract_mutations.py",
+            "scripts/m336k9_run_admission_mutations.py",
         }
         else "BUILD_HELPER"
     )

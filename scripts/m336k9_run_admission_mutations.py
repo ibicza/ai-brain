@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 from pathlib import Path
 
@@ -33,6 +34,11 @@ def main() -> None:
             "tests/test_m336k9_controller_admission.py",
         ),
         cwd=repository,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(repository / "src"),
+            "PYTHONNOUSERSITE": "1",
+        },
         capture_output=True,
         check=False,
     )
