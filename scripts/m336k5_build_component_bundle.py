@@ -130,7 +130,7 @@ def main() -> None:
         raise M336K2ProtocolError("M336K5 component identity namespace is invalid")
     repository = Path(request["repository"]).resolve(strict=True)
     legacy = Path(request["legacy_bundle"]).resolve(strict=True)
-    if identity_namespace == "m336k7":
+    if identity_namespace == "m336k7" and request["identity_mode"] == "OFFICIAL":
         verify_m336k7_unchanged_candidate_pool(Path(request["candidate_pool"]))
     output = Path(request["output"]).resolve(strict=False)
     if output.exists() or output.is_relative_to(repository):
@@ -177,7 +177,8 @@ def main() -> None:
     if identity_namespace == "m336k7":
         _write_m336k7_legacy_bindings(output, request)
         _write_m336k7_persistent_capsule_route(output)
-        verify_m336k7_unchanged_candidate_pool(output / "candidate_pool.json")
+        if request["identity_mode"] == "OFFICIAL":
+            verify_m336k7_unchanged_candidate_pool(output / "candidate_pool.json")
     for name, source in (
         ("q28_readiness", request["q_readiness"]),
         ("q28_evidence_manifest", request["q_evidence_manifest"]),

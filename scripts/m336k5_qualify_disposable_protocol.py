@@ -132,8 +132,11 @@ def main() -> None:
         {"persistent_karina_overlay"} if persistent else set()
     ):
         raise M336K2ProtocolError("M336K5 disposable request fields changed")
+    final_candidate_pool = None
     if namespace == "m336k7":
-        verify_m336k7_unchanged_candidate_pool(Path(request["candidate_pool"]))
+        final_candidate_pool = verify_m336k7_unchanged_candidate_pool(
+            Path(request["candidate_pool"])
+        )
     output = Path(request["output"]).resolve(strict=False)
     if output.exists():
         raise FileExistsError("M336K5 disposable output must be fresh")
@@ -307,8 +310,6 @@ def main() -> None:
             ),
         }
     )
-    if namespace == "m336k7":
-        legacy_request["candidate_pool"] = request["candidate_pool"]
     legacy_request["executables"]["python"]["path"] = str(python)
     legacy_request["executables"]["powershell"]["path"] = str(powershell)
     legacy_request["karina_public_execution_capsule_receipt"] = karina_overlay[
@@ -420,7 +421,10 @@ def main() -> None:
                 "preservation_set": request["preservation_set"],
                 "cleanup_plan": request["cleanup_plan"],
                 "cleanup_cutoff_state": request["cleanup_cutoff_state"],
-                "candidate_pool": request["candidate_pool"],
+                # The exact final pool is verified above but must remain
+                # metadata-only until F32.  The disposable route freezes and
+                # executes the rehearsal provider's matching synthetic pool.
+                "candidate_pool": legacy_request["candidate_pool"],
             }
         )
     else:
@@ -738,6 +742,7 @@ def main() -> None:
     _write(public / "disposable_resource_budget.json", asdict(measured_budget))
     if measured_budget.status != "PASS":
         raise M336K2ProtocolError("M336K5 disposable resource budget failed")
+    rehearsal_pool = _object(typed_output / "candidate_pool.json")
     body = {
         "schema_version": 1,
         "contract_role": (
@@ -784,6 +789,23 @@ def main() -> None:
         "absolute_path_count": protocol["absolute_path_count"],
         "private_public_artifact_count": protocol["private_artifact_count"],
         "official_one_shot_counter_count": 0,
+        **(
+            {
+                "final_candidate_pool_hash": final_candidate_pool["pool_hash"],
+                "final_candidate_pool_bytes_hash": bytes_hash(
+                    Path(request["candidate_pool"]).resolve(strict=True).read_bytes()
+                ),
+                "final_candidate_count": final_candidate_pool["candidate_count"],
+                "final_organization_count": final_candidate_pool["organization_count"],
+                "final_maximum_candidates_per_organization": final_candidate_pool[
+                    "maximum_candidates_per_organization"
+                ],
+                "disposable_candidate_pool_hash": rehearsal_pool["pool_hash"],
+                "final_source_body_bytes_before_f32": 0,
+            }
+            if final_candidate_pool is not None
+            else {}
+        ),
         "status": "PASS",
     }
     receipt = {**body, "receipt_hash": content_hash(body)}
