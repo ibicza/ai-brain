@@ -12,6 +12,11 @@ from pathlib import Path
 import pytest
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
+from ai_brain.stage3.acquisition.m336k2_publication import (
+    _e_source_files,
+    _h_source_files,
+    build_m336k2_publication_contract,
+)
 from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K8_ACQUISITION_RUN_ID,
     M336K8_EVALUATOR_RUN_ID,
@@ -20,6 +25,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K8_SELECTOR_RUN_ID,
     build_m336k8_official_identity_bundle,
 )
+from ai_brain.stage3.acquisition.m336k5_recovery import M336K5RecoveryLedger
 from ai_brain.stage3.acquisition.m336k8_contracts import (
     M336K8_BRIDGE_PATHS,
     M336K8_POST_FREEZE_CONSUMED_COMPONENTS,
@@ -138,6 +144,37 @@ def test_m336k8_official_identity_namespace_is_exact() -> None:
     assert bundle.acquisition_run_id.value == M336K8_ACQUISITION_RUN_ID
     assert bundle.selector_run_id.value == M336K8_SELECTOR_RUN_ID
     assert bundle.evaluator_run_id.value == M336K8_EVALUATOR_RUN_ID
+
+
+def test_m336k8_publication_requires_typed_identity_observation() -> None:
+    contract = build_m336k2_publication_contract(
+        q_root="artifacts/m336k8/q33",
+        f_root="artifacts/m336k8/f33-freeze",
+        h_root="artifacts/m336k8/h33",
+        e_root="artifacts/m336k8/e33",
+    )
+
+    assert "route_identity_observation.json" in _h_source_files(contract)
+    assert "route_identity_observation.json" in _e_source_files(contract)
+
+
+def test_m336k8_branch_can_write_path_free_recovery_checkpoint(tmp_path: Path) -> None:
+    checkpoint = M336K5RecoveryLedger(tmp_path / "recovery.jsonl").append(
+        branch="exp/stage3-m336k8-source-domain-final-v17",
+        head_sha=SHA,
+        phase="R33_PREFREEZE",
+        worktree_status="CLEAN",
+        worktree_status_hash=H,
+        completed_receipt_hashes=(H2,),
+        startup_policy_hash=H,
+        resource_sample_count=0,
+        resource_sample_chain_hash=H,
+        official_ledger_states={"acquisition": 0, "route": 0},
+        official_vault_state="ABSENT",
+        next_permitted_operation="CONTINUE_PREFREEZE",
+    )
+
+    assert checkpoint.branch == "exp/stage3-m336k8-source-domain-final-v17"
 
 
 def test_m336k8_source_identity_binds_committed_and_live_bytes(tmp_path: Path) -> None:

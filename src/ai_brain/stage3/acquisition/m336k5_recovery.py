@@ -19,6 +19,7 @@ _BRANCHES = frozenset(
     {
         "exp/stage3-m336k5-hermetic-python-final-v14",
         "exp/stage3-m336k7-frozen-contract-final-v16",
+        "exp/stage3-m336k8-source-domain-final-v17",
     }
 )
 

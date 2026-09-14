@@ -620,7 +620,12 @@ def _safe_public_root(value: str) -> bool:
 
 def _h_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
     if contract.h_root.startswith(
-        ("artifacts/m336k4/", "artifacts/m336k5/", "artifacts/m336k7/")
+        (
+            "artifacts/m336k4/",
+            "artifacts/m336k5/",
+            "artifacts/m336k7/",
+            "artifacts/m336k8/",
+        )
     ):
         return _H_ROOT_FILES | {_M336K4_IDENTITY_FILE}
     return _H_ROOT_FILES
@@ -628,7 +633,12 @@ def _h_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
 
 def _e_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
     if contract.e_root.startswith(
-        ("artifacts/m336k4/", "artifacts/m336k5/", "artifacts/m336k7/")
+        (
+            "artifacts/m336k4/",
+            "artifacts/m336k5/",
+            "artifacts/m336k7/",
+            "artifacts/m336k8/",
+        )
     ):
         return _E_SOURCE_FILES | {_M336K4_IDENTITY_FILE}
     return _E_SOURCE_FILES
