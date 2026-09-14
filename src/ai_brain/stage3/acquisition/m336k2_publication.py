@@ -627,6 +627,7 @@ def _h_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
             "artifacts/m336k5/",
             "artifacts/m336k7/",
             "artifacts/m336k8/",
+            "artifacts/m336k9/",
         )
     ):
         return _H_ROOT_FILES | {_M336K4_IDENTITY_FILE}
@@ -640,6 +641,7 @@ def _e_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
             "artifacts/m336k5/",
             "artifacts/m336k7/",
             "artifacts/m336k8/",
+            "artifacts/m336k9/",
         )
     ):
         return _E_SOURCE_FILES | {_M336K4_IDENTITY_FILE}

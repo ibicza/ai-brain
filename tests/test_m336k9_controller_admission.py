@@ -14,6 +14,8 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
     verify_complete_freeze,
 )
 from ai_brain.stage3.acquisition.m336k2_publication import (
+    _e_source_files,
+    _h_source_files,
     _qualification_path_prefixes,
     build_m336k2_publication_contract,
     publication_contract_from_dict,
@@ -427,6 +429,16 @@ def test_m336k9_commit_protocol_accepts_only_current_qualification_roots() -> No
         "runs/m336k9/q34/",
         "docs/m336k9_",
     )
+
+
+def test_m336k9_publication_contract_includes_route_identity_observation() -> None:
+    contract = build_m336k2_publication_contract(
+        h_root="artifacts/m336k9/h34",
+        e_root="artifacts/m336k9/e34",
+    )
+
+    assert "route_identity_observation.json" in _h_source_files(contract)
+    assert "route_identity_observation.json" in _e_source_files(contract)
 
 
 @pytest.mark.parametrize("case", M336K9_ADMISSION_MUTATION_CASES)
