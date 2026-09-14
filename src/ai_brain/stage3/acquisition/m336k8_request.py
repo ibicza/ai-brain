@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import subprocess
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, ClassVar, Self
 
@@ -105,6 +105,10 @@ def _is_sha(value: object) -> bool:
     )
 
 
+def _field_names(cls: type) -> set[str]:
+    return {field.name for field in fields(cls)}
+
+
 @dataclass(frozen=True)
 class M336K8FinalRouteRequestV4:
     schema_version: int
@@ -189,7 +193,7 @@ class M336K8FinalRouteRequestV4:
         return {**self._body(), "request_hash": self.request_hash}
 
     def verify(self) -> None:
-        field_names = set(type(self).__dataclass_fields__)
+        field_names = _field_names(type(self))
         phase_tokens = ("f30", "f31", "f32", "f33", "pre_f", "post_f")
         if (
             self.schema_version != 4
@@ -210,7 +214,7 @@ class M336K8FinalRouteRequestV4:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Self:
-        if type(value) is not dict or set(value) != set(cls.__dataclass_fields__):
+        if type(value) is not dict or set(value) != _field_names(cls):
             raise M336K2ProtocolError("M336K8 final request fields changed")
         result = cls(**value)
         result.verify()
@@ -291,9 +295,7 @@ def build_m336k8_final_route_request(**values: Any) -> M336K8FinalRouteRequestV4
         **values,
         "builder_identity_hash": M336K8_FINAL_REQUEST_BUILDER_HASH,
     }
-    if set(body) != set(M336K8FinalRouteRequestV4.__dataclass_fields__) - {
-        "request_hash"
-    }:
+    if set(body) != _field_names(M336K8FinalRouteRequestV4) - {"request_hash"}:
         raise M336K2ProtocolError("M336K8 request builder arguments changed")
     result = M336K8FinalRouteRequestV4(**body, request_hash=content_hash(body))
     result.verify()
@@ -1214,7 +1216,7 @@ def build_m336k8_internal_stage_request(validated: M336K8ValidatedInvocation) ->
 
 def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceipt:
     value = _object(path.resolve(strict=True))
-    if set(value) != set(M336K8PreLedgerInvocationReceipt.__dataclass_fields__):
+    if set(value) != _field_names(M336K8PreLedgerInvocationReceipt):
         raise M336K2ProtocolError("M336K8 preledger receipt fields changed")
     receipt = M336K8PreLedgerInvocationReceipt(**value)
     body = asdict(receipt)

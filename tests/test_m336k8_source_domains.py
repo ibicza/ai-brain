@@ -47,6 +47,7 @@ from ai_brain.stage3.acquisition.m336k8_mutations import (
     _require_semantic_gate_rejection,
     run_m336k8_mutation_case,
 )
+from ai_brain.stage3.acquisition.m336k8_request import M336K8FinalRouteRequestV4
 
 H = "1" * 64
 H2 = "2" * 64
@@ -291,6 +292,8 @@ def test_m336k8_current_validator_has_no_phase_defaults_or_identity_equality() -
     )
 
     assert _source_static_counts((request_source,)) == (0, 0, 0)
+    assert "__dataclass_fields__" not in request_source.read_text(encoding="utf-8")
+    assert "ROLE" not in {field.name for field in fields(M336K8FinalRouteRequestV4)}
 
 
 def test_m336k8_gate_executes_semantic_verifier() -> None:
