@@ -289,15 +289,7 @@ def verify_m336k2_commit_protocol(
     e_paths = _diff_paths(git, root, exact_h28_sha, exact_e28_sha)
     q_paths = _diff_paths(git, root, f"{exact_q28_sha}^", exact_q28_sha)
     f_paths = _diff_paths(git, root, exact_q28_sha, exact_f28_sha)
-    if contract.q_root.startswith("artifacts/m336k5/"):
-        run_q_root = "runs/m336k5/q30/"
-        docs_prefix = "docs/m336k5_"
-    elif contract.q_root.startswith("artifacts/m336k4/"):
-        run_q_root = "runs/m336k4/q29/"
-        docs_prefix = "docs/m336k4_"
-    else:
-        run_q_root = "runs/m336k2/q28/"
-        docs_prefix = "docs/m336k2_"
+    run_q_root, docs_prefix = _qualification_path_prefixes(contract.q_root)
     unauthorized_q = tuple(
         path
         for path in q_paths
@@ -438,6 +430,16 @@ def verify_m336k2_commit_protocol(
     if not passed:
         raise M336K2ProtocolError("M336K2 Q/F/H/E commit protocol failed")
     return result
+
+
+def _qualification_path_prefixes(q_root: str) -> tuple[str, str]:
+    if q_root.startswith("artifacts/m336k9/"):
+        return "runs/m336k9/q34/", "docs/m336k9_"
+    if q_root.startswith("artifacts/m336k5/"):
+        return "runs/m336k5/q30/", "docs/m336k5_"
+    if q_root.startswith("artifacts/m336k4/"):
+        return "runs/m336k4/q29/", "docs/m336k4_"
+    return "runs/m336k2/q28/", "docs/m336k2_"
 
 
 def scan_m336k2_public_tree(root: Path, *, allowed_root_files: frozenset[str]) -> dict:

@@ -13,6 +13,11 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
     M336K2ProtocolError,
     verify_complete_freeze,
 )
+from ai_brain.stage3.acquisition.m336k2_publication import (
+    _qualification_path_prefixes,
+    build_m336k2_publication_contract,
+    publication_contract_from_dict,
+)
 from ai_brain.stage3.acquisition.m336k2_stage import (
     _attestation as _stage_attestation,
 )
@@ -54,6 +59,7 @@ from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfileStatus,
     m336k_official_profile_registry,
 )
+from scripts.m336k5_build_component_bundle import _write_m336k7_legacy_bindings
 
 
 @dataclass(frozen=True)
@@ -366,6 +372,61 @@ def test_m336k9_stage_loads_v2_freeze_attestation(tmp_path: Path) -> None:
 
     assert isinstance(attestation, M336K9CommittedFreezeAttestation)
     assert attestation.contract_role == M336K9CommittedFreezeAttestation.ROLE
+
+
+def test_m336k9_profile_bundle_preserves_current_publication_contract(
+    tmp_path: Path,
+) -> None:
+    branch_ref = "refs/heads/disposable/m336k8-profile-rehearsal-v2"
+    values = {
+        "branch_ref": branch_ref,
+        "q_root": "artifacts/m336k9/q34",
+        "f_root": "artifacts/m336k9/f34-freeze",
+        "h_root": "artifacts/m336k9/h34",
+        "e_root": "artifacts/m336k9/e34",
+        "q_subject": "M-33.6k.9 qualify disposable admission route",
+        "f_subject": "M-33.6k.9 freeze disposable admission route",
+        "h_subject": "M-33.6k.9 publish disposable sealed production",
+        "e_subject": "M-33.6k.9 publish disposable independent evidence",
+    }
+    contract = build_m336k2_publication_contract(**values)
+    for name in ("h28_publication_contract", "e28_publication_contract"):
+        (tmp_path / f"{name}.json").write_text(
+            json.dumps(asdict(contract)), encoding="utf-8"
+        )
+    for name, body in (
+        ("implementation_tip", {"exact_implementation_tip": "0" * 40}),
+        ("q28_commit", {"exact_q28_sha": "0" * 40}),
+        ("commit_protocol", {"branch_ref": "refs/heads/old"}),
+    ):
+        value = {**body, "receipt_hash": content_hash(body)}
+        (tmp_path / f"{name}.json").write_text(json.dumps(value), encoding="utf-8")
+
+    _write_m336k7_legacy_bindings(
+        tmp_path,
+        {
+            "identity_namespace": "m336k8",
+            "official_profile_id": "m336k8-rehearsal-v2",
+            "branch_ref": branch_ref,
+            "exact_implementation_tip": "1" * 40,
+            "exact_q30_sha": "2" * 40,
+        },
+    )
+
+    for name in ("h28_publication_contract", "e28_publication_contract"):
+        loaded = publication_contract_from_dict(
+            json.loads((tmp_path / f"{name}.json").read_text(encoding="utf-8"))
+        )
+        assert tuple(getattr(loaded, field) for field in values) == tuple(
+            values.values()
+        )
+
+
+def test_m336k9_commit_protocol_accepts_only_current_qualification_roots() -> None:
+    assert _qualification_path_prefixes("artifacts/m336k9/q34") == (
+        "runs/m336k9/q34/",
+        "docs/m336k9_",
+    )
 
 
 @pytest.mark.parametrize("case", M336K9_ADMISSION_MUTATION_CASES)
