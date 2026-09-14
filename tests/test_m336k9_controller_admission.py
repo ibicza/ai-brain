@@ -535,3 +535,14 @@ def test_m336k9_rehearsal_profile_is_admitted_only_as_disposable() -> None:
     assert receipt.purpose == "DISPOSABLE"
     assert receipt.profile_status == "REHEARSAL_ONLY"
     assert receipt.side_effect_count == 0
+
+
+def test_m336k9_official_admission_rehearsal_uses_final_pool_for_gate() -> None:
+    source = Path("scripts/m336k5_qualify_disposable_protocol.py").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        'request["candidate_pool"]\n                    if official_admission_only'
+        in source
+    )
+    assert 'else legacy_request["candidate_pool"]' in source

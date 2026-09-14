@@ -553,10 +553,16 @@ def main() -> None:
                 "preservation_set": request["preservation_set"],
                 "cleanup_plan": request["cleanup_plan"],
                 "cleanup_cutoff_state": request["cleanup_cutoff_state"],
-                # The exact final pool is verified above but must remain
-                # metadata-only until F32.  The disposable route freezes and
-                # executes the rehearsal provider's matching synthetic pool.
-                "candidate_pool": legacy_request["candidate_pool"],
+                # An OFFICIAL-purpose admission rehearsal must present the
+                # unchanged final metadata-only pool to the official component
+                # builder.  The builder still freezes the disclosed synthetic
+                # pool copied from the legacy rehearsal bundle, so this check
+                # cannot acquire or expose final source bodies.
+                "candidate_pool": (
+                    request["candidate_pool"]
+                    if official_admission_only
+                    else legacy_request["candidate_pool"]
+                ),
             }
         )
         if namespace == "m336k8":
