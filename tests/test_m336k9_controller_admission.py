@@ -538,11 +538,16 @@ def test_m336k9_rehearsal_profile_is_admitted_only_as_disposable() -> None:
 
 
 def test_m336k9_official_admission_rehearsal_uses_final_pool_for_gate() -> None:
-    source = Path("scripts/m336k5_qualify_disposable_protocol.py").read_text(
+    qualifier_source = Path("scripts/m336k5_qualify_disposable_protocol.py").read_text(
         encoding="utf-8"
     )
     assert (
         'request["candidate_pool"]\n                    if official_admission_only'
-        in source
+        in qualifier_source
     )
-    assert 'else legacy_request["candidate_pool"]' in source
+    assert 'else legacy_request["candidate_pool"]' in qualifier_source
+    builder_source = Path("scripts/m336k5_build_component_bundle.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'not (profile_id is not None and mode == "OFFICIAL")' in builder_source
+    assert "candidate_pool_hash=candidate_pool_hash" in builder_source

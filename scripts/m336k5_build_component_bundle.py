@@ -370,10 +370,11 @@ def main() -> None:
             evaluator_policy_hash=evaluator["policy_hash"],
         )
     legacy_authorization = _object(output / "final_authorization.json")
+    candidate_pool_hash = _object(output / "candidate_pool.json")["pool_hash"]
     if (
         identity_namespace in {"m336k7", "m336k8"}
-        and legacy_authorization["candidate_pool_hash"]
-        != _object(output / "candidate_pool.json")["pool_hash"]
+        and not (profile_id is not None and mode == "OFFICIAL")
+        and legacy_authorization["candidate_pool_hash"] != candidate_pool_hash
     ):
         raise M336K2ProtocolError("M336K7 candidate-pool authorization changed")
     python_environment = _object(output / "python_environment_manifest.json")
@@ -406,7 +407,7 @@ def main() -> None:
         exact_implementation_tip=request["exact_implementation_tip"],
         exact_q30_sha=request["exact_q30_sha"],
         branch_ref=request["branch_ref"],
-        candidate_pool_hash=legacy_authorization["candidate_pool_hash"],
+        candidate_pool_hash=candidate_pool_hash,
         acquisition_policy_hash=acquisition["acquisition_policy_hash"],
         archive_policy_hash=legacy_authorization["archive_policy_hash"],
         candidate_terminal_policy_hash=legacy_authorization[
