@@ -174,13 +174,37 @@ def main() -> None:
     stable_host = _verified(
         Path(request["stable_host_identity_receipt"]), "receipt_hash"
     )
+    if (
+        persistent_public.get("implementation_sha")
+        != capsule_binding.implementation_tip
+        or persistent_public.get("project_source_identity") is None
+        or persistent_public.get("python_environment_manifest_hash")
+        != capsule_environment.get("environment_manifest_hash")
+        or persistent_public.get("executable_dependency_manifest_hash")
+        != capsule_dependency.get("manifest_hash")
+        or persistent_public.get("capsule_identity_hash")
+        != capsule_binding.capsule_identity_hash
+        or persistent_public.get("content_manifest_hash")
+        != capsule_content.get("manifest_hash")
+        or persistent_public.get("lifecycle_policy_hash")
+        != capsule_lifecycle.get("policy_hash")
+        or persistent_public.get("legacy_public_receipt_hash")
+        != legacy_public.get("receipt_hash")
+        or persistent_public.get("stable_host_identity_hash")
+        != stable_host.get("receipt_hash")
+        or capsule_binding.capsule_liveness_receipt_hash
+        != capsule_liveness.get("receipt_hash")
+        or capsule_binding.persistent_capsule_public_receipt_hash
+        != persistent_public.get("receipt_hash")
+    ):
+        raise M336K2ProtocolError("M336K8 persistent capsule source inputs diverged")
     bridge = build_m336k8_bridge_surface_manifest(
         repository=root, capsule_content_manifest=capsule_content
     )
     capsule_source = M336K8PersistentCapsuleSourceBinding.build(
         persistent_capsule_binding_set_hash=capsule_binding.binding_set_hash,
         capsule_implementation_tip=capsule_binding.implementation_tip,
-        capsule_project_source_identity=capsule_environment["project_source_identity"],
+        capsule_project_source_identity=persistent_public["project_source_identity"],
         capsule_python_environment_manifest_hash=capsule_environment["identity_hash"],
         capsule_executable_dependency_manifest_hash=capsule_dependency["manifest_hash"],
         capsule_identity_hash=capsule_binding.capsule_identity_hash,

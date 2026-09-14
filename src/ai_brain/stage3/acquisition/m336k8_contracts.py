@@ -1662,7 +1662,15 @@ def m336k8_semantic_binding_mismatches(
     environment = values.get("controller_python_environment_manifest", {})
     dependency = values.get("controller_executable_dependency_manifest", {})
     startup = values.get("controller_startup_binding", {})
+    capsule_binding = values.get("capsule_binding_set", {})
     capsule = values.get("persistent_capsule_source_binding", {})
+    capsule_environment = values.get(
+        "persistent_capsule_python_environment_manifest", {}
+    )
+    capsule_dependency = values.get(
+        "persistent_capsule_executable_dependency_manifest", {}
+    )
+    capsule_liveness = values.get("capsule_liveness", {})
     bridge = values.get("bridge_surface_manifest", {})
     compatibility = values.get("source_domain_compatibility", {})
     assembly_plan = values.get("freeze_assembly_plan", {})
@@ -1732,9 +1740,57 @@ def m336k8_semantic_binding_mismatches(
         mismatches += int(
             capsule.get("source_domain") != PERSISTENT_KARINA_RUNTIME_CAPSULE
         )
-        mismatches += int(
-            capsule.get("bridge_surface_manifest_hash") != bridge.get("manifest_hash")
+        relations = (
+            (
+                capsule.get("persistent_capsule_binding_set_hash"),
+                capsule_binding.get("binding_set_hash"),
+            ),
+            (
+                capsule.get("capsule_implementation_tip"),
+                capsule_binding.get("implementation_tip"),
+            ),
+            (
+                capsule.get("capsule_python_environment_manifest_hash"),
+                capsule_environment.get("identity_hash"),
+            ),
+            (
+                capsule.get("capsule_executable_dependency_manifest_hash"),
+                capsule_dependency.get("manifest_hash"),
+            ),
+            (
+                capsule.get("capsule_identity_hash"),
+                capsule_binding.get("capsule_identity_hash"),
+            ),
+            (
+                capsule.get("capsule_content_manifest_hash"),
+                capsule_binding.get("capsule_content_manifest_hash"),
+            ),
+            (
+                capsule.get("capsule_lifecycle_policy_hash"),
+                capsule_binding.get("capsule_lifecycle_policy_hash"),
+            ),
+            (
+                capsule.get("capsule_liveness_receipt_hash"),
+                capsule_liveness.get("receipt_hash"),
+            ),
+            (
+                capsule.get("persistent_public_receipt_hash"),
+                capsule_binding.get("persistent_capsule_public_receipt_hash"),
+            ),
+            (
+                capsule.get("legacy_public_receipt_hash"),
+                capsule_binding.get("legacy_public_capsule_receipt_hash"),
+            ),
+            (
+                capsule.get("stable_host_identity_hash"),
+                capsule_binding.get("stable_karina_host_identity_hash"),
+            ),
+            (
+                capsule.get("bridge_surface_manifest_hash"),
+                bridge.get("manifest_hash"),
+            ),
         )
+        mismatches += sum(left != right for left, right in relations)
     elif name == "bridge_surface_manifest":
         mismatches += int(
             bridge.get("controller_tree_hash") != bridge.get("capsule_tree_hash")
