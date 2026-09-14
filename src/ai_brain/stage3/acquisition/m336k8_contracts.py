@@ -8,6 +8,7 @@ separate and owns the shared rehearsal/official freeze-input assembler.
 from __future__ import annotations
 
 import ast
+import json
 import subprocess
 from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass, fields
@@ -1509,11 +1510,15 @@ class M336K8FrozenContractCompatibilityGateV2:
                 "FREEZE_INPUT_ASSEMBLER",
             ),
         }
-        values = {name: dict(pair[0]) for name, pair in artifacts.items()}
+        values = {
+            name: json.loads(canonical_json(pair[0]))
+            for name, pair in artifacts.items()
+        }
         results = []
         for name in sorted(artifacts):
             produced, consumer = artifacts[name]
-            loaded = consumer(dict(produced))
+            serialized_produced = json.loads(canonical_json(produced))
+            loaded = consumer(serialized_produced)
             if hasattr(loaded, "canonical_object"):
                 canonical = loaded.canonical_object()
             else:
