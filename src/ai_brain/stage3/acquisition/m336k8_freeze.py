@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, ClassVar, Self
 
@@ -175,7 +175,9 @@ class M336K8FreezeManifest:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Self:
-        if type(value) is not dict or set(value) != set(cls.__dataclass_fields__):
+        if type(value) is not dict or set(value) != {
+            field.name for field in fields(cls)
+        }:
             raise M336K2ProtocolError("M336K8 freeze manifest fields changed")
         if (
             type(value["components"]) is not list
@@ -263,7 +265,9 @@ class M336K8CommittedFreezeAttestation:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Self:
-        if type(value) is not dict or set(value) != set(cls.__dataclass_fields__):
+        if type(value) is not dict or set(value) != {
+            field.name for field in fields(cls)
+        }:
             raise M336K2ProtocolError("M336K8 freeze attestation fields changed")
         result = cls(**value)
         result.verify()

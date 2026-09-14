@@ -6,12 +6,12 @@ import json
 import shutil
 import subprocess
 import textwrap
-from dataclasses import fields
+from dataclasses import asdict, fields
 from pathlib import Path
 
 import pytest
 
-from ai_brain.stage2.facts.canonical import bytes_hash
+from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K8_ACQUISITION_RUN_ID,
     M336K8_EVALUATOR_RUN_ID,
@@ -37,6 +37,10 @@ from ai_brain.stage3.acquisition.m336k8_contracts import (
     _source_static_counts,
     build_m336k8_bridge_surface_manifest,
     build_m336k8_project_source_identity_receipt,
+)
+from ai_brain.stage3.acquisition.m336k8_freeze import (
+    M336K8CommittedFreezeAttestation,
+    M336K8FreezeManifest,
 )
 from ai_brain.stage3.acquisition.m336k8_mutations import (
     M336K8_MUTATION_CASES,
@@ -217,6 +221,68 @@ def test_m336k8_schema_field_sets_match_typed_contracts() -> None:
         expected = {field.name for field in fields(contract)}
         assert set(definitions[definition]["required"]) == expected
         assert set(definitions[definition]["properties"]) == expected
+
+
+def test_m336k8_freeze_and_attestation_json_field_round_trip() -> None:
+    manifest = M336K8FreezeManifest(
+        schema_version=1,
+        contract_role=M336K8FreezeManifest.ROLE,
+        implementation_tip=SHA,
+        exact_qualification_sha=SHA,
+        exact_freeze_sha="0" * 40,
+        committed_freeze_tree="0" * 40,
+        readiness_hash=H,
+        authorization_hash=H,
+        route_hash=H,
+        route_identity_bundle_hash=H,
+        canonical_request_builder_hash=H,
+        post_freeze_input_bundle_hash=H,
+        source_identity_receipt_hash=H,
+        controller_startup_binding_hash=H,
+        persistent_capsule_source_binding_hash=H,
+        bridge_surface_manifest_hash=H,
+        source_domain_compatibility_receipt_hash=H,
+        freeze_assembly_plan_hash=H,
+        freeze_assembly_receipt_hash=H,
+        compatibility_gate_v2_hash=H,
+        components=(),
+        self_reference_safe_exclusions=(),
+        prospective_freeze_tree_hash=H,
+        manifest_hash=H,
+    )
+    assert (
+        M336K8FreezeManifest.from_dict(json.loads(json.dumps(asdict(manifest))))
+        == manifest
+    )
+
+    attestation_body = {
+        "schema_version": 1,
+        "contract_role": M336K8CommittedFreezeAttestation.ROLE,
+        "exact_freeze_sha": SHA,
+        "exact_qualification_parent": SHA,
+        "committed_tree_hash": SHA,
+        "prospective_freeze_tree_hash": H,
+        "prospective_tree_matches": True,
+        "route_identity_bundle_hash": H,
+        "authorization_hash": H,
+        "route_hash": H,
+        "post_freeze_input_bundle_hash": H,
+        "source_identity_receipt_hash": H,
+        "freeze_assembly_plan_hash": H,
+        "producer_origin_map_hash": H,
+        "implementation_change_count": 0,
+        "merge_count": 0,
+        "head_upstream_remote_equal": True,
+        "worktree_clean": True,
+        "status": "PASS",
+    }
+    attestation = {
+        **attestation_body,
+        "attestation_hash": content_hash(attestation_body),
+    }
+    assert (
+        asdict(M336K8CommittedFreezeAttestation.from_dict(attestation)) == attestation
+    )
 
 
 def test_m336k8_current_validator_has_no_phase_defaults_or_identity_equality() -> None:
