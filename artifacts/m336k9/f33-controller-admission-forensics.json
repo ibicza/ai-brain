@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "contract_role": "M336K9_F33_CONTROLLER_ADMISSION_FORENSICS",
+  "historical_f33_sha": "3c5f64ee32d9d6af7d7810dbeabcc1be9c600771",
+  "historical_q33_sha": "6dd28c8c75f9b8958964ac92d8f540ae496ced1b",
+  "historical_implementation_tip": "4559dd67082db37a259cf0035aa4f98d38d0dd93",
+  "historical_validate_only_status": "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER",
+  "historical_validate_only_receipt_hash": "dd50cc1ae6fb1bc5360b44352092411179f38e216f4342920c3066c00112e39d",
+  "historical_controller_invocation_count": 1,
+  "historical_controller_completion_count": 0,
+  "typed_identity_values": {
+    "route_version": "m336k8.candidate-isolated-java-final-route.v1",
+    "protocol_run_id": "m336k8.final-java.outcome-a.v1",
+    "acquisition_run_id": "m336k8.final-java.global-acquisition.v1",
+    "selector_run_id": "m336k8.final-java.selector.v1",
+    "evaluator_run_id": "m336k8.final-java.evaluator.v1",
+    "execution_mode": "FINAL"
+  },
+  "typed_official_protocol_value_set_contains_historical_k8": true,
+  "controller_imported_protocol_constants": [
+    "M336K5_PROTOCOL_RUN_ID",
+    "M336K6_PROTOCOL_RUN_ID",
+    "M336K7_PROTOCOL_RUN_ID"
+  ],
+  "controller_hardcoded_protocol_whitelist": [
+    "m336k5.final-java.outcome-a.v1",
+    "m336k6.final-java.outcome-a.v1",
+    "m336k7.final-java.outcome-a.v1"
+  ],
+  "omitted_protocol_id": "m336k8.final-java.outcome-a.v1",
+  "validate_only_checks_controller_admission": false,
+  "controller_only_checks": [
+    "OFFICIAL protocol_run_id membership in an independently maintained controller set"
+  ],
+  "disposable_purpose_behavior": "bypasses the OFFICIAL-only controller whitelist predicate",
+  "official_purpose_behavior": "executes the independent controller whitelist predicate",
+  "first_failing_predicate": "purpose == OFFICIAL and protocol_run_id not in controller hardcoded whitelist",
+  "exception_type": "M336K2ProtocolError",
+  "exception_message": "M336K5 official protocol run ID is not canonical",
+  "reproduction_method": "direct side-effect-free invocation of the historical controller identity predicate with the frozen F33 route identity bundle",
+  "reproduction_invoked_historical_controller": false,
+  "reproduction_side_effect_counts": {
+    "route_events": 0,
+    "acquisition_reservations": 0,
+    "acquisition_invocations": 0,
+    "selector_reservations": 0,
+    "selector_invocations": 0,
+    "evaluator_reservations": 0,
+    "evaluator_invocations": 0,
+    "candidate_attempts": 0,
+    "source_body_bytes": 0,
+    "vault_files": 0,
+    "new_official_files": 0
+  },
+  "classifications": [
+    "DUPLICATED_OFFICIAL_IDENTITY_AUTHORITY",
+    "CONTROLLER_WHITELIST_OMITTED_TYPED_CANONICAL_IDENTITY",
+    "VALIDATE_ONLY_DID_NOT_EXECUTE_CONTROLLER_ADMISSION",
+    "DISPOSABLE_PURPOSE_BYPASSED_OFFICIAL_ONLY_CHECK",
+    "OFFICIAL_PROFILE_SET_AND_CONTROLLER_SET_DIVERGED"
+  ],
+  "unclassified_cause_count": 0,
+  "status": "REPRODUCED_WITH_ZERO_SIDE_EFFECTS",
+  "report_hash": "5cba1257c4ab9410f3b9e28a5d15337ab8db475d56fcad745fbbd6c02396cfc7"
+}

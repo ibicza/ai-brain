@@ -34,10 +34,7 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
     m336k2_minimal_environment,
 )
 from ai_brain.stage3.acquisition.m336k5_authorization import M336K5FinalAuthorization
-from ai_brain.stage3.acquisition.m336k5_identity import (
-    M336K7_PROTOCOL_RUN_ID,
-    M336K5RouteIdentityBundle,
-)
+from ai_brain.stage3.acquisition.m336k5_identity import M336K5RouteIdentityBundle
 from ai_brain.stage3.acquisition.m336k5_registry import build_m336k5_route_registry
 from ai_brain.stage3.acquisition.m336k5_request import (
     _verify_destination_set,
@@ -79,6 +76,9 @@ from ai_brain.stage3.acquisition.m336k7_freeze import (
     M336K7_FREEZE_MANIFEST_CONTRACT_HASH,
     M336K7CommittedFreezeAttestation,
     M336K7FreezeManifest,
+)
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    m336k_official_profile_registry,
 )
 
 M336K7_FINAL_REQUEST_CONTRACT = {
@@ -310,13 +310,29 @@ def validate_m336k7_final_invocation(
         _object(Path(request.legacy_compatibility_receipt).resolve(strict=True))
     )
     verify_m336k7_capsule_compatibility_binding(binding, compatibility)
+    identity_tuple = (
+        bundle.route_version.value,
+        bundle.protocol_run_id.value,
+        bundle.acquisition_run_id.value,
+        bundle.selector_run_id.value,
+        bundle.evaluator_run_id.value,
+        bundle.execution_mode.value,
+    )
+    try:
+        registered_profile = (
+            m336k_official_profile_registry().profile_for_identity_tuple(identity_tuple)
+        )
+    except M336K2ProtocolError:
+        registered_profile = None
 
     if (
         request.exact_implementation_sha != freeze.implementation_tip
         or authorization.exact_implementation_tip != freeze.implementation_tip
         or authorization.exact_q30_sha != freeze.exact_q32_sha
-        or bundle.protocol_run_id.value != M336K7_PROTOCOL_RUN_ID
-        and request.purpose == "OFFICIAL"
+        or request.purpose == "DISPOSABLE"
+        and registered_profile is not None
+        or request.purpose == "OFFICIAL"
+        and registered_profile is None
         or bundle.route_version.value.split(".", 1)[0] != "m336k7"
         or freeze.route_identity_bundle_hash != bundle.bundle_hash
         or freeze.authorization_hash != authorization.authorization_hash

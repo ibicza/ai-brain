@@ -9,10 +9,6 @@ from typing import Self
 from ai_brain.stage2.facts.canonical import content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_identity import (
-    M336K5_PROTOCOL_RUN_ID,
-    M336K6_PROTOCOL_RUN_ID,
-    M336K7_PROTOCOL_RUN_ID,
-    M336K8_PROTOCOL_RUN_ID,
     M336K5AcquisitionRunId,
     M336K5EvaluatorRunId,
     M336K5ExecutionMode,
@@ -20,6 +16,9 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5RouteIdentityBundle,
     M336K5RouteVersion,
     M336K5SelectorRunId,
+)
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    m336k_official_profile_registry,
 )
 
 _SHA = re.compile(r"[0-9a-f]{40}")
@@ -163,28 +162,23 @@ class M336K5FinalAuthorization:
         hashes = tuple(
             value for name, value in self._body().items() if name.endswith("_hash")
         ) + (self.authorization_hash,)
-        official_branches = {
-            M336K5_PROTOCOL_RUN_ID: (
-                "refs/heads/exp/stage3-m336k5-hermetic-python-final-v14"
-            ),
-            M336K6_PROTOCOL_RUN_ID: (
-                "refs/heads/exp/stage3-m336k6-persistent-capsule-final-v15"
-            ),
-            M336K7_PROTOCOL_RUN_ID: (
-                "refs/heads/exp/stage3-m336k7-frozen-contract-final-v16"
-            ),
-            M336K8_PROTOCOL_RUN_ID: (
-                "refs/heads/exp/stage3-m336k8-source-domain-final-v17"
-            ),
-        }
-        protocol = self.protocol_run_id_typed.value
-        branch_valid = (
-            self.branch_ref == official_branches[protocol]
-            if protocol in official_branches
-            else self.branch_ref.startswith(
-                f"refs/heads/disposable/{protocol.split('.', 1)[0]}-"
-            )
+        registry = m336k_official_profile_registry()
+        identity_tuple = (
+            self.route_version_typed.value,
+            self.protocol_run_id_typed.value,
+            self.acquisition_run_id_typed.value,
+            self.selector_run_id_typed.value,
+            self.evaluator_run_id_typed.value,
+            self.execution_mode_typed.value,
         )
+        try:
+            profile = registry.profile_for_identity_tuple(identity_tuple)
+        except M336K2ProtocolError:
+            branch_valid = self.branch_ref.startswith(
+                f"refs/heads/disposable/{self.protocol_run_id_typed.value.split('.', 1)[0]}-"
+            )
+        else:
+            branch_valid = self.branch_ref == profile.authorization_branch_ref
         if (
             self.schema_version != 2
             or self.contract_role != "M336K5_TYPED_FINAL_AUTHORIZATION_V2"

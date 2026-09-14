@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "M336K official route profile registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract_role", "profiles", "registry_hash"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract_role": {"const": "M336K_OFFICIAL_ROUTE_PROFILE_REGISTRY"},
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "contract_role",
+          "profile_id",
+          "profile_status",
+          "route_version",
+          "protocol_run_id",
+          "acquisition_run_id",
+          "selector_run_id",
+          "evaluator_run_id",
+          "execution_mode",
+          "minimum_controller_version",
+          "authorization_branch_ref",
+          "profile_hash"
+        ],
+        "properties": {
+          "schema_version": {"const": 1},
+          "contract_role": {"const": "M336K_OFFICIAL_ROUTE_PROFILE"},
+          "profile_id": {"type": "string", "minLength": 1},
+          "profile_status": {
+            "enum": ["HISTORICAL_READ_ONLY", "CURRENT_ACTIVE", "REHEARSAL_ONLY"]
+          },
+          "route_version": {"type": "string", "minLength": 1},
+          "protocol_run_id": {"type": "string", "minLength": 1},
+          "acquisition_run_id": {"type": "string", "minLength": 1},
+          "selector_run_id": {"type": "string", "minLength": 1},
+          "evaluator_run_id": {"type": "string", "minLength": 1},
+          "execution_mode": {"const": "FINAL"},
+          "minimum_controller_version": {"type": "string", "minLength": 1},
+          "authorization_branch_ref": {"type": "string", "pattern": "^refs/heads/"},
+          "profile_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "registry_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

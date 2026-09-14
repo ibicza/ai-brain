@@ -26,6 +26,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     build_m336k6_official_identity_bundle,
     build_m336k7_official_identity_bundle,
     build_m336k8_official_identity_bundle,
+    build_m336k_identity_bundle_for_profile,
 )
 from ai_brain.stage3.acquisition.m336k5_registry import (
     build_m336k5_route_manifest,
@@ -85,6 +86,18 @@ from ai_brain.stage3.acquisition.m336k8_request import (
 )
 from ai_brain.stage3.acquisition.m336k8_request import (
     _compatibility_artifacts as _m336k8_compatibility_artifacts,
+)
+from ai_brain.stage3.acquisition.m336k9_admission import (
+    M336K9_CONTROLLER_ADMISSION_CONTRACT,
+    M336K9_CONTROLLER_ADMISSION_CONTRACT_HASH,
+    run_m336k_official_profile_coverage_gate,
+)
+from ai_brain.stage3.acquisition.m336k9_authorization import (
+    build_m336k9_final_authorization,
+)
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    M336KOfficialRouteProfileStatus,
+    m336k_official_profile_registry,
 )
 
 _LABEL = re.compile(r"[a-z0-9][a-z0-9-]{3,63}")
@@ -151,6 +164,7 @@ def main() -> None:
         "freeze_assembly_plan",
     }
     identity_namespace = request.get("identity_namespace", "m336k5")
+    profile_id = request.get("official_profile_id")
     expected = (
         base_expected - {"resource_budget"}
         if identity_namespace in {"m336k7", "m336k8"}
@@ -162,6 +176,8 @@ def main() -> None:
         expected |= frozen_contract_components | {"candidate_pool"}
     if identity_namespace == "m336k8":
         expected |= source_domain_components
+    if profile_id is not None:
+        expected |= {"official_profile_id"}
     if set(request) != expected:
         raise M336K2ProtocolError("M336K5 component bundle request fields changed")
     if identity_namespace not in {"m336k5", "m336k6", "m336k7", "m336k8"}:
@@ -250,8 +266,12 @@ def main() -> None:
         (output / f"{name}.json").write_text(
             canonical_json(value) + "\n", encoding="utf-8", newline="\n"
         )
-    registry = build_m336k5_route_registry(repository, identity_namespace)
-    schemas = build_m336k5_schema_registry(identity_namespace)
+    profile_registry = m336k_official_profile_registry()
+    profile = profile_registry.profile(profile_id) if profile_id is not None else None
+    registry = build_m336k5_route_registry(
+        repository, identity_namespace, profile_id=profile_id
+    )
+    schemas = build_m336k5_schema_registry(identity_namespace, profile_id=profile_id)
     route = build_m336k5_route_manifest(registry, schemas)
     acquisition = _object(output / "acquisition_policy.json")
     acquisition.pop("acquisition_policy_hash", None)
@@ -260,7 +280,17 @@ def main() -> None:
     threshold = _object(output / "threshold_manifest.json")
     mode = request["identity_mode"]
     label = request["disposable_label"]
-    if mode == "OFFICIAL":
+    if profile is not None:
+        expected_profile_status = {
+            "OFFICIAL": M336KOfficialRouteProfileStatus.CURRENT_ACTIVE,
+            "DISPOSABLE": M336KOfficialRouteProfileStatus.REHEARSAL_ONLY,
+        }.get(mode)
+        if profile.profile_status is not expected_profile_status:
+            raise M336K2ProtocolError("M336K9 component profile purpose changed")
+        acquisition_id = profile.acquisition_run_id
+        selector_id = profile.selector_run_id
+        evaluator_id = profile.evaluator_run_id
+    elif mode == "OFFICIAL":
         acquisition_id = f"{identity_namespace}.final-java.global-acquisition.v1"
         selector_id = f"{identity_namespace}.final-java.selector.v1"
         evaluator_id = f"{identity_namespace}.final-java.evaluator.v1"
@@ -299,7 +329,16 @@ def main() -> None:
         "production_evaluator_reads": 0,
     }
     evaluator = {**evaluator_body, "policy_hash": content_hash(evaluator_body)}
-    if mode == "OFFICIAL":
+    if profile is not None:
+        bundle = build_m336k_identity_bundle_for_profile(
+            profile_id=profile.profile_id,
+            route_registry_hash=registry.registry_hash,
+            route_manifest_hash=route.manifest_hash,
+            acquisition_policy_hash=acquisition["acquisition_policy_hash"],
+            selector_policy_hash=selector["policy_hash"],
+            evaluator_policy_hash=evaluator["policy_hash"],
+        )
+    elif mode == "OFFICIAL":
         official_builders = {
             "m336k5": build_m336k5_official_identity_bundle,
             "m336k6": build_m336k6_official_identity_bundle,
@@ -356,8 +395,14 @@ def main() -> None:
     resource_monitor = _object(output / "resource_monitor.json")
     cleanup = _object(output / "cleanup_policy.json")
     recovery = _object(output / "recovery_checkpoint_policy.json")
-    authorization = build_m336k5_final_authorization(
+    authorization_builder = (
+        build_m336k9_final_authorization
+        if profile is not None
+        else build_m336k5_final_authorization
+    )
+    authorization = authorization_builder(
         bundle=bundle,
+        **({"official_profile_id": profile.profile_id} if profile is not None else {}),
         exact_implementation_tip=request["exact_implementation_tip"],
         exact_q30_sha=request["exact_q30_sha"],
         branch_ref=request["branch_ref"],
@@ -442,6 +487,19 @@ def main() -> None:
         "final_authorization": authorization.canonical_object(),
         "canonical_request_builder_identity": builder,
     }
+    if profile is not None:
+        coverage = run_m336k_official_profile_coverage_gate()
+        values.update(
+            {
+                "official_profile_registry": profile_registry.canonical_object(),
+                "active_official_profile": profile.canonical_object(),
+                "profile_coverage_gate": coverage.canonical_object(),
+                "controller_admission_contract": {
+                    **M336K9_CONTROLLER_ADMISSION_CONTRACT,
+                    "contract_hash": M336K9_CONTROLLER_ADMISSION_CONTRACT_HASH,
+                },
+            }
+        )
     for name, value in values.items():
         (output / f"{name}.json").write_text(
             canonical_json(value) + "\n", encoding="utf-8", newline="\n"
@@ -612,7 +670,9 @@ def main() -> None:
             "m336k6": "PUBLIC_SAFE_M336K6_COMPONENT_BUNDLE_RECEIPT",
             "m336k7": "PUBLIC_SAFE_M336K7_COMPONENT_BUNDLE_RECEIPT",
             "m336k8": "PUBLIC_SAFE_M336K8_COMPONENT_BUNDLE_RECEIPT",
-        }[identity_namespace],
+        }[identity_namespace]
+        if profile is None
+        else "PUBLIC_SAFE_M336K9_COMPONENT_BUNDLE_RECEIPT",
         "component_count": len(tuple(output.glob("*.json"))),
         "candidate_pool_hash": pool["pool_hash"],
         "route_registry_hash": registry.registry_hash,

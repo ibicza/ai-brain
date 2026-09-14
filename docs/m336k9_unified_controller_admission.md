@@ -1,0 +1,9 @@
+# M-33.6k.9 unified controller admission
+
+M-33.6k.9 defines one canonical `M336KOfficialRouteProfileRegistry` for the complete route identity tuple: route version, protocol run ID, acquisition run ID, selector run ID, evaluator run ID, and execution mode. Profiles are strictly ordered and hashed. Historical K5-K8 v1 profiles remain parseable as `HISTORICAL_READ_ONLY`; `m336k8-final-v2` is the sole `CURRENT_ACTIVE` profile; and `m336k8-rehearsal-v2` is `REHEARSAL_ONLY`.
+
+Typed codecs derive all five official-value sets from this registry. Compatibility constants remain aliases to registered profiles. Legacy validators use registry membership rather than local protocol lists, while the current K8 route binds the selected profile and registry to route/schema registries, policy IDs, the typed identity bundle, authorization, freeze, and preledger receipt.
+
+`verify_m336k_controller_admission` is the only current controller-admission authority. It is side-effect free, verifies the complete typed tuple and the integrity and bindings of authorization and freeze, admits `OFFICIAL` only for `CURRENT_ACTIVE`, and admits `DISPOSABLE` only for `REHEARSAL_ONLY`. Validate-only invokes it and binds its receipt hash. The final controller invokes the same function again and requires exact receipt equality before calling the preledger guard or appending an event.
+
+The coverage gate executes codec, registry, authorization, freeze, and admission checks for every registered profile. It also enforces five typed-value equality invariants, zero historical profiles admitted for new official execution, zero independent controller whitelists, zero controller-only identity predicates, and zero profiles missing from the executable test inventory. The mutation suite contains all required invalid bindings plus the positive active-v2 case.

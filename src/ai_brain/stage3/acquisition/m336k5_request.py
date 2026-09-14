@@ -41,11 +41,7 @@ from ai_brain.stage3.acquisition.m336k5_freeze import (
     M336K5FreezeManifest,
     verify_complete_m336k5_freeze,
 )
-from ai_brain.stage3.acquisition.m336k5_identity import (
-    M336K5_PROTOCOL_RUN_ID,
-    M336K6_PROTOCOL_RUN_ID,
-    M336K5RouteIdentityBundle,
-)
+from ai_brain.stage3.acquisition.m336k5_identity import M336K5RouteIdentityBundle
 from ai_brain.stage3.acquisition.m336k5_registry import build_m336k5_route_registry
 from ai_brain.stage3.acquisition.m336k5_startup import (
     M336K5PythonStartupPolicy,
@@ -53,6 +49,9 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_karina_invocation,
     build_m336k5_python_startup_policy,
     startup_receipt_from_path,
+)
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    m336k_official_profile_registry,
 )
 
 M336K5_FINAL_REQUEST_CONTRACT = {
@@ -257,6 +256,20 @@ def validate_m336k5_final_invocation(
     freeze_path = Path(request.freeze_manifest).resolve(strict=True)
     freeze = M336K5FreezeManifest.from_dict(_object(freeze_path))
     verify_complete_m336k5_freeze(root, freeze, allow_prospective_f30=True)
+    identity_tuple = (
+        bundle.route_version.value,
+        bundle.protocol_run_id.value,
+        bundle.acquisition_run_id.value,
+        bundle.selector_run_id.value,
+        bundle.evaluator_run_id.value,
+        bundle.execution_mode.value,
+    )
+    try:
+        registered_profile = (
+            m336k_official_profile_registry().profile_for_identity_tuple(identity_tuple)
+        )
+    except M336K2ProtocolError:
+        registered_profile = None
     components = {item.name: item for item in freeze.components}
     _verify_component_handle(root, components, "route_identity_bundle", bundle_path)
     _verify_component_handle(
@@ -270,16 +283,10 @@ def validate_m336k5_final_invocation(
         or request.exact_implementation_sha != freeze.implementation_tip
         or authorization.exact_implementation_tip != freeze.implementation_tip
         or authorization.exact_q30_sha != freeze.exact_q30_sha
-        or (
-            request.purpose == "DISPOSABLE"
-            and bundle.protocol_run_id.value
-            in {M336K5_PROTOCOL_RUN_ID, M336K6_PROTOCOL_RUN_ID}
-        )
-        or (
-            request.purpose == "OFFICIAL"
-            and bundle.protocol_run_id.value
-            not in {M336K5_PROTOCOL_RUN_ID, M336K6_PROTOCOL_RUN_ID}
-        )
+        or request.purpose == "DISPOSABLE"
+        and registered_profile is not None
+        or request.purpose == "OFFICIAL"
+        and registered_profile is None
     ):
         raise M336K2ProtocolError(
             "M336K5 request/freeze/authorization cross-binding changed"

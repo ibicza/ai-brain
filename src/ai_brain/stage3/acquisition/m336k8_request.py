@@ -18,10 +18,7 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
     m336k2_minimal_environment,
 )
 from ai_brain.stage3.acquisition.m336k5_authorization import M336K5FinalAuthorization
-from ai_brain.stage3.acquisition.m336k5_identity import (
-    M336K8_PROTOCOL_RUN_ID,
-    M336K5RouteIdentityBundle,
-)
+from ai_brain.stage3.acquisition.m336k5_identity import M336K5RouteIdentityBundle
 from ai_brain.stage3.acquisition.m336k5_registry import build_m336k5_route_registry
 from ai_brain.stage3.acquisition.m336k5_request import (
     _verify_destination_set,
@@ -70,6 +67,21 @@ from ai_brain.stage3.acquisition.m336k8_contracts import (
 from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K8CommittedFreezeAttestation,
     M336K8FreezeManifest,
+    M336K9CommittedFreezeAttestation,
+)
+from ai_brain.stage3.acquisition.m336k9_admission import (
+    M336K9_CONTROLLER_ADMISSION_CONTRACT,
+    M336K9_CONTROLLER_ADMISSION_CONTRACT_HASH,
+    M336KControllerAdmissionReceipt,
+    M336KOfficialProfileCoverageGate,
+    run_m336k_official_profile_coverage_gate,
+    verify_m336k_controller_admission,
+)
+from ai_brain.stage3.acquisition.m336k9_authorization import M336K9FinalAuthorization
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    M336KOfficialRouteProfile,
+    M336KOfficialRouteProfileRegistry,
+    m336k_official_profile_registry,
 )
 
 M336K8_FINAL_REQUEST_CONTRACT = {
@@ -82,6 +94,8 @@ M336K8_FINAL_REQUEST_CONTRACT = {
         "post_freeze_input_bundle_v2",
         "freeze_assembly_plan",
         "source_domain_compatibility",
+        "official_route_profile_registry",
+        "controller_admission_preflight",
     ),
     "historical_current_authority_calls": 0,
     "canonical_serialization": "UTF-8/LF/RFC8785-compatible-project-canonical-json",
@@ -263,6 +277,10 @@ class M336K8PreLedgerInvocationReceipt:
     karina_storage_preflight_hash: str
     status: str
     receipt_hash: str
+    official_profile_id: str | None = None
+    official_profile_hash: str | None = None
+    official_profile_registry_hash: str | None = None
+    controller_admission_receipt_hash: str | None = None
 
 
 @dataclass(frozen=True)
@@ -286,6 +304,7 @@ class M336K8ValidatedInvocation:
     assembly_receipt: M336K8FreezeAssemblyReceipt
     compatibility_gate: M336K8FrozenContractCompatibilityGateV2
     receipt: M336K8PreLedgerInvocationReceipt
+    controller_admission: M336KControllerAdmissionReceipt
 
 
 def build_m336k8_final_route_request(**values: Any) -> M336K8FinalRouteRequestV4:
@@ -344,8 +363,13 @@ def validate_m336k8_final_invocation(
     bundle = M336K5RouteIdentityBundle.from_dict(
         _object(Path(request.route_identity_bundle).resolve(strict=True))
     )
-    authorization = M336K5FinalAuthorization.from_dict(
-        _object(Path(request.final_authorization).resolve(strict=True))
+    authorization_value = _object(
+        Path(request.final_authorization).resolve(strict=True)
+    )
+    authorization = (
+        M336K9FinalAuthorization.from_dict(authorization_value)
+        if "official_profile_id" in authorization_value
+        else M336K5FinalAuthorization.from_dict(authorization_value)
     )
     authorization.verify(bundle)
     post = M336K8PostFreezeInputBundleV2.from_dict(
@@ -427,8 +451,6 @@ def validate_m336k8_final_invocation(
         request.exact_implementation_tip != freeze.implementation_tip
         or authorization.exact_implementation_tip != freeze.implementation_tip
         or authorization.exact_q30_sha != freeze.exact_qualification_sha
-        or request.purpose == "OFFICIAL"
-        and bundle.protocol_run_id.value != M336K8_PROTOCOL_RUN_ID
         or bundle.route_version.value.split(".", 1)[0] != "m336k8"
         or freeze.route_identity_bundle_hash != bundle.bundle_hash
         or freeze.authorization_hash != authorization.authorization_hash
@@ -447,10 +469,26 @@ def validate_m336k8_final_invocation(
     ):
         raise M336K2ProtocolError("M336K8 request/freeze identity binding changed")
 
-    registry = build_m336k5_route_registry(root, "m336k8")
+    registry = build_m336k5_route_registry(
+        root,
+        "m336k8",
+        profile_id=getattr(authorization, "official_profile_id", None),
+    )
     if registry.registry_hash != bundle.route_registry_hash:
         raise M336K2ProtocolError("M336K8 executable route registry changed")
     _verify_identity_policy_components(root, components, bundle)
+    profile_registry, active_profile, _coverage = _verify_official_profile_components(
+        root, components, authorization=authorization, freeze=freeze, bundle=bundle
+    )
+    controller_admission = verify_m336k_controller_admission(
+        purpose=request.purpose,
+        route_identity_bundle=bundle,
+        expected_official_profile_id=active_profile.profile_id,
+        expected_profile_hash=active_profile.profile_hash,
+        current_registry=profile_registry,
+        final_authorization=authorization,
+        freeze_manifest=freeze,
+    )
     verify_m336k7_resource_gate_binding(
         resource_policy, resource_observation, reservation, resource_gate
     )
@@ -626,6 +664,10 @@ def validate_m336k8_final_invocation(
             }
         ),
         "status": "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER",
+        "official_profile_id": active_profile.profile_id,
+        "official_profile_hash": active_profile.profile_hash,
+        "official_profile_registry_hash": profile_registry.registry_hash,
+        "controller_admission_receipt_hash": controller_admission.receipt_hash,
     }
     receipt = M336K8PreLedgerInvocationReceipt(**body, receipt_hash=content_hash(body))
     return M336K8ValidatedInvocation(
@@ -648,6 +690,7 @@ def validate_m336k8_final_invocation(
         assembly_receipt,
         frozen_gate,
         receipt,
+        controller_admission,
     )
 
 
@@ -1146,8 +1189,24 @@ def _verify_lineage(root, git, request, freeze, bundle, post) -> None:
         return
     if request.freeze_attestation is None:
         raise M336K2ProtocolError("M336K8 exact freeze attestation is absent")
-    attestation = M336K8CommittedFreezeAttestation.from_dict(
-        _object(Path(request.freeze_attestation).resolve(strict=True))
+    attestation_value = _object(Path(request.freeze_attestation).resolve(strict=True))
+    attestation = (
+        M336K9CommittedFreezeAttestation.from_dict(attestation_value)
+        if "official_profile_id" in attestation_value
+        else M336K8CommittedFreezeAttestation.from_dict(attestation_value)
+    )
+    profile_attestation_mismatch = (
+        freeze.contract_role == M336K8FreezeManifest.ROLE_V2
+        and (
+            attestation.official_profile_id != freeze.official_profile_id
+            or attestation.official_profile_hash != freeze.official_profile_hash
+            or attestation.official_profile_registry_hash
+            != freeze.official_profile_registry_hash
+            or attestation.profile_coverage_gate_hash
+            != freeze.profile_coverage_gate_hash
+            or attestation.controller_admission_contract_hash
+            != freeze.controller_admission_contract_hash
+        )
     )
     branch = subprocess.run(
         (str(git), "symbolic-ref", "HEAD"),
@@ -1173,6 +1232,7 @@ def _verify_lineage(root, git, request, freeze, bundle, post) -> None:
         or attestation.freeze_assembly_plan_hash != freeze.freeze_assembly_plan_hash
         or attestation.producer_origin_map_hash
         != _object(Path(request.freeze_assembly_plan))["producer_origin_map_hash"]
+        or profile_attestation_mismatch
         or head != upstream
         or head != remote
         or head != request.exact_freeze_sha
@@ -1219,11 +1279,21 @@ def build_m336k8_internal_stage_request(validated: M336K8ValidatedInvocation) ->
 
 def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceipt:
     value = _object(path.resolve(strict=True))
-    if set(value) != _field_names(M336K8PreLedgerInvocationReceipt):
+    all_fields = _field_names(M336K8PreLedgerInvocationReceipt)
+    profile_fields = {
+        "official_profile_id",
+        "official_profile_hash",
+        "official_profile_registry_hash",
+        "controller_admission_receipt_hash",
+    }
+    if set(value) != all_fields and set(value) != all_fields - profile_fields:
         raise M336K2ProtocolError("M336K8 preledger receipt fields changed")
-    receipt = M336K8PreLedgerInvocationReceipt(**value)
+    receipt = M336K8PreLedgerInvocationReceipt(
+        **{**{name: None for name in profile_fields}, **value}
+    )
     body = asdict(receipt)
     claimed = body.pop("receipt_hash")
+    body = {name: item for name, item in body.items() if item is not None}
     counters = (
         receipt.acquisition_reservations,
         receipt.acquisition_invocations,
@@ -1240,6 +1310,8 @@ def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceip
         content_hash(body) != claimed
         or any(counters)
         or receipt.status != "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER"
+        or set(value) == all_fields
+        and any(getattr(receipt, name) is None for name in profile_fields)
     ):
         raise M336K2ProtocolError("M336K8 preledger receipt is invalid")
     return receipt
@@ -1248,6 +1320,71 @@ def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceip
 def _component_map(request: M336K8FinalRouteRequestV4) -> dict[str, Any]:
     freeze = M336K8FreezeManifest.from_dict(_object(Path(request.freeze_manifest)))
     return {item.name: item for item in freeze.components}
+
+
+def _verify_official_profile_components(
+    root: Path,
+    components: dict[str, Any],
+    *,
+    authorization: Any,
+    freeze: M336K8FreezeManifest,
+    bundle: M336K5RouteIdentityBundle,
+) -> tuple[
+    M336KOfficialRouteProfileRegistry,
+    M336KOfficialRouteProfile,
+    M336KOfficialProfileCoverageGate,
+]:
+    required = {
+        "official_profile_registry",
+        "active_official_profile",
+        "profile_coverage_gate",
+        "controller_admission_contract",
+    }
+    if not required.issubset(components):
+        raise M336K2ProtocolError("M336K9 official profile components are absent")
+    registry = M336KOfficialRouteProfileRegistry.from_dict(
+        _component_object(root, components, "official_profile_registry")
+    )
+    canonical_registry = m336k_official_profile_registry()
+    profile = M336KOfficialRouteProfile.from_dict(
+        _component_object(root, components, "active_official_profile")
+    )
+    coverage = M336KOfficialProfileCoverageGate.from_dict(
+        _component_object(root, components, "profile_coverage_gate")
+    )
+    contract = _component_object(root, components, "controller_admission_contract")
+    contract_body = dict(contract)
+    contract_hash = contract_body.pop("contract_hash", None)
+    actual_coverage = run_m336k_official_profile_coverage_gate()
+    if (
+        registry != canonical_registry
+        or profile != registry.profile(profile.profile_id)
+        or profile.profile_id != getattr(authorization, "official_profile_id", None)
+        or profile.identity_tuple
+        != (
+            bundle.route_version.value,
+            bundle.protocol_run_id.value,
+            bundle.acquisition_run_id.value,
+            bundle.selector_run_id.value,
+            bundle.evaluator_run_id.value,
+            bundle.execution_mode.value,
+        )
+        or coverage != actual_coverage
+        or coverage.official_profile_registry_hash != registry.registry_hash
+        or contract_hash != content_hash(contract_body)
+        or contract_body != M336K9_CONTROLLER_ADMISSION_CONTRACT
+        or contract_hash != M336K9_CONTROLLER_ADMISSION_CONTRACT_HASH
+        or contract["verifier"] != "verify_m336k_controller_admission"
+        or contract["side_effect_count"] != 0
+        or contract["status"] != "FROZEN"
+        or freeze.official_profile_id != profile.profile_id
+        or freeze.official_profile_hash != profile.profile_hash
+        or freeze.official_profile_registry_hash != registry.registry_hash
+        or freeze.profile_coverage_gate_hash != coverage.gate_hash
+        or freeze.controller_admission_contract_hash != contract_hash
+    ):
+        raise M336K2ProtocolError("M336K9 official profile freeze binding changed")
+    return registry, profile, coverage
 
 
 def _component_path(root: Path, components: dict[str, Any], name: str) -> Path:
@@ -1289,8 +1426,11 @@ def _verified_object(path: Path, hash_field: str) -> dict[str, Any]:
 
 
 def _authorization_branch_ref(request: M336K8FinalRouteRequestV4) -> str:
-    authorization = M336K5FinalAuthorization.from_dict(
-        _object(Path(request.final_authorization))
+    value = _object(Path(request.final_authorization))
+    authorization = (
+        M336K9FinalAuthorization.from_dict(value)
+        if "official_profile_id" in value
+        else M336K5FinalAuthorization.from_dict(value)
     )
     return authorization.branch_ref
 

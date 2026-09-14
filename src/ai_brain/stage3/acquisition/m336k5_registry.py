@@ -16,6 +16,9 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5RouteComponentId,
     M336K5RouteVersion,
 )
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    m336k_official_profile_registry,
+)
 
 M336K5_ROUTE_COMPONENTS = (
     ("typed-identity", "src/ai_brain/stage3/acquisition/m336k5_identity.py"),
@@ -76,6 +79,12 @@ M336K7_ROUTE_COMPONENTS = M336K6_ROUTE_COMPONENTS + (
     ("frozen-contract-mutations", "scripts/m336k7_run_contract_mutations.py"),
 )
 M336K8_ROUTE_COMPONENTS = M336K7_ROUTE_COMPONENTS + (
+    ("official-route-profiles", "src/ai_brain/stage3/acquisition/m336k9_profiles.py"),
+    ("controller-admission", "src/ai_brain/stage3/acquisition/m336k9_admission.py"),
+    (
+        "profile-authorization",
+        "src/ai_brain/stage3/acquisition/m336k9_authorization.py",
+    ),
     ("source-domain-contracts", "src/ai_brain/stage3/acquisition/m336k8_contracts.py"),
     ("current-final-request", "src/ai_brain/stage3/acquisition/m336k8_request.py"),
     ("current-freeze", "src/ai_brain/stage3/acquisition/m336k8_freeze.py"),
@@ -86,18 +95,30 @@ M336K8_ROUTE_COMPONENTS = M336K7_ROUTE_COMPONENTS + (
     ("current-freeze-builder", "scripts/m336k8_materialize_f33.py"),
     ("source-domain-mutations", "scripts/m336k8_run_contract_mutations.py"),
     ("source-domain-schema", "schemas/m336k8_source_domain_contracts.schema.json"),
+    ("official-profile-schema", "schemas/m336k9_official_route_profiles.schema.json"),
+    ("official-profile-builder", "scripts/m336k9_build_profile_components.py"),
+    ("controller-admission-mutations", "scripts/m336k9_run_admission_mutations.py"),
 )
 
 
-def _namespace_values(namespace: str) -> tuple[str, tuple[tuple[str, str], ...]]:
+def _namespace_values(
+    namespace: str, profile_id: str | None = None
+) -> tuple[str, tuple[tuple[str, str], ...]]:
+    if profile_id is not None:
+        profile = m336k_official_profile_registry().profile(profile_id)
+        if profile.route_version.split(".", 1)[0] != namespace:
+            raise M336K2ProtocolError("M336K route profile namespace changed")
+        route_value = profile.route_version
+    else:
+        route_value = None
     if namespace == "m336k5":
-        return M336K5_ROUTE_VERSION, M336K5_ROUTE_COMPONENTS
+        return route_value or M336K5_ROUTE_VERSION, M336K5_ROUTE_COMPONENTS
     if namespace == "m336k6":
-        return M336K6_ROUTE_VERSION, M336K6_ROUTE_COMPONENTS
+        return route_value or M336K6_ROUTE_VERSION, M336K6_ROUTE_COMPONENTS
     if namespace == "m336k7":
-        return M336K7_ROUTE_VERSION, M336K7_ROUTE_COMPONENTS
+        return route_value or M336K7_ROUTE_VERSION, M336K7_ROUTE_COMPONENTS
     if namespace == "m336k8":
-        return M336K8_ROUTE_VERSION, M336K8_ROUTE_COMPONENTS
+        return route_value or M336K8_ROUTE_VERSION, M336K8_ROUTE_COMPONENTS
     raise M336K2ProtocolError("M336K5 route registry namespace is invalid")
 
 
@@ -193,8 +214,10 @@ class M336K5RouteManifest:
         return {**self._body(), "manifest_hash": self.manifest_hash}
 
 
-def build_m336k5_schema_registry(namespace: str = "m336k5") -> M336K5SchemaRegistry:
-    route_value, _components = _namespace_values(namespace)
+def build_m336k5_schema_registry(
+    namespace: str = "m336k5", *, profile_id: str | None = None
+) -> M336K5SchemaRegistry:
+    route_value, _components = _namespace_values(namespace, profile_id)
     route = M336K5RouteVersion(route_value)
     bindings = []
     for stage in M336K2_ROUTE_STAGES:
@@ -229,10 +252,10 @@ def build_m336k5_schema_registry(namespace: str = "m336k5") -> M336K5SchemaRegis
 
 
 def build_m336k5_route_registry(
-    repository: Path, namespace: str = "m336k5"
+    repository: Path, namespace: str = "m336k5", *, profile_id: str | None = None
 ) -> M336K5RouteRegistry:
     root = repository.resolve(strict=True)
-    route_value, route_components = _namespace_values(namespace)
+    route_value, route_components = _namespace_values(namespace, profile_id)
     components = []
     missing = []
     for name, relative in route_components:

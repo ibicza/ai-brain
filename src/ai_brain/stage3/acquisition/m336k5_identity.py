@@ -9,27 +9,41 @@ from typing import ClassVar, Self
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    M336K_OFFICIAL_PROFILE_REGISTRY,
+)
 
-M336K5_ROUTE_VERSION = "m336k5.candidate-isolated-java-final-route.v1"
-M336K5_PROTOCOL_RUN_ID = "m336k5.final-java.outcome-a.v1"
-M336K5_ACQUISITION_RUN_ID = "m336k5.final-java.global-acquisition.v1"
-M336K5_SELECTOR_RUN_ID = "m336k5.final-java.selector.v1"
-M336K5_EVALUATOR_RUN_ID = "m336k5.final-java.evaluator.v1"
-M336K6_ROUTE_VERSION = "m336k6.candidate-isolated-java-final-route.v1"
-M336K6_PROTOCOL_RUN_ID = "m336k6.final-java.outcome-a.v1"
-M336K6_ACQUISITION_RUN_ID = "m336k6.final-java.global-acquisition.v1"
-M336K6_SELECTOR_RUN_ID = "m336k6.final-java.selector.v1"
-M336K6_EVALUATOR_RUN_ID = "m336k6.final-java.evaluator.v1"
-M336K7_ROUTE_VERSION = "m336k7.candidate-isolated-java-final-route.v1"
-M336K7_PROTOCOL_RUN_ID = "m336k7.final-java.outcome-a.v1"
-M336K7_ACQUISITION_RUN_ID = "m336k7.final-java.global-acquisition.v1"
-M336K7_SELECTOR_RUN_ID = "m336k7.final-java.selector.v1"
-M336K7_EVALUATOR_RUN_ID = "m336k7.final-java.evaluator.v1"
-M336K8_ROUTE_VERSION = "m336k8.candidate-isolated-java-final-route.v1"
-M336K8_PROTOCOL_RUN_ID = "m336k8.final-java.outcome-a.v1"
-M336K8_ACQUISITION_RUN_ID = "m336k8.final-java.global-acquisition.v1"
-M336K8_SELECTOR_RUN_ID = "m336k8.final-java.selector.v1"
-M336K8_EVALUATOR_RUN_ID = "m336k8.final-java.evaluator.v1"
+_K5_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k5-final-v1")
+_K6_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k6-final-v1")
+_K7_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k7-final-v1")
+_K8_V1_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v1")
+_K8_ACTIVE_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v2")
+
+M336K5_ROUTE_VERSION = _K5_PROFILE.route_version
+M336K5_PROTOCOL_RUN_ID = _K5_PROFILE.protocol_run_id
+M336K5_ACQUISITION_RUN_ID = _K5_PROFILE.acquisition_run_id
+M336K5_SELECTOR_RUN_ID = _K5_PROFILE.selector_run_id
+M336K5_EVALUATOR_RUN_ID = _K5_PROFILE.evaluator_run_id
+M336K6_ROUTE_VERSION = _K6_PROFILE.route_version
+M336K6_PROTOCOL_RUN_ID = _K6_PROFILE.protocol_run_id
+M336K6_ACQUISITION_RUN_ID = _K6_PROFILE.acquisition_run_id
+M336K6_SELECTOR_RUN_ID = _K6_PROFILE.selector_run_id
+M336K6_EVALUATOR_RUN_ID = _K6_PROFILE.evaluator_run_id
+M336K7_ROUTE_VERSION = _K7_PROFILE.route_version
+M336K7_PROTOCOL_RUN_ID = _K7_PROFILE.protocol_run_id
+M336K7_ACQUISITION_RUN_ID = _K7_PROFILE.acquisition_run_id
+M336K7_SELECTOR_RUN_ID = _K7_PROFILE.selector_run_id
+M336K7_EVALUATOR_RUN_ID = _K7_PROFILE.evaluator_run_id
+M336K8_ROUTE_VERSION = _K8_V1_PROFILE.route_version
+M336K8_PROTOCOL_RUN_ID = _K8_V1_PROFILE.protocol_run_id
+M336K8_ACQUISITION_RUN_ID = _K8_V1_PROFILE.acquisition_run_id
+M336K8_SELECTOR_RUN_ID = _K8_V1_PROFILE.selector_run_id
+M336K8_EVALUATOR_RUN_ID = _K8_V1_PROFILE.evaluator_run_id
+M336K9_ROUTE_VERSION = _K8_ACTIVE_PROFILE.route_version
+M336K9_PROTOCOL_RUN_ID = _K8_ACTIVE_PROFILE.protocol_run_id
+M336K9_ACQUISITION_RUN_ID = _K8_ACTIVE_PROFILE.acquisition_run_id
+M336K9_SELECTOR_RUN_ID = _K8_ACTIVE_PROFILE.selector_run_id
+M336K9_EVALUATOR_RUN_ID = _K8_ACTIVE_PROFILE.evaluator_run_id
 
 _HASH = re.compile(r"[0-9a-f]{64}")
 
@@ -121,13 +135,8 @@ class M336K5RouteVersion(_M336K5Identity):
     namespace: ClassVar[re.Pattern[str]] = re.compile(
         r"m336k[5-8]\.candidate-isolated-java-(?:final|disposable)-route\.v[1-9][0-9]*"
     )
-    official_values: ClassVar[frozenset[str]] = frozenset(
-        {
-            M336K5_ROUTE_VERSION,
-            M336K6_ROUTE_VERSION,
-            M336K7_ROUTE_VERSION,
-            M336K8_ROUTE_VERSION,
-        }
+    official_values: ClassVar[frozenset[str]] = (
+        M336K_OFFICIAL_PROFILE_REGISTRY.official_values("route_version")
     )
 
 
@@ -137,13 +146,8 @@ class M336K5ProtocolRunId(_M336K5Identity):
     namespace: ClassVar[re.Pattern[str]] = re.compile(
         r"m336k[5-8]\.(?:final-java\.outcome-a|disposable\.[a-z0-9-]+)\.v[1-9][0-9]*"
     )
-    official_values: ClassVar[frozenset[str]] = frozenset(
-        {
-            M336K5_PROTOCOL_RUN_ID,
-            M336K6_PROTOCOL_RUN_ID,
-            M336K7_PROTOCOL_RUN_ID,
-            M336K8_PROTOCOL_RUN_ID,
-        }
+    official_values: ClassVar[frozenset[str]] = (
+        M336K_OFFICIAL_PROFILE_REGISTRY.official_values("protocol_run_id")
     )
 
 
@@ -153,13 +157,8 @@ class M336K5AcquisitionRunId(_M336K5Identity):
     namespace: ClassVar[re.Pattern[str]] = re.compile(
         r"m336k[5-8]\.(?:final-java\.global-acquisition|disposable\.[a-z0-9-]+\.acquisition)\.v[1-9][0-9]*"
     )
-    official_values: ClassVar[frozenset[str]] = frozenset(
-        {
-            M336K5_ACQUISITION_RUN_ID,
-            M336K6_ACQUISITION_RUN_ID,
-            M336K7_ACQUISITION_RUN_ID,
-            M336K8_ACQUISITION_RUN_ID,
-        }
+    official_values: ClassVar[frozenset[str]] = (
+        M336K_OFFICIAL_PROFILE_REGISTRY.official_values("acquisition_run_id")
     )
 
 
@@ -169,13 +168,8 @@ class M336K5SelectorRunId(_M336K5Identity):
     namespace: ClassVar[re.Pattern[str]] = re.compile(
         r"m336k[5-8]\.(?:final-java\.selector|disposable\.[a-z0-9-]+\.selector)\.v[1-9][0-9]*"
     )
-    official_values: ClassVar[frozenset[str]] = frozenset(
-        {
-            M336K5_SELECTOR_RUN_ID,
-            M336K6_SELECTOR_RUN_ID,
-            M336K7_SELECTOR_RUN_ID,
-            M336K8_SELECTOR_RUN_ID,
-        }
+    official_values: ClassVar[frozenset[str]] = (
+        M336K_OFFICIAL_PROFILE_REGISTRY.official_values("selector_run_id")
     )
 
 
@@ -185,13 +179,8 @@ class M336K5EvaluatorRunId(_M336K5Identity):
     namespace: ClassVar[re.Pattern[str]] = re.compile(
         r"m336k[5-8]\.(?:final-java\.evaluator|disposable\.[a-z0-9-]+\.evaluator)\.v[1-9][0-9]*"
     )
-    official_values: ClassVar[frozenset[str]] = frozenset(
-        {
-            M336K5_EVALUATOR_RUN_ID,
-            M336K6_EVALUATOR_RUN_ID,
-            M336K7_EVALUATOR_RUN_ID,
-            M336K8_EVALUATOR_RUN_ID,
-        }
+    official_values: ClassVar[frozenset[str]] = (
+        M336K_OFFICIAL_PROFILE_REGISTRY.official_values("evaluator_run_id")
     )
 
 
@@ -337,55 +326,50 @@ class M336K5RouteIdentityBundle:
             raise M336K2ProtocolError("M336K5 route identity bundle is invalid")
 
 
-def build_m336k5_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityBundle:
+def build_m336k_identity_bundle_for_profile(
+    profile_id: str, **hashes: str
+) -> M336K5RouteIdentityBundle:
+    profile = M336K_OFFICIAL_PROFILE_REGISTRY.profile(profile_id)
     return M336K5RouteIdentityBundle.build(
-        route_version=M336K5RouteVersion(M336K5_ROUTE_VERSION),
-        protocol_run_id=M336K5ProtocolRunId(M336K5_PROTOCOL_RUN_ID),
-        acquisition_run_id=M336K5AcquisitionRunId(M336K5_ACQUISITION_RUN_ID),
-        selector_run_id=M336K5SelectorRunId(M336K5_SELECTOR_RUN_ID),
-        evaluator_run_id=M336K5EvaluatorRunId(M336K5_EVALUATOR_RUN_ID),
-        execution_mode=M336K5ExecutionMode("FINAL"),
+        route_version=M336K5RouteVersion(profile.route_version),
+        protocol_run_id=M336K5ProtocolRunId(profile.protocol_run_id),
+        acquisition_run_id=M336K5AcquisitionRunId(profile.acquisition_run_id),
+        selector_run_id=M336K5SelectorRunId(profile.selector_run_id),
+        evaluator_run_id=M336K5EvaluatorRunId(profile.evaluator_run_id),
+        execution_mode=M336K5ExecutionMode(profile.execution_mode),
         **hashes,
     )
+
+
+def build_m336k5_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityBundle:
+    return build_m336k_identity_bundle_for_profile("m336k5-final-v1", **hashes)
 
 
 def build_m336k6_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityBundle:
     """Build the exact M-33.6k.6 identities without changing route semantics."""
 
-    return M336K5RouteIdentityBundle.build(
-        route_version=M336K5RouteVersion(M336K6_ROUTE_VERSION),
-        protocol_run_id=M336K5ProtocolRunId(M336K6_PROTOCOL_RUN_ID),
-        acquisition_run_id=M336K5AcquisitionRunId(M336K6_ACQUISITION_RUN_ID),
-        selector_run_id=M336K5SelectorRunId(M336K6_SELECTOR_RUN_ID),
-        evaluator_run_id=M336K5EvaluatorRunId(M336K6_EVALUATOR_RUN_ID),
-        execution_mode=M336K5ExecutionMode("FINAL"),
-        **hashes,
-    )
+    return build_m336k_identity_bundle_for_profile("m336k6-final-v1", **hashes)
 
 
 def build_m336k7_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityBundle:
     """Build the exact M-33.6k.7 identities for the current final route."""
 
-    return M336K5RouteIdentityBundle.build(
-        route_version=M336K5RouteVersion(M336K7_ROUTE_VERSION),
-        protocol_run_id=M336K5ProtocolRunId(M336K7_PROTOCOL_RUN_ID),
-        acquisition_run_id=M336K5AcquisitionRunId(M336K7_ACQUISITION_RUN_ID),
-        selector_run_id=M336K5SelectorRunId(M336K7_SELECTOR_RUN_ID),
-        evaluator_run_id=M336K5EvaluatorRunId(M336K7_EVALUATOR_RUN_ID),
-        execution_mode=M336K5ExecutionMode("FINAL"),
-        **hashes,
-    )
+    return build_m336k_identity_bundle_for_profile("m336k7-final-v1", **hashes)
 
 
 def build_m336k8_official_identity_bundle(**hashes: str) -> M336K5RouteIdentityBundle:
     """Build the source-domain-bound M-33.6k.8 final identities."""
 
-    return M336K5RouteIdentityBundle.build(
-        route_version=M336K5RouteVersion(M336K8_ROUTE_VERSION),
-        protocol_run_id=M336K5ProtocolRunId(M336K8_PROTOCOL_RUN_ID),
-        acquisition_run_id=M336K5AcquisitionRunId(M336K8_ACQUISITION_RUN_ID),
-        selector_run_id=M336K5SelectorRunId(M336K8_SELECTOR_RUN_ID),
-        evaluator_run_id=M336K5EvaluatorRunId(M336K8_EVALUATOR_RUN_ID),
-        execution_mode=M336K5ExecutionMode("FINAL"),
-        **hashes,
-    )
+    return build_m336k_identity_bundle_for_profile("m336k8-final-v1", **hashes)
+
+
+def build_m336k9_official_identity_bundle(
+    **hashes: str,
+) -> M336K5RouteIdentityBundle:
+    return build_m336k_identity_bundle_for_profile("m336k8-final-v2", **hashes)
+
+
+def build_m336k8_rehearsal_identity_bundle(
+    **hashes: str,
+) -> M336K5RouteIdentityBundle:
+    return build_m336k_identity_bundle_for_profile("m336k8-rehearsal-v2", **hashes)

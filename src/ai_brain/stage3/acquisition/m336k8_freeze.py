@@ -21,6 +21,9 @@ from ai_brain.stage3.acquisition.m336k7_freeze import (
 M336K8_READY_STATUS = "READY_FOR_SOURCE_DOMAIN_BOUND_FINAL_JAVA_EXECUTION_V8"
 M336K8_BRANCH = "exp/stage3-m336k8-source-domain-final-v17"
 M336K8_F33_ROOT = Path("artifacts/m336k8/f33-freeze")
+M336K9_READY_STATUS = "READY_FOR_UNIFIED_ADMISSION_FINAL_JAVA_EXECUTION_V9"
+M336K9_BRANCH = "exp/stage3-m336k9-controller-admission-final-v18"
+M336K9_F34_ROOT = Path("artifacts/m336k9/f34-freeze")
 M336K8_REQUIRED_FREEZE_COMPONENTS = frozenset(
     (set(M336K7_REQUIRED_FREEZE_COMPONENTS) - {"frozen_contract_compatibility"})
     | {
@@ -38,6 +41,15 @@ M336K8_REQUIRED_FREEZE_COMPONENTS = frozenset(
         "freeze_assembly_receipt",
         "frozen_contract_compatibility_v2",
         "legacy_controller_alias_receipt",
+    }
+)
+M336K9_REQUIRED_FREEZE_COMPONENTS = frozenset(
+    set(M336K8_REQUIRED_FREEZE_COMPONENTS)
+    | {
+        "official_profile_registry",
+        "active_official_profile",
+        "profile_coverage_gate",
+        "controller_admission_contract",
     }
 )
 _SOURCE_SCOPE = ("src", "scripts", "tools", "schemas", "pyproject.toml", "uv.lock")
@@ -108,8 +120,14 @@ class M336K8FreezeManifest:
     self_reference_safe_exclusions: tuple[str, ...]
     prospective_freeze_tree_hash: str
     manifest_hash: str
+    official_profile_id: str | None = None
+    official_profile_hash: str | None = None
+    official_profile_registry_hash: str | None = None
+    profile_coverage_gate_hash: str | None = None
+    controller_admission_contract_hash: str | None = None
 
     ROLE: ClassVar[str] = "M336K8_SOURCE_DOMAIN_BOUND_FREEZE_V1"
+    ROLE_V2: ClassVar[str] = "M336K9_UNIFIED_ADMISSION_FREEZE_V2"
 
     @property
     def exact_q28_sha(self) -> str:
@@ -126,7 +144,7 @@ class M336K8FreezeManifest:
     def _body(self) -> dict[str, Any]:
         value = asdict(self)
         value.pop("manifest_hash")
-        return value
+        return {name: item for name, item in value.items() if item is not None}
 
     def canonical_object(self) -> dict[str, Any]:
         return {**self._body(), "manifest_hash": self.manifest_hash}
@@ -147,7 +165,23 @@ class M336K8FreezeManifest:
                 )
         exclusions = self.self_reference_safe_exclusions
         exclusion_roots = {Path(item).parent.as_posix() for item in exclusions}
-        expected_names = {"freeze_manifest.json", "f33_build_receipt.json"}
+        current = self.contract_role == self.ROLE_V2
+        expected_names = {
+            "freeze_manifest.json",
+            "f34_build_receipt.json" if current else "f33_build_receipt.json",
+        }
+        required_components = (
+            M336K9_REQUIRED_FREEZE_COMPONENTS
+            if current
+            else M336K8_REQUIRED_FREEZE_COMPONENTS
+        )
+        profile_values = (
+            self.official_profile_id,
+            self.official_profile_hash,
+            self.official_profile_registry_hash,
+            self.profile_coverage_gate_hash,
+            self.controller_admission_contract_hash,
+        )
         hashes = tuple(
             value
             for name, value in self.canonical_object().items()
@@ -156,8 +190,8 @@ class M336K8FreezeManifest:
         prospective = self.exact_freeze_sha == "0" * 40
         if (
             self.schema_version != 1
-            or self.contract_role != self.ROLE
-            or names != M336K8_REQUIRED_FREEZE_COMPONENTS
+            or self.contract_role not in {self.ROLE, self.ROLE_V2}
+            or names != required_components
             or len(names) != len(self.components)
             or not _is_sha(self.implementation_tip)
             or not _is_sha(self.exact_qualification_sha)
@@ -169,15 +203,31 @@ class M336K8FreezeManifest:
             or prospective != (self.committed_freeze_tree == "0" * 40)
             or prospective
             and not allow_prospective
+            or current
+            and (
+                type(self.official_profile_id) is not str
+                or not self.official_profile_id
+                or any(not _is_hash(value) for value in profile_values[1:])
+            )
+            or not current
+            and any(value is not None for value in profile_values)
             or self.manifest_hash != content_hash(self._body())
         ):
             raise M336K2ProtocolError("M336K8 freeze manifest is invalid")
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Self:
-        if type(value) is not dict or set(value) != {
-            field.name for field in fields(cls)
-        }:
+        all_fields = {field.name for field in fields(cls)}
+        optional = {
+            "official_profile_id",
+            "official_profile_hash",
+            "official_profile_registry_hash",
+            "profile_coverage_gate_hash",
+            "controller_admission_contract_hash",
+        }
+        if type(value) is not dict or (
+            set(value) != all_fields and set(value) != all_fields - optional
+        ):
             raise M336K2ProtocolError("M336K8 freeze manifest fields changed")
         if (
             type(value["components"]) is not list
@@ -186,6 +236,7 @@ class M336K8FreezeManifest:
             raise M336K2ProtocolError("M336K8 freeze collections changed")
         return cls(
             **{
+                **{name: None for name in optional},
                 **value,
                 "components": tuple(
                     M336K8FrozenComponent(**item) for item in value["components"]
@@ -274,6 +325,53 @@ class M336K8CommittedFreezeAttestation:
         return result
 
 
+@dataclass(frozen=True)
+class M336K9CommittedFreezeAttestation(M336K8CommittedFreezeAttestation):
+    official_profile_id: str
+    official_profile_hash: str
+    official_profile_registry_hash: str
+    profile_coverage_gate_hash: str
+    controller_admission_contract_hash: str
+
+    ROLE: ClassVar[str] = "M336K9_COMMITTED_FREEZE_ATTESTATION"
+
+    def verify(self) -> None:
+        hashes = tuple(
+            value
+            for name, value in self.canonical_object().items()
+            if name.endswith("_hash") and name != "committed_tree_hash"
+        )
+        passed = (
+            self.prospective_tree_matches
+            and self.implementation_change_count == 0
+            and self.merge_count == 0
+            and self.head_upstream_remote_equal
+            and self.worktree_clean
+        )
+        if (
+            self.schema_version != 1
+            or self.contract_role != self.ROLE
+            or not self.official_profile_id
+            or not _is_sha(self.exact_freeze_sha)
+            or not _is_sha(self.exact_qualification_parent)
+            or not _is_sha(self.committed_tree_hash)
+            or any(not _is_hash(value) for value in hashes)
+            or self.status != ("PASS" if passed else "FAIL")
+            or self.attestation_hash != content_hash(self._body())
+        ):
+            raise M336K2ProtocolError("M336K9 committed freeze attestation is invalid")
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> Self:
+        if type(value) is not dict or set(value) != {
+            field.name for field in fields(cls)
+        }:
+            raise M336K2ProtocolError("M336K9 freeze attestation fields changed")
+        result = cls(**value)
+        result.verify()
+        return result
+
+
 def materialize_m336k8_freeze(
     *,
     repository: Path,
@@ -285,6 +383,10 @@ def materialize_m336k8_freeze(
     output: Path,
     expected_branch: str = M336K8_BRANCH,
     freeze_relative_root: str = M336K8_F33_ROOT.as_posix(),
+    readiness_status: str = M336K8_READY_STATUS,
+    freeze_role: str = M336K8FreezeManifest.ROLE,
+    required_components: frozenset[str] = M336K8_REQUIRED_FREEZE_COMPONENTS,
+    build_receipt_name: str = "f33_build_receipt.json",
 ) -> dict[str, Any]:
     """Materialize prospective F-like bytes through one strict component map."""
 
@@ -298,7 +400,10 @@ def materialize_m336k8_freeze(
     if (
         destination.exists()
         or relative_output != freeze_relative_root
-        or set(component_sources) != M336K8_REQUIRED_FREEZE_COMPONENTS
+        or set(component_sources) != required_components
+        or freeze_role not in {M336K8FreezeManifest.ROLE, M336K8FreezeManifest.ROLE_V2}
+        or build_receipt_name
+        not in {"f33_build_receipt.json", "f34_build_receipt.json"}
     ):
         raise M336K2ProtocolError("M336K8 freeze destination/component set changed")
     _verify_qualification_lineage(
@@ -310,7 +415,7 @@ def materialize_m336k8_freeze(
     )
     readiness_value = _verified_object(readiness, "readiness_hash")
     if (
-        readiness_value["status"] != M336K8_READY_STATUS
+        readiness_value["status"] != readiness_status
         or readiness_value["exact_implementation_tip"] != exact_implementation_tip
         or readiness_value["official_one_shot_counter_count"] != 0
         or readiness_value["new_final_source_body_bytes"] != 0
@@ -354,7 +459,7 @@ def materialize_m336k8_freeze(
         prospective = content_hash(_tree_rows(destination))
         values = {
             "schema_version": 1,
-            "contract_role": M336K8FreezeManifest.ROLE,
+            "contract_role": freeze_role,
             "implementation_tip": exact_implementation_tip,
             "exact_qualification_sha": exact_qualification_sha,
             "exact_freeze_sha": "0" * 40,
@@ -404,10 +509,30 @@ def materialize_m336k8_freeze(
             "components": tuple(components),
             "self_reference_safe_exclusions": (
                 f"{freeze_relative_root}/freeze_manifest.json",
-                f"{freeze_relative_root}/f33_build_receipt.json",
+                f"{freeze_relative_root}/{build_receipt_name}",
             ),
             "prospective_freeze_tree_hash": prospective,
         }
+        if freeze_role == M336K8FreezeManifest.ROLE_V2:
+            profile = _object(component_sources["active_official_profile"])
+            values.update(
+                {
+                    "official_profile_id": profile["profile_id"],
+                    "official_profile_hash": _semantic_hash(
+                        component_sources["active_official_profile"], "profile_hash"
+                    ),
+                    "official_profile_registry_hash": _semantic_hash(
+                        component_sources["official_profile_registry"], "registry_hash"
+                    ),
+                    "profile_coverage_gate_hash": _semantic_hash(
+                        component_sources["profile_coverage_gate"], "gate_hash"
+                    ),
+                    "controller_admission_contract_hash": _semantic_hash(
+                        component_sources["controller_admission_contract"],
+                        "contract_hash",
+                    ),
+                }
+            )
         temporary = M336K8FreezeManifest(**values, manifest_hash="0" * 64)
         manifest = M336K8FreezeManifest(
             **values, manifest_hash=content_hash(temporary._body())
@@ -419,7 +544,11 @@ def materialize_m336k8_freeze(
         raise
     body = {
         "schema_version": 1,
-        "contract_role": "PUBLIC_SAFE_M336K8_FREEZE_BUILD_RECEIPT",
+        "contract_role": (
+            "PUBLIC_SAFE_M336K9_FREEZE_BUILD_RECEIPT"
+            if freeze_role == M336K8FreezeManifest.ROLE_V2
+            else "PUBLIC_SAFE_M336K8_FREEZE_BUILD_RECEIPT"
+        ),
         "exact_implementation_tip": exact_implementation_tip,
         "exact_qualification_sha": exact_qualification_sha,
         "component_count": len(components),
@@ -431,7 +560,7 @@ def materialize_m336k8_freeze(
         "status": "PASS",
     }
     receipt = {**body, "receipt_hash": content_hash(body)}
-    _write(destination / "f33_build_receipt.json", receipt)
+    _write(destination / build_receipt_name, receipt)
     return receipt
 
 
@@ -492,9 +621,14 @@ def attest_committed_m336k8_freeze(
         and prospective == freeze_manifest.prospective_freeze_tree_hash
     )
     plan = _component_object(root, freeze_manifest, "freeze_assembly_plan")
+    attestation_type = (
+        M336K9CommittedFreezeAttestation
+        if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V2
+        else M336K8CommittedFreezeAttestation
+    )
     body = {
         "schema_version": 1,
-        "contract_role": M336K8CommittedFreezeAttestation.ROLE,
+        "contract_role": attestation_type.ROLE,
         "exact_freeze_sha": exact_freeze_sha,
         "exact_qualification_parent": parent,
         "committed_tree_hash": tree,
@@ -514,9 +648,17 @@ def attest_committed_m336k8_freeze(
         "worktree_clean": clean,
         "status": "PASS" if passed else "FAIL",
     }
-    result = M336K8CommittedFreezeAttestation(
-        **body, attestation_hash=content_hash(body)
-    )
+    if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V2:
+        body.update(
+            {
+                "official_profile_id": freeze_manifest.official_profile_id,
+                "official_profile_hash": freeze_manifest.official_profile_hash,
+                "official_profile_registry_hash": freeze_manifest.official_profile_registry_hash,
+                "profile_coverage_gate_hash": freeze_manifest.profile_coverage_gate_hash,
+                "controller_admission_contract_hash": freeze_manifest.controller_admission_contract_hash,
+            }
+        )
+    result = attestation_type(**body, attestation_hash=content_hash(body))
     result.verify()
     if not passed:
         raise M336K2ProtocolError("M336K8 committed freeze attestation failed")

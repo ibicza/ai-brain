@@ -19,13 +19,14 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
     M336K2ProtocolError,
     M336K2RouteLedger,
 )
-from ai_brain.stage3.acquisition.m336k5_identity import (
-    M336K5_PROTOCOL_RUN_ID,
-    M336K6_PROTOCOL_RUN_ID,
-    M336K7_PROTOCOL_RUN_ID,
-    M336K5RouteIdentityBundle,
-)
+from ai_brain.stage3.acquisition.m336k5_identity import M336K5RouteIdentityBundle
 from ai_brain.stage3.acquisition.m336k5_request import M336K5ValidatedInvocation
+from ai_brain.stage3.acquisition.m336k9_admission import (
+    verify_m336k_controller_admission,
+)
+from ai_brain.stage3.acquisition.m336k9_profiles import (
+    m336k_official_profile_registry,
+)
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
 
@@ -63,7 +64,26 @@ def run_m336k5_final_controller(
     bundle = validated.bundle
     if output.exists() or ledger.events():
         raise M336K2ProtocolError("M336K5 final controller destinations are not fresh")
-    _verify_final_identity(request.purpose, bundle)
+    prior_admission = getattr(validated, "controller_admission", None)
+    if prior_admission is None:
+        raise M336K2ProtocolError("M336K controller admission receipt is absent")
+    recomputed_admission = verify_m336k_controller_admission(
+        purpose=request.purpose,
+        route_identity_bundle=bundle,
+        expected_official_profile_id=getattr(
+            validated.authorization, "official_profile_id", None
+        ),
+        expected_profile_hash=getattr(
+            validated.authorization, "official_profile_hash", None
+        ),
+        current_registry=m336k_official_profile_registry(),
+        final_authorization=validated.authorization,
+        freeze_manifest=validated.freeze,
+    )
+    if recomputed_admission != prior_admission:
+        raise M336K2ProtocolError(
+            "M336K controller admission differs from validate-only receipt"
+        )
     proof = preledger_guard()
     if proof != validated.receipt:
         raise M336K2ProtocolError(
@@ -323,20 +343,6 @@ def _evaluator_events(path: Path) -> tuple[dict, ...]:
         result.append(value)
         previous = claimed
     return tuple(result)
-
-
-def _verify_final_identity(purpose: str, bundle: M336K5RouteIdentityBundle) -> None:
-    bundle.verify()
-    if purpose not in {"DISPOSABLE", "OFFICIAL"}:
-        raise M336K2ProtocolError("M336K5 qualification request is not executable")
-    if bundle.execution_mode.value != "FINAL":
-        raise M336K2ProtocolError("M336K5 controller execution mode is not FINAL")
-    if purpose == "OFFICIAL" and bundle.protocol_run_id.value not in {
-        M336K5_PROTOCOL_RUN_ID,
-        M336K6_PROTOCOL_RUN_ID,
-        M336K7_PROTOCOL_RUN_ID,
-    }:
-        raise M336K2ProtocolError("M336K5 official protocol run ID is not canonical")
 
 
 def _verify_worker_receipt(
