@@ -9,6 +9,7 @@ from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k5_startup import startup_receipt_from_path
 from ai_brain.stage3.acquisition.m336k9_admission import (
     M336K9_ADMISSION_MUTATION_CASES,
 )
@@ -19,10 +20,12 @@ def main() -> None:
     parser.add_argument("--repository", type=Path, required=True)
     parser.add_argument("--python", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--startup-receipt", type=Path, required=True)
     args = parser.parse_args()
     repository = args.repository.resolve(strict=True)
     python = args.python.resolve(strict=True)
     output = args.output.resolve(strict=False)
+    startup = startup_receipt_from_path(args.startup_receipt.resolve(strict=True))
     if output.exists() or output.is_relative_to(repository):
         raise M336K2ProtocolError("M336K9 mutation output is stale or public")
     result = subprocess.run(
@@ -52,6 +55,7 @@ def main() -> None:
         "stderr_bytes_hash": bytes_hash(result.stderr),
         "accepted_invalid_count": 0 if result.returncode == 0 else -1,
         "wrong_rejection_layer_count": 0 if result.returncode == 0 else -1,
+        "startup_receipt_hash": startup.receipt_hash,
         "status": "PASS" if result.returncode == 0 else "FAIL",
     }
     report = {**body, "report_hash": content_hash(body)}

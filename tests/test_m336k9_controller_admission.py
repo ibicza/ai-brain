@@ -563,3 +563,8 @@ def test_m336k9_official_admission_rehearsal_uses_final_pool_for_gate() -> None:
     )
     assert 'not (profile_id is not None and mode == "OFFICIAL")' in builder_source
     assert "candidate_pool_hash=candidate_pool_hash" in builder_source
+    mutation_source = Path("scripts/m336k9_run_admission_mutations.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'parser.add_argument("--startup-receipt"' in mutation_source
+    assert '"startup_receipt_hash": startup.receipt_hash' in mutation_source
