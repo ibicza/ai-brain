@@ -17,6 +17,9 @@ from ai_brain.stage3.acquisition.m336k2_publication import (
     _h_source_files,
     build_m336k2_publication_contract,
 )
+from ai_brain.stage3.acquisition.m336k5_authorization import (
+    build_m336k5_final_authorization,
+)
 from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K8_ACQUISITION_RUN_ID,
     M336K8_EVALUATOR_RUN_ID,
@@ -144,6 +147,60 @@ def test_m336k8_official_identity_namespace_is_exact() -> None:
     assert bundle.acquisition_run_id.value == M336K8_ACQUISITION_RUN_ID
     assert bundle.selector_run_id.value == M336K8_SELECTOR_RUN_ID
     assert bundle.evaluator_run_id.value == M336K8_EVALUATOR_RUN_ID
+
+
+def test_m336k8_official_authorization_accepts_exact_branch() -> None:
+    bundle = build_m336k8_official_identity_bundle(
+        route_registry_hash=H,
+        route_manifest_hash=H,
+        acquisition_policy_hash=H,
+        selector_policy_hash=H,
+        evaluator_policy_hash=H,
+    )
+    authorization = build_m336k5_final_authorization(
+        bundle=bundle,
+        exact_implementation_tip=SHA,
+        exact_q30_sha=SHA,
+        branch_ref="refs/heads/exp/stage3-m336k8-source-domain-final-v17",
+        candidate_pool_hash=H,
+        acquisition_policy_hash=H,
+        archive_policy_hash=H,
+        candidate_terminal_policy_hash=H,
+        global_continuation_policy_hash=H,
+        route_manifest_hash=H,
+        route_registry_hash=H,
+        schema_registry_hash=H,
+        readiness_hash=H,
+        executable_dependency_manifest_hash=H,
+        python_environment_manifest_hash=H,
+        python_startup_policy_hash=H,
+        bootstrap_source_hash=H,
+        windows_launcher_source_hash=H,
+        karina_launcher_hash=H,
+        sanitized_environment_hash=H,
+        startup_receipt_schema_hash=H,
+        resource_budget_hash=H,
+        storage_reservation_receipt_hash=H,
+        resource_monitor_hash=H,
+        cleanup_policy_hash=H,
+        recovery_policy_hash=H,
+        authority_statement_hash=H,
+        disclosure_registry_manifest_hash=H,
+        selector_policy_hash=H,
+        evaluator_policy_hash=H,
+        allowed_network_hosts=("example.invalid",),
+        minimum_candidate_families=80,
+        minimum_organizations=64,
+        maximum_candidates_per_organization=2,
+        acquisition_reservation_limit=1,
+        selector_reservation_limit=1,
+        evaluator_reservation_limit=1,
+        candidate_retry_limit=0,
+        candidate_replacement_limit=0,
+        pre_freeze_source_body_bytes=0,
+    )
+
+    authorization.verify(bundle)
 
 
 def test_m336k8_publication_requires_typed_identity_observation() -> None:

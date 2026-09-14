@@ -12,6 +12,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
     M336K5_PROTOCOL_RUN_ID,
     M336K6_PROTOCOL_RUN_ID,
     M336K7_PROTOCOL_RUN_ID,
+    M336K8_PROTOCOL_RUN_ID,
     M336K5AcquisitionRunId,
     M336K5EvaluatorRunId,
     M336K5ExecutionMode,
@@ -171,6 +172,9 @@ class M336K5FinalAuthorization:
             ),
             M336K7_PROTOCOL_RUN_ID: (
                 "refs/heads/exp/stage3-m336k7-frozen-contract-final-v16"
+            ),
+            M336K8_PROTOCOL_RUN_ID: (
+                "refs/heads/exp/stage3-m336k8-source-domain-final-v17"
             ),
         }
         protocol = self.protocol_run_id_typed.value
