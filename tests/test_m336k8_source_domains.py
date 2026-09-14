@@ -49,6 +49,7 @@ from ai_brain.stage3.acquisition.m336k8_mutations import (
 )
 from ai_brain.stage3.acquisition.m336k8_request import (
     M336K8FinalRouteRequestV4,
+    _verify_capsule_source_domain,
     build_m336k8_final_route_request,
 )
 
@@ -333,6 +334,14 @@ def test_m336k8_mutation_runner_consumes_hermetic_startup_receipt() -> None:
     assert 'parser.add_argument("--startup-receipt"' in source
     assert "startup_receipt_from_path" in source
     assert '"startup_receipt_hash": startup.receipt_hash' in source
+
+
+def test_m336k8_capsule_domain_uses_verified_capsule_receipt_identity() -> None:
+    source = inspect.getsource(_verify_capsule_source_domain)
+    parameters = inspect.signature(_verify_capsule_source_domain).parameters
+
+    assert "capsule_project_source_identity" in parameters
+    assert 'environment["project_source_identity"]' not in source
 
 
 def test_m336k8_gate_executes_semantic_verifier() -> None:

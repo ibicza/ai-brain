@@ -469,6 +469,17 @@ def validate_m336k8_final_invocation(
         authorization,
     )
     verify_m336k7_capsule_compatibility_binding(capsule_binding, legacy_capsule)
+    capsule, legacy_public, karina_dependencies, capsule_identity = (
+        _verify_capsule_bindings(
+            root,
+            request,
+            components,
+            freeze=freeze,
+            binding=capsule_binding,
+            compatibility=legacy_capsule,
+            liveness=liveness,
+        )
+    )
     _verify_capsule_source_domain(
         capsule_binding,
         capsule_source,
@@ -476,6 +487,7 @@ def validate_m336k8_final_invocation(
         capsule_dependencies,
         bridge,
         liveness,
+        capsule_project_source_identity=capsule_identity,
     )
     _verify_source_domain_compatibility(
         source_identity,
@@ -558,17 +570,6 @@ def validate_m336k8_final_invocation(
     )
     _verify_destination_set(root, git, request)
     _verify_lineage(root, git, request, freeze, bundle, post)
-    capsule, legacy_public, karina_dependencies, capsule_identity = (
-        _verify_capsule_bindings(
-            root,
-            request,
-            components,
-            freeze=freeze,
-            binding=capsule_binding,
-            compatibility=legacy_capsule,
-            liveness=liveness,
-        )
-    )
     host, storage = _verify_live_karina(
         root,
         request,
@@ -831,13 +832,15 @@ def _verify_capsule_source_domain(
     dependencies,
     bridge,
     liveness,
+    *,
+    capsule_project_source_identity: str,
 ) -> None:
     relations = (
         (capsule.persistent_capsule_binding_set_hash, binding.binding_set_hash),
         (capsule.capsule_implementation_tip, binding.implementation_tip),
         (
             capsule.capsule_project_source_identity,
-            environment["project_source_identity"],
+            capsule_project_source_identity,
         ),
         (
             capsule.capsule_python_environment_manifest_hash,
