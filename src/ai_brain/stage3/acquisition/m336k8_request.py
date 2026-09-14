@@ -1370,7 +1370,8 @@ def _verify_official_profile_components(
         or coverage != actual_coverage
         or coverage.official_profile_registry_hash != registry.registry_hash
         or contract_hash != content_hash(contract_body)
-        or contract_body != M336K9_CONTROLLER_ADMISSION_CONTRACT
+        or content_hash(contract_body)
+        != content_hash(M336K9_CONTROLLER_ADMISSION_CONTRACT)
         or contract_hash != M336K9_CONTROLLER_ADMISSION_CONTRACT_HASH
         or contract["verifier"] != "verify_m336k_controller_admission"
         or contract["side_effect_count"] != 0

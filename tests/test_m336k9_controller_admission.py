@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,6 +25,8 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
 )
 from ai_brain.stage3.acquisition.m336k9_admission import (
     M336K9_ADMISSION_MUTATION_CASES,
+    M336K9_CONTROLLER_ADMISSION_CONTRACT,
+    M336K9_CONTROLLER_ADMISSION_CONTRACT_HASH,
     M336K9_CONTROLLER_ADMISSION_TESTED_PROFILE_IDS,
     M336KControllerAdmissionReceipt,
     run_m336k_official_profile_coverage_gate,
@@ -547,6 +550,12 @@ def test_m336k9_current_authorization_consumer_roundtrips_profile_fields() -> No
     )
     assert parsed == authorization
     assert isinstance(parsed, M336K9FinalAuthorization)
+
+
+def test_m336k9_admission_contract_survives_json_sequence_roundtrip() -> None:
+    serialized = json.loads(json.dumps(M336K9_CONTROLLER_ADMISSION_CONTRACT))
+    assert serialized != M336K9_CONTROLLER_ADMISSION_CONTRACT
+    assert content_hash(serialized) == M336K9_CONTROLLER_ADMISSION_CONTRACT_HASH
 
 
 def test_m336k9_official_admission_rehearsal_uses_final_pool_for_gate() -> None:
