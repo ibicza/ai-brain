@@ -308,7 +308,8 @@ def main() -> None:
         path.write_text(canonical_json(value) + "\n", encoding="utf-8", newline="\n")
     if identity_namespace in {"m336k7", "m336k8"}:
         _write_m336k7_legacy_bindings(output, request)
-        _write_m336k7_persistent_capsule_route(output)
+        if profile_id != M336K11_PROFILE_ID:
+            _write_m336k7_persistent_capsule_route(output)
         if request["identity_mode"] == "OFFICIAL":
             verify_m336k7_unchanged_candidate_pool(output / "candidate_pool.json")
     if identity_namespace == "m336k8":

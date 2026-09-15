@@ -375,6 +375,23 @@ def test_v4_route_registry_covers_the_executable_closure(graph: dict) -> None:
     }.issubset(paths)
 
 
+def test_v4_builder_does_not_require_a_denied_legacy_route() -> None:
+    source = (ROOT / "scripts/m336k5_build_component_bundle.py").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        "if profile_id != M336K11_PROFILE_ID:\n"
+        "            _write_m336k7_persistent_capsule_route(output)"
+    ) in source
+    compatibility_source = (
+        ROOT / "src/ai_brain/stage3/acquisition/m336k8_request.py"
+    ).read_text(encoding="utf-8")
+    assert (
+        '"controller_executable_dependency_manifest": (\n'
+        "                    M336K11HermeticExecutableDependencyManifest.from_dict"
+    ) in compatibility_source
+
+
 def test_current_binding_alias_live_inputs_and_native_plan(graph: dict) -> None:
     receipt = _verify(graph)
     assert receipt.status == "PASS"

@@ -1362,6 +1362,9 @@ def _compatibility_artifacts(
     if assembly_plan.contract_role == M336K8FreezeAssemblyPlan.ROLE_V2:
         consumers.update(
             {
+                "controller_executable_dependency_manifest": (
+                    M336K11HermeticExecutableDependencyManifest.from_dict
+                ),
                 "executable_dependency_manifest": (
                     M336K11HermeticExecutableDependencyManifest.from_dict
                 ),
