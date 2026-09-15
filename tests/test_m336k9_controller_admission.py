@@ -855,6 +855,14 @@ def test_m336k9_official_admission_rehearsal_uses_final_pool_for_gate() -> None:
     qualifier_source = Path("scripts/m336k5_qualify_disposable_protocol.py").read_text(
         encoding="utf-8"
     )
+    generation_guard = qualifier_source.split(
+        "or disposable_publication_generation is not None", maxsplit=1
+    )[1].split(
+        'raise M336K2ProtocolError("M336K9 rehearsal profile purpose changed")',
+        maxsplit=1,
+    )[0]
+    assert "or official_admission_only" not in generation_guard
+    assert 'if disposable_publication_generation == "m336k10"' in qualifier_source
     assert (
         'request["candidate_pool"]\n                    if official_admission_only'
         in qualifier_source

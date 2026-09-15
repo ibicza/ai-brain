@@ -185,7 +185,6 @@ def main() -> None:
         and (
             disposable_publication_generation != "m336k10"
             or namespace != "m336k8"
-            or official_admission_only
             or official_profile is None
         )
     ):
