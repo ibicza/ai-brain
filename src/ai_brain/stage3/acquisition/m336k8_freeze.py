@@ -583,6 +583,7 @@ def materialize_m336k8_freeze(
     freeze_role: str = M336K8FreezeManifest.ROLE,
     required_components: frozenset[str] = M336K8_REQUIRED_FREEZE_COMPONENTS,
     build_receipt_name: str = "f33_build_receipt.json",
+    allow_unpublished_qualification: bool = False,
 ) -> dict[str, Any]:
     """Materialize prospective F-like bytes through one strict component map."""
 
@@ -610,16 +611,29 @@ def materialize_m336k8_freeze(
             "f34_build_receipt.json",
             "f35_build_receipt.json",
             "f36_build_receipt.json",
+            "prospective_freeze_build_receipt.json",
         }
+        or allow_unpublished_qualification
+        and (
+            freeze_role != M336K8FreezeManifest.ROLE_V4
+            or expected_branch != M336K11_BRANCH
+            or build_receipt_name != "prospective_freeze_build_receipt.json"
+            or exact_qualification_sha != exact_implementation_tip
+        )
     ):
         raise M336K2ProtocolError("M336K8 freeze destination/component set changed")
-    _verify_qualification_lineage(
-        root,
-        git,
-        exact_implementation_tip,
-        exact_qualification_sha,
-        expected_branch,
-    )
+    if allow_unpublished_qualification:
+        _verify_prospective_qualification_context(
+            root, git, exact_implementation_tip, expected_branch
+        )
+    else:
+        _verify_qualification_lineage(
+            root,
+            git,
+            exact_implementation_tip,
+            exact_qualification_sha,
+            expected_branch,
+        )
     readiness_value = _verified_object(readiness, "readiness_hash")
     if (
         readiness_value["status"] != readiness_status
@@ -820,7 +834,9 @@ def materialize_m336k8_freeze(
     body = {
         "schema_version": 1,
         "contract_role": (
-            "PUBLIC_SAFE_M336K11_FREEZE_BUILD_RECEIPT"
+            "PUBLIC_SAFE_M336K11_PROSPECTIVE_FREEZE_BUILD_RECEIPT"
+            if allow_unpublished_qualification
+            else "PUBLIC_SAFE_M336K11_FREEZE_BUILD_RECEIPT"
             if freeze_role == M336K8FreezeManifest.ROLE_V4
             else "PUBLIC_SAFE_M336K10_FREEZE_BUILD_RECEIPT"
             if freeze_role == M336K8FreezeManifest.ROLE_V3
@@ -1010,6 +1026,30 @@ def _verify_qualification_lineage(
     ):
         raise M336K2ProtocolError(
             "M336K8 freeze requires exact pushed evidence-only qualification"
+        )
+
+
+def _verify_prospective_qualification_context(
+    root: Path,
+    git: Path,
+    implementation: str,
+    branch: str,
+) -> None:
+    """Require an exact pushed implementation tip without pretending it is Q36."""
+
+    remote_rows = _git(
+        git, root, "ls-remote", "--exit-code", "origin", f"refs/heads/{branch}"
+    ).split()
+    remote = remote_rows[0] if remote_rows else ""
+    if (
+        _git(git, root, "rev-parse", "HEAD^{commit}") != implementation
+        or _git(git, root, "branch", "--show-current") != branch
+        or _git(git, root, "rev-parse", "@{upstream}^{commit}") != implementation
+        or remote != implementation
+        or _git(git, root, "status", "--porcelain=v1")
+    ):
+        raise M336K2ProtocolError(
+            "M336K11 prospective freeze requires exact pushed implementation"
         )
 
 

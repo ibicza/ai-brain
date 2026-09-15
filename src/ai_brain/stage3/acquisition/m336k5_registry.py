@@ -115,6 +115,10 @@ M336K11_ROUTE_COMPONENTS = M336K8_ROUTE_COMPONENTS + (
     ),
     ("hermetic-component-builder", "scripts/m336k11_build_component_bundle.py"),
     ("hermetic-freeze-builder", "scripts/m336k11_materialize_f36.py"),
+    (
+        "hermetic-prospective-freeze-builder",
+        "scripts/m336k11_materialize_prospective_freeze.py",
+    ),
     ("hermetic-final-cli", "scripts/m336k11_run_final_route.py"),
 )
 

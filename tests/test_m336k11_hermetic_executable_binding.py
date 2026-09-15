@@ -371,6 +371,7 @@ def test_v4_route_registry_covers_the_executable_closure(graph: dict) -> None:
         "src/ai_brain/stage3/acquisition/m336k11_execution.py",
         "scripts/m336k11_build_component_bundle.py",
         "scripts/m336k11_materialize_f36.py",
+        "scripts/m336k11_materialize_prospective_freeze.py",
         "scripts/m336k11_run_final_route.py",
     }.issubset(paths)
 
