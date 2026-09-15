@@ -211,10 +211,13 @@ class M336K8FreezeManifest:
         current = self.contract_role in {self.ROLE_V2, self.ROLE_V3, self.ROLE_V4}
         acquisition_bound = self.contract_role in {self.ROLE_V3, self.ROLE_V4}
         executable_bound = self.contract_role == self.ROLE_V4
+        prospective = self.exact_freeze_sha == "0" * 40
         expected_names = {
             "freeze_manifest.json",
             (
-                "f36_build_receipt.json"
+                "prospective_freeze_build_receipt.json"
+                if executable_bound and prospective
+                else "f36_build_receipt.json"
                 if executable_bound
                 else "f35_build_receipt.json"
                 if acquisition_bound
@@ -261,7 +264,6 @@ class M336K8FreezeManifest:
             for name, value in self.canonical_object().items()
             if name.endswith("_hash")
         )
-        prospective = self.exact_freeze_sha == "0" * 40
         if (
             self.schema_version != 1
             or self.contract_role

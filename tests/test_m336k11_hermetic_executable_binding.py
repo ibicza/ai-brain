@@ -393,6 +393,16 @@ def test_v4_builder_does_not_require_a_denied_legacy_route() -> None:
     ) in compatibility_source
 
 
+def test_v4_prospective_freeze_has_a_distinct_build_receipt_name() -> None:
+    source = (ROOT / "src/ai_brain/stage3/acquisition/m336k8_freeze.py").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        '"prospective_freeze_build_receipt.json"\n'
+        "                if executable_bound and prospective"
+    ) in source
+
+
 def test_current_binding_alias_live_inputs_and_native_plan(graph: dict) -> None:
     receipt = _verify(graph)
     assert receipt.status == "PASS"
