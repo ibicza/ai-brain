@@ -76,6 +76,8 @@ from ai_brain.stage3.acquisition.m336k8_contracts import (
 from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K9_READY_STATUS,
     M336K9_REQUIRED_FREEZE_COMPONENTS,
+    M336K10_READY_STATUS,
+    M336K10_REQUIRED_FREEZE_COMPONENTS,
     M336K8FreezeManifest,
     attest_committed_m336k8_freeze,
     materialize_m336k8_freeze,
@@ -167,6 +169,7 @@ def main() -> None:
         if official_profile_id is not None
         else None
     )
+    acquisition_bound_official = official_profile_id == "m336k8-final-v3"
     expected_profile_status = (
         M336KOfficialRouteProfileStatus.CURRENT_ACTIVE
         if official_admission_only
@@ -509,7 +512,9 @@ def main() -> None:
         "official_one_shot_counter_count": 0,
         "new_final_source_body_bytes": 0,
         "status": (
-            M336K9_READY_STATUS
+            M336K10_READY_STATUS
+            if acquisition_bound_official
+            else M336K9_READY_STATUS
             if official_profile is not None
             else "READY_FOR_SOURCE_DOMAIN_BOUND_FINAL_JAVA_EXECUTION_V8"
             if namespace == "m336k8"
@@ -655,10 +660,26 @@ def main() -> None:
         freeze_relative_root=legacy_request["f_root"],
         **(
             {
-                "readiness_status": M336K9_READY_STATUS,
-                "freeze_role": M336K8FreezeManifest.ROLE_V2,
-                "required_components": M336K9_REQUIRED_FREEZE_COMPONENTS,
-                "build_receipt_name": "f34_build_receipt.json",
+                "readiness_status": (
+                    M336K10_READY_STATUS
+                    if acquisition_bound_official
+                    else M336K9_READY_STATUS
+                ),
+                "freeze_role": (
+                    M336K8FreezeManifest.ROLE_V3
+                    if acquisition_bound_official
+                    else M336K8FreezeManifest.ROLE_V2
+                ),
+                "required_components": (
+                    M336K10_REQUIRED_FREEZE_COMPONENTS
+                    if acquisition_bound_official
+                    else M336K9_REQUIRED_FREEZE_COMPONENTS
+                ),
+                "build_receipt_name": (
+                    "f35_build_receipt.json"
+                    if acquisition_bound_official
+                    else "f34_build_receipt.json"
+                ),
             }
             if official_profile is not None
             else {}
@@ -1019,6 +1040,8 @@ def main() -> None:
             or preledger.get("official_profile_registry_hash")
             != m336k_official_profile_registry().registry_hash
             or not preledger.get("controller_admission_receipt_hash")
+            or acquisition_bound_official
+            and not preledger.get("official_acquisition_binding_receipt_hash")
             or any(Path(path).exists() for path in destinations.values())
         ):
             raise M336K2ProtocolError("M336K9 official admission rehearsal spent state")
@@ -1042,7 +1065,11 @@ def main() -> None:
         monitor.stop("OFFICIAL_ADMISSION_REHEARSAL")
         body = {
             "schema_version": 1,
-            "contract_role": "PUBLIC_SAFE_M336K9_OFFICIAL_PURPOSE_ADMISSION_REHEARSAL",
+            "contract_role": (
+                "PUBLIC_SAFE_M336K10_OFFICIAL_ACQUISITION_ADMISSION_REHEARSAL"
+                if acquisition_bound_official
+                else "PUBLIC_SAFE_M336K9_OFFICIAL_PURPOSE_ADMISSION_REHEARSAL"
+            ),
             "implementation_tip": implementation,
             "q_like_sha": q_like,
             "f_like_sha": f_like,
@@ -1062,6 +1089,14 @@ def main() -> None:
             ],
             "controller_admission_result": "PASS",
             "controller_admission_receipt_bound": True,
+            "official_acquisition_binding_receipt_hash": preledger.get(
+                "official_acquisition_binding_receipt_hash"
+            ),
+            "acquisition_admission_status": (
+                "OFFICIAL_ACQUISITION_INPUTS_ACCEPTED_PRELEDGER"
+                if acquisition_bound_official
+                else "NOT_APPLICABLE"
+            ),
             "reservation_release_receipt_hash": release_receipt["receipt_hash"],
             **counters,
             "official_one_shot_counter_count": 0,
@@ -1573,6 +1608,7 @@ def _load_freeze(path: Path):
     if value.get("contract_role") in {
         M336K8FreezeManifest.ROLE,
         M336K8FreezeManifest.ROLE_V2,
+        M336K8FreezeManifest.ROLE_V3,
     }:
         return M336K8FreezeManifest.from_dict(value)
     if value.get("contract_role") == "M336K7_F32_TYPED_FREEZE_V1":

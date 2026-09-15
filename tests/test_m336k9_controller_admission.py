@@ -863,6 +863,16 @@ def test_m336k9_official_admission_rehearsal_uses_final_pool_for_gate() -> None:
     )[0]
     assert "or official_admission_only" not in generation_guard
     assert 'if disposable_publication_generation == "m336k10"' in qualifier_source
+    assert 'acquisition_bound_official = official_profile_id == "m336k8-final-v3"' in (
+        qualifier_source
+    )
+    assert "M336K10_REQUIRED_FREEZE_COMPONENTS" in qualifier_source
+    assert "M336K8FreezeManifest.ROLE_V3" in qualifier_source
+    assert '"f35_build_receipt.json"' in qualifier_source
+    assert "OFFICIAL_ACQUISITION_INPUTS_ACCEPTED_PRELEDGER" in qualifier_source
+    assert 'preledger.get("official_acquisition_binding_receipt_hash")' in (
+        qualifier_source
+    )
     assert (
         'request["candidate_pool"]\n                    if official_admission_only'
         in qualifier_source
