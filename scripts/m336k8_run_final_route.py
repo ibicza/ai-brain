@@ -192,6 +192,21 @@ def main() -> None:
         receipt_root=Path(request.stage_receipt_root),
         bundle=validated.bundle,
         expected_startup_receipt_hash=validated.receipt.startup_receipt_hash,
+        expected_acquisition_binding_hashes=(
+            {}
+            if validated.official_acquisition_binding is None
+            else {
+                "official_acquisition_binding_receipt_hash": (
+                    validated.official_acquisition_binding.receipt_hash
+                ),
+                "stage_request_acquisition_binding_hash": (
+                    validated.post_freeze_inputs.stage_request_acquisition_binding_hash
+                ),
+                "acquisition_ledger_context_template_hash": (
+                    validated.post_freeze_inputs.acquisition_ledger_context_template_hash
+                ),
+            }
+        ),
     )
     try:
         result = run_m336k5_final_controller(
@@ -208,6 +223,11 @@ def main() -> None:
         bundle=validated.bundle,
         exact_f30_sha=request.exact_freeze_sha,
         preledger_receipt_hash=validated.receipt.receipt_hash,
+        official_acquisition_binding_receipt_hash=(
+            None
+            if validated.official_acquisition_binding is None
+            else validated.official_acquisition_binding.receipt_hash
+        ),
     )
     print(canonical_json(asdict(result)))
 

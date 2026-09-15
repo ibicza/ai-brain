@@ -62,12 +62,14 @@ from ai_brain.stage3.acquisition.m336k8_contracts import (
     M336K8SourceDomainCompatibilityReceipt,
     build_m336k8_project_source_identity_receipt,
     m336k8_semantic_binding_mismatches,
+    m336k_current_post_freeze_input_bundle_from_dict,
     require_m336k8_frozen_bytes,
 )
 from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K8CommittedFreezeAttestation,
     M336K8FreezeManifest,
     M336K9CommittedFreezeAttestation,
+    M336K10CommittedFreezeAttestation,
 )
 from ai_brain.stage3.acquisition.m336k9_admission import (
     M336K9_CONTROLLER_ADMISSION_CONTRACT,
@@ -84,6 +86,20 @@ from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfile,
     M336KOfficialRouteProfileRegistry,
     m336k_official_profile_registry,
+)
+from ai_brain.stage3.acquisition.m336k10_binding import (
+    M336K10_PROFILE_ID,
+    M336K10AcquisitionLedgerContextTemplate,
+    M336K10FreezeOriginReceipt,
+    M336K10NetworkAuthorityManifest,
+    M336K10OfficialAcquisitionBindingReceipt,
+    M336K10OfficialAcquisitionPolicy,
+    M336K10OfficialCandidatePoolBinding,
+    M336K10ProviderConfiguration,
+    M336K10SharedPolicyBinding,
+    M336K10StageRequestAcquisitionBinding,
+    read_provider_sources,
+    verify_m336k10_official_acquisition_binding,
 )
 
 M336K8_FINAL_REQUEST_CONTRACT = {
@@ -283,6 +299,7 @@ class M336K8PreLedgerInvocationReceipt:
     official_profile_hash: str | None = None
     official_profile_registry_hash: str | None = None
     controller_admission_receipt_hash: str | None = None
+    official_acquisition_binding_receipt_hash: str | None = None
 
 
 @dataclass(frozen=True)
@@ -307,6 +324,7 @@ class M336K8ValidatedInvocation:
     compatibility_gate: M336K8FrozenContractCompatibilityGateV2
     receipt: M336K8PreLedgerInvocationReceipt
     controller_admission: M336KControllerAdmissionReceipt
+    official_acquisition_binding: M336K10OfficialAcquisitionBindingReceipt | None
 
 
 def build_m336k8_final_route_request(**values: Any) -> M336K8FinalRouteRequestV4:
@@ -370,7 +388,7 @@ def validate_m336k8_final_invocation(
     )
     authorization = m336k_current_final_authorization_from_dict(authorization_value)
     authorization.verify(bundle)
-    post = M336K8PostFreezeInputBundleV2.from_dict(
+    post = m336k_current_post_freeze_input_bundle_from_dict(
         _object(Path(request.post_freeze_input_bundle).resolve(strict=True))
     )
     policy = M336K8ProjectSourceIdentityPolicy.from_dict(
@@ -478,6 +496,15 @@ def validate_m336k8_final_invocation(
     profile_registry, active_profile, _coverage = _verify_official_profile_components(
         root, components, authorization=authorization, freeze=freeze, bundle=bundle
     )
+    acquisition_binding = _verify_m336k10_acquisition_components(
+        root,
+        request,
+        components,
+        profile=active_profile,
+        authorization=authorization,
+        post=post,
+        freeze=freeze,
+    )
     controller_admission = verify_m336k_controller_admission(
         purpose=request.purpose,
         route_identity_bundle=bundle,
@@ -486,6 +513,7 @@ def validate_m336k8_final_invocation(
         current_registry=profile_registry,
         final_authorization=authorization,
         freeze_manifest=freeze,
+        official_acquisition_binding=acquisition_binding,
     )
     verify_m336k7_resource_gate_binding(
         resource_policy, resource_observation, reservation, resource_gate
@@ -666,7 +694,11 @@ def validate_m336k8_final_invocation(
         "official_profile_hash": active_profile.profile_hash,
         "official_profile_registry_hash": profile_registry.registry_hash,
         "controller_admission_receipt_hash": controller_admission.receipt_hash,
+        "official_acquisition_binding_receipt_hash": (
+            None if acquisition_binding is None else acquisition_binding.receipt_hash
+        ),
     }
+    body = {name: value for name, value in body.items() if value is not None}
     receipt = M336K8PreLedgerInvocationReceipt(**body, receipt_hash=content_hash(body))
     return M336K8ValidatedInvocation(
         request,
@@ -689,6 +721,7 @@ def validate_m336k8_final_invocation(
         frozen_gate,
         receipt,
         controller_admission,
+        acquisition_binding,
     )
 
 
@@ -1054,7 +1087,7 @@ def _compatibility_artifacts(
         "legacy_controller_alias_receipt": M336K8LegacyControllerAliasReceipt.from_dict,
         "route_identity_bundle": M336K5RouteIdentityBundle.from_dict,
         "final_authorization": m336k_current_final_authorization_from_dict,
-        "post_freeze_input_bundle": M336K8PostFreezeInputBundleV2.from_dict,
+        "post_freeze_input_bundle": m336k_current_post_freeze_input_bundle_from_dict,
         "freeze_assembly_plan": M336K8FreezeAssemblyPlan.from_dict,
         "freeze_assembly_receipt": M336K8FreezeAssemblyReceipt.from_dict,
     }
@@ -1189,21 +1222,38 @@ def _verify_lineage(root, git, request, freeze, bundle, post) -> None:
         raise M336K2ProtocolError("M336K8 exact freeze attestation is absent")
     attestation_value = _object(Path(request.freeze_attestation).resolve(strict=True))
     attestation = (
-        M336K9CommittedFreezeAttestation.from_dict(attestation_value)
+        M336K10CommittedFreezeAttestation.from_dict(attestation_value)
+        if attestation_value["contract_role"] == M336K10CommittedFreezeAttestation.ROLE
+        else M336K9CommittedFreezeAttestation.from_dict(attestation_value)
         if "official_profile_id" in attestation_value
         else M336K8CommittedFreezeAttestation.from_dict(attestation_value)
     )
-    profile_attestation_mismatch = (
-        freeze.contract_role == M336K8FreezeManifest.ROLE_V2
-        and (
-            attestation.official_profile_id != freeze.official_profile_id
-            or attestation.official_profile_hash != freeze.official_profile_hash
-            or attestation.official_profile_registry_hash
-            != freeze.official_profile_registry_hash
-            or attestation.profile_coverage_gate_hash
-            != freeze.profile_coverage_gate_hash
-            or attestation.controller_admission_contract_hash
-            != freeze.controller_admission_contract_hash
+    profile_attestation_mismatch = freeze.contract_role in {
+        M336K8FreezeManifest.ROLE_V2,
+        M336K8FreezeManifest.ROLE_V3,
+    } and (
+        attestation.official_profile_id != freeze.official_profile_id
+        or attestation.official_profile_hash != freeze.official_profile_hash
+        or attestation.official_profile_registry_hash
+        != freeze.official_profile_registry_hash
+        or attestation.profile_coverage_gate_hash != freeze.profile_coverage_gate_hash
+        or attestation.controller_admission_contract_hash
+        != freeze.controller_admission_contract_hash
+    )
+    acquisition_attestation_mismatch = (
+        freeze.contract_role == M336K8FreezeManifest.ROLE_V3
+        and any(
+            getattr(attestation, name, None) != getattr(freeze, name)
+            for name in (
+                "official_candidate_pool_binding_hash",
+                "official_network_authority_manifest_hash",
+                "official_acquisition_policy_hash",
+                "official_acquisition_binding_receipt_hash",
+                "official_provider_configuration_hash",
+                "stage_request_acquisition_binding_hash",
+                "acquisition_ledger_context_template_hash",
+                "official_freeze_origin_receipt_hash",
+            )
         )
     )
     branch = subprocess.run(
@@ -1231,6 +1281,7 @@ def _verify_lineage(root, git, request, freeze, bundle, post) -> None:
         or attestation.producer_origin_map_hash
         != _object(Path(request.freeze_assembly_plan))["producer_origin_map_hash"]
         or profile_attestation_mismatch
+        or acquisition_attestation_mismatch
         or head != upstream
         or head != remote
         or head != request.exact_freeze_sha
@@ -1245,8 +1296,8 @@ def build_m336k8_internal_stage_request(validated: M336K8ValidatedInvocation) ->
 
     request = validated.request
     bundle = validated.bundle
-    return {
-        "schema_version": 3,
+    result = {
+        "schema_version": 4 if validated.official_acquisition_binding else 3,
         "repository": request.repository,
         "git_executable": request.git_executable,
         "python_executable": request.python_executable,
@@ -1273,6 +1324,21 @@ def build_m336k8_internal_stage_request(validated: M336K8ValidatedInvocation) ->
         "karina": _legacy_stage_karina(request.karina),
         "executable_handles": request.executable_handles,
     }
+    if validated.official_acquisition_binding is not None:
+        result.update(
+            {
+                "official_acquisition_binding_receipt_hash": (
+                    validated.official_acquisition_binding.receipt_hash
+                ),
+                "stage_request_acquisition_binding_hash": (
+                    validated.post_freeze_inputs.stage_request_acquisition_binding_hash
+                ),
+                "acquisition_ledger_context_template_hash": (
+                    validated.post_freeze_inputs.acquisition_ledger_context_template_hash
+                ),
+            }
+        )
+    return result
 
 
 def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceipt:
@@ -1283,8 +1349,14 @@ def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceip
         "official_profile_hash",
         "official_profile_registry_hash",
         "controller_admission_receipt_hash",
+        "official_acquisition_binding_receipt_hash",
     }
-    if set(value) != all_fields and set(value) != all_fields - profile_fields:
+    mandatory_fields = all_fields - profile_fields
+    if (
+        type(value) is not dict
+        or not mandatory_fields.issubset(value)
+        or set(value) - mandatory_fields - profile_fields
+    ):
         raise M336K2ProtocolError("M336K8 preledger receipt fields changed")
     receipt = M336K8PreLedgerInvocationReceipt(
         **{**{name: None for name in profile_fields}, **value}
@@ -1308,8 +1380,13 @@ def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceip
         content_hash(body) != claimed
         or any(counters)
         or receipt.status != "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER"
-        or set(value) == all_fields
-        and any(getattr(receipt, name) is None for name in profile_fields)
+        or any(
+            getattr(receipt, name) is None
+            for name in profile_fields - {"official_acquisition_binding_receipt_hash"}
+        )
+        and any(name in value for name in profile_fields)
+        or receipt.official_profile_id == M336K10_PROFILE_ID
+        and receipt.official_acquisition_binding_receipt_hash is None
     ):
         raise M336K2ProtocolError("M336K8 preledger receipt is invalid")
     return receipt
@@ -1384,6 +1461,130 @@ def _verify_official_profile_components(
     ):
         raise M336K2ProtocolError("M336K9 official profile freeze binding changed")
     return registry, profile, coverage
+
+
+def _verify_m336k10_acquisition_components(
+    root: Path,
+    request: M336K8FinalRouteRequestV4,
+    components: dict[str, Any],
+    *,
+    profile: M336KOfficialRouteProfile,
+    authorization: M336K5FinalAuthorization,
+    post: M336K8PostFreezeInputBundleV2,
+    freeze: M336K8FreezeManifest,
+) -> M336K10OfficialAcquisitionBindingReceipt | None:
+    if profile.profile_id != M336K10_PROFILE_ID:
+        return None
+    required = {
+        "acquisition_ledger_context_template",
+        "acquisition_policy",
+        "candidate_pool",
+        "disclosure_registry_manifest",
+        "official_acquisition_binding_receipt",
+        "official_candidate_pool_binding",
+        "official_freeze_origin_receipt",
+        "official_network_authority_manifest",
+        "official_provider_configuration",
+        "shared_acquisition_policy_binding",
+        "stage_request_acquisition_binding",
+    }
+    if not required.issubset(components):
+        raise M336K2ProtocolError("M336K10 acquisition components are absent")
+    pool_path = _component_path(root, components, "candidate_pool")
+    disclosure_path = _component_path(root, components, "disclosure_registry_manifest")
+    pool_binding = M336K10OfficialCandidatePoolBinding.from_dict(
+        _component_object(root, components, "official_candidate_pool_binding")
+    )
+    network = M336K10NetworkAuthorityManifest.from_dict(
+        _component_object(root, components, "official_network_authority_manifest")
+    )
+    policy = M336K10OfficialAcquisitionPolicy.from_dict(
+        _component_object(root, components, "acquisition_policy")
+    )
+    shared = M336K10SharedPolicyBinding.from_dict(
+        _component_object(root, components, "shared_acquisition_policy_binding")
+    )
+    provider = M336K10ProviderConfiguration.from_dict(
+        _component_object(root, components, "official_provider_configuration")
+    )
+    ledger = M336K10AcquisitionLedgerContextTemplate.from_dict(
+        _component_object(root, components, "acquisition_ledger_context_template")
+    )
+    stage = M336K10StageRequestAcquisitionBinding.from_dict(
+        _component_object(root, components, "stage_request_acquisition_binding")
+    )
+    expected = M336K10OfficialAcquisitionBindingReceipt.from_dict(
+        _component_object(root, components, "official_acquisition_binding_receipt")
+    )
+    origin = M336K10FreezeOriginReceipt.from_dict(
+        _component_object(root, components, "official_freeze_origin_receipt")
+    )
+    maven_source, scm_source = read_provider_sources(root)
+    actual = verify_m336k10_official_acquisition_binding(
+        pool=_object(pool_path),
+        pool_bytes=pool_path.read_bytes(),
+        pool_binding=pool_binding,
+        network_authority=network,
+        policy=policy,
+        profile=profile,
+        shared_policy=shared,
+        provider=provider,
+        authorization=authorization,
+        ledger_context=ledger,
+        stage_binding=stage,
+        authority_statement_bytes=Path(request.authority_statement)
+        .resolve(strict=True)
+        .read_bytes(),
+        disclosure_registry_manifest_bytes=disclosure_path.read_bytes(),
+        maven_provider_source=maven_source,
+        scm_provider_source=scm_source,
+        expected_receipt=expected,
+    )
+    post_values = {
+        "official_candidate_pool_binding_hash": pool_binding.binding_hash,
+        "official_network_authority_manifest_hash": network.manifest_hash,
+        "official_acquisition_policy_hash": policy.acquisition_policy_hash,
+        "official_acquisition_binding_receipt_hash": actual.receipt_hash,
+        "official_provider_configuration_hash": provider.configuration_hash,
+        "stage_request_acquisition_binding_hash": stage.binding_hash,
+        "acquisition_ledger_context_template_hash": ledger.template_hash,
+    }
+    freeze_values = {
+        **post_values,
+        "official_freeze_origin_receipt_hash": origin.receipt_hash,
+    }
+    if (
+        any(getattr(post, name, None) != value for name, value in post_values.items())
+        or any(
+            getattr(freeze, name, None) != value
+            for name, value in freeze_values.items()
+        )
+        or origin.status != "PASS"
+    ):
+        raise M336K2ProtocolError("M336K10 freeze acquisition binding changed")
+    return actual
+
+
+def recompute_m336k10_acquisition_binding(
+    validated: M336K8ValidatedInvocation,
+) -> M336K10OfficialAcquisitionBindingReceipt | None:
+    """Recompute the complete semantic binding immediately before route events."""
+
+    profile_id = getattr(validated.authorization, "official_profile_id", None)
+    if profile_id != M336K10_PROFILE_ID:
+        return None
+    root = Path(validated.request.repository).resolve(strict=True)
+    components = {item.name: item for item in validated.freeze.components}
+    profile = m336k_official_profile_registry().profile(profile_id)
+    return _verify_m336k10_acquisition_components(
+        root,
+        validated.request,
+        components,
+        profile=profile,
+        authorization=validated.authorization,
+        post=validated.post_freeze_inputs,
+        freeze=validated.freeze,
+    )
 
 
 def _component_path(root: Path, components: dict[str, Any], name: str) -> Path:

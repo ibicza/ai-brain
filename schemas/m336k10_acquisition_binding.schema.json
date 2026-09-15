@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-brain.local/schemas/m336k10-acquisition-binding.schema.json",
+  "title": "M-33.6k.10 official acquisition binding components",
+  "type": "object",
+  "required": ["schema_version", "contract_role"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract_role": {
+      "enum": [
+        "M336K10_OFFICIAL_CANDIDATE_POOL_BINDING",
+        "M336K10_OFFICIAL_NETWORK_AUTHORITY_MANIFEST",
+        "M336K10_SHARED_ACQUISITION_POLICY_BINDING",
+        "M336K10_OFFICIAL_ACQUISITION_POLICY",
+        "M336K10_OFFICIAL_PROVIDER_CONFIGURATION",
+        "M336K10_ACQUISITION_LEDGER_CONTEXT_TEMPLATE",
+        "M336K10_STAGE_REQUEST_ACQUISITION_BINDING",
+        "M336K10_OFFICIAL_ACQUISITION_BINDING_RECEIPT",
+        "M336K10_OFFICIAL_FREEZE_ORIGIN_RECEIPT"
+      ]
+    },
+    "execution_scope": {
+      "enum": ["OFFICIAL", "SHARED_POLICY", "HISTORICAL_READ_ONLY"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "contract_role": {"const": "M336K10_OFFICIAL_CANDIDATE_POOL_BINDING"}
+        }
+      },
+      "then": {
+        "required": [
+          "execution_scope",
+          "pool_semantic_hash",
+          "pool_bytes_hash",
+          "candidate_count",
+          "organization_count",
+          "maximum_candidates_per_organization",
+          "ordered_candidate_identity_manifest_hash",
+          "ordered_family_id_manifest_hash",
+          "candidate_url_manifest_hash",
+          "derived_network_authority_hash",
+          "binding_hash"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "contract_role": {"const": "M336K10_OFFICIAL_NETWORK_AUTHORITY_MANIFEST"}
+        }
+      },
+      "then": {
+        "required": [
+          "execution_scope",
+          "endpoints",
+          "allowed_network_hosts",
+          "host_set_hash",
+          "url_manifest_hash",
+          "pool_binding_hash",
+          "manifest_hash"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "contract_role": {"const": "M336K10_OFFICIAL_ACQUISITION_POLICY"}
+        }
+      },
+      "then": {
+        "required": [
+          "execution_scope",
+          "candidate_pool_hash",
+          "official_candidate_pool_binding_hash",
+          "network_authority_manifest_hash",
+          "allowed_network_hosts",
+          "acquisition_run_id",
+          "acquisition_policy_hash"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "contract_role": {"const": "M336K10_OFFICIAL_ACQUISITION_BINDING_RECEIPT"}
+        }
+      },
+      "then": {
+        "required": [
+          "candidate_pool_binding_hash",
+          "candidate_pool_semantic_hash",
+          "candidate_pool_bytes_hash",
+          "network_authority_manifest_hash",
+          "official_acquisition_policy_hash",
+          "final_authorization_hash",
+          "provider_configuration_hash",
+          "stage_request_acquisition_binding_hash",
+          "acquisition_ledger_context_template_hash",
+          "status",
+          "receipt_hash"
+        ]
+      }
+    }
+  ]
+}

@@ -535,6 +535,7 @@ def _verify_inputs(
             "m336k2.candidate-isolated-final.v1",
             "m336k4.candidate-isolated-final.v1",
             "m336k5.candidate-isolated-final.v1",
+            "m336k10.official-acquisition.v1",
         }
         or acquisition_policy.get("acquisition_run_id")
         != authorization.acquisition_run_id

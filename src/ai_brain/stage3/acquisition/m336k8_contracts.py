@@ -1384,6 +1384,57 @@ class M336K8PostFreezeInputBundleV2:
         result.verify()
         return result
 
+
+@dataclass(frozen=True)
+class M336K10PostFreezeInputBundle(M336K8PostFreezeInputBundleV2):
+    official_candidate_pool_binding_hash: str
+    official_network_authority_manifest_hash: str
+    official_acquisition_policy_hash: str
+    official_acquisition_binding_receipt_hash: str
+    official_provider_configuration_hash: str
+    stage_request_acquisition_binding_hash: str
+    acquisition_ledger_context_template_hash: str
+
+    ROLE: ClassVar[str] = "M336K10_POST_FREEZE_INPUT_BUNDLE_V3"
+
+    def verify(self) -> None:
+        body = self._body()
+        if (
+            self.schema_version != 3
+            or self.contract_role != self.ROLE
+            or any(
+                not _is_hash(value)
+                for name, value in self.canonical_object().items()
+                if name.endswith("_hash")
+            )
+            or self.acquisition_policy_hash != self.official_acquisition_policy_hash
+            or self.bundle_hash != content_hash(body)
+        ):
+            raise M336K2ProtocolError("M336K10 post-freeze bundle is invalid")
+
+    @classmethod
+    def build(cls, **values: Any) -> Self:
+        body = {"schema_version": 3, "contract_role": cls.ROLE, **values}
+        if set(body) != _field_names(cls) - {"bundle_hash"}:
+            raise M336K2ProtocolError("M336K10 post-freeze bundle inputs changed")
+        result = cls(**body, bundle_hash=content_hash(body))
+        result.verify()
+        return result
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> Self:
+        result = cls(**_strict_fields(value, cls, "M336K10 post-freeze input bundle"))
+        result.verify()
+        return result
+
+
+def m336k_current_post_freeze_input_bundle_from_dict(
+    value: dict[str, Any],
+) -> M336K8PostFreezeInputBundleV2:
+    if value.get("contract_role") == M336K10PostFreezeInputBundle.ROLE:
+        return M336K10PostFreezeInputBundle.from_dict(value)
+    return M336K8PostFreezeInputBundleV2.from_dict(value)
+
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Self:
         result = cls(**_strict_fields(value, cls, "post-freeze input bundle"))

@@ -79,6 +79,10 @@ M336K7_ROUTE_COMPONENTS = M336K6_ROUTE_COMPONENTS + (
     ("frozen-contract-mutations", "scripts/m336k7_run_contract_mutations.py"),
 )
 M336K8_ROUTE_COMPONENTS = M336K7_ROUTE_COMPONENTS + (
+    (
+        "official-acquisition-binding",
+        "src/ai_brain/stage3/acquisition/m336k10_binding.py",
+    ),
     ("official-route-profiles", "src/ai_brain/stage3/acquisition/m336k9_profiles.py"),
     ("controller-admission", "src/ai_brain/stage3/acquisition/m336k9_admission.py"),
     (
@@ -98,6 +102,11 @@ M336K8_ROUTE_COMPONENTS = M336K7_ROUTE_COMPONENTS + (
     ("official-profile-schema", "schemas/m336k9_official_route_profiles.schema.json"),
     ("official-profile-builder", "scripts/m336k9_build_profile_components.py"),
     ("controller-admission-mutations", "scripts/m336k9_run_admission_mutations.py"),
+    ("official-acquisition-schema", "schemas/m336k10_acquisition_binding.schema.json"),
+    ("official-acquisition-mutations", "scripts/m336k10_run_binding_mutations.py"),
+    ("official-component-builder", "scripts/m336k10_build_component_bundle.py"),
+    ("official-freeze-builder", "scripts/m336k10_materialize_f35.py"),
+    ("official-final-cli", "scripts/m336k10_run_final_route.py"),
 )
 
 

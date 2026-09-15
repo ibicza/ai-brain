@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, fields, replace
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -52,6 +52,7 @@ from ai_brain.stage3.acquisition.m336k9_admission import (
 )
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     M336K9FinalAuthorization,
+    M336K10FinalAuthorization,
     build_m336k9_final_authorization,
     m336k_current_final_authorization_from_dict,
 )
@@ -71,6 +72,7 @@ class _Freeze:
     official_profile_registry_hash: str
     route_identity_bundle_hash: str
     authorization_hash: str
+    official_acquisition_binding_receipt_hash: str | None
     manifest_hash: str
 
     def _body(self) -> dict[str, Any]:
@@ -92,6 +94,11 @@ class _Freeze:
             "official_profile_registry_hash": registry.registry_hash,
             "route_identity_bundle_hash": bundle.bundle_hash,
             "authorization_hash": authorization.authorization_hash,
+            "official_acquisition_binding_receipt_hash": (
+                content_hash((profile.profile_id, "acquisition-binding-receipt"))
+                if profile.profile_id == "m336k8-final-v3"
+                else None
+            ),
         }
         return cls(**body, manifest_hash=content_hash(body))
 
@@ -116,7 +123,7 @@ def _hashes(label: str) -> dict[str, str]:
 
 def _authorization(
     bundle: M336K5RouteIdentityBundle, profile_id: str
-) -> M336K9FinalAuthorization:
+) -> M336K9FinalAuthorization | M336K10FinalAuthorization:
     profile = m336k_official_profile_registry().profile(profile_id)
     bound_hashes = {
         name: content_hash((profile_id, name))
@@ -144,7 +151,7 @@ def _authorization(
             "disclosure_registry_manifest_hash",
         )
     }
-    return build_m336k9_final_authorization(
+    base = build_m336k9_final_authorization(
         bundle=bundle,
         official_profile_id=profile_id,
         exact_implementation_tip="1" * 40,
@@ -167,15 +174,42 @@ def _authorization(
         pre_freeze_source_body_bytes=0,
         **bound_hashes,
     )
+    if profile_id != "m336k8-final-v3":
+        return base
+    base_values = {
+        field.name: getattr(base, field.name)
+        for field in fields(M336K9FinalAuthorization)
+        if field.name != "authorization_hash"
+    }
+    additions = {
+        "official_candidate_pool_binding_hash": content_hash(
+            (profile_id, "pool-binding")
+        ),
+        "network_authority_manifest_hash": content_hash((profile_id, "network")),
+        "official_acquisition_policy_hash": base.acquisition_policy_hash,
+        "pool_semantic_hash": base.candidate_pool_hash,
+        "pool_bytes_hash": content_hash((profile_id, "pool-bytes")),
+        "derived_host_set_hash": content_hash((profile_id, "hosts")),
+        "provider_configuration_hash": content_hash((profile_id, "provider")),
+        "acquisition_binding_receipt_hash": content_hash(
+            (profile_id, "authorization-binding")
+        ),
+    }
+    temporary = M336K10FinalAuthorization(
+        **base_values, **additions, authorization_hash="0" * 64
+    )
+    result = replace(temporary, authorization_hash=content_hash(temporary._body()))
+    result.verify(bundle)
+    return result
 
 
 def _valid(
-    profile_id: str = "m336k8-final-v2",
+    profile_id: str = "m336k8-final-v3",
 ) -> tuple[
     M336KOfficialRouteProfileRegistry,
     M336KOfficialRouteProfile,
     M336K5RouteIdentityBundle,
-    M336K9FinalAuthorization,
+    M336K9FinalAuthorization | M336K10FinalAuthorization,
     _Freeze,
     str,
 ]:
@@ -197,12 +231,20 @@ def _admit(
         M336KOfficialRouteProfileRegistry,
         M336KOfficialRouteProfile,
         M336K5RouteIdentityBundle,
-        M336K9FinalAuthorization,
+        M336K9FinalAuthorization | M336K10FinalAuthorization,
         _Freeze,
         str,
     ],
 ) -> M336KControllerAdmissionReceipt:
     registry, profile, bundle, authorization, freeze, purpose = state
+    binding = (
+        SimpleNamespace(
+            receipt_hash=freeze.official_acquisition_binding_receipt_hash,
+            authorization_binding_hash=(authorization.acquisition_binding_receipt_hash),
+        )
+        if isinstance(authorization, M336K10FinalAuthorization)
+        else None
+    )
     return verify_m336k_controller_admission(
         purpose=purpose,
         route_identity_bundle=bundle,
@@ -211,6 +253,7 @@ def _admit(
         current_registry=registry,
         final_authorization=authorization,
         freeze_manifest=freeze,
+        official_acquisition_binding=binding,
     )
 
 
@@ -246,13 +289,22 @@ def _mixed_bundle(
 
 def _controller(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
     *,
     bundle: M336K5RouteIdentityBundle,
-    authorization: M336K9FinalAuthorization,
+    authorization: M336K9FinalAuthorization | M336K10FinalAuthorization,
     freeze: _Freeze,
     purpose: str,
     admission: M336KControllerAdmissionReceipt | None,
 ) -> None:
+    binding = (
+        SimpleNamespace(
+            receipt_hash=freeze.official_acquisition_binding_receipt_hash,
+            authorization_binding_hash=(authorization.acquisition_binding_receipt_hash),
+        )
+        if isinstance(authorization, M336K10FinalAuthorization)
+        else None
+    )
     validated = SimpleNamespace(
         request=SimpleNamespace(purpose=purpose),
         bundle=bundle,
@@ -260,6 +312,11 @@ def _controller(
         freeze=freeze,
         receipt=SimpleNamespace(receipt_hash=content_hash("preledger")),
         controller_admission=admission,
+        official_acquisition_binding=binding,
+    )
+    monkeypatch.setattr(
+        "ai_brain.stage3.acquisition.m336k8_request.recompute_m336k10_acquisition_binding",
+        lambda _validated: binding,
     )
     run_m336k5_final_controller(
         validated=validated,
@@ -449,7 +506,7 @@ def test_m336k9_controller_admission_mutations(
     registry, profile, bundle, authorization, freeze, purpose = active
     other = registry.profile("m336k8-final-v1")
 
-    if case == "active-k8-v2":
+    if case == "active-k8-v3":
         assert _admit(active).official_admission_result == "PASS"
         return
     if case in {"historical-k8-v1-new-official", "f33-v1-used-as-f34-authority"}:
@@ -571,6 +628,7 @@ def test_m336k9_controller_admission_mutations(
     elif case == "validate-admission-missing":
         operation = lambda: _controller(
             tmp_path,
+            monkeypatch,
             bundle=bundle,
             authorization=authorization,
             freeze=freeze,
@@ -581,6 +639,7 @@ def test_m336k9_controller_admission_mutations(
         rehearsal = _valid("m336k8-rehearsal-v2")
         operation = lambda: _controller(
             tmp_path,
+            monkeypatch,
             bundle=bundle,
             authorization=authorization,
             freeze=freeze,
@@ -593,6 +652,7 @@ def test_m336k9_controller_admission_mutations(
         changed = replace(changed, receipt_hash=content_hash(changed._body()))
         operation = lambda: _controller(
             tmp_path,
+            monkeypatch,
             bundle=bundle,
             authorization=authorization,
             freeze=freeze,
@@ -697,7 +757,7 @@ def test_m336k9_profile_coverage_and_identity_sets() -> None:
     registry = m336k_official_profile_registry()
     gate = run_m336k_official_profile_coverage_gate()
     assert gate.status == "PASS"
-    assert gate.registered_profile_count == gate.tested_profile_count == 6
+    assert gate.registered_profile_count == gate.tested_profile_count == 7
     assert gate.untested_profile_count == 0
     assert gate.independent_controller_whitelist_count == 0
     assert gate.controller_only_identity_predicate_count == 0

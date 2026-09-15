@@ -13,6 +13,9 @@ from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K9_BRANCH,
     M336K9_READY_STATUS,
     M336K9_REQUIRED_FREEZE_COMPONENTS,
+    M336K10_BRANCH,
+    M336K10_READY_STATUS,
+    M336K10_REQUIRED_FREEZE_COMPONENTS,
     M336K8FreezeManifest,
     attest_committed_m336k8_freeze,
     materialize_m336k8_freeze,
@@ -78,6 +81,13 @@ def main() -> None:
         freeze_relative_root=value["freeze_relative_root"],
         **(
             {
+                "readiness_status": M336K10_READY_STATUS,
+                "freeze_role": M336K8FreezeManifest.ROLE_V3,
+                "required_components": M336K10_REQUIRED_FREEZE_COMPONENTS,
+                "build_receipt_name": "f35_build_receipt.json",
+            }
+            if value["expected_branch"] == M336K10_BRANCH
+            else {
                 "readiness_status": M336K9_READY_STATUS,
                 "freeze_role": M336K8FreezeManifest.ROLE_V2,
                 "required_components": M336K9_REQUIRED_FREEZE_COMPONENTS,

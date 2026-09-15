@@ -67,6 +67,16 @@ def run_m336k5_final_controller(
     prior_admission = getattr(validated, "controller_admission", None)
     if prior_admission is None:
         raise M336K2ProtocolError("M336K controller admission receipt is absent")
+    from ai_brain.stage3.acquisition.m336k8_request import (
+        recompute_m336k10_acquisition_binding,
+    )
+
+    prior_acquisition_binding = getattr(validated, "official_acquisition_binding", None)
+    recomputed_acquisition_binding = recompute_m336k10_acquisition_binding(validated)
+    if recomputed_acquisition_binding != prior_acquisition_binding:
+        raise M336K2ProtocolError(
+            "M336K acquisition binding differs from validate-only receipt"
+        )
     recomputed_admission = verify_m336k_controller_admission(
         purpose=request.purpose,
         route_identity_bundle=bundle,
@@ -79,6 +89,7 @@ def run_m336k5_final_controller(
         current_registry=m336k_official_profile_registry(),
         final_authorization=validated.authorization,
         freeze_manifest=validated.freeze,
+        official_acquisition_binding=recomputed_acquisition_binding,
     )
     if recomputed_admission != prior_admission:
         raise M336K2ProtocolError(
@@ -89,15 +100,16 @@ def run_m336k5_final_controller(
         raise M336K2ProtocolError(
             "M336K5 pre-ledger proof differs from exact validation"
         )
-    context = content_hash(
-        (
-            bundle.protocol_run_id.canonical_object(),
-            bundle.bundle_hash,
-            request.exact_f30_sha,
-            bundle.route_registry_hash,
-            validated.receipt.receipt_hash,
-        )
+    context_values = (
+        bundle.protocol_run_id.canonical_object(),
+        bundle.bundle_hash,
+        request.exact_f30_sha,
+        bundle.route_registry_hash,
+        validated.receipt.receipt_hash,
     )
+    if recomputed_acquisition_binding is not None:
+        context_values += (recomputed_acquisition_binding.receipt_hash,)
+    context = content_hash(context_values)
     initial = (
         ("PREFLIGHT_VERIFIED", validated.receipt.receipt_hash),
         ("FREEZE_VERIFIED", validated.freeze.manifest_hash),
@@ -172,11 +184,15 @@ class M336K5IdentityCheckingWorker:
         receipt_root: Path,
         bundle: M336K5RouteIdentityBundle,
         expected_startup_receipt_hash: str,
+        expected_acquisition_binding_hashes: dict[str, str] | None = None,
     ) -> None:
         self._worker = worker
         self._receipt_root = receipt_root
         self._bundle = bundle
         self._expected_startup_receipt_hash = expected_startup_receipt_hash
+        self._expected_acquisition_binding_hashes = (
+            expected_acquisition_binding_hashes or {}
+        )
 
     def __call__(self, request: M336K2StageRequest) -> M336K2StageReceipt:
         if request.route_run_id != self._bundle.protocol_run_id.value:
@@ -194,6 +210,10 @@ class M336K5IdentityCheckingWorker:
             or value.get("route_run_id") != self._bundle.protocol_run_id.value
             or value.get("route_identity_bundle_hash") != self._bundle.bundle_hash
             or value.get("startup_receipt_hash") != self._expected_startup_receipt_hash
+            or any(
+                value.get(name) != expected
+                for name, expected in self._expected_acquisition_binding_hashes.items()
+            )
         ):
             raise M336K2ProtocolError("M336K5 worker response changed final identity")
         return result
@@ -205,16 +225,18 @@ def verify_m336k5_route_ledger_identity(
     bundle: M336K5RouteIdentityBundle,
     exact_f30_sha: str,
     preledger_receipt_hash: str,
+    official_acquisition_binding_receipt_hash: str | None = None,
 ) -> str:
-    context = content_hash(
-        (
-            bundle.protocol_run_id.canonical_object(),
-            bundle.bundle_hash,
-            exact_f30_sha,
-            bundle.route_registry_hash,
-            preledger_receipt_hash,
-        )
+    context_values = (
+        bundle.protocol_run_id.canonical_object(),
+        bundle.bundle_hash,
+        exact_f30_sha,
+        bundle.route_registry_hash,
+        preledger_receipt_hash,
     )
+    if official_acquisition_binding_receipt_hash is not None:
+        context_values += (official_acquisition_binding_receipt_hash,)
+    context = content_hash(context_values)
     events = ledger.events()
     if not events or any(event.context_hash != context for event in events):
         raise M336K2ProtocolError("M336K5 route ledger context changed final identity")

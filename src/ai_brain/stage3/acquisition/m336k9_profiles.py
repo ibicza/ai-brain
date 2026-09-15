@@ -169,7 +169,7 @@ class M336KOfficialRouteProfileRegistry:
             or len(set(hashes)) != len(hashes)
             or len(set(identities)) != len(identities)
             or len(active) != 1
-            or active[0].profile_id != "m336k8-final-v2"
+            or active[0].profile_id != "m336k8-final-v3"
             or self.registry_hash != content_hash(self._body())
         ):
             raise M336K2ProtocolError(
@@ -279,8 +279,8 @@ def _profile(
         evaluator_run_id=evaluator,
         execution_mode="FINAL",
         minimum_controller_version=(
-            "m336k9-controller.v2"
-            if namespace == "m336k8" and version == 2
+            ("m336k10-controller.v3" if version == 3 else "m336k9-controller.v2")
+            if namespace == "m336k8" and version in {2, 3}
             else "m336k5-controller.v1"
         ),
         authorization_branch_ref=branch,
@@ -319,10 +319,17 @@ M336K_OFFICIAL_PROFILE_REGISTRY = M336KOfficialRouteProfileRegistry.build(
         ),
         _profile(
             "m336k8-final-v2",
-            M336KOfficialRouteProfileStatus.CURRENT_ACTIVE,
+            M336KOfficialRouteProfileStatus.HISTORICAL_READ_ONLY,
             "m336k8",
             2,
             "refs/heads/exp/stage3-m336k9-controller-admission-final-v18",
+        ),
+        _profile(
+            "m336k8-final-v3",
+            M336KOfficialRouteProfileStatus.CURRENT_ACTIVE,
+            "m336k8",
+            3,
+            "refs/heads/exp/stage3-m336k10-official-acquisition-binding-v19",
         ),
         _profile(
             "m336k8-rehearsal-v2",

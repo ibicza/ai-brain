@@ -98,6 +98,7 @@ from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K8CommittedFreezeAttestation,
     M336K8FreezeManifest,
     M336K9CommittedFreezeAttestation,
+    M336K10CommittedFreezeAttestation,
 )
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     m336k_current_final_authorization_from_dict,
@@ -143,6 +144,11 @@ _M336K4_REQUEST_FIELDS = _REQUEST_FIELDS | {
 _M336K5_REQUEST_FIELDS = _M336K4_REQUEST_FIELDS | {
     "startup_receipt_hash",
     "karina_startup_receipt_hash",
+}
+_M336K10_REQUEST_FIELDS = _M336K5_REQUEST_FIELDS | {
+    "official_acquisition_binding_receipt_hash",
+    "stage_request_acquisition_binding_hash",
+    "acquisition_ledger_context_template_hash",
 }
 _DESTINATION_FIELDS = {
     "acquisition_ledger",
@@ -209,11 +215,13 @@ def run_m336k2_stage(
     if _typed(request):
         state_body["schema_version"] = request["schema_version"]
         state_body["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
-    if request["schema_version"] == 3:
+    if request["schema_version"] in {3, 4}:
         state_body["startup_receipt_hash"] = request["startup_receipt_hash"]
         state_body["karina_startup_receipt_hash"] = request[
             "karina_startup_receipt_hash"
         ]
+    if request["schema_version"] == 4:
+        state_body.update(_acquisition_binding_observation_fields(request))
     next_state = {**state_body, "state_hash": content_hash(state_body)}
     _write_private_state(state_path, next_state)
     body = {
@@ -229,9 +237,11 @@ def run_m336k2_stage(
     if _typed(request):
         body["schema_version"] = request["schema_version"]
         body["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
-    if request["schema_version"] == 3:
+    if request["schema_version"] in {3, 4}:
         body["startup_receipt_hash"] = request["startup_receipt_hash"]
         body["karina_startup_receipt_hash"] = request["karina_startup_receipt_hash"]
+    if request["schema_version"] == 4:
+        body.update(_acquisition_binding_observation_fields(request))
     receipt = {**body, "receipt_hash": content_hash(body)}
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.write_text(
@@ -589,7 +599,7 @@ def _run_windows_production(request: dict) -> dict:
         authorization=authorization,
     )
     python_worker = None
-    if request["schema_version"] == 3:
+    if request["schema_version"] in {3, 4}:
 
         def python_worker(
             target: Path, arguments: tuple[str, ...], working_directory: Path
@@ -615,7 +625,7 @@ def _run_windows_production(request: dict) -> dict:
         production_request, python_worker=python_worker
     )
     if (
-        request["schema_version"] == 3
+        request["schema_version"] in {3, 4}
         and _object(destinations["windows_production"] / "production_summary.json").get(
             "startup_receipt_hash"
         )
@@ -761,7 +771,7 @@ def _publish_h28(request: dict) -> dict:
             _identity_observation_receipt(
                 request,
                 "H30_PRODUCTION"
-                if request["schema_version"] == 3
+                if request["schema_version"] in {3, 4}
                 else "H29_PRODUCTION",
             ),
         )
@@ -948,7 +958,7 @@ def _create_goldens(request: dict) -> dict:
         }
     )
     golden_startup_hash = None
-    if request["schema_version"] == 3:
+    if request["schema_version"] in {3, 4}:
         launch_root = private / "golden-author-startup"
         invocation = build_m336k5_python_invocation(
             platform_role="WINDOWS",
@@ -1187,7 +1197,7 @@ def _compare_evaluation(request: dict) -> dict:
         "independent_evaluation_result_hash",
         "receipt_hash",
     }
-    if request.get("schema_version") == 3:
+    if request.get("schema_version") in {3, 4}:
         if karina.get("startup_receipt_hash") != request["karina_startup_receipt_hash"]:
             raise M336K2ProtocolError(
                 "M336K5 Karina evaluation startup binding changed"
@@ -1283,7 +1293,7 @@ def _publish_e28(request: dict) -> dict:
             _identity_observation_receipt(
                 request,
                 "E30_EVALUATION"
-                if request["schema_version"] == 3
+                if request["schema_version"] in {3, 4}
                 else "E29_EVALUATION",
             ),
         )
@@ -1481,7 +1491,7 @@ def _rehearsal_provider(request: dict) -> dict:
 
 
 def _typed(request: dict) -> bool:
-    return request.get("schema_version") in {2, 3}
+    return request.get("schema_version") in {2, 3, 4}
 
 
 def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) -> None:
@@ -1494,8 +1504,11 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
     typed_k5 = (
         set(request) == _M336K5_REQUEST_FIELDS and request.get("schema_version") == 3
     )
+    typed_k10 = (
+        set(request) == _M336K10_REQUEST_FIELDS and request.get("schema_version") == 4
+    )
     if (
-        not (legacy or typed_k4 or typed_k5)
+        not (legacy or typed_k4 or typed_k5 or typed_k10)
         or request.get("execution_mode") not in {"REHEARSAL", "FINAL"}
         or not isinstance(destinations, dict)
         or set(destinations) != _DESTINATION_FIELDS
@@ -1524,7 +1537,7 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
             or authorization.route_identity_bundle_hash != bundle.bundle_hash
         ):
             raise M336K2ProtocolError("M336K4 native stage identity binding changed")
-    if typed_k5:
+    if typed_k5 or typed_k10:
         if startup_receipt_path is None:
             raise M336K2ProtocolError("M336K5 stage startup receipt is absent")
         startup = startup_receipt_from_path(startup_receipt_path)
@@ -1553,6 +1566,15 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
             )
             or freeze.route_identity_bundle_hash != bundle.bundle_hash
             or authorization.route_identity_bundle_hash != bundle.bundle_hash
+            or typed_k10
+            and (
+                request["official_acquisition_binding_receipt_hash"]
+                != getattr(freeze, "official_acquisition_binding_receipt_hash", None)
+                or request["stage_request_acquisition_binding_hash"]
+                != getattr(freeze, "stage_request_acquisition_binding_hash", None)
+                or request["acquisition_ledger_context_template_hash"]
+                != getattr(freeze, "acquisition_ledger_context_template_hash", None)
+            )
         ):
             raise M336K2ProtocolError("M336K5 native stage identity binding changed")
     repository = Path(request["repository"]).resolve(strict=True)
@@ -1642,12 +1664,12 @@ def _karina_args(request: dict):
             request, "karina_stable_host_identity"
         ),
         supplied_f24_sha=_karina_expected_head(request),
-        m336k5_enabled=request["schema_version"] == 3,
+        m336k5_enabled=request["schema_version"] in {3, 4},
         m336k5_bootstrap_source_hash=(
             _component_object(request, "python_startup_bootstrap").get(
                 "source_bytes_hash"
             )
-            if request["schema_version"] == 3
+            if request["schema_version"] in {3, 4}
             else None
         ),
         m336k5_target_source_hash=bytes_hash(
@@ -1660,7 +1682,7 @@ def _karina_args(request: dict):
         ),
         m336k5_expected_karina_startup_receipt_hash=(
             request["karina_startup_receipt_hash"]
-            if request["schema_version"] == 3
+            if request["schema_version"] in {3, 4}
             else None
         ),
     )
@@ -1721,11 +1743,13 @@ def _load_state(path: Path, request: dict) -> dict:
         if _typed(request):
             value["schema_version"] = request["schema_version"]
             value["route_identity_bundle_hash"] = request["route_identity_bundle_hash"]
-        if request["schema_version"] == 3:
+        if request["schema_version"] in {3, 4}:
             value["startup_receipt_hash"] = request["startup_receipt_hash"]
             value["karina_startup_receipt_hash"] = request[
                 "karina_startup_receipt_hash"
             ]
+        if request["schema_version"] == 4:
+            value.update(_acquisition_binding_observation_fields(request))
         return value
     value = _object(path)
     body = dict(value)
@@ -1741,9 +1765,11 @@ def _load_state(path: Path, request: dict) -> dict:
     }
     if _typed(request):
         expected_fields.add("route_identity_bundle_hash")
-    if request["schema_version"] == 3:
+    if request["schema_version"] in {3, 4}:
         expected_fields.add("startup_receipt_hash")
         expected_fields.add("karina_startup_receipt_hash")
+    if request["schema_version"] == 4:
+        expected_fields.update(_acquisition_binding_observation_fields(request))
     if (
         set(value) != expected_fields
         or value["route_run_id"] != request["route_run_id"]
@@ -1753,6 +1779,12 @@ def _load_state(path: Path, request: dict) -> dict:
         or value.get("startup_receipt_hash") != request.get("startup_receipt_hash")
         or value.get("karina_startup_receipt_hash")
         != request.get("karina_startup_receipt_hash")
+        or any(
+            value.get(name) != expected
+            for name, expected in _acquisition_binding_observation_fields(
+                request
+            ).items()
+        )
         or tuple(value["completed_events"])
         != _STAGE_EVENTS[: len(value["completed_events"])]
         or content_hash(body) != claimed
@@ -1808,6 +1840,7 @@ def _freeze(
     if value.get("contract_role") in {
         M336K8FreezeManifest.ROLE,
         M336K8FreezeManifest.ROLE_V2,
+        M336K8FreezeManifest.ROLE_V3,
     }:
         return M336K8FreezeManifest.from_dict(value)
     if value.get("contract_role") == "M336K4_F29_TYPED_FREEZE_V2":
@@ -1836,8 +1869,11 @@ def _attestation(
     | M336K7CommittedFreezeAttestation
     | M336K8CommittedFreezeAttestation
     | M336K9CommittedFreezeAttestation
+    | M336K10CommittedFreezeAttestation
 ):
     value = _object(Path(request["f28_attestation"]).resolve(strict=True))
+    if value.get("contract_role") == M336K10CommittedFreezeAttestation.ROLE:
+        return M336K10CommittedFreezeAttestation.from_dict(value)
     if value.get("contract_role") == M336K9CommittedFreezeAttestation.ROLE:
         return M336K9CommittedFreezeAttestation.from_dict(value)
     if value.get("contract_role") == M336K8CommittedFreezeAttestation.ROLE:
@@ -1879,9 +1915,24 @@ def _component_object(request: dict, name: str) -> dict:
 
 def _identity_observation_fields(request: dict) -> dict:
     bundle = _route_identity_bundle(request)
-    return {
+    result = {
         "protocol_run_id": bundle.protocol_run_id.canonical_object(),
         "route_identity_bundle_hash": bundle.bundle_hash,
+    }
+    result.update(_acquisition_binding_observation_fields(request))
+    return result
+
+
+def _acquisition_binding_observation_fields(request: dict) -> dict:
+    if request.get("schema_version") != 4:
+        return {}
+    return {
+        name: request[name]
+        for name in (
+            "official_acquisition_binding_receipt_hash",
+            "stage_request_acquisition_binding_hash",
+            "acquisition_ledger_context_template_hash",
+        )
     }
 
 
@@ -1891,7 +1942,7 @@ def _identity_observation_receipt(request: dict, observer: str) -> dict:
         "schema_version": 1,
         "contract_role": (
             "PUBLIC_SAFE_M336K5_ROUTE_IDENTITY_OBSERVATION"
-            if request["schema_version"] == 3
+            if request["schema_version"] in {3, 4}
             else "PUBLIC_SAFE_M336K4_ROUTE_IDENTITY_OBSERVATION"
         ),
         "observer": observer,
@@ -1904,12 +1955,13 @@ def _identity_observation_receipt(request: dict, observer: str) -> dict:
         "route_identity_bundle_hash": bundle.bundle_hash,
         "status": "PASS",
     }
+    body.update(_acquisition_binding_observation_fields(request))
     return {**body, "receipt_hash": content_hash(body)}
 
 
 def _route_identity_bundle(request: dict):
     value = _object(Path(request["route_identity_bundle"]).resolve(strict=True))
-    if request["schema_version"] == 3:
+    if request["schema_version"] in {3, 4}:
         return M336K5RouteIdentityBundle.from_dict(value)
     return M336K4RouteIdentityBundle.from_dict(value)
 

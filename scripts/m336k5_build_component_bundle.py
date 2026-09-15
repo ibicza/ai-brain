@@ -9,7 +9,7 @@ import shutil
 from dataclasses import asdict
 from pathlib import Path
 
-from ai_brain.stage2.facts.canonical import canonical_json, content_hash
+from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_authorization import (
     M336K5FinalAuthorization,
@@ -78,6 +78,7 @@ from ai_brain.stage3.acquisition.m336k8_contracts import (
     M336K8ProjectSourceIdentityPolicy,
     M336K8ProjectSourceIdentityReceipt,
     M336K8SourceDomainCompatibilityReceipt,
+    M336K10PostFreezeInputBundle,
     m336k8_semantic_binding_mismatches,
 )
 from ai_brain.stage3.acquisition.m336k8_request import (
@@ -94,10 +95,25 @@ from ai_brain.stage3.acquisition.m336k9_admission import (
 )
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     build_m336k9_final_authorization,
+    build_m336k10_final_authorization,
+    m336k_current_final_authorization_from_dict,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfileStatus,
     m336k_official_profile_registry,
+)
+from ai_brain.stage3.acquisition.m336k10_binding import (
+    M336K10_EXECUTION_SCOPE_HISTORICAL,
+    M336K10_EXECUTION_SCOPE_OFFICIAL,
+    M336K10_EXECUTION_SCOPE_SHARED,
+    M336K10_PROFILE_ID,
+    M336K10FreezeOriginEntry,
+    M336K10FreezeOriginReceipt,
+    build_m336k10_post_authorization_components,
+    build_official_acquisition_components,
+    build_rehearsal_acquisition_components,
+    read_provider_sources,
+    verify_m336k10_official_acquisition_binding,
 )
 
 _LABEL = re.compile(r"[a-z0-9][a-z0-9-]{3,63}")
@@ -273,8 +289,7 @@ def main() -> None:
     )
     schemas = build_m336k5_schema_registry(identity_namespace, profile_id=profile_id)
     route = build_m336k5_route_manifest(registry, schemas)
-    acquisition = _object(output / "acquisition_policy.json")
-    acquisition.pop("acquisition_policy_hash", None)
+    legacy_acquisition = _object(output / "acquisition_policy.json")
     selector = _object(output / "selector_policy.json")
     selector.pop("policy_hash", None)
     threshold = _object(output / "threshold_manifest.json")
@@ -300,17 +315,6 @@ def main() -> None:
         evaluator_id = f"{identity_namespace}.disposable.{label}.evaluator.v1"
     else:
         raise M336K2ProtocolError("M336K5 component identity mode is invalid")
-    acquisition.update(
-        {
-            "contract_role": "M336K5_CANDIDATE_ISOLATED_ACQUISITION_POLICY",
-            "policy_version": "m336k5.candidate-isolated-final.v1",
-            "acquisition_run_id": acquisition_id,
-        }
-    )
-    acquisition = {
-        **acquisition,
-        "acquisition_policy_hash": content_hash(acquisition),
-    }
     selector.update(
         {
             "contract_role": "M336K5_COUNT_NEUTRAL_SELECTOR_POLICY",
@@ -318,6 +322,37 @@ def main() -> None:
         }
     )
     selector = {**selector, "policy_hash": content_hash(selector)}
+    legacy_authorization = _object(output / "final_authorization.json")
+    official_components = None
+    if profile_id == M336K10_PROFILE_ID and mode == "OFFICIAL":
+        pool_path = output / "candidate_pool.json"
+        maven_source, scm_source = read_provider_sources(repository)
+        official_components = build_official_acquisition_components(
+            pool=_object(pool_path),
+            pool_bytes=pool_path.read_bytes(),
+            profile=profile,
+            archive_policy_hash=_object(output / "archive_policy.json")["policy_hash"],
+            candidate_terminal_policy_hash=_object(
+                output / "candidate_terminal_policy.json"
+            )["policy_hash"],
+            global_continuation_policy_hash=_object(
+                output / "global_continuation_policy.json"
+            )["policy_hash"],
+            authority_statement_hash=legacy_authorization["authority_statement_hash"],
+            disclosure_registry_manifest_hash=bytes_hash(
+                (output / "disclosure_registry_manifest.json").read_bytes()
+            ),
+            selector_policy=selector,
+            selector_policy_hash=selector["policy_hash"],
+            maven_provider_source=maven_source,
+            scm_provider_source=scm_source,
+        )
+        acquisition = official_components["acquisition_policy"].canonical_object()
+    else:
+        acquisition = build_rehearsal_acquisition_components(
+            acquisition_policy=legacy_acquisition,
+            acquisition_run_id=acquisition_id,
+        )
     evaluator_body = {
         "schema_version": 1,
         "contract_role": "M336K5_INDEPENDENT_EVALUATOR_POLICY",
@@ -369,7 +404,6 @@ def main() -> None:
             selector_policy_hash=selector["policy_hash"],
             evaluator_policy_hash=evaluator["policy_hash"],
         )
-    legacy_authorization = _object(output / "final_authorization.json")
     candidate_pool_hash = _object(output / "candidate_pool.json")["pool_hash"]
     if (
         identity_namespace in {"m336k7", "m336k8"}
@@ -397,18 +431,18 @@ def main() -> None:
     cleanup = _object(output / "cleanup_policy.json")
     recovery = _object(output / "recovery_checkpoint_policy.json")
     authorization_builder = (
-        build_m336k9_final_authorization
+        build_m336k10_final_authorization
+        if official_components is not None
+        else build_m336k9_final_authorization
         if profile is not None
         else build_m336k5_final_authorization
     )
-    authorization = authorization_builder(
+    common_authorization_values = dict(
         bundle=bundle,
         **({"official_profile_id": profile.profile_id} if profile is not None else {}),
         exact_implementation_tip=request["exact_implementation_tip"],
         exact_q30_sha=request["exact_q30_sha"],
         branch_ref=request["branch_ref"],
-        candidate_pool_hash=candidate_pool_hash,
-        acquisition_policy_hash=acquisition["acquisition_policy_hash"],
         archive_policy_hash=legacy_authorization["archive_policy_hash"],
         candidate_terminal_policy_hash=legacy_authorization[
             "candidate_terminal_policy_hash"
@@ -449,7 +483,6 @@ def main() -> None:
         ],
         selector_policy_hash=selector["policy_hash"],
         evaluator_policy_hash=evaluator["policy_hash"],
-        allowed_network_hosts=tuple(legacy_authorization["allowed_network_hosts"]),
         minimum_candidate_families=legacy_authorization["minimum_candidate_families"],
         minimum_organizations=legacy_authorization["minimum_organizations"],
         maximum_candidates_per_organization=legacy_authorization[
@@ -462,6 +495,24 @@ def main() -> None:
         candidate_replacement_limit=0,
         pre_freeze_source_body_bytes=0,
     )
+    if official_components is not None:
+        authorization = authorization_builder(
+            pool_binding=official_components["pool_binding"],
+            network_authority=official_components["network_authority"],
+            acquisition_policy=official_components["acquisition_policy"],
+            provider_configuration=official_components["provider_configuration"],
+            acquisition_binding_receipt_hash=official_components[
+                "authorization_binding_hash"
+            ],
+            **common_authorization_values,
+        )
+    else:
+        authorization = authorization_builder(
+            candidate_pool_hash=candidate_pool_hash,
+            acquisition_policy_hash=acquisition["acquisition_policy_hash"],
+            allowed_network_hosts=tuple(legacy_authorization["allowed_network_hosts"]),
+            **common_authorization_values,
+        )
     if identity_namespace == "m336k8":
         builder = {
             **M336K8_FINAL_REQUEST_CONTRACT,
@@ -488,6 +539,68 @@ def main() -> None:
         "final_authorization": authorization.canonical_object(),
         "canonical_request_builder_identity": builder,
     }
+    binding_receipt = None
+    if official_components is not None:
+        post_authorization = build_m336k10_post_authorization_components(
+            pool_binding=official_components["pool_binding"],
+            network_authority=official_components["network_authority"],
+            policy=official_components["acquisition_policy"],
+            profile=profile,
+            provider=official_components["provider_configuration"],
+            authorization=authorization,
+            route_identity_bundle_hash=bundle.bundle_hash,
+            authorization_binding_hash=official_components[
+                "authorization_binding_hash"
+            ],
+        )
+        binding_receipt = verify_m336k10_official_acquisition_binding(
+            pool=_object(output / "candidate_pool.json"),
+            pool_bytes=(output / "candidate_pool.json").read_bytes(),
+            pool_binding=official_components["pool_binding"],
+            network_authority=official_components["network_authority"],
+            policy=official_components["acquisition_policy"],
+            profile=profile,
+            shared_policy=official_components["shared_policy"],
+            provider=official_components["provider_configuration"],
+            authorization=authorization,
+            ledger_context=post_authorization["ledger_context"],
+            stage_binding=post_authorization["stage_binding"],
+            authority_statement_bytes=(
+                repository
+                / "artifacts/acquisition/m336i_freeze_v8/authority_statement.txt"
+            ).read_bytes(),
+            disclosure_registry_manifest_bytes=(
+                output / "disclosure_registry_manifest.json"
+            ).read_bytes(),
+            maven_provider_source=maven_source,
+            scm_provider_source=scm_source,
+            expected_receipt=post_authorization["receipt"],
+        )
+        values.update(
+            {
+                "official_candidate_pool_binding": official_components[
+                    "pool_binding"
+                ].canonical_object(),
+                "official_network_authority_manifest": official_components[
+                    "network_authority"
+                ].canonical_object(),
+                "shared_acquisition_policy_binding": official_components[
+                    "shared_policy"
+                ].canonical_object(),
+                "official_provider_configuration": official_components[
+                    "provider_configuration"
+                ].canonical_object(),
+                "acquisition_ledger_context_template": post_authorization[
+                    "ledger_context"
+                ].canonical_object(),
+                "stage_request_acquisition_binding": post_authorization[
+                    "stage_binding"
+                ].canonical_object(),
+                "official_acquisition_binding_receipt": (
+                    binding_receipt.canonical_object()
+                ),
+            }
+        )
     if profile is not None:
         coverage = run_m336k_official_profile_coverage_gate()
         values.update(
@@ -515,7 +628,15 @@ def main() -> None:
             "executable_dependency_manifest_hash"
         ]
         _write_rehashed(output / "execution_capsule_receipt.json", execution_capsule)
-        _write_m336k8_post_freeze_and_gate(repository, output, authorization, bundle)
+        _write_m336k8_post_freeze_and_gate(
+            repository,
+            output,
+            authorization,
+            bundle,
+            official_acquisition_binding_receipt_hash=(
+                None if binding_receipt is None else binding_receipt.receipt_hash
+            ),
+        )
     if identity_namespace == "m336k7":
         execution_capsule = _object(output / "execution_capsule_receipt.json")
         binding = _object(output / "capsule_binding_set.json")
@@ -663,6 +784,8 @@ def main() -> None:
             encoding="utf-8",
             newline="\n",
         )
+    if official_components is not None:
+        _write_m336k10_freeze_origin_receipt(output)
     pool = _object(output / "candidate_pool.json")
     body = {
         "schema_version": 1,
@@ -697,11 +820,102 @@ def main() -> None:
     print(canonical_json(receipt))
 
 
+def _write_m336k10_freeze_origin_receipt(output: Path) -> None:
+    official = {
+        "acquisition_ledger_context_template",
+        "acquisition_policy",
+        "active_official_profile",
+        "candidate_pool",
+        "canonical_request_builder_identity",
+        "controller_admission_contract",
+        "evaluator_policy",
+        "final_authorization",
+        "official_acquisition_binding_receipt",
+        "official_candidate_pool_binding",
+        "official_network_authority_manifest",
+        "official_profile_registry",
+        "official_provider_configuration",
+        "post_freeze_input_bundle",
+        "profile_coverage_gate",
+        "route_identity_bundle",
+        "selector_policy",
+        "stage_request_acquisition_binding",
+        "typed_route_manifest",
+        "typed_route_registry",
+        "typed_schema_registry",
+    }
+    shared = {
+        "archive_policy",
+        "candidate_terminal_policy",
+        "disclosure_registry_manifest",
+        "e28_publication_contract",
+        "global_continuation_policy",
+        "h28_publication_contract",
+        "resource_budget_policy",
+        "shared_acquisition_policy_binding",
+        "threshold_manifest",
+    }
+    paths = tuple(
+        sorted(
+            (
+                path
+                for path in output.glob("*.json")
+                if path.stem not in {"bundle_receipt", "official_freeze_origin_receipt"}
+            ),
+            key=lambda path: path.stem,
+        )
+    )
+    entries = []
+    official_bytes = bytearray()
+    for path in paths:
+        if path.stem in official:
+            scope = M336K10_EXECUTION_SCOPE_OFFICIAL
+            official_bytes.extend(path.read_bytes())
+        elif path.stem in shared:
+            scope = M336K10_EXECUTION_SCOPE_SHARED
+        else:
+            scope = M336K10_EXECUTION_SCOPE_HISTORICAL
+        entry = M336K10FreezeOriginEntry(
+            component_name=path.stem,
+            execution_scope=scope,
+            producer_role=f"{path.stem.upper()}_PRODUCER",
+            source_artifact_hash=bytes_hash(path.read_bytes()),
+            consumer_roles=("F35_FREEZE", "POST_FREEZE_VALIDATOR"),
+            status="PASS",
+        )
+        entry.verify()
+        entries.append(entry)
+    fixture_count = official_bytes.count(b"fixture.invalid")
+    wrong_pool_count = official_bytes.count(
+        b"b4128991cdaa118ddac58bb3e87f060028b5794374e75b2b68dca1a8f59cd40e"
+    )
+    body = {
+        "schema_version": 1,
+        "contract_role": M336K10FreezeOriginReceipt.ROLE,
+        "entries": tuple(entries),
+        "component_count": len(entries),
+        "rehearsal_scope_component_count": 0,
+        "fixture_host_occurrence_count": fixture_count,
+        "wrong_pool_occurrence_count": wrong_pool_count,
+        "unclassified_component_count": 0,
+        "status": "PASS" if fixture_count == wrong_pool_count == 0 else "FAIL",
+    }
+    receipt = M336K10FreezeOriginReceipt(**body, receipt_hash=content_hash(body))
+    receipt.verify()
+    (output / "official_freeze_origin_receipt.json").write_text(
+        canonical_json(receipt.canonical_object()) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def _write_m336k8_post_freeze_and_gate(
     repository: Path,
     output: Path,
     authorization: M336K5FinalAuthorization,
     bundle: M336K5RouteIdentityBundle,
+    *,
+    official_acquisition_binding_receipt_hash: str | None = None,
 ) -> None:
     plan = M336K8FreezeAssemblyPlan.from_dict(
         _object(output / "freeze_assembly_plan.json")
@@ -826,9 +1040,38 @@ def _write_m336k8_post_freeze_and_gate(
             )
         ),
     }
-    provisional = M336K8PostFreezeInputBundleV2.build(
-        **post_values, freeze_assembly_receipt_hash="0" * 64
+    post_type = (
+        M336K10PostFreezeInputBundle
+        if official_acquisition_binding_receipt_hash is not None
+        else M336K8PostFreezeInputBundleV2
     )
+    if official_acquisition_binding_receipt_hash is not None:
+        post_values.update(
+            {
+                "official_candidate_pool_binding_hash": _object(
+                    output / "official_candidate_pool_binding.json"
+                )["binding_hash"],
+                "official_network_authority_manifest_hash": _object(
+                    output / "official_network_authority_manifest.json"
+                )["manifest_hash"],
+                "official_acquisition_policy_hash": _object(
+                    output / "acquisition_policy.json"
+                )["acquisition_policy_hash"],
+                "official_acquisition_binding_receipt_hash": (
+                    official_acquisition_binding_receipt_hash
+                ),
+                "official_provider_configuration_hash": _object(
+                    output / "official_provider_configuration.json"
+                )["configuration_hash"],
+                "stage_request_acquisition_binding_hash": _object(
+                    output / "stage_request_acquisition_binding.json"
+                )["binding_hash"],
+                "acquisition_ledger_context_template_hash": _object(
+                    output / "acquisition_ledger_context_template.json"
+                )["template_hash"],
+            }
+        )
+    provisional = post_type.build(**post_values, freeze_assembly_receipt_hash="0" * 64)
     values = {
         "controller_python_environment_manifest": controller_environment,
         "controller_executable_dependency_manifest": controller_dependencies,
@@ -859,7 +1102,7 @@ def _write_m336k8_post_freeze_and_gate(
         component_origins=origins,
         semantic_verifier=m336k8_semantic_binding_mismatches,
     )
-    post = M336K8PostFreezeInputBundleV2.build(
+    post = post_type.build(
         **post_values, freeze_assembly_receipt_hash=assembly.receipt_hash
     )
     values["post_freeze_input_bundle"] = post.canonical_object()
@@ -992,7 +1235,19 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
     _write_rehashed(output / "q28_commit.json", q_commit)
 
     namespace = request["identity_namespace"]
-    if request.get("official_profile_id") is not None:
+    if request.get("official_profile_id") == M336K10_PROFILE_ID:
+        publication_values = {
+            "branch_ref": request["branch_ref"],
+            "q_root": "artifacts/m336k10/q35",
+            "f_root": "artifacts/m336k10/f35-freeze",
+            "h_root": "artifacts/m336k10/h35",
+            "e_root": "artifacts/m336k10/e35",
+            "q_subject": "M-33.6k.10 qualify official acquisition authority",
+            "f_subject": "M-33.6k.10 freeze final Java execution",
+            "h_subject": "M-33.6k.10 publish sealed Java production",
+            "e_subject": "M-33.6k.10 publish independent Java evidence",
+        }
+    elif request.get("official_profile_id") is not None:
         names = (
             "branch_ref",
             "q_root",
@@ -1187,7 +1442,7 @@ def _consume_storage_reservation(value: dict) -> M336K7StrictArtifact:
 def _consume_authorization(
     value: dict, all_inputs: dict[str, dict]
 ) -> M336K5FinalAuthorization:
-    authorization = M336K5FinalAuthorization.from_dict(value)
+    authorization = m336k_current_final_authorization_from_dict(value)
     authorization.verify(
         M336K5RouteIdentityBundle.from_dict(all_inputs["route_identity_bundle"])
     )

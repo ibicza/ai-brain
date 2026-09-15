@@ -433,6 +433,8 @@ def verify_m336k2_commit_protocol(
 
 
 def _qualification_path_prefixes(q_root: str) -> tuple[str, str]:
+    if q_root.startswith("artifacts/m336k10/"):
+        return "runs/m336k10/q35/", "docs/m336k10_"
     if q_root.startswith("artifacts/m336k9/"):
         return "runs/m336k9/q34/", "docs/m336k9_"
     if q_root.startswith("artifacts/m336k5/"):
@@ -628,6 +630,7 @@ def _h_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
             "artifacts/m336k7/",
             "artifacts/m336k8/",
             "artifacts/m336k9/",
+            "artifacts/m336k10/",
         )
     ):
         return _H_ROOT_FILES | {_M336K4_IDENTITY_FILE}
@@ -642,6 +645,7 @@ def _e_source_files(contract: M336K2PublicationContract) -> frozenset[str]:
             "artifacts/m336k7/",
             "artifacts/m336k8/",
             "artifacts/m336k9/",
+            "artifacts/m336k10/",
         )
     ):
         return _E_SOURCE_FILES | {_M336K4_IDENTITY_FILE}

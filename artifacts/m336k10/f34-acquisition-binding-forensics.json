@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "contract_role": "PUBLIC_SAFE_M336K10_F34_ACQUISITION_BINDING_FORENSICS",
+  "historical_state": {
+    "f33_sha": "3c5f64ee32d9d6af7d7810dbeabcc1be9c600771",
+    "r34_sha": "2defe196857721a5f1859cb183bd4c1eed20d0f4",
+    "q34_sha": "0478f3b2c1401812a4786d7c6d04e91cb8ae4f7d",
+    "f34_sha": "12f590937fdb3e402a92b25b215e0476ef30a20a",
+    "f34_parent_sha": "0478f3b2c1401812a4786d7c6d04e91cb8ae4f7d",
+    "q34_parent_sha": "2defe196857721a5f1859cb183bd4c1eed20d0f4",
+    "h34_state": "NOT_CREATED",
+    "e34_state": "NOT_CREATED",
+    "merge_count": 0,
+    "local_upstream_remote_equal": true,
+    "all_worktrees_clean": true,
+    "official_worker_active_count": 0,
+    "outcome": "OUTCOME_C_BLOCKED"
+  },
+  "candidate_pool": {
+    "contract_role": "M336K2_METADATA_ONLY_CANDIDATE_POOL",
+    "pool_semantic_hash": "b48ee354dc710a6c0ac0ed2cfceb1385c0d12cc8efb6b8fbef00e8d2f6ab572e",
+    "pool_bytes_hash": "78cfb85fc59687186f0e420d410bf648816bce6ae2539acb445f8da74d77a0fa",
+    "candidate_count": 96,
+    "organization_count": 64,
+    "maximum_candidates_per_organization": 2
+  },
+  "acquisition_policy": {
+    "contract_role": "M336K5_CANDIDATE_ISOLATED_ACQUISITION_POLICY",
+    "acquisition_policy_hash": "34a2760850e3b20786f6512feb9c19c648181f27746a3a1d8bc2e372d2dd450e",
+    "candidate_pool_hash": "b4128991cdaa118ddac58bb3e87f060028b5794374e75b2b68dca1a8f59cd40e",
+    "acquisition_run_id": "m336k8.final-java.global-acquisition.v2",
+    "allowed_network_hosts": [
+      "fixture.invalid"
+    ]
+  },
+  "final_authorization": {
+    "contract_role": "M336K5_TYPED_FINAL_AUTHORIZATION_V2",
+    "authorization_hash": "7f13d922810a77d86a6d320436d4173b98145150e324d27c0ce149e01bebedf3",
+    "candidate_pool_hash": "b48ee354dc710a6c0ac0ed2cfceb1385c0d12cc8efb6b8fbef00e8d2f6ab572e",
+    "acquisition_policy_hash": "34a2760850e3b20786f6512feb9c19c648181f27746a3a1d8bc2e372d2dd450e",
+    "allowed_network_hosts": [
+      "fixture.invalid"
+    ],
+    "route_identity_bundle_hash": "25b751f0fca5c0a8cf05223d7cf7f7031c4a35db2f3e5a9c94669a789ad8285f"
+  },
+  "route_identity_bundle": {
+    "bundle_hash": "25b751f0fca5c0a8cf05223d7cf7f7031c4a35db2f3e5a9c94669a789ad8285f",
+    "acquisition_policy_hash": "34a2760850e3b20786f6512feb9c19c648181f27746a3a1d8bc2e372d2dd450e",
+    "acquisition_run_id": "m336k8.final-java.global-acquisition.v2"
+  },
+  "post_freeze_input_bundle": {
+    "contract_role": "M336K8_POST_FREEZE_INPUT_BUNDLE_V2",
+    "bundle_hash": "bb342130e935997859635e08fba0e9d1532f3d852a115b2585c79590943dd246",
+    "candidate_pool_hash": "b48ee354dc710a6c0ac0ed2cfceb1385c0d12cc8efb6b8fbef00e8d2f6ab572e",
+    "acquisition_policy_hash": "34a2760850e3b20786f6512feb9c19c648181f27746a3a1d8bc2e372d2dd450e",
+    "route_identity_bundle_hash": "25b751f0fca5c0a8cf05223d7cf7f7031c4a35db2f3e5a9c94669a789ad8285f"
+  },
+  "stage_request": {
+    "canonical_request_schema_version": 4,
+    "canonical_request_contract_role": "M336K8_CANONICAL_FINAL_ROUTE_REQUEST_V4",
+    "canonical_request_hash": "b1b616ecdb4040ece47f0adad8de46ef6fde2d1e28d71fbb1cde6df0d43cba2e",
+    "internal_request_schema_version": 3,
+    "execution_purpose": "OFFICIAL",
+    "execution_mode": "FINAL",
+    "route_run_id": "m336k8.final-java.outcome-a.v2",
+    "route_identity_bundle_hash": "25b751f0fca5c0a8cf05223d7cf7f7031c4a35db2f3e5a9c94669a789ad8285f",
+    "acquisition_binding_receipt_hash": "ABSENT"
+  },
+  "provider_configuration": {
+    "standalone_committed_artifact": "ABSENT",
+    "official_pool_derived_host_binding": "ABSENT",
+    "effective_policy_host_tuple": [
+      "fixture.invalid"
+    ]
+  },
+  "expected_pool_derived_hosts": [
+    "codeload.github.com",
+    "github.com",
+    "repo.maven.apache.org"
+  ],
+  "route_ledger": {
+    "event_count": 6,
+    "events": [
+      "PREFLIGHT_VERIFIED",
+      "FREEZE_VERIFIED",
+      "AUTHORIZATION_VALIDATED",
+      "ACQUISITION_RESERVED",
+      "ACQUISITION_STARTED",
+      "FINAL_ROUTE_FAILED"
+    ],
+    "last_successfully_appended_phase": "ACQUISITION_STARTED",
+    "final_event": "FINAL_ROUTE_FAILED",
+    "bytes_hash": "419f035eb290726a1fe77114546cc9639f3c9ce21fcef89a08aa3cda1e0d4d3e",
+    "byte_count": 2325
+  },
+  "downstream_state": {
+    "acquisition_ledger": "ABSENT",
+    "selector_ledger": "ABSENT",
+    "evaluator_ledger": "ABSENT",
+    "candidate_attempt_count": 0,
+    "terminal_receipt_count": 0,
+    "source_jar_get_bytes": 0,
+    "scm_archive_bytes": 0,
+    "java_source_bytes": 0,
+    "source_body_bytes": 0,
+    "official_vault": "ABSENT",
+    "windows_production": "NOT_CREATED",
+    "karina_production": "NOT_CREATED"
+  },
+  "failure_reproduction": {
+    "historical_code_sha": "12f590937fdb3e402a92b25b215e0476ef30a20a",
+    "input_bytes": "EXACT_COMMITTED_F34",
+    "exception_type": "M336K2ProtocolError",
+    "exception_message": "M336K2 acquisition inputs are inconsistent",
+    "side_effect_count": 0,
+    "route_events_created": 0,
+    "acquisition_events_created": 0,
+    "candidate_attempts_created": 0,
+    "source_body_bytes_created": 0,
+    "status": "REPRODUCED"
+  },
+  "root_cause_classifications": [
+    "OFFICIAL_POOL_REPLACED_WITHOUT_POLICY_REBUILD",
+    "DISPOSABLE_ACQUISITION_POLICY_REUSED_BY_OFFICIAL_FREEZE",
+    "OFFICIAL_AUTHORIZATION_MIXED_NEW_POOL_WITH_LEGACY_HOSTS",
+    "NETWORK_AUTHORITY_NOT_DERIVED_FROM_OFFICIAL_POOL",
+    "VALIDATE_ONLY_OMITTED_ACQUISITION_INPUT_SEMANTICS",
+    "ROUTE_EVENTS_APPENDED_BEFORE_ACQUISITION_INPUT_ADMISSION"
+  ],
+  "unclassified_root_cause_count": 0,
+  "persistent_capsule": {
+    "capsule_identity_hash": "d2d0309398f4744c50f1fe8eb5e7de535baa199897a7ab02ded37ad24d8c03c1",
+    "content_manifest_hash": "17741c0f76e76ba082564c79aa9c2a800fd2993b420ad8c80a965f78e579c720",
+    "liveness_receipt_hash": "48df7bfc8db9a96fa1391661ebe89120ddb58e8ad645df4f168055544ff92bf9",
+    "liveness_status": "PASS",
+    "recreated": false
+  },
+  "historical_storage_reservation": {
+    "reservation_receipt_hash": "230f7b0b330f9e3977dae367cc42127071e204cff0aec707ec866e26142021ae",
+    "reservation_bytes": 2563642326,
+    "allocated_size_bytes": 2563642326,
+    "sparse": false,
+    "release_receipt_hash": "2308ba1c70440d81d8819f9b44dbbe5fd6ef81e7d1a65b268ab3ad6a118d298f",
+    "released_bytes": 2563642326,
+    "status": "RELEASED_HISTORICAL_DO_NOT_REUSE"
+  },
+  "status": "PASS",
+  "report_hash": "1fbe06ab908cdca539caf491d3a556dbff15387676ae66e8efd5bb054a371554"
+}
