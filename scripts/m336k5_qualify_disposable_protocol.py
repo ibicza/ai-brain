@@ -108,6 +108,7 @@ def main() -> None:
     namespace = request.get("protocol_namespace", "m336k5")
     official_profile_id = request.get("official_profile_id")
     official_admission_only = request.get("official_admission_only", False)
+    disposable_publication_generation = request.get("disposable_publication_generation")
     if namespace not in {"m336k5", "m336k7", "m336k8"}:
         raise M336K2ProtocolError("M336K disposable protocol namespace changed")
     expected = {
@@ -150,6 +151,8 @@ def main() -> None:
         expected |= {"official_profile_id"}
     if "official_admission_only" in request:
         expected |= {"official_admission_only"}
+    if "disposable_publication_generation" in request:
+        expected |= {"disposable_publication_generation"}
     persistent = "persistent_karina_overlay" in request
     if namespace in {"m336k7", "m336k8"} and not persistent:
         raise M336K2ProtocolError(
@@ -177,6 +180,13 @@ def main() -> None:
         and (
             namespace != "m336k8"
             or official_profile.profile_status is not expected_profile_status
+        )
+        or disposable_publication_generation is not None
+        and (
+            disposable_publication_generation != "m336k10"
+            or namespace != "m336k8"
+            or official_admission_only
+            or official_profile is None
         )
     ):
         raise M336K2ProtocolError("M336K9 rehearsal profile purpose changed")
@@ -328,7 +338,18 @@ def main() -> None:
         Path(request["legacy_component_request_template"]).resolve(strict=True)
     )
     legacy_output = private / "legacy-components"
-    if official_profile is not None:
+    if disposable_publication_generation == "m336k10":
+        publication_values = {
+            "q_root": "artifacts/m336k10/disposable/q35-like",
+            "f_root": "artifacts/m336k10/disposable/f35-like-freeze",
+            "h_root": "artifacts/m336k10/disposable/h35-like",
+            "e_root": "artifacts/m336k10/disposable/e35-like",
+            "q_subject": "M-33.6k.10 qualify disposable acquisition route",
+            "f_subject": "M-33.6k.10 freeze disposable acquisition route",
+            "h_subject": "M-33.6k.10 publish disposable sealed production",
+            "e_subject": "M-33.6k.10 publish disposable independent evidence",
+        }
+    elif official_profile is not None:
         publication_values = {
             "q_root": "artifacts/m336k9/q34",
             "f_root": "artifacts/m336k9/f34-freeze",

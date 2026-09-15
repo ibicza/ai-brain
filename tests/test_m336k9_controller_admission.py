@@ -481,6 +481,54 @@ def test_m336k9_profile_bundle_preserves_current_publication_contract(
         )
 
 
+def test_m336k10_disposable_bundle_uses_generation_isolated_publication_contract(
+    tmp_path: Path,
+) -> None:
+    branch_ref = "refs/heads/disposable/m336k8-m336k10-full-rehearsal-v1"
+    values = {
+        "branch_ref": branch_ref,
+        "q_root": "artifacts/m336k10/disposable/q35-like",
+        "f_root": "artifacts/m336k10/disposable/f35-like-freeze",
+        "h_root": "artifacts/m336k10/disposable/h35-like",
+        "e_root": "artifacts/m336k10/disposable/e35-like",
+        "q_subject": "M-33.6k.10 qualify disposable acquisition route",
+        "f_subject": "M-33.6k.10 freeze disposable acquisition route",
+        "h_subject": "M-33.6k.10 publish disposable sealed production",
+        "e_subject": "M-33.6k.10 publish disposable independent evidence",
+    }
+    contract = build_m336k2_publication_contract(**values)
+    for name in ("h28_publication_contract", "e28_publication_contract"):
+        (tmp_path / f"{name}.json").write_text(
+            json.dumps(asdict(contract)), encoding="utf-8"
+        )
+    for name, body in (
+        ("implementation_tip", {"exact_implementation_tip": "0" * 40}),
+        ("q28_commit", {"exact_q28_sha": "0" * 40}),
+        ("commit_protocol", {"branch_ref": "refs/heads/old"}),
+    ):
+        value = {**body, "receipt_hash": content_hash(body)}
+        (tmp_path / f"{name}.json").write_text(json.dumps(value), encoding="utf-8")
+
+    _write_m336k7_legacy_bindings(
+        tmp_path,
+        {
+            "identity_namespace": "m336k8",
+            "official_profile_id": "m336k8-rehearsal-v2",
+            "branch_ref": branch_ref,
+            "exact_implementation_tip": "1" * 40,
+            "exact_q30_sha": "2" * 40,
+        },
+    )
+
+    for name in ("h28_publication_contract", "e28_publication_contract"):
+        loaded = publication_contract_from_dict(
+            json.loads((tmp_path / f"{name}.json").read_text(encoding="utf-8"))
+        )
+        assert tuple(getattr(loaded, field) for field in values) == tuple(
+            values.values()
+        )
+
+
 def test_m336k9_commit_protocol_accepts_only_current_qualification_roots() -> None:
     assert _qualification_path_prefixes("artifacts/m336k9/q34") == (
         "runs/m336k9/q34/",

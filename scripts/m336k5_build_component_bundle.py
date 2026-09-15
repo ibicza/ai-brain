@@ -1262,38 +1262,55 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
         h_contract = _object(output / "h28_publication_contract.json")
         e_contract = _object(output / "e28_publication_contract.json")
         publication_values = {name: h_contract[name] for name in names}
-        subject_tuple = tuple(
+        publication_tuple = tuple(
             publication_values[name]
-            for name in ("q_subject", "f_subject", "h_subject", "e_subject")
+            for name in (
+                "q_root",
+                "f_root",
+                "h_root",
+                "e_root",
+                "q_subject",
+                "f_subject",
+                "h_subject",
+                "e_subject",
+            )
         )
-        allowed_subject_tuples = {
+        allowed_publication_tuples = {
             (
+                "artifacts/m336k9/q34",
+                "artifacts/m336k9/f34-freeze",
+                "artifacts/m336k9/h34",
+                "artifacts/m336k9/e34",
                 "M-33.6k.9 qualify disposable admission route",
                 "M-33.6k.9 freeze disposable admission route",
                 "M-33.6k.9 publish disposable sealed production",
                 "M-33.6k.9 publish disposable independent evidence",
             ),
             (
+                "artifacts/m336k9/q34",
+                "artifacts/m336k9/f34-freeze",
+                "artifacts/m336k9/h34",
+                "artifacts/m336k9/e34",
                 "M-33.6k.9 qualify official controller admission",
                 "M-33.6k.9 freeze final Java execution",
                 "M-33.6k.9 publish sealed Java production",
                 "M-33.6k.9 publish independent Java evidence",
             ),
+            (
+                "artifacts/m336k10/disposable/q35-like",
+                "artifacts/m336k10/disposable/f35-like-freeze",
+                "artifacts/m336k10/disposable/h35-like",
+                "artifacts/m336k10/disposable/e35-like",
+                "M-33.6k.10 qualify disposable acquisition route",
+                "M-33.6k.10 freeze disposable acquisition route",
+                "M-33.6k.10 publish disposable sealed production",
+                "M-33.6k.10 publish disposable independent evidence",
+            ),
         }
         if (
             any(e_contract[name] != value for name, value in publication_values.items())
             or publication_values["branch_ref"] != request["branch_ref"]
-            or tuple(
-                publication_values[name]
-                for name in ("q_root", "f_root", "h_root", "e_root")
-            )
-            != (
-                "artifacts/m336k9/q34",
-                "artifacts/m336k9/f34-freeze",
-                "artifacts/m336k9/h34",
-                "artifacts/m336k9/e34",
-            )
-            or subject_tuple not in allowed_subject_tuples
+            or publication_tuple not in allowed_publication_tuples
         ):
             raise M336K2ProtocolError("M336K9 publication contract changed")
     elif namespace == "m336k8":
