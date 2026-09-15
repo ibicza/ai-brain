@@ -12,6 +12,10 @@ from ai_brain.stage3.acquisition.m336k2_execution import (
     build_m336k2_executable_dependency_manifest,
 )
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k5_startup import (
+    M336K5PythonInvocationPlan,
+    M336K5PythonStartupReceipt,
+)
 from ai_brain.stage3.acquisition.m336k7_contracts import (
     M336K7PersistentCapsuleBindingSet,
 )
@@ -25,6 +29,12 @@ from ai_brain.stage3.acquisition.m336k8_contracts import (
     M336K8SourceDomainCompatibilityReceipt,
     build_m336k8_bridge_surface_manifest,
     build_m336k8_project_source_identity_receipt,
+)
+from ai_brain.stage3.acquisition.m336k11_execution import (
+    M336K11_PROFILE_ID,
+    OFFICIAL_CONTROLLER,
+    M336K11EffectiveEnvironmentBinding,
+    M336K11HermeticExecutableDependencyManifest,
 )
 
 
@@ -51,7 +61,13 @@ def main() -> None:
         "executable_handles",
         "output",
     }
-    if set(request) != expected:
+    v4_fields = {
+        "official_profile_id",
+        "windows_invocation_plan",
+        "windows_startup_receipt",
+    }
+    is_v4 = request.get("official_profile_id") == M336K11_PROFILE_ID
+    if set(request) != expected | (v4_fields if is_v4 else set()):
         raise M336K2ProtocolError("M336K8 source-domain request fields changed")
     root = Path(request["repository"]).resolve(strict=True)
     git = Path(request["git_executable"]).resolve(strict=True)
@@ -120,12 +136,60 @@ def main() -> None:
             Path(specification["path"]).resolve(strict=True),
             tuple(specification["version_arguments"]),
         )
-    dependency = build_m336k2_executable_dependency_manifest(
-        executables=executables,
-        python_invocation_handle=str(python),
-        environment_identity_hash=environment["environment_manifest_hash"],
-        source_identity_hash=source_identity.live_project_source_identity,
+    effective_environment = None
+    if is_v4:
+        invocation_plan = M336K5PythonInvocationPlan.from_dict(
+            _object(Path(request["windows_invocation_plan"]))
+        )
+        startup_receipt = M336K5PythonStartupReceipt.from_dict(
+            _object(Path(request["windows_startup_receipt"]))
+        )
+        if (
+            invocation_plan.sanitized_environment.environment_hash
+            != sanitized["windows_environment_hash"]
+        ):
+            raise M336K2ProtocolError(
+                "M336K11 invocation and sanitized environment policy diverged"
+            )
+        dependency = M336K11HermeticExecutableDependencyManifest.build(
+            executables=executables,
+            python_invocation_handle=str(python),
+            execution_scope=OFFICIAL_CONTROLLER,
+            exact_implementation_tip=implementation,
+            controller_python_environment_manifest_hash=environment[
+                "environment_manifest_hash"
+            ],
+            controller_source_identity_hash=(
+                source_identity.live_project_source_identity
+            ),
+            static_startup_policy_hash=startup_policy["policy_hash"],
+            sanitized_environment_policy_hash=sanitized["receipt_hash"],
+            expected_windows_sanitized_environment_hash=sanitized[
+                "windows_environment_hash"
+            ],
+            startup_receipt_schema_hash=startup_schema["schema_hash"],
+            bootstrap_source_hash=bootstrap["source_bytes_hash"],
+            windows_launcher_source_hash=launcher["source_bytes_hash"],
+        )
+        effective_environment = M336K11EffectiveEnvironmentBinding.build(
+            plan=invocation_plan,
+            startup_receipt=startup_receipt,
+            sanitized_environment_policy_hash=sanitized["receipt_hash"],
+            execution_scope=OFFICIAL_CONTROLLER,
+        )
+    else:
+        dependency = build_m336k2_executable_dependency_manifest(
+            executables=executables,
+            python_invocation_handle=str(python),
+            environment_identity_hash=environment["environment_manifest_hash"],
+            source_identity_hash=source_identity.live_project_source_identity,
+        )
+    controller_target = root / (
+        "scripts/m336k11_run_final_route.py"
+        if is_v4
+        else "scripts/m336k8_run_final_route.py"
     )
+    controller_target_hash = bytes_hash(controller_target.read_bytes())
     controller = M336K8ControllerStartupBinding.build(
         exact_implementation_tip=implementation,
         project_source_identity_policy_hash=policy.policy_hash,
@@ -140,12 +204,8 @@ def main() -> None:
         startup_receipt_schema_hash=startup_schema["schema_hash"],
         bootstrap_source_hash=bootstrap["source_bytes_hash"],
         windows_launcher_source_hash=launcher["source_bytes_hash"],
-        validate_only_target_source_hash=bytes_hash(
-            (root / "scripts/m336k8_run_final_route.py").read_bytes()
-        ),
-        final_controller_target_source_hash=bytes_hash(
-            (root / "scripts/m336k8_run_final_route.py").read_bytes()
-        ),
+        validate_only_target_source_hash=controller_target_hash,
+        final_controller_target_source_hash=controller_target_hash,
     )
 
     capsule_binding = M336K7PersistentCapsuleBindingSet.from_dict(
@@ -225,7 +285,7 @@ def main() -> None:
         controller_dependencies=asdict(dependency),
         legacy_dependencies=asdict(dependency),
     )
-    plan = M336K8FreezeAssemblyPlan.build()
+    plan = M336K8FreezeAssemblyPlan.build(active_executable_closure=is_v4)
     output.mkdir(parents=True)
     values = {
         "controller_source_identity_policy": policy.canonical_object(),
@@ -239,6 +299,10 @@ def main() -> None:
         "legacy_controller_alias_receipt": alias.canonical_object(),
         "freeze_assembly_plan": plan.canonical_object(),
     }
+    if effective_environment is not None:
+        values["effective_environment_binding"] = (
+            effective_environment.canonical_object()
+        )
     for name, value in values.items():
         _write(output / f"{name}.json", value)
     body = {

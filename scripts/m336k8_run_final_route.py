@@ -45,6 +45,12 @@ from ai_brain.stage3.acquisition.m336k8_request import (
     load_m336k8_preledger_receipt,
     validate_m336k8_final_invocation,
 )
+from ai_brain.stage3.acquisition.m336k11_execution import (
+    M336K11EffectiveEnvironmentBinding,
+    M336K11HermeticExecutableDependencyManifest,
+    M336K11NativeExecutionCapsuleReceipt,
+    build_m336k11_native_execution_plan,
+)
 
 
 def main() -> None:
@@ -149,27 +155,53 @@ def main() -> None:
         canonical_json(internal_request) + "\n", encoding="utf-8", newline="\n"
     )
     components = {item.name: item for item in validated.freeze.components}
-    dependency = executable_dependency_manifest_from_dict(
-        _component_object(
-            Path(request.repository), components, "executable_dependency_manifest"
+    dependency_value = _component_object(
+        Path(request.repository), components, "executable_dependency_manifest"
+    )
+    capsule_value = _component_object(
+        Path(request.repository), components, "execution_capsule_receipt"
+    )
+    if (
+        dependency_value.get("contract_role")
+        == M336K11HermeticExecutableDependencyManifest.ROLE
+    ):
+        dependency = M336K11HermeticExecutableDependencyManifest.from_dict(
+            dependency_value
         )
-    )
-    capsule = execution_capsule_receipt_from_dict(
-        _component_object(
-            Path(request.repository), components, "execution_capsule_receipt"
+        capsule = M336K11NativeExecutionCapsuleReceipt.from_dict(capsule_value)
+        effective_environment = M336K11EffectiveEnvironmentBinding.from_dict(
+            _component_object(
+                Path(request.repository), components, "effective_environment_binding"
+            )
         )
-    )
-    plan = build_m336k2_native_execution_plan(
-        repository=Path(request.repository),
-        python_executable=Path(request.python_executable),
-        stage_request=stage_request_path,
-        stage_receipt_root=Path(request.stage_receipt_root),
-        route_run_id=validated.bundle.protocol_run_id.value,
-        exact_f28_sha=request.exact_freeze_sha,
-        route_registry_hash=capsule.route_registry_hash,
-        dependency_manifest=dependency,
-        capsule=capsule,
-    )
+        plan = build_m336k11_native_execution_plan(
+            repository=Path(request.repository),
+            python_executable=Path(request.python_executable),
+            stage_request=stage_request_path,
+            stage_receipt_root=Path(request.stage_receipt_root),
+            route_run_id=validated.bundle.protocol_run_id.value,
+            exact_f36_sha=request.exact_freeze_sha,
+            route_registry_hash=capsule.route_registry_hash,
+            dependency_manifest=dependency,
+            effective_environment=effective_environment,
+            capsule=capsule,
+        )
+    else:
+        historical_dependency = executable_dependency_manifest_from_dict(
+            dependency_value
+        )
+        historical_capsule = execution_capsule_receipt_from_dict(capsule_value)
+        plan = build_m336k2_native_execution_plan(
+            repository=Path(request.repository),
+            python_executable=Path(request.python_executable),
+            stage_request=stage_request_path,
+            stage_receipt_root=Path(request.stage_receipt_root),
+            route_run_id=validated.bundle.protocol_run_id.value,
+            exact_f28_sha=request.exact_freeze_sha,
+            route_registry_hash=historical_capsule.route_registry_hash,
+            dependency_manifest=historical_dependency,
+            capsule=historical_capsule,
+        )
     ledger = M336K2RouteLedger(
         Path(request.route_ledger),
         git_worktrees=_worktrees(
@@ -227,6 +259,11 @@ def main() -> None:
             None
             if validated.official_acquisition_binding is None
             else validated.official_acquisition_binding.receipt_hash
+        ),
+        official_executable_binding_receipt_hash=(
+            None
+            if validated.official_executable_binding is None
+            else validated.official_executable_binding.receipt_hash
         ),
     )
     print(canonical_json(asdict(result)))

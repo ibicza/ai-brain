@@ -69,8 +69,15 @@ def run_m336k5_final_controller(
         raise M336K2ProtocolError("M336K controller admission receipt is absent")
     from ai_brain.stage3.acquisition.m336k8_request import (
         recompute_m336k10_acquisition_binding,
+        recompute_m336k11_executable_binding,
     )
 
+    prior_executable_binding = getattr(validated, "official_executable_binding", None)
+    recomputed_executable_binding = recompute_m336k11_executable_binding(validated)
+    if recomputed_executable_binding != prior_executable_binding:
+        raise M336K2ProtocolError(
+            "M336K executable binding differs from validate-only receipt"
+        )
     prior_acquisition_binding = getattr(validated, "official_acquisition_binding", None)
     recomputed_acquisition_binding = recompute_m336k10_acquisition_binding(validated)
     if recomputed_acquisition_binding != prior_acquisition_binding:
@@ -90,6 +97,7 @@ def run_m336k5_final_controller(
         final_authorization=validated.authorization,
         freeze_manifest=validated.freeze,
         official_acquisition_binding=recomputed_acquisition_binding,
+        official_executable_binding=recomputed_executable_binding,
     )
     if recomputed_admission != prior_admission:
         raise M336K2ProtocolError(
@@ -109,6 +117,8 @@ def run_m336k5_final_controller(
     )
     if recomputed_acquisition_binding is not None:
         context_values += (recomputed_acquisition_binding.receipt_hash,)
+    if recomputed_executable_binding is not None:
+        context_values += (recomputed_executable_binding.receipt_hash,)
     context = content_hash(context_values)
     initial = (
         ("PREFLIGHT_VERIFIED", validated.receipt.receipt_hash),
@@ -226,6 +236,7 @@ def verify_m336k5_route_ledger_identity(
     exact_f30_sha: str,
     preledger_receipt_hash: str,
     official_acquisition_binding_receipt_hash: str | None = None,
+    official_executable_binding_receipt_hash: str | None = None,
 ) -> str:
     context_values = (
         bundle.protocol_run_id.canonical_object(),
@@ -236,6 +247,8 @@ def verify_m336k5_route_ledger_identity(
     )
     if official_acquisition_binding_receipt_hash is not None:
         context_values += (official_acquisition_binding_receipt_hash,)
+    if official_executable_binding_receipt_hash is not None:
+        context_values += (official_executable_binding_receipt_hash,)
     context = content_hash(context_values)
     events = ledger.events()
     if not events or any(event.context_hash != context for event in events):

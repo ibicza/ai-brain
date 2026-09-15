@@ -27,6 +27,14 @@ from ai_brain.stage3.acquisition.m336k9_profiles import (
 
 M336K10_PROFILE_ID = "m336k8-final-v3"
 M336K10_ACQUISITION_RUN_ID = "m336k8.final-java.global-acquisition.v3"
+M336K11_PROFILE_ID = "m336k8-final-v4"
+M336K11_ACQUISITION_RUN_ID = "m336k8.final-java.global-acquisition.v4"
+M336K_OFFICIAL_ACQUISITION_PROFILE_IDS = frozenset(
+    {M336K10_PROFILE_ID, M336K11_PROFILE_ID}
+)
+M336K_OFFICIAL_ACQUISITION_RUN_IDS = frozenset(
+    {M336K10_ACQUISITION_RUN_ID, M336K11_ACQUISITION_RUN_ID}
+)
 M336K10_OFFICIAL_POOL_SEMANTIC_HASH = (
     "b48ee354dc710a6c0ac0ed2cfceb1385c0d12cc8efb6b8fbef00e8d2f6ab572e"
 )
@@ -458,7 +466,7 @@ class M336K10OfficialAcquisitionPolicy:
             or self.contract_role != self.ROLE
             or self.execution_scope != M336K10_EXECUTION_SCOPE_OFFICIAL
             or self.policy_version != self.VERSION
-            or self.acquisition_run_id != M336K10_ACQUISITION_RUN_ID
+            or self.acquisition_run_id not in M336K_OFFICIAL_ACQUISITION_RUN_IDS
             or self.allowed_network_hosts != M336K10_REQUIRED_OFFICIAL_HOSTS
             or any(
                 not _is_hash(value)
@@ -504,10 +512,10 @@ class M336K10OfficialAcquisitionPolicy:
         shared_policy.verify()
         profile.verify()
         if (
-            profile.profile_id != M336K10_PROFILE_ID
+            profile.profile_id not in M336K_OFFICIAL_ACQUISITION_PROFILE_IDS
             or profile.profile_status
             is not M336KOfficialRouteProfileStatus.CURRENT_ACTIVE
-            or profile.acquisition_run_id != M336K10_ACQUISITION_RUN_ID
+            or profile.acquisition_run_id not in M336K_OFFICIAL_ACQUISITION_RUN_IDS
             or network_authority.pool_binding_hash != pool_binding.binding_hash
         ):
             raise M336K2ProtocolError(
@@ -689,7 +697,7 @@ class M336K10AcquisitionLedgerContextTemplate:
             self.schema_version != 1
             or self.contract_role != self.ROLE
             or self.execution_scope != M336K10_EXECUTION_SCOPE_OFFICIAL
-            or self.acquisition_run_id != M336K10_ACQUISITION_RUN_ID
+            or self.acquisition_run_id not in M336K_OFFICIAL_ACQUISITION_RUN_IDS
             or self.exact_freeze_sha_source != "FINAL_COMMITTED_FREEZE_SHA"
             or any(
                 not _is_hash(value)

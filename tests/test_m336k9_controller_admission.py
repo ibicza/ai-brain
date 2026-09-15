@@ -53,6 +53,7 @@ from ai_brain.stage3.acquisition.m336k9_admission import (
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     M336K9FinalAuthorization,
     M336K10FinalAuthorization,
+    M336K11FinalAuthorization,
     build_m336k9_final_authorization,
     m336k_current_final_authorization_from_dict,
 )
@@ -73,6 +74,7 @@ class _Freeze:
     route_identity_bundle_hash: str
     authorization_hash: str
     official_acquisition_binding_receipt_hash: str | None
+    official_executable_binding_receipt_hash: str | None
     manifest_hash: str
 
     def _body(self) -> dict[str, Any]:
@@ -96,7 +98,12 @@ class _Freeze:
             "authorization_hash": authorization.authorization_hash,
             "official_acquisition_binding_receipt_hash": (
                 content_hash((profile.profile_id, "acquisition-binding-receipt"))
-                if profile.profile_id == "m336k8-final-v3"
+                if profile.profile_id in {"m336k8-final-v3", "m336k8-final-v4"}
+                else None
+            ),
+            "official_executable_binding_receipt_hash": (
+                content_hash((profile.profile_id, "executable-binding-receipt"))
+                if profile.profile_id == "m336k8-final-v4"
                 else None
             ),
         }
@@ -123,7 +130,7 @@ def _hashes(label: str) -> dict[str, str]:
 
 def _authorization(
     bundle: M336K5RouteIdentityBundle, profile_id: str
-) -> M336K9FinalAuthorization | M336K10FinalAuthorization:
+) -> M336K9FinalAuthorization | M336K10FinalAuthorization | M336K11FinalAuthorization:
     profile = m336k_official_profile_registry().profile(profile_id)
     bound_hashes = {
         name: content_hash((profile_id, name))
@@ -174,7 +181,7 @@ def _authorization(
         pre_freeze_source_body_bytes=0,
         **bound_hashes,
     )
-    if profile_id != "m336k8-final-v3":
+    if profile_id not in {"m336k8-final-v3", "m336k8-final-v4"}:
         return base
     base_values = {
         field.name: getattr(base, field.name)
@@ -195,7 +202,23 @@ def _authorization(
             (profile_id, "authorization-binding")
         ),
     }
-    temporary = M336K10FinalAuthorization(
+    authorization_type = (
+        M336K11FinalAuthorization
+        if profile_id == "m336k8-final-v4"
+        else M336K10FinalAuthorization
+    )
+    if profile_id == "m336k8-final-v4":
+        additions.update(
+            {
+                "official_controller_executable_binding_hash": content_hash(
+                    (profile_id, "executable-binding")
+                ),
+                "official_executable_binding_receipt_hash": content_hash(
+                    (profile_id, "executable-binding")
+                ),
+            }
+        )
+    temporary = authorization_type(
         **base_values, **additions, authorization_hash="0" * 64
     )
     result = replace(temporary, authorization_hash=content_hash(temporary._body()))
@@ -204,12 +227,12 @@ def _authorization(
 
 
 def _valid(
-    profile_id: str = "m336k8-final-v3",
+    profile_id: str = "m336k8-final-v4",
 ) -> tuple[
     M336KOfficialRouteProfileRegistry,
     M336KOfficialRouteProfile,
     M336K5RouteIdentityBundle,
-    M336K9FinalAuthorization | M336K10FinalAuthorization,
+    M336K9FinalAuthorization | M336K10FinalAuthorization | M336K11FinalAuthorization,
     _Freeze,
     str,
 ]:
@@ -245,6 +268,18 @@ def _admit(
         if isinstance(authorization, M336K10FinalAuthorization)
         else None
     )
+    executable_binding = (
+        SimpleNamespace(
+            receipt_hash=freeze.official_executable_binding_receipt_hash,
+            official_controller_executable_binding_hash=(
+                authorization.official_controller_executable_binding_hash
+            ),
+            status="PASS",
+            verify=lambda: None,
+        )
+        if isinstance(authorization, M336K11FinalAuthorization)
+        else None
+    )
     return verify_m336k_controller_admission(
         purpose=purpose,
         route_identity_bundle=bundle,
@@ -254,6 +289,7 @@ def _admit(
         final_authorization=authorization,
         freeze_manifest=freeze,
         official_acquisition_binding=binding,
+        official_executable_binding=executable_binding,
     )
 
 
@@ -554,7 +590,7 @@ def test_m336k9_controller_admission_mutations(
     registry, profile, bundle, authorization, freeze, purpose = active
     other = registry.profile("m336k8-final-v1")
 
-    if case == "active-k8-v3":
+    if case == "active-k8-v4":
         assert _admit(active).official_admission_result == "PASS"
         return
     if case in {"historical-k8-v1-new-official", "f33-v1-used-as-f34-authority"}:
@@ -805,7 +841,7 @@ def test_m336k9_profile_coverage_and_identity_sets() -> None:
     registry = m336k_official_profile_registry()
     gate = run_m336k_official_profile_coverage_gate()
     assert gate.status == "PASS"
-    assert gate.registered_profile_count == gate.tested_profile_count == 7
+    assert gate.registered_profile_count == gate.tested_profile_count == 8
     assert gate.untested_profile_count == 0
     assert gate.independent_controller_whitelist_count == 0
     assert gate.controller_only_identity_predicate_count == 0
@@ -824,6 +860,26 @@ def test_m336k9_profile_coverage_and_identity_sets() -> None:
     assert M336K5EvaluatorRunId.official_values == registry.official_values(
         "evaluator_run_id"
     )
+
+
+def test_m336k11_active_admission_requires_executable_receipt() -> None:
+    state = _valid("m336k8-final-v4")
+    registry, profile, bundle, authorization, freeze, purpose = state
+    acquisition = SimpleNamespace(
+        receipt_hash=freeze.official_acquisition_binding_receipt_hash,
+        authorization_binding_hash=authorization.acquisition_binding_receipt_hash,
+    )
+    with pytest.raises(M336K2ProtocolError, match="rejected the route profile"):
+        verify_m336k_controller_admission(
+            purpose=purpose,
+            route_identity_bundle=bundle,
+            expected_official_profile_id=profile.profile_id,
+            expected_profile_hash=profile.profile_hash,
+            current_registry=registry,
+            final_authorization=authorization,
+            freeze_manifest=freeze,
+            official_acquisition_binding=acquisition,
+        )
 
 
 def test_m336k9_rehearsal_profile_is_admitted_only_as_disposable() -> None:

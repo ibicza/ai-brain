@@ -426,6 +426,8 @@ def test_m336k8_v4_builder_accepts_phase_neutral_post_freeze_field() -> None:
             values[field.name] = "DISPOSABLE"
         elif field.name in {"exact_implementation_tip", "exact_freeze_sha"}:
             values[field.name] = "a" * 40
+        elif field.name == "official_controller_executable_binding_hash":
+            values[field.name] = "a" * 64
         elif field.name in mapping_fields:
             values[field.name] = {}
         else:

@@ -935,6 +935,40 @@ _ASSEMBLY_COMPONENTS: tuple[tuple[str, str, str, str], ...] = (
     ),
 )
 
+_M336K11_ASSEMBLY_COMPONENTS: tuple[tuple[str, str, str, str], ...] = (
+    *_ASSEMBLY_COMPONENTS,
+    (
+        "executable_dependency_manifest",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "OFFICIAL_EXECUTABLE_COMPONENT_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "effective_environment_binding",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "EFFECTIVE_ENVIRONMENT_BINDING_BUILDER",
+        "EXACT_LAUNCHER_INVOCATION",
+    ),
+    (
+        "official_controller_executable_binding",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "OFFICIAL_EXECUTABLE_BINDING_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "execution_capsule_receipt",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "NATIVE_EXECUTION_CAPSULE_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "native_route_manifest",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "ACTIVE_NATIVE_ROUTE_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+)
+
 
 def _default_hash_field(name: str) -> str:
     return {
@@ -959,10 +993,22 @@ def _default_hash_field(name: str) -> str:
         "route_identity_bundle": "bundle_hash",
         "final_authorization": "authorization_hash",
         "post_freeze_input_bundle": "bundle_hash",
+        "executable_dependency_manifest": "manifest_hash",
+        "effective_environment_binding": "receipt_hash",
+        "official_controller_executable_binding": "binding_hash",
+        "execution_capsule_receipt": "receipt_hash",
+        "native_route_manifest": "manifest_hash",
     }[name]
 
 
-def _build_assembly_entries() -> tuple[M336K8FreezeAssemblyEntry, ...]:
+def _build_assembly_entries(
+    *, active_executable_closure: bool = False
+) -> tuple[M336K8FreezeAssemblyEntry, ...]:
+    components = (
+        _M336K11_ASSEMBLY_COMPONENTS
+        if active_executable_closure
+        else _ASSEMBLY_COMPONENTS
+    )
     return tuple(
         M336K8FreezeAssemblyEntry(
             component_name=name,
@@ -975,7 +1021,7 @@ def _build_assembly_entries() -> tuple[M336K8FreezeAssemblyEntry, ...]:
             byte_equality_with_other_domain_required=name
             in {"legacy_controller_alias_receipt", "bridge_surface_manifest"},
         )
-        for name, domain, producer, commit_role in _ASSEMBLY_COMPONENTS
+        for name, domain, producer, commit_role in components
     )
 
 
@@ -989,6 +1035,7 @@ class M336K8FreezeAssemblyPlan:
     plan_hash: str
 
     ROLE: ClassVar[str] = "M336K8_FREEZE_ASSEMBLY_PLAN"
+    ROLE_V2: ClassVar[str] = "M336K11_EXECUTABLE_CLOSURE_ASSEMBLY_PLAN_V2"
 
     def _body(self) -> dict[str, Any]:
         return {
@@ -1016,18 +1063,23 @@ class M336K8FreezeAssemblyPlan:
         )
         if (
             self.schema_version != 1
-            or self.contract_role != self.ROLE
+            or self.contract_role not in {self.ROLE, self.ROLE_V2}
             or self.component_count != len(self.entries)
             or len({item.component_name for item in self.entries}) != len(self.entries)
-            or self.entries != _build_assembly_entries()
+            or self.entries
+            != _build_assembly_entries(
+                active_executable_closure=self.contract_role == self.ROLE_V2
+            )
             or self.producer_origin_map_hash != content_hash(origins)
             or self.plan_hash != content_hash(self._body())
         ):
             raise M336K2ProtocolError("M336K8 freeze assembly plan is invalid")
 
     @classmethod
-    def build(cls) -> Self:
-        entries = _build_assembly_entries()
+    def build(cls, *, active_executable_closure: bool = False) -> Self:
+        entries = _build_assembly_entries(
+            active_executable_closure=active_executable_closure
+        )
         origins = tuple(
             (
                 item.component_name,
@@ -1039,7 +1091,7 @@ class M336K8FreezeAssemblyPlan:
         )
         body = {
             "schema_version": 1,
-            "contract_role": cls.ROLE,
+            "contract_role": cls.ROLE_V2 if active_executable_closure else cls.ROLE,
             "entries": entries,
             "component_count": len(entries),
             "producer_origin_map_hash": content_hash(origins),
@@ -1437,6 +1489,12 @@ class M336K10PostFreezeInputBundle(M336K8PostFreezeInputBundleV2):
 def m336k_current_post_freeze_input_bundle_from_dict(
     value: dict[str, Any],
 ) -> M336K8PostFreezeInputBundleV2:
+    if value.get("contract_role") == "M336K11_POST_FREEZE_INPUT_BUNDLE_V4":
+        from ai_brain.stage3.acquisition.m336k11_execution import (
+            M336K11PostFreezeInputBundle,
+        )
+
+        return M336K11PostFreezeInputBundle.from_dict(value)
     if value.get("contract_role") == M336K10PostFreezeInputBundle.ROLE:
         return M336K10PostFreezeInputBundle.from_dict(value)
     return M336K8PostFreezeInputBundleV2.from_dict(value)
@@ -1444,6 +1502,12 @@ def m336k_current_post_freeze_input_bundle_from_dict(
 
 M336K8_POST_FREEZE_CONSUMED_COMPONENTS = (
     *(item[0] for item in _ASSEMBLY_COMPONENTS),
+    "freeze_assembly_plan",
+    "freeze_assembly_receipt",
+    "frozen_contract_compatibility_v2",
+)
+M336K11_POST_FREEZE_CONSUMED_COMPONENTS = (
+    *(item[0] for item in _M336K11_ASSEMBLY_COMPONENTS),
     "freeze_assembly_plan",
     "freeze_assembly_receipt",
     "frozen_contract_compatibility_v2",
@@ -1527,7 +1591,10 @@ class M336K8FrozenContractCompatibilityGateV2:
             self.schema_version != 2
             or self.contract_role != self.ROLE
             or self.consumed_artifact_count
-            != len(M336K8_POST_FREEZE_CONSUMED_COMPONENTS)
+            not in {
+                len(M336K8_POST_FREEZE_CONSUMED_COMPONENTS),
+                len(M336K11_POST_FREEZE_CONSUMED_COMPONENTS),
+            }
             or self.compatibility_artifact_count != len(self.artifacts)
             or self.semantic_check_count < self.compatibility_artifact_count
             or any(type(item) is not int or item < 0 for item in failures)
@@ -1548,7 +1615,12 @@ class M336K8FrozenContractCompatibilityGateV2:
         current_route_sources: tuple[Path, ...],
     ) -> Self:
         plan.verify()
-        expected = set(M336K8_POST_FREEZE_CONSUMED_COMPONENTS)
+        expected = {
+            *(item.component_name for item in plan.entries),
+            "freeze_assembly_plan",
+            "freeze_assembly_receipt",
+            "frozen_contract_compatibility_v2",
+        }
         supplied = set(artifacts) | {"frozen_contract_compatibility_v2"}
         origins = {item.component_name: item for item in plan.entries}
         generated_origins = {
@@ -1732,6 +1804,11 @@ def m336k8_semantic_binding_mismatches(
     assembly_plan = values.get("freeze_assembly_plan", {})
     assembly_receipt = values.get("freeze_assembly_receipt", {})
     alias = values.get("legacy_controller_alias_receipt", {})
+    active_alias = values.get("executable_dependency_manifest", {})
+    effective_environment = values.get("effective_environment_binding", {})
+    executable_binding = values.get("official_controller_executable_binding", {})
+    native_capsule = values.get("execution_capsule_receipt", {})
+    native_route = values.get("native_route_manifest", {})
     if name == "controller_source_identity_receipt":
         mismatches += int(
             receipt.get("source_identity_policy_hash") != policy.get("policy_hash")
@@ -1753,14 +1830,119 @@ def m336k8_semantic_binding_mismatches(
             != receipt.get("exact_implementation_tip")
         )
     elif name == "controller_executable_dependency_manifest":
-        mismatches += int(
-            dependency.get("environment_identity_hash")
-            != environment.get("environment_manifest_hash")
+        environment_reference = dependency.get(
+            "controller_python_environment_manifest_hash",
+            dependency.get("environment_identity_hash"),
+        )
+        source_reference = dependency.get(
+            "controller_source_identity_hash", dependency.get("source_identity_hash")
         )
         mismatches += int(
-            dependency.get("source_identity_hash")
-            != receipt.get("live_project_source_identity")
+            environment_reference != environment.get("environment_manifest_hash")
         )
+        mismatches += int(
+            source_reference != receipt.get("live_project_source_identity")
+        )
+    elif name == "executable_dependency_manifest":
+        mismatches += int(active_alias != dependency)
+    elif name == "effective_environment_binding":
+        relations = (
+            (
+                effective_environment.get("static_startup_policy_hash"),
+                dependency.get("static_startup_policy_hash"),
+            ),
+            (
+                effective_environment.get("sanitized_environment_policy_hash"),
+                dependency.get("sanitized_environment_policy_hash"),
+            ),
+            (
+                effective_environment.get("expected_sanitized_environment_hash"),
+                dependency.get("expected_windows_sanitized_environment_hash"),
+            ),
+            (
+                effective_environment.get(
+                    "actual_startup_receipt_sanitized_environment_hash"
+                ),
+                dependency.get("expected_windows_sanitized_environment_hash"),
+            ),
+        )
+        mismatches += sum(left != right for left, right in relations)
+        mismatches += int(
+            effective_environment.get("actual_environment_equals_invocation_plan")
+            is not True
+        )
+    elif name == "official_controller_executable_binding":
+        relations = (
+            (
+                executable_binding.get("controller_source_identity_receipt_hash"),
+                receipt.get("receipt_hash"),
+            ),
+            (
+                executable_binding.get("controller_source_identity_hash"),
+                receipt.get("live_project_source_identity"),
+            ),
+            (
+                executable_binding.get("controller_python_environment_manifest_hash"),
+                environment.get("environment_manifest_hash"),
+            ),
+            (
+                executable_binding.get("executable_dependency_manifest_hash"),
+                dependency.get("manifest_hash"),
+            ),
+            (
+                executable_binding.get("effective_environment_binding_receipt_hash"),
+                effective_environment.get("receipt_hash"),
+            ),
+        )
+        mismatches += sum(left != right for left, right in relations)
+    elif name == "execution_capsule_receipt":
+        relations = (
+            (
+                native_capsule.get("executable_dependency_manifest_hash"),
+                dependency.get("manifest_hash"),
+            ),
+            (
+                native_capsule.get("effective_environment_binding_receipt_hash"),
+                effective_environment.get("receipt_hash"),
+            ),
+            (
+                native_capsule.get("route_registry_hash"),
+                executable_binding.get("route_registry_hash"),
+            ),
+            (
+                native_capsule.get("typed_route_manifest_hash"),
+                executable_binding.get("typed_route_manifest_hash"),
+            ),
+            (
+                native_capsule.get("stage_worker_bytes_hash"),
+                executable_binding.get("native_stage_worker_source_hash"),
+            ),
+            (
+                native_capsule.get("command_contract_hash"),
+                executable_binding.get("native_command_contract_hash"),
+            ),
+        )
+        mismatches += sum(left != right for left, right in relations)
+    elif name == "native_route_manifest":
+        relations = (
+            (
+                native_route.get("executable_dependency_manifest_hash"),
+                dependency.get("manifest_hash"),
+            ),
+            (
+                native_route.get("native_execution_capsule_receipt_hash"),
+                native_capsule.get("receipt_hash"),
+            ),
+            (
+                native_route.get("route_registry_hash"),
+                executable_binding.get("route_registry_hash"),
+            ),
+            (
+                native_route.get("typed_route_manifest_hash"),
+                executable_binding.get("typed_route_manifest_hash"),
+            ),
+        )
+        mismatches += sum(left != right for left, right in relations)
     elif name == "controller_startup_binding":
         relations = (
             (
@@ -1940,6 +2122,24 @@ def m336k8_semantic_binding_mismatches(
             "freeze_assembly_plan_hash": assembly_plan.get("plan_hash"),
             "legacy_controller_alias_receipt_hash": alias.get("receipt_hash"),
         }
+        if executable_binding:
+            relations.update(
+                {
+                    "official_controller_executable_binding_hash": (
+                        executable_binding.get("binding_hash")
+                    ),
+                    "effective_environment_binding_receipt_hash": (
+                        effective_environment.get("receipt_hash")
+                    ),
+                    "native_execution_capsule_receipt_hash": native_capsule.get(
+                        "receipt_hash"
+                    ),
+                    "native_route_manifest_hash": native_route.get("manifest_hash"),
+                    "official_executable_binding_receipt_hash": (
+                        executable_binding.get("binding_hash")
+                    ),
+                }
+            )
         if assembly_receipt:
             relations["freeze_assembly_receipt_hash"] = assembly_receipt.get(
                 "receipt_hash"

@@ -108,6 +108,15 @@ M336K8_ROUTE_COMPONENTS = M336K7_ROUTE_COMPONENTS + (
     ("official-freeze-builder", "scripts/m336k10_materialize_f35.py"),
     ("official-final-cli", "scripts/m336k10_run_final_route.py"),
 )
+M336K11_ROUTE_COMPONENTS = M336K8_ROUTE_COMPONENTS + (
+    (
+        "hermetic-executable-binding",
+        "src/ai_brain/stage3/acquisition/m336k11_execution.py",
+    ),
+    ("hermetic-component-builder", "scripts/m336k11_build_component_bundle.py"),
+    ("hermetic-freeze-builder", "scripts/m336k11_materialize_f36.py"),
+    ("hermetic-final-cli", "scripts/m336k11_run_final_route.py"),
+)
 
 
 def _namespace_values(
@@ -127,7 +136,12 @@ def _namespace_values(
     if namespace == "m336k7":
         return route_value or M336K7_ROUTE_VERSION, M336K7_ROUTE_COMPONENTS
     if namespace == "m336k8":
-        return route_value or M336K8_ROUTE_VERSION, M336K8_ROUTE_COMPONENTS
+        components = (
+            M336K11_ROUTE_COMPONENTS
+            if profile_id == "m336k8-final-v4"
+            else M336K8_ROUTE_COMPONENTS
+        )
+        return route_value or M336K8_ROUTE_VERSION, components
     raise M336K2ProtocolError("M336K5 route registry namespace is invalid")
 
 

@@ -1,0 +1,281 @@
+{
+  "schema_version": 1,
+  "contract_role": "M336K11_F35_EXECUTABLE_BINDING_FORENSICS",
+  "historical_scope": "HISTORICAL_READ_ONLY",
+  "historical_result": "OUTCOME_C_BLOCKED",
+  "f35": "ad5342da01dfa05d690f7341c69e4e0e78f5fa2b",
+  "q35": "e75e1686c9388640b9b7f1c597eb5f44e9796e7c",
+  "r35e": "babf1467d390a846042f1c945f0b149c50aca31d",
+  "h35": "NOT_CREATED",
+  "e35": "NOT_CREATED",
+  "failure": {
+    "exception_type": "M336K2ProtocolError",
+    "message": "M336K2 executable manifest is invalid",
+    "location": "src/ai_brain/stage3/acquisition/m336k2_execution.py::executable_dependency_manifest_from_dict",
+    "ordering": [
+      "AFTER_EXACT_HERMETIC_PYTHON_STARTUP",
+      "BEFORE_OFFICIAL_ACQUISITION_BINDING_ADMISSION",
+      "BEFORE_CONTROLLER_ADMISSION",
+      "BEFORE_PRELEDGER_RECEIPT",
+      "BEFORE_ROUTE_EVENT",
+      "BEFORE_SOURCE_REQUEST"
+    ],
+    "post_freeze_validate_only_invocation_count": 1,
+    "controller_invocation_count": 0,
+    "route_event_count": 0,
+    "acquisition_event_count": 0,
+    "selector_event_count": 0,
+    "evaluator_event_count": 0,
+    "source_request_count": 0,
+    "source_body_byte_count": 0,
+    "official_vault_state": "ABSENT"
+  },
+  "environment_identity_failure": {
+    "legacy_expression": "content_hash(tuple(sorted(m336k2_minimal_environment())))",
+    "precise_expression_semantics": "HASH_OF_SORTED_EFFECTIVE_ENVIRONMENT_KEY_NAMES",
+    "raw_effective_values_in_legacy_hash": false,
+    "live_environment_presence_in_legacy_hash": true,
+    "committed_controller_hash": "77f06836cbfdd9ac7ba0e1333120b6985f672972a5f018276bb11eeb6c5640d2",
+    "hermetic_runtime_hash": "476f9fb7422f6f8bc644e8266021a50df8ede0f4f65ea765f51f3f7671fa7360",
+    "aggregate_mismatch_count": 1,
+    "build_key_set_unique_reconstruction_count": 1,
+    "build_present_names": [
+      "COMSPEC",
+      "GIT_CONFIG_NOSYSTEM",
+      "GIT_TERMINAL_PROMPT",
+      "LANG",
+      "LC_ALL",
+      "PATH",
+      "PATHEXT",
+      "PIP_NO_INDEX",
+      "PROGRAMDATA",
+      "PYTHONDONTWRITEBYTECODE",
+      "PYTHONNOUSERSITE",
+      "SYSTEMROOT",
+      "TEMP",
+      "TMP",
+      "TZ",
+      "UV_OFFLINE",
+      "WINDIR"
+    ],
+    "runtime_present_names": [
+      "COMSPEC",
+      "GIT_CONFIG_NOSYSTEM",
+      "GIT_TERMINAL_PROMPT",
+      "PATH",
+      "PATHEXT",
+      "PIP_NO_INDEX",
+      "PROGRAMDATA",
+      "PYTHONDONTWRITEBYTECODE",
+      "PYTHONNOUSERSITE",
+      "SYSTEMROOT",
+      "TEMP",
+      "TMP",
+      "TZ",
+      "UV_OFFLINE",
+      "WINDIR"
+    ],
+    "differences": [
+      {
+        "name": "LANG",
+        "build_presence": "PRESENT",
+        "runtime_presence": "ABSENT",
+        "build_value_sha256": "NOT_BOUND_BY_LEGACY_IDENTITY",
+        "runtime_value_sha256": "ABSENT"
+      },
+      {
+        "name": "LC_ALL",
+        "build_presence": "PRESENT",
+        "runtime_presence": "ABSENT",
+        "build_value_sha256": "NOT_BOUND_BY_LEGACY_IDENTITY",
+        "runtime_value_sha256": "ABSENT"
+      }
+    ],
+    "variable_presence_mismatch_count": 2,
+    "private_value_disclosure_count": 0,
+    "static_startup_policy_hash": "c9f8d357ad6ea1b0fc50368801df3f8774e3a339eaa6b2bc7ec3a6ce60eb2682",
+    "sanitized_environment_policy_receipt_hash": "e6818f7a067286ffb4d0ee762a9a2c553b3faa8325953f92fb1292b469e0ac59",
+    "windows_sanitized_environment_hash": "18378fe6090979d5df226ce37c11a43cb342fbc5382c9c6c471388f59b2b21f5",
+    "karina_sanitized_environment_hash": "94d08444772af0b15a8cff0070f1dec2d19a1002070e80f05bc3bf008030863b"
+  },
+  "frozen_artifacts": {
+    "controller_executable_dependency_manifest": {
+      "bytes_hash": "40df3dd152586a7ca07bc00525d7e8f0f92dffe9241903b3cdc2af9671da08f0",
+      "semantic_hash": "e1c4dc4765c2f980ab29cbb07baa171392bc8ef091a9008d363423e239fedc7f",
+      "environment_identity_hash": "e2034b47b953845f80619e0fbfe4e8147c08c8b9e38814ae9aad8265d7f0c46d",
+      "minimal_environment_policy_hash": "77f06836cbfdd9ac7ba0e1333120b6985f672972a5f018276bb11eeb6c5640d2"
+    },
+    "executable_dependency_manifest_alias": {
+      "bytes_hash": "40df3dd152586a7ca07bc00525d7e8f0f92dffe9241903b3cdc2af9671da08f0",
+      "semantic_hash": "e1c4dc4765c2f980ab29cbb07baa171392bc8ef091a9008d363423e239fedc7f"
+    },
+    "controller_python_environment_manifest": {
+      "bytes_hash": "82d4de1905622dd941887e59fefd69fe40eeb6053c2e017b107293f51ab92031",
+      "semantic_hash": "e2034b47b953845f80619e0fbfe4e8147c08c8b9e38814ae9aad8265d7f0c46d"
+    },
+    "python_environment_manifest_alias": {
+      "bytes_hash": "82d4de1905622dd941887e59fefd69fe40eeb6053c2e017b107293f51ab92031",
+      "semantic_hash": "e2034b47b953845f80619e0fbfe4e8147c08c8b9e38814ae9aad8265d7f0c46d"
+    },
+    "native_execution_capsule_receipt": {
+      "bytes_hash": "c951cf2fd803eb3ec79a946861f7204171d40d30e777eab815dc08fc9aea4fac",
+      "semantic_hash": "e7ea92f881d7a790d690de6e4d36dea2733781a8317595630f33be1853a686d8",
+      "minimal_environment_policy_hash": "476f9fb7422f6f8bc644e8266021a50df8ede0f4f65ea765f51f3f7671fa7360"
+    },
+    "legacy_native_route_manifest": {
+      "bytes_hash": "06c53c21901dbd72ebb3f28c3cfe3086821008c1a1aa427e2fd66b72158889f3",
+      "semantic_hash": "9dfeb52e5a2caeac55492f673dec4d01af696c993f6de9b42f457884c4675bab",
+      "route_version": "m336k2.candidate-isolated-java-final-route.v1",
+      "executable_dependency_manifest_hash": "ed89e40b399bc289516e8363c46a095cf700762f77eff1744941bb766512d8a3",
+      "python_environment_manifest_hash": "95f1f4a48a71f800387a360c380e1cc8941fd2fe67845d7cba1eca1d1b8effcf",
+      "minimal_environment_policy_hash": "476f9fb7422f6f8bc644e8266021a50df8ede0f4f65ea765f51f3f7671fa7360"
+    },
+    "typed_route_manifest": {
+      "bytes_hash": "30b8c30ef47f7e030a7dc91e0b71604c897fb440f8eca47bfba61fec80823af5",
+      "semantic_hash": "f9845a1313c37c3a61c3d35624e99ae1e3bf5b46f773c60a8235aaf45a5338c4"
+    },
+    "typed_route_registry": {
+      "bytes_hash": "86f49bf74fd5dd6659e073c330d89b2e3999c2a0e55266eb050ad0c0726be26b",
+      "semantic_hash": "6ec5ecb407487bdcd426e503f286b5595ef80e4883e4b40909662382b2d00288"
+    },
+    "legacy_route_registry": {
+      "bytes_hash": "b9894c3ebef0b30e6a9ba2f1cdf4d9cd21ef90bbc5c0a3e841c0584a8cf92723",
+      "semantic_hash": "e835366690c209b09cd0e98db57e54c1cfbcc1338b277ccc7c9a480c51fe896b"
+    }
+  },
+  "mismatch_inventory": [
+    {
+      "predicate": "controller_manifest.static_policy_hash == hermetic_runtime.legacy_environment_key_hash",
+      "left_hash": "77f06836cbfdd9ac7ba0e1333120b6985f672972a5f018276bb11eeb6c5640d2",
+      "right_hash": "476f9fb7422f6f8bc644e8266021a50df8ede0f4f65ea765f51f3f7671fa7360",
+      "difference_count": 1
+    },
+    {
+      "predicate": "controller_manifest.manifest_hash == legacy_native_route_manifest.executable_dependency_manifest_hash",
+      "left_hash": "e1c4dc4765c2f980ab29cbb07baa171392bc8ef091a9008d363423e239fedc7f",
+      "right_hash": "ed89e40b399bc289516e8363c46a095cf700762f77eff1744941bb766512d8a3",
+      "difference_count": 1
+    },
+    {
+      "predicate": "controller_python_environment_manifest.environment_manifest_hash == legacy_native_route_manifest.python_environment_manifest_hash",
+      "left_hash": "e2034b47b953845f80619e0fbfe4e8147c08c8b9e38814ae9aad8265d7f0c46d",
+      "right_hash": "95f1f4a48a71f800387a360c380e1cc8941fd2fe67845d7cba1eca1d1b8effcf",
+      "difference_count": 1
+    },
+    {
+      "predicate": "controller_manifest.static_policy_hash == copied_native_capsule.minimal_environment_policy_hash",
+      "left_hash": "77f06836cbfdd9ac7ba0e1333120b6985f672972a5f018276bb11eeb6c5640d2",
+      "right_hash": "476f9fb7422f6f8bc644e8266021a50df8ede0f4f65ea765f51f3f7671fa7360",
+      "difference_count": 1
+    }
+  ],
+  "alias_checks": {
+    "controller_and_active_executable_alias_byte_difference_count": 0,
+    "controller_and_active_executable_alias_semantic_difference_count": 0,
+    "controller_and_active_python_environment_alias_byte_difference_count": 0,
+    "controller_and_active_python_environment_alias_semantic_difference_count": 0
+  },
+  "producer_consumer_inventory": [
+    {
+      "artifact": "m336k2_minimal_environment",
+      "producer": "src/ai_brain/stage3/acquisition/m336k2_protocol.py::m336k2_minimal_environment",
+      "consumers": ["src/ai_brain/stage3/acquisition/m336k2_execution.py::minimal_environment_policy_identity", "subprocess environment call sites"]
+    },
+    {
+      "artifact": "minimal_environment_policy_identity",
+      "producer": "src/ai_brain/stage3/acquisition/m336k2_execution.py::minimal_environment_policy_identity",
+      "consumers": ["build_m336k2_executable_dependency_manifest", "executable_dependency_manifest_from_dict", "build_m336k2_execution_capsule_receipt", "execution_capsule_receipt_from_dict"]
+    },
+    {
+      "artifact": "M336K2ExecutableDependencyManifest",
+      "producer": "src/ai_brain/stage3/acquisition/m336k2_execution.py::build_m336k2_executable_dependency_manifest",
+      "consumers": ["executable_dependency_manifest_from_dict", "verify_m336k2_executable_handles", "build_m336k2_native_execution_plan"]
+    },
+    {
+      "artifact": "executable_dependency_manifest_from_dict",
+      "producer": "src/ai_brain/stage3/acquisition/m336k2_execution.py::executable_dependency_manifest_from_dict",
+      "consumers": ["src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request", "scripts/m336k8_run_final_route.py::main"]
+    },
+    {
+      "artifact": "M336K2ExecutionCapsuleReceipt",
+      "producer": "src/ai_brain/stage3/acquisition/m336k2_execution.py::build_m336k2_execution_capsule_receipt",
+      "consumers": ["execution_capsule_receipt_from_dict", "build_m336k2_native_execution_plan"]
+    },
+    {
+      "artifact": "build_m336k2_native_execution_plan",
+      "producer": "src/ai_brain/stage3/acquisition/m336k2_execution.py::build_m336k2_native_execution_plan",
+      "consumers": ["scripts/m336k8_run_final_route.py::main"]
+    },
+    {
+      "artifact": "controller_executable_dependency_manifest",
+      "producer": "scripts/m336k8_build_source_domain_contracts.py::main",
+      "consumers": ["scripts/m336k5_build_component_bundle.py::main", "src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request"]
+    },
+    {
+      "artifact": "executable_dependency_manifest_alias",
+      "producer": "scripts/m336k5_build_component_bundle.py::main",
+      "consumers": ["scripts/m336k8_run_final_route.py::main", "src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request"]
+    },
+    {
+      "artifact": "execution_capsule_receipt",
+      "producer": "scripts/m336k5_build_component_bundle.py::main",
+      "consumers": ["scripts/m336k8_run_final_route.py::main", "src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request"]
+    },
+    {
+      "artifact": "legacy_native_route_manifest",
+      "producer": "scripts/m336k5_build_component_bundle.py::main",
+      "consumers": ["scripts/m336k8_run_final_route.py::main"]
+    },
+    {
+      "artifact": "typed_route_manifest",
+      "producer": "src/ai_brain/stage3/acquisition/m336k5_identity.py::build_m336k8_route_identity_bundle",
+      "consumers": ["scripts/m336k5_build_component_bundle.py::main", "src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request"]
+    },
+    {
+      "artifact": "controller_startup_binding",
+      "producer": "scripts/m336k8_build_source_domain_contracts.py::main",
+      "consumers": ["src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request"]
+    },
+    {
+      "artifact": "final_authorization",
+      "producer": "scripts/m336k5_build_component_bundle.py::main",
+      "consumers": ["src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request", "src/ai_brain/stage3/acquisition/m336k9_admission.py::verify_m336k9_controller_admission"]
+    },
+    {
+      "artifact": "post_freeze_input_bundle",
+      "producer": "scripts/m336k5_build_component_bundle.py::main",
+      "consumers": ["src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request"]
+    },
+    {
+      "artifact": "private_invocation_plan",
+      "producer": "src/ai_brain/stage3/acquisition/m336k5_startup.py::build_python_invocation_plan",
+      "consumers": ["scripts/m336k5_launch_python.ps1", "scripts/m336k8_run_final_route.py::main"]
+    },
+    {
+      "artifact": "startup_receipt",
+      "producer": "scripts/m336k5_python_bootstrap.py::main",
+      "consumers": ["src/ai_brain/stage3/acquisition/m336k5_startup.py::startup_receipt_from_path", "src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request"]
+    },
+    {
+      "artifact": "preledger_receipt",
+      "producer": "src/ai_brain/stage3/acquisition/m336k8_request.py::validate_m336k8_final_request",
+      "consumers": ["src/ai_brain/stage3/acquisition/m336k5_controller.py::run_m336k5_final_controller", "scripts/m336k8_run_final_route.py::main"]
+    }
+  ],
+  "root_cause_classifications": [
+    "LIVE_ENVIRONMENT_VALUES_HASHED_AS_STATIC_POLICY_IDENTITY",
+    "BUILD_PROCESS_ENVIRONMENT_BOUND_INTO_RUNTIME_POLICY",
+    "STATIC_POLICY_AND_EFFECTIVE_ENVIRONMENT_NOT_SEPARATED",
+    "CURRENT_EXECUTABLE_MANIFEST_MIXED_WITH_LEGACY_NATIVE_CAPSULE",
+    "CURRENT_EXECUTABLE_MANIFEST_MIXED_WITH_LEGACY_NATIVE_ROUTE_MANIFEST",
+    "ACTIVE_AND_HISTORICAL_EXECUTABLE_ARTIFACTS_COLOCATED_WITHOUT_SCOPE",
+    "EXECUTABLE_CLOSURE_NOT_INCLUDED_IN_FREEZE_SEMANTIC_GATE",
+    "PREFREEZE_QUALIFICATION_BYPASSED_EXACT_HERMETIC_LAUNCHER",
+    "POSTFREEZE_CONSUMER_GRAPH_NOT_EXECUTED_BEFORE_FREEZE"
+  ],
+  "root_cause_classification_count": 9,
+  "unclassified_root_cause_count": 0,
+  "forensic_side_effect_count": 0,
+  "reservation_mutation_count": 0,
+  "report_hash": "9844a92fe6d8352eb32d579f3cf6e2ae03e68c93e8d32a3b9a65d582f8ca41f7"
+}

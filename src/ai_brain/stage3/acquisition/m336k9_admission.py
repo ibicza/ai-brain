@@ -20,6 +20,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
 )
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     M336K10FinalAuthorization,
+    M336K11FinalAuthorization,
     build_m336k9_final_authorization,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
@@ -28,7 +29,7 @@ from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
 )
 
-M336K9_CONTROLLER_VERSION = "m336k10-controller.v3"
+M336K9_CONTROLLER_VERSION = "m336k11-controller.v4"
 _HASH = re.compile(r"[0-9a-f]{64}")
 _CONTROLLER_VERSION = re.compile(r"m336k([0-9]+)-controller\.v([0-9]+)")
 M336K9_CONTROLLER_ADMISSION_CONTRACT = {
@@ -44,6 +45,7 @@ M336K9_CONTROLLER_ADMISSION_CONTRACT = {
         "final_authorization",
         "freeze_manifest",
         "official_acquisition_binding",
+        "official_executable_binding",
     ),
     "required_identity_fields": (
         "route_version",
@@ -68,11 +70,12 @@ M336K9_CONTROLLER_ADMISSION_TESTED_PROFILE_IDS = (
     "m336k8-final-v1",
     "m336k8-final-v2",
     "m336k8-final-v3",
+    "m336k8-final-v4",
     "m336k8-rehearsal-v2",
 )
 M336K9_ADMISSION_MUTATION_CASES = (
     "historical-k8-v1-new-official",
-    "active-k8-v3",
+    "active-k8-v4",
     "profile-absent",
     "route-from-another-profile",
     "protocol-from-another-profile",
@@ -114,6 +117,7 @@ class M336KControllerAdmissionReceipt:
     authorization_hash: str
     freeze_hash: str
     official_acquisition_binding_receipt_hash: str | None
+    official_executable_binding_receipt_hash: str | None
     execution_mode: str
     official_admission_result: str
     side_effect_count: int
@@ -144,6 +148,12 @@ class M336KControllerAdmissionReceipt:
             and _HASH.fullmatch(self.official_acquisition_binding_receipt_hash)
             is not None
         )
+        executable_hash_valid = (
+            self.official_executable_binding_receipt_hash is None
+            or type(self.official_executable_binding_receipt_hash) is str
+            and _HASH.fullmatch(self.official_executable_binding_receipt_hash)
+            is not None
+        )
         if (
             self.schema_version != 1
             or self.contract_role != self.ROLE
@@ -154,6 +164,7 @@ class M336KControllerAdmissionReceipt:
             or self.official_admission_result != "PASS"
             or self.side_effect_count != 0
             or not binding_hash_valid
+            or not executable_hash_valid
             or any(
                 type(value) is not str or _HASH.fullmatch(value) is None
                 for value in hashes
@@ -165,10 +176,25 @@ class M336KControllerAdmissionReceipt:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Self:
         expected = {field.name for field in fields(cls)}
-        optional = {"official_acquisition_binding_receipt_hash"}
-        if type(value) is not dict or set(value) not in {expected, expected - optional}:
+        optional = {
+            "official_acquisition_binding_receipt_hash",
+            "official_executable_binding_receipt_hash",
+        }
+        allowed = {
+            expected,
+            expected - {"official_acquisition_binding_receipt_hash"},
+            expected - {"official_executable_binding_receipt_hash"},
+            expected - optional,
+        }
+        if type(value) is not dict or set(value) not in allowed:
             raise M336K2ProtocolError("M336K controller admission fields changed")
-        result = cls(**{"official_acquisition_binding_receipt_hash": None, **value})
+        result = cls(
+            **{
+                "official_acquisition_binding_receipt_hash": None,
+                "official_executable_binding_receipt_hash": None,
+                **value,
+            }
+        )
         result.verify()
         return result
 
@@ -183,6 +209,7 @@ def verify_m336k_controller_admission(
     final_authorization: Any,
     freeze_manifest: Any,
     official_acquisition_binding: Any | None = None,
+    official_executable_binding: Any | None = None,
 ) -> M336KControllerAdmissionReceipt:
     """Apply every controller identity predicate without producing side effects."""
 
@@ -221,10 +248,19 @@ def verify_m336k_controller_admission(
     authorization_binding_hash = getattr(
         final_authorization, "acquisition_binding_receipt_hash", None
     )
+    executable_receipt_hash = getattr(official_executable_binding, "receipt_hash", None)
+    executable_binding_hash = getattr(
+        official_executable_binding,
+        "official_controller_executable_binding_hash",
+        None,
+    )
     current_controller = _CONTROLLER_VERSION.fullmatch(M336K9_CONTROLLER_VERSION)
     minimum_controller = _CONTROLLER_VERSION.fullmatch(
         profile.minimum_controller_version
     )
+    executable_verifier = getattr(official_executable_binding, "verify", None)
+    if official_executable_binding is not None and callable(executable_verifier):
+        executable_verifier()
     if (
         expected_status is None
         or current_controller is None
@@ -270,7 +306,7 @@ def verify_m336k_controller_admission(
         or type(freeze_hash) is not str
         or _HASH.fullmatch(freeze_hash) is None
         or freeze_hash != content_hash(freeze_body())
-        or profile.profile_id == "m336k8-final-v3"
+        or profile.profile_id in {"m336k8-final-v3", "m336k8-final-v4"}
         and (
             official_acquisition_binding is None
             or type(binding_receipt_hash) is not str
@@ -282,6 +318,26 @@ def verify_m336k_controller_admission(
                 None,
             )
             != binding_receipt_hash
+        )
+        or profile.profile_id == "m336k8-final-v4"
+        and (
+            official_executable_binding is None
+            or not callable(getattr(official_executable_binding, "verify", None))
+            or getattr(official_executable_binding, "status", None) != "PASS"
+            or type(executable_receipt_hash) is not str
+            or _HASH.fullmatch(executable_receipt_hash) is None
+            or executable_binding_hash
+            != getattr(
+                final_authorization,
+                "official_controller_executable_binding_hash",
+                None,
+            )
+            or getattr(
+                freeze_manifest,
+                "official_executable_binding_receipt_hash",
+                None,
+            )
+            != executable_receipt_hash
         )
     ):
         raise M336K2ProtocolError(
@@ -299,13 +355,18 @@ def verify_m336k_controller_admission(
         "authorization_hash": authorization_hash,
         "freeze_hash": freeze_hash,
         "official_acquisition_binding_receipt_hash": binding_receipt_hash,
+        "official_executable_binding_receipt_hash": executable_receipt_hash,
         "execution_mode": route_identity_bundle.execution_mode.value,
         "official_admission_result": "PASS",
         "side_effect_count": 0,
     }
     body = {name: value for name, value in body.items() if value is not None}
     receipt = M336KControllerAdmissionReceipt(
-        **{"official_acquisition_binding_receipt_hash": None, **body},
+        **{
+            "official_acquisition_binding_receipt_hash": None,
+            "official_executable_binding_receipt_hash": None,
+            **body,
+        },
         receipt_hash=content_hash(body),
     )
     receipt.verify()
@@ -386,6 +447,7 @@ class _CoverageFreeze:
     route_identity_bundle_hash: str
     authorization_hash: str
     official_acquisition_binding_receipt_hash: str | None
+    official_executable_binding_receipt_hash: str | None
     manifest_hash: str
 
     def _body(self) -> dict[str, Any]:
@@ -403,6 +465,7 @@ class _CoverageFreeze:
         bundle_hash: str,
         authorization_hash: str,
         acquisition_binding_receipt_hash: str | None = None,
+        executable_binding_receipt_hash: str | None = None,
     ) -> Self:
         body = {
             "official_profile_id": profile_id,
@@ -412,6 +475,9 @@ class _CoverageFreeze:
             "authorization_hash": authorization_hash,
             "official_acquisition_binding_receipt_hash": (
                 acquisition_binding_receipt_hash
+            ),
+            "official_executable_binding_receipt_hash": (
+                executable_binding_receipt_hash
             ),
         }
         return cls(**body, manifest_hash=content_hash(body))
@@ -477,7 +543,7 @@ def _coverage_authorization(profile_id: str, bundle: M336K5RouteIdentityBundle) 
         pre_freeze_source_body_bytes=0,
         **hashes,
     )
-    if profile_id != "m336k8-final-v3":
+    if profile_id not in {"m336k8-final-v3", "m336k8-final-v4"}:
         return result
     binding_commitment = content_hash((profile_id, "acquisition-binding"))
     body = {
@@ -495,18 +561,42 @@ def _coverage_authorization(profile_id: str, bundle: M336K5RouteIdentityBundle) 
         "provider_configuration_hash": content_hash((profile_id, "provider")),
         "acquisition_binding_receipt_hash": binding_commitment,
     }
-    temporary = M336K10FinalAuthorization(**body, authorization_hash="0" * 64)
-    result_v3 = M336K10FinalAuthorization(
+    authorization_type = M336K10FinalAuthorization
+    if profile_id == "m336k8-final-v4":
+        authorization_type = M336K11FinalAuthorization
+        body.update(
+            {
+                "official_controller_executable_binding_hash": content_hash(
+                    (profile_id, "executable-binding")
+                ),
+                "official_executable_binding_receipt_hash": content_hash(
+                    (profile_id, "executable-binding")
+                ),
+            }
+        )
+    temporary = authorization_type(**body, authorization_hash="0" * 64)
+    result_bound = authorization_type(
         **body, authorization_hash=content_hash(temporary._body())
     )
-    result_v3.verify(bundle)
-    return result_v3
+    result_bound.verify(bundle)
+    return result_bound
 
 
 @dataclass(frozen=True)
 class _CoverageAcquisitionBinding:
     receipt_hash: str
     authorization_binding_hash: str
+
+
+@dataclass(frozen=True)
+class _CoverageExecutableBinding:
+    receipt_hash: str
+    official_controller_executable_binding_hash: str
+    status: str = "PASS"
+
+    def verify(self) -> None:
+        if self.status != "PASS":
+            raise M336K2ProtocolError("M336K11 coverage executable binding failed")
 
 
 def run_m336k_official_profile_coverage_gate() -> M336KOfficialProfileCoverageGate:
@@ -536,11 +626,19 @@ def run_m336k_official_profile_coverage_gate() -> M336KOfficialProfileCoverageGa
             raise M336K2ProtocolError("M336K profile codec coverage changed")
         authorization = _coverage_authorization(profile.profile_id, bundle)
         acquisition_binding = None
-        if profile.profile_id == "m336k8-final-v3":
+        if profile.profile_id in {"m336k8-final-v3", "m336k8-final-v4"}:
             acquisition_binding = _CoverageAcquisitionBinding(
                 receipt_hash=content_hash((profile.profile_id, "receipt")),
                 authorization_binding_hash=(
                     authorization.acquisition_binding_receipt_hash
+                ),
+            )
+        executable_binding = None
+        if profile.profile_id == "m336k8-final-v4":
+            executable_binding = _CoverageExecutableBinding(
+                receipt_hash=content_hash((profile.profile_id, "executable-receipt")),
+                official_controller_executable_binding_hash=(
+                    authorization.official_controller_executable_binding_hash
                 ),
             )
         freeze = _CoverageFreeze.build(
@@ -553,6 +651,9 @@ def run_m336k_official_profile_coverage_gate() -> M336KOfficialProfileCoverageGa
                 None
                 if acquisition_binding is None
                 else acquisition_binding.receipt_hash
+            ),
+            executable_binding_receipt_hash=(
+                None if executable_binding is None else executable_binding.receipt_hash
             ),
         )
         purpose = (
@@ -570,6 +671,7 @@ def run_m336k_official_profile_coverage_gate() -> M336KOfficialProfileCoverageGa
                 final_authorization=authorization,
                 freeze_manifest=freeze,
                 official_acquisition_binding=acquisition_binding,
+                official_executable_binding=executable_binding,
             )
         except M336K2ProtocolError:
             if (
