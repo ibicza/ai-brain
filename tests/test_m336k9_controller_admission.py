@@ -882,6 +882,15 @@ def test_m336k11_active_admission_requires_executable_receipt() -> None:
         )
 
 
+def test_m336k11_active_admission_accepts_side_effect_free_qualification() -> None:
+    state = _valid("m336k8-final-v4")
+    receipt = _admit((*state[:-1], "QUALIFICATION"))
+
+    assert receipt.purpose == "QUALIFICATION"
+    assert receipt.profile_status == "CURRENT_ACTIVE"
+    assert receipt.side_effect_count == 0
+
+
 def test_m336k9_rehearsal_profile_is_admitted_only_as_disposable() -> None:
     state = _valid("m336k8-rehearsal-v2")
     receipt = _admit(state)

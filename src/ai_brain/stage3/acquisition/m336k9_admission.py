@@ -56,6 +56,7 @@ M336K9_CONTROLLER_ADMISSION_CONTRACT = {
         "execution_mode",
     ),
     "official_required_status": "CURRENT_ACTIVE",
+    "qualification_required_status": "CURRENT_ACTIVE",
     "disposable_required_status": "REHEARSAL_ONLY",
     "side_effect_count": 0,
     "status": "FROZEN",
@@ -157,7 +158,7 @@ class M336KControllerAdmissionReceipt:
         if (
             self.schema_version != 1
             or self.contract_role != self.ROLE
-            or self.purpose not in {"OFFICIAL", "DISPOSABLE"}
+            or self.purpose not in {"OFFICIAL", "DISPOSABLE", "QUALIFICATION"}
             or self.profile_status
             not in {item.value for item in M336KOfficialRouteProfileStatus}
             or self.execution_mode != "FINAL"
@@ -229,6 +230,7 @@ def verify_m336k_controller_admission(
     profile.verify()
     expected_status = {
         "OFFICIAL": M336KOfficialRouteProfileStatus.CURRENT_ACTIVE,
+        "QUALIFICATION": M336KOfficialRouteProfileStatus.CURRENT_ACTIVE,
         "DISPOSABLE": M336KOfficialRouteProfileStatus.REHEARSAL_ONLY,
     }.get(purpose)
     identity_tuple = (
