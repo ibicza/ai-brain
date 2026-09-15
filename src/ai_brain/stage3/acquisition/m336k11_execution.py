@@ -552,21 +552,55 @@ def verify_m336k11_live_execution_inputs(
     *,
     manifest: M336K11HermeticExecutableDependencyManifest,
     effective_environment: M336K11EffectiveEnvironmentBinding,
+    invocation_plan: M336K5PythonInvocationPlan,
     startup_receipt: M336K5PythonStartupReceipt,
     executable_handles: Mapping[str, Path],
     native_stage_worker_bytes: bytes,
     native_capsule: M336K11NativeExecutionCapsuleReceipt,
+    expected_target: Path,
 ) -> None:
     """Match live launch inputs to the frozen v4 closure without environment reads."""
 
     manifest.verify()
     effective_environment.verify()
     native_capsule.verify()
+    validate_m336k5_python_invocation(invocation_plan)
     startup = M336K5PythonStartupReceipt.from_dict(asdict(startup_receipt))
     if effective_environment.status != "PASS":
         raise M336K2ProtocolError("M336K11 effective environment did not pass")
+    if (
+        invocation_plan.platform_role != "WINDOWS"
+        or invocation_plan.target_kind != "SCRIPT"
+        or Path(invocation_plan.target).resolve(strict=True)
+        != expected_target.resolve(strict=True)
+    ):
+        raise M336K2ProtocolError("M336K11 invocation plan target changed")
     verify_m336k2_executable_handles(manifest, dict(executable_handles))
     relations = (
+        (
+            invocation_plan.invocation_plan_hash,
+            effective_environment.invocation_plan_hash,
+        ),
+        (
+            invocation_plan.startup_policy.policy_hash,
+            manifest.static_startup_policy_hash,
+        ),
+        (
+            invocation_plan.sanitized_environment.environment_hash,
+            manifest.expected_windows_sanitized_environment_hash,
+        ),
+        (
+            invocation_plan.expected_project_source_identity,
+            manifest.controller_source_identity_hash,
+        ),
+        (
+            content_hash(invocation_plan.python_executable),
+            manifest.python_invocation_handle_hash,
+        ),
+        (
+            invocation_plan.expected_bootstrap_source_hash,
+            manifest.bootstrap_source_hash,
+        ),
         (startup.startup_policy_hash, manifest.static_startup_policy_hash),
         (
             startup.sanitized_environment_hash,
@@ -1141,9 +1175,11 @@ def verify_m336k11_official_executable_binding(
     post_freeze_input_bundle: Mapping[str, Any],
     final_request: Mapping[str, Any],
     component_scopes: Mapping[str, str],
+    invocation_plan: M336K5PythonInvocationPlan,
     startup_receipt: M336K5PythonStartupReceipt,
     executable_handles: Mapping[str, Path],
     native_stage_worker_bytes: bytes,
+    expected_target: Path,
     historical_copied_names: frozenset[str] = frozenset(),
 ) -> M336K11OfficialExecutableBindingReceipt:
     """Verify the complete active v4 executable graph without side effects."""
@@ -1157,10 +1193,12 @@ def verify_m336k11_official_executable_binding(
     verify_m336k11_live_execution_inputs(
         manifest=manifest,
         effective_environment=effective_environment,
+        invocation_plan=invocation_plan,
         startup_receipt=startup_receipt,
         executable_handles=executable_handles,
         native_stage_worker_bytes=native_stage_worker_bytes,
         native_capsule=native_capsule,
+        expected_target=expected_target,
     )
     sanitized_hash = _public_sanitized_environment_policy_hash(
         sanitized_environment_policy, startup_policy

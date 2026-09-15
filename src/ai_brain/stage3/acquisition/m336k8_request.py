@@ -25,6 +25,7 @@ from ai_brain.stage3.acquisition.m336k5_request import (
     _verify_identity_policy_components,
 )
 from ai_brain.stage3.acquisition.m336k5_startup import (
+    M336K5PythonInvocationPlan,
     M336K5PythonStartupPolicy,
     M336K5PythonStartupReceipt,
     startup_receipt_from_path,
@@ -214,6 +215,7 @@ class M336K8FinalRouteRequestV4:
     native_route_manifest: str | None = None
     official_executable_binding_receipt: str | None = None
     official_controller_executable_binding_hash: str | None = None
+    windows_invocation_plan: str | None = None
 
     ROLE: ClassVar[str] = "M336K8_CANONICAL_FINAL_ROUTE_REQUEST_V4"
 
@@ -277,6 +279,7 @@ class M336K8FinalRouteRequestV4:
             "native_route_manifest",
             "official_executable_binding_receipt",
             "official_controller_executable_binding_hash",
+            "windows_invocation_plan",
         }
         mandatory = _field_names(cls) - optional
         if (
@@ -382,6 +385,7 @@ def build_m336k8_final_route_request(**values: Any) -> M336K8FinalRouteRequestV4
         "native_route_manifest",
         "official_executable_binding_receipt",
         "official_controller_executable_binding_hash",
+        "windows_invocation_plan",
     }
     mandatory = _field_names(M336K8FinalRouteRequestV4) - optional - {"request_hash"}
     if not mandatory.issubset(body) or set(body) - mandatory - optional:
@@ -495,6 +499,7 @@ def validate_m336k8_final_invocation(
             request.native_route_manifest,
             request.official_executable_binding_receipt,
             request.official_controller_executable_binding_hash,
+            request.windows_invocation_plan,
         )
         if any(value is None for value in required_handles):
             raise M336K2ProtocolError("M336K11 active executable handles are absent")
@@ -512,9 +517,13 @@ def validate_m336k8_final_invocation(
         native_route = M336K11NativeRouteManifest.from_dict(
             _object(Path(request.native_route_manifest))
         )
+        invocation_plan = M336K5PythonInvocationPlan.from_dict(
+            _object(Path(request.windows_invocation_plan))
+        )
         verify_m336k11_live_execution_inputs(
             manifest=controller_dependencies,
             effective_environment=effective_environment,
+            invocation_plan=invocation_plan,
             startup_receipt=startup,
             executable_handles={
                 name: Path(value) for name, value in request.executable_handles.items()
@@ -523,6 +532,7 @@ def validate_m336k8_final_invocation(
                 root / "scripts/m336k2_run_stage.py"
             ).read_bytes(),
             native_capsule=native_execution_capsule,
+            expected_target=root / "scripts/m336k11_run_final_route.py",
         )
     capsule_binding = M336K7PersistentCapsuleBindingSet.from_dict(
         _object(Path(request.persistent_capsule_binding_set))
@@ -641,6 +651,7 @@ def validate_m336k8_final_invocation(
                 builder_identity_hash=request.builder_identity_hash,
             ),
             component_scopes=component_scopes,
+            invocation_plan=invocation_plan,
             startup_receipt=startup,
             executable_handles={
                 name: Path(value) for name, value in request.executable_handles.items()
@@ -648,6 +659,7 @@ def validate_m336k8_final_invocation(
             native_stage_worker_bytes=(
                 root / "scripts/m336k2_run_stage.py"
             ).read_bytes(),
+            expected_target=root / "scripts/m336k11_run_final_route.py",
         )
         expected_executable_receipt = M336K11OfficialExecutableBindingReceipt.from_dict(
             _object(Path(request.official_executable_binding_receipt))
@@ -1958,15 +1970,20 @@ def recompute_m336k11_executable_binding(
     startup = getattr(validated, "startup_receipt", None)
     if startup is None:
         raise M336K2ProtocolError("M336K11 controller startup receipt is absent")
+    invocation_plan = M336K5PythonInvocationPlan.from_dict(
+        _object(Path(request.windows_invocation_plan))
+    )
     verify_m336k11_live_execution_inputs(
         manifest=manifest,
         effective_environment=effective,
+        invocation_plan=invocation_plan,
         startup_receipt=startup,
         executable_handles={
             name: Path(value) for name, value in request.executable_handles.items()
         },
         native_stage_worker_bytes=(root / "scripts/m336k2_run_stage.py").read_bytes(),
         native_capsule=capsule,
+        expected_target=root / "scripts/m336k11_run_final_route.py",
     )
     receipt = verify_m336k11_official_executable_binding(
         binding=binding,
@@ -2004,11 +2021,13 @@ def recompute_m336k11_executable_binding(
             builder_identity_hash=request.builder_identity_hash,
         ),
         component_scopes=m336k11_official_component_scopes(),
+        invocation_plan=invocation_plan,
         startup_receipt=startup,
         executable_handles={
             name: Path(value) for name, value in request.executable_handles.items()
         },
         native_stage_worker_bytes=(root / "scripts/m336k2_run_stage.py").read_bytes(),
+        expected_target=root / "scripts/m336k11_run_final_route.py",
     )
     expected = M336K11OfficialExecutableBindingReceipt.from_dict(
         _component_object(root, components, "official_executable_binding_receipt")

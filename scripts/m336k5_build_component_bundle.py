@@ -41,6 +41,7 @@ from ai_brain.stage3.acquisition.m336k5_request import (
     M336K5_FINAL_REQUEST_CONTRACT,
 )
 from ai_brain.stage3.acquisition.m336k5_startup import (
+    M336K5PythonInvocationPlan,
     M336K5PythonStartupPolicy,
     M336K5PythonStartupReceipt,
 )
@@ -216,7 +217,11 @@ def main() -> None:
     if profile_id is not None:
         expected |= {"official_profile_id"}
     if profile_id == M336K11_PROFILE_ID:
-        expected |= {"executable_handles", "windows_startup_receipt"}
+        expected |= {
+            "executable_handles",
+            "windows_invocation_plan",
+            "windows_startup_receipt",
+        }
     if set(request) != expected:
         raise M336K2ProtocolError("M336K5 component bundle request fields changed")
     if identity_namespace not in {"m336k5", "m336k6", "m336k7", "m336k8"}:
@@ -783,6 +788,9 @@ def main() -> None:
         _write_m336k11_executable_binding_receipt(
             repository=repository,
             output=output,
+            invocation_plan=M336K5PythonInvocationPlan.from_dict(
+                _object(Path(request["windows_invocation_plan"]))
+            ),
             startup_receipt=M336K5PythonStartupReceipt.from_dict(
                 _object(Path(request["windows_startup_receipt"]))
             ),
@@ -1084,6 +1092,7 @@ def _write_m336k11_executable_binding_receipt(
     *,
     repository: Path,
     output: Path,
+    invocation_plan: M336K5PythonInvocationPlan,
     startup_receipt: M336K5PythonStartupReceipt,
     executable_handles: dict[str, Path],
 ) -> None:
@@ -1138,11 +1147,13 @@ def _write_m336k11_executable_binding_receipt(
         post_freeze_input_bundle=_object(output / "post_freeze_input_bundle.json"),
         final_request=final_request_binding,
         component_scopes=m336k11_official_component_scopes(),
+        invocation_plan=invocation_plan,
         startup_receipt=startup_receipt,
         executable_handles=executable_handles,
         native_stage_worker_bytes=(
             repository / "scripts/m336k2_run_stage.py"
         ).read_bytes(),
+        expected_target=repository / "scripts/m336k11_run_final_route.py",
     )
     (output / "official_executable_binding_receipt.json").write_text(
         canonical_json(receipt.canonical_object()) + "\n",

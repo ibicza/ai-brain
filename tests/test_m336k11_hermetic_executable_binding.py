@@ -95,7 +95,7 @@ def graph(tmp_path_factory: pytest.TempPathFactory) -> dict:
         repository=ROOT,
         working_directory=ROOT,
         bootstrap_script=ROOT / "scripts/m336k5_python_bootstrap.py",
-        target=ROOT / "scripts/m336k8_run_final_route.py",
+        target=ROOT / "scripts/m336k11_run_final_route.py",
         execute_arguments=("--request", "prospective.json"),
         validate_arguments=("--validate-only",),
         execute_startup_receipt=private / "execute-startup.json",
@@ -278,12 +278,14 @@ def _verify(graph: dict, **changes):
             "scopes",
             m336k11_official_component_scopes(),
         ),
+        invocation_plan=values.get("plan", graph["plan"]),
         startup_receipt=values.get("startup", graph["startup"]),
         executable_handles=values.get("handles", graph["handles"]),
         native_stage_worker_bytes=values.get(
             "native_stage_worker_bytes",
             (ROOT / "scripts/m336k2_run_stage.py").read_bytes(),
         ),
+        expected_target=ROOT / "scripts/m336k11_run_final_route.py",
     )
 
 
@@ -390,10 +392,12 @@ def test_current_binding_alias_live_inputs_and_native_plan(graph: dict) -> None:
     verify_m336k11_live_execution_inputs(
         manifest=graph["manifest"],
         effective_environment=graph["effective"],
+        invocation_plan=graph["plan"],
         startup_receipt=graph["startup"],
         executable_handles=graph["handles"],
         native_stage_worker_bytes=(ROOT / "scripts/m336k2_run_stage.py").read_bytes(),
         native_capsule=graph["capsule"],
+        expected_target=ROOT / "scripts/m336k11_run_final_route.py",
     )
     request = graph["private"] / "stage-request.json"
     request.write_text("{}\n", encoding="utf-8", newline="\n")
@@ -446,6 +450,35 @@ def test_official_binding_rejects_rehearsal_scopes(graph: dict) -> None:
             native_stage_worker_source_hash=graph["capsule"].stage_worker_bytes_hash,
             native_command_contract_hash=graph["capsule"].command_contract_hash,
         )
+
+
+def test_startup_receipt_from_another_invocation_plan_is_rejected(
+    graph: dict,
+) -> None:
+    other_plan = build_m336k5_python_invocation(
+        platform_role="WINDOWS",
+        process_role="VALIDATE_ONLY",
+        python_executable=graph["handles"]["python"],
+        git_executable=graph["handles"]["git"],
+        powershell_executable=graph["handles"]["powershell"],
+        repository=ROOT,
+        working_directory=ROOT,
+        bootstrap_script=ROOT / "scripts/m336k5_python_bootstrap.py",
+        target=ROOT / "scripts/m336k11_run_final_route.py",
+        execute_arguments=("--request", "different-prospective.json"),
+        validate_arguments=("--validate-only",),
+        execute_startup_receipt=graph["private"] / "other-execute-startup.json",
+        validate_startup_receipt=graph["private"] / "other-validate-startup.json",
+        parent_environment={
+            "SYSTEMROOT": "C:/Windows",
+            "TEMP": "C:/private/temp-a",
+            "TMP": "C:/private/tmp-a",
+        },
+    )
+    assert other_plan.sanitized_environment == graph["plan"].sanitized_environment
+    assert other_plan.invocation_plan_hash != graph["plan"].invocation_plan_hash
+    with pytest.raises(M336K2ProtocolError, match="live executable binding changed"):
+        _verify(graph, plan=other_plan)
 
 
 def test_historical_f35_loader_is_read_only_and_v4_is_active(
