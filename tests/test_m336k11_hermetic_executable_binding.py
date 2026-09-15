@@ -55,6 +55,12 @@ def _tool(name: str) -> Path:
     return Path(value).resolve(strict=True)
 
 
+def _test_executable(root: Path, name: str) -> Path:
+    path = root / f"{name}.test-executable"
+    path.write_bytes(f"m336k11-test-executable:{name}\n".encode())
+    return path.resolve(strict=True)
+
+
 def _hashed(body: dict, field: str) -> dict:
     return {**body, field: content_hash(body)}
 
@@ -85,7 +91,7 @@ def graph(tmp_path_factory: pytest.TempPathFactory) -> dict:
     private = tmp_path_factory.mktemp("m336k11-executable")
     python = Path(__import__("sys").executable).absolute()
     git = _tool("git")
-    powershell = _tool("powershell")
+    powershell = _test_executable(private, "powershell")
     plan = build_m336k5_python_invocation(
         platform_role="WINDOWS",
         process_role="VALIDATE_ONLY",
@@ -133,11 +139,13 @@ def graph(tmp_path_factory: pytest.TempPathFactory) -> dict:
         },
         "environment_manifest_hash",
     )
-    handles = {
-        name: _tool(name)
-        for name in ("git", "java", "javac", "ssh", "scp", "tar", "powershell", "cmd")
-    }
-    handles["python"] = python
+    handles = {"git": git, "python": python, "powershell": powershell}
+    handles.update(
+        {
+            name: _test_executable(private, name)
+            for name in ("java", "javac", "ssh", "scp", "tar", "cmd")
+        }
+    )
     manifest = M336K11HermeticExecutableDependencyManifest.build(
         executables={name: (path, ()) for name, path in handles.items()},
         python_invocation_handle=str(python),
