@@ -46,6 +46,7 @@ from ai_brain.stage3.acquisition.m336k8_contracts import (
     _source_static_counts,
     build_m336k8_bridge_surface_manifest,
     build_m336k8_project_source_identity_receipt,
+    m336k_current_post_freeze_input_bundle_from_dict,
 )
 from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K8CommittedFreezeAttestation,
@@ -320,6 +321,21 @@ def test_m336k8_schema_field_sets_match_typed_contracts() -> None:
         expected = {field.name for field in fields(contract)}
         assert set(definitions[definition]["required"]) == expected
         assert set(definitions[definition]["properties"]) == expected
+
+
+def test_m336k8_current_post_freeze_reader_round_trips_v2() -> None:
+    generated = {"schema_version", "contract_role", "bundle_hash"}
+    values = {
+        field.name: H
+        for field in fields(M336K8PostFreezeInputBundleV2)
+        if field.name not in generated
+    }
+    bundle = M336K8PostFreezeInputBundleV2.build(**values)
+
+    assert (
+        m336k_current_post_freeze_input_bundle_from_dict(bundle.canonical_object())
+        == bundle
+    )
 
 
 def test_m336k8_freeze_and_attestation_json_field_round_trip() -> None:

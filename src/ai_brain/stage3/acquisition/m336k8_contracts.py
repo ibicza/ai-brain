@@ -1384,6 +1384,12 @@ class M336K8PostFreezeInputBundleV2:
         result.verify()
         return result
 
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> Self:
+        result = cls(**_strict_fields(value, cls, "post-freeze input bundle"))
+        result.verify()
+        return result
+
 
 @dataclass(frozen=True)
 class M336K10PostFreezeInputBundle(M336K8PostFreezeInputBundleV2):
@@ -1434,12 +1440,6 @@ def m336k_current_post_freeze_input_bundle_from_dict(
     if value.get("contract_role") == M336K10PostFreezeInputBundle.ROLE:
         return M336K10PostFreezeInputBundle.from_dict(value)
     return M336K8PostFreezeInputBundleV2.from_dict(value)
-
-    @classmethod
-    def from_dict(cls, value: dict[str, Any]) -> Self:
-        result = cls(**_strict_fields(value, cls, "post-freeze input bundle"))
-        result.verify()
-        return result
 
 
 M336K8_POST_FREEZE_CONSUMED_COMPONENTS = (
