@@ -475,6 +475,7 @@ def test_m336k8_v4_builder_canonicalizes_absent_prospective_attestation() -> Non
 
     assert request.freeze_attestation is None
     assert "freeze_attestation" not in request.canonical_object()
+    assert M336K8FinalRouteRequestV4.from_dict(request.canonical_object()) == request
 
 
 def test_m336k8_mutation_runner_consumes_hermetic_startup_receipt() -> None:

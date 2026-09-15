@@ -272,6 +272,7 @@ class M336K8FinalRouteRequestV4:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Self:
         optional = {
+            "freeze_attestation",
             "executable_dependency_manifest",
             "effective_environment_binding",
             "official_controller_executable_binding",
@@ -378,6 +379,7 @@ def build_m336k8_final_route_request(**values: Any) -> M336K8FinalRouteRequestV4
         "builder_identity_hash": M336K8_FINAL_REQUEST_BUILDER_HASH,
     }
     optional = {
+        "freeze_attestation",
         "executable_dependency_manifest",
         "effective_environment_binding",
         "official_controller_executable_binding",
