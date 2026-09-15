@@ -1,0 +1,7 @@
+# M-33.6k.9 Q34 qualification
+
+Status: `READY_FOR_UNIFIED_ADMISSION_FINAL_JAVA_EXECUTION_V9`
+
+Q34 binds exact implementation tip `2defe196857721a5f1859cb183bd4c1eed20d0f4`, immutable historical F33 `3c5f64ee32d9d6af7d7810dbeabcc1be9c600771`, canonical registry `b6cbf45bc793d5d677bfb42dbc04e61c02602da0fd59f0d2deaafecc2a0f07ee`, active profile `b938cbff7ad9b3de8516cb046a5896075a2a05e3a3376966195c30b4381a2c9a`, controller admission contract `1d42802c55a4c9708f081e2ad05f172415265c2306cc1e008d723ece289ed78f`, profile coverage `89c98943d9b3fa050c91503c07a6b10f8e93153bdc7308c8ef708036b651d9f9`, official-purpose rehearsal `a7d3dbe4b626244855044bf5df46b0bae6806b72e2bd4c89f0d23762f7240828`, complete disposable route `9b238860d23c43428af13930f0248c402200a67bf5be52087481e2fb978a5398`, Windows quality `cfab4a6f1eb050f2aebeb0ae65259a7a9833a21d2f1b615a7521dd022f6224fa`, Karina quality `54a1b9a1348ff22d3a50959faaee5bc3feab384e8d486421e86fcf7b16acce24`, capsule liveness `48df7bfc8db9a96fa1391661ebe89120ddb58e8ad645df4f168055544ff92bf9`, resource gate `6d971df6334bd7224e56d5da8fcf5298c470c13ec9a2c8a281f2438e49e194bb`, and storage reservation `230f7b0b330f9e3977dae367cc42127071e204cff0aec707ec866e26142021ae`.
+
+All official one-shot counters remain zero. The candidate pool and frozen policies are unchanged. No raw source, excerpt, private-role artifact, or absolute private path is published.
