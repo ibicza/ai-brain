@@ -390,9 +390,10 @@ def build_m336k8_final_route_request(**values: Any) -> M336K8FinalRouteRequestV4
     mandatory = _field_names(M336K8FinalRouteRequestV4) - optional - {"request_hash"}
     if not mandatory.issubset(body) or set(body) - mandatory - optional:
         raise M336K2ProtocolError("M336K8 request builder arguments changed")
+    canonical_body = {name: item for name, item in body.items() if item is not None}
     result = M336K8FinalRouteRequestV4(
         **body,
-        request_hash=content_hash(body),
+        request_hash=content_hash(canonical_body),
         **{name: None for name in optional - set(body)},
     )
     result.verify()

@@ -438,6 +438,45 @@ def test_m336k8_v4_builder_accepts_phase_neutral_post_freeze_field() -> None:
     assert request.post_freeze_input_bundle == "/frozen/component"
 
 
+def test_m336k8_v4_builder_canonicalizes_absent_prospective_attestation() -> None:
+    values: dict[str, object] = {}
+    generated = {
+        "schema_version",
+        "contract_role",
+        "builder_identity_hash",
+        "request_hash",
+    }
+    mapping_fields = {"final_destinations", "karina", "executable_handles"}
+    optional = {
+        "executable_dependency_manifest",
+        "effective_environment_binding",
+        "official_controller_executable_binding",
+        "native_execution_capsule_receipt",
+        "native_route_manifest",
+        "official_executable_binding_receipt",
+        "official_controller_executable_binding_hash",
+        "windows_invocation_plan",
+    }
+    for field in fields(M336K8FinalRouteRequestV4):
+        if field.name in generated or field.name in optional:
+            continue
+        if field.name == "purpose":
+            values[field.name] = "QUALIFICATION"
+        elif field.name in {"exact_implementation_tip", "exact_freeze_sha"}:
+            values[field.name] = "a" * 40
+        elif field.name == "freeze_attestation":
+            values[field.name] = None
+        elif field.name in mapping_fields:
+            values[field.name] = {}
+        else:
+            values[field.name] = "/frozen/component"
+
+    request = build_m336k8_final_route_request(**values)
+
+    assert request.freeze_attestation is None
+    assert "freeze_attestation" not in request.canonical_object()
+
+
 def test_m336k8_mutation_runner_consumes_hermetic_startup_receipt() -> None:
     source = Path("scripts/m336k8_run_contract_mutations.py").read_text(
         encoding="utf-8"
