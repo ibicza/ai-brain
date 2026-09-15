@@ -747,6 +747,9 @@ def validate_m336k8_final_invocation(
             binding=capsule_binding,
             compatibility=legacy_capsule,
             liveness=liveness,
+            require_capsule_route_authority=(
+                freeze.contract_role != M336K8FreezeManifest.ROLE_V4
+            ),
         )
     )
     _verify_capsule_source_domain(

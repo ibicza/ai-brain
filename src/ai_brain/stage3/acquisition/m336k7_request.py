@@ -773,6 +773,7 @@ def _verify_capsule_bindings(
     binding: M336K7PersistentCapsuleBindingSet,
     compatibility: M336K7LegacyCapsuleCompatibilityReceipt,
     liveness: M336K6CapsuleLivenessReceipt,
+    require_capsule_route_authority: bool = True,
 ):
     karina = request.karina
     expected = {
@@ -824,11 +825,12 @@ def _verify_capsule_bindings(
     lifecycle = _component_object(root, components, "capsule_lifecycle_policy")
     preservation = _component_object(root, components, "preservation_set")
     cutoff = _component_object(root, components, "cleanup_cutoff_state")
-    verify_m336k7_persistent_capsule_route_binding(
-        content_value=content,
-        registry_value=_component_object(root, components, "route_registry"),
-        route_value=_component_object(root, components, "route_manifest"),
-    )
+    if require_capsule_route_authority:
+        verify_m336k7_persistent_capsule_route_binding(
+            content_value=content,
+            registry_value=_component_object(root, components, "route_registry"),
+            route_value=_component_object(root, components, "route_manifest"),
+        )
     if (
         binding.implementation_tip != private.implementation_sha
         or binding.capsule_identity_hash != private.capsule_identity_hash

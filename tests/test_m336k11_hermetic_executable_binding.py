@@ -391,6 +391,17 @@ def test_v4_builder_does_not_require_a_denied_legacy_route() -> None:
         '"controller_executable_dependency_manifest": (\n'
         "                    M336K11HermeticExecutableDependencyManifest.from_dict"
     ) in compatibility_source
+    assert (
+        "require_capsule_route_authority=(\n"
+        "                freeze.contract_role != M336K8FreezeManifest.ROLE_V4"
+    ) in compatibility_source
+    legacy_validator_source = (
+        ROOT / "src/ai_brain/stage3/acquisition/m336k7_request.py"
+    ).read_text(encoding="utf-8")
+    assert (
+        "if require_capsule_route_authority:\n"
+        "        verify_m336k7_persistent_capsule_route_binding("
+    ) in legacy_validator_source
 
 
 def test_v4_prospective_freeze_has_a_distinct_build_receipt_name() -> None:
