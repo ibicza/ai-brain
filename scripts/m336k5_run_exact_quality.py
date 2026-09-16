@@ -16,6 +16,10 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     startup_receipt_from_path,
     write_m336k5_python_invocation_plan,
 )
+from ai_brain.stage3.acquisition.m336k8_mutations import M336K8_MUTATION_CASES
+from ai_brain.stage3.acquisition.m336k9_admission import (
+    M336K9_ADMISSION_MUTATION_CASES,
+)
 
 
 def main() -> None:
@@ -113,9 +117,16 @@ def main() -> None:
         and disposable.get("karina_project_source_identity")
         == base_receipt.get("project_source_identity")
         and disposable.get("official_one_shot_counter_count") == 0
-        and disposable.get("identity_mutation_case_count") == 25
+        and disposable.get("official_profile_id") == "m336k8-rehearsal-v2"
+        and disposable.get("official_profile_status") == "REHEARSAL_ONLY"
+        and disposable.get("identity_mutation_case_count") == len(M336K8_MUTATION_CASES)
         and disposable.get("accepted_invalid_case_count") == 0
         and disposable.get("wrong_rejection_layer_count") == 0
+        and disposable.get("controller_admission_mutation_case_count")
+        == len(M336K9_ADMISSION_MUTATION_CASES)
+        and disposable.get("controller_admission_accepted_invalid_count") == 0
+        and disposable.get("controller_admission_wrong_rejection_layer_count") == 0
+        and disposable.get("controller_admission_result") == "PASS"
         and disposable.get("source_leak_count") == 0
         and disposable.get("absolute_path_count") == 0
         and disposable.get("private_public_artifact_count") == 0
