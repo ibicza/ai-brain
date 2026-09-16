@@ -54,6 +54,7 @@ from ai_brain.stage3.acquisition.m336k9_authorization import (
     M336K9FinalAuthorization,
     M336K10FinalAuthorization,
     M336K11FinalAuthorization,
+    M336K12FinalAuthorization,
     build_m336k9_final_authorization,
     m336k_current_final_authorization_from_dict,
 )
@@ -75,6 +76,9 @@ class _Freeze:
     authorization_hash: str
     official_acquisition_binding_receipt_hash: str | None
     official_executable_binding_receipt_hash: str | None
+    native_stage_plan_binding_hash: str | None
+    producer_consumer_parity_receipt_hash: str | None
+    dispatch_contract_hash: str | None
     manifest_hash: str
 
     def _body(self) -> dict[str, Any]:
@@ -98,12 +102,28 @@ class _Freeze:
             "authorization_hash": authorization.authorization_hash,
             "official_acquisition_binding_receipt_hash": (
                 content_hash((profile.profile_id, "acquisition-binding-receipt"))
-                if profile.profile_id in {"m336k8-final-v3", "m336k8-final-v4"}
+                if profile.profile_id
+                in {"m336k8-final-v3", "m336k8-final-v4", "m336k8-final-v5"}
                 else None
             ),
             "official_executable_binding_receipt_hash": (
                 content_hash((profile.profile_id, "executable-binding-receipt"))
-                if profile.profile_id == "m336k8-final-v4"
+                if profile.profile_id in {"m336k8-final-v4", "m336k8-final-v5"}
+                else None
+            ),
+            "native_stage_plan_binding_hash": (
+                content_hash((profile.profile_id, "native-stage-plan"))
+                if profile.profile_id == "m336k8-final-v5"
+                else None
+            ),
+            "producer_consumer_parity_receipt_hash": (
+                content_hash((profile.profile_id, "producer-consumer-parity"))
+                if profile.profile_id == "m336k8-final-v5"
+                else None
+            ),
+            "dispatch_contract_hash": (
+                content_hash((profile.profile_id, "dispatch-contract"))
+                if profile.profile_id == "m336k8-final-v5"
                 else None
             ),
         }
@@ -130,7 +150,12 @@ def _hashes(label: str) -> dict[str, str]:
 
 def _authorization(
     bundle: M336K5RouteIdentityBundle, profile_id: str
-) -> M336K9FinalAuthorization | M336K10FinalAuthorization | M336K11FinalAuthorization:
+) -> (
+    M336K9FinalAuthorization
+    | M336K10FinalAuthorization
+    | M336K11FinalAuthorization
+    | M336K12FinalAuthorization
+):
     profile = m336k_official_profile_registry().profile(profile_id)
     bound_hashes = {
         name: content_hash((profile_id, name))
@@ -181,7 +206,11 @@ def _authorization(
         pre_freeze_source_body_bytes=0,
         **bound_hashes,
     )
-    if profile_id not in {"m336k8-final-v3", "m336k8-final-v4"}:
+    if profile_id not in {
+        "m336k8-final-v3",
+        "m336k8-final-v4",
+        "m336k8-final-v5",
+    }:
         return base
     base_values = {
         field.name: getattr(base, field.name)
@@ -202,12 +231,13 @@ def _authorization(
             (profile_id, "authorization-binding")
         ),
     }
-    authorization_type = (
-        M336K11FinalAuthorization
-        if profile_id == "m336k8-final-v4"
-        else M336K10FinalAuthorization
-    )
-    if profile_id == "m336k8-final-v4":
+    authorization_type = M336K10FinalAuthorization
+    if profile_id in {"m336k8-final-v4", "m336k8-final-v5"}:
+        authorization_type = (
+            M336K12FinalAuthorization
+            if profile_id == "m336k8-final-v5"
+            else M336K11FinalAuthorization
+        )
         additions.update(
             {
                 "official_controller_executable_binding_hash": content_hash(
@@ -218,6 +248,20 @@ def _authorization(
                 ),
             }
         )
+        if profile_id == "m336k8-final-v5":
+            additions.update(
+                {
+                    "native_stage_plan_binding_hash": content_hash(
+                        (profile_id, "native-stage-plan")
+                    ),
+                    "producer_consumer_parity_receipt_hash": content_hash(
+                        (profile_id, "producer-consumer-parity")
+                    ),
+                    "native_execution_capsule_receipt_hash": content_hash(
+                        (profile_id, "native-capsule")
+                    ),
+                }
+            )
     temporary = authorization_type(
         **base_values, **additions, authorization_hash="0" * 64
     )
@@ -227,12 +271,15 @@ def _authorization(
 
 
 def _valid(
-    profile_id: str = "m336k8-final-v4",
+    profile_id: str = "m336k8-final-v5",
 ) -> tuple[
     M336KOfficialRouteProfileRegistry,
     M336KOfficialRouteProfile,
     M336K5RouteIdentityBundle,
-    M336K9FinalAuthorization | M336K10FinalAuthorization | M336K11FinalAuthorization,
+    M336K9FinalAuthorization
+    | M336K10FinalAuthorization
+    | M336K11FinalAuthorization
+    | M336K12FinalAuthorization,
     _Freeze,
     str,
 ]:
@@ -275,6 +322,13 @@ def _admit(
                 authorization.official_controller_executable_binding_hash
             ),
             status="PASS",
+            native_stage_plan_binding_hash=getattr(
+                authorization, "native_stage_plan_binding_hash", None
+            ),
+            producer_consumer_parity_receipt_hash=getattr(
+                authorization, "producer_consumer_parity_receipt_hash", None
+            ),
+            dispatch_contract_hash=freeze.dispatch_contract_hash,
             verify=lambda: None,
         )
         if isinstance(authorization, M336K11FinalAuthorization)
@@ -590,7 +644,7 @@ def test_m336k9_controller_admission_mutations(
     registry, profile, bundle, authorization, freeze, purpose = active
     other = registry.profile("m336k8-final-v1")
 
-    if case == "active-k8-v4":
+    if case == "active-k8-v5":
         assert _admit(active).official_admission_result == "PASS"
         return
     if case in {"historical-k8-v1-new-official", "f33-v1-used-as-f34-authority"}:
@@ -841,7 +895,7 @@ def test_m336k9_profile_coverage_and_identity_sets() -> None:
     registry = m336k_official_profile_registry()
     gate = run_m336k_official_profile_coverage_gate()
     assert gate.status == "PASS"
-    assert gate.registered_profile_count == gate.tested_profile_count == 8
+    assert gate.registered_profile_count == gate.tested_profile_count == 9
     assert gate.untested_profile_count == 0
     assert gate.independent_controller_whitelist_count == 0
     assert gate.controller_only_identity_predicate_count == 0
@@ -862,8 +916,8 @@ def test_m336k9_profile_coverage_and_identity_sets() -> None:
     )
 
 
-def test_m336k11_active_admission_requires_executable_receipt() -> None:
-    state = _valid("m336k8-final-v4")
+def test_m336k12_active_admission_requires_executable_receipt() -> None:
+    state = _valid("m336k8-final-v5")
     registry, profile, bundle, authorization, freeze, purpose = state
     acquisition = SimpleNamespace(
         receipt_hash=freeze.official_acquisition_binding_receipt_hash,
@@ -882,8 +936,8 @@ def test_m336k11_active_admission_requires_executable_receipt() -> None:
         )
 
 
-def test_m336k11_active_admission_accepts_side_effect_free_qualification() -> None:
-    state = _valid("m336k8-final-v4")
+def test_m336k12_active_admission_accepts_side_effect_free_qualification() -> None:
+    state = _valid("m336k8-final-v5")
     receipt = _admit((*state[:-1], "QUALIFICATION"))
 
     assert receipt.purpose == "QUALIFICATION"

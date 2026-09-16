@@ -910,7 +910,7 @@ class M336K11OfficialControllerExecutableBinding:
             or self.execution_scope != OFFICIAL_CONTROLLER
             or self.official_profile_id != M336K11_PROFILE_ID
             or profile.profile_status
-            is not M336KOfficialRouteProfileStatus.CURRENT_ACTIVE
+            is not M336KOfficialRouteProfileStatus.HISTORICAL_READ_ONLY
             or self.official_profile_hash != profile.profile_hash
             or not _is_sha(self.exact_implementation_tip)
             or any(not _is_hash(item) for item in hashes)

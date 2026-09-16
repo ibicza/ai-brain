@@ -384,12 +384,12 @@ def test_v4_route_registry_covers_the_executable_closure(graph: dict) -> None:
     }.issubset(paths)
 
 
-def test_v4_builder_does_not_require_a_denied_legacy_route() -> None:
+def test_v4_and_v5_builders_do_not_require_a_denied_legacy_route() -> None:
     source = (ROOT / "scripts/m336k5_build_component_bundle.py").read_text(
         encoding="utf-8"
     )
     assert (
-        "if profile_id != M336K11_PROFILE_ID:\n"
+        "if profile_id not in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:\n"
         "            _write_m336k7_persistent_capsule_route(output)"
     ) in source
     compatibility_source = (
@@ -401,7 +401,8 @@ def test_v4_builder_does_not_require_a_denied_legacy_route() -> None:
     ) in compatibility_source
     assert (
         "require_capsule_route_authority=(\n"
-        "                freeze.contract_role != M336K8FreezeManifest.ROLE_V4"
+        "                freeze.contract_role\n"
+        "                not in {"
     ) in compatibility_source
     legacy_validator_source = (
         ROOT / "src/ai_brain/stage3/acquisition/m336k7_request.py"
@@ -528,7 +529,7 @@ def test_startup_receipt_from_another_invocation_plan_is_rejected(
         _verify(graph, plan=other_plan)
 
 
-def test_historical_f35_loader_is_read_only_and_v4_is_active(
+def test_historical_f35_loader_is_read_only_and_v4_is_historical(
     graph: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     historical = json.loads(
@@ -548,7 +549,7 @@ def test_historical_f35_loader_is_read_only_and_v4_is_active(
     )
     assert (
         graph["profile"].profile_status
-        is M336KOfficialRouteProfileStatus.CURRENT_ACTIVE
+        is M336KOfficialRouteProfileStatus.HISTORICAL_READ_ONLY
     )
 
 

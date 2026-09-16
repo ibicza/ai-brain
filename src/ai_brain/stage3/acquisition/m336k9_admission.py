@@ -21,6 +21,7 @@ from ai_brain.stage3.acquisition.m336k5_identity import (
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     M336K10FinalAuthorization,
     M336K11FinalAuthorization,
+    M336K12FinalAuthorization,
     build_m336k9_final_authorization,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
@@ -29,7 +30,7 @@ from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
 )
 
-M336K9_CONTROLLER_VERSION = "m336k11-controller.v4"
+M336K9_CONTROLLER_VERSION = "m336k12-controller.v5"
 _HASH = re.compile(r"[0-9a-f]{64}")
 _CONTROLLER_VERSION = re.compile(r"m336k([0-9]+)-controller\.v([0-9]+)")
 M336K9_CONTROLLER_ADMISSION_CONTRACT = {
@@ -72,11 +73,12 @@ M336K9_CONTROLLER_ADMISSION_TESTED_PROFILE_IDS = (
     "m336k8-final-v2",
     "m336k8-final-v3",
     "m336k8-final-v4",
+    "m336k8-final-v5",
     "m336k8-rehearsal-v2",
 )
 M336K9_ADMISSION_MUTATION_CASES = (
     "historical-k8-v1-new-official",
-    "active-k8-v4",
+    "active-k8-v5",
     "profile-absent",
     "route-from-another-profile",
     "protocol-from-another-profile",
@@ -119,6 +121,9 @@ class M336KControllerAdmissionReceipt:
     freeze_hash: str
     official_acquisition_binding_receipt_hash: str | None
     official_executable_binding_receipt_hash: str | None
+    native_stage_plan_binding_hash: str | None
+    producer_consumer_parity_receipt_hash: str | None
+    dispatch_contract_hash: str | None
     execution_mode: str
     official_admission_result: str
     side_effect_count: int
@@ -155,6 +160,15 @@ class M336KControllerAdmissionReceipt:
             and _HASH.fullmatch(self.official_executable_binding_receipt_hash)
             is not None
         )
+        native_hashes = (
+            self.native_stage_plan_binding_hash,
+            self.producer_consumer_parity_receipt_hash,
+            self.dispatch_contract_hash,
+        )
+        native_hashes_valid = all(
+            value is None or type(value) is str and _HASH.fullmatch(value) is not None
+            for value in native_hashes
+        )
         if (
             self.schema_version != 1
             or self.contract_role != self.ROLE
@@ -166,6 +180,7 @@ class M336KControllerAdmissionReceipt:
             or self.side_effect_count != 0
             or not binding_hash_valid
             or not executable_hash_valid
+            or not native_hashes_valid
             or any(
                 type(value) is not str or _HASH.fullmatch(value) is None
                 for value in hashes
@@ -180,19 +195,24 @@ class M336KControllerAdmissionReceipt:
         optional = {
             "official_acquisition_binding_receipt_hash",
             "official_executable_binding_receipt_hash",
+            "native_stage_plan_binding_hash",
+            "producer_consumer_parity_receipt_hash",
+            "dispatch_contract_hash",
         }
-        allowed = {
-            expected,
-            expected - {"official_acquisition_binding_receipt_hash"},
-            expected - {"official_executable_binding_receipt_hash"},
-            expected - optional,
-        }
-        if type(value) is not dict or set(value) not in allowed:
+        mandatory = expected - optional
+        if (
+            type(value) is not dict
+            or not mandatory.issubset(value)
+            or set(value) - mandatory - optional
+        ):
             raise M336K2ProtocolError("M336K controller admission fields changed")
         result = cls(
             **{
                 "official_acquisition_binding_receipt_hash": None,
                 "official_executable_binding_receipt_hash": None,
+                "native_stage_plan_binding_hash": None,
+                "producer_consumer_parity_receipt_hash": None,
+                "dispatch_contract_hash": None,
                 **value,
             }
         )
@@ -308,7 +328,8 @@ def verify_m336k_controller_admission(
         or type(freeze_hash) is not str
         or _HASH.fullmatch(freeze_hash) is None
         or freeze_hash != content_hash(freeze_body())
-        or profile.profile_id in {"m336k8-final-v3", "m336k8-final-v4"}
+        or profile.profile_id
+        in {"m336k8-final-v3", "m336k8-final-v4", "m336k8-final-v5"}
         and (
             official_acquisition_binding is None
             or type(binding_receipt_hash) is not str
@@ -321,7 +342,7 @@ def verify_m336k_controller_admission(
             )
             != binding_receipt_hash
         )
-        or profile.profile_id == "m336k8-final-v4"
+        or profile.profile_id in {"m336k8-final-v4", "m336k8-final-v5"}
         and (
             official_executable_binding is None
             or not callable(getattr(official_executable_binding, "verify", None))
@@ -341,6 +362,39 @@ def verify_m336k_controller_admission(
             )
             != executable_receipt_hash
         )
+        or profile.profile_id == "m336k8-final-v5"
+        and (
+            getattr(final_authorization, "native_stage_plan_binding_hash", None)
+            != getattr(freeze_manifest, "native_stage_plan_binding_hash", None)
+            or getattr(
+                final_authorization,
+                "producer_consumer_parity_receipt_hash",
+                None,
+            )
+            != getattr(
+                freeze_manifest,
+                "producer_consumer_parity_receipt_hash",
+                None,
+            )
+            or getattr(
+                official_executable_binding,
+                "native_stage_plan_binding_hash",
+                None,
+            )
+            != getattr(freeze_manifest, "native_stage_plan_binding_hash", None)
+            or getattr(
+                official_executable_binding,
+                "producer_consumer_parity_receipt_hash",
+                None,
+            )
+            != getattr(
+                freeze_manifest,
+                "producer_consumer_parity_receipt_hash",
+                None,
+            )
+            or getattr(official_executable_binding, "dispatch_contract_hash", None)
+            != getattr(freeze_manifest, "dispatch_contract_hash", None)
+        )
     ):
         raise M336K2ProtocolError(
             "M336K controller admission rejected the route profile"
@@ -358,6 +412,17 @@ def verify_m336k_controller_admission(
         "freeze_hash": freeze_hash,
         "official_acquisition_binding_receipt_hash": binding_receipt_hash,
         "official_executable_binding_receipt_hash": executable_receipt_hash,
+        "native_stage_plan_binding_hash": getattr(
+            final_authorization, "native_stage_plan_binding_hash", None
+        ),
+        "producer_consumer_parity_receipt_hash": getattr(
+            final_authorization,
+            "producer_consumer_parity_receipt_hash",
+            None,
+        ),
+        "dispatch_contract_hash": getattr(
+            freeze_manifest, "dispatch_contract_hash", None
+        ),
         "execution_mode": route_identity_bundle.execution_mode.value,
         "official_admission_result": "PASS",
         "side_effect_count": 0,
@@ -367,6 +432,9 @@ def verify_m336k_controller_admission(
         **{
             "official_acquisition_binding_receipt_hash": None,
             "official_executable_binding_receipt_hash": None,
+            "native_stage_plan_binding_hash": None,
+            "producer_consumer_parity_receipt_hash": None,
+            "dispatch_contract_hash": None,
             **body,
         },
         receipt_hash=content_hash(body),
@@ -450,6 +518,9 @@ class _CoverageFreeze:
     authorization_hash: str
     official_acquisition_binding_receipt_hash: str | None
     official_executable_binding_receipt_hash: str | None
+    native_stage_plan_binding_hash: str | None
+    producer_consumer_parity_receipt_hash: str | None
+    dispatch_contract_hash: str | None
     manifest_hash: str
 
     def _body(self) -> dict[str, Any]:
@@ -468,6 +539,9 @@ class _CoverageFreeze:
         authorization_hash: str,
         acquisition_binding_receipt_hash: str | None = None,
         executable_binding_receipt_hash: str | None = None,
+        native_stage_plan_binding_hash: str | None = None,
+        producer_consumer_parity_receipt_hash: str | None = None,
+        dispatch_contract_hash: str | None = None,
     ) -> Self:
         body = {
             "official_profile_id": profile_id,
@@ -481,6 +555,11 @@ class _CoverageFreeze:
             "official_executable_binding_receipt_hash": (
                 executable_binding_receipt_hash
             ),
+            "native_stage_plan_binding_hash": native_stage_plan_binding_hash,
+            "producer_consumer_parity_receipt_hash": (
+                producer_consumer_parity_receipt_hash
+            ),
+            "dispatch_contract_hash": dispatch_contract_hash,
         }
         return cls(**body, manifest_hash=content_hash(body))
 
@@ -545,7 +624,11 @@ def _coverage_authorization(profile_id: str, bundle: M336K5RouteIdentityBundle) 
         pre_freeze_source_body_bytes=0,
         **hashes,
     )
-    if profile_id not in {"m336k8-final-v3", "m336k8-final-v4"}:
+    if profile_id not in {
+        "m336k8-final-v3",
+        "m336k8-final-v4",
+        "m336k8-final-v5",
+    }:
         return result
     binding_commitment = content_hash((profile_id, "acquisition-binding"))
     body = {
@@ -564,8 +647,12 @@ def _coverage_authorization(profile_id: str, bundle: M336K5RouteIdentityBundle) 
         "acquisition_binding_receipt_hash": binding_commitment,
     }
     authorization_type = M336K10FinalAuthorization
-    if profile_id == "m336k8-final-v4":
-        authorization_type = M336K11FinalAuthorization
+    if profile_id in {"m336k8-final-v4", "m336k8-final-v5"}:
+        authorization_type = (
+            M336K12FinalAuthorization
+            if profile_id == "m336k8-final-v5"
+            else M336K11FinalAuthorization
+        )
         body.update(
             {
                 "official_controller_executable_binding_hash": content_hash(
@@ -576,6 +663,20 @@ def _coverage_authorization(profile_id: str, bundle: M336K5RouteIdentityBundle) 
                 ),
             }
         )
+        if profile_id == "m336k8-final-v5":
+            body.update(
+                {
+                    "native_stage_plan_binding_hash": content_hash(
+                        (profile_id, "native-stage-plan")
+                    ),
+                    "producer_consumer_parity_receipt_hash": content_hash(
+                        (profile_id, "producer-consumer-parity")
+                    ),
+                    "native_execution_capsule_receipt_hash": content_hash(
+                        (profile_id, "native-capsule")
+                    ),
+                }
+            )
     temporary = authorization_type(**body, authorization_hash="0" * 64)
     result_bound = authorization_type(
         **body, authorization_hash=content_hash(temporary._body())
@@ -594,6 +695,9 @@ class _CoverageAcquisitionBinding:
 class _CoverageExecutableBinding:
     receipt_hash: str
     official_controller_executable_binding_hash: str
+    native_stage_plan_binding_hash: str | None = None
+    producer_consumer_parity_receipt_hash: str | None = None
+    dispatch_contract_hash: str | None = None
     status: str = "PASS"
 
     def verify(self) -> None:
@@ -628,7 +732,11 @@ def run_m336k_official_profile_coverage_gate() -> M336KOfficialProfileCoverageGa
             raise M336K2ProtocolError("M336K profile codec coverage changed")
         authorization = _coverage_authorization(profile.profile_id, bundle)
         acquisition_binding = None
-        if profile.profile_id in {"m336k8-final-v3", "m336k8-final-v4"}:
+        if profile.profile_id in {
+            "m336k8-final-v3",
+            "m336k8-final-v4",
+            "m336k8-final-v5",
+        }:
             acquisition_binding = _CoverageAcquisitionBinding(
                 receipt_hash=content_hash((profile.profile_id, "receipt")),
                 authorization_binding_hash=(
@@ -636,11 +744,24 @@ def run_m336k_official_profile_coverage_gate() -> M336KOfficialProfileCoverageGa
                 ),
             )
         executable_binding = None
-        if profile.profile_id == "m336k8-final-v4":
+        if profile.profile_id in {"m336k8-final-v4", "m336k8-final-v5"}:
             executable_binding = _CoverageExecutableBinding(
                 receipt_hash=content_hash((profile.profile_id, "executable-receipt")),
                 official_controller_executable_binding_hash=(
                     authorization.official_controller_executable_binding_hash
+                ),
+                native_stage_plan_binding_hash=getattr(
+                    authorization, "native_stage_plan_binding_hash", None
+                ),
+                producer_consumer_parity_receipt_hash=getattr(
+                    authorization,
+                    "producer_consumer_parity_receipt_hash",
+                    None,
+                ),
+                dispatch_contract_hash=(
+                    content_hash((profile.profile_id, "dispatch-contract"))
+                    if profile.profile_id == "m336k8-final-v5"
+                    else None
                 ),
             )
         freeze = _CoverageFreeze.build(
@@ -656,6 +777,19 @@ def run_m336k_official_profile_coverage_gate() -> M336KOfficialProfileCoverageGa
             ),
             executable_binding_receipt_hash=(
                 None if executable_binding is None else executable_binding.receipt_hash
+            ),
+            native_stage_plan_binding_hash=getattr(
+                authorization, "native_stage_plan_binding_hash", None
+            ),
+            producer_consumer_parity_receipt_hash=getattr(
+                authorization,
+                "producer_consumer_parity_receipt_hash",
+                None,
+            ),
+            dispatch_contract_hash=(
+                None
+                if executable_binding is None
+                else executable_binding.dispatch_contract_hash
             ),
         )
         purpose = (

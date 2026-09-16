@@ -969,6 +969,34 @@ _M336K11_ASSEMBLY_COMPONENTS: tuple[tuple[str, str, str, str], ...] = (
     ),
 )
 
+_M336K12_ASSEMBLY_COMPONENTS: tuple[tuple[str, str, str, str], ...] = (
+    *_M336K11_ASSEMBLY_COMPONENTS,
+    (
+        "official_executable_binding_receipt",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "OFFICIAL_EXECUTABLE_BINDING_VERIFIER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "native_stage_dispatches",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "NATIVE_STAGE_DISPATCH_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "native_stage_plan_binding",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "NATIVE_STAGE_PLAN_BINDING_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "producer_consumer_parity_receipt",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "PRODUCER_CONSUMER_PARITY_VERIFIER",
+        "IMPLEMENTATION_TIP",
+    ),
+)
+
 
 def _default_hash_field(name: str) -> str:
     return {
@@ -998,14 +1026,22 @@ def _default_hash_field(name: str) -> str:
         "official_controller_executable_binding": "binding_hash",
         "execution_capsule_receipt": "receipt_hash",
         "native_route_manifest": "manifest_hash",
+        "native_stage_dispatches": "receipt_hash",
+        "native_stage_plan_binding": "plan_binding_hash",
+        "producer_consumer_parity_receipt": "receipt_hash",
+        "official_executable_binding_receipt": "receipt_hash",
     }[name]
 
 
 def _build_assembly_entries(
-    *, active_executable_closure: bool = False
+    *,
+    active_executable_closure: bool = False,
+    native_stage_dispatch_closure: bool = False,
 ) -> tuple[M336K8FreezeAssemblyEntry, ...]:
     components = (
-        _M336K11_ASSEMBLY_COMPONENTS
+        _M336K12_ASSEMBLY_COMPONENTS
+        if native_stage_dispatch_closure
+        else _M336K11_ASSEMBLY_COMPONENTS
         if active_executable_closure
         else _ASSEMBLY_COMPONENTS
     )
@@ -1036,6 +1072,7 @@ class M336K8FreezeAssemblyPlan:
 
     ROLE: ClassVar[str] = "M336K8_FREEZE_ASSEMBLY_PLAN"
     ROLE_V2: ClassVar[str] = "M336K11_EXECUTABLE_CLOSURE_ASSEMBLY_PLAN_V2"
+    ROLE_V3: ClassVar[str] = "M336K12_NATIVE_STAGE_DISPATCH_ASSEMBLY_PLAN_V3"
 
     def _body(self) -> dict[str, Any]:
         return {
@@ -1063,12 +1100,14 @@ class M336K8FreezeAssemblyPlan:
         )
         if (
             self.schema_version != 1
-            or self.contract_role not in {self.ROLE, self.ROLE_V2}
+            or self.contract_role not in {self.ROLE, self.ROLE_V2, self.ROLE_V3}
             or self.component_count != len(self.entries)
             or len({item.component_name for item in self.entries}) != len(self.entries)
             or self.entries
             != _build_assembly_entries(
-                active_executable_closure=self.contract_role == self.ROLE_V2
+                active_executable_closure=self.contract_role
+                in {self.ROLE_V2, self.ROLE_V3},
+                native_stage_dispatch_closure=self.contract_role == self.ROLE_V3,
             )
             or self.producer_origin_map_hash != content_hash(origins)
             or self.plan_hash != content_hash(self._body())
@@ -1076,9 +1115,17 @@ class M336K8FreezeAssemblyPlan:
             raise M336K2ProtocolError("M336K8 freeze assembly plan is invalid")
 
     @classmethod
-    def build(cls, *, active_executable_closure: bool = False) -> Self:
+    def build(
+        cls,
+        *,
+        active_executable_closure: bool = False,
+        native_stage_dispatch_closure: bool = False,
+    ) -> Self:
+        if native_stage_dispatch_closure:
+            active_executable_closure = True
         entries = _build_assembly_entries(
-            active_executable_closure=active_executable_closure
+            active_executable_closure=active_executable_closure,
+            native_stage_dispatch_closure=native_stage_dispatch_closure,
         )
         origins = tuple(
             (
@@ -1091,7 +1138,13 @@ class M336K8FreezeAssemblyPlan:
         )
         body = {
             "schema_version": 1,
-            "contract_role": cls.ROLE_V2 if active_executable_closure else cls.ROLE,
+            "contract_role": (
+                cls.ROLE_V3
+                if native_stage_dispatch_closure
+                else cls.ROLE_V2
+                if active_executable_closure
+                else cls.ROLE
+            ),
             "entries": entries,
             "component_count": len(entries),
             "producer_origin_map_hash": content_hash(origins),
@@ -1489,6 +1542,12 @@ class M336K10PostFreezeInputBundle(M336K8PostFreezeInputBundleV2):
 def m336k_current_post_freeze_input_bundle_from_dict(
     value: dict[str, Any],
 ) -> M336K8PostFreezeInputBundleV2:
+    if value.get("contract_role") == "M336K12_POST_FREEZE_INPUT_BUNDLE_V5":
+        from ai_brain.stage3.acquisition.m336k12_dispatch import (
+            M336K12PostFreezeInputBundle,
+        )
+
+        return M336K12PostFreezeInputBundle.from_dict(value)
     if value.get("contract_role") == "M336K11_POST_FREEZE_INPUT_BUNDLE_V4":
         from ai_brain.stage3.acquisition.m336k11_execution import (
             M336K11PostFreezeInputBundle,
@@ -1508,6 +1567,12 @@ M336K8_POST_FREEZE_CONSUMED_COMPONENTS = (
 )
 M336K11_POST_FREEZE_CONSUMED_COMPONENTS = (
     *(item[0] for item in _M336K11_ASSEMBLY_COMPONENTS),
+    "freeze_assembly_plan",
+    "freeze_assembly_receipt",
+    "frozen_contract_compatibility_v2",
+)
+M336K12_POST_FREEZE_CONSUMED_COMPONENTS = (
+    *(item[0] for item in _M336K12_ASSEMBLY_COMPONENTS),
     "freeze_assembly_plan",
     "freeze_assembly_receipt",
     "frozen_contract_compatibility_v2",
@@ -1594,6 +1659,7 @@ class M336K8FrozenContractCompatibilityGateV2:
             not in {
                 len(M336K8_POST_FREEZE_CONSUMED_COMPONENTS),
                 len(M336K11_POST_FREEZE_CONSUMED_COMPONENTS),
+                len(M336K12_POST_FREEZE_CONSUMED_COMPONENTS),
             }
             or self.compatibility_artifact_count != len(self.artifacts)
             or self.semantic_check_count < self.compatibility_artifact_count
@@ -1809,6 +1875,10 @@ def m336k8_semantic_binding_mismatches(
     executable_binding = values.get("official_controller_executable_binding", {})
     native_capsule = values.get("execution_capsule_receipt", {})
     native_route = values.get("native_route_manifest", {})
+    native_dispatches = values.get("native_stage_dispatches", {})
+    native_plan = values.get("native_stage_plan_binding", {})
+    native_parity = values.get("producer_consumer_parity_receipt", {})
+    executable_receipt = values.get("official_executable_binding_receipt", {})
     if name == "controller_source_identity_receipt":
         mismatches += int(
             receipt.get("source_identity_policy_hash") != policy.get("policy_hash")
@@ -1895,6 +1965,26 @@ def m336k8_semantic_binding_mismatches(
             ),
         )
         mismatches += sum(left != right for left, right in relations)
+        if native_plan:
+            relations = (
+                (
+                    executable_binding.get("native_stage_plan_binding_hash"),
+                    native_plan.get("plan_binding_hash"),
+                ),
+                (
+                    executable_binding.get("producer_consumer_parity_receipt_hash"),
+                    native_parity.get("receipt_hash"),
+                ),
+                (
+                    executable_binding.get("native_execution_capsule_receipt_hash"),
+                    native_capsule.get("receipt_hash"),
+                ),
+                (
+                    executable_binding.get("dispatch_contract_hash"),
+                    native_dispatches.get("dispatch_contract_hash"),
+                ),
+            )
+            mismatches += sum(left != right for left, right in relations)
     elif name == "execution_capsule_receipt":
         relations = (
             (
@@ -1923,6 +2013,22 @@ def m336k8_semantic_binding_mismatches(
             ),
         )
         mismatches += sum(left != right for left, right in relations)
+        if native_plan:
+            relations = (
+                (
+                    native_capsule.get("native_stage_plan_binding_hash"),
+                    native_plan.get("plan_binding_hash"),
+                ),
+                (
+                    native_capsule.get("producer_consumer_parity_receipt_hash"),
+                    native_parity.get("receipt_hash"),
+                ),
+                (
+                    native_capsule.get("dispatch_contract_hash"),
+                    native_dispatches.get("dispatch_contract_hash"),
+                ),
+            )
+            mismatches += sum(left != right for left, right in relations)
     elif name == "native_route_manifest":
         relations = (
             (
@@ -1943,6 +2049,84 @@ def m336k8_semantic_binding_mismatches(
             ),
         )
         mismatches += sum(left != right for left, right in relations)
+        if native_plan:
+            relations = (
+                (
+                    native_route.get("native_stage_plan_binding_hash"),
+                    native_plan.get("plan_binding_hash"),
+                ),
+                (
+                    native_route.get("producer_consumer_parity_receipt_hash"),
+                    native_parity.get("receipt_hash"),
+                ),
+                (
+                    native_route.get("dispatch_contract_hash"),
+                    native_dispatches.get("dispatch_contract_hash"),
+                ),
+            )
+            mismatches += sum(left != right for left, right in relations)
+    elif name == "native_stage_dispatches":
+        mismatches += int(
+            native_dispatches.get("dispatch_count")
+            != len(native_dispatches.get("dispatches", ()))
+        )
+    elif name == "native_stage_plan_binding":
+        relations = (
+            (
+                tuple(native_plan.get("dispatch_hashes", ())),
+                tuple(
+                    item.get("dispatch_hash")
+                    for item in native_dispatches.get("dispatches", ())
+                ),
+            ),
+            (
+                native_plan.get("route_registry_hash"),
+                executable_binding.get("route_registry_hash"),
+            ),
+        )
+        mismatches += sum(left != right for left, right in relations)
+    elif name == "producer_consumer_parity_receipt":
+        relations = (
+            (
+                native_parity.get("native_stage_plan_binding_hash"),
+                native_plan.get("plan_binding_hash"),
+            ),
+            (
+                native_parity.get("dispatch_contract_hash"),
+                native_dispatches.get("dispatch_contract_hash"),
+            ),
+        )
+        mismatches += sum(left != right for left, right in relations)
+        mismatches += int(native_parity.get("status") != "PASS")
+    elif name == "official_executable_binding_receipt":
+        relations = (
+            (
+                executable_receipt.get("official_controller_executable_binding_hash"),
+                executable_binding.get("binding_hash"),
+            ),
+            (
+                executable_receipt.get("native_execution_capsule_receipt_hash"),
+                native_capsule.get("receipt_hash"),
+            ),
+            (
+                executable_receipt.get("native_route_manifest_hash"),
+                native_route.get("manifest_hash"),
+            ),
+            (
+                executable_receipt.get("native_stage_plan_binding_hash"),
+                native_plan.get("plan_binding_hash"),
+            ),
+            (
+                executable_receipt.get("producer_consumer_parity_receipt_hash"),
+                native_parity.get("receipt_hash"),
+            ),
+            (
+                executable_receipt.get("dispatch_contract_hash"),
+                native_dispatches.get("dispatch_contract_hash"),
+            ),
+        )
+        mismatches += sum(left != right for left, right in relations)
+        mismatches += int(executable_receipt.get("status") != "PASS")
     elif name == "controller_startup_binding":
         relations = (
             (
@@ -2136,7 +2320,23 @@ def m336k8_semantic_binding_mismatches(
                     ),
                     "native_route_manifest_hash": native_route.get("manifest_hash"),
                     "official_executable_binding_receipt_hash": (
-                        executable_binding.get("binding_hash")
+                        executable_receipt.get("receipt_hash")
+                        if executable_receipt
+                        else executable_binding.get("binding_hash")
+                    ),
+                }
+            )
+        if native_plan:
+            relations.update(
+                {
+                    "native_stage_plan_binding_hash": native_plan.get(
+                        "plan_binding_hash"
+                    ),
+                    "producer_consumer_parity_receipt_hash": native_parity.get(
+                        "receipt_hash"
+                    ),
+                    "dispatch_contract_hash": native_dispatches.get(
+                        "dispatch_contract_hash"
                     ),
                 }
             )

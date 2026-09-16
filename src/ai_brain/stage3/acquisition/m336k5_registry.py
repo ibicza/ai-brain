@@ -121,6 +121,19 @@ M336K11_ROUTE_COMPONENTS = M336K8_ROUTE_COMPONENTS + (
     ),
     ("hermetic-final-cli", "scripts/m336k11_run_final_route.py"),
 )
+M336K12_ROUTE_COMPONENTS = M336K11_ROUTE_COMPONENTS + (
+    (
+        "native-stage-dispatch",
+        "src/ai_brain/stage3/acquisition/m336k12_dispatch.py",
+    ),
+    ("native-stage-freeze-builder", "scripts/m336k12_materialize_f37.py"),
+    (
+        "native-stage-prospective-freeze-builder",
+        "scripts/m336k12_materialize_prospective_freeze.py",
+    ),
+    ("native-stage-mutations", "scripts/m336k12_run_dispatch_mutations.py"),
+    ("native-stage-final-cli", "scripts/m336k12_run_final_route.py"),
+)
 
 
 def _namespace_values(
@@ -141,7 +154,9 @@ def _namespace_values(
         return route_value or M336K7_ROUTE_VERSION, M336K7_ROUTE_COMPONENTS
     if namespace == "m336k8":
         components = (
-            M336K11_ROUTE_COMPONENTS
+            M336K12_ROUTE_COMPONENTS
+            if profile_id == "m336k8-final-v5"
+            else M336K11_ROUTE_COMPONENTS
             if profile_id == "m336k8-final-v4"
             else M336K8_ROUTE_COMPONENTS
         )

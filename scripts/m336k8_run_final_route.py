@@ -51,6 +51,12 @@ from ai_brain.stage3.acquisition.m336k11_execution import (
     M336K11NativeExecutionCapsuleReceipt,
     build_m336k11_native_execution_plan,
 )
+from ai_brain.stage3.acquisition.m336k12_dispatch import (
+    M336K12DisposableDispatchClosure,
+    M336K12NativeStageDispatch,
+    build_m336k12_native_execution_plan,
+    verify_m336k12_native_stage_plan,
+)
 
 
 def main() -> None:
@@ -61,6 +67,7 @@ def main() -> None:
     parser.add_argument("--startup-receipt", type=Path, required=True)
     parser.add_argument("--post-freeze-validation-receipt", type=Path)
     parser.add_argument("--reservation-release-receipt", type=Path)
+    parser.add_argument("--native-dispatch-rehearsal", type=Path)
     args = parser.parse_args()
     request_path = args.request.resolve(strict=True)
     startup_receipt_path = args.startup_receipt.resolve(strict=True)
@@ -74,6 +81,10 @@ def main() -> None:
             )
         validated = validate_m336k8_final_invocation(
             request_path, startup_receipt_path=startup_receipt_path
+        )
+        rehearsal_closure = _load_rehearsal_dispatch_closure(
+            args.native_dispatch_rehearsal,
+            validated=validated,
         )
     else:
         if (
@@ -96,6 +107,10 @@ def main() -> None:
             raise M336K2ProtocolError(
                 "M336K8 execution differs from post-freeze validation"
             )
+        rehearsal_closure = _load_rehearsal_dispatch_closure(
+            args.native_dispatch_rehearsal,
+            validated=validated,
+        )
         if validated.request.purpose == "QUALIFICATION":
             raise M336K2ProtocolError("M336K8 qualification request is not executable")
         require_m336k8_execution_authority(
@@ -140,6 +155,18 @@ def main() -> None:
         operation="INVOKE_FINAL_CONTROLLER",
     )
     internal_request = build_m336k8_internal_stage_request(validated)
+    if rehearsal_closure is not None:
+        internal_request.update(
+            {
+                "native_stage_plan_binding_hash": (
+                    rehearsal_closure.native_stage_plan_binding.plan_binding_hash
+                ),
+                "producer_consumer_parity_receipt_hash": (
+                    rehearsal_closure.producer_consumer_parity.receipt_hash
+                ),
+                "dispatch_contract_hash": rehearsal_closure.dispatch_contract_hash,
+            }
+        )
     private_root = Path(request.private_root).resolve(strict=False)
     private_root.mkdir(parents=True)
     monitor = M336K5ResourceMonitor(
@@ -161,7 +188,53 @@ def main() -> None:
     capsule_value = _component_object(
         Path(request.repository), components, "execution_capsule_receipt"
     )
-    if (
+    native_stage_dispatches = None
+    native_stage_plan_binding = validated.native_stage_plan_binding
+    producer_consumer_parity = validated.producer_consumer_parity_receipt
+    if rehearsal_closure is not None:
+        native_stage_dispatches = rehearsal_closure.dispatches
+        native_stage_plan_binding = rehearsal_closure.native_stage_plan_binding
+        producer_consumer_parity = rehearsal_closure.producer_consumer_parity
+        plan = build_m336k12_native_execution_plan(
+            repository=Path(request.repository),
+            python_executable=Path(request.python_executable),
+            stage_request=stage_request_path,
+            stage_receipt_root=Path(request.stage_receipt_root),
+            route_run_id=validated.bundle.protocol_run_id.value,
+            exact_f37_sha=request.exact_freeze_sha,
+            route_registry_hash=validated.bundle.route_registry_hash,
+            dispatches=native_stage_dispatches,
+        )
+        parity = verify_m336k12_native_stage_plan(
+            plan=plan,
+            dispatches=native_stage_dispatches,
+            plan_binding=native_stage_plan_binding,
+            repository=Path(request.repository),
+            python_executable=Path(request.python_executable),
+        )
+        if parity != producer_consumer_parity:
+            raise M336K2ProtocolError(
+                "M336K12 disposable execution plan differs from preledger admission"
+            )
+    elif validated.native_stage_plan_binding is not None:
+        dispatch_value = _component_object(
+            Path(request.repository), components, "native_stage_dispatches"
+        )
+        native_stage_dispatches = tuple(
+            M336K12NativeStageDispatch.from_dict(item)
+            for item in dispatch_value["dispatches"]
+        )
+        plan = build_m336k12_native_execution_plan(
+            repository=Path(request.repository),
+            python_executable=Path(request.python_executable),
+            stage_request=stage_request_path,
+            stage_receipt_root=Path(request.stage_receipt_root),
+            route_run_id=validated.bundle.protocol_run_id.value,
+            exact_f37_sha=request.exact_freeze_sha,
+            route_registry_hash=validated.bundle.route_registry_hash,
+            dispatches=native_stage_dispatches,
+        )
+    elif (
         dependency_value.get("contract_role")
         == M336K11HermeticExecutableDependencyManifest.ROLE
     ):
@@ -220,6 +293,9 @@ def main() -> None:
             ),
             expected_startup_receipt_hash=validated.receipt.startup_receipt_hash,
             resource_monitor=monitor,
+            native_stage_dispatches=native_stage_dispatches,
+            native_stage_plan_binding=native_stage_plan_binding,
+            producer_consumer_parity=producer_consumer_parity,
         ),
         receipt_root=Path(request.stage_receipt_root),
         bundle=validated.bundle,
@@ -276,6 +352,56 @@ def _component_object(root: Path, components: dict, name: str) -> dict:
     if type(value) is not dict:
         raise TypeError(f"M336K8 frozen component is not an object: {name}")
     return value
+
+
+def _load_rehearsal_dispatch_closure(
+    path: Path | None,
+    *,
+    validated,
+) -> M336K12DisposableDispatchClosure | None:
+    if path is None:
+        return None
+    closure_path = path.resolve(strict=True)
+    repository = Path(validated.request.repository).resolve(strict=True)
+    if closure_path.is_relative_to(repository):
+        raise M336K2ProtocolError("M336K12 disposable dispatch closure is public")
+    value = json.loads(closure_path.read_text(encoding="utf-8"))
+    closure = M336K12DisposableDispatchClosure.from_dict(value)
+    profile_id = getattr(validated.request, "official_profile_id", None)
+    if (
+        validated.request.purpose != "DISPOSABLE"
+        or profile_id != closure.rehearsal_profile_id
+        or closure.native_stage_plan_binding.exact_implementation_tip
+        != validated.request.exact_implementation_sha
+        or closure.native_stage_plan_binding.route_registry_hash
+        != validated.bundle.route_registry_hash
+        or closure.native_stage_plan_binding.typed_route_manifest_hash
+        != validated.bundle.route_manifest_hash
+    ):
+        raise M336K2ProtocolError("M336K12 disposable dispatch identity changed")
+    prospective_plan = build_m336k12_native_execution_plan(
+        repository=repository,
+        python_executable=Path(validated.request.python_executable),
+        stage_request=(
+            Path(validated.request.private_root)
+            / "canonical-internal-stage-request.json"
+        ),
+        stage_receipt_root=Path(validated.request.stage_receipt_root),
+        route_run_id=validated.bundle.protocol_run_id.value,
+        exact_f37_sha=validated.request.exact_freeze_sha,
+        route_registry_hash=validated.bundle.route_registry_hash,
+        dispatches=closure.dispatches,
+    )
+    parity = verify_m336k12_native_stage_plan(
+        plan=prospective_plan,
+        dispatches=closure.dispatches,
+        plan_binding=closure.native_stage_plan_binding,
+        repository=repository,
+        python_executable=Path(validated.request.python_executable),
+    )
+    if parity != closure.producer_consumer_parity:
+        raise M336K2ProtocolError("M336K12 disposable dispatch parity changed")
+    return closure
 
 
 def _claim_execution_lock(release_path: Path, request_path: Path) -> None:

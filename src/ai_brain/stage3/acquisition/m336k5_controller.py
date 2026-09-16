@@ -64,6 +64,12 @@ def run_m336k5_final_controller(
     bundle = validated.bundle
     if output.exists() or ledger.events():
         raise M336K2ProtocolError("M336K5 final controller destinations are not fresh")
+    profile_id = getattr(validated.authorization, "official_profile_id", None)
+    worker_preflight = getattr(worker, "preflight", None)
+    if profile_id == "m336k8-final-v5" and not callable(worker_preflight):
+        raise M336K2ProtocolError("M336K12 worker preflight is absent")
+    if callable(worker_preflight):
+        worker_preflight()
     prior_admission = getattr(validated, "controller_admission", None)
     if prior_admission is None:
         raise M336K2ProtocolError("M336K controller admission receipt is absent")
@@ -119,6 +125,14 @@ def run_m336k5_final_controller(
         context_values += (recomputed_acquisition_binding.receipt_hash,)
     if recomputed_executable_binding is not None:
         context_values += (recomputed_executable_binding.receipt_hash,)
+    plan_binding = getattr(validated, "native_stage_plan_binding", None)
+    parity_receipt = getattr(validated, "producer_consumer_parity_receipt", None)
+    if plan_binding is not None and parity_receipt is not None:
+        context_values += (
+            plan_binding.plan_binding_hash,
+            parity_receipt.receipt_hash,
+            validated.receipt.dispatch_contract_hash,
+        )
     context = content_hash(context_values)
     initial = (
         ("PREFLIGHT_VERIFIED", validated.receipt.receipt_hash),
@@ -203,6 +217,12 @@ class M336K5IdentityCheckingWorker:
         self._expected_acquisition_binding_hashes = (
             expected_acquisition_binding_hashes or {}
         )
+
+    def preflight(self) -> object:
+        preflight = getattr(self._worker, "preflight", None)
+        if not callable(preflight):
+            return None
+        return preflight()
 
     def __call__(self, request: M336K2StageRequest) -> M336K2StageReceipt:
         if request.route_run_id != self._bundle.protocol_run_id.value:

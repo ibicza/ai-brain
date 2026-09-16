@@ -93,6 +93,13 @@ from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfileStatus,
     m336k_official_profile_registry,
 )
+from ai_brain.stage3.acquisition.m336k12_dispatch import (
+    M336K12DisposableDispatchClosure,
+    M336K12NativeStagePlanBinding,
+    build_m336k12_native_execution_plan,
+    build_m336k12_native_stage_dispatches,
+    verify_m336k12_native_stage_plan,
+)
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
 _LAUNCH_GIT: Path | None = None
@@ -111,6 +118,7 @@ def main() -> None:
     official_profile_id = request.get("official_profile_id")
     official_admission_only = request.get("official_admission_only", False)
     disposable_publication_generation = request.get("disposable_publication_generation")
+    native_stage_dispatch_generation = request.get("native_stage_dispatch_generation")
     if namespace not in {"m336k5", "m336k7", "m336k8"}:
         raise M336K2ProtocolError("M336K disposable protocol namespace changed")
     expected = {
@@ -155,6 +163,8 @@ def main() -> None:
         expected |= {"official_admission_only"}
     if "disposable_publication_generation" in request:
         expected |= {"disposable_publication_generation"}
+    if "native_stage_dispatch_generation" in request:
+        expected |= {"native_stage_dispatch_generation"}
     persistent = "persistent_karina_overlay" in request
     if namespace in {"m336k7", "m336k8"} and not persistent:
         raise M336K2ProtocolError(
@@ -183,6 +193,15 @@ def main() -> None:
         and (
             namespace != "m336k8"
             or official_profile.profile_status is not expected_profile_status
+        )
+        or native_stage_dispatch_generation is not None
+        and (
+            native_stage_dispatch_generation != "m336k12"
+            or namespace != "m336k8"
+            or official_admission_only
+            or official_profile is None
+            or official_profile.profile_status
+            is not M336KOfficialRouteProfileStatus.REHEARSAL_ONLY
         )
         or disposable_publication_generation is not None
         and (
@@ -931,6 +950,62 @@ def main() -> None:
         else write_m336k5_final_route_request
     )
     request_writer(final_request, final_request_path)
+    native_dispatch_closure = None
+    native_dispatch_closure_path = None
+    if native_stage_dispatch_generation == "m336k12":
+        rehearsal_bundle = M336K5RouteIdentityBundle.from_dict(_object(bundle_path))
+        native_stage_dispatches = build_m336k12_native_stage_dispatches(
+            repository=repository,
+            execution_scope="REHEARSAL",
+            bootstrap_script=repository / "scripts/m336k5_python_bootstrap.py",
+        )
+        native_plan = build_m336k12_native_execution_plan(
+            repository=repository,
+            python_executable=python,
+            stage_request=(
+                Path(final_request.private_root)
+                / "canonical-internal-stage-request.json"
+            ),
+            stage_receipt_root=Path(final_request.stage_receipt_root),
+            route_run_id=rehearsal_bundle.protocol_run_id.value,
+            exact_f37_sha=f_like,
+            route_registry_hash=rehearsal_bundle.route_registry_hash,
+            dispatches=native_stage_dispatches,
+        )
+        historical_capsule = _object(
+            _frozen_component(repository, freeze, "execution_capsule_receipt")
+        )
+        native_plan_binding = M336K12NativeStagePlanBinding.build(
+            repository=repository,
+            exact_implementation_tip=implementation,
+            active_profile_hash=official_profile.profile_hash,
+            route_registry_hash=rehearsal_bundle.route_registry_hash,
+            typed_route_manifest_hash=rehearsal_bundle.route_manifest_hash,
+            dispatches=native_stage_dispatches,
+            python_executable=python,
+            outer_startup_policy_hash=_object(
+                _frozen_component(repository, freeze, "python_startup_policy")
+            )["policy_hash"],
+            native_capsule_receipt_hash=historical_capsule["receipt_hash"],
+        )
+        native_parity = verify_m336k12_native_stage_plan(
+            plan=native_plan,
+            dispatches=native_stage_dispatches,
+            plan_binding=native_plan_binding,
+            repository=repository,
+            python_executable=python,
+        )
+        native_dispatch_closure = M336K12DisposableDispatchClosure.build(
+            rehearsal_profile_id=official_profile.profile_id,
+            dispatches=native_stage_dispatches,
+            plan_binding=native_plan_binding,
+            parity=native_parity,
+        )
+        native_dispatch_closure_path = private / "native-dispatch-rehearsal.json"
+        _write(
+            native_dispatch_closure_path,
+            native_dispatch_closure.canonical_object(),
+        )
     mutation_path = public / "identity_mutation_receipt.json"
     if namespace == "m336k8":
         _run(
@@ -1019,6 +1094,11 @@ def main() -> None:
         *(
             ("--startup-receipt", str(startup_receipt_path))
             if namespace == "m336k8"
+            else ()
+        ),
+        *(
+            ("--native-dispatch-rehearsal", str(native_dispatch_closure_path))
+            if native_dispatch_closure_path is not None
             else ()
         ),
     )
@@ -1133,6 +1213,10 @@ def main() -> None:
     execution_arguments = ["--request", str(final_request_path)]
     if namespace in {"m336k7", "m336k8"}:
         execution_arguments.extend(("--startup-receipt", str(startup_receipt_path)))
+    if native_dispatch_closure_path is not None:
+        execution_arguments.extend(
+            ("--native-dispatch-rehearsal", str(native_dispatch_closure_path))
+        )
     if namespace in {"m336k7", "m336k8"}:
         execution_arguments.extend(
             (
@@ -1323,6 +1407,42 @@ def main() -> None:
         "absolute_path_count": protocol["absolute_path_count"],
         "private_public_artifact_count": protocol["private_artifact_count"],
         "official_one_shot_counter_count": 0,
+        **(
+            {
+                "native_dispatch_generation": native_stage_dispatch_generation,
+                "native_dispatch_closure_hash": (native_dispatch_closure.closure_hash),
+                "dispatch_contract_hash": (
+                    native_dispatch_closure.dispatch_contract_hash
+                ),
+                "producer_consumer_parity_receipt_hash": (
+                    native_dispatch_closure.producer_consumer_parity.receipt_hash
+                ),
+                "official_plan_builder_source_hash": (
+                    native_dispatch_closure.official_plan_builder_source_hash
+                ),
+                "rehearsal_plan_builder_source_hash": (
+                    native_dispatch_closure.rehearsal_plan_builder_source_hash
+                ),
+                "official_consumer_source_hash": (
+                    native_dispatch_closure.official_consumer_source_hash
+                ),
+                "rehearsal_consumer_source_hash": (
+                    native_dispatch_closure.rehearsal_consumer_source_hash
+                ),
+                "official_rehearsal_plan_builder_source_difference_count": (
+                    native_dispatch_closure.plan_builder_source_difference_count
+                ),
+                "official_rehearsal_consumer_source_difference_count": (
+                    native_dispatch_closure.consumer_source_difference_count
+                ),
+                "native_plan_status": "PASS",
+                "producer_consumer_parity_status": (
+                    native_dispatch_closure.producer_consumer_parity.status
+                ),
+            }
+            if native_dispatch_closure is not None
+            else {}
+        ),
         **(
             {
                 "official_profile_id": official_profile.profile_id,

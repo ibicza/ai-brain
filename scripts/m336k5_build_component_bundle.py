@@ -104,6 +104,7 @@ from ai_brain.stage3.acquisition.m336k9_authorization import (
     build_m336k9_final_authorization,
     build_m336k10_final_authorization,
     build_m336k11_final_authorization,
+    build_m336k12_final_authorization,
     m336k_current_final_authorization_from_dict,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
@@ -133,7 +134,23 @@ from ai_brain.stage3.acquisition.m336k11_execution import (
     M336K11PostFreezeInputBundle,
     build_m336k11_final_request_binding,
     m336k11_official_component_scopes,
+    verify_m336k11_live_execution_inputs,
     verify_m336k11_official_executable_binding,
+)
+from ai_brain.stage3.acquisition.m336k12_dispatch import (
+    M336K12_PROFILE_ID,
+    M336K12NativeExecutionCapsuleReceipt,
+    M336K12NativeRouteManifest,
+    M336K12NativeStageDispatch,
+    M336K12NativeStagePlanBinding,
+    M336K12OfficialControllerExecutableBinding,
+    M336K12OfficialExecutableBindingReceipt,
+    M336K12PostFreezeInputBundle,
+    M336K12ProducerConsumerParityReceipt,
+    build_m336k12_native_execution_plan,
+    build_m336k12_native_stage_dispatches,
+    m336k12_native_dispatch_contract_hash,
+    verify_m336k12_native_stage_plan,
 )
 
 _LABEL = re.compile(r"[a-z0-9][a-z0-9-]{3,63}")
@@ -201,7 +218,7 @@ def main() -> None:
     }
     identity_namespace = request.get("identity_namespace", "m336k5")
     profile_id = request.get("official_profile_id")
-    if profile_id == M336K11_PROFILE_ID:
+    if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:
         source_domain_components |= {"effective_environment_binding"}
     expected = (
         base_expected - {"resource_budget"}
@@ -216,7 +233,7 @@ def main() -> None:
         expected |= source_domain_components
     if profile_id is not None:
         expected |= {"official_profile_id"}
-    if profile_id == M336K11_PROFILE_ID:
+    if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:
         expected |= {
             "executable_handles",
             "windows_invocation_plan",
@@ -260,8 +277,11 @@ def main() -> None:
             "official_executable_binding_receipt",
             "official_controller_executable_binding",
             "native_route_manifest",
+            "native_stage_dispatches",
+            "native_stage_plan_binding",
+            "producer_consumer_parity_receipt",
         }
-        if profile_id == M336K11_PROFILE_ID
+        if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}
         else set()
     )
     for name, source in sources.items():
@@ -308,7 +328,7 @@ def main() -> None:
         path.write_text(canonical_json(value) + "\n", encoding="utf-8", newline="\n")
     if identity_namespace in {"m336k7", "m336k8"}:
         _write_m336k7_legacy_bindings(output, request)
-        if profile_id != M336K11_PROFILE_ID:
+        if profile_id not in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:
             _write_m336k7_persistent_capsule_route(output)
         if request["identity_mode"] == "OFFICIAL":
             verify_m336k7_unchanged_candidate_pool(output / "candidate_pool.json")
@@ -375,7 +395,15 @@ def main() -> None:
     selector = {**selector, "policy_hash": content_hash(selector)}
     legacy_authorization = _object(output / "final_authorization.json")
     official_components = None
-    if profile_id in {M336K10_PROFILE_ID, M336K11_PROFILE_ID} and mode == "OFFICIAL":
+    if (
+        profile_id
+        in {
+            M336K10_PROFILE_ID,
+            M336K11_PROFILE_ID,
+            M336K12_PROFILE_ID,
+        }
+        and mode == "OFFICIAL"
+    ):
         pool_path = output / "candidate_pool.json"
         maven_source, scm_source = read_provider_sources(repository)
         official_components = build_official_acquisition_components(
@@ -484,14 +512,17 @@ def main() -> None:
     executable_binding = None
     native_capsule = None
     native_route = None
-    if profile_id == M336K11_PROFILE_ID:
+    plan_binding = None
+    producer_consumer_parity = None
+    native_stage_dispatches = None
+    if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:
         dependency = M336K11HermeticExecutableDependencyManifest.from_dict(
             _object(output / "controller_executable_dependency_manifest.json")
         )
         effective_environment = M336K11EffectiveEnvironmentBinding.from_dict(
             _object(output / "effective_environment_binding.json")
         )
-        native_capsule = M336K11NativeExecutionCapsuleReceipt.build(
+        base_capsule = M336K11NativeExecutionCapsuleReceipt.build(
             repository=repository,
             route_registry_hash=registry.registry_hash,
             typed_route_manifest_hash=route.manifest_hash,
@@ -499,8 +530,13 @@ def main() -> None:
             effective_environment=effective_environment,
         )
         source_identity = _object(output / "controller_source_identity_receipt.json")
-        executable_binding = M336K11OfficialControllerExecutableBinding.build(
-            profile=profile,
+        base_profile = (
+            profile_registry.profile(M336K11_PROFILE_ID)
+            if profile_id == M336K12_PROFILE_ID
+            else profile
+        )
+        base_binding = M336K11OfficialControllerExecutableBinding.build(
+            profile=base_profile,
             source_identity_receipt_hash=source_identity["receipt_hash"],
             source_identity_hash=source_identity["live_project_source_identity"],
             environment_manifest_hash=python_environment["environment_manifest_hash"],
@@ -508,14 +544,71 @@ def main() -> None:
             effective_environment=effective_environment,
             route_registry_hash=registry.registry_hash,
             typed_route_manifest_hash=route.manifest_hash,
-            native_stage_worker_source_hash=native_capsule.stage_worker_bytes_hash,
-            native_command_contract_hash=native_capsule.command_contract_hash,
+            native_stage_worker_source_hash=base_capsule.stage_worker_bytes_hash,
+            native_command_contract_hash=base_capsule.command_contract_hash,
         )
-        native_route = M336K11NativeRouteManifest.build(
-            profile=profile,
-            binding=executable_binding,
-            capsule=native_capsule,
-        )
+        if profile_id == M336K12_PROFILE_ID:
+            native_stage_dispatches = build_m336k12_native_stage_dispatches(
+                repository=repository,
+                execution_scope="OFFICIAL_CONTROLLER",
+                bootstrap_script=repository / "scripts/m336k5_python_bootstrap.py",
+            )
+            private_plan = build_m336k12_native_execution_plan(
+                repository=repository,
+                python_executable=Path(request["executable_handles"]["python"]),
+                stage_request=output / "private-stage-request.json",
+                stage_receipt_root=output / "private-stage-receipts",
+                route_run_id=profile.protocol_run_id,
+                exact_f37_sha=request["exact_implementation_tip"],
+                route_registry_hash=registry.registry_hash,
+                dispatches=native_stage_dispatches,
+            )
+            plan_binding = M336K12NativeStagePlanBinding.build(
+                repository=repository,
+                exact_implementation_tip=request["exact_implementation_tip"],
+                active_profile_hash=profile.profile_hash,
+                route_registry_hash=registry.registry_hash,
+                typed_route_manifest_hash=route.manifest_hash,
+                dispatches=native_stage_dispatches,
+                python_executable=Path(request["executable_handles"]["python"]),
+                outer_startup_policy_hash=dependency.static_startup_policy_hash,
+                native_capsule_receipt_hash=base_capsule.receipt_hash,
+            )
+            producer_consumer_parity = verify_m336k12_native_stage_plan(
+                plan=private_plan,
+                dispatches=native_stage_dispatches,
+                plan_binding=plan_binding,
+                repository=repository,
+                python_executable=Path(request["executable_handles"]["python"]),
+            )
+            native_capsule = M336K12NativeExecutionCapsuleReceipt.build(
+                base_capsule=base_capsule,
+                plan_binding=plan_binding,
+                parity=producer_consumer_parity,
+                dispatches=native_stage_dispatches,
+            )
+            executable_binding = M336K12OfficialControllerExecutableBinding.build(
+                base_binding=base_binding,
+                profile=profile,
+                capsule=native_capsule,
+                plan_binding=plan_binding,
+                parity=producer_consumer_parity,
+            )
+            native_route = M336K12NativeRouteManifest.build(
+                profile=profile,
+                binding=executable_binding,
+                capsule=native_capsule,
+                plan_binding=plan_binding,
+                parity=producer_consumer_parity,
+            )
+        else:
+            native_capsule = base_capsule
+            executable_binding = base_binding
+            native_route = M336K11NativeRouteManifest.build(
+                profile=profile,
+                binding=executable_binding,
+                capsule=native_capsule,
+            )
         manifest_bytes = (
             output / "controller_executable_dependency_manifest.json"
         ).read_bytes()
@@ -540,7 +633,9 @@ def main() -> None:
             newline="\n",
         )
     authorization_builder = (
-        build_m336k11_final_authorization
+        build_m336k12_final_authorization
+        if profile_id == M336K12_PROFILE_ID
+        else build_m336k11_final_authorization
         if profile_id == M336K11_PROFILE_ID
         else build_m336k10_final_authorization
         if official_components is not None
@@ -621,6 +716,18 @@ def main() -> None:
             official_authorization_values[
                 "official_controller_executable_binding_hash"
             ] = executable_binding.binding_hash
+        if profile_id == M336K12_PROFILE_ID:
+            official_authorization_values.update(
+                {
+                    "native_stage_plan_binding_hash": (plan_binding.plan_binding_hash),
+                    "producer_consumer_parity_receipt_hash": (
+                        producer_consumer_parity.receipt_hash
+                    ),
+                    "native_execution_capsule_receipt_hash": (
+                        native_capsule.receipt_hash
+                    ),
+                }
+            )
         authorization = authorization_builder(**official_authorization_values)
     else:
         authorization = authorization_builder(
@@ -672,6 +779,31 @@ def main() -> None:
                 "native_route_manifest": native_route.canonical_object(),
             }
         )
+        if profile_id == M336K12_PROFILE_ID:
+            dispatch_contract_hash = m336k12_native_dispatch_contract_hash(
+                native_stage_dispatches
+            )
+            dispatch_body = {
+                "schema_version": 1,
+                "contract_role": "M336K12_NATIVE_STAGE_DISPATCH_SET",
+                "dispatches": tuple(
+                    item.canonical_object() for item in native_stage_dispatches
+                ),
+                "dispatch_count": len(native_stage_dispatches),
+                "dispatch_contract_hash": dispatch_contract_hash,
+            }
+            values.update(
+                {
+                    "native_stage_dispatches": {
+                        **dispatch_body,
+                        "receipt_hash": content_hash(dispatch_body),
+                    },
+                    "native_stage_plan_binding": plan_binding.canonical_object(),
+                    "producer_consumer_parity_receipt": (
+                        producer_consumer_parity.canonical_object()
+                    ),
+                }
+            )
     binding_receipt = None
     if official_components is not None:
         post_authorization = build_m336k10_post_authorization_components(
@@ -751,7 +883,10 @@ def main() -> None:
         (output / f"{name}.json").write_text(
             canonical_json(value) + "\n", encoding="utf-8", newline="\n"
         )
-    if identity_namespace == "m336k8" and profile_id != M336K11_PROFILE_ID:
+    if identity_namespace == "m336k8" and profile_id not in {
+        M336K11_PROFILE_ID,
+        M336K12_PROFILE_ID,
+    }:
         execution_capsule = _object(output / "execution_capsule_receipt.json")
         binding = _object(output / "capsule_binding_set.json")
         execution_capsule["karina_public_execution_capsule_receipt_hash"] = binding[
@@ -771,6 +906,30 @@ def main() -> None:
             ),
         )
     elif identity_namespace == "m336k8":
+        executable_handles = request["executable_handles"]
+        if (
+            type(executable_handles) is not dict
+            or set(executable_handles) != M336K2_REQUIRED_EXECUTABLE_ROLES
+        ):
+            raise M336K2ProtocolError("M336K11 executable handle roles changed")
+        invocation_plan = M336K5PythonInvocationPlan.from_dict(
+            _object(Path(request["windows_invocation_plan"]))
+        )
+        startup_receipt = M336K5PythonStartupReceipt.from_dict(
+            _object(Path(request["windows_startup_receipt"]))
+        )
+        resolved_executable_handles = {
+            name: Path(path).resolve(strict=True)
+            for name, path in executable_handles.items()
+        }
+        if profile_id == M336K12_PROFILE_ID:
+            _write_m336k12_executable_binding_receipt(
+                repository=repository,
+                output=output,
+                invocation_plan=invocation_plan,
+                startup_receipt=startup_receipt,
+                executable_handles=resolved_executable_handles,
+            )
         _write_m336k8_post_freeze_and_gate(
             repository,
             output,
@@ -780,26 +939,14 @@ def main() -> None:
                 None if binding_receipt is None else binding_receipt.receipt_hash
             ),
         )
-        executable_handles = request["executable_handles"]
-        if (
-            type(executable_handles) is not dict
-            or set(executable_handles) != M336K2_REQUIRED_EXECUTABLE_ROLES
-        ):
-            raise M336K2ProtocolError("M336K11 executable handle roles changed")
-        _write_m336k11_executable_binding_receipt(
-            repository=repository,
-            output=output,
-            invocation_plan=M336K5PythonInvocationPlan.from_dict(
-                _object(Path(request["windows_invocation_plan"]))
-            ),
-            startup_receipt=M336K5PythonStartupReceipt.from_dict(
-                _object(Path(request["windows_startup_receipt"]))
-            ),
-            executable_handles={
-                name: Path(path).resolve(strict=True)
-                for name, path in executable_handles.items()
-            },
-        )
+        if profile_id == M336K11_PROFILE_ID:
+            _write_m336k11_executable_binding_receipt(
+                repository=repository,
+                output=output,
+                invocation_plan=invocation_plan,
+                startup_receipt=startup_receipt,
+                executable_handles=resolved_executable_handles,
+            )
     if identity_namespace == "m336k7":
         execution_capsule = _object(output / "execution_capsule_receipt.json")
         binding = _object(output / "capsule_binding_set.json")
@@ -1163,6 +1310,116 @@ def _write_m336k11_executable_binding_receipt(
     )
 
 
+def _write_m336k12_executable_binding_receipt(
+    *,
+    repository: Path,
+    output: Path,
+    invocation_plan: M336K5PythonInvocationPlan,
+    startup_receipt: M336K5PythonStartupReceipt,
+    executable_handles: dict[str, Path],
+) -> None:
+    binding = M336K12OfficialControllerExecutableBinding.from_dict(
+        _object(output / "official_controller_executable_binding.json")
+    )
+    manifest = M336K11HermeticExecutableDependencyManifest.from_dict(
+        _object(output / "controller_executable_dependency_manifest.json")
+    )
+    effective = M336K11EffectiveEnvironmentBinding.from_dict(
+        _object(output / "effective_environment_binding.json")
+    )
+    capsule = M336K12NativeExecutionCapsuleReceipt.from_dict(
+        _object(output / "execution_capsule_receipt.json")
+    )
+    route = M336K12NativeRouteManifest.from_dict(
+        _object(output / "native_route_manifest.json")
+    )
+    plan_binding = M336K12NativeStagePlanBinding.from_dict(
+        _object(output / "native_stage_plan_binding.json")
+    )
+    parity = M336K12ProducerConsumerParityReceipt.from_dict(
+        _object(output / "producer_consumer_parity_receipt.json")
+    )
+    dispatch_value = _object(output / "native_stage_dispatches.json")
+    dispatches = tuple(
+        M336K12NativeStageDispatch.from_dict(item)
+        for item in dispatch_value["dispatches"]
+    )
+    dispatch_body = dict(dispatch_value)
+    dispatch_receipt_hash = dispatch_body.pop("receipt_hash", None)
+    if (
+        dispatch_value.get("contract_role") != "M336K12_NATIVE_STAGE_DISPATCH_SET"
+        or dispatch_value.get("dispatch_count") != len(dispatches)
+        or dispatch_value.get("dispatch_contract_hash")
+        != m336k12_native_dispatch_contract_hash(dispatches)
+        or dispatch_receipt_hash != content_hash(dispatch_body)
+    ):
+        raise M336K2ProtocolError("M336K12 native dispatch set changed")
+    verify_m336k11_live_execution_inputs(
+        manifest=manifest,
+        effective_environment=effective,
+        invocation_plan=invocation_plan,
+        startup_receipt=startup_receipt,
+        executable_handles=executable_handles,
+        native_stage_worker_bytes=(
+            repository / "scripts/m336k2_run_stage.py"
+        ).read_bytes(),
+        native_capsule=capsule,
+        expected_target=repository / "scripts/m336k12_run_final_route.py",
+    )
+    authorization = _object(output / "final_authorization.json")
+    relations = (
+        (binding.executable_dependency_manifest_hash, manifest.manifest_hash),
+        (binding.effective_environment_binding_receipt_hash, effective.receipt_hash),
+        (binding.native_execution_capsule_receipt_hash, capsule.receipt_hash),
+        (route.native_execution_capsule_receipt_hash, capsule.receipt_hash),
+        (
+            authorization["official_controller_executable_binding_hash"],
+            binding.binding_hash,
+        ),
+        (
+            authorization["native_execution_capsule_receipt_hash"],
+            capsule.receipt_hash,
+        ),
+        (
+            authorization["native_stage_plan_binding_hash"],
+            plan_binding.plan_binding_hash,
+        ),
+        (
+            authorization["producer_consumer_parity_receipt_hash"],
+            parity.receipt_hash,
+        ),
+    )
+    executable_mismatches = sum(left != right for left, right in relations)
+    semantic_anchor = content_hash(
+        (
+            manifest.manifest_hash,
+            effective.receipt_hash,
+            invocation_plan.invocation_plan_hash,
+            startup_receipt.receipt_hash,
+            binding.binding_hash,
+            capsule.receipt_hash,
+            route.manifest_hash,
+            plan_binding.plan_binding_hash,
+            parity.receipt_hash,
+            dispatch_receipt_hash,
+        )
+    )
+    receipt = M336K12OfficialExecutableBindingReceipt.build(
+        executable_semantic_anchor_hash=semantic_anchor,
+        executable_semantic_mismatch_count=executable_mismatches,
+        binding=binding,
+        capsule=capsule,
+        route=route,
+        plan_binding=plan_binding,
+        parity=parity,
+    )
+    (output / "official_executable_binding_receipt.json").write_text(
+        canonical_json(receipt.canonical_object()) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def _write_m336k8_post_freeze_and_gate(
     repository: Path,
     output: Path,
@@ -1174,9 +1431,16 @@ def _write_m336k8_post_freeze_and_gate(
     plan = M336K8FreezeAssemblyPlan.from_dict(
         _object(output / "freeze_assembly_plan.json")
     )
-    active_executable_closure = plan.contract_role == M336K8FreezeAssemblyPlan.ROLE_V2
+    active_native_dispatch_closure = (
+        plan.contract_role == M336K8FreezeAssemblyPlan.ROLE_V3
+    )
+    active_executable_closure = plan.contract_role in {
+        M336K8FreezeAssemblyPlan.ROLE_V2,
+        M336K8FreezeAssemblyPlan.ROLE_V3,
+    }
     if plan != M336K8FreezeAssemblyPlan.build(
-        active_executable_closure=active_executable_closure
+        active_executable_closure=active_executable_closure,
+        native_stage_dispatch_closure=active_native_dispatch_closure,
     ):
         raise M336K2ProtocolError("M336K8 freeze assembly plan changed")
     policy = M336K8ProjectSourceIdentityPolicy.from_dict(
@@ -1298,7 +1562,9 @@ def _write_m336k8_post_freeze_and_gate(
         ),
     }
     post_type = (
-        M336K11PostFreezeInputBundle
+        M336K12PostFreezeInputBundle
+        if active_native_dispatch_closure
+        else M336K11PostFreezeInputBundle
         if active_executable_closure
         else M336K10PostFreezeInputBundle
         if official_acquisition_binding_receipt_hash is not None
@@ -1347,9 +1613,28 @@ def _write_m336k8_post_freeze_and_gate(
                 ),
                 "native_execution_capsule_receipt_hash": native_capsule["receipt_hash"],
                 "native_route_manifest_hash": native_route["manifest_hash"],
-                "official_executable_binding_receipt_hash": executable_binding[
-                    "binding_hash"
-                ],
+                "official_executable_binding_receipt_hash": (
+                    _object(output / "official_executable_binding_receipt.json")[
+                        "receipt_hash"
+                    ]
+                    if active_native_dispatch_closure
+                    else executable_binding["binding_hash"]
+                ),
+            }
+        )
+    if active_native_dispatch_closure:
+        plan_binding = M336K12NativeStagePlanBinding.from_dict(
+            _object(output / "native_stage_plan_binding.json")
+        )
+        parity = M336K12ProducerConsumerParityReceipt.from_dict(
+            _object(output / "producer_consumer_parity_receipt.json")
+        )
+        dispatch_set = _object(output / "native_stage_dispatches.json")
+        post_values.update(
+            {
+                "native_stage_plan_binding_hash": plan_binding.plan_binding_hash,
+                "producer_consumer_parity_receipt_hash": parity.receipt_hash,
+                "dispatch_contract_hash": dispatch_set["dispatch_contract_hash"],
             }
         )
     provisional = post_type.build(**post_values, freeze_assembly_receipt_hash="0" * 64)
@@ -1386,6 +1671,17 @@ def _write_m336k8_post_freeze_and_gate(
                 "official_controller_executable_binding": executable_binding,
                 "execution_capsule_receipt": native_capsule,
                 "native_route_manifest": native_route,
+            }
+        )
+    if active_native_dispatch_closure:
+        values.update(
+            {
+                "native_stage_dispatches": dispatch_set,
+                "native_stage_plan_binding": plan_binding.canonical_object(),
+                "producer_consumer_parity_receipt": parity.canonical_object(),
+                "official_executable_binding_receipt": _object(
+                    output / "official_executable_binding_receipt.json"
+                ),
             }
         )
     origins = {item.component_name: item.source_domain for item in plan.entries}
@@ -1528,7 +1824,19 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
     _write_rehashed(output / "q28_commit.json", q_commit)
 
     namespace = request["identity_namespace"]
-    if request.get("official_profile_id") == M336K11_PROFILE_ID:
+    if request.get("official_profile_id") == M336K12_PROFILE_ID:
+        publication_values = {
+            "branch_ref": request["branch_ref"],
+            "q_root": "artifacts/m336k12/q37",
+            "f_root": "artifacts/m336k12/f37-freeze",
+            "h_root": "artifacts/m336k12/h37",
+            "e_root": "artifacts/m336k12/e37",
+            "q_subject": "M-33.6k.12 qualify native stage dispatch authority",
+            "f_subject": "M-33.6k.12 freeze final Java execution",
+            "h_subject": "M-33.6k.12 publish sealed Java production",
+            "e_subject": "M-33.6k.12 publish independent Java evidence",
+        }
+    elif request.get("official_profile_id") == M336K11_PROFILE_ID:
         publication_values = {
             "branch_ref": request["branch_ref"],
             "q_root": "artifacts/m336k11/q36",

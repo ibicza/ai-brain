@@ -30,6 +30,9 @@ M336K10_F35_ROOT = Path("artifacts/m336k10/f35-freeze")
 M336K11_READY_STATUS = "READY_FOR_HERMETIC_EXECUTABLE_BOUND_FINAL_JAVA_EXECUTION_V11"
 M336K11_BRANCH = "exp/stage3-m336k11-hermetic-executable-binding-v20"
 M336K11_F36_ROOT = Path("artifacts/m336k11/f36-freeze")
+M336K12_READY_STATUS = "READY_FOR_NATIVE_STAGE_DISPATCH_BOUND_FINAL_JAVA_EXECUTION_V12"
+M336K12_BRANCH = "exp/stage3-m336k12-native-stage-dispatch-v21"
+M336K12_F37_ROOT = Path("artifacts/m336k12/f37-freeze")
 M336K8_REQUIRED_FREEZE_COMPONENTS = frozenset(
     (set(M336K7_REQUIRED_FREEZE_COMPONENTS) - {"frozen_contract_compatibility"})
     | {
@@ -78,6 +81,14 @@ M336K11_REQUIRED_FREEZE_COMPONENTS = frozenset(
         "official_controller_executable_binding",
         "official_executable_binding_receipt",
         "native_route_manifest",
+    }
+)
+M336K12_REQUIRED_FREEZE_COMPONENTS = frozenset(
+    set(M336K11_REQUIRED_FREEZE_COMPONENTS)
+    | {
+        "native_stage_dispatches",
+        "native_stage_plan_binding",
+        "producer_consumer_parity_receipt",
     }
 )
 _SOURCE_SCOPE = ("src", "scripts", "tools", "schemas", "pyproject.toml", "uv.lock")
@@ -166,11 +177,15 @@ class M336K8FreezeManifest:
     native_execution_capsule_receipt_hash: str | None = None
     native_route_manifest_hash: str | None = None
     official_executable_binding_receipt_hash: str | None = None
+    native_stage_plan_binding_hash: str | None = None
+    producer_consumer_parity_receipt_hash: str | None = None
+    dispatch_contract_hash: str | None = None
 
     ROLE: ClassVar[str] = "M336K8_SOURCE_DOMAIN_BOUND_FREEZE_V1"
     ROLE_V2: ClassVar[str] = "M336K9_UNIFIED_ADMISSION_FREEZE_V2"
     ROLE_V3: ClassVar[str] = "M336K10_OFFICIAL_ACQUISITION_BOUND_FREEZE_V3"
     ROLE_V4: ClassVar[str] = "M336K11_HERMETIC_EXECUTABLE_BOUND_FREEZE_V4"
+    ROLE_V5: ClassVar[str] = "M336K12_NATIVE_STAGE_DISPATCH_BOUND_FREEZE_V5"
 
     @property
     def exact_q28_sha(self) -> str:
@@ -208,15 +223,27 @@ class M336K8FreezeManifest:
                 )
         exclusions = self.self_reference_safe_exclusions
         exclusion_roots = {Path(item).parent.as_posix() for item in exclusions}
-        current = self.contract_role in {self.ROLE_V2, self.ROLE_V3, self.ROLE_V4}
-        acquisition_bound = self.contract_role in {self.ROLE_V3, self.ROLE_V4}
-        executable_bound = self.contract_role == self.ROLE_V4
+        current = self.contract_role in {
+            self.ROLE_V2,
+            self.ROLE_V3,
+            self.ROLE_V4,
+            self.ROLE_V5,
+        }
+        acquisition_bound = self.contract_role in {
+            self.ROLE_V3,
+            self.ROLE_V4,
+            self.ROLE_V5,
+        }
+        executable_bound = self.contract_role in {self.ROLE_V4, self.ROLE_V5}
+        native_dispatch_bound = self.contract_role == self.ROLE_V5
         prospective = self.exact_freeze_sha == "0" * 40
         expected_names = {
             "freeze_manifest.json",
             (
                 "prospective_freeze_build_receipt.json"
                 if executable_bound and prospective
+                else "f37_build_receipt.json"
+                if native_dispatch_bound
                 else "f36_build_receipt.json"
                 if executable_bound
                 else "f35_build_receipt.json"
@@ -227,7 +254,9 @@ class M336K8FreezeManifest:
             ),
         }
         required_components = (
-            M336K11_REQUIRED_FREEZE_COMPONENTS
+            M336K12_REQUIRED_FREEZE_COMPONENTS
+            if native_dispatch_bound
+            else M336K11_REQUIRED_FREEZE_COMPONENTS
             if executable_bound
             else M336K10_REQUIRED_FREEZE_COMPONENTS
             if acquisition_bound
@@ -259,6 +288,11 @@ class M336K8FreezeManifest:
             self.native_route_manifest_hash,
             self.official_executable_binding_receipt_hash,
         )
+        native_dispatch_values = (
+            self.native_stage_plan_binding_hash,
+            self.producer_consumer_parity_receipt_hash,
+            self.dispatch_contract_hash,
+        )
         hashes = tuple(
             value
             for name, value in self.canonical_object().items()
@@ -267,7 +301,13 @@ class M336K8FreezeManifest:
         if (
             self.schema_version != 1
             or self.contract_role
-            not in {self.ROLE, self.ROLE_V2, self.ROLE_V3, self.ROLE_V4}
+            not in {
+                self.ROLE,
+                self.ROLE_V2,
+                self.ROLE_V3,
+                self.ROLE_V4,
+                self.ROLE_V5,
+            }
             or names != required_components
             or len(names) != len(self.components)
             or not _is_sha(self.implementation_tip)
@@ -296,6 +336,10 @@ class M336K8FreezeManifest:
             and any(not _is_hash(value) for value in executable_values)
             or not executable_bound
             and any(value is not None for value in executable_values)
+            or native_dispatch_bound
+            and any(not _is_hash(value) for value in native_dispatch_values)
+            or not native_dispatch_bound
+            and any(value is not None for value in native_dispatch_values)
             or self.manifest_hash != content_hash(self._body())
         ):
             raise M336K2ProtocolError("M336K8 freeze manifest is invalid")
@@ -322,6 +366,9 @@ class M336K8FreezeManifest:
             "native_execution_capsule_receipt_hash",
             "native_route_manifest_hash",
             "official_executable_binding_receipt_hash",
+            "native_stage_plan_binding_hash",
+            "producer_consumer_parity_receipt_hash",
+            "dispatch_contract_hash",
         }
         mandatory = all_fields - optional
         if (
@@ -570,6 +617,51 @@ class M336K11CommittedFreezeAttestation(M336K10CommittedFreezeAttestation):
         return result
 
 
+@dataclass(frozen=True)
+class M336K12CommittedFreezeAttestation(M336K11CommittedFreezeAttestation):
+    native_stage_plan_binding_hash: str
+    producer_consumer_parity_receipt_hash: str
+    dispatch_contract_hash: str
+
+    ROLE: ClassVar[str] = "M336K12_COMMITTED_FREEZE_ATTESTATION"
+
+    def verify(self) -> None:
+        hashes = tuple(
+            value
+            for name, value in self.canonical_object().items()
+            if name.endswith("_hash") and name != "committed_tree_hash"
+        )
+        passed = (
+            self.prospective_tree_matches
+            and self.implementation_change_count == 0
+            and self.merge_count == 0
+            and self.head_upstream_remote_equal
+            and self.worktree_clean
+        )
+        if (
+            self.schema_version != 1
+            or self.contract_role != self.ROLE
+            or self.official_profile_id != "m336k8-final-v5"
+            or not _is_sha(self.exact_freeze_sha)
+            or not _is_sha(self.exact_qualification_parent)
+            or not _is_sha(self.committed_tree_hash)
+            or any(not _is_hash(value) for value in hashes)
+            or self.status != ("PASS" if passed else "FAIL")
+            or self.attestation_hash != content_hash(self._body())
+        ):
+            raise M336K2ProtocolError("M336K12 committed freeze attestation is invalid")
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> Self:
+        if type(value) is not dict or set(value) != {
+            field.name for field in fields(cls)
+        }:
+            raise M336K2ProtocolError("M336K12 freeze attestation fields changed")
+        result = cls(**value)
+        result.verify()
+        return result
+
+
 def materialize_m336k8_freeze(
     *,
     repository: Path,
@@ -606,6 +698,7 @@ def materialize_m336k8_freeze(
             M336K8FreezeManifest.ROLE_V2,
             M336K8FreezeManifest.ROLE_V3,
             M336K8FreezeManifest.ROLE_V4,
+            M336K8FreezeManifest.ROLE_V5,
         }
         or build_receipt_name
         not in {
@@ -613,12 +706,19 @@ def materialize_m336k8_freeze(
             "f34_build_receipt.json",
             "f35_build_receipt.json",
             "f36_build_receipt.json",
+            "f37_build_receipt.json",
             "prospective_freeze_build_receipt.json",
         }
         or allow_unpublished_qualification
         and (
-            freeze_role != M336K8FreezeManifest.ROLE_V4
-            or expected_branch != M336K11_BRANCH
+            freeze_role
+            not in {M336K8FreezeManifest.ROLE_V4, M336K8FreezeManifest.ROLE_V5}
+            or expected_branch
+            != (
+                M336K12_BRANCH
+                if freeze_role == M336K8FreezeManifest.ROLE_V5
+                else M336K11_BRANCH
+            )
             or build_receipt_name != "prospective_freeze_build_receipt.json"
             or exact_qualification_sha != exact_implementation_tip
         )
@@ -740,6 +840,7 @@ def materialize_m336k8_freeze(
             M336K8FreezeManifest.ROLE_V2,
             M336K8FreezeManifest.ROLE_V3,
             M336K8FreezeManifest.ROLE_V4,
+            M336K8FreezeManifest.ROLE_V5,
         }:
             profile = _object(component_sources["active_official_profile"])
             values.update(
@@ -763,6 +864,7 @@ def materialize_m336k8_freeze(
         if freeze_role in {
             M336K8FreezeManifest.ROLE_V3,
             M336K8FreezeManifest.ROLE_V4,
+            M336K8FreezeManifest.ROLE_V5,
         }:
             values.update(
                 {
@@ -800,7 +902,10 @@ def materialize_m336k8_freeze(
                     ),
                 }
             )
-        if freeze_role == M336K8FreezeManifest.ROLE_V4:
+        if freeze_role in {
+            M336K8FreezeManifest.ROLE_V4,
+            M336K8FreezeManifest.ROLE_V5,
+        }:
             values.update(
                 {
                     "official_controller_executable_binding_hash": _semantic_hash(
@@ -824,6 +929,23 @@ def materialize_m336k8_freeze(
                     ),
                 }
             )
+        if freeze_role == M336K8FreezeManifest.ROLE_V5:
+            values.update(
+                {
+                    "native_stage_plan_binding_hash": _semantic_hash(
+                        component_sources["native_stage_plan_binding"],
+                        "plan_binding_hash",
+                    ),
+                    "producer_consumer_parity_receipt_hash": _semantic_hash(
+                        component_sources["producer_consumer_parity_receipt"],
+                        "receipt_hash",
+                    ),
+                    "dispatch_contract_hash": _verified_object(
+                        component_sources["native_stage_dispatches"],
+                        "receipt_hash",
+                    )["dispatch_contract_hash"],
+                }
+            )
         temporary = M336K8FreezeManifest(**values, manifest_hash="0" * 64)
         manifest = M336K8FreezeManifest(
             **values, manifest_hash=content_hash(temporary._body())
@@ -836,8 +958,13 @@ def materialize_m336k8_freeze(
     body = {
         "schema_version": 1,
         "contract_role": (
-            "PUBLIC_SAFE_M336K11_PROSPECTIVE_FREEZE_BUILD_RECEIPT"
+            "PUBLIC_SAFE_M336K12_PROSPECTIVE_FREEZE_BUILD_RECEIPT"
             if allow_unpublished_qualification
+            and freeze_role == M336K8FreezeManifest.ROLE_V5
+            else "PUBLIC_SAFE_M336K11_PROSPECTIVE_FREEZE_BUILD_RECEIPT"
+            if allow_unpublished_qualification
+            else "PUBLIC_SAFE_M336K12_FREEZE_BUILD_RECEIPT"
+            if freeze_role == M336K8FreezeManifest.ROLE_V5
             else "PUBLIC_SAFE_M336K11_FREEZE_BUILD_RECEIPT"
             if freeze_role == M336K8FreezeManifest.ROLE_V4
             else "PUBLIC_SAFE_M336K10_FREEZE_BUILD_RECEIPT"
@@ -919,7 +1046,9 @@ def attest_committed_m336k8_freeze(
     )
     plan = _component_object(root, freeze_manifest, "freeze_assembly_plan")
     attestation_type = (
-        M336K11CommittedFreezeAttestation
+        M336K12CommittedFreezeAttestation
+        if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V5
+        else M336K11CommittedFreezeAttestation
         if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V4
         else M336K10CommittedFreezeAttestation
         if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V3
@@ -953,6 +1082,7 @@ def attest_committed_m336k8_freeze(
         M336K8FreezeManifest.ROLE_V2,
         M336K8FreezeManifest.ROLE_V3,
         M336K8FreezeManifest.ROLE_V4,
+        M336K8FreezeManifest.ROLE_V5,
     }:
         body.update(
             {
@@ -966,6 +1096,7 @@ def attest_committed_m336k8_freeze(
     if freeze_manifest.contract_role in {
         M336K8FreezeManifest.ROLE_V3,
         M336K8FreezeManifest.ROLE_V4,
+        M336K8FreezeManifest.ROLE_V5,
     }:
         body.update(
             {
@@ -979,7 +1110,10 @@ def attest_committed_m336k8_freeze(
                 "official_freeze_origin_receipt_hash": freeze_manifest.official_freeze_origin_receipt_hash,
             }
         )
-    if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V4:
+    if freeze_manifest.contract_role in {
+        M336K8FreezeManifest.ROLE_V4,
+        M336K8FreezeManifest.ROLE_V5,
+    }:
         body.update(
             {
                 "official_controller_executable_binding_hash": freeze_manifest.official_controller_executable_binding_hash,
@@ -987,6 +1121,14 @@ def attest_committed_m336k8_freeze(
                 "native_execution_capsule_receipt_hash": freeze_manifest.native_execution_capsule_receipt_hash,
                 "native_route_manifest_hash": freeze_manifest.native_route_manifest_hash,
                 "official_executable_binding_receipt_hash": freeze_manifest.official_executable_binding_receipt_hash,
+            }
+        )
+    if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V5:
+        body.update(
+            {
+                "native_stage_plan_binding_hash": freeze_manifest.native_stage_plan_binding_hash,
+                "producer_consumer_parity_receipt_hash": freeze_manifest.producer_consumer_parity_receipt_hash,
+                "dispatch_contract_hash": freeze_manifest.dispatch_contract_hash,
             }
         )
     result = attestation_type(**body, attestation_hash=content_hash(body))

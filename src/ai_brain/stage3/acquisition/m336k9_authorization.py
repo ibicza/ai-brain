@@ -23,6 +23,7 @@ from ai_brain.stage3.acquisition.m336k9_profiles import (
 from ai_brain.stage3.acquisition.m336k10_binding import (
     M336K10_PROFILE_ID,
     M336K11_PROFILE_ID,
+    M336K12_PROFILE_ID,
     M336K10NetworkAuthorityManifest,
     M336K10OfficialAcquisitionPolicy,
     M336K10OfficialCandidatePoolBinding,
@@ -149,7 +150,8 @@ class M336K10FinalAuthorization(M336K9FinalAuthorization):
             self.acquisition_binding_receipt_hash,
         )
         if (
-            self.official_profile_id not in {M336K10_PROFILE_ID, M336K11_PROFILE_ID}
+            self.official_profile_id
+            not in {M336K10_PROFILE_ID, M336K11_PROFILE_ID, M336K12_PROFILE_ID}
             or self.candidate_pool_hash != self.pool_semantic_hash
             or self.acquisition_policy_hash != self.official_acquisition_policy_hash
             or self.acquisition_run_id != profile.acquisition_run_id
@@ -268,11 +270,91 @@ class M336K11FinalAuthorization(M336K10FinalAuthorization):
         return result
 
 
+@dataclass(frozen=True)
+class M336K12FinalAuthorization(M336K11FinalAuthorization):
+    """V5 authority bound to the admitted native-stage plan and parity proof."""
+
+    native_stage_plan_binding_hash: str
+    producer_consumer_parity_receipt_hash: str
+    native_execution_capsule_receipt_hash: str
+
+    def _body(self) -> dict[str, Any]:
+        return {
+            **super()._body(),
+            "native_stage_plan_binding_hash": self.native_stage_plan_binding_hash,
+            "producer_consumer_parity_receipt_hash": (
+                self.producer_consumer_parity_receipt_hash
+            ),
+            "native_execution_capsule_receipt_hash": (
+                self.native_execution_capsule_receipt_hash
+            ),
+        }
+
+    def verify(self, bundle: M336K5RouteIdentityBundle | None = None) -> None:
+        # M336K11 verifies the same executable and acquisition closure but has a
+        # historical profile predicate, so call its acquisition parent directly.
+        M336K10FinalAuthorization.verify(self, bundle)
+        hashes = (
+            self.official_controller_executable_binding_hash,
+            self.official_executable_binding_receipt_hash,
+            self.native_stage_plan_binding_hash,
+            self.producer_consumer_parity_receipt_hash,
+            self.native_execution_capsule_receipt_hash,
+        )
+        if (
+            self.official_profile_id != M336K12_PROFILE_ID
+            or self.official_executable_binding_receipt_hash
+            != self.official_controller_executable_binding_hash
+            or any(
+                type(value) is not str
+                or len(value) != 64
+                or any(character not in "0123456789abcdef" for character in value)
+                for value in hashes
+            )
+        ):
+            raise M336K2ProtocolError("M336K12 authorization binding changed")
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> Self:
+        if type(value) is not dict or set(value) != {
+            field.name for field in fields(cls)
+        }:
+            raise M336K2ProtocolError("M336K12 authorization fields changed")
+        result = cls(
+            **{
+                **value,
+                "route_version_typed": M336K5RouteVersion.from_dict(
+                    value["route_version_typed"]
+                ),
+                "protocol_run_id_typed": M336K5ProtocolRunId.from_dict(
+                    value["protocol_run_id_typed"]
+                ),
+                "acquisition_run_id_typed": M336K5AcquisitionRunId.from_dict(
+                    value["acquisition_run_id_typed"]
+                ),
+                "selector_run_id_typed": M336K5SelectorRunId.from_dict(
+                    value["selector_run_id_typed"]
+                ),
+                "evaluator_run_id_typed": M336K5EvaluatorRunId.from_dict(
+                    value["evaluator_run_id_typed"]
+                ),
+                "execution_mode_typed": M336K5ExecutionMode.from_dict(
+                    value["execution_mode_typed"]
+                ),
+                "allowed_network_hosts": tuple(value["allowed_network_hosts"]),
+            }
+        )
+        result.verify()
+        return result
+
+
 def m336k_current_final_authorization_from_dict(
     value: dict[str, Any],
 ) -> M336K5FinalAuthorization:
     """Read both historical K5 authorization and profile-bound K9 authority."""
 
+    if "native_stage_plan_binding_hash" in value:
+        return M336K12FinalAuthorization.from_dict(value)
     if "official_controller_executable_binding_hash" in value:
         return M336K11FinalAuthorization.from_dict(value)
     if "official_candidate_pool_binding_hash" in value:
@@ -405,6 +487,45 @@ def build_m336k11_final_authorization(
     }
     temporary = M336K11FinalAuthorization(**body, authorization_hash="0" * 64)
     result = M336K11FinalAuthorization(
+        **body, authorization_hash=content_hash(temporary._body())
+    )
+    result.verify(values.get("bundle"))
+    return result
+
+
+def build_m336k12_final_authorization(
+    *,
+    official_controller_executable_binding_hash: str,
+    native_stage_plan_binding_hash: str,
+    producer_consumer_parity_receipt_hash: str,
+    native_execution_capsule_receipt_hash: str,
+    **values: Any,
+) -> M336K12FinalAuthorization:
+    """Build v5 authority from one dispatch-bound executable closure."""
+
+    base = build_m336k10_final_authorization(**values)
+    body = {
+        **{
+            field.name: getattr(base, field.name)
+            for field in fields(type(base))
+            if field.name != "authorization_hash"
+        },
+        "official_controller_executable_binding_hash": (
+            official_controller_executable_binding_hash
+        ),
+        "official_executable_binding_receipt_hash": (
+            official_controller_executable_binding_hash
+        ),
+        "native_stage_plan_binding_hash": native_stage_plan_binding_hash,
+        "producer_consumer_parity_receipt_hash": (
+            producer_consumer_parity_receipt_hash
+        ),
+        "native_execution_capsule_receipt_hash": (
+            native_execution_capsule_receipt_hash
+        ),
+    }
+    temporary = M336K12FinalAuthorization(**body, authorization_hash="0" * 64)
+    result = M336K12FinalAuthorization(
         **body, authorization_hash=content_hash(temporary._body())
     )
     result.verify(values.get("bundle"))

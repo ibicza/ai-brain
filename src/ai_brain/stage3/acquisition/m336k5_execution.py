@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ai_brain.stage2.facts.canonical import bytes_hash, content_hash
 from ai_brain.stage3.acquisition.m336k2_controller import (
@@ -23,6 +24,13 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     startup_receipt_from_path,
     write_m336k5_python_invocation_plan,
 )
+
+if TYPE_CHECKING:
+    from ai_brain.stage3.acquisition.m336k12_dispatch import (
+        M336K12NativeStageDispatch,
+        M336K12NativeStagePlanBinding,
+        M336K12ProducerConsumerParityReceipt,
+    )
 
 
 @dataclass(frozen=True)
@@ -48,6 +56,9 @@ class M336K5HermeticCommandWorker:
         bootstrap_script: Path,
         expected_startup_receipt_hash: str,
         resource_monitor: M336K5ResourceMonitor | None = None,
+        native_stage_dispatches: tuple[M336K12NativeStageDispatch, ...] | None = None,
+        native_stage_plan_binding: M336K12NativeStagePlanBinding | None = None,
+        producer_consumer_parity: M336K12ProducerConsumerParityReceipt | None = None,
     ) -> None:
         self._plan = plan
         self._commands = {item.event: item for item in plan.commands}
@@ -60,12 +71,50 @@ class M336K5HermeticCommandWorker:
         self._expected_startup = expected_startup_receipt_hash
         self._resource_monitor = resource_monitor
         self._bindings: list[M336K5StageStartupBinding] = []
+        active_values = (
+            native_stage_dispatches,
+            native_stage_plan_binding,
+            producer_consumer_parity,
+        )
+        if any(value is not None for value in active_values) and any(
+            value is None for value in active_values
+        ):
+            raise M336K2ProtocolError(
+                "M336K12 active native plan binding is incomplete"
+            )
+        self._native_stage_dispatches = native_stage_dispatches
+        self._native_stage_plan_binding = native_stage_plan_binding
+        self._producer_consumer_parity = producer_consumer_parity
         if len(expected_startup_receipt_hash) != 64:
             raise M336K2ProtocolError("M336K5 expected startup receipt is invalid")
+        if self._native_stage_dispatches is not None:
+            self.preflight()
 
     @property
     def bindings(self) -> tuple[M336K5StageStartupBinding, ...]:
         return tuple(self._bindings)
+
+    def preflight(self) -> object:
+        """Admit the complete active plan before any route-ledger event."""
+
+        if self._native_stage_dispatches is None:
+            return None
+        from ai_brain.stage3.acquisition.m336k12_dispatch import (
+            verify_m336k12_native_stage_plan,
+        )
+
+        actual = verify_m336k12_native_stage_plan(
+            plan=self._plan,
+            dispatches=self._native_stage_dispatches,
+            plan_binding=self._native_stage_plan_binding,
+            repository=self._repository,
+            python_executable=self._python,
+        )
+        if actual != self._producer_consumer_parity:
+            raise M336K2ProtocolError(
+                "M336K12 producer/consumer parity differs from frozen receipt"
+            )
+        return actual
 
     def __call__(self, request: M336K2StageRequest) -> M336K2StageReceipt:
         expected = M336K2_COMMAND_EVENTS[len(self._completed)]
@@ -78,13 +127,31 @@ class M336K5HermeticCommandWorker:
             raise M336K2ProtocolError("M336K5 command worker context changed")
         command = self._commands[request.event]
         arguments = command.arguments
-        if (
-            len(arguments) < 2
-            or arguments[0] != "-B"
-            or Path(arguments[1]).resolve(strict=True)
-            != self._repository / "scripts" / "m336k2_run_stage.py"
-        ):
-            raise M336K2ProtocolError("M336K5 native stage command shape changed")
+        if self._native_stage_dispatches is not None:
+            from ai_brain.stage3.acquisition.m336k12_dispatch import (
+                adapt_m336k12_legacy_command,
+            )
+
+            dispatch_by_event = {
+                item.event: item for item in self._native_stage_dispatches
+            }
+            adapted = adapt_m336k12_legacy_command(
+                command,
+                dispatch_by_event[request.event],
+                repository=self._repository,
+            )
+            target = adapted.target
+            execute_arguments = adapted.target_arguments
+        else:
+            if (
+                len(arguments) < 2
+                or arguments[0] != "-B"
+                or Path(arguments[1]).resolve(strict=True)
+                != self._repository / "scripts" / "m336k2_run_stage.py"
+            ):
+                raise M336K2ProtocolError("M336K5 native stage command shape changed")
+            target = Path(arguments[1])
+            execute_arguments = tuple(arguments[2:])
         native_receipt = Path(command.receipt_path).resolve(strict=False)
         root = native_receipt.parent
         startup_receipt = root / f"{request.event}.startup.json"
@@ -113,9 +180,9 @@ class M336K5HermeticCommandWorker:
             repository=self._repository,
             working_directory=Path(command.working_directory),
             bootstrap_script=self._bootstrap,
-            target=Path(arguments[1]),
-            execute_arguments=tuple(arguments[2:]),
-            validate_arguments=tuple(arguments[2:]),
+            target=target,
+            execute_arguments=execute_arguments,
+            validate_arguments=execute_arguments,
             execute_startup_receipt=startup_receipt,
             validate_startup_receipt=startup_receipt.with_suffix(".validate.json"),
         )

@@ -419,6 +419,12 @@ def test_m336k8_v4_builder_accepts_phase_neutral_post_freeze_field() -> None:
         "request_hash",
     }
     mapping_fields = {"final_destinations", "karina", "executable_handles"}
+    native_dispatch_fields = {
+        "native_stage_dispatches",
+        "native_stage_plan_binding",
+        "producer_consumer_parity_receipt",
+        "dispatch_contract_hash",
+    }
     for field in fields(M336K8FinalRouteRequestV4):
         if field.name in generated:
             continue
@@ -428,6 +434,8 @@ def test_m336k8_v4_builder_accepts_phase_neutral_post_freeze_field() -> None:
             values[field.name] = "a" * 40
         elif field.name == "official_controller_executable_binding_hash":
             values[field.name] = "a" * 64
+        elif field.name in native_dispatch_fields:
+            values[field.name] = None
         elif field.name in mapping_fields:
             values[field.name] = {}
         else:
@@ -456,6 +464,10 @@ def test_m336k8_v4_builder_canonicalizes_absent_prospective_attestation() -> Non
         "official_executable_binding_receipt",
         "official_controller_executable_binding_hash",
         "windows_invocation_plan",
+        "native_stage_dispatches",
+        "native_stage_plan_binding",
+        "producer_consumer_parity_receipt",
+        "dispatch_contract_hash",
     }
     for field in fields(M336K8FinalRouteRequestV4):
         if field.name in generated or field.name in optional:

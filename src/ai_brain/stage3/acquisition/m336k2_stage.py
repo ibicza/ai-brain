@@ -150,6 +150,17 @@ _M336K10_REQUEST_FIELDS = _M336K5_REQUEST_FIELDS | {
     "stage_request_acquisition_binding_hash",
     "acquisition_ledger_context_template_hash",
 }
+_M336K12_NATIVE_REQUEST_FIELDS = {
+    "native_stage_plan_binding_hash",
+    "producer_consumer_parity_receipt_hash",
+    "dispatch_contract_hash",
+}
+_M336K12_REHEARSAL_REQUEST_FIELDS = (
+    _M336K5_REQUEST_FIELDS | _M336K12_NATIVE_REQUEST_FIELDS
+)
+_M336K12_OFFICIAL_REQUEST_FIELDS = (
+    _M336K10_REQUEST_FIELDS | _M336K12_NATIVE_REQUEST_FIELDS
+)
 _DESTINATION_FIELDS = {
     "acquisition_ledger",
     "selector_ledger",
@@ -222,6 +233,8 @@ def run_m336k2_stage(
         ]
     if request["schema_version"] == 4:
         state_body.update(_acquisition_binding_observation_fields(request))
+    if _native_dispatch_bound(request):
+        state_body.update(_native_dispatch_observation_fields(request))
     next_state = {**state_body, "state_hash": content_hash(state_body)}
     _write_private_state(state_path, next_state)
     body = {
@@ -242,6 +255,8 @@ def run_m336k2_stage(
         body["karina_startup_receipt_hash"] = request["karina_startup_receipt_hash"]
     if request["schema_version"] == 4:
         body.update(_acquisition_binding_observation_fields(request))
+    if _native_dispatch_bound(request):
+        body.update(_native_dispatch_observation_fields(request))
     receipt = {**body, "receipt_hash": content_hash(body)}
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.write_text(
@@ -1507,8 +1522,23 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
     typed_k10 = (
         set(request) == _M336K10_REQUEST_FIELDS and request.get("schema_version") == 4
     )
+    typed_k12_rehearsal = (
+        set(request) == _M336K12_REHEARSAL_REQUEST_FIELDS
+        and request.get("schema_version") == 3
+    )
+    typed_k12_official = (
+        set(request) == _M336K12_OFFICIAL_REQUEST_FIELDS
+        and request.get("schema_version") == 4
+    )
     if (
-        not (legacy or typed_k4 or typed_k5 or typed_k10)
+        not (
+            legacy
+            or typed_k4
+            or typed_k5
+            or typed_k10
+            or typed_k12_rehearsal
+            or typed_k12_official
+        )
         or request.get("execution_mode") not in {"REHEARSAL", "FINAL"}
         or not isinstance(destinations, dict)
         or set(destinations) != _DESTINATION_FIELDS
@@ -1537,7 +1567,7 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
             or authorization.route_identity_bundle_hash != bundle.bundle_hash
         ):
             raise M336K2ProtocolError("M336K4 native stage identity binding changed")
-    if typed_k5 or typed_k10:
+    if typed_k5 or typed_k10 or typed_k12_rehearsal or typed_k12_official:
         if startup_receipt_path is None:
             raise M336K2ProtocolError("M336K5 stage startup receipt is absent")
         startup = startup_receipt_from_path(startup_receipt_path)
@@ -1566,7 +1596,7 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
             )
             or freeze.route_identity_bundle_hash != bundle.bundle_hash
             or authorization.route_identity_bundle_hash != bundle.bundle_hash
-            or typed_k10
+            or (typed_k10 or typed_k12_official)
             and (
                 request["official_acquisition_binding_receipt_hash"]
                 != getattr(freeze, "official_acquisition_binding_receipt_hash", None)
@@ -1577,6 +1607,21 @@ def _verify_request(request: dict, *, startup_receipt_path: Path | None = None) 
             )
         ):
             raise M336K2ProtocolError("M336K5 native stage identity binding changed")
+        if typed_k12_rehearsal or typed_k12_official:
+            native_values = _native_dispatch_observation_fields(request)
+            frozen_values = {
+                name: getattr(freeze, name, None) for name in native_values
+            }
+            if (
+                any(not _valid_hash(value) for value in native_values.values())
+                or typed_k12_official
+                and native_values != frozen_values
+                or typed_k12_rehearsal
+                and request["execution_purpose"] != "DISPOSABLE"
+            ):
+                raise M336K2ProtocolError(
+                    "M336K12 native stage dispatch binding changed"
+                )
     repository = Path(request["repository"]).resolve(strict=True)
     state = Path(request["stage_state"]).resolve(strict=False)
     receipts = Path(request["stage_receipt_root"]).resolve(strict=False)
@@ -1750,6 +1795,8 @@ def _load_state(path: Path, request: dict) -> dict:
             ]
         if request["schema_version"] == 4:
             value.update(_acquisition_binding_observation_fields(request))
+        if _native_dispatch_bound(request):
+            value.update(_native_dispatch_observation_fields(request))
         return value
     value = _object(path)
     body = dict(value)
@@ -1770,6 +1817,8 @@ def _load_state(path: Path, request: dict) -> dict:
         expected_fields.add("karina_startup_receipt_hash")
     if request["schema_version"] == 4:
         expected_fields.update(_acquisition_binding_observation_fields(request))
+    if _native_dispatch_bound(request):
+        expected_fields.update(_native_dispatch_observation_fields(request))
     if (
         set(value) != expected_fields
         or value["route_run_id"] != request["route_run_id"]
@@ -1784,6 +1833,10 @@ def _load_state(path: Path, request: dict) -> dict:
             for name, expected in _acquisition_binding_observation_fields(
                 request
             ).items()
+        )
+        or any(
+            value.get(name) != expected
+            for name, expected in _native_dispatch_observation_fields(request).items()
         )
         or tuple(value["completed_events"])
         != _STAGE_EVENTS[: len(value["completed_events"])]
@@ -1841,6 +1894,8 @@ def _freeze(
         M336K8FreezeManifest.ROLE,
         M336K8FreezeManifest.ROLE_V2,
         M336K8FreezeManifest.ROLE_V3,
+        M336K8FreezeManifest.ROLE_V4,
+        M336K8FreezeManifest.ROLE_V5,
     }:
         return M336K8FreezeManifest.from_dict(value)
     if value.get("contract_role") == "M336K4_F29_TYPED_FREEZE_V2":
@@ -1934,6 +1989,24 @@ def _acquisition_binding_observation_fields(request: dict) -> dict:
             "acquisition_ledger_context_template_hash",
         )
     }
+
+
+def _native_dispatch_bound(request: dict) -> bool:
+    return _M336K12_NATIVE_REQUEST_FIELDS.issubset(request)
+
+
+def _valid_hash(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _native_dispatch_observation_fields(request: dict) -> dict:
+    if not _native_dispatch_bound(request):
+        return {}
+    return {name: request[name] for name in _M336K12_NATIVE_REQUEST_FIELDS}
 
 
 def _identity_observation_receipt(request: dict, observer: str) -> dict:

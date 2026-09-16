@@ -9,13 +9,13 @@ import pytest
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_identity import (
-    build_m336k11_official_identity_bundle,
+    build_m336k12_official_identity_bundle,
 )
 from ai_brain.stage3.acquisition.m336k8_freeze import (
     M336K10CommittedFreezeAttestation,
 )
 from ai_brain.stage3.acquisition.m336k9_authorization import (
-    build_m336k11_final_authorization,
+    build_m336k12_final_authorization,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfileStatus,
@@ -25,8 +25,8 @@ from ai_brain.stage3.acquisition.m336k10_binding import (
     M336K10_MUTATION_CASES,
     M336K10_PROFILE_ID,
     M336K10_REQUIRED_OFFICIAL_HOSTS,
-    M336K11_ACQUISITION_RUN_ID,
-    M336K11_PROFILE_ID,
+    M336K12_ACQUISITION_RUN_ID,
+    M336K12_PROFILE_ID,
     M336K10FreezeOriginReceipt,
     _m336k10_preledger_source_evidence,
     build_m336k10_post_authorization_components,
@@ -62,7 +62,7 @@ def _graph() -> dict:
     pool = json.loads(POOL.read_text(encoding="utf-8"))
     selector = json.loads((F34 / "69-selector_policy.json").read_text("utf-8"))
     maven_source, scm_source = read_provider_sources(ROOT)
-    profile = m336k_official_profile_registry().profile(M336K11_PROFILE_ID)
+    profile = m336k_official_profile_registry().profile(M336K12_PROFILE_ID)
     components = build_official_acquisition_components(
         pool=pool,
         pool_bytes=POOL.read_bytes(),
@@ -78,16 +78,19 @@ def _graph() -> dict:
         scm_provider_source=scm_source,
     )
     policy = components["acquisition_policy"]
-    bundle = build_m336k11_official_identity_bundle(
+    bundle = build_m336k12_official_identity_bundle(
         route_registry_hash=content_hash("route-registry"),
         route_manifest_hash=content_hash("route-manifest"),
         acquisition_policy_hash=policy.acquisition_policy_hash,
         selector_policy_hash=selector["policy_hash"],
         evaluator_policy_hash=content_hash("evaluator-policy"),
     )
-    authorization = build_m336k11_final_authorization(
+    authorization = build_m336k12_final_authorization(
         official_controller_executable_binding_hash=H,
-        official_profile_id=M336K11_PROFILE_ID,
+        native_stage_plan_binding_hash=H,
+        producer_consumer_parity_receipt_hash=H,
+        native_execution_capsule_receipt_hash=H,
+        official_profile_id=M336K12_PROFILE_ID,
         bundle=bundle,
         pool_binding=components["pool_binding"],
         network_authority=components["network_authority"],
@@ -190,19 +193,22 @@ def test_exact_official_binding_and_metadata_only_admission() -> None:
         M336K10_REQUIRED_OFFICIAL_HOSTS
     )
     assert graph["acquisition_policy"].acquisition_run_id == (
-        M336K11_ACQUISITION_RUN_ID
+        M336K12_ACQUISITION_RUN_ID
     )
     assert receipt.status == "PASS"
 
 
-def test_profile_v4_is_only_active_profile() -> None:
+def test_profile_v5_is_only_active_profile() -> None:
     registry = m336k_official_profile_registry()
     active = [
         item
         for item in registry.profiles
         if item.profile_status is M336KOfficialRouteProfileStatus.CURRENT_ACTIVE
     ]
-    assert [item.profile_id for item in active] == [M336K11_PROFILE_ID]
+    assert [item.profile_id for item in active] == [M336K12_PROFILE_ID]
+    assert registry.profile("m336k8-final-v4").profile_status is (
+        M336KOfficialRouteProfileStatus.HISTORICAL_READ_ONLY
+    )
     assert registry.profile(M336K10_PROFILE_ID).profile_status is (
         M336KOfficialRouteProfileStatus.HISTORICAL_READ_ONLY
     )
