@@ -8,7 +8,7 @@ import re
 import shutil
 import subprocess
 from dataclasses import asdict
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from m336k5_prepare_karina_capsule import prepare_m336k5_karina_capsule
 
@@ -56,6 +56,9 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     run_m336k5_python_invocation,
     startup_receipt_from_path,
     write_m336k5_python_invocation_plan,
+)
+from ai_brain.stage3.acquisition.m336k6_capsule import (
+    M336K6PrivateExecutionCapsule,
 )
 from ai_brain.stage3.acquisition.m336k7_contracts import (
     verify_m336k7_unchanged_candidate_pool,
@@ -306,17 +309,12 @@ def main() -> None:
         }
         if set(persistent_overlay) != required_overlay:
             raise M336K2ProtocolError("M336K6 persistent overlay fields changed")
-        karina_overlay = {
-            name: persistent_overlay[name]
-            for name in (
-                "private_execution_capsule",
-                "public_execution_capsule_receipt",
-                "executable_dependency_manifest",
-                "private_capsule_remote",
-                "repository",
-                "private_root",
-            )
-        }
+        persistent_capsule = M336K6PrivateExecutionCapsule.from_dict(
+            _object(Path(request["persistent_private_capsule"]).resolve(strict=True))
+        )
+        karina_overlay = _persistent_disposable_karina_overlay(
+            persistent_overlay, persistent_capsule, label
+        )
         karina_preparation = {
             "project_source_identity": persistent_overlay["project_source_identity"]
         }
@@ -1834,6 +1832,47 @@ def _run(python: Path, repository: Path, script: str, *arguments: str) -> None:
             output=result.stdout,
             stderr=result.stderr,
         )
+
+
+def _persistent_disposable_private_root(private_route_root: str, label: str) -> str:
+    route_root = PurePosixPath(private_route_root)
+    if not route_root.is_absolute() or re.fullmatch(r"[a-z0-9-]+", label) is None:
+        raise M336K2ProtocolError("M336K6 persistent disposable root is invalid")
+    result = route_root / label
+    if result.parent != route_root or not result.is_relative_to(route_root):
+        raise M336K2ProtocolError("M336K6 persistent disposable root escaped")
+    return result.as_posix()
+
+
+def _persistent_disposable_karina_overlay(
+    persistent_overlay: dict,
+    persistent_capsule: M336K6PrivateExecutionCapsule,
+    label: str,
+) -> dict:
+    result = {
+        name: persistent_overlay[name]
+        for name in (
+            "private_execution_capsule",
+            "public_execution_capsule_receipt",
+            "executable_dependency_manifest",
+            "private_capsule_remote",
+            "repository",
+            "private_root",
+        )
+    }
+    historical_root = PurePosixPath(result["private_root"])
+    route_root = PurePosixPath(persistent_capsule.private_route_root)
+    if historical_root.parent != route_root:
+        raise M336K2ProtocolError(
+            "M336K6 persistent overlay run root escaped its route root"
+        )
+    disposable_root = _persistent_disposable_private_root(
+        persistent_capsule.private_route_root, label
+    )
+    if PurePosixPath(disposable_root) == historical_root:
+        raise M336K2ProtocolError("M336K6 persistent disposable run root is not fresh")
+    result["private_root"] = disposable_root
+    return result
 
 
 def _git(git: Path, repository: Path | None, *arguments: str) -> str:

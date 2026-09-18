@@ -318,6 +318,38 @@ def test_m336k12_rehearsal_preledger_allows_private_dispatch_closure(
         load_m336k8_preledger_receipt(official_path)
 
 
+def test_m336k12_persistent_rehearsal_uses_fresh_remote_destination(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    from m336k5_qualify_disposable_protocol import (
+        _persistent_disposable_karina_overlay,
+    )
+
+    route_root = "/home/worker/.local/state/ai-brain/routes/capsule-v3"
+    overlay = {
+        "private_execution_capsule": "/capsule/legacy-private.json",
+        "public_execution_capsule_receipt": "/local/legacy-public.json",
+        "executable_dependency_manifest": "/local/dependencies.json",
+        "private_capsule_remote": "/capsule/legacy-private.json",
+        "repository": "/capsule/source",
+        "private_root": f"{route_root}/historical-r36k",
+    }
+    capsule = SimpleNamespace(private_route_root=route_root)
+
+    result = _persistent_disposable_karina_overlay(
+        overlay, capsule, "m336k12-rehearsal-r37h-v6"
+    )
+
+    assert result == {
+        **overlay,
+        "private_root": f"{route_root}/m336k12-rehearsal-r37h-v6",
+    }
+    assert overlay["private_root"] == f"{route_root}/historical-r36k"
+    with pytest.raises(M336K2ProtocolError, match="is not fresh"):
+        _persistent_disposable_karina_overlay(overlay, capsule, "historical-r36k")
+
+
 @pytest.mark.parametrize(
     "prefix",
     [
