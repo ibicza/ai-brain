@@ -372,7 +372,7 @@ def _load_rehearsal_dispatch_closure(
         validated.request.purpose != "DISPOSABLE"
         or profile_id != closure.rehearsal_profile_id
         or closure.native_stage_plan_binding.exact_implementation_tip
-        != validated.request.exact_implementation_sha
+        != validated.request.exact_implementation_tip
         or closure.native_stage_plan_binding.route_registry_hash
         != validated.bundle.route_registry_hash
         or closure.native_stage_plan_binding.typed_route_manifest_hash

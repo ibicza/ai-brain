@@ -227,7 +227,7 @@ def test_m336k12_disposable_closure_uses_authorized_profile_identity(
             private_root=str(tmp_path / "private"),
             stage_receipt_root=str(tmp_path / "receipts"),
             exact_freeze_sha="a" * 40,
-            exact_implementation_sha="a" * 40,
+            exact_implementation_tip="a" * 40,
         ),
         authorization=SimpleNamespace(official_profile_id=profile.profile_id),
         bundle=SimpleNamespace(
