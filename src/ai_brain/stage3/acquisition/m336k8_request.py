@@ -2042,6 +2042,12 @@ def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceip
         "producer_consumer_parity_receipt_hash",
         "dispatch_contract_hash",
     }
+    base_profile_fields = {
+        "official_profile_id",
+        "official_profile_hash",
+        "official_profile_registry_hash",
+        "controller_admission_receipt_hash",
+    }
     mandatory_fields = all_fields - profile_fields
     if (
         type(value) is not dict
@@ -2071,14 +2077,7 @@ def load_m336k8_preledger_receipt(path: Path) -> M336K8PreLedgerInvocationReceip
         content_hash(body) != claimed
         or any(counters)
         or receipt.status != "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER"
-        or any(
-            getattr(receipt, name) is None
-            for name in profile_fields
-            - {
-                "official_acquisition_binding_receipt_hash",
-                "official_executable_binding_receipt_hash",
-            }
-        )
+        or any(getattr(receipt, name) is None for name in base_profile_fields)
         and any(name in value for name in profile_fields)
         or receipt.official_profile_id == M336K10_PROFILE_ID
         and receipt.official_acquisition_binding_receipt_hash is None

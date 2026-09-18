@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
-from dataclasses import asdict, replace
+from dataclasses import asdict, fields, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -18,8 +18,10 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_startup_policy,
 )
 from ai_brain.stage3.acquisition.m336k8_request import (
+    M336K8PreLedgerInvocationReceipt,
     _component_member_hash,
     _controller_target_source,
+    load_m336k8_preledger_receipt,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
@@ -255,6 +257,65 @@ def test_m336k12_disposable_closure_uses_authorized_profile_identity(
         )
         == closure
     )
+
+
+def test_m336k12_rehearsal_preledger_allows_private_dispatch_closure(
+    tmp_path: Path,
+) -> None:
+    body = {
+        field.name: "a" * 64
+        for field in fields(M336K8PreLedgerInvocationReceipt)
+        if field.name != "receipt_hash"
+    }
+    body.update(
+        {
+            "schema_version": 4,
+            "contract_role": M336K8PreLedgerInvocationReceipt.__name__,
+            "exact_implementation_tip": "a" * 40,
+            "exact_freeze_sha": "b" * 40,
+            "official_profile_id": "m336k8-rehearsal-v2",
+            "official_acquisition_binding_receipt_hash": None,
+            "official_executable_binding_receipt_hash": None,
+            "native_stage_plan_binding_hash": None,
+            "producer_consumer_parity_receipt_hash": None,
+            "dispatch_contract_hash": None,
+            "status": "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER",
+            "acquisition_reservations": 0,
+            "acquisition_invocations": 0,
+            "selector_reservations": 0,
+            "selector_invocations": 0,
+            "evaluator_reservations": 0,
+            "evaluator_invocations": 0,
+            "route_ledger_writes": 0,
+            "source_requests": 0,
+            "vault_files": 0,
+            "cleanup_operations_after_freeze": 0,
+        }
+    )
+    canonical_body = {name: value for name, value in body.items() if value is not None}
+    receipt_path = tmp_path / "preledger.json"
+    receipt_path.write_text(
+        json.dumps({**canonical_body, "receipt_hash": content_hash(canonical_body)}),
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    receipt = load_m336k8_preledger_receipt(receipt_path)
+
+    assert receipt.official_profile_id == "m336k8-rehearsal-v2"
+    assert receipt.native_stage_plan_binding_hash is None
+    assert receipt.producer_consumer_parity_receipt_hash is None
+    assert receipt.dispatch_contract_hash is None
+
+    canonical_body["official_profile_id"] = "m336k8-final-v5"
+    official_path = tmp_path / "official-preledger.json"
+    official_path.write_text(
+        json.dumps({**canonical_body, "receipt_hash": content_hash(canonical_body)}),
+        encoding="utf-8",
+        newline="\n",
+    )
+    with pytest.raises(M336K2ProtocolError, match="preledger receipt is invalid"):
+        load_m336k8_preledger_receipt(official_path)
 
 
 @pytest.mark.parametrize(
