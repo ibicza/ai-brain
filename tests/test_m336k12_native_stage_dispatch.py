@@ -17,6 +17,7 @@ from ai_brain.stage3.acquisition.m336k5_execution import M336K5HermeticCommandWo
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_startup_policy,
 )
+from ai_brain.stage3.acquisition.m336k8_freeze import M336K8FreezeManifest
 from ai_brain.stage3.acquisition.m336k8_request import (
     M336K8PreLedgerInvocationReceipt,
     _component_member_hash,
@@ -664,3 +665,22 @@ def test_m336k12_preledger_reads_dispatch_hash_through_receipt(
         )
         == dispatch_hash
     )
+
+
+@pytest.mark.parametrize(
+    ("qualification", "expected"),
+    (
+        ("a" * 40, "prospective_freeze_build_receipt.json"),
+        ("b" * 40, "f37_build_receipt.json"),
+    ),
+)
+def test_m336k12_v5_freeze_distinguishes_unpublished_and_q37_bound_receipts(
+    qualification: str, expected: str
+) -> None:
+    manifest = object.__new__(M336K8FreezeManifest)
+    object.__setattr__(manifest, "contract_role", M336K8FreezeManifest.ROLE_V5)
+    object.__setattr__(manifest, "implementation_tip", "a" * 40)
+    object.__setattr__(manifest, "exact_qualification_sha", qualification)
+    object.__setattr__(manifest, "exact_freeze_sha", "0" * 40)
+
+    assert manifest._build_receipt_name() == expected

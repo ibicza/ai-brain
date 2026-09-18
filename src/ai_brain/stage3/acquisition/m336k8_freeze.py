@@ -207,6 +207,26 @@ class M336K8FreezeManifest:
     def canonical_object(self) -> dict[str, Any]:
         return {**self._body(), "manifest_hash": self.manifest_hash}
 
+    def _build_receipt_name(self) -> str:
+        unpublished_qualification = (
+            self.exact_freeze_sha == "0" * 40
+            and self.exact_qualification_sha == self.implementation_tip
+        )
+        if (
+            self.contract_role in {self.ROLE_V4, self.ROLE_V5}
+            and unpublished_qualification
+        ):
+            return "prospective_freeze_build_receipt.json"
+        if self.contract_role == self.ROLE_V5:
+            return "f37_build_receipt.json"
+        if self.contract_role == self.ROLE_V4:
+            return "f36_build_receipt.json"
+        if self.contract_role == self.ROLE_V3:
+            return "f35_build_receipt.json"
+        if self.contract_role == self.ROLE_V2:
+            return "f34_build_receipt.json"
+        return "f33_build_receipt.json"
+
     def verify(self, repository: Path, *, allow_prospective: bool = False) -> None:
         root = repository.resolve(strict=True)
         names = {item.name for item in self.components}
@@ -239,19 +259,7 @@ class M336K8FreezeManifest:
         prospective = self.exact_freeze_sha == "0" * 40
         expected_names = {
             "freeze_manifest.json",
-            (
-                "prospective_freeze_build_receipt.json"
-                if executable_bound and prospective
-                else "f37_build_receipt.json"
-                if native_dispatch_bound
-                else "f36_build_receipt.json"
-                if executable_bound
-                else "f35_build_receipt.json"
-                if acquisition_bound
-                else "f34_build_receipt.json"
-                if current
-                else "f33_build_receipt.json"
-            ),
+            self._build_receipt_name(),
         }
         required_components = (
             M336K12_REQUIRED_FREEZE_COMPONENTS
