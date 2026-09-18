@@ -118,6 +118,7 @@ from ai_brain.stage3.acquisition.m336k11_execution import (
     verify_m336k11_official_executable_binding,
 )
 from ai_brain.stage3.acquisition.m336k12_dispatch import (
+    M336K12_PROFILE_ID,
     M336K12NativeExecutionCapsuleReceipt,
     M336K12NativeRouteManifest,
     M336K12NativeStageDispatch,
@@ -529,7 +530,7 @@ def validate_m336k8_final_invocation(
     native_stage_plan_binding = None
     producer_consumer_parity = None
     active_native_dispatch_closure = (
-        getattr(authorization, "official_profile_id", None) == "m336k8-final-v5"
+        getattr(authorization, "official_profile_id", None) == M336K12_PROFILE_ID
     )
     if active_executable_closure:
         required_handles = (
@@ -1363,15 +1364,8 @@ def _verify_controller_domain(
         or binding.windows_launcher_source_hash != launcher["source_bytes_hash"]
         or binding.validate_only_target_source_hash
         != bytes_hash(
-            (
-                Path(request.repository)
-                / (
-                    "scripts/m336k11_run_final_route.py"
-                    if isinstance(
-                        dependency, M336K11HermeticExecutableDependencyManifest
-                    )
-                    else "scripts/m336k8_run_final_route.py"
-                )
+            _controller_target_source(
+                Path(request.repository), dependency, authorization
             ).read_bytes()
         )
         or binding.final_controller_target_source_hash
@@ -1386,6 +1380,16 @@ def _verify_controller_domain(
         != dependency.manifest_hash
     ):
         raise M336K2ProtocolError("M336K8 controller source domain changed")
+
+
+def _controller_target_source(repository: Path, dependency, authorization) -> Path:
+    if getattr(authorization, "official_profile_id", None) == M336K12_PROFILE_ID:
+        relative = "scripts/m336k12_run_final_route.py"
+    elif isinstance(dependency, M336K11HermeticExecutableDependencyManifest):
+        relative = "scripts/m336k11_run_final_route.py"
+    else:
+        relative = "scripts/m336k8_run_final_route.py"
+    return repository / relative
 
 
 def _verify_capsule_source_domain(

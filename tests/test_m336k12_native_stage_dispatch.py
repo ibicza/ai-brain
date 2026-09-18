@@ -4,6 +4,7 @@ import json
 import sys
 from dataclasses import asdict, replace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -15,6 +16,7 @@ from ai_brain.stage3.acquisition.m336k5_execution import M336K5HermeticCommandWo
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_startup_policy,
 )
+from ai_brain.stage3.acquisition.m336k8_request import _controller_target_source
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
 )
@@ -459,3 +461,13 @@ def test_m336k12_closed_under_rehash_mutations(case: str, tmp_path: Path) -> Non
 def test_m336k12_mutation_suite_shape() -> None:
     assert len(M336K12_MUTATION_CASES) == 42
     assert len(set(M336K12_MUTATION_CASES)) == 42
+
+
+def test_m336k12_preledger_controller_target_is_v5_entrypoint() -> None:
+    target = _controller_target_source(
+        ROOT,
+        object(),
+        SimpleNamespace(official_profile_id="m336k8-final-v5"),
+    )
+
+    assert target == ROOT / "scripts/m336k12_run_final_route.py"
