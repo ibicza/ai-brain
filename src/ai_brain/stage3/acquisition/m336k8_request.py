@@ -2556,7 +2556,7 @@ def _component_member_hash(
     value = _component_object(root, components, name)
     body = dict(value)
     claimed = body.pop(integrity_field)
-    member = value.get(member_field)
+    member = value[member_field]
     if not _is_hash(claimed) or content_hash(body) != claimed or not _is_hash(member):
         raise M336K2ProtocolError(f"M336K8 component member hash changed: {name}")
     return member
