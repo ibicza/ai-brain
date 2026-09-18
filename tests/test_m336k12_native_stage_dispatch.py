@@ -195,6 +195,68 @@ def test_m336k12_disposable_closure_uses_active_builder_and_consumer(
     assert closure.producer_consumer_parity.status == "PASS"
 
 
+def test_m336k12_disposable_closure_uses_authorized_profile_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    import m336k8_run_final_route
+
+    profile = m336k_official_profile_registry().profile("m336k8-rehearsal-v2")
+    dispatches, plan, binding = _closure(tmp_path, profile_hash=profile.profile_hash)
+    parity = verify_m336k12_native_stage_plan(
+        plan=plan,
+        dispatches=dispatches,
+        plan_binding=binding,
+        repository=ROOT,
+    )
+    closure = M336K12DisposableDispatchClosure.build(
+        rehearsal_profile_id=profile.profile_id,
+        dispatches=dispatches,
+        plan_binding=binding,
+        parity=parity,
+    )
+    closure_path = tmp_path / "native-dispatch-rehearsal.json"
+    closure_path.write_text(
+        json.dumps(closure.canonical_object()), encoding="utf-8", newline="\n"
+    )
+    validated = SimpleNamespace(
+        request=SimpleNamespace(
+            purpose="DISPOSABLE",
+            repository=str(ROOT),
+            python_executable=sys.executable,
+            private_root=str(tmp_path / "private"),
+            stage_receipt_root=str(tmp_path / "receipts"),
+            exact_freeze_sha="a" * 40,
+            exact_implementation_sha="a" * 40,
+        ),
+        authorization=SimpleNamespace(official_profile_id=profile.profile_id),
+        bundle=SimpleNamespace(
+            protocol_run_id=SimpleNamespace(
+                value="m336k8.disposable.native-stage-dispatch.v5"
+            ),
+            route_registry_hash="b" * 64,
+            route_manifest_hash="d" * 64,
+        ),
+    )
+    monkeypatch.setattr(
+        m336k8_run_final_route,
+        "build_m336k12_native_execution_plan",
+        lambda **_: plan,
+    )
+    monkeypatch.setattr(
+        m336k8_run_final_route,
+        "verify_m336k12_native_stage_plan",
+        lambda **_: parity,
+    )
+
+    assert (
+        m336k8_run_final_route._load_rehearsal_dispatch_closure(
+            closure_path, validated=validated
+        )
+        == closure
+    )
+
+
 @pytest.mark.parametrize(
     "prefix",
     [

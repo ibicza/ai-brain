@@ -367,7 +367,7 @@ def _load_rehearsal_dispatch_closure(
         raise M336K2ProtocolError("M336K12 disposable dispatch closure is public")
     value = json.loads(closure_path.read_text(encoding="utf-8"))
     closure = M336K12DisposableDispatchClosure.from_dict(value)
-    profile_id = getattr(validated.request, "official_profile_id", None)
+    profile_id = getattr(validated.authorization, "official_profile_id", None)
     if (
         validated.request.purpose != "DISPOSABLE"
         or profile_id != closure.rehearsal_profile_id
