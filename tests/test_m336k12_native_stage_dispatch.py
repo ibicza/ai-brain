@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from dataclasses import asdict, replace
@@ -16,7 +17,10 @@ from ai_brain.stage3.acquisition.m336k5_execution import M336K5HermeticCommandWo
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_startup_policy,
 )
-from ai_brain.stage3.acquisition.m336k8_request import _controller_target_source
+from ai_brain.stage3.acquisition.m336k8_request import (
+    _component_member_hash,
+    _controller_target_source,
+)
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
 )
@@ -471,3 +475,37 @@ def test_m336k12_preledger_controller_target_is_v5_entrypoint() -> None:
     )
 
     assert target == ROOT / "scripts/m336k12_run_final_route.py"
+
+
+def test_m336k12_preledger_reads_dispatch_hash_through_receipt(
+    tmp_path: Path,
+) -> None:
+    dispatch_hash = "d" * 64
+    body = {
+        "schema_version": 1,
+        "contract_role": "M336K12_NATIVE_STAGE_DISPATCH_SET",
+        "dispatch_contract_hash": dispatch_hash,
+        "dispatches": [],
+    }
+    path = tmp_path / "native_stage_dispatches.json"
+    path.write_text(
+        json.dumps({**body, "receipt_hash": content_hash(body)}),
+        encoding="utf-8",
+        newline="\n",
+    )
+    component = SimpleNamespace(
+        relative_path=path.name,
+        byte_count=path.stat().st_size,
+        bytes_hash=hashlib.sha256(path.read_bytes()).hexdigest(),
+    )
+
+    assert (
+        _component_member_hash(
+            tmp_path,
+            {"native_stage_dispatches": component},
+            "native_stage_dispatches",
+            "receipt_hash",
+            "dispatch_contract_hash",
+        )
+        == dispatch_hash
+    )

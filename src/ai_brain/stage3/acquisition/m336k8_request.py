@@ -1842,10 +1842,11 @@ def _verify_post_bundle(
                     "producer_consumer_parity_receipt",
                     "receipt_hash",
                 ),
-                "dispatch_contract_hash": _component_hash(
+                "dispatch_contract_hash": _component_member_hash(
                     root,
                     components,
                     "native_stage_dispatches",
+                    "receipt_hash",
                     "dispatch_contract_hash",
                 ),
             }
@@ -2543,6 +2544,22 @@ def _component_hash(
     if not _is_hash(claimed) or content_hash(body) != claimed:
         raise M336K2ProtocolError(f"M336K8 component hash changed: {name}")
     return claimed
+
+
+def _component_member_hash(
+    root: Path,
+    components: dict[str, Any],
+    name: str,
+    integrity_field: str,
+    member_field: str,
+) -> str:
+    value = _component_object(root, components, name)
+    body = dict(value)
+    claimed = body.pop(integrity_field)
+    member = value.get(member_field)
+    if not _is_hash(claimed) or content_hash(body) != claimed or not _is_hash(member):
+        raise M336K2ProtocolError(f"M336K8 component member hash changed: {name}")
+    return member
 
 
 def _verified_object(path: Path, hash_field: str) -> dict[str, Any]:
