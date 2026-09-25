@@ -21,6 +21,7 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_startup_policy,
     build_m336k5_sanitized_environment,
 )
+from ai_brain.stage3.acquisition.m336k8_freeze import M336K8FreezeManifest
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfileStatus,
     m336k_official_profile_registry,
@@ -414,13 +415,16 @@ def test_v4_and_v5_builders_do_not_require_a_denied_legacy_route() -> None:
 
 
 def test_v4_prospective_freeze_has_a_distinct_build_receipt_name() -> None:
-    source = (ROOT / "src/ai_brain/stage3/acquisition/m336k8_freeze.py").read_text(
-        encoding="utf-8"
-    )
-    assert (
-        '"prospective_freeze_build_receipt.json"\n'
-        "                if executable_bound and prospective"
-    ) in source
+    manifest = object.__new__(M336K8FreezeManifest)
+    object.__setattr__(manifest, "contract_role", M336K8FreezeManifest.ROLE_V4)
+    object.__setattr__(manifest, "implementation_tip", "a" * 40)
+    object.__setattr__(manifest, "exact_qualification_sha", "a" * 40)
+    object.__setattr__(manifest, "exact_freeze_sha", "0" * 40)
+
+    assert manifest._build_receipt_name() == "prospective_freeze_build_receipt.json"
+
+    object.__setattr__(manifest, "exact_qualification_sha", "b" * 40)
+    assert manifest._build_receipt_name() == "f36_build_receipt.json"
 
 
 def test_current_binding_alias_live_inputs_and_native_plan(graph: dict) -> None:
