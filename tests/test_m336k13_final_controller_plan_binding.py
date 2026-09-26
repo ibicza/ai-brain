@@ -6,7 +6,7 @@ import re
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -14,6 +14,10 @@ import pytest
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k2_publication import (
+    build_m336k2_publication_contract,
+    publication_contract_from_dict,
+)
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_invocation,
     write_m336k5_python_invocation_plan,
@@ -42,6 +46,60 @@ from ai_brain.stage3.acquisition.m336k13_startup import (
     run_m336k13_python_invocation,
 )
 
+_PUBLICATION_FIELDS = (
+    "q_root",
+    "f_root",
+    "h_root",
+    "e_root",
+    "q_subject",
+    "f_subject",
+    "h_subject",
+    "e_subject",
+)
+_K13_DISPOSABLE_PUBLICATION_TUPLE = (
+    "artifacts/m336k13/disposable/q38-like",
+    "artifacts/m336k13/disposable/f38-like-freeze",
+    "artifacts/m336k13/disposable/h38-like",
+    "artifacts/m336k13/disposable/e38-like",
+    "M-33.6k.13 qualify disposable immutable launch",
+    "M-33.6k.13 freeze disposable immutable launch",
+    "M-33.6k.13 publish disposable sealed production",
+    "M-33.6k.13 publish disposable independent evidence",
+)
+_K10_DISPOSABLE_PUBLICATION_TUPLE = (
+    "artifacts/m336k10/disposable/q35-like",
+    "artifacts/m336k10/disposable/f35-like-freeze",
+    "artifacts/m336k10/disposable/h35-like",
+    "artifacts/m336k10/disposable/e35-like",
+    "M-33.6k.10 qualify disposable acquisition route",
+    "M-33.6k.10 freeze disposable acquisition route",
+    "M-33.6k.10 publish disposable sealed production",
+    "M-33.6k.10 publish disposable independent evidence",
+)
+_HISTORICAL_PUBLICATION_TUPLES = (
+    (
+        "artifacts/m336k9/q34",
+        "artifacts/m336k9/f34-freeze",
+        "artifacts/m336k9/h34",
+        "artifacts/m336k9/e34",
+        "M-33.6k.9 qualify disposable admission route",
+        "M-33.6k.9 freeze disposable admission route",
+        "M-33.6k.9 publish disposable sealed production",
+        "M-33.6k.9 publish disposable independent evidence",
+    ),
+    (
+        "artifacts/m336k9/q34",
+        "artifacts/m336k9/f34-freeze",
+        "artifacts/m336k9/h34",
+        "artifacts/m336k9/e34",
+        "M-33.6k.9 qualify official controller admission",
+        "M-33.6k.9 freeze final Java execution",
+        "M-33.6k.9 publish sealed Java production",
+        "M-33.6k.9 publish independent Java evidence",
+    ),
+    _K10_DISPOSABLE_PUBLICATION_TUPLE,
+)
+
 
 @dataclass(frozen=True)
 class _SyntheticPreledgerReceipt:
@@ -57,6 +115,217 @@ def _tool(name: str) -> Path:
     if value is None:
         pytest.skip(f"required test executable is absent: {name}")
     return Path(value)
+
+
+def _component_builder():
+    scripts = str(Path(__file__).resolve().parents[1] / "scripts")
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    import m336k5_build_component_bundle
+
+    return m336k5_build_component_bundle
+
+
+def _publication_values(
+    branch_ref: str, publication_tuple: tuple[str, ...]
+) -> dict[str, str]:
+    return {
+        "branch_ref": branch_ref,
+        **dict(zip(_PUBLICATION_FIELDS, publication_tuple, strict=True)),
+    }
+
+
+def _write_publication_admission_inputs(
+    output: Path,
+    *,
+    h_values: dict[str, str],
+    e_values: dict[str, str] | None = None,
+) -> None:
+    for name, values in (
+        ("h28_publication_contract", h_values),
+        ("e28_publication_contract", e_values or h_values),
+    ):
+        contract = build_m336k2_publication_contract(**values)
+        (output / f"{name}.json").write_text(
+            json.dumps(asdict(contract)), encoding="utf-8"
+        )
+    for name, body in (
+        ("implementation_tip", {"exact_implementation_tip": "0" * 40}),
+        ("q28_commit", {"exact_q28_sha": "0" * 40}),
+        ("commit_protocol", {"branch_ref": "refs/heads/old"}),
+    ):
+        value = {**body, "receipt_hash": content_hash(body)}
+        (output / f"{name}.json").write_text(json.dumps(value), encoding="utf-8")
+
+
+def _admit_publication_tuple(
+    output: Path,
+    publication_tuple: tuple[str, ...],
+    *,
+    e_publication_tuple: tuple[str, ...] | None = None,
+    contract_branch: str = "refs/heads/disposable/m336k13-r38e-rehearsal-v1",
+    request_branch: str | None = None,
+) -> None:
+    h_values = _publication_values(contract_branch, publication_tuple)
+    e_values = (
+        _publication_values(contract_branch, e_publication_tuple)
+        if e_publication_tuple is not None
+        else None
+    )
+    _write_publication_admission_inputs(
+        output,
+        h_values=h_values,
+        e_values=e_values,
+    )
+    _component_builder()._write_m336k7_legacy_bindings(
+        output,
+        {
+            "identity_namespace": "m336k8",
+            "official_profile_id": "m336k8-rehearsal-v2",
+            "branch_ref": request_branch or contract_branch,
+            "exact_implementation_tip": "1" * 40,
+            "exact_q30_sha": "2" * 40,
+        },
+    )
+
+
+def test_m336k13_exact_disposable_publication_tuple_is_admitted(
+    tmp_path: Path,
+) -> None:
+    _admit_publication_tuple(tmp_path, _K13_DISPOSABLE_PUBLICATION_TUPLE)
+
+    loaded = publication_contract_from_dict(
+        json.loads(
+            (tmp_path / "h28_publication_contract.json").read_text(encoding="utf-8")
+        )
+    )
+    assert tuple(getattr(loaded, field) for field in _PUBLICATION_FIELDS) == (
+        _K13_DISPOSABLE_PUBLICATION_TUPLE
+    )
+
+
+def test_m336k13_disposable_publication_requires_h_e_equality(
+    tmp_path: Path,
+) -> None:
+    changed_e = (*_K13_DISPOSABLE_PUBLICATION_TUPLE[:-1], "changed E subject")
+    with pytest.raises(
+        M336K2ProtocolError, match="M336K9 publication contract changed"
+    ):
+        _admit_publication_tuple(
+            tmp_path,
+            _K13_DISPOSABLE_PUBLICATION_TUPLE,
+            e_publication_tuple=changed_e,
+        )
+
+
+@pytest.mark.parametrize(
+    ("h_tuple", "e_tuple"),
+    (
+        (
+            (
+                *_K13_DISPOSABLE_PUBLICATION_TUPLE[:4],
+                *_K10_DISPOSABLE_PUBLICATION_TUPLE[4:],
+            ),
+            None,
+        ),
+        (
+            (
+                *_K10_DISPOSABLE_PUBLICATION_TUPLE[:4],
+                *_K13_DISPOSABLE_PUBLICATION_TUPLE[4:],
+            ),
+            None,
+        ),
+        (_K13_DISPOSABLE_PUBLICATION_TUPLE, _K10_DISPOSABLE_PUBLICATION_TUPLE),
+    ),
+)
+def test_m336k13_hybrid_publication_tuples_are_rejected(
+    tmp_path: Path,
+    h_tuple: tuple[str, ...],
+    e_tuple: tuple[str, ...] | None,
+) -> None:
+    with pytest.raises(
+        M336K2ProtocolError, match="M336K9 publication contract changed"
+    ):
+        _admit_publication_tuple(tmp_path, h_tuple, e_publication_tuple=e_tuple)
+
+
+@pytest.mark.parametrize("field_name", (*_PUBLICATION_FIELDS, "branch_ref"))
+def test_m336k13_single_field_publication_mutations_are_rejected(
+    tmp_path: Path,
+    field_name: str,
+) -> None:
+    mutated = list(_K13_DISPOSABLE_PUBLICATION_TUPLE)
+    contract_branch = "refs/heads/disposable/m336k13-r38e-rehearsal-v1"
+    request_branch = None
+    if field_name == "branch_ref":
+        request_branch = "refs/heads/disposable/m336k13-r38e-rehearsal-mutated"
+    else:
+        mutated[_PUBLICATION_FIELDS.index(field_name)] += "-mutated"
+    with pytest.raises(
+        M336K2ProtocolError, match="M336K9 publication contract changed"
+    ):
+        _admit_publication_tuple(
+            tmp_path,
+            tuple(mutated),
+            contract_branch=contract_branch,
+            request_branch=request_branch,
+        )
+
+
+def test_m336k13_unknown_future_publication_tuple_is_rejected(
+    tmp_path: Path,
+) -> None:
+    future = tuple(
+        value.replace("m336k13", "m336k14").replace("M-33.6k.13", "M-33.6k.14")
+        for value in _K13_DISPOSABLE_PUBLICATION_TUPLE
+    )
+    with pytest.raises(
+        M336K2ProtocolError, match="M336K9 publication contract changed"
+    ):
+        _admit_publication_tuple(tmp_path, future)
+
+
+@pytest.mark.parametrize("publication_tuple", _HISTORICAL_PUBLICATION_TUPLES)
+def test_m336k13_historical_publication_tuple_behavior_is_unchanged(
+    tmp_path: Path,
+    publication_tuple: tuple[str, ...],
+) -> None:
+    _admit_publication_tuple(tmp_path, publication_tuple)
+
+
+def test_m336k13_official_publication_authority_is_not_expanded(
+    tmp_path: Path,
+) -> None:
+    official = (
+        "artifacts/m336k13/q38",
+        "artifacts/m336k13/f38-freeze",
+        "artifacts/m336k13/h38",
+        "artifacts/m336k13/e38",
+        "M-33.6k.13 qualify immutable final-controller plan",
+        "M-33.6k.13 freeze final Java execution",
+        "M-33.6k.13 publish sealed Java production",
+        "M-33.6k.13 publish independent Java evidence",
+    )
+    with pytest.raises(
+        M336K2ProtocolError, match="M336K9 publication contract changed"
+    ):
+        _admit_publication_tuple(tmp_path, official)
+
+
+def test_m336k13_disposable_publication_tuple_contains_no_private_values() -> None:
+    allowed = _component_builder().M336K_ALLOWED_DISPOSABLE_PUBLICATION_TUPLES
+    assert _K13_DISPOSABLE_PUBLICATION_TUPLE in (allowed)
+    assert all(
+        re.match(r"^[A-Za-z0-9][^:\\\n]*$", value)
+        for value in _K13_DISPOSABLE_PUBLICATION_TUPLE
+    )
+    assert all(
+        "private" not in value.casefold() for value in _K13_DISPOSABLE_PUBLICATION_TUPLE
+    )
+    assert all(
+        "source excerpt" not in value.casefold()
+        for value in _K13_DISPOSABLE_PUBLICATION_TUPLE
+    )
 
 
 def test_m336k13_two_operation_preledger_comparison_is_stable_only(

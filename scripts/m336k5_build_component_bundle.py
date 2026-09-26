@@ -174,6 +174,51 @@ from ai_brain.stage3.acquisition.m336k13_plan import (
 
 _LABEL = re.compile(r"[a-z0-9][a-z0-9-]{3,63}")
 
+M336K_ALLOWED_DISPOSABLE_PUBLICATION_TUPLES = frozenset(
+    {
+        (
+            "artifacts/m336k9/q34",
+            "artifacts/m336k9/f34-freeze",
+            "artifacts/m336k9/h34",
+            "artifacts/m336k9/e34",
+            "M-33.6k.9 qualify disposable admission route",
+            "M-33.6k.9 freeze disposable admission route",
+            "M-33.6k.9 publish disposable sealed production",
+            "M-33.6k.9 publish disposable independent evidence",
+        ),
+        (
+            "artifacts/m336k9/q34",
+            "artifacts/m336k9/f34-freeze",
+            "artifacts/m336k9/h34",
+            "artifacts/m336k9/e34",
+            "M-33.6k.9 qualify official controller admission",
+            "M-33.6k.9 freeze final Java execution",
+            "M-33.6k.9 publish sealed Java production",
+            "M-33.6k.9 publish independent Java evidence",
+        ),
+        (
+            "artifacts/m336k10/disposable/q35-like",
+            "artifacts/m336k10/disposable/f35-like-freeze",
+            "artifacts/m336k10/disposable/h35-like",
+            "artifacts/m336k10/disposable/e35-like",
+            "M-33.6k.10 qualify disposable acquisition route",
+            "M-33.6k.10 freeze disposable acquisition route",
+            "M-33.6k.10 publish disposable sealed production",
+            "M-33.6k.10 publish disposable independent evidence",
+        ),
+        (
+            "artifacts/m336k13/disposable/q38-like",
+            "artifacts/m336k13/disposable/f38-like-freeze",
+            "artifacts/m336k13/disposable/h38-like",
+            "artifacts/m336k13/disposable/e38-like",
+            "M-33.6k.13 qualify disposable immutable launch",
+            "M-33.6k.13 freeze disposable immutable launch",
+            "M-33.6k.13 publish disposable sealed production",
+            "M-33.6k.13 publish disposable independent evidence",
+        ),
+    }
+)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -2252,42 +2297,10 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
                 "e_subject",
             )
         )
-        allowed_publication_tuples = {
-            (
-                "artifacts/m336k9/q34",
-                "artifacts/m336k9/f34-freeze",
-                "artifacts/m336k9/h34",
-                "artifacts/m336k9/e34",
-                "M-33.6k.9 qualify disposable admission route",
-                "M-33.6k.9 freeze disposable admission route",
-                "M-33.6k.9 publish disposable sealed production",
-                "M-33.6k.9 publish disposable independent evidence",
-            ),
-            (
-                "artifacts/m336k9/q34",
-                "artifacts/m336k9/f34-freeze",
-                "artifacts/m336k9/h34",
-                "artifacts/m336k9/e34",
-                "M-33.6k.9 qualify official controller admission",
-                "M-33.6k.9 freeze final Java execution",
-                "M-33.6k.9 publish sealed Java production",
-                "M-33.6k.9 publish independent Java evidence",
-            ),
-            (
-                "artifacts/m336k10/disposable/q35-like",
-                "artifacts/m336k10/disposable/f35-like-freeze",
-                "artifacts/m336k10/disposable/h35-like",
-                "artifacts/m336k10/disposable/e35-like",
-                "M-33.6k.10 qualify disposable acquisition route",
-                "M-33.6k.10 freeze disposable acquisition route",
-                "M-33.6k.10 publish disposable sealed production",
-                "M-33.6k.10 publish disposable independent evidence",
-            ),
-        }
         if (
             any(e_contract[name] != value for name, value in publication_values.items())
             or publication_values["branch_ref"] != request["branch_ref"]
-            or publication_tuple not in allowed_publication_tuples
+            or publication_tuple not in M336K_ALLOWED_DISPOSABLE_PUBLICATION_TUPLES
         ):
             raise M336K2ProtocolError("M336K9 publication contract changed")
     elif namespace == "m336k8":
