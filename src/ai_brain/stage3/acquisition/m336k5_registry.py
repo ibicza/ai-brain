@@ -134,6 +134,22 @@ M336K12_ROUTE_COMPONENTS = M336K11_ROUTE_COMPONENTS + (
     ("native-stage-mutations", "scripts/m336k12_run_dispatch_mutations.py"),
     ("native-stage-final-cli", "scripts/m336k12_run_final_route.py"),
 )
+M336K13_ROUTE_COMPONENTS = M336K12_ROUTE_COMPONENTS + (
+    (
+        "final-controller-plan-binding",
+        "src/ai_brain/stage3/acquisition/m336k13_plan.py",
+    ),
+    (
+        "final-controller-component-builder",
+        "scripts/m336k13_build_component_bundle.py",
+    ),
+    ("final-controller-freeze-builder", "scripts/m336k13_materialize_f38.py"),
+    (
+        "final-controller-prospective-freeze-builder",
+        "scripts/m336k13_materialize_prospective_freeze.py",
+    ),
+    ("final-controller-plan-cli", "scripts/m336k13_run_final_route.py"),
+)
 
 
 def _namespace_values(
@@ -154,7 +170,9 @@ def _namespace_values(
         return route_value or M336K7_ROUTE_VERSION, M336K7_ROUTE_COMPONENTS
     if namespace == "m336k8":
         components = (
-            M336K12_ROUTE_COMPONENTS
+            M336K13_ROUTE_COMPONENTS
+            if profile_id == "m336k8-final-v6"
+            else M336K12_ROUTE_COMPONENTS
             if profile_id == "m336k8-final-v5"
             else M336K11_ROUTE_COMPONENTS
             if profile_id == "m336k8-final-v4"

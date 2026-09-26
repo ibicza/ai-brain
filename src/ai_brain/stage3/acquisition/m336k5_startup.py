@@ -512,6 +512,8 @@ def run_m336k5_python_invocation(
     plan_path: Path,
     operation: str,
     capture_output: bool = True,
+    actual_launcher_plan_receipt: Path | None = None,
+    execution_scope: str = "OFFICIAL_CONTROLLER",
 ) -> subprocess.CompletedProcess[bytes]:
     import json
 
@@ -532,6 +534,13 @@ def run_m336k5_python_invocation(
             "--operation",
             mode,
         )
+        if actual_launcher_plan_receipt is not None:
+            command += (
+                "--actual-launcher-plan-receipt",
+                str(actual_launcher_plan_receipt.resolve(strict=False)),
+                "--execution-scope",
+                execution_scope,
+            )
         return subprocess.run(
             command,
             cwd=Path(plan.working_directory).resolve(strict=True),
@@ -556,6 +565,13 @@ def run_m336k5_python_invocation(
         "-Operation",
         mode,
     )
+    if actual_launcher_plan_receipt is not None:
+        command += (
+            "-ActualLauncherPlanReceipt",
+            str(actual_launcher_plan_receipt.resolve(strict=False)),
+            "-ExecutionScope",
+            execution_scope,
+        )
     return subprocess.run(
         command,
         cwd=Path(plan.working_directory).resolve(strict=True),

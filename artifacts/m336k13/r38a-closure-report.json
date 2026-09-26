@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "contract_role": "PUBLIC_SAFE_M336K13_R38A_CLOSURE_REPORT",
+  "exact_r38a": "9de5a86082a12ce4be4b285bb3a91e8340fd2c72",
+  "exact_parent_f37": "d90dc54f121cec13ac90131e8f52c4129033c65b",
+  "modified_files": [
+    "scripts/m336k5_build_component_bundle.py",
+    "src/ai_brain/stage3/acquisition/m336k12_dispatch.py",
+    "tests/test_m336k12_native_stage_dispatch.py"
+  ],
+  "closed_predicates": [
+    "VALIDATE_EXECUTE_REQUEST_PATH_AGREEMENT",
+    "VALIDATE_EXECUTE_VALIDATION_RECEIPT_AGREEMENT",
+    "BOUND_DESTINATION_PATH_UNIQUENESS",
+    "ABSOLUTE_FINAL_CONTROLLER_DESTINATION_PATHS",
+    "POST_Q_PROSPECTIVE_BASENAME_DIAGNOSTIC",
+    "OLD_F37_PLAN_REJECTED_BEFORE_STALE_OUTPUT_VALIDATION"
+  ],
+  "open_predicates": [
+    "EXACT_PLAN_BYTE_EQUALITY",
+    "EXACT_INVOCATION_PLAN_HASH_EQUALITY",
+    "ACTUAL_BOOTSTRAP_LOADED_PLAN_IDENTITY",
+    "SELECTED_OPERATION_BINDING",
+    "SELECTED_OPERATION_ARGUMENT_BINDING",
+    "TARGET_IDENTITY_AT_ACTUAL_LAUNCH",
+    "SAME_PLAN_FILE_VALIDATE_EXECUTE_REUSE",
+    "PLAN_FILE_IMMUTABILITY_AFTER_FREEZE",
+    "CANONICAL_REQUEST_ACTUAL_LAUNCHER_PLAN_EQUALITY",
+    "EQUAL_SHA_PROSPECTIVE_BYPASS",
+    "SAME_SHAPE_OR_BASENAME_DIFFERENT_PLAN_MUTATIONS"
+  ],
+  "closed_predicate_count": 6,
+  "open_predicate_count": 11,
+  "unclassified_predicate_count": 0,
+  "status": "PASS"
+}

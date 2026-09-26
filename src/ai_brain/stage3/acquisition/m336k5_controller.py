@@ -66,7 +66,9 @@ def run_m336k5_final_controller(
         raise M336K2ProtocolError("M336K5 final controller destinations are not fresh")
     profile_id = getattr(validated.authorization, "official_profile_id", None)
     worker_preflight = getattr(worker, "preflight", None)
-    if profile_id == "m336k8-final-v5" and not callable(worker_preflight):
+    if profile_id in {"m336k8-final-v5", "m336k8-final-v6"} and not callable(
+        worker_preflight
+    ):
         raise M336K2ProtocolError("M336K12 worker preflight is absent")
     if callable(worker_preflight):
         worker_preflight()
@@ -104,6 +106,11 @@ def run_m336k5_final_controller(
         freeze_manifest=validated.freeze,
         official_acquisition_binding=recomputed_acquisition_binding,
         official_executable_binding=recomputed_executable_binding,
+        final_controller_plan_binding_receipt_hash=getattr(
+            getattr(validated, "final_controller_plan_binding", None),
+            "receipt_hash",
+            None,
+        ),
     )
     if recomputed_admission != prior_admission:
         raise M336K2ProtocolError(
@@ -133,6 +140,9 @@ def run_m336k5_final_controller(
             parity_receipt.receipt_hash,
             validated.receipt.dispatch_contract_hash,
         )
+    final_plan_binding = getattr(validated, "final_controller_plan_binding", None)
+    if final_plan_binding is not None:
+        context_values += (final_plan_binding.receipt_hash,)
     context = content_hash(context_values)
     initial = (
         ("PREFLIGHT_VERIFIED", validated.receipt.receipt_hash),

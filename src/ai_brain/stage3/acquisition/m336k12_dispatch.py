@@ -1119,7 +1119,7 @@ class M336K12OfficialControllerExecutableBinding(
             or self.execution_scope != OFFICIAL_CONTROLLER
             or self.official_profile_id != M336K12_PROFILE_ID
             or profile.profile_status
-            is not M336KOfficialRouteProfileStatus.CURRENT_ACTIVE
+            is not M336KOfficialRouteProfileStatus.HISTORICAL_READ_ONLY
             or self.official_profile_hash != profile.profile_hash
             or not _is_sha(self.exact_implementation_tip)
             or self.native_command_contract_hash != self.dispatch_contract_hash

@@ -4,7 +4,12 @@ param(
 
     [Parameter(Mandatory = $true)]
     [ValidateSet("validate", "execute")]
-    [string]$Operation
+    [string]$Operation,
+
+    [string]$ActualLauncherPlanReceipt,
+
+    [ValidateSet("OFFICIAL_CONTROLLER", "REHEARSAL")]
+    [string]$ExecutionScope = "OFFICIAL_CONTROLLER"
 )
 
 $ErrorActionPreference = "Stop"
@@ -108,6 +113,12 @@ foreach ($argument in @(
     $Operation
 )) {
     [void]$start.ArgumentList.Add([string]$argument)
+}
+if ($ActualLauncherPlanReceipt) {
+    [void]$start.ArgumentList.Add("--actual-launcher-plan-receipt")
+    [void]$start.ArgumentList.Add([string]$ActualLauncherPlanReceipt)
+    [void]$start.ArgumentList.Add("--execution-scope")
+    [void]$start.ArgumentList.Add([string]$ExecutionScope)
 }
 
 $process = [System.Diagnostics.Process]::Start($start)

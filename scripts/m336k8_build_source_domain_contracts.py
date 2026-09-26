@@ -37,6 +37,7 @@ from ai_brain.stage3.acquisition.m336k11_execution import (
     M336K11HermeticExecutableDependencyManifest,
 )
 from ai_brain.stage3.acquisition.m336k12_dispatch import M336K12_PROFILE_ID
+from ai_brain.stage3.acquisition.m336k13_plan import M336K13_PROFILE_ID
 
 
 def main() -> None:
@@ -70,7 +71,8 @@ def main() -> None:
     profile_id = request.get("official_profile_id")
     is_v4 = profile_id == M336K11_PROFILE_ID
     is_v5 = profile_id == M336K12_PROFILE_ID
-    if set(request) != expected | (v4_fields if is_v4 or is_v5 else set()):
+    is_v6 = profile_id == M336K13_PROFILE_ID
+    if set(request) != expected | (v4_fields if is_v4 or is_v5 or is_v6 else set()):
         raise M336K2ProtocolError("M336K8 source-domain request fields changed")
     root = Path(request["repository"]).resolve(strict=True)
     git = Path(request["git_executable"]).resolve(strict=True)
@@ -140,7 +142,7 @@ def main() -> None:
             tuple(specification["version_arguments"]),
         )
     effective_environment = None
-    if is_v4 or is_v5:
+    if is_v4 or is_v5 or is_v6:
         invocation_plan = M336K5PythonInvocationPlan.from_dict(
             _object(Path(request["windows_invocation_plan"]))
         )
@@ -188,7 +190,9 @@ def main() -> None:
             source_identity_hash=source_identity.live_project_source_identity,
         )
     controller_target = root / (
-        "scripts/m336k12_run_final_route.py"
+        "scripts/m336k13_run_final_route.py"
+        if is_v6
+        else "scripts/m336k12_run_final_route.py"
         if is_v5
         else "scripts/m336k11_run_final_route.py"
         if is_v4
@@ -291,8 +295,9 @@ def main() -> None:
         legacy_dependencies=asdict(dependency),
     )
     plan = M336K8FreezeAssemblyPlan.build(
-        active_executable_closure=is_v4 or is_v5,
-        native_stage_dispatch_closure=is_v5,
+        active_executable_closure=is_v4 or is_v5 or is_v6,
+        native_stage_dispatch_closure=is_v5 or is_v6,
+        final_controller_plan_closure=is_v6,
     )
     output.mkdir(parents=True)
     values = {

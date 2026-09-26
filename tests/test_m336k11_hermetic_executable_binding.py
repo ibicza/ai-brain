@@ -385,14 +385,22 @@ def test_v4_route_registry_covers_the_executable_closure(graph: dict) -> None:
     }.issubset(paths)
 
 
-def test_v4_and_v5_builders_do_not_require_a_denied_legacy_route() -> None:
+def test_v4_v5_and_v6_builders_do_not_require_a_denied_legacy_route() -> None:
     source = (ROOT / "scripts/m336k5_build_component_bundle.py").read_text(
         encoding="utf-8"
     )
-    assert (
-        "if profile_id not in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:\n"
-        "            _write_m336k7_persistent_capsule_route(output)"
-    ) in source
+    condition_start = source.index("if profile_id not in {")
+    condition_end = source.index("}:", condition_start)
+    condition = source[condition_start:condition_end]
+    assert all(
+        name in condition
+        for name in (
+            "M336K11_PROFILE_ID",
+            "M336K12_PROFILE_ID",
+            "M336K13_PROFILE_ID",
+        )
+    )
+    assert "_write_m336k7_persistent_capsule_route(output)" in source
     compatibility_source = (
         ROOT / "src/ai_brain/stage3/acquisition/m336k8_request.py"
     ).read_text(encoding="utf-8")

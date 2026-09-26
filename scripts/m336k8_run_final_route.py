@@ -68,6 +68,7 @@ def main() -> None:
     parser.add_argument("--post-freeze-validation-receipt", type=Path)
     parser.add_argument("--reservation-release-receipt", type=Path)
     parser.add_argument("--native-dispatch-rehearsal", type=Path)
+    parser.add_argument("--actual-launcher-plan-receipt", type=Path)
     args = parser.parse_args()
     request_path = args.request.resolve(strict=True)
     startup_receipt_path = args.startup_receipt.resolve(strict=True)
@@ -80,7 +81,10 @@ def main() -> None:
                 "M336K8 validate-only release inputs are forbidden"
             )
         validated = validate_m336k8_final_invocation(
-            request_path, startup_receipt_path=startup_receipt_path
+            request_path,
+            startup_receipt_path=startup_receipt_path,
+            actual_launcher_plan_receipt_path=args.actual_launcher_plan_receipt,
+            expected_operation="validate",
         )
         rehearsal_closure = _load_rehearsal_dispatch_closure(
             args.native_dispatch_rehearsal,
@@ -101,7 +105,10 @@ def main() -> None:
             args.post_freeze_validation_receipt.resolve(strict=True)
         )
         validated = validate_m336k8_final_invocation(
-            request_path, startup_receipt_path=startup_receipt_path
+            request_path,
+            startup_receipt_path=startup_receipt_path,
+            actual_launcher_plan_receipt_path=args.actual_launcher_plan_receipt,
+            expected_operation="execute",
         )
         if validated.receipt != prior:
             raise M336K2ProtocolError(

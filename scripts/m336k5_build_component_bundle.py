@@ -105,6 +105,7 @@ from ai_brain.stage3.acquisition.m336k9_authorization import (
     build_m336k10_final_authorization,
     build_m336k11_final_authorization,
     build_m336k12_final_authorization,
+    build_m336k13_final_authorization,
     m336k_current_final_authorization_from_dict,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
@@ -152,6 +153,23 @@ from ai_brain.stage3.acquisition.m336k12_dispatch import (
     m336k12_native_dispatch_contract_hash,
     verify_m336k12_freeze_plan_admission,
     verify_m336k12_native_stage_plan,
+)
+from ai_brain.stage3.acquisition.m336k13_plan import (
+    M336K13_PROFILE_ID,
+    M336K13ActualLauncherPlanReceiptSchema,
+    M336K13EffectiveEnvironmentBinding,
+    M336K13FinalControllerInvocationPlanV2,
+    M336K13FinalControllerPlanBindingReceipt,
+    M336K13FinalControllerPlanLifecyclePolicy,
+    M336K13FinalControllerPlanPathRoleManifest,
+    M336K13FinalControllerPlanTemplate,
+    M336K13NativeExecutionCapsuleReceipt,
+    M336K13NativeRouteManifest,
+    M336K13NativeStagePlanBinding,
+    M336K13OfficialControllerExecutableBinding,
+    M336K13OfficialExecutableBindingReceipt,
+    M336K13PostFreezeInputBundle,
+    verify_m336k13_final_controller_plan_binding,
 )
 
 _LABEL = re.compile(r"[a-z0-9][a-z0-9-]{3,63}")
@@ -219,7 +237,11 @@ def main() -> None:
     }
     identity_namespace = request.get("identity_namespace", "m336k5")
     profile_id = request.get("official_profile_id")
-    if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:
+    if profile_id in {
+        M336K11_PROFILE_ID,
+        M336K12_PROFILE_ID,
+        M336K13_PROFILE_ID,
+    }:
         source_domain_components |= {"effective_environment_binding"}
     expected = (
         base_expected - {"resource_budget"}
@@ -234,11 +256,21 @@ def main() -> None:
         expected |= source_domain_components
     if profile_id is not None:
         expected |= {"official_profile_id"}
-    if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:
+    if profile_id in {
+        M336K11_PROFILE_ID,
+        M336K12_PROFILE_ID,
+        M336K13_PROFILE_ID,
+    }:
         expected |= {
             "executable_handles",
             "windows_invocation_plan",
             "windows_startup_receipt",
+        }
+    if profile_id == M336K13_PROFILE_ID:
+        expected |= {
+            "final_controller_plan_template",
+            "final_controller_plan_lifecycle_receipt",
+            "final_controller_plan_binding_receipt",
         }
     if set(request) != expected:
         raise M336K2ProtocolError("M336K5 component bundle request fields changed")
@@ -246,7 +278,38 @@ def main() -> None:
         raise M336K2ProtocolError("M336K5 component identity namespace is invalid")
     repository = Path(request["repository"]).resolve(strict=True)
     legacy = Path(request["legacy_bundle"]).resolve(strict=True)
-    if profile_id == M336K12_PROFILE_ID:
+    final_plan_template = None
+    final_plan_lifecycle = None
+    final_plan_binding = None
+    if profile_id == M336K13_PROFILE_ID:
+        final_plan_template = M336K13FinalControllerPlanTemplate.from_dict(
+            _object(Path(request["final_controller_plan_template"]))
+        )
+        final_plan_lifecycle = M336K13FinalControllerInvocationPlanV2.from_dict(
+            _object(Path(request["final_controller_plan_lifecycle_receipt"]))
+        )
+        final_plan_binding = M336K13FinalControllerPlanBindingReceipt.from_dict(
+            _object(Path(request["final_controller_plan_binding_receipt"]))
+        )
+        if (
+            final_plan_lifecycle.exact_implementation_tip
+            != request["exact_implementation_tip"]
+            or final_plan_lifecycle.exact_qualification_sha != request["exact_q30_sha"]
+        ):
+            raise M336K2ProtocolError("M336K13 exact plan lineage changed")
+        verify_m336k13_final_controller_plan_binding(
+            plan_path=Path(request["windows_invocation_plan"]),
+            template=final_plan_template,
+            lifecycle=final_plan_lifecycle,
+            binding=final_plan_binding,
+        )
+        if (
+            final_plan_template.execution_scope != "OFFICIAL_CONTROLLER"
+            or final_plan_lifecycle.execution_scope != "OFFICIAL_CONTROLLER"
+            or final_plan_binding.execution_scope != "OFFICIAL_CONTROLLER"
+        ):
+            raise M336K2ProtocolError("M336K13 official component plan scope changed")
+    elif profile_id == M336K12_PROFILE_ID:
         verify_m336k12_freeze_plan_admission(
             plan=M336K5PythonInvocationPlan.from_dict(
                 _object(Path(request["windows_invocation_plan"]))
@@ -290,7 +353,7 @@ def main() -> None:
             "native_stage_plan_binding",
             "producer_consumer_parity_receipt",
         }
-        if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}
+        if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID, M336K13_PROFILE_ID}
         else set()
     )
     for name, source in sources.items():
@@ -335,9 +398,37 @@ def main() -> None:
     for path in output.glob("*.json"):
         value = _rehash_top_level(_replace(_object(path), replacements))
         path.write_text(canonical_json(value) + "\n", encoding="utf-8", newline="\n")
+    if profile_id == M336K13_PROFILE_ID:
+        public_plan_components = {
+            "final_controller_plan_template": final_plan_template.canonical_object(),
+            "final_controller_plan_binding_receipt": (
+                final_plan_binding.canonical_object()
+            ),
+            "actual_launcher_plan_receipt_schema": (
+                M336K13ActualLauncherPlanReceiptSchema.build().canonical_object()
+            ),
+            "final_controller_plan_lifecycle_policy": (
+                M336K13FinalControllerPlanLifecyclePolicy.build().canonical_object()
+            ),
+            "final_controller_plan_path_role_manifest": (
+                M336K13FinalControllerPlanPathRoleManifest.build(
+                    template=final_plan_template,
+                    lifecycle=final_plan_lifecycle,
+                    binding=final_plan_binding,
+                ).canonical_object()
+            ),
+        }
+        for name, value in public_plan_components.items():
+            (output / f"{name}.json").write_text(
+                canonical_json(value) + "\n", encoding="utf-8", newline="\n"
+            )
     if identity_namespace in {"m336k7", "m336k8"}:
         _write_m336k7_legacy_bindings(output, request)
-        if profile_id not in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:
+        if profile_id not in {
+            M336K11_PROFILE_ID,
+            M336K12_PROFILE_ID,
+            M336K13_PROFILE_ID,
+        }:
             _write_m336k7_persistent_capsule_route(output)
         if request["identity_mode"] == "OFFICIAL":
             verify_m336k7_unchanged_candidate_pool(output / "candidate_pool.json")
@@ -410,6 +501,7 @@ def main() -> None:
             M336K10_PROFILE_ID,
             M336K11_PROFILE_ID,
             M336K12_PROFILE_ID,
+            M336K13_PROFILE_ID,
         }
         and mode == "OFFICIAL"
     ):
@@ -524,13 +616,41 @@ def main() -> None:
     plan_binding = None
     producer_consumer_parity = None
     native_stage_dispatches = None
-    if profile_id in {M336K11_PROFILE_ID, M336K12_PROFILE_ID}:
+    if profile_id in {
+        M336K11_PROFILE_ID,
+        M336K12_PROFILE_ID,
+        M336K13_PROFILE_ID,
+    }:
         dependency = M336K11HermeticExecutableDependencyManifest.from_dict(
             _object(output / "controller_executable_dependency_manifest.json")
         )
-        effective_environment = M336K11EffectiveEnvironmentBinding.from_dict(
-            _object(output / "effective_environment_binding.json")
-        )
+        effective_value = _object(output / "effective_environment_binding.json")
+        if profile_id == M336K13_PROFILE_ID:
+            effective_environment = (
+                M336K13EffectiveEnvironmentBinding.from_dict(effective_value)
+                if effective_value.get("contract_role")
+                == M336K13EffectiveEnvironmentBinding.ROLE
+                else M336K13EffectiveEnvironmentBinding.build(
+                    M336K11EffectiveEnvironmentBinding.from_dict(effective_value),
+                    final_plan_binding.receipt_hash,
+                )
+            )
+            if (
+                effective_environment.final_controller_plan_binding_receipt_hash
+                != final_plan_binding.receipt_hash
+            ):
+                raise M336K2ProtocolError(
+                    "M336K13 effective environment plan binding changed"
+                )
+            (output / "effective_environment_binding.json").write_text(
+                canonical_json(effective_environment.canonical_object()) + "\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+        else:
+            effective_environment = M336K11EffectiveEnvironmentBinding.from_dict(
+                effective_value
+            )
         base_capsule = M336K11NativeExecutionCapsuleReceipt.build(
             repository=repository,
             route_registry_hash=registry.registry_hash,
@@ -541,7 +661,7 @@ def main() -> None:
         source_identity = _object(output / "controller_source_identity_receipt.json")
         base_profile = (
             profile_registry.profile(M336K11_PROFILE_ID)
-            if profile_id == M336K12_PROFILE_ID
+            if profile_id in {M336K12_PROFILE_ID, M336K13_PROFILE_ID}
             else profile
         )
         base_binding = M336K11OfficialControllerExecutableBinding.build(
@@ -556,7 +676,7 @@ def main() -> None:
             native_stage_worker_source_hash=base_capsule.stage_worker_bytes_hash,
             native_command_contract_hash=base_capsule.command_contract_hash,
         )
-        if profile_id == M336K12_PROFILE_ID:
+        if profile_id in {M336K12_PROFILE_ID, M336K13_PROFILE_ID}:
             native_stage_dispatches = build_m336k12_native_stage_dispatches(
                 repository=repository,
                 execution_scope="OFFICIAL_CONTROLLER",
@@ -572,7 +692,7 @@ def main() -> None:
                 route_registry_hash=registry.registry_hash,
                 dispatches=native_stage_dispatches,
             )
-            plan_binding = M336K12NativeStagePlanBinding.build(
+            base_plan_binding = M336K12NativeStagePlanBinding.build(
                 repository=repository,
                 exact_implementation_tip=request["exact_implementation_tip"],
                 active_profile_hash=profile.profile_hash,
@@ -583,6 +703,14 @@ def main() -> None:
                 outer_startup_policy_hash=dependency.static_startup_policy_hash,
                 native_capsule_receipt_hash=base_capsule.receipt_hash,
             )
+            plan_binding = (
+                M336K13NativeStagePlanBinding.build(
+                    base_plan_binding,
+                    final_plan_binding.receipt_hash,
+                )
+                if profile_id == M336K13_PROFILE_ID
+                else base_plan_binding
+            )
             producer_consumer_parity = verify_m336k12_native_stage_plan(
                 plan=private_plan,
                 dispatches=native_stage_dispatches,
@@ -590,25 +718,75 @@ def main() -> None:
                 repository=repository,
                 python_executable=Path(request["executable_handles"]["python"]),
             )
-            native_capsule = M336K12NativeExecutionCapsuleReceipt.build(
+            base_native_capsule = M336K12NativeExecutionCapsuleReceipt.build(
                 base_capsule=base_capsule,
                 plan_binding=plan_binding,
                 parity=producer_consumer_parity,
                 dispatches=native_stage_dispatches,
             )
-            executable_binding = M336K12OfficialControllerExecutableBinding.build(
-                base_binding=base_binding,
-                profile=profile,
-                capsule=native_capsule,
-                plan_binding=plan_binding,
-                parity=producer_consumer_parity,
+            native_capsule = (
+                M336K13NativeExecutionCapsuleReceipt.build(
+                    base_native_capsule,
+                    final_plan_binding.receipt_hash,
+                )
+                if profile_id == M336K13_PROFILE_ID
+                else base_native_capsule
             )
-            native_route = M336K12NativeRouteManifest.build(
-                profile=profile,
-                binding=executable_binding,
-                capsule=native_capsule,
-                plan_binding=plan_binding,
-                parity=producer_consumer_parity,
+            base_dispatch_profile = (
+                profile_registry.profile(M336K12_PROFILE_ID)
+                if profile_id == M336K13_PROFILE_ID
+                else profile
+            )
+            base_executable_binding = (
+                M336K12OfficialControllerExecutableBinding.build(
+                    base_binding=base_binding,
+                    profile=base_dispatch_profile,
+                    capsule=base_native_capsule,
+                    plan_binding=plan_binding,
+                    parity=producer_consumer_parity,
+                )
+                if profile_id == M336K13_PROFILE_ID
+                else None
+            )
+            executable_binding = (
+                M336K13OfficialControllerExecutableBinding.build(
+                    base_binding=base_executable_binding,
+                    profile=profile,
+                    capsule=native_capsule,
+                    plan_binding=plan_binding,
+                    parity=producer_consumer_parity,
+                    final_controller_plan_binding_receipt_hash=(
+                        final_plan_binding.receipt_hash
+                    ),
+                )
+                if profile_id == M336K13_PROFILE_ID
+                else M336K12OfficialControllerExecutableBinding.build(
+                    base_binding=base_binding,
+                    profile=profile,
+                    capsule=native_capsule,
+                    plan_binding=plan_binding,
+                    parity=producer_consumer_parity,
+                )
+            )
+            native_route = (
+                M336K13NativeRouteManifest.build(
+                    profile=profile,
+                    binding=executable_binding,
+                    capsule=native_capsule,
+                    plan_binding=plan_binding,
+                    parity=producer_consumer_parity,
+                    final_controller_plan_binding_receipt_hash=(
+                        final_plan_binding.receipt_hash
+                    ),
+                )
+                if profile_id == M336K13_PROFILE_ID
+                else M336K12NativeRouteManifest.build(
+                    profile=profile,
+                    binding=executable_binding,
+                    capsule=native_capsule,
+                    plan_binding=plan_binding,
+                    parity=producer_consumer_parity,
+                )
             )
         else:
             native_capsule = base_capsule
@@ -642,7 +820,9 @@ def main() -> None:
             newline="\n",
         )
     authorization_builder = (
-        build_m336k12_final_authorization
+        build_m336k13_final_authorization
+        if profile_id == M336K13_PROFILE_ID
+        else build_m336k12_final_authorization
         if profile_id == M336K12_PROFILE_ID
         else build_m336k11_final_authorization
         if profile_id == M336K11_PROFILE_ID
@@ -725,7 +905,7 @@ def main() -> None:
             official_authorization_values[
                 "official_controller_executable_binding_hash"
             ] = executable_binding.binding_hash
-        if profile_id == M336K12_PROFILE_ID:
+        if profile_id in {M336K12_PROFILE_ID, M336K13_PROFILE_ID}:
             official_authorization_values.update(
                 {
                     "native_stage_plan_binding_hash": (plan_binding.plan_binding_hash),
@@ -737,6 +917,10 @@ def main() -> None:
                     ),
                 }
             )
+        if profile_id == M336K13_PROFILE_ID:
+            official_authorization_values[
+                "final_controller_plan_binding_receipt_hash"
+            ] = final_plan_binding.receipt_hash
         authorization = authorization_builder(**official_authorization_values)
     else:
         authorization = authorization_builder(
@@ -788,7 +972,7 @@ def main() -> None:
                 "native_route_manifest": native_route.canonical_object(),
             }
         )
-        if profile_id == M336K12_PROFILE_ID:
+        if profile_id in {M336K12_PROFILE_ID, M336K13_PROFILE_ID}:
             dispatch_contract_hash = m336k12_native_dispatch_contract_hash(
                 native_stage_dispatches
             )
@@ -813,6 +997,8 @@ def main() -> None:
                     ),
                 }
             )
+    if profile_id == M336K13_PROFILE_ID:
+        values.update(public_plan_components)
     binding_receipt = None
     if official_components is not None:
         post_authorization = build_m336k10_post_authorization_components(
@@ -895,6 +1081,7 @@ def main() -> None:
     if identity_namespace == "m336k8" and profile_id not in {
         M336K11_PROFILE_ID,
         M336K12_PROFILE_ID,
+        M336K13_PROFILE_ID,
     }:
         execution_capsule = _object(output / "execution_capsule_receipt.json")
         binding = _object(output / "capsule_binding_set.json")
@@ -936,6 +1123,15 @@ def main() -> None:
                 repository=repository,
                 output=output,
                 invocation_plan=invocation_plan,
+                startup_receipt=startup_receipt,
+                executable_handles=resolved_executable_handles,
+            )
+        if profile_id == M336K13_PROFILE_ID:
+            _write_m336k13_executable_binding_receipt(
+                repository=repository,
+                output=output,
+                invocation_plan_path=Path(request["windows_invocation_plan"]),
+                lifecycle_path=Path(request["final_controller_plan_lifecycle_receipt"]),
                 startup_receipt=startup_receipt,
                 executable_handles=resolved_executable_handles,
             )
@@ -1429,6 +1625,138 @@ def _write_m336k12_executable_binding_receipt(
     )
 
 
+def _write_m336k13_executable_binding_receipt(
+    *,
+    repository: Path,
+    output: Path,
+    invocation_plan_path: Path,
+    lifecycle_path: Path,
+    startup_receipt: M336K5PythonStartupReceipt,
+    executable_handles: dict[str, Path],
+) -> None:
+    template = M336K13FinalControllerPlanTemplate.from_dict(
+        _object(output / "final_controller_plan_template.json")
+    )
+    lifecycle = M336K13FinalControllerInvocationPlanV2.from_dict(
+        _object(lifecycle_path)
+    )
+    final_plan_binding = M336K13FinalControllerPlanBindingReceipt.from_dict(
+        _object(output / "final_controller_plan_binding_receipt.json")
+    )
+    invocation_plan = verify_m336k13_final_controller_plan_binding(
+        plan_path=invocation_plan_path,
+        template=template,
+        lifecycle=lifecycle,
+        binding=final_plan_binding,
+    )
+    binding = M336K13OfficialControllerExecutableBinding.from_dict(
+        _object(output / "official_controller_executable_binding.json")
+    )
+    manifest = M336K11HermeticExecutableDependencyManifest.from_dict(
+        _object(output / "controller_executable_dependency_manifest.json")
+    )
+    effective = M336K13EffectiveEnvironmentBinding.from_dict(
+        _object(output / "effective_environment_binding.json")
+    )
+    capsule = M336K13NativeExecutionCapsuleReceipt.from_dict(
+        _object(output / "execution_capsule_receipt.json")
+    )
+    route = M336K13NativeRouteManifest.from_dict(
+        _object(output / "native_route_manifest.json")
+    )
+    plan_binding = M336K13NativeStagePlanBinding.from_dict(
+        _object(output / "native_stage_plan_binding.json")
+    )
+    parity = M336K12ProducerConsumerParityReceipt.from_dict(
+        _object(output / "producer_consumer_parity_receipt.json")
+    )
+    dispatch_value = _object(output / "native_stage_dispatches.json")
+    dispatches = tuple(
+        M336K12NativeStageDispatch.from_dict(item)
+        for item in dispatch_value["dispatches"]
+    )
+    dispatch_body = dict(dispatch_value)
+    dispatch_receipt_hash = dispatch_body.pop("receipt_hash", None)
+    if (
+        dispatch_value.get("contract_role") != "M336K12_NATIVE_STAGE_DISPATCH_SET"
+        or dispatch_value.get("dispatch_count") != len(dispatches)
+        or dispatch_value.get("dispatch_contract_hash")
+        != m336k12_native_dispatch_contract_hash(dispatches)
+        or dispatch_receipt_hash != content_hash(dispatch_body)
+    ):
+        raise M336K2ProtocolError("M336K13 native dispatch set changed")
+    verify_m336k11_live_execution_inputs(
+        manifest=manifest,
+        effective_environment=effective,
+        invocation_plan=invocation_plan,
+        startup_receipt=startup_receipt,
+        executable_handles=executable_handles,
+        native_stage_worker_bytes=(
+            repository / "scripts/m336k2_run_stage.py"
+        ).read_bytes(),
+        native_capsule=capsule,
+        expected_target=repository / "scripts/m336k13_run_final_route.py",
+    )
+    authorization = _object(output / "final_authorization.json")
+    plan_hash = final_plan_binding.receipt_hash
+    relations = (
+        (binding.executable_dependency_manifest_hash, manifest.manifest_hash),
+        (binding.effective_environment_binding_receipt_hash, effective.receipt_hash),
+        (binding.native_execution_capsule_receipt_hash, capsule.receipt_hash),
+        (route.native_execution_capsule_receipt_hash, capsule.receipt_hash),
+        (
+            authorization["official_controller_executable_binding_hash"],
+            binding.binding_hash,
+        ),
+        (authorization["native_execution_capsule_receipt_hash"], capsule.receipt_hash),
+        (
+            authorization["native_stage_plan_binding_hash"],
+            plan_binding.plan_binding_hash,
+        ),
+        (
+            authorization["producer_consumer_parity_receipt_hash"],
+            parity.receipt_hash,
+        ),
+        (authorization["final_controller_plan_binding_receipt_hash"], plan_hash),
+        (effective.final_controller_plan_binding_receipt_hash, plan_hash),
+        (binding.final_controller_plan_binding_receipt_hash, plan_hash),
+        (capsule.final_controller_plan_binding_receipt_hash, plan_hash),
+        (route.final_controller_plan_binding_receipt_hash, plan_hash),
+        (plan_binding.final_controller_plan_binding_receipt_hash, plan_hash),
+    )
+    executable_mismatches = sum(left != right for left, right in relations)
+    semantic_anchor = content_hash(
+        (
+            manifest.manifest_hash,
+            effective.receipt_hash,
+            invocation_plan.invocation_plan_hash,
+            startup_receipt.receipt_hash,
+            binding.binding_hash,
+            capsule.receipt_hash,
+            route.manifest_hash,
+            plan_binding.plan_binding_hash,
+            parity.receipt_hash,
+            dispatch_receipt_hash,
+            plan_hash,
+        )
+    )
+    receipt = M336K13OfficialExecutableBindingReceipt.build(
+        executable_semantic_anchor_hash=semantic_anchor,
+        executable_semantic_mismatch_count=executable_mismatches,
+        binding=binding,
+        capsule=capsule,
+        route=route,
+        plan_binding=plan_binding,
+        parity=parity,
+        final_controller_plan_binding_receipt_hash=plan_hash,
+    )
+    (output / "official_executable_binding_receipt.json").write_text(
+        canonical_json(receipt.canonical_object()) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def _write_m336k8_post_freeze_and_gate(
     repository: Path,
     output: Path,
@@ -1440,16 +1768,20 @@ def _write_m336k8_post_freeze_and_gate(
     plan = M336K8FreezeAssemblyPlan.from_dict(
         _object(output / "freeze_assembly_plan.json")
     )
-    active_native_dispatch_closure = (
-        plan.contract_role == M336K8FreezeAssemblyPlan.ROLE_V3
-    )
+    active_final_plan_closure = plan.contract_role == M336K8FreezeAssemblyPlan.ROLE_V4
+    active_native_dispatch_closure = plan.contract_role in {
+        M336K8FreezeAssemblyPlan.ROLE_V3,
+        M336K8FreezeAssemblyPlan.ROLE_V4,
+    }
     active_executable_closure = plan.contract_role in {
         M336K8FreezeAssemblyPlan.ROLE_V2,
         M336K8FreezeAssemblyPlan.ROLE_V3,
+        M336K8FreezeAssemblyPlan.ROLE_V4,
     }
     if plan != M336K8FreezeAssemblyPlan.build(
         active_executable_closure=active_executable_closure,
         native_stage_dispatch_closure=active_native_dispatch_closure,
+        final_controller_plan_closure=active_final_plan_closure,
     ):
         raise M336K2ProtocolError("M336K8 freeze assembly plan changed")
     policy = M336K8ProjectSourceIdentityPolicy.from_dict(
@@ -1571,7 +1903,9 @@ def _write_m336k8_post_freeze_and_gate(
         ),
     }
     post_type = (
-        M336K12PostFreezeInputBundle
+        M336K13PostFreezeInputBundle
+        if active_final_plan_closure
+        else M336K12PostFreezeInputBundle
         if active_native_dispatch_closure
         else M336K11PostFreezeInputBundle
         if active_executable_closure
@@ -1632,8 +1966,11 @@ def _write_m336k8_post_freeze_and_gate(
             }
         )
     if active_native_dispatch_closure:
-        plan_binding = M336K12NativeStagePlanBinding.from_dict(
-            _object(output / "native_stage_plan_binding.json")
+        plan_binding_value = _object(output / "native_stage_plan_binding.json")
+        plan_binding = (
+            M336K13NativeStagePlanBinding.from_dict(plan_binding_value)
+            if active_final_plan_closure
+            else M336K12NativeStagePlanBinding.from_dict(plan_binding_value)
         )
         parity = M336K12ProducerConsumerParityReceipt.from_dict(
             _object(output / "producer_consumer_parity_receipt.json")
@@ -1646,6 +1983,10 @@ def _write_m336k8_post_freeze_and_gate(
                 "dispatch_contract_hash": dispatch_set["dispatch_contract_hash"],
             }
         )
+    if active_final_plan_closure:
+        post_values["final_controller_plan_binding_receipt_hash"] = _object(
+            output / "final_controller_plan_binding_receipt.json"
+        )["receipt_hash"]
     provisional = post_type.build(**post_values, freeze_assembly_receipt_hash="0" * 64)
     values = {
         "controller_python_environment_manifest": controller_environment,
@@ -1691,6 +2032,19 @@ def _write_m336k8_post_freeze_and_gate(
                 "official_executable_binding_receipt": _object(
                     output / "official_executable_binding_receipt.json"
                 ),
+            }
+        )
+    if active_final_plan_closure:
+        values.update(
+            {
+                name: _object(output / f"{name}.json")
+                for name in (
+                    "final_controller_plan_template",
+                    "final_controller_plan_binding_receipt",
+                    "actual_launcher_plan_receipt_schema",
+                    "final_controller_plan_lifecycle_policy",
+                    "final_controller_plan_path_role_manifest",
+                )
             }
         )
     origins = {item.component_name: item.source_domain for item in plan.entries}

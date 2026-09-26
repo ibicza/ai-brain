@@ -169,7 +169,7 @@ class M336KOfficialRouteProfileRegistry:
             or len(set(hashes)) != len(hashes)
             or len(set(identities)) != len(identities)
             or len(active) != 1
-            or active[0].profile_id != "m336k8-final-v5"
+            or active[0].profile_id != "m336k8-final-v6"
             or self.registry_hash != content_hash(self._body())
         ):
             raise M336K2ProtocolError(
@@ -280,7 +280,9 @@ def _profile(
         execution_mode="FINAL",
         minimum_controller_version=(
             (
-                "m336k12-controller.v5"
+                "m336k13-controller.v6"
+                if version == 6
+                else "m336k12-controller.v5"
                 if version == 5
                 else "m336k11-controller.v4"
                 if version == 4
@@ -288,7 +290,7 @@ def _profile(
                 if version == 3
                 else "m336k9-controller.v2"
             )
-            if namespace == "m336k8" and version in {2, 3, 4, 5}
+            if namespace == "m336k8" and version in {2, 3, 4, 5, 6}
             else "m336k5-controller.v1"
         ),
         authorization_branch_ref=branch,
@@ -348,10 +350,17 @@ M336K_OFFICIAL_PROFILE_REGISTRY = M336KOfficialRouteProfileRegistry.build(
         ),
         _profile(
             "m336k8-final-v5",
-            M336KOfficialRouteProfileStatus.CURRENT_ACTIVE,
+            M336KOfficialRouteProfileStatus.HISTORICAL_READ_ONLY,
             "m336k8",
             5,
             "refs/heads/exp/stage3-m336k12-native-stage-dispatch-v21",
+        ),
+        _profile(
+            "m336k8-final-v6",
+            M336KOfficialRouteProfileStatus.CURRENT_ACTIVE,
+            "m336k8",
+            6,
+            "refs/heads/exp/stage3-m336k13-final-controller-plan-binding-v23",
         ),
         _profile(
             "m336k8-rehearsal-v2",

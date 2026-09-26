@@ -424,6 +424,10 @@ def test_m336k8_v4_builder_accepts_phase_neutral_post_freeze_field() -> None:
         "native_stage_plan_binding",
         "producer_consumer_parity_receipt",
         "dispatch_contract_hash",
+        "final_controller_plan_template",
+        "final_controller_plan_lifecycle_receipt",
+        "final_controller_plan_binding_receipt",
+        "final_controller_plan_binding_receipt_hash",
     }
     for field in fields(M336K8FinalRouteRequestV4):
         if field.name in generated:
@@ -468,6 +472,10 @@ def test_m336k8_v4_builder_canonicalizes_absent_prospective_attestation() -> Non
         "native_stage_plan_binding",
         "producer_consumer_parity_receipt",
         "dispatch_contract_hash",
+        "final_controller_plan_template",
+        "final_controller_plan_lifecycle_receipt",
+        "final_controller_plan_binding_receipt",
+        "final_controller_plan_binding_receipt_hash",
     }
     for field in fields(M336K8FinalRouteRequestV4):
         if field.name in generated or field.name in optional:

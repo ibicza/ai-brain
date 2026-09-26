@@ -20,7 +20,8 @@ _K8_V1_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v1")
 _K8_V2_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v2")
 _K8_V3_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v3")
 _K8_V4_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v4")
-_K8_ACTIVE_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v5")
+_K8_V5_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v5")
+_K8_ACTIVE_PROFILE = M336K_OFFICIAL_PROFILE_REGISTRY.profile("m336k8-final-v6")
 
 M336K5_ROUTE_VERSION = _K5_PROFILE.route_version
 M336K5_PROTOCOL_RUN_ID = _K5_PROFILE.protocol_run_id
@@ -57,11 +58,16 @@ M336K11_PROTOCOL_RUN_ID = _K8_V4_PROFILE.protocol_run_id
 M336K11_ACQUISITION_RUN_ID = _K8_V4_PROFILE.acquisition_run_id
 M336K11_SELECTOR_RUN_ID = _K8_V4_PROFILE.selector_run_id
 M336K11_EVALUATOR_RUN_ID = _K8_V4_PROFILE.evaluator_run_id
-M336K12_ROUTE_VERSION = _K8_ACTIVE_PROFILE.route_version
-M336K12_PROTOCOL_RUN_ID = _K8_ACTIVE_PROFILE.protocol_run_id
-M336K12_ACQUISITION_RUN_ID = _K8_ACTIVE_PROFILE.acquisition_run_id
-M336K12_SELECTOR_RUN_ID = _K8_ACTIVE_PROFILE.selector_run_id
-M336K12_EVALUATOR_RUN_ID = _K8_ACTIVE_PROFILE.evaluator_run_id
+M336K12_ROUTE_VERSION = _K8_V5_PROFILE.route_version
+M336K12_PROTOCOL_RUN_ID = _K8_V5_PROFILE.protocol_run_id
+M336K12_ACQUISITION_RUN_ID = _K8_V5_PROFILE.acquisition_run_id
+M336K12_SELECTOR_RUN_ID = _K8_V5_PROFILE.selector_run_id
+M336K12_EVALUATOR_RUN_ID = _K8_V5_PROFILE.evaluator_run_id
+M336K13_ROUTE_VERSION = _K8_ACTIVE_PROFILE.route_version
+M336K13_PROTOCOL_RUN_ID = _K8_ACTIVE_PROFILE.protocol_run_id
+M336K13_ACQUISITION_RUN_ID = _K8_ACTIVE_PROFILE.acquisition_run_id
+M336K13_SELECTOR_RUN_ID = _K8_ACTIVE_PROFILE.selector_run_id
+M336K13_EVALUATOR_RUN_ID = _K8_ACTIVE_PROFILE.evaluator_run_id
 
 _HASH = re.compile(r"[0-9a-f]{64}")
 
@@ -403,6 +409,12 @@ def build_m336k12_official_identity_bundle(
     **hashes: str,
 ) -> M336K5RouteIdentityBundle:
     return build_m336k_identity_bundle_for_profile("m336k8-final-v5", **hashes)
+
+
+def build_m336k13_official_identity_bundle(
+    **hashes: str,
+) -> M336K5RouteIdentityBundle:
+    return build_m336k_identity_bundle_for_profile("m336k8-final-v6", **hashes)
 
 
 def build_m336k8_rehearsal_identity_bundle(

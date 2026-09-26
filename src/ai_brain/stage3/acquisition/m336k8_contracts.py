@@ -997,6 +997,40 @@ _M336K12_ASSEMBLY_COMPONENTS: tuple[tuple[str, str, str, str], ...] = (
     ),
 )
 
+_M336K13_ASSEMBLY_COMPONENTS: tuple[tuple[str, str, str, str], ...] = (
+    *_M336K12_ASSEMBLY_COMPONENTS,
+    (
+        "final_controller_plan_template",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "FINAL_CONTROLLER_PLAN_TEMPLATE_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "final_controller_plan_binding_receipt",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "FINAL_CONTROLLER_PLAN_BINDING_BUILDER",
+        "EXACT_POST_Q_PLAN",
+    ),
+    (
+        "actual_launcher_plan_receipt_schema",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "ACTUAL_LAUNCHER_PLAN_RECEIPT_SCHEMA_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "final_controller_plan_lifecycle_policy",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "FINAL_CONTROLLER_PLAN_LIFECYCLE_POLICY_BUILDER",
+        "IMPLEMENTATION_TIP",
+    ),
+    (
+        "final_controller_plan_path_role_manifest",
+        CURRENT_IMPLEMENTATION_CONTROLLER,
+        "FINAL_CONTROLLER_PLAN_PATH_ROLE_BUILDER",
+        "EXACT_POST_Q_PLAN",
+    ),
+)
+
 
 def _default_hash_field(name: str) -> str:
     return {
@@ -1030,6 +1064,11 @@ def _default_hash_field(name: str) -> str:
         "native_stage_plan_binding": "plan_binding_hash",
         "producer_consumer_parity_receipt": "receipt_hash",
         "official_executable_binding_receipt": "receipt_hash",
+        "final_controller_plan_template": "template_hash",
+        "final_controller_plan_binding_receipt": "receipt_hash",
+        "actual_launcher_plan_receipt_schema": "schema_hash",
+        "final_controller_plan_lifecycle_policy": "policy_hash",
+        "final_controller_plan_path_role_manifest": "manifest_hash",
     }[name]
 
 
@@ -1037,9 +1076,12 @@ def _build_assembly_entries(
     *,
     active_executable_closure: bool = False,
     native_stage_dispatch_closure: bool = False,
+    final_controller_plan_closure: bool = False,
 ) -> tuple[M336K8FreezeAssemblyEntry, ...]:
     components = (
-        _M336K12_ASSEMBLY_COMPONENTS
+        _M336K13_ASSEMBLY_COMPONENTS
+        if final_controller_plan_closure
+        else _M336K12_ASSEMBLY_COMPONENTS
         if native_stage_dispatch_closure
         else _M336K11_ASSEMBLY_COMPONENTS
         if active_executable_closure
@@ -1073,6 +1115,7 @@ class M336K8FreezeAssemblyPlan:
     ROLE: ClassVar[str] = "M336K8_FREEZE_ASSEMBLY_PLAN"
     ROLE_V2: ClassVar[str] = "M336K11_EXECUTABLE_CLOSURE_ASSEMBLY_PLAN_V2"
     ROLE_V3: ClassVar[str] = "M336K12_NATIVE_STAGE_DISPATCH_ASSEMBLY_PLAN_V3"
+    ROLE_V4: ClassVar[str] = "M336K13_FINAL_CONTROLLER_PLAN_ASSEMBLY_PLAN_V4"
 
     def _body(self) -> dict[str, Any]:
         return {
@@ -1100,14 +1143,17 @@ class M336K8FreezeAssemblyPlan:
         )
         if (
             self.schema_version != 1
-            or self.contract_role not in {self.ROLE, self.ROLE_V2, self.ROLE_V3}
+            or self.contract_role
+            not in {self.ROLE, self.ROLE_V2, self.ROLE_V3, self.ROLE_V4}
             or self.component_count != len(self.entries)
             or len({item.component_name for item in self.entries}) != len(self.entries)
             or self.entries
             != _build_assembly_entries(
                 active_executable_closure=self.contract_role
-                in {self.ROLE_V2, self.ROLE_V3},
-                native_stage_dispatch_closure=self.contract_role == self.ROLE_V3,
+                in {self.ROLE_V2, self.ROLE_V3, self.ROLE_V4},
+                native_stage_dispatch_closure=self.contract_role
+                in {self.ROLE_V3, self.ROLE_V4},
+                final_controller_plan_closure=self.contract_role == self.ROLE_V4,
             )
             or self.producer_origin_map_hash != content_hash(origins)
             or self.plan_hash != content_hash(self._body())
@@ -1120,12 +1166,16 @@ class M336K8FreezeAssemblyPlan:
         *,
         active_executable_closure: bool = False,
         native_stage_dispatch_closure: bool = False,
+        final_controller_plan_closure: bool = False,
     ) -> Self:
+        if final_controller_plan_closure:
+            native_stage_dispatch_closure = True
         if native_stage_dispatch_closure:
             active_executable_closure = True
         entries = _build_assembly_entries(
             active_executable_closure=active_executable_closure,
             native_stage_dispatch_closure=native_stage_dispatch_closure,
+            final_controller_plan_closure=final_controller_plan_closure,
         )
         origins = tuple(
             (
@@ -1139,7 +1189,9 @@ class M336K8FreezeAssemblyPlan:
         body = {
             "schema_version": 1,
             "contract_role": (
-                cls.ROLE_V3
+                cls.ROLE_V4
+                if final_controller_plan_closure
+                else cls.ROLE_V3
                 if native_stage_dispatch_closure
                 else cls.ROLE_V2
                 if active_executable_closure
@@ -1542,6 +1594,12 @@ class M336K10PostFreezeInputBundle(M336K8PostFreezeInputBundleV2):
 def m336k_current_post_freeze_input_bundle_from_dict(
     value: dict[str, Any],
 ) -> M336K8PostFreezeInputBundleV2:
+    if value.get("contract_role") == "M336K13_POST_FREEZE_INPUT_BUNDLE_V6":
+        from ai_brain.stage3.acquisition.m336k13_plan import (
+            M336K13PostFreezeInputBundle,
+        )
+
+        return M336K13PostFreezeInputBundle.from_dict(value)
     if value.get("contract_role") == "M336K12_POST_FREEZE_INPUT_BUNDLE_V5":
         from ai_brain.stage3.acquisition.m336k12_dispatch import (
             M336K12PostFreezeInputBundle,
@@ -1879,6 +1937,15 @@ def m336k8_semantic_binding_mismatches(
     native_plan = values.get("native_stage_plan_binding", {})
     native_parity = values.get("producer_consumer_parity_receipt", {})
     executable_receipt = values.get("official_executable_binding_receipt", {})
+    authorization = values.get("final_authorization", {})
+    final_plan_template = values.get("final_controller_plan_template", {})
+    final_plan_binding = values.get("final_controller_plan_binding_receipt", {})
+    actual_launcher_schema = values.get("actual_launcher_plan_receipt_schema", {})
+    final_plan_lifecycle_policy = values.get(
+        "final_controller_plan_lifecycle_policy", {}
+    )
+    final_plan_path_roles = values.get("final_controller_plan_path_role_manifest", {})
+    final_plan_hash = final_plan_binding.get("receipt_hash")
     if name == "controller_source_identity_receipt":
         mismatches += int(
             receipt.get("source_identity_policy_hash") != policy.get("policy_hash")
@@ -1941,6 +2008,11 @@ def m336k8_semantic_binding_mismatches(
             effective_environment.get("actual_environment_equals_invocation_plan")
             is not True
         )
+        if final_plan_binding:
+            mismatches += int(
+                effective_environment.get("final_controller_plan_binding_receipt_hash")
+                != final_plan_hash
+            )
     elif name == "official_controller_executable_binding":
         relations = (
             (
@@ -1985,6 +2057,11 @@ def m336k8_semantic_binding_mismatches(
                 ),
             )
             mismatches += sum(left != right for left, right in relations)
+        if final_plan_binding:
+            mismatches += int(
+                executable_binding.get("final_controller_plan_binding_receipt_hash")
+                != final_plan_hash
+            )
     elif name == "execution_capsule_receipt":
         relations = (
             (
@@ -2029,6 +2106,11 @@ def m336k8_semantic_binding_mismatches(
                 ),
             )
             mismatches += sum(left != right for left, right in relations)
+        if final_plan_binding:
+            mismatches += int(
+                native_capsule.get("final_controller_plan_binding_receipt_hash")
+                != final_plan_hash
+            )
     elif name == "native_route_manifest":
         relations = (
             (
@@ -2065,6 +2147,11 @@ def m336k8_semantic_binding_mismatches(
                 ),
             )
             mismatches += sum(left != right for left, right in relations)
+        if final_plan_binding:
+            mismatches += int(
+                native_route.get("final_controller_plan_binding_receipt_hash")
+                != final_plan_hash
+            )
     elif name == "native_stage_dispatches":
         mismatches += int(
             native_dispatches.get("dispatch_count")
@@ -2085,6 +2172,11 @@ def m336k8_semantic_binding_mismatches(
             ),
         )
         mismatches += sum(left != right for left, right in relations)
+        if final_plan_binding:
+            mismatches += int(
+                native_plan.get("final_controller_plan_binding_receipt_hash")
+                != final_plan_hash
+            )
     elif name == "producer_consumer_parity_receipt":
         relations = (
             (
@@ -2127,6 +2219,86 @@ def m336k8_semantic_binding_mismatches(
         )
         mismatches += sum(left != right for left, right in relations)
         mismatches += int(executable_receipt.get("status") != "PASS")
+        if final_plan_binding:
+            mismatches += int(
+                executable_receipt.get("final_controller_plan_binding_receipt_hash")
+                != final_plan_hash
+            )
+    elif name == "final_authorization" and final_plan_binding:
+        mismatches += int(
+            authorization.get("final_controller_plan_binding_receipt_hash")
+            != final_plan_hash
+        )
+    elif name == "final_controller_plan_template":
+        mismatches += int(final_plan_template.get("profile_id") != "m336k8-final-v6")
+        mismatches += int(
+            final_plan_template.get("actual_launcher_attestation_required") is not True
+        )
+    elif name == "final_controller_plan_binding_receipt":
+        mismatches += int(
+            final_plan_binding.get("public_template_hash")
+            != final_plan_template.get("template_hash")
+        )
+        mismatches += int(final_plan_binding.get("rewrite_count") != 0)
+        mismatches += int(final_plan_binding.get("path_collision_count") != 0)
+        mismatches += int(final_plan_binding.get("status") != "PASS")
+    elif name == "actual_launcher_plan_receipt_schema":
+        mismatches += int(
+            actual_launcher_schema.get("contract_role")
+            != "M336K13_ACTUAL_LAUNCHER_PLAN_RECEIPT_SCHEMA"
+        )
+        mismatches += int(
+            actual_launcher_schema.get("receipt_contract_role")
+            != "M336K13_ACTUAL_LAUNCHER_PLAN_RECEIPT"
+        )
+        mismatches += int(
+            actual_launcher_schema.get("producer_repository_path")
+            != "scripts/m336k5_python_bootstrap.py"
+        )
+        mismatches += int(
+            actual_launcher_schema.get("write_order") != "BEFORE_TARGET_DISPATCH"
+        )
+    elif name == "final_controller_plan_lifecycle_policy":
+        mismatches += int(
+            final_plan_lifecycle_policy.get("creation_operation") != "O_CREAT|O_EXCL"
+        )
+        mismatches += int(
+            final_plan_lifecycle_policy.get("exclusive_create_required") is not True
+        )
+        mismatches += int(final_plan_lifecycle_policy.get("exact_write_count") != 1)
+        mismatches += int(final_plan_lifecycle_policy.get("maximum_rewrite_count") != 0)
+        mismatches += int(
+            final_plan_lifecycle_policy.get("maximum_overwrite_count") != 0
+        )
+        mismatches += int(
+            final_plan_lifecycle_policy.get("parent_directory_fsync_required")
+            is not True
+        )
+        mismatches += int(
+            final_plan_lifecycle_policy.get("post_freeze_modification_forbidden")
+            is not True
+        )
+    elif name == "final_controller_plan_path_role_manifest":
+        path_role_identities = tuple(
+            tuple(item)
+            for item in final_plan_path_roles.get("bound_path_role_identities", ())
+        )
+        relations = (
+            (
+                final_plan_path_roles.get("public_template_hash"),
+                final_plan_template.get("template_hash"),
+            ),
+            (
+                final_plan_path_roles.get("plan_binding_receipt_hash"),
+                final_plan_hash,
+            ),
+            (
+                content_hash(path_role_identities),
+                final_plan_binding.get("path_role_manifest_hash"),
+            ),
+        )
+        mismatches += sum(left != right for left, right in relations)
+        mismatches += int(final_plan_path_roles.get("raw_private_path_count") != 0)
     elif name == "controller_startup_binding":
         relations = (
             (
@@ -2340,6 +2512,8 @@ def m336k8_semantic_binding_mismatches(
                     ),
                 }
             )
+        if final_plan_binding:
+            relations["final_controller_plan_binding_receipt_hash"] = final_plan_hash
         if assembly_receipt:
             relations["freeze_assembly_receipt_hash"] = assembly_receipt.get(
                 "receipt_hash"

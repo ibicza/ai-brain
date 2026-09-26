@@ -33,6 +33,9 @@ M336K11_F36_ROOT = Path("artifacts/m336k11/f36-freeze")
 M336K12_READY_STATUS = "READY_FOR_NATIVE_STAGE_DISPATCH_BOUND_FINAL_JAVA_EXECUTION_V12"
 M336K12_BRANCH = "exp/stage3-m336k12-native-stage-dispatch-v21"
 M336K12_F37_ROOT = Path("artifacts/m336k12/f37-freeze")
+M336K13_READY_STATUS = "READY_FOR_IMMUTABLE_FINAL_CONTROLLER_PLAN_BOUND_EXECUTION_V13"
+M336K13_BRANCH = "exp/stage3-m336k13-final-controller-plan-binding-v23"
+M336K13_F38_ROOT = Path("artifacts/m336k13/f38-freeze")
 M336K8_REQUIRED_FREEZE_COMPONENTS = frozenset(
     (set(M336K7_REQUIRED_FREEZE_COMPONENTS) - {"frozen_contract_compatibility"})
     | {
@@ -89,6 +92,16 @@ M336K12_REQUIRED_FREEZE_COMPONENTS = frozenset(
         "native_stage_dispatches",
         "native_stage_plan_binding",
         "producer_consumer_parity_receipt",
+    }
+)
+M336K13_REQUIRED_FREEZE_COMPONENTS = frozenset(
+    set(M336K12_REQUIRED_FREEZE_COMPONENTS)
+    | {
+        "final_controller_plan_template",
+        "final_controller_plan_binding_receipt",
+        "actual_launcher_plan_receipt_schema",
+        "final_controller_plan_lifecycle_policy",
+        "final_controller_plan_path_role_manifest",
     }
 )
 _SOURCE_SCOPE = ("src", "scripts", "tools", "schemas", "pyproject.toml", "uv.lock")
@@ -180,12 +193,14 @@ class M336K8FreezeManifest:
     native_stage_plan_binding_hash: str | None = None
     producer_consumer_parity_receipt_hash: str | None = None
     dispatch_contract_hash: str | None = None
+    final_controller_plan_binding_receipt_hash: str | None = None
 
     ROLE: ClassVar[str] = "M336K8_SOURCE_DOMAIN_BOUND_FREEZE_V1"
     ROLE_V2: ClassVar[str] = "M336K9_UNIFIED_ADMISSION_FREEZE_V2"
     ROLE_V3: ClassVar[str] = "M336K10_OFFICIAL_ACQUISITION_BOUND_FREEZE_V3"
     ROLE_V4: ClassVar[str] = "M336K11_HERMETIC_EXECUTABLE_BOUND_FREEZE_V4"
     ROLE_V5: ClassVar[str] = "M336K12_NATIVE_STAGE_DISPATCH_BOUND_FREEZE_V5"
+    ROLE_V6: ClassVar[str] = "M336K13_FINAL_CONTROLLER_PLAN_BOUND_FREEZE_V6"
 
     @property
     def exact_q28_sha(self) -> str:
@@ -208,15 +223,19 @@ class M336K8FreezeManifest:
         return {**self._body(), "manifest_hash": self.manifest_hash}
 
     def _build_receipt_name(self) -> str:
+        prospective = self.exact_freeze_sha == "0" * 40
         unpublished_qualification = (
-            self.exact_freeze_sha == "0" * 40
-            and self.exact_qualification_sha == self.implementation_tip
+            prospective and self.exact_qualification_sha == self.implementation_tip
         )
+        if self.contract_role == self.ROLE_V6 and prospective:
+            return "prospective_freeze_build_receipt.json"
         if (
             self.contract_role in {self.ROLE_V4, self.ROLE_V5}
             and unpublished_qualification
         ):
             return "prospective_freeze_build_receipt.json"
+        if self.contract_role == self.ROLE_V6:
+            return "f38_build_receipt.json"
         if self.contract_role == self.ROLE_V5:
             return "f37_build_receipt.json"
         if self.contract_role == self.ROLE_V4:
@@ -248,21 +267,30 @@ class M336K8FreezeManifest:
             self.ROLE_V3,
             self.ROLE_V4,
             self.ROLE_V5,
+            self.ROLE_V6,
         }
         acquisition_bound = self.contract_role in {
             self.ROLE_V3,
             self.ROLE_V4,
             self.ROLE_V5,
+            self.ROLE_V6,
         }
-        executable_bound = self.contract_role in {self.ROLE_V4, self.ROLE_V5}
-        native_dispatch_bound = self.contract_role == self.ROLE_V5
+        executable_bound = self.contract_role in {
+            self.ROLE_V4,
+            self.ROLE_V5,
+            self.ROLE_V6,
+        }
+        native_dispatch_bound = self.contract_role in {self.ROLE_V5, self.ROLE_V6}
+        final_plan_bound = self.contract_role == self.ROLE_V6
         prospective = self.exact_freeze_sha == "0" * 40
         expected_names = {
             "freeze_manifest.json",
             self._build_receipt_name(),
         }
         required_components = (
-            M336K12_REQUIRED_FREEZE_COMPONENTS
+            M336K13_REQUIRED_FREEZE_COMPONENTS
+            if final_plan_bound
+            else M336K12_REQUIRED_FREEZE_COMPONENTS
             if native_dispatch_bound
             else M336K11_REQUIRED_FREEZE_COMPONENTS
             if executable_bound
@@ -301,6 +329,7 @@ class M336K8FreezeManifest:
             self.producer_consumer_parity_receipt_hash,
             self.dispatch_contract_hash,
         )
+        final_plan_values = (self.final_controller_plan_binding_receipt_hash,)
         hashes = tuple(
             value
             for name, value in self.canonical_object().items()
@@ -315,6 +344,7 @@ class M336K8FreezeManifest:
                 self.ROLE_V3,
                 self.ROLE_V4,
                 self.ROLE_V5,
+                self.ROLE_V6,
             }
             or names != required_components
             or len(names) != len(self.components)
@@ -348,6 +378,10 @@ class M336K8FreezeManifest:
             and any(not _is_hash(value) for value in native_dispatch_values)
             or not native_dispatch_bound
             and any(value is not None for value in native_dispatch_values)
+            or final_plan_bound
+            and any(not _is_hash(value) for value in final_plan_values)
+            or not final_plan_bound
+            and any(value is not None for value in final_plan_values)
             or self.manifest_hash != content_hash(self._body())
         ):
             raise M336K2ProtocolError("M336K8 freeze manifest is invalid")
@@ -377,6 +411,7 @@ class M336K8FreezeManifest:
             "native_stage_plan_binding_hash",
             "producer_consumer_parity_receipt_hash",
             "dispatch_contract_hash",
+            "final_controller_plan_binding_receipt_hash",
         }
         mandatory = all_fields - optional
         if (
@@ -670,6 +705,49 @@ class M336K12CommittedFreezeAttestation(M336K11CommittedFreezeAttestation):
         return result
 
 
+@dataclass(frozen=True)
+class M336K13CommittedFreezeAttestation(M336K12CommittedFreezeAttestation):
+    final_controller_plan_binding_receipt_hash: str
+
+    ROLE: ClassVar[str] = "M336K13_COMMITTED_FREEZE_ATTESTATION"
+
+    def verify(self) -> None:
+        hashes = tuple(
+            value
+            for name, value in self.canonical_object().items()
+            if name.endswith("_hash") and name != "committed_tree_hash"
+        )
+        passed = (
+            self.prospective_tree_matches
+            and self.implementation_change_count == 0
+            and self.merge_count == 0
+            and self.head_upstream_remote_equal
+            and self.worktree_clean
+        )
+        if (
+            self.schema_version != 1
+            or self.contract_role != self.ROLE
+            or self.official_profile_id != "m336k8-final-v6"
+            or not _is_sha(self.exact_freeze_sha)
+            or not _is_sha(self.exact_qualification_parent)
+            or not _is_sha(self.committed_tree_hash)
+            or any(not _is_hash(value) for value in hashes)
+            or self.status != ("PASS" if passed else "FAIL")
+            or self.attestation_hash != content_hash(self._body())
+        ):
+            raise M336K2ProtocolError("M336K13 committed freeze attestation is invalid")
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> Self:
+        if type(value) is not dict or set(value) != {
+            field.name for field in fields(cls)
+        }:
+            raise M336K2ProtocolError("M336K13 freeze attestation fields changed")
+        result = cls(**value)
+        result.verify()
+        return result
+
+
 def materialize_m336k8_freeze(
     *,
     repository: Path,
@@ -707,6 +785,7 @@ def materialize_m336k8_freeze(
             M336K8FreezeManifest.ROLE_V3,
             M336K8FreezeManifest.ROLE_V4,
             M336K8FreezeManifest.ROLE_V5,
+            M336K8FreezeManifest.ROLE_V6,
         }
         or build_receipt_name
         not in {
@@ -715,27 +794,46 @@ def materialize_m336k8_freeze(
             "f35_build_receipt.json",
             "f36_build_receipt.json",
             "f37_build_receipt.json",
+            "f38_build_receipt.json",
             "prospective_freeze_build_receipt.json",
         }
         or allow_unpublished_qualification
         and (
             freeze_role
-            not in {M336K8FreezeManifest.ROLE_V4, M336K8FreezeManifest.ROLE_V5}
+            not in {
+                M336K8FreezeManifest.ROLE_V4,
+                M336K8FreezeManifest.ROLE_V5,
+                M336K8FreezeManifest.ROLE_V6,
+            }
             or expected_branch
             != (
-                M336K12_BRANCH
+                M336K13_BRANCH
+                if freeze_role == M336K8FreezeManifest.ROLE_V6
+                else M336K12_BRANCH
                 if freeze_role == M336K8FreezeManifest.ROLE_V5
                 else M336K11_BRANCH
             )
             or build_receipt_name != "prospective_freeze_build_receipt.json"
-            or exact_qualification_sha != exact_implementation_tip
+            or freeze_role == M336K8FreezeManifest.ROLE_V6
+            and exact_qualification_sha == exact_implementation_tip
+            or freeze_role != M336K8FreezeManifest.ROLE_V6
+            and exact_qualification_sha != exact_implementation_tip
         )
     ):
         raise M336K2ProtocolError("M336K8 freeze destination/component set changed")
     if allow_unpublished_qualification:
-        _verify_prospective_qualification_context(
-            root, git, exact_implementation_tip, expected_branch
-        )
+        if freeze_role == M336K8FreezeManifest.ROLE_V6:
+            _verify_qualification_lineage(
+                root,
+                git,
+                exact_implementation_tip,
+                exact_qualification_sha,
+                expected_branch,
+            )
+        else:
+            _verify_prospective_qualification_context(
+                root, git, exact_implementation_tip, expected_branch
+            )
     else:
         _verify_qualification_lineage(
             root,
@@ -849,6 +947,7 @@ def materialize_m336k8_freeze(
             M336K8FreezeManifest.ROLE_V3,
             M336K8FreezeManifest.ROLE_V4,
             M336K8FreezeManifest.ROLE_V5,
+            M336K8FreezeManifest.ROLE_V6,
         }:
             profile = _object(component_sources["active_official_profile"])
             values.update(
@@ -873,6 +972,7 @@ def materialize_m336k8_freeze(
             M336K8FreezeManifest.ROLE_V3,
             M336K8FreezeManifest.ROLE_V4,
             M336K8FreezeManifest.ROLE_V5,
+            M336K8FreezeManifest.ROLE_V6,
         }:
             values.update(
                 {
@@ -913,6 +1013,7 @@ def materialize_m336k8_freeze(
         if freeze_role in {
             M336K8FreezeManifest.ROLE_V4,
             M336K8FreezeManifest.ROLE_V5,
+            M336K8FreezeManifest.ROLE_V6,
         }:
             values.update(
                 {
@@ -937,7 +1038,7 @@ def materialize_m336k8_freeze(
                     ),
                 }
             )
-        if freeze_role == M336K8FreezeManifest.ROLE_V5:
+        if freeze_role in {M336K8FreezeManifest.ROLE_V5, M336K8FreezeManifest.ROLE_V6}:
             values.update(
                 {
                     "native_stage_plan_binding_hash": _semantic_hash(
@@ -954,6 +1055,11 @@ def materialize_m336k8_freeze(
                     )["dispatch_contract_hash"],
                 }
             )
+        if freeze_role == M336K8FreezeManifest.ROLE_V6:
+            values["final_controller_plan_binding_receipt_hash"] = _semantic_hash(
+                component_sources["final_controller_plan_binding_receipt"],
+                "receipt_hash",
+            )
         temporary = M336K8FreezeManifest(**values, manifest_hash="0" * 64)
         manifest = M336K8FreezeManifest(
             **values, manifest_hash=content_hash(temporary._body())
@@ -966,11 +1072,16 @@ def materialize_m336k8_freeze(
     body = {
         "schema_version": 1,
         "contract_role": (
-            "PUBLIC_SAFE_M336K12_PROSPECTIVE_FREEZE_BUILD_RECEIPT"
+            "PUBLIC_SAFE_M336K13_PROSPECTIVE_FREEZE_BUILD_RECEIPT"
+            if allow_unpublished_qualification
+            and freeze_role == M336K8FreezeManifest.ROLE_V6
+            else "PUBLIC_SAFE_M336K12_PROSPECTIVE_FREEZE_BUILD_RECEIPT"
             if allow_unpublished_qualification
             and freeze_role == M336K8FreezeManifest.ROLE_V5
             else "PUBLIC_SAFE_M336K11_PROSPECTIVE_FREEZE_BUILD_RECEIPT"
             if allow_unpublished_qualification
+            else "PUBLIC_SAFE_M336K13_FREEZE_BUILD_RECEIPT"
+            if freeze_role == M336K8FreezeManifest.ROLE_V6
             else "PUBLIC_SAFE_M336K12_FREEZE_BUILD_RECEIPT"
             if freeze_role == M336K8FreezeManifest.ROLE_V5
             else "PUBLIC_SAFE_M336K11_FREEZE_BUILD_RECEIPT"
@@ -1054,7 +1165,9 @@ def attest_committed_m336k8_freeze(
     )
     plan = _component_object(root, freeze_manifest, "freeze_assembly_plan")
     attestation_type = (
-        M336K12CommittedFreezeAttestation
+        M336K13CommittedFreezeAttestation
+        if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V6
+        else M336K12CommittedFreezeAttestation
         if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V5
         else M336K11CommittedFreezeAttestation
         if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V4
@@ -1091,6 +1204,7 @@ def attest_committed_m336k8_freeze(
         M336K8FreezeManifest.ROLE_V3,
         M336K8FreezeManifest.ROLE_V4,
         M336K8FreezeManifest.ROLE_V5,
+        M336K8FreezeManifest.ROLE_V6,
     }:
         body.update(
             {
@@ -1105,6 +1219,7 @@ def attest_committed_m336k8_freeze(
         M336K8FreezeManifest.ROLE_V3,
         M336K8FreezeManifest.ROLE_V4,
         M336K8FreezeManifest.ROLE_V5,
+        M336K8FreezeManifest.ROLE_V6,
     }:
         body.update(
             {
@@ -1121,6 +1236,7 @@ def attest_committed_m336k8_freeze(
     if freeze_manifest.contract_role in {
         M336K8FreezeManifest.ROLE_V4,
         M336K8FreezeManifest.ROLE_V5,
+        M336K8FreezeManifest.ROLE_V6,
     }:
         body.update(
             {
@@ -1131,13 +1247,20 @@ def attest_committed_m336k8_freeze(
                 "official_executable_binding_receipt_hash": freeze_manifest.official_executable_binding_receipt_hash,
             }
         )
-    if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V5:
+    if freeze_manifest.contract_role in {
+        M336K8FreezeManifest.ROLE_V5,
+        M336K8FreezeManifest.ROLE_V6,
+    }:
         body.update(
             {
                 "native_stage_plan_binding_hash": freeze_manifest.native_stage_plan_binding_hash,
                 "producer_consumer_parity_receipt_hash": freeze_manifest.producer_consumer_parity_receipt_hash,
                 "dispatch_contract_hash": freeze_manifest.dispatch_contract_hash,
             }
+        )
+    if freeze_manifest.contract_role == M336K8FreezeManifest.ROLE_V6:
+        body["final_controller_plan_binding_receipt_hash"] = (
+            freeze_manifest.final_controller_plan_binding_receipt_hash
         )
     result = attestation_type(**body, attestation_hash=content_hash(body))
     result.verify()
