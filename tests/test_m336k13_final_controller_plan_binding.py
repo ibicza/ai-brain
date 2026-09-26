@@ -6,7 +6,7 @@ import re
 import shutil
 import subprocess
 import sys
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -20,6 +20,7 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
     write_m336k5_python_invocation_plan,
 )
 from ai_brain.stage3.acquisition.m336k8_freeze import M336K8FreezeManifest
+from ai_brain.stage3.acquisition.m336k8_request import _controller_target_source
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
 )
@@ -38,11 +39,67 @@ from ai_brain.stage3.acquisition.m336k13_plan import (
 )
 
 
+@dataclass(frozen=True)
+class _SyntheticPreledgerReceipt:
+    receipt_hash: str
+    startup_receipt_hash: str
+    actual_launcher_plan_receipt_hash: str
+    final_controller_plan_binding_receipt_hash: str
+    canonical_final_request_hash: str
+
+
 def _tool(name: str) -> Path:
     value = shutil.which(name)
     if value is None:
         pytest.skip(f"required test executable is absent: {name}")
     return Path(value)
+
+
+def test_m336k13_two_operation_preledger_comparison_is_stable_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    monkeypatch.syspath_prepend(str(root / "scripts"))
+    from m336k8_run_final_route import _stable_preledger_authority
+
+    validate = _SyntheticPreledgerReceipt(
+        receipt_hash="1" * 64,
+        startup_receipt_hash="2" * 64,
+        actual_launcher_plan_receipt_hash="3" * 64,
+        final_controller_plan_binding_receipt_hash="4" * 64,
+        canonical_final_request_hash="5" * 64,
+    )
+    execute = replace(
+        validate,
+        receipt_hash="6" * 64,
+        startup_receipt_hash="7" * 64,
+        actual_launcher_plan_receipt_hash="8" * 64,
+    )
+    assert _stable_preledger_authority(validate) == _stable_preledger_authority(execute)
+    changed = replace(execute, canonical_final_request_hash="9" * 64)
+    assert _stable_preledger_authority(validate) != _stable_preledger_authority(changed)
+
+
+def test_m336k13_disposable_harness_reuses_one_exact_plan_source() -> None:
+    source = Path("scripts/m336k5_qualify_disposable_protocol.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'final_controller_plan_generation != "m336k13"' in source
+    assert '_run_m336k13_plan_operation(final_plan_state, "validate")' in source
+    assert '_run_m336k13_plan_operation(final_plan_state, "execute")' in source
+    helper = source.split("def _run_m336k13_plan_operation", maxsplit=1)[1].split(
+        "def _persistent_disposable_private_root", maxsplit=1
+    )[0]
+    assert 'plan_path=state["plan_path"]' in helper
+    assert 'execution_scope="REHEARSAL"' in helper
+
+
+def test_m336k13_controller_source_domain_uses_v13_target() -> None:
+    root = Path(__file__).resolve().parents[1]
+    authorization = SimpleNamespace(official_profile_id="m336k8-final-v6")
+    assert _controller_target_source(root, object(), authorization) == (
+        root / "scripts/m336k13_run_final_route.py"
+    )
 
 
 @pytest.fixture(scope="module")

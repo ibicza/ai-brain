@@ -7,7 +7,7 @@ import json
 import os
 import shutil
 import subprocess
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 from ai_brain.stage2.facts.canonical import canonical_json, content_hash
@@ -87,7 +87,7 @@ def main() -> None:
             expected_operation="validate",
         )
         rehearsal_closure = _load_rehearsal_dispatch_closure(
-            args.native_dispatch_rehearsal,
+            _rehearsal_dispatch_path(args.native_dispatch_rehearsal, validated),
             validated=validated,
         )
     else:
@@ -110,12 +110,21 @@ def main() -> None:
             actual_launcher_plan_receipt_path=args.actual_launcher_plan_receipt,
             expected_operation="execute",
         )
-        if validated.receipt != prior:
-            raise M336K2ProtocolError(
-                "M336K8 execution differs from post-freeze validation"
-            )
+        if validated.final_controller_plan_binding is None:
+            if validated.receipt != prior:
+                raise M336K2ProtocolError(
+                    "M336K8 execution differs from post-freeze validation"
+                )
+        else:
+            if _stable_preledger_authority(validated.receipt) != (
+                _stable_preledger_authority(prior)
+            ):
+                raise M336K2ProtocolError(
+                    "M336K13 execution authority differs from validation"
+                )
+            validated = replace(validated, receipt=prior)
         rehearsal_closure = _load_rehearsal_dispatch_closure(
-            args.native_dispatch_rehearsal,
+            _rehearsal_dispatch_path(args.native_dispatch_rehearsal, validated),
             validated=validated,
         )
         if validated.request.purpose == "QUALIFICATION":
@@ -409,6 +418,29 @@ def _load_rehearsal_dispatch_closure(
     if parity != closure.producer_consumer_parity:
         raise M336K2ProtocolError("M336K12 disposable dispatch parity changed")
     return closure
+
+
+def _rehearsal_dispatch_path(command_path: Path | None, validated) -> Path | None:
+    request_value = validated.request.native_dispatch_rehearsal
+    request_path = None if request_value is None else Path(request_value)
+    if (
+        command_path is not None
+        and request_path is not None
+        and (command_path.resolve(strict=True) != request_path.resolve(strict=True))
+    ):
+        raise M336K2ProtocolError("M336K12 rehearsal dispatch paths diverged")
+    return command_path if command_path is not None else request_path
+
+
+def _stable_preledger_authority(receipt) -> dict:
+    value = asdict(receipt)
+    for name in (
+        "receipt_hash",
+        "startup_receipt_hash",
+        "actual_launcher_plan_receipt_hash",
+    ):
+        value.pop(name)
+    return value
 
 
 def _claim_execution_lock(release_path: Path, request_path: Path) -> None:

@@ -257,6 +257,7 @@ class M336K8FinalRouteRequestV4:
     final_controller_plan_lifecycle_receipt: str | None = None
     final_controller_plan_binding_receipt: str | None = None
     final_controller_plan_binding_receipt_hash: str | None = None
+    native_dispatch_rehearsal: str | None = None
 
     ROLE: ClassVar[str] = "M336K8_CANONICAL_FINAL_ROUTE_REQUEST_V4"
 
@@ -334,6 +335,7 @@ class M336K8FinalRouteRequestV4:
             "final_controller_plan_lifecycle_receipt",
             "final_controller_plan_binding_receipt",
             "final_controller_plan_binding_receipt_hash",
+            "native_dispatch_rehearsal",
         }
         mandatory = _field_names(cls) - optional
         if (
@@ -463,6 +465,7 @@ def build_m336k8_final_route_request(**values: Any) -> M336K8FinalRouteRequestV4
         "final_controller_plan_lifecycle_receipt",
         "final_controller_plan_binding_receipt",
         "final_controller_plan_binding_receipt_hash",
+        "native_dispatch_rehearsal",
     }
     mandatory = _field_names(M336K8FinalRouteRequestV4) - optional - {"request_hash"}
     if not mandatory.issubset(body) or set(body) - mandatory - optional:
@@ -579,6 +582,24 @@ def validate_m336k8_final_invocation(
         M336K13_PROFILE_ID,
     }
     active_final_plan_closure = active_profile_id == M336K13_PROFILE_ID
+    final_plan_handles = (
+        request.windows_invocation_plan,
+        request.final_controller_plan_template,
+        request.final_controller_plan_lifecycle_receipt,
+        request.final_controller_plan_binding_receipt,
+        request.final_controller_plan_binding_receipt_hash,
+        actual_launcher_plan_receipt_path,
+    )
+    requested_final_plan_closure = any(
+        value is not None for value in final_plan_handles[1:-1]
+    )
+    if requested_final_plan_closure and any(
+        value is None for value in final_plan_handles
+    ):
+        raise M336K2ProtocolError("M336K13 final plan handles are incomplete")
+    rehearsal_final_plan_closure = (
+        requested_final_plan_closure and not active_final_plan_closure
+    )
     final_plan_binding = None
     actual_launcher_plan_receipt = None
     if active_executable_closure:
@@ -815,6 +836,59 @@ def validate_m336k8_final_invocation(
                 actual_launcher_receipt=actual_launcher_plan_receipt,
                 selected_operation=expected_operation,
             )
+    if rehearsal_final_plan_closure:
+        if expected_operation not in {"validate", "execute"}:
+            raise M336K2ProtocolError("M336K13 expected launcher operation is absent")
+        rehearsal_profile = m336k_official_profile_registry().profile(active_profile_id)
+        if (
+            request.purpose != "DISPOSABLE"
+            or rehearsal_profile.profile_status.value != "REHEARSAL_ONLY"
+            or request.native_dispatch_rehearsal is None
+        ):
+            raise M336K2ProtocolError("M336K13 rehearsal plan purpose changed")
+        invocation_plan = M336K5PythonInvocationPlan.from_dict(
+            _object(Path(request.windows_invocation_plan))
+        )
+        template = M336K13FinalControllerPlanTemplate.from_dict(
+            _object(Path(request.final_controller_plan_template))
+        )
+        lifecycle = M336K13FinalControllerInvocationPlanV2.from_dict(
+            _object(Path(request.final_controller_plan_lifecycle_receipt))
+        )
+        final_plan_binding = M336K13FinalControllerPlanBindingReceipt.from_dict(
+            _object(Path(request.final_controller_plan_binding_receipt))
+        )
+        actual_launcher_plan_receipt = M336K13ActualLauncherPlanReceipt.from_dict(
+            _object(Path(actual_launcher_plan_receipt_path))
+        )
+        expected_startup_receipt = Path(
+            invocation_plan.validate_startup_receipt
+            if expected_operation == "validate"
+            else invocation_plan.execute_startup_receipt
+        ).resolve(strict=True)
+        qualification_sha = _git(
+            git, root, "rev-parse", f"{request.exact_freeze_sha}^{{commit}}"
+        )
+        if (
+            startup_receipt_path.resolve(strict=True) != expected_startup_receipt
+            or actual_launcher_plan_receipt.selected_operation != expected_operation
+            or template.execution_scope != "REHEARSAL"
+            or lifecycle.execution_scope != "REHEARSAL"
+            or final_plan_binding.execution_scope != "REHEARSAL"
+            or lifecycle.exact_implementation_tip != request.exact_implementation_tip
+            or lifecycle.exact_qualification_sha != qualification_sha
+            or request.final_controller_plan_binding_receipt_hash
+            != final_plan_binding.receipt_hash
+        ):
+            raise M336K2ProtocolError("M336K13 rehearsal plan binding changed")
+        verify_m336k13_final_controller_plan_binding(
+            plan_path=Path(request.windows_invocation_plan),
+            template=template,
+            lifecycle=lifecycle,
+            binding=final_plan_binding,
+            actual_launcher_receipt=actual_launcher_plan_receipt,
+            selected_operation=expected_operation,
+        )
     capsule_binding = M336K7PersistentCapsuleBindingSet.from_dict(
         _object(Path(request.persistent_capsule_binding_set))
     )
@@ -1333,7 +1407,7 @@ def validate_m336k8_final_invocation(
         ),
         "actual_launcher_plan_receipt_schema_hash": (
             M336K13_ACTUAL_LAUNCHER_RECEIPT_SCHEMA_HASH
-            if active_final_plan_closure
+            if final_plan_binding is not None
             else None
         ),
     }
@@ -1579,7 +1653,9 @@ def _verify_controller_domain(
 
 
 def _controller_target_source(repository: Path, dependency, authorization) -> Path:
-    if getattr(authorization, "official_profile_id", None) == M336K12_PROFILE_ID:
+    if getattr(authorization, "official_profile_id", None) == M336K13_PROFILE_ID:
+        relative = "scripts/m336k13_run_final_route.py"
+    elif getattr(authorization, "official_profile_id", None) == M336K12_PROFILE_ID:
         relative = "scripts/m336k12_run_final_route.py"
     elif isinstance(dependency, M336K11HermeticExecutableDependencyManifest):
         relative = "scripts/m336k11_run_final_route.py"

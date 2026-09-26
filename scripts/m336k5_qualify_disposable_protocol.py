@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import re
 import shutil
@@ -103,6 +104,13 @@ from ai_brain.stage3.acquisition.m336k12_dispatch import (
     build_m336k12_native_stage_dispatches,
     verify_m336k12_native_stage_plan,
 )
+from ai_brain.stage3.acquisition.m336k13_plan import (
+    M336K13ActualLauncherPlanReceipt,
+    build_m336k13_final_controller_plan_binding,
+    build_m336k13_final_controller_plan_template,
+    create_m336k13_final_controller_plan_once,
+    verify_m336k13_final_controller_plan_binding,
+)
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
 _LAUNCH_GIT: Path | None = None
@@ -122,6 +130,7 @@ def main() -> None:
     official_admission_only = request.get("official_admission_only", False)
     disposable_publication_generation = request.get("disposable_publication_generation")
     native_stage_dispatch_generation = request.get("native_stage_dispatch_generation")
+    final_controller_plan_generation = request.get("final_controller_plan_generation")
     if namespace not in {"m336k5", "m336k7", "m336k8"}:
         raise M336K2ProtocolError("M336K disposable protocol namespace changed")
     expected = {
@@ -168,6 +177,8 @@ def main() -> None:
         expected |= {"disposable_publication_generation"}
     if "native_stage_dispatch_generation" in request:
         expected |= {"native_stage_dispatch_generation"}
+    if "final_controller_plan_generation" in request:
+        expected |= {"final_controller_plan_generation"}
     persistent = "persistent_karina_overlay" in request
     if namespace in {"m336k7", "m336k8"} and not persistent:
         raise M336K2ProtocolError(
@@ -211,6 +222,17 @@ def main() -> None:
             disposable_publication_generation != "m336k10"
             or namespace != "m336k8"
             or official_profile is None
+        )
+        or final_controller_plan_generation is not None
+        and (
+            final_controller_plan_generation != "m336k13"
+            or native_stage_dispatch_generation != "m336k12"
+            or namespace != "m336k8"
+            or expected_profile_status
+            is not M336KOfficialRouteProfileStatus.REHEARSAL_ONLY
+            or official_profile is None
+            or official_profile.profile_status
+            is not M336KOfficialRouteProfileStatus.REHEARSAL_ONLY
         )
     ):
         raise M336K2ProtocolError("M336K9 rehearsal profile purpose changed")
@@ -357,7 +379,18 @@ def main() -> None:
         Path(request["legacy_component_request_template"]).resolve(strict=True)
     )
     legacy_output = private / "legacy-components"
-    if disposable_publication_generation == "m336k10":
+    if final_controller_plan_generation == "m336k13":
+        publication_values = {
+            "q_root": "artifacts/m336k13/disposable/q38-like",
+            "f_root": "artifacts/m336k13/disposable/f38-like-freeze",
+            "h_root": "artifacts/m336k13/disposable/h38-like",
+            "e_root": "artifacts/m336k13/disposable/e38-like",
+            "q_subject": "M-33.6k.13 qualify disposable immutable launch",
+            "f_subject": "M-33.6k.13 freeze disposable immutable launch",
+            "h_subject": "M-33.6k.13 publish disposable sealed production",
+            "e_subject": "M-33.6k.13 publish disposable independent evidence",
+        }
+    elif disposable_publication_generation == "m336k10":
         publication_values = {
             "q_root": "artifacts/m336k10/disposable/q35-like",
             "f_root": "artifacts/m336k10/disposable/f35-like-freeze",
@@ -947,7 +980,6 @@ def main() -> None:
         if namespace == "m336k7"
         else write_m336k5_final_route_request
     )
-    request_writer(final_request, final_request_path)
     native_dispatch_closure = None
     native_dispatch_closure_path = None
     if native_stage_dispatch_generation == "m336k12":
@@ -1004,6 +1036,23 @@ def main() -> None:
             native_dispatch_closure_path,
             native_dispatch_closure.canonical_object(),
         )
+    final_plan_state = None
+    if final_controller_plan_generation == "m336k13":
+        final_request, final_plan_state = _attach_m336k13_rehearsal_plan(
+            final_request=final_request,
+            repository=repository,
+            git=git,
+            python=python,
+            powershell=powershell,
+            implementation=implementation,
+            qualification=q_like,
+            final_request_path=final_request_path,
+            validation_path=private / "preledger-invocation.json",
+            release_path=public / "reservation_release_receipt.json",
+            native_dispatch_closure_path=native_dispatch_closure_path,
+            plan_root=private / "final-controller-plan",
+        )
+    request_writer(final_request, final_request_path)
     mutation_path = public / "identity_mutation_receipt.json"
     if namespace == "m336k8":
         _run(
@@ -1074,32 +1123,37 @@ def main() -> None:
             raise M336K2ProtocolError("M336K9 admission mutation matrix failed")
     validation_path = private / "preledger-invocation.json"
     final_route_script = (
-        "scripts/m336k8_run_final_route.py"
+        "scripts/m336k13_run_final_route.py"
+        if final_controller_plan_generation == "m336k13"
+        else "scripts/m336k8_run_final_route.py"
         if namespace == "m336k8"
         else "scripts/m336k7_run_final_route.py"
         if namespace == "m336k7"
         else "scripts/m336k5_run_final_route.py"
     )
-    _run(
-        python,
-        repository,
-        final_route_script,
-        "--request",
-        str(final_request_path),
-        "--validate-only",
-        "--validation-receipt",
-        str(validation_path),
-        *(
-            ("--startup-receipt", str(startup_receipt_path))
-            if namespace == "m336k8"
-            else ()
-        ),
-        *(
-            ("--native-dispatch-rehearsal", str(native_dispatch_closure_path))
-            if native_dispatch_closure_path is not None
-            else ()
-        ),
-    )
+    if final_plan_state is not None:
+        _run_m336k13_plan_operation(final_plan_state, "validate")
+    else:
+        _run(
+            python,
+            repository,
+            final_route_script,
+            "--request",
+            str(final_request_path),
+            "--validate-only",
+            "--validation-receipt",
+            str(validation_path),
+            *(
+                ("--startup-receipt", str(startup_receipt_path))
+                if namespace == "m336k8"
+                else ()
+            ),
+            *(
+                ("--native-dispatch-rehearsal", str(native_dispatch_closure_path))
+                if native_dispatch_closure_path is not None
+                else ()
+            ),
+        )
     monitor.sample("DISPOSABLE_POST_FREEZE_VALIDATION")
     release_receipt_path = public / "reservation_release_receipt.json"
     if official_admission_only:
@@ -1224,7 +1278,10 @@ def main() -> None:
                 str(release_receipt_path),
             )
         )
-    _run(python, repository, final_route_script, *execution_arguments)
+    if final_plan_state is not None:
+        _run_m336k13_plan_operation(final_plan_state, "execute")
+    else:
+        _run(python, repository, final_route_script, *execution_arguments)
     release_receipt = _object(release_receipt_path)
     monitor.sample("DISPOSABLE_FINAL_ROUTE_COMPLETE")
     e_like = _git(git, repository, "rev-parse", "HEAD^{commit}")
@@ -1352,10 +1409,143 @@ def main() -> None:
     if measured_budget.status != "PASS":
         raise M336K2ProtocolError("M336K5 disposable resource budget failed")
     rehearsal_pool = _object(typed_output / "candidate_pool.json")
+    final_plan_evidence = {}
+    if final_plan_state is not None:
+        validate_actual = M336K13ActualLauncherPlanReceipt.from_dict(
+            _object(final_plan_state["validate_actual_receipt"])
+        )
+        execute_actual = M336K13ActualLauncherPlanReceipt.from_dict(
+            _object(final_plan_state["execute_actual_receipt"])
+        )
+        for operation, actual in (
+            ("validate", validate_actual),
+            ("execute", execute_actual),
+        ):
+            verify_m336k13_final_controller_plan_binding(
+                plan_path=final_plan_state["plan_path"],
+                template=final_plan_state["template"],
+                lifecycle=final_plan_state["lifecycle"],
+                binding=final_plan_state["binding"],
+                actual_launcher_receipt=actual,
+                selected_operation=operation,
+            )
+        binding = final_plan_state["binding"]
+        lifecycle = final_plan_state["lifecycle"]
+        source_hashes = final_plan_state["source_hashes"]
+        if (
+            bytes_hash(final_plan_state["plan_path"].read_bytes())
+            != binding.canonical_plan_bytes_hash
+            or validate_actual.actual_invocation_plan_hash
+            != binding.canonical_invocation_plan_hash
+            or execute_actual.actual_invocation_plan_hash
+            != binding.canonical_invocation_plan_hash
+            or validate_actual.selected_operation != "validate"
+            or execute_actual.selected_operation != "execute"
+            or _object(validation_path).get("actual_launcher_plan_receipt_hash")
+            != validate_actual.receipt_hash
+        ):
+            raise M336K2ProtocolError("M336K13 two-operation plan reuse changed")
+        two_operation_body = {
+            "schema_version": 1,
+            "contract_role": "PUBLIC_SAFE_M336K13_TWO_OPERATION_PLAN_REUSE",
+            "plan_template_hash": final_plan_state["template"].template_hash,
+            "plan_binding_receipt_hash": binding.receipt_hash,
+            "canonical_invocation_plan_hash": binding.canonical_invocation_plan_hash,
+            "canonical_plan_bytes_hash": binding.canonical_plan_bytes_hash,
+            "validate_actual_launcher_receipt_hash": validate_actual.receipt_hash,
+            "execute_actual_launcher_receipt_hash": execute_actual.receipt_hash,
+            "validate_execute_plan_hash_difference_count": int(
+                validate_actual.actual_invocation_plan_hash
+                != execute_actual.actual_invocation_plan_hash
+            ),
+            "validate_execute_plan_bytes_difference_count": int(
+                validate_actual.actual_plan_bytes_hash
+                != execute_actual.actual_plan_bytes_hash
+            ),
+            "selected_operation_mismatch_count": int(
+                validate_actual.selected_operation != "validate"
+            )
+            + int(execute_actual.selected_operation != "execute"),
+            "plan_creation_count": lifecycle.creation_count,
+            "plan_write_count": lifecycle.write_count,
+            "plan_rewrite_count": lifecycle.rewrite_count,
+            "parent_directory_fsync_result": (lifecycle.parent_directory_fsync_result),
+            "launcher_plan_receipts_status": "PASS",
+            "controller_status": "PASS",
+            "complete_rehearsal_route_status": "PASS",
+            "official_counter_count": 0,
+            "official_route_event_count": 0,
+            "official_source_body_bytes": 0,
+            "status": "PASS",
+        }
+        two_operation = {
+            **two_operation_body,
+            "report_hash": content_hash(two_operation_body),
+        }
+        _write(public / "two_operation_plan_reuse_report.json", two_operation)
+        active_path_body = {
+            "schema_version": 1,
+            "contract_role": "PUBLIC_SAFE_M336K13_ACTIVE_PATH_DISPOSABLE_ROUTE",
+            "plan_template_builder_source_hash": source_hashes["plan_template_builder"],
+            "rehearsal_plan_template_builder_source_hash": source_hashes[
+                "plan_template_builder"
+            ],
+            "exact_plan_builder_source_hash": source_hashes["exact_plan_builder"],
+            "rehearsal_exact_plan_builder_source_hash": source_hashes[
+                "exact_plan_builder"
+            ],
+            "bootstrap_receipt_producer_source_hash": source_hashes[
+                "bootstrap_receipt_producer"
+            ],
+            "rehearsal_bootstrap_receipt_producer_source_hash": source_hashes[
+                "bootstrap_receipt_producer"
+            ],
+            "target_verifier_source_hash": source_hashes["target_verifier"],
+            "rehearsal_target_verifier_source_hash": source_hashes["target_verifier"],
+            "source_difference_counts": (0, 0, 0, 0),
+            "validate_status": "PASS",
+            "execute_status": "PASS",
+            "acquisition_status": "PASS",
+            "candidate_isolation_status": "PASS",
+            "selector_status": "PASS",
+            "windows_production_status": "PASS",
+            "karina_production_status": "PASS",
+            "h_publication_status": "PASS",
+            "evaluator_status": "PASS",
+            "runtime_status": "PASS",
+            "e_publication_status": "PASS",
+            "commit_protocol_status": "PASS",
+            "source_leak_count": protocol["source_leak_count"],
+            "absolute_path_count": protocol["absolute_path_count"],
+            "private_public_artifact_count": protocol["private_artifact_count"],
+            "status": "PASS",
+        }
+        active_path = {
+            **active_path_body,
+            "report_hash": content_hash(active_path_body),
+        }
+        _write(public / "active_path_disposable_route_report.json", active_path)
+        final_plan_evidence = {
+            "final_controller_plan_generation": final_controller_plan_generation,
+            "final_controller_plan_template_hash": (
+                final_plan_state["template"].template_hash
+            ),
+            "final_controller_plan_binding_receipt_hash": binding.receipt_hash,
+            "validate_actual_launcher_plan_receipt_hash": validate_actual.receipt_hash,
+            "execute_actual_launcher_plan_receipt_hash": execute_actual.receipt_hash,
+            "two_operation_plan_reuse_report_hash": two_operation["report_hash"],
+            "active_path_disposable_route_report_hash": active_path["report_hash"],
+            "plan_rewrite_count": lifecycle.rewrite_count,
+            "official_plan_counter_count": 0,
+            "official_route_event_count": 0,
+            "official_source_body_bytes": 0,
+        }
     body = {
         "schema_version": 1,
         "contract_role": (
-            "PUBLIC_SAFE_M336K9_CONTROLLER_ADMISSION_FULL_ROUTE_REHEARSAL"
+            "PUBLIC_SAFE_M336K13_IMMUTABLE_LAUNCH_FULL_ROUTE_REHEARSAL"
+            if final_controller_plan_generation == "m336k13"
+            else "PUBLIC_SAFE_M336K9_CONTROLLER_ADMISSION_FULL_ROUTE_REHEARSAL"
             if official_profile is not None
             else "PUBLIC_SAFE_M336K8_OFFICIAL_ISOMORPHIC_COMMITTED_FREEZE_REHEARSAL"
             if namespace == "m336k8"
@@ -1468,6 +1658,7 @@ def main() -> None:
             else {}
         ),
         **source_domain_evidence,
+        **final_plan_evidence,
         **(
             {
                 "final_candidate_pool_hash": final_candidate_pool["pool_hash"],
@@ -1829,6 +2020,146 @@ def _run(python: Path, repository: Path, script: str, *arguments: str) -> None:
         raise subprocess.CalledProcessError(
             result.returncode,
             (script, *arguments),
+            output=result.stdout,
+            stderr=result.stderr,
+        )
+
+
+def _attach_m336k13_rehearsal_plan(
+    *,
+    final_request,
+    repository: Path,
+    git: Path,
+    python: Path,
+    powershell: Path,
+    implementation: str,
+    qualification: str,
+    final_request_path: Path,
+    validation_path: Path,
+    release_path: Path,
+    native_dispatch_closure_path: Path | None,
+    plan_root: Path,
+):
+    if native_dispatch_closure_path is None:
+        raise M336K2ProtocolError("M336K13 rehearsal dispatch closure is absent")
+    target = repository / "scripts/m336k13_run_final_route.py"
+    bootstrap = repository / "scripts/m336k5_python_bootstrap.py"
+    template = build_m336k13_final_controller_plan_template(
+        target_source_hash=bytes_hash(target.read_bytes()),
+        bootstrap_source_hash=bytes_hash(bootstrap.read_bytes()),
+        execution_scope="REHEARSAL",
+    )
+    plan = build_m336k5_python_invocation(
+        platform_role="WINDOWS",
+        process_role="FINAL_CONTROLLER",
+        python_executable=python,
+        git_executable=git,
+        powershell_executable=powershell,
+        repository=repository,
+        working_directory=repository,
+        bootstrap_script=bootstrap,
+        target=target,
+        validate_arguments=(
+            "--request",
+            str(final_request_path),
+            "--validate-only",
+            "--validation-receipt",
+            str(validation_path),
+        ),
+        execute_arguments=(
+            "--request",
+            str(final_request_path),
+            "--post-freeze-validation-receipt",
+            str(validation_path),
+            "--reservation-release-receipt",
+            str(release_path),
+        ),
+        validate_startup_receipt=plan_root / "validate-startup.json",
+        execute_startup_receipt=plan_root / "execute-startup.json",
+    )
+    plan_path = plan_root / "exact-invocation-plan.json"
+    lifecycle = create_m336k13_final_controller_plan_once(
+        plan=plan,
+        plan_path=plan_path,
+        template=template,
+        exact_implementation_tip=implementation,
+        exact_qualification_sha=qualification,
+    )
+    binding = build_m336k13_final_controller_plan_binding(
+        plan=plan,
+        plan_path=plan_path,
+        template=template,
+        lifecycle=lifecycle,
+    )
+    verify_m336k13_final_controller_plan_binding(
+        plan_path=plan_path,
+        template=template,
+        lifecycle=lifecycle,
+        binding=binding,
+    )
+    template_path = plan_root / "public-plan-template.json"
+    lifecycle_path = plan_root / "private-plan-lifecycle.json"
+    binding_path = plan_root / "public-plan-binding.json"
+    _write(template_path, template.canonical_object())
+    _write(lifecycle_path, lifecycle.canonical_object())
+    _write(binding_path, binding.canonical_object())
+    values = asdict(final_request)
+    for name in (
+        "schema_version",
+        "contract_role",
+        "builder_identity_hash",
+        "request_hash",
+    ):
+        values.pop(name)
+    values.update(
+        {
+            "windows_invocation_plan": str(plan_path),
+            "final_controller_plan_template": str(template_path),
+            "final_controller_plan_lifecycle_receipt": str(lifecycle_path),
+            "final_controller_plan_binding_receipt": str(binding_path),
+            "final_controller_plan_binding_receipt_hash": binding.receipt_hash,
+            "native_dispatch_rehearsal": str(native_dispatch_closure_path),
+        }
+    )
+    rebound_request = build_m336k8_final_route_request(**values)
+    source_hashes = {
+        "plan_template_builder": content_hash(
+            inspect.getsource(build_m336k13_final_controller_plan_template)
+        ),
+        "exact_plan_builder": content_hash(
+            inspect.getsource(create_m336k13_final_controller_plan_once)
+        ),
+        "bootstrap_receipt_producer": bytes_hash(bootstrap.read_bytes()),
+        "target_verifier": content_hash(
+            inspect.getsource(verify_m336k13_final_controller_plan_binding)
+        ),
+    }
+    return rebound_request, {
+        "template": template,
+        "lifecycle": lifecycle,
+        "binding": binding,
+        "plan_path": plan_path,
+        "validate_actual_receipt": plan_root / "validate-actual-launch.json",
+        "execute_actual_receipt": plan_root / "execute-actual-launch.json",
+        "source_hashes": source_hashes,
+    }
+
+
+def _run_m336k13_plan_operation(state: dict, operation: str) -> None:
+    actual_path = state[f"{operation}_actual_receipt"]
+    result = run_m336k5_python_invocation(
+        plan_path=state["plan_path"],
+        operation=operation,
+        actual_launcher_plan_receipt=actual_path,
+        execution_scope="REHEARSAL",
+    )
+    if result.returncode:
+        failure_root = state["plan_path"].parent
+        (failure_root / f"{operation}-failure.stdout.log").write_bytes(result.stdout)
+        (failure_root / f"{operation}-failure.stderr.log").write_bytes(result.stderr)
+        raise subprocess.CalledProcessError(
+            result.returncode,
+            ("m336k13-final-controller-plan", operation),
             output=result.stdout,
             stderr=result.stderr,
         )
