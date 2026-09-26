@@ -24,6 +24,7 @@ from ai_brain.stage3.acquisition.m336k2_execution import (
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_startup import (
     M336K5_REQUIRED_INTERPRETER_ARGUMENTS,
+    M336K5PythonInvocationPlan,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     M336KOfficialRouteProfile,
@@ -88,6 +89,7 @@ M336K12_MUTATION_CASES = (
     "target-arguments-include-private-environment-value",
     "historical-v4-profile-used-for-v5-plan",
     "native-capsule-command-hash-kept-stale",
+    "published-freeze-plan-validation-path-changed",
 )
 
 
@@ -133,6 +135,56 @@ def _target_argument_template(event: str) -> tuple[str, ...]:
         "--receipt",
         f"{{PRIVATE_STAGE_RECEIPTS}}/{event}.json",
     )
+
+
+def verify_m336k12_freeze_plan_admission(
+    *,
+    plan: M336K5PythonInvocationPlan,
+    exact_implementation_tip: str,
+    exact_qualification_sha: str,
+) -> None:
+    """Reject a post-Q freeze plan that cannot be reused after F commits."""
+
+    if not _is_sha(exact_implementation_tip) or not _is_sha(exact_qualification_sha):
+        raise M336K2ProtocolError("M336K12 freeze plan lineage is invalid")
+    if exact_qualification_sha == exact_implementation_tip:
+        return
+    validate = plan.validate_arguments
+    execute = plan.execute_arguments
+    if (
+        plan.process_role != "FINAL_CONTROLLER"
+        or len(validate) != 5
+        or validate[0] != "--request"
+        or validate[2] != "--validate-only"
+        or validate[3] != "--validation-receipt"
+        or len(execute) != 6
+        or execute[0] != "--request"
+        or execute[2] != "--post-freeze-validation-receipt"
+        or execute[4] != "--reservation-release-receipt"
+    ):
+        raise M336K2ProtocolError(
+            "M336K12 published freeze plan operation shape changed"
+        )
+    request_path = validate[1]
+    validation_path = validate[4]
+    release_path = execute[5]
+    bound_paths = (
+        request_path,
+        validation_path,
+        release_path,
+        plan.validate_startup_receipt,
+        plan.execute_startup_receipt,
+    )
+    if (
+        execute[1] != request_path
+        or execute[3] != validation_path
+        or len(set(bound_paths)) != len(bound_paths)
+        or any(not Path(value).is_absolute() for value in bound_paths)
+        or any("prospective" in Path(value).name.casefold() for value in bound_paths)
+    ):
+        raise M336K2ProtocolError(
+            "M336K12 published freeze plan is not final-controller stable"
+        )
 
 
 @dataclass(frozen=True)

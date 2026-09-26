@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import sys
 from dataclasses import asdict, fields, replace
 from pathlib import Path
@@ -15,6 +16,7 @@ from ai_brain.stage3.acquisition.m336k2_execution import M336K2_COMMAND_EVENTS
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_execution import M336K5HermeticCommandWorker
 from ai_brain.stage3.acquisition.m336k5_startup import (
+    build_m336k5_python_invocation,
     build_m336k5_python_startup_policy,
 )
 from ai_brain.stage3.acquisition.m336k8_freeze import M336K8FreezeManifest
@@ -40,6 +42,7 @@ from ai_brain.stage3.acquisition.m336k12_dispatch import (
     M336K12PreledgerDispatchAdmissionPolicy,
     build_m336k12_native_execution_plan,
     build_m336k12_native_stage_dispatches,
+    verify_m336k12_freeze_plan_admission,
     verify_m336k12_native_stage_plan,
 )
 
@@ -140,6 +143,46 @@ def _rehash_dataclass(value, hash_field: str, **changes):
     body = asdict(changed)
     body.pop(hash_field)
     return replace(changed, **{hash_field: content_hash(body)})
+
+
+def _final_controller_plan(tmp_path: Path):
+    request = tmp_path / "official-final-request-v2.json"
+    validation = tmp_path / "post-f38-validation.json"
+    git = shutil.which("git")
+    assert git is not None
+    return build_m336k5_python_invocation(
+        platform_role="WINDOWS",
+        process_role="FINAL_CONTROLLER",
+        python_executable=Path(sys.executable),
+        git_executable=Path(git),
+        powershell_executable=Path(sys.executable),
+        repository=ROOT,
+        working_directory=ROOT,
+        bootstrap_script=ROOT / "scripts/m336k5_python_bootstrap.py",
+        target=ROOT / "scripts/m336k12_run_final_route.py",
+        execute_arguments=(
+            "--request",
+            str(request),
+            "--post-freeze-validation-receipt",
+            str(validation),
+            "--reservation-release-receipt",
+            str(tmp_path / "f38-reservation-release.json"),
+        ),
+        validate_arguments=(
+            "--request",
+            str(request),
+            "--validate-only",
+            "--validation-receipt",
+            str(validation),
+        ),
+        execute_startup_receipt=tmp_path / "official-execute-startup.json",
+        validate_startup_receipt=tmp_path / "post-f38-validate-startup.json",
+        parent_environment={
+            "SYSTEMROOT": str(tmp_path),
+            "TEMP": str(tmp_path),
+            "TMP": str(tmp_path),
+        },
+    )
 
 
 def test_m336k12_complete_plan_has_one_typed_producer_and_consumer(
@@ -611,6 +654,22 @@ def test_m336k12_closed_under_rehash_mutations(case: str, tmp_path: Path) -> Non
             dispatch_contract_hash=content_hash(case),
         )
         operation = changed.verify
+    elif number == 43:
+        final_plan = _final_controller_plan(tmp_path)
+        changed = _rehash_dataclass(
+            final_plan,
+            "invocation_plan_hash",
+            execute_arguments=(
+                *final_plan.execute_arguments[:3],
+                str(tmp_path / "different-post-f38-validation.json"),
+                *final_plan.execute_arguments[4:],
+            ),
+        )
+        operation = lambda: verify_m336k12_freeze_plan_admission(
+            plan=changed,
+            exact_implementation_tip="a" * 40,
+            exact_qualification_sha="b" * 40,
+        )
     else:
         raise AssertionError(f"unhandled mutation {number}: {case}")
 
@@ -619,8 +678,40 @@ def test_m336k12_closed_under_rehash_mutations(case: str, tmp_path: Path) -> Non
 
 
 def test_m336k12_mutation_suite_shape() -> None:
-    assert len(M336K12_MUTATION_CASES) == 42
-    assert len(set(M336K12_MUTATION_CASES)) == 42
+    assert len(M336K12_MUTATION_CASES) == 43
+    assert len(set(M336K12_MUTATION_CASES)) == 43
+
+
+def test_m336k12_published_freeze_plan_is_reusable_after_commit(
+    tmp_path: Path,
+) -> None:
+    plan = _final_controller_plan(tmp_path)
+
+    verify_m336k12_freeze_plan_admission(
+        plan=plan,
+        exact_implementation_tip="a" * 40,
+        exact_qualification_sha="b" * 40,
+    )
+
+
+def test_m336k12_prospective_plan_remains_phase_neutral(tmp_path: Path) -> None:
+    plan = _rehash_dataclass(
+        _final_controller_plan(tmp_path),
+        "invocation_plan_hash",
+        validate_arguments=(
+            "--request",
+            str(tmp_path / "prospective-final-request.json"),
+            "--validate-only",
+            "--validation-receipt",
+            str(tmp_path / "prospective-validation.json"),
+        ),
+    )
+
+    verify_m336k12_freeze_plan_admission(
+        plan=plan,
+        exact_implementation_tip="a" * 40,
+        exact_qualification_sha="a" * 40,
+    )
 
 
 def test_m336k12_preledger_controller_target_is_v5_entrypoint() -> None:

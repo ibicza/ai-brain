@@ -150,6 +150,7 @@ from ai_brain.stage3.acquisition.m336k12_dispatch import (
     build_m336k12_native_execution_plan,
     build_m336k12_native_stage_dispatches,
     m336k12_native_dispatch_contract_hash,
+    verify_m336k12_freeze_plan_admission,
     verify_m336k12_native_stage_plan,
 )
 
@@ -245,6 +246,14 @@ def main() -> None:
         raise M336K2ProtocolError("M336K5 component identity namespace is invalid")
     repository = Path(request["repository"]).resolve(strict=True)
     legacy = Path(request["legacy_bundle"]).resolve(strict=True)
+    if profile_id == M336K12_PROFILE_ID:
+        verify_m336k12_freeze_plan_admission(
+            plan=M336K5PythonInvocationPlan.from_dict(
+                _object(Path(request["windows_invocation_plan"]))
+            ),
+            exact_implementation_tip=request["exact_implementation_tip"],
+            exact_qualification_sha=request["exact_q30_sha"],
+        )
     if (
         identity_namespace in {"m336k7", "m336k8"}
         and request["identity_mode"] == "OFFICIAL"
