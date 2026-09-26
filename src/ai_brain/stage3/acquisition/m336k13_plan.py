@@ -45,7 +45,7 @@ M336K13_PROFILE_ID = "m336k8-final-v6"
 M336K13_CONTROLLER_VERSION = "m336k13-controller.v6"
 M336K13_EXECUTION_SCOPES = frozenset({"OFFICIAL_CONTROLLER", "REHEARSAL"})
 M336K13_TARGET_REPOSITORY_PATH = "scripts/m336k13_run_final_route.py"
-M336K13_BOOTSTRAP_REPOSITORY_PATH = "scripts/m336k5_python_bootstrap.py"
+M336K13_BOOTSTRAP_REPOSITORY_PATH = "scripts/m336k13_final_controller_bootstrap.py"
 M336K13_VALIDATE_SHAPE = (
     "--request",
     "{FINAL_REQUEST}",

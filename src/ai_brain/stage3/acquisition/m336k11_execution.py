@@ -558,6 +558,7 @@ def verify_m336k11_live_execution_inputs(
     native_stage_worker_bytes: bytes,
     native_capsule: M336K11NativeExecutionCapsuleReceipt,
     expected_target: Path,
+    controller_bootstrap_source_hash: str | None = None,
 ) -> None:
     """Match live launch inputs to the frozen v4 closure without environment reads."""
 
@@ -568,6 +569,17 @@ def verify_m336k11_live_execution_inputs(
     startup = M336K5PythonStartupReceipt.from_dict(asdict(startup_receipt))
     if effective_environment.status != "PASS":
         raise M336K2ProtocolError("M336K11 effective environment did not pass")
+    if controller_bootstrap_source_hash is not None and (
+        not _is_hash(controller_bootstrap_source_hash)
+        or not _is_hash(
+            getattr(
+                native_capsule,
+                "final_controller_plan_binding_receipt_hash",
+                None,
+            )
+        )
+    ):
+        raise M336K2ProtocolError("M336K13 controller bootstrap authority is invalid")
     if (
         invocation_plan.platform_role != "WINDOWS"
         or invocation_plan.target_kind != "SCRIPT"
@@ -599,7 +611,7 @@ def verify_m336k11_live_execution_inputs(
         ),
         (
             invocation_plan.expected_bootstrap_source_hash,
-            manifest.bootstrap_source_hash,
+            controller_bootstrap_source_hash or manifest.bootstrap_source_hash,
         ),
         (startup.startup_policy_hash, manifest.static_startup_policy_hash),
         (

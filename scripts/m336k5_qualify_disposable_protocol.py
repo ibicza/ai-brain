@@ -111,6 +111,9 @@ from ai_brain.stage3.acquisition.m336k13_plan import (
     create_m336k13_final_controller_plan_once,
     verify_m336k13_final_controller_plan_binding,
 )
+from ai_brain.stage3.acquisition.m336k13_startup import (
+    run_m336k13_python_invocation,
+)
 from ai_brain.stage3.acquisition.m336k_acquisition import M336KAcquisitionLedger
 
 _LAUNCH_GIT: Path | None = None
@@ -2043,7 +2046,7 @@ def _attach_m336k13_rehearsal_plan(
     if native_dispatch_closure_path is None:
         raise M336K2ProtocolError("M336K13 rehearsal dispatch closure is absent")
     target = repository / "scripts/m336k13_run_final_route.py"
-    bootstrap = repository / "scripts/m336k5_python_bootstrap.py"
+    bootstrap = repository / "scripts/m336k13_final_controller_bootstrap.py"
     template = build_m336k13_final_controller_plan_template(
         target_source_hash=bytes_hash(target.read_bytes()),
         bootstrap_source_hash=bytes_hash(bootstrap.read_bytes()),
@@ -2147,7 +2150,7 @@ def _attach_m336k13_rehearsal_plan(
 
 def _run_m336k13_plan_operation(state: dict, operation: str) -> None:
     actual_path = state[f"{operation}_actual_receipt"]
-    result = run_m336k5_python_invocation(
+    result = run_m336k13_python_invocation(
         plan_path=state["plan_path"],
         operation=operation,
         actual_launcher_plan_receipt=actual_path,

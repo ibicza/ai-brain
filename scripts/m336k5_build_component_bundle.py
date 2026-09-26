@@ -1696,6 +1696,7 @@ def _write_m336k13_executable_binding_receipt(
         ).read_bytes(),
         native_capsule=capsule,
         expected_target=repository / "scripts/m336k13_run_final_route.py",
+        controller_bootstrap_source_hash=template.bootstrap_source_hash,
     )
     authorization = _object(output / "final_authorization.json")
     plan_hash = final_plan_binding.receipt_hash

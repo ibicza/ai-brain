@@ -133,6 +133,7 @@ from ai_brain.stage3.acquisition.m336k12_dispatch import (
 )
 from ai_brain.stage3.acquisition.m336k13_plan import (
     M336K13_ACTUAL_LAUNCHER_RECEIPT_SCHEMA_HASH,
+    M336K13_BOOTSTRAP_REPOSITORY_PATH,
     M336K13_PROFILE_ID,
     M336K13ActualLauncherPlanReceipt,
     M336K13ActualLauncherPlanReceiptSchema,
@@ -688,6 +689,11 @@ def validate_m336k8_final_invocation(
                 else "scripts/m336k12_run_final_route.py"
                 if active_native_dispatch_closure
                 else "scripts/m336k11_run_final_route.py"
+            ),
+            controller_bootstrap_source_hash=(
+                bytes_hash((root / M336K13_BOOTSTRAP_REPOSITORY_PATH).read_bytes())
+                if active_final_plan_closure
+                else None
             ),
         )
         if active_native_dispatch_closure:
@@ -2797,6 +2803,9 @@ def recompute_m336k11_executable_binding(
                 "scripts/m336k13_run_final_route.py"
                 if final_plan_active
                 else "scripts/m336k12_run_final_route.py"
+            ),
+            controller_bootstrap_source_hash=(
+                template.bootstrap_source_hash if final_plan_active else None
             ),
         )
         prospective_plan = build_m336k12_native_execution_plan(

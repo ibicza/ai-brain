@@ -16,15 +16,16 @@ from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_invocation,
-    run_m336k5_python_invocation,
     write_m336k5_python_invocation_plan,
 )
+from ai_brain.stage3.acquisition.m336k8_contracts import M336K8_BRIDGE_PATHS
 from ai_brain.stage3.acquisition.m336k8_freeze import M336K8FreezeManifest
 from ai_brain.stage3.acquisition.m336k8_request import _controller_target_source
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
 )
 from ai_brain.stage3.acquisition.m336k13_plan import (
+    M336K13_BOOTSTRAP_REPOSITORY_PATH,
     M336K13_MUTATION_CASES,
     M336K13_PLAN_BINDING_CONSUMERS,
     M336K13ActualLauncherPlanReceipt,
@@ -36,6 +37,9 @@ from ai_brain.stage3.acquisition.m336k13_plan import (
     build_m336k13_final_controller_plan_template,
     create_m336k13_final_controller_plan_once,
     verify_m336k13_final_controller_plan_binding,
+)
+from ai_brain.stage3.acquisition.m336k13_startup import (
+    run_m336k13_python_invocation,
 )
 
 
@@ -102,6 +106,29 @@ def test_m336k13_controller_source_domain_uses_v13_target() -> None:
     )
 
 
+def test_m336k13_controller_bootstrap_preserves_frozen_capsule_bridge() -> None:
+    root = Path(__file__).resolve().parents[1]
+    shared_paths = (
+        "scripts/m336k5_python_bootstrap.py",
+        "src/ai_brain/stage3/acquisition/m336k5_startup.py",
+    )
+    for relative in shared_paths:
+        frozen = subprocess.run(
+            (
+                str(_tool("git")),
+                "show",
+                f"9de5a86082a12ce4be4b285bb3a91e8340fd2c72:{relative}",
+            ),
+            cwd=root,
+            check=True,
+            capture_output=True,
+        ).stdout
+        assert (root / relative).read_bytes() == frozen
+    bridge_paths = {relative for _role, relative in M336K8_BRIDGE_PATHS}
+    assert M336K13_BOOTSTRAP_REPOSITORY_PATH not in bridge_paths
+    assert (root / M336K13_BOOTSTRAP_REPOSITORY_PATH).is_file()
+
+
 @pytest.fixture(scope="module")
 def closure(tmp_path_factory: pytest.TempPathFactory) -> SimpleNamespace:
     root = Path(__file__).resolve().parents[1]
@@ -113,7 +140,7 @@ def closure(tmp_path_factory: pytest.TempPathFactory) -> SimpleNamespace:
     execute_startup = private / "execute-startup.json"
     plan_path = private / "final-controller-plan.json"
     target = root / "scripts/m336k13_run_final_route.py"
-    bootstrap = root / "scripts/m336k5_python_bootstrap.py"
+    bootstrap = root / "scripts/m336k13_final_controller_bootstrap.py"
     powershell = shutil.which("pwsh") or shutil.which("powershell")
     if powershell is None:
         pytest.skip("PowerShell is absent")
@@ -290,7 +317,7 @@ def test_m336k13_template_repository_target_role_cannot_be_spoofed(
 ) -> None:
     root = Path(__file__).resolve().parents[1]
     target = root / "tests/fixtures/m336k13_bootstrap_probe.py"
-    bootstrap = root / "scripts/m336k5_python_bootstrap.py"
+    bootstrap = root / "scripts/m336k13_final_controller_bootstrap.py"
     powershell = shutil.which("pwsh") or shutil.which("powershell")
     if powershell is None:
         pytest.skip("PowerShell is absent")
@@ -404,7 +431,7 @@ def test_m336k13_bootstrap_attests_same_exact_plan_for_both_operations(
         powershell_executable=Path(powershell),
         repository=root,
         working_directory=root,
-        bootstrap_script=root / "scripts/m336k5_python_bootstrap.py",
+        bootstrap_script=root / "scripts/m336k13_final_controller_bootstrap.py",
         target=root / "tests/fixtures/m336k13_bootstrap_probe.py",
         validate_arguments=(
             "--request",
@@ -426,7 +453,7 @@ def test_m336k13_bootstrap_attests_same_exact_plan_for_both_operations(
     )
     write_m336k5_python_invocation_plan(plan, plan_path)
     frozen_bytes = plan_path.read_bytes()
-    validate = run_m336k5_python_invocation(
+    validate = run_m336k13_python_invocation(
         plan_path=plan_path,
         operation="validate",
         actual_launcher_plan_receipt=validate_actual,
@@ -434,7 +461,7 @@ def test_m336k13_bootstrap_attests_same_exact_plan_for_both_operations(
     )
     assert validate.returncode == 0, validate.stderr.decode(errors="replace")
     assert plan_path.read_bytes() == frozen_bytes
-    execute = run_m336k5_python_invocation(
+    execute = run_m336k13_python_invocation(
         plan_path=plan_path,
         operation="execute",
         actual_launcher_plan_receipt=execute_actual,
@@ -464,7 +491,7 @@ def test_m336k13_bootstrap_attests_same_exact_plan_for_both_operations(
         validate_receipt.actual_plan_file_identity_hash
         == execute_receipt.actual_plan_file_identity_hash
     )
-    collision = run_m336k5_python_invocation(
+    collision = run_m336k13_python_invocation(
         plan_path=plan_path,
         operation="validate",
         actual_launcher_plan_receipt=validation,
