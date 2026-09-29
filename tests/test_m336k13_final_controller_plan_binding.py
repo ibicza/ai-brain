@@ -718,8 +718,7 @@ def test_m336k13_rehearsal_plan_handles_are_external_to_historical_freeze(
         "bytes_hash": bytes_hash(frozen_bytes),
     }
     components = {
-        name: SimpleNamespace(**component_value)
-        for name in component_attributes
+        name: SimpleNamespace(**component_value) for name in component_attributes
     }
     components.update(
         {
