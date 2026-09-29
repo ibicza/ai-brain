@@ -26,6 +26,7 @@ from ai_brain.stage3.acquisition.m336k8_contracts import M336K8_BRIDGE_PATHS
 from ai_brain.stage3.acquisition.m336k8_freeze import M336K8FreezeManifest
 from ai_brain.stage3.acquisition.m336k8_request import (
     _controller_target_source,
+    _m336k13_rehearsal_qualification_sha,
     _verify_frozen_component_handles,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
@@ -735,6 +736,31 @@ def test_m336k13_rehearsal_plan_handles_are_external_to_historical_freeze(
     request.official_executable_binding_receipt = str(external)
     with pytest.raises(M336K2ProtocolError, match="frozen component handle is absent"):
         _verify_frozen_component_handles(tmp_path, components, request)
+
+
+def test_m336k13_rehearsal_qualification_is_freeze_first_parent() -> None:
+    root = Path(__file__).resolve().parents[1]
+    git = _tool("git")
+    freeze_sha = subprocess.run(
+        (str(git), "rev-parse", "HEAD^{commit}"),
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="strict",
+    ).stdout.strip()
+    expected = subprocess.run(
+        (str(git), "rev-parse", f"{freeze_sha}^1^{{commit}}"),
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="strict",
+    ).stdout.strip()
+
+    assert _m336k13_rehearsal_qualification_sha(git, root, freeze_sha) == expected
 
 
 def test_m336k13_exact_plan_is_write_once_parent_fsynced_and_equal_sha_safe(

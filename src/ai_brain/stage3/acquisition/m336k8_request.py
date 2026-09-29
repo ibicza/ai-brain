@@ -872,8 +872,8 @@ def validate_m336k8_final_invocation(
             if expected_operation == "validate"
             else invocation_plan.execute_startup_receipt
         ).resolve(strict=True)
-        qualification_sha = _git(
-            git, root, "rev-parse", f"{request.exact_freeze_sha}^{{commit}}"
+        qualification_sha = _m336k13_rehearsal_qualification_sha(
+            git, root, request.exact_freeze_sha
         )
         if (
             startup_receipt_path.resolve(strict=True) != expected_startup_receipt
@@ -3063,3 +3063,9 @@ def _git(git: Path, root: Path, *arguments: str) -> str:
         errors="strict",
         env=m336k2_minimal_environment(),
     ).stdout.strip()
+
+
+def _m336k13_rehearsal_qualification_sha(git: Path, root: Path, freeze_sha: str) -> str:
+    if not _is_sha(freeze_sha):
+        raise M336K2ProtocolError("M336K13 rehearsal freeze SHA is invalid")
+    return _git(git, root, "rev-parse", f"{freeze_sha}^1^{{commit}}")
