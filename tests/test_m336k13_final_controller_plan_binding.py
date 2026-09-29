@@ -15,6 +15,8 @@ import pytest
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k2_publication import (
+    _e_source_files,
+    _h_source_files,
     build_m336k2_publication_contract,
     publication_contract_from_dict,
 )
@@ -87,6 +89,27 @@ _K10_DISPOSABLE_PUBLICATION_TUPLE = (
     "M-33.6k.10 publish disposable sealed production",
     "M-33.6k.10 publish disposable independent evidence",
 )
+
+
+@pytest.mark.parametrize(
+    ("h_root", "e_root"),
+    (
+        (
+            "artifacts/m336k13/disposable/h38-like",
+            "artifacts/m336k13/disposable/e38-like",
+        ),
+        ("artifacts/m336k13/h38", "artifacts/m336k13/e38"),
+    ),
+)
+def test_m336k13_publication_requires_route_identity_observation(
+    h_root: str, e_root: str
+) -> None:
+    contract = build_m336k2_publication_contract(h_root=h_root, e_root=e_root)
+
+    assert "route_identity_observation.json" in _h_source_files(contract)
+    assert "route_identity_observation.json" in _e_source_files(contract)
+
+
 _HISTORICAL_PUBLICATION_TUPLES = (
     (
         "artifacts/m336k9/q34",
