@@ -415,7 +415,7 @@ def test_final_lineage_uses_real_git_objects_without_depth_shortcuts(
     tmp_path: Path,
 ) -> None:
     remote = tmp_path / "remote.git"
-    repository = tmp_path / "repository"
+    repository = tmp_path / "r"
     _run("init", "--bare", str(remote))
     _run("clone", "--no-local", str(ROOT), str(repository))
     _run("config", "user.email", "m336j3@example.invalid", cwd=repository)
