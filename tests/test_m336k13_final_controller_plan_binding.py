@@ -24,7 +24,10 @@ from ai_brain.stage3.acquisition.m336k5_startup import (
 )
 from ai_brain.stage3.acquisition.m336k8_contracts import M336K8_BRIDGE_PATHS
 from ai_brain.stage3.acquisition.m336k8_freeze import M336K8FreezeManifest
-from ai_brain.stage3.acquisition.m336k8_request import _controller_target_source
+from ai_brain.stage3.acquisition.m336k8_request import (
+    _controller_target_source,
+    _verify_frozen_component_handles,
+)
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
 )
@@ -643,6 +646,96 @@ def test_m336k13_final_route_wrapper_is_directly_invocable() -> None:
         capture_output=True,
     )
     assert result.returncode == 0, result.stderr.decode(errors="replace")
+
+
+def test_m336k13_rehearsal_plan_handles_are_external_to_historical_freeze(
+    tmp_path: Path,
+) -> None:
+    frozen = tmp_path / "frozen.json"
+    frozen.write_text("{}\n", encoding="utf-8", newline="\n")
+    external = tmp_path / "external.json"
+    external.write_text("{}\n", encoding="utf-8", newline="\n")
+    component_attributes = {
+        "final_authorization": "final_authorization",
+        "route_identity_bundle": "route_identity_bundle",
+        "post_freeze_input_bundle": "post_freeze_input_bundle",
+        "freeze_assembly_plan": "freeze_assembly_plan",
+        "freeze_assembly_receipt": "freeze_assembly_receipt",
+        "controller_source_identity_policy": "controller_source_identity_policy",
+        "controller_source_identity_receipt": "controller_source_identity_receipt",
+        "controller_python_environment_manifest": (
+            "controller_python_environment_manifest"
+        ),
+        "controller_executable_dependency_manifest": (
+            "controller_executable_dependency_manifest"
+        ),
+        "controller_startup_binding": "controller_startup_binding",
+        "capsule_binding_set": "persistent_capsule_binding_set",
+        "persistent_capsule_source_binding": "persistent_capsule_source_binding",
+        "persistent_capsule_python_environment_manifest": (
+            "persistent_capsule_python_environment_manifest"
+        ),
+        "persistent_capsule_executable_dependency_manifest": (
+            "persistent_capsule_executable_dependency_manifest"
+        ),
+        "legacy_capsule_compatibility": "legacy_capsule_compatibility",
+        "legacy_controller_alias_receipt": "legacy_controller_alias_receipt",
+        "bridge_surface_manifest": "bridge_surface_manifest",
+        "source_domain_compatibility": "source_domain_compatibility",
+        "frozen_contract_compatibility_v2": "frozen_contract_compatibility_v2",
+        "resource_budget_policy": "resource_budget_policy",
+        "resource_observation": "resource_observation_receipt",
+        "storage_reservation": "storage_reservation_receipt",
+        "resource_gate": "resource_gate_receipt",
+        "capsule_liveness": "capsule_liveness_receipt",
+    }
+    optional_attributes = {
+        "executable_dependency_manifest",
+        "effective_environment_binding",
+        "official_controller_executable_binding",
+        "native_execution_capsule_receipt",
+        "native_route_manifest",
+        "official_executable_binding_receipt",
+        "native_stage_dispatches",
+        "native_stage_plan_binding",
+        "producer_consumer_parity_receipt",
+    }
+    request_values = {
+        attribute: str(frozen) for attribute in component_attributes.values()
+    }
+    request_values.update({attribute: None for attribute in optional_attributes})
+    request_values.update(
+        purpose="DISPOSABLE",
+        native_dispatch_rehearsal=str(external),
+        final_controller_plan_template=str(external),
+        final_controller_plan_binding_receipt=str(external),
+    )
+    request = SimpleNamespace(**request_values)
+    frozen_bytes = frozen.read_bytes()
+    component_value = {
+        "relative_path": frozen.name,
+        "byte_count": len(frozen_bytes),
+        "bytes_hash": bytes_hash(frozen_bytes),
+    }
+    components = {
+        name: SimpleNamespace(**component_value)
+        for name in component_attributes
+    }
+    components.update(
+        {
+            name: SimpleNamespace(**component_value)
+            for name in (
+                "python_environment_manifest",
+                "executable_dependency_manifest",
+            )
+        }
+    )
+
+    _verify_frozen_component_handles(tmp_path, components, request)
+
+    request.official_executable_binding_receipt = str(external)
+    with pytest.raises(M336K2ProtocolError, match="frozen component handle is absent"):
+        _verify_frozen_component_handles(tmp_path, components, request)
 
 
 def test_m336k13_exact_plan_is_write_once_parent_fsynced_and_equal_sha_safe(

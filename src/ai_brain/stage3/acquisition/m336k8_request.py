@@ -1498,9 +1498,23 @@ def _verify_frozen_component_handles(
             request.final_controller_plan_binding_receipt
         ),
     }
-    mappings.update(
-        {name: value for name, value in optional_mappings.items() if value is not None}
-    )
+    external_rehearsal_plan_components = {
+        "final_controller_plan_template",
+        "final_controller_plan_binding_receipt",
+    }
+    for name, value in optional_mappings.items():
+        if value is None:
+            continue
+        if name in components:
+            mappings[name] = value
+            continue
+        if (
+            name in external_rehearsal_plan_components
+            and request.purpose == "DISPOSABLE"
+            and request.native_dispatch_rehearsal is not None
+        ):
+            continue
+        raise M336K2ProtocolError(f"M336K8 frozen component handle is absent: {name}")
     for name, supplied_value in mappings.items():
         component = components[name]
         frozen = root.joinpath(*Path(component.relative_path).parts).resolve(
