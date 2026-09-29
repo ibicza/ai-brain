@@ -90,6 +90,9 @@ from ai_brain.stage3.acquisition.m336k8_request import (
     build_m336k8_final_route_request,
     write_m336k8_final_route_request,
 )
+from ai_brain.stage3.acquisition.m336k9_admission import (
+    M336K9_ADMISSION_MUTATION_CASES,
+)
 from ai_brain.stage3.acquisition.m336k9_authorization import (
     m336k_current_final_authorization_from_dict,
 )
@@ -1131,7 +1134,8 @@ def main() -> None:
         )
         admission_mutation = _object(admission_mutation_path)
         if (
-            admission_mutation.get("mutation_case_count") != 27
+            admission_mutation.get("mutation_case_count")
+            != len(M336K9_ADMISSION_MUTATION_CASES)
             or admission_mutation.get("accepted_invalid_count") != 0
             or admission_mutation.get("wrong_rejection_layer_count") != 0
             or admission_mutation.get("status") != "PASS"

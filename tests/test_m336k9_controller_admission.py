@@ -1041,3 +1041,5 @@ def test_m336k9_official_admission_rehearsal_uses_final_pool_for_gate() -> None:
     )
     assert 'parser.add_argument("--startup-receipt"' in mutation_source
     assert '"startup_receipt_hash": startup.receipt_hash' in mutation_source
+    assert "!= len(M336K9_ADMISSION_MUTATION_CASES)" in qualifier_source
+    assert 'admission_mutation.get("mutation_case_count") != 27' not in qualifier_source
