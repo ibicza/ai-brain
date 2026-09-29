@@ -18,6 +18,12 @@ from ai_brain.stage3.acquisition.m336k2_publication import (
     build_m336k2_publication_contract,
     publication_contract_from_dict,
 )
+from ai_brain.stage3.acquisition.m336k2_stage import (
+    _M336K13_OFFICIAL_REQUEST_FIELDS,
+    _M336K13_REHEARSAL_REQUEST_FIELDS,
+    _final_controller_plan_observation_fields,
+    _verify_final_controller_plan_observation_fields,
+)
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_invocation,
     write_m336k5_python_invocation_plan,
@@ -28,6 +34,7 @@ from ai_brain.stage3.acquisition.m336k8_request import (
     _controller_target_source,
     _m336k13_rehearsal_qualification_sha,
     _verify_frozen_component_handles,
+    build_m336k8_internal_stage_request,
 )
 from ai_brain.stage3.acquisition.m336k9_profiles import (
     m336k_official_profile_registry,
@@ -377,6 +384,136 @@ def test_m336k13_controller_source_domain_uses_v13_target() -> None:
     assert _controller_target_source(root, object(), authorization) == (
         root / "scripts/m336k13_run_final_route.py"
     )
+
+
+def _m336k13_internal_stage_request(*, official: bool) -> dict:
+    hashes = {
+        name: character * 64
+        for name, character in zip(
+            (
+                "startup",
+                "karina_startup",
+                "bundle",
+                "acquisition_binding",
+                "stage_acquisition",
+                "ledger_context",
+                "native_plan",
+                "parity",
+                "dispatch",
+                "final_plan",
+                "actual_launcher",
+            ),
+            "123456789ab",
+            strict=True,
+        )
+    }
+    request = SimpleNamespace(
+        repository="repository",
+        git_executable="git",
+        python_executable="python",
+        exact_freeze_sha="c" * 40,
+        freeze_manifest="freeze.json",
+        freeze_attestation="attestation.json",
+        final_authorization="authorization.json",
+        publication_contract="publication.json",
+        route_identity_bundle="route-identity.json",
+        purpose="OFFICIAL" if official else "DISPOSABLE",
+        stage_state="state.json",
+        stage_receipt_root="receipts",
+        private_root="private",
+        authority_statement="authority.json",
+        frozen_spdx_reference="spdx.json",
+        windows_java="java",
+        windows_javac="javac",
+        final_destinations={},
+        karina={
+            "private_execution_capsule": "private-capsule.json",
+            "legacy_public_capsule_receipt": "public-capsule.json",
+            "executable_dependency_manifest": "dependencies.json",
+            "ssh_executable": "ssh",
+            "ssh_key": "ssh-key",
+            "known_hosts_file": "known-hosts",
+            "worker_endpoint": "worker",
+            "repository": "/repository",
+            "private_root": "/private",
+            "private_capsule_remote": "/private/capsule.json",
+            "javac": "/javac",
+        },
+        executable_handles={},
+    )
+    official_binding = (
+        SimpleNamespace(receipt_hash=hashes["acquisition_binding"])
+        if official
+        else None
+    )
+    validated = SimpleNamespace(
+        request=request,
+        bundle=SimpleNamespace(
+            protocol_run_id=SimpleNamespace(value="run"),
+            execution_mode=SimpleNamespace(value="FINAL" if official else "REHEARSAL"),
+            bundle_hash=hashes["bundle"],
+        ),
+        receipt=SimpleNamespace(
+            startup_receipt_hash=hashes["startup"],
+            karina_startup_receipt_hash=hashes["karina_startup"],
+            dispatch_contract_hash=hashes["dispatch"],
+        ),
+        official_acquisition_binding=official_binding,
+        post_freeze_inputs=SimpleNamespace(
+            stage_request_acquisition_binding_hash=hashes["stage_acquisition"],
+            acquisition_ledger_context_template_hash=hashes["ledger_context"],
+        ),
+        native_stage_plan_binding=SimpleNamespace(
+            plan_binding_hash=hashes["native_plan"]
+        ),
+        producer_consumer_parity_receipt=SimpleNamespace(receipt_hash=hashes["parity"]),
+        final_controller_plan_binding=SimpleNamespace(
+            receipt_hash=hashes["final_plan"]
+        ),
+        actual_launcher_plan_receipt=SimpleNamespace(
+            receipt_hash=hashes["actual_launcher"]
+        ),
+    )
+    return build_m336k8_internal_stage_request(validated)
+
+
+@pytest.mark.parametrize(
+    ("official", "expected_fields"),
+    (
+        (False, _M336K13_REHEARSAL_REQUEST_FIELDS),
+        (True, _M336K13_OFFICIAL_REQUEST_FIELDS),
+    ),
+)
+def test_m336k13_internal_stage_request_matches_native_worker_contract(
+    official: bool, expected_fields: set[str]
+) -> None:
+    request = _m336k13_internal_stage_request(official=official)
+
+    assert set(request) == expected_fields
+    assert _final_controller_plan_observation_fields(request) == {
+        "final_controller_plan_binding_receipt_hash": "a" * 64,
+        "actual_launcher_plan_receipt_hash": "b" * 64,
+    }
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("final_controller_plan_binding_receipt_hash", "not-a-hash"),
+        ("actual_launcher_plan_receipt_hash", "not-a-hash"),
+    ),
+)
+def test_m336k13_native_stage_rejects_plan_binding_mutation(
+    field: str, value: str
+) -> None:
+    request = _m336k13_internal_stage_request(official=False)
+    request[field] = value
+
+    with pytest.raises(
+        M336K2ProtocolError,
+        match="M336K13 native stage final-controller plan binding changed",
+    ):
+        _verify_final_controller_plan_observation_fields(request)
 
 
 def test_m336k13_controller_bootstrap_preserves_frozen_capsule_bridge() -> None:
