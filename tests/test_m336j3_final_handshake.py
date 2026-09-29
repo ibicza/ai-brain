@@ -390,14 +390,18 @@ def test_evaluator_crash_after_reservation_is_terminal(
 
 
 def _run(*args: str, cwd: Path | None = None) -> str:
-    return subprocess.run(
-        (str(GIT), *args),
-        cwd=cwd,
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-    ).stdout.strip()
+    try:
+        return subprocess.run(
+            (str(GIT), *args),
+            cwd=cwd,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).stdout.strip()
+    except subprocess.CalledProcessError as error:
+        error.add_note(f"git stderr: {error.stderr}")
+        raise
 
 
 def _commit(repository: Path, subject: str, name: str) -> str:
