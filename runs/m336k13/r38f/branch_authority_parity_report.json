@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "contract_role": "M336K13_R38F_BRANCH_AUTHORITY_PARITY_REPORT",
+  "authority_predicate_version": "m336k13.branch-authority.v1",
+  "cases": [
+    {
+      "case": "registered-rehearsal-exact-branch",
+      "early_preflight": "ACCEPT",
+      "typed_authorization_path": "ACCEPT",
+      "parity": true
+    },
+    {
+      "case": "registered-rehearsal-prefix-compatible-wrong-branch",
+      "early_preflight": "REJECT",
+      "typed_authorization_path": "REJECT",
+      "parity": true
+    },
+    {
+      "case": "registered-official-exact-branch-official-mode",
+      "early_preflight": "ACCEPT",
+      "typed_authorization_path": "ACCEPT",
+      "parity": true
+    },
+    {
+      "case": "registered-official-exact-branch-rehearsal-mode",
+      "early_preflight": "REJECT",
+      "typed_authorization_path": "REJECT",
+      "parity": true
+    },
+    {
+      "case": "historical-profile",
+      "early_preflight": "REJECT",
+      "typed_authorization_path": "REJECT",
+      "parity": true
+    },
+    {
+      "case": "unknown-profile",
+      "early_preflight": "REJECT",
+      "typed_authorization_path": "REJECT",
+      "parity": true
+    },
+    {
+      "case": "profileless-generic-valid",
+      "early_preflight": "ACCEPT",
+      "typed_authorization_path": "NOT_APPLICABLE",
+      "parity": true
+    },
+    {
+      "case": "profileless-generic-wrong-namespace",
+      "early_preflight": "REJECT",
+      "typed_authorization_path": "NOT_APPLICABLE",
+      "parity": true
+    }
+  ],
+  "parity_case_count": 8,
+  "parity_mismatch_count": 0,
+  "accepted_invalid_case_count": 0,
+  "wrong_rejection_layer_count": 0,
+  "status": "PASS"
+}

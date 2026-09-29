@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "contract_role": "M336K13_R38F_V3_TYPED_AUTHORIZATION_FORENSICS",
+  "execution_scope": "PRESERVED_V3_POST_Q_PRE_F_READ_ONLY",
+  "source_implementation_tip": "d0d37c17edc3844a1cdb2cb48516075d2e565056",
+  "q_like_commit": "061a62237c6f152c0df64f562f3d1acc8c951257",
+  "q_like_parent": "d0d37c17edc3844a1cdb2cb48516075d2e565056",
+  "q_like_subject": "M-33.6k.13 qualify disposable immutable launch",
+  "profile_id": "m336k8-rehearsal-v2",
+  "profile_status": "REHEARSAL_ONLY",
+  "profile_hash": "b1d73c612a79822a06a5947b5cbc1f9fb35a5bc3cdcab143b1fcf26e6b8a1651",
+  "profile_registry_hash": "6c1a277f019db781e5e97cf34eb9658bdd332d8d65c480b00e89536d6c0cbe57",
+  "identity_tuple_registered": true,
+  "expected_branch_ref": "refs/heads/disposable/m336k8-profile-rehearsal-v2",
+  "actual_branch_ref": "refs/heads/disposable/m336k8-m336k13-r38e-full-rehearsal-v3",
+  "expected_branch_ref_hash": "9d23f3ac567149ee8ba8964032066358a59d995ae3b4b681699cc9ea37ca08f5",
+  "actual_branch_ref_hash": "07ab99818d28eb9cdbdc757ec5b689f5883ebbc5ed15bc4ca7a118f3e2975c5b",
+  "branch_equality": false,
+  "prospective_authorization": {
+    "authorization_type": "M336K9FinalAuthorization",
+    "schema_version": 2,
+    "contract_role": "M336K5_TYPED_FINAL_AUTHORIZATION_V2",
+    "route_identity_bundle_hash": "9197175a31b8b29b46cef924a9c75dbfdb8bcdfb3814ff1b2c8f273e98531ab2",
+    "all_hash_fields_structurally_valid": true,
+    "allowed_network_hosts": {
+      "semantic_role": "registered acquisition network authority tuple",
+      "tuple_hash": "c6fece52fc7514add468ba10cc8376ced2caf4fc0fff9ed8551dfb5eeef244f6",
+      "count": 1,
+      "sorted_unique": true,
+      "nonempty": true
+    },
+    "minimum_candidate_families": 80,
+    "minimum_organizations": 64,
+    "maximum_candidates_per_organization": 2,
+    "reservation_limit_tuple": [
+      1,
+      1,
+      1
+    ],
+    "candidate_retry_limit": 0,
+    "candidate_replacement_limit": 0,
+    "pre_freeze_source_body_bytes": 0,
+    "computed_authorization_hash": "b35b5a1a19e2e53e7f6e7831b96720110daa0a1da8449776ffdf5e63b6131229",
+    "claimed_authorization_hash": "b35b5a1a19e2e53e7f6e7831b96720110daa0a1da8449776ffdf5e63b6131229",
+    "authorization_hash_equality": true
+  },
+  "input_evidence": [
+    {
+      "semantic_role": "v3 typed component request",
+      "sha256": "4977e86467dc133ab312d955cf8cbe0ebad20ae9daf60ce44b80d64efb8608df"
+    },
+    {
+      "semantic_role": "v3 legacy final authorization template",
+      "sha256": "5626a701f4702d5218152335282d0bf1151e918e2ea4f59d53d34a7d65129e86"
+    },
+    {
+      "semantic_role": "v3 realized legacy final authorization input",
+      "sha256": "88cba13b365913f7ec0fed7588f93dd155ba9534631430e3314eb8b47a1a0887"
+    },
+    {
+      "semantic_role": "v3 pre-freeze blocked evidence",
+      "sha256": "79c85e0ba156b8b84f4e63d8bf58336abbc83d0c831212364032d34dc873110d"
+    }
+  ],
+  "predicate_matrix": [
+    {
+      "name": "SCHEMA_VERSION_EQUAL_2",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "CONTRACT_ROLE_EQUAL_M336K5_TYPED_FINAL_AUTHORIZATION_V2",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "EXACT_IMPLEMENTATION_TIP_SHA40",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "EXACT_Q30_SHA40",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "REGISTERED_PROFILE_BRANCH_REF_EQUALITY",
+      "layer": "base",
+      "passed": false
+    },
+    {
+      "name": "ALL_HASH_FIELDS_SHA256",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "ALLOWED_NETWORK_HOSTS_SORTED_UNIQUE",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "ALLOWED_NETWORK_HOSTS_NONEMPTY",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "MINIMUM_CANDIDATE_FAMILIES_AT_LEAST_80",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "MINIMUM_ORGANIZATIONS_AT_LEAST_64",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "MAXIMUM_CANDIDATES_PER_ORGANIZATION_AT_MOST_2",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "RESERVATION_LIMITS_EQUAL_1_1_1",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "CANDIDATE_RETRY_LIMIT_EQUAL_0",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "CANDIDATE_REPLACEMENT_LIMIT_EQUAL_0",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "PRE_FREEZE_SOURCE_BODY_BYTES_EQUAL_0",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "AUTHORIZATION_HASH_EQUAL_CANONICAL_BODY_HASH",
+      "layer": "base",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_ROUTE_VERSION_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_PROTOCOL_RUN_ID_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_ACQUISITION_RUN_ID_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_SELECTOR_RUN_ID_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_EVALUATOR_RUN_ID_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_EXECUTION_MODE_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_HASH_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_ROUTE_REGISTRY_HASH_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_ROUTE_MANIFEST_HASH_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_ACQUISITION_POLICY_HASH_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_SELECTOR_POLICY_HASH_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "BUNDLE_EVALUATOR_POLICY_HASH_EQUALITY",
+      "layer": "bundle",
+      "passed": true
+    },
+    {
+      "name": "PROFILE_HASH_EQUALITY",
+      "layer": "profile",
+      "passed": true
+    },
+    {
+      "name": "PROFILE_REGISTRY_HASH_EQUALITY",
+      "layer": "profile",
+      "passed": true
+    },
+    {
+      "name": "PROFILE_IDENTITY_TUPLE_EQUALITY",
+      "layer": "profile",
+      "passed": true
+    },
+    {
+      "name": "PROFILE_BUNDLE_IDENTITY_TUPLE_EQUALITY",
+      "layer": "profile",
+      "passed": true
+    }
+  ],
+  "predicate_summary": {
+    "predicate_count": 32,
+    "failing_base_predicate_count": 1,
+    "failing_base_predicates": [
+      "REGISTERED_PROFILE_BRANCH_REF_EQUALITY"
+    ],
+    "other_base_predicate_failure_count": 0,
+    "bundle_mismatch_count": 0,
+    "profile_binding_mismatch_count": 0
+  },
+  "side_effects": {
+    "file_writes_outside_designated_evidence": 0,
+    "git_commits": 0,
+    "route_events": 0,
+    "reservation_mutations": 0,
+    "domain_subprocess_launches": 0,
+    "source_requests": 0
+  },
+  "conclusion": "BOUNDED_REGISTERED_PROFILE_BRANCH_AUTHORITY_MISMATCH",
+  "status": "PASS"
+}

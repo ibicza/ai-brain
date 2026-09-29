@@ -111,6 +111,10 @@ from ai_brain.stage3.acquisition.m336k13_plan import (
     create_m336k13_final_controller_plan_once,
     verify_m336k13_final_controller_plan_binding,
 )
+from ai_brain.stage3.acquisition.m336k13_rehearsal import (
+    M336K13RehearsalBranchAuthorityReceipt,
+    verify_m336k_rehearsal_branch_authority,
+)
 from ai_brain.stage3.acquisition.m336k13_startup import (
     run_m336k13_python_invocation,
 )
@@ -239,6 +243,18 @@ def main() -> None:
         )
     ):
         raise M336K2ProtocolError("M336K9 rehearsal profile purpose changed")
+    branch = request["disposable_branch"]
+    branch_authority = verify_m336k_rehearsal_branch_authority(
+        namespace=namespace,
+        disposable_branch=branch,
+        official_admission_only=official_admission_only,
+        profile_id=official_profile_id,
+    )
+    branch_authority_receipt = (
+        None
+        if official_admission_only
+        else M336K13RehearsalBranchAuthorityReceipt.build(branch_authority)
+    )
     final_candidate_pool = None
     if namespace in {"m336k7", "m336k8"}:
         final_candidate_pool = verify_m336k7_unchanged_candidate_pool(
@@ -248,6 +264,11 @@ def main() -> None:
     if output.exists():
         raise FileExistsError("M336K5 disposable output must be fresh")
     output.mkdir(parents=True)
+    if branch_authority_receipt is not None:
+        _write(
+            output / "branch-authority-receipt.json",
+            branch_authority_receipt.canonical_object(),
+        )
     monitor = M336K5ResourceMonitor(
         ledger=output / "resource-samples.private.jsonl",
         filesystem_root=output,
@@ -266,14 +287,6 @@ def main() -> None:
         powershell,
         output / "launcher-receipts",
     )
-    branch = request["disposable_branch"]
-    if (
-        official_admission_only
-        and f"refs/heads/{branch}" != official_profile.authorization_branch_ref
-        or not official_admission_only
-        and not branch.startswith(f"disposable/{namespace}-")
-    ):
-        raise M336K2ProtocolError("M336K5 disposable branch namespace changed")
     remote = output / "origin.git"
     repository = output / "repository"
     private = output / "private"
