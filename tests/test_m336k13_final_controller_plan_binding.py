@@ -13,7 +13,10 @@ from types import SimpleNamespace
 import pytest
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
-from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
+from ai_brain.stage3.acquisition.m336k2_protocol import (
+    M336K2ProtocolError,
+    M336K2RouteLedger,
+)
 from ai_brain.stage3.acquisition.m336k2_publication import (
     _e_source_files,
     _h_source_files,
@@ -25,6 +28,9 @@ from ai_brain.stage3.acquisition.m336k2_stage import (
     _M336K13_REHEARSAL_REQUEST_FIELDS,
     _final_controller_plan_observation_fields,
     _verify_final_controller_plan_observation_fields,
+)
+from ai_brain.stage3.acquisition.m336k5_controller import (
+    verify_m336k5_route_ledger_identity,
 )
 from ai_brain.stage3.acquisition.m336k5_startup import (
     build_m336k5_python_invocation,
@@ -89,6 +95,92 @@ _K10_DISPOSABLE_PUBLICATION_TUPLE = (
     "M-33.6k.10 publish disposable sealed production",
     "M-33.6k.10 publish disposable independent evidence",
 )
+
+
+def test_m336k13_route_ledger_verifier_replays_extended_context(
+    tmp_path: Path,
+) -> None:
+    protocol_run_id = {
+        "schema_version": 1,
+        "identity_kind": "PROTOCOL_RUN_ID",
+        "value": "m336k8.disposable.controller-admission.v2",
+        "identity_hash": content_hash("protocol-run"),
+    }
+    hashes = {
+        name: content_hash(name)
+        for name in (
+            "bundle",
+            "route_registry",
+            "preledger",
+            "acquisition_binding",
+            "executable_binding",
+            "native_plan",
+            "parity",
+            "dispatch",
+            "final_plan",
+            "operation",
+        )
+    }
+    bundle = SimpleNamespace(
+        protocol_run_id=SimpleNamespace(
+            canonical_object=lambda: protocol_run_id,
+        ),
+        bundle_hash=hashes["bundle"],
+        route_registry_hash=hashes["route_registry"],
+    )
+    exact_f30_sha = "a" * 40
+    expected = content_hash(
+        (
+            protocol_run_id,
+            hashes["bundle"],
+            exact_f30_sha,
+            hashes["route_registry"],
+            hashes["preledger"],
+            hashes["acquisition_binding"],
+            hashes["executable_binding"],
+            hashes["native_plan"],
+            hashes["parity"],
+            hashes["dispatch"],
+            hashes["final_plan"],
+        )
+    )
+    ledger = M336K2RouteLedger(tmp_path / "route.jsonl", git_worktrees=())
+    ledger.append(
+        "PREFLIGHT_VERIFIED",
+        context_hash=expected,
+        operation_hash=hashes["operation"],
+    )
+
+    assert (
+        verify_m336k5_route_ledger_identity(
+            ledger,
+            bundle=bundle,
+            exact_f30_sha=exact_f30_sha,
+            preledger_receipt_hash=hashes["preledger"],
+            official_acquisition_binding_receipt_hash=hashes["acquisition_binding"],
+            official_executable_binding_receipt_hash=hashes["executable_binding"],
+            native_stage_plan_binding_hash=hashes["native_plan"],
+            producer_consumer_parity_receipt_hash=hashes["parity"],
+            dispatch_contract_hash=hashes["dispatch"],
+            final_controller_plan_binding_receipt_hash=hashes["final_plan"],
+        )
+        == expected
+    )
+    with pytest.raises(M336K2ProtocolError, match="ledger context"):
+        verify_m336k5_route_ledger_identity(
+            ledger,
+            bundle=bundle,
+            exact_f30_sha=exact_f30_sha,
+            preledger_receipt_hash=hashes["preledger"],
+            official_acquisition_binding_receipt_hash=hashes["acquisition_binding"],
+            official_executable_binding_receipt_hash=hashes["executable_binding"],
+            native_stage_plan_binding_hash=hashes["native_plan"],
+            producer_consumer_parity_receipt_hash=hashes["parity"],
+            dispatch_contract_hash=hashes["dispatch"],
+            final_controller_plan_binding_receipt_hash=content_hash(
+                "changed-final-plan"
+            ),
+        )
 
 
 @pytest.mark.parametrize(

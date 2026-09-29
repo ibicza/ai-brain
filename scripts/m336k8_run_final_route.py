@@ -357,6 +357,22 @@ def main() -> None:
             if validated.official_executable_binding is None
             else validated.official_executable_binding.receipt_hash
         ),
+        native_stage_plan_binding_hash=(
+            None
+            if validated.native_stage_plan_binding is None
+            else validated.native_stage_plan_binding.plan_binding_hash
+        ),
+        producer_consumer_parity_receipt_hash=(
+            None
+            if validated.producer_consumer_parity_receipt is None
+            else validated.producer_consumer_parity_receipt.receipt_hash
+        ),
+        dispatch_contract_hash=validated.receipt.dispatch_contract_hash,
+        final_controller_plan_binding_receipt_hash=(
+            None
+            if validated.final_controller_plan_binding is None
+            else validated.final_controller_plan_binding.receipt_hash
+        ),
     )
     print(canonical_json(asdict(result)))
 

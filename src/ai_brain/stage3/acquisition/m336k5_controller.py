@@ -52,6 +52,43 @@ class M336K5FinalRouteReceipt:
     receipt_hash: str
 
 
+def _m336k5_route_ledger_context_hash(
+    *,
+    bundle: M336K5RouteIdentityBundle,
+    exact_f30_sha: str,
+    preledger_receipt_hash: str,
+    official_acquisition_binding_receipt_hash: str | None = None,
+    official_executable_binding_receipt_hash: str | None = None,
+    native_stage_plan_binding_hash: str | None = None,
+    producer_consumer_parity_receipt_hash: str | None = None,
+    dispatch_contract_hash: str | None = None,
+    final_controller_plan_binding_receipt_hash: str | None = None,
+) -> str:
+    context_values = (
+        bundle.protocol_run_id.canonical_object(),
+        bundle.bundle_hash,
+        exact_f30_sha,
+        bundle.route_registry_hash,
+        preledger_receipt_hash,
+    )
+    if official_acquisition_binding_receipt_hash is not None:
+        context_values += (official_acquisition_binding_receipt_hash,)
+    if official_executable_binding_receipt_hash is not None:
+        context_values += (official_executable_binding_receipt_hash,)
+    if (
+        native_stage_plan_binding_hash is not None
+        and producer_consumer_parity_receipt_hash is not None
+    ):
+        context_values += (
+            native_stage_plan_binding_hash,
+            producer_consumer_parity_receipt_hash,
+            dispatch_contract_hash,
+        )
+    if final_controller_plan_binding_receipt_hash is not None:
+        context_values += (final_controller_plan_binding_receipt_hash,)
+    return content_hash(context_values)
+
+
 def run_m336k5_final_controller(
     *,
     validated: M336K5ValidatedInvocation,
@@ -121,29 +158,36 @@ def run_m336k5_final_controller(
         raise M336K2ProtocolError(
             "M336K5 pre-ledger proof differs from exact validation"
         )
-    context_values = (
-        bundle.protocol_run_id.canonical_object(),
-        bundle.bundle_hash,
-        request.exact_f30_sha,
-        bundle.route_registry_hash,
-        validated.receipt.receipt_hash,
-    )
-    if recomputed_acquisition_binding is not None:
-        context_values += (recomputed_acquisition_binding.receipt_hash,)
-    if recomputed_executable_binding is not None:
-        context_values += (recomputed_executable_binding.receipt_hash,)
     plan_binding = getattr(validated, "native_stage_plan_binding", None)
     parity_receipt = getattr(validated, "producer_consumer_parity_receipt", None)
-    if plan_binding is not None and parity_receipt is not None:
-        context_values += (
-            plan_binding.plan_binding_hash,
-            parity_receipt.receipt_hash,
-            validated.receipt.dispatch_contract_hash,
-        )
     final_plan_binding = getattr(validated, "final_controller_plan_binding", None)
-    if final_plan_binding is not None:
-        context_values += (final_plan_binding.receipt_hash,)
-    context = content_hash(context_values)
+    context = _m336k5_route_ledger_context_hash(
+        bundle=bundle,
+        exact_f30_sha=request.exact_f30_sha,
+        preledger_receipt_hash=validated.receipt.receipt_hash,
+        official_acquisition_binding_receipt_hash=(
+            None
+            if recomputed_acquisition_binding is None
+            else recomputed_acquisition_binding.receipt_hash
+        ),
+        official_executable_binding_receipt_hash=(
+            None
+            if recomputed_executable_binding is None
+            else recomputed_executable_binding.receipt_hash
+        ),
+        native_stage_plan_binding_hash=(
+            None if plan_binding is None else plan_binding.plan_binding_hash
+        ),
+        producer_consumer_parity_receipt_hash=(
+            None if parity_receipt is None else parity_receipt.receipt_hash
+        ),
+        dispatch_contract_hash=getattr(
+            validated.receipt, "dispatch_contract_hash", None
+        ),
+        final_controller_plan_binding_receipt_hash=(
+            None if final_plan_binding is None else final_plan_binding.receipt_hash
+        ),
+    )
     initial = (
         ("PREFLIGHT_VERIFIED", validated.receipt.receipt_hash),
         ("FREEZE_VERIFIED", validated.freeze.manifest_hash),
@@ -267,19 +311,28 @@ def verify_m336k5_route_ledger_identity(
     preledger_receipt_hash: str,
     official_acquisition_binding_receipt_hash: str | None = None,
     official_executable_binding_receipt_hash: str | None = None,
+    native_stage_plan_binding_hash: str | None = None,
+    producer_consumer_parity_receipt_hash: str | None = None,
+    dispatch_contract_hash: str | None = None,
+    final_controller_plan_binding_receipt_hash: str | None = None,
 ) -> str:
-    context_values = (
-        bundle.protocol_run_id.canonical_object(),
-        bundle.bundle_hash,
-        exact_f30_sha,
-        bundle.route_registry_hash,
-        preledger_receipt_hash,
+    context = _m336k5_route_ledger_context_hash(
+        bundle=bundle,
+        exact_f30_sha=exact_f30_sha,
+        preledger_receipt_hash=preledger_receipt_hash,
+        official_acquisition_binding_receipt_hash=(
+            official_acquisition_binding_receipt_hash
+        ),
+        official_executable_binding_receipt_hash=(
+            official_executable_binding_receipt_hash
+        ),
+        native_stage_plan_binding_hash=native_stage_plan_binding_hash,
+        producer_consumer_parity_receipt_hash=(producer_consumer_parity_receipt_hash),
+        dispatch_contract_hash=dispatch_contract_hash,
+        final_controller_plan_binding_receipt_hash=(
+            final_controller_plan_binding_receipt_hash
+        ),
     )
-    if official_acquisition_binding_receipt_hash is not None:
-        context_values += (official_acquisition_binding_receipt_hash,)
-    if official_executable_binding_receipt_hash is not None:
-        context_values += (official_executable_binding_receipt_hash,)
-    context = content_hash(context_values)
     events = ledger.events()
     if not events or any(event.context_hash != context for event in events):
         raise M336K2ProtocolError("M336K5 route ledger context changed final identity")
