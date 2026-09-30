@@ -263,7 +263,9 @@ def build_m336k5_resource_budget_receipt(
     )
     minimum_inodes = min(inode_values) if inode_values else 0
     memory_status = "PASS" if minimum_ram >= required_ram else "FAIL"
-    storage_status = "PASS" if minimum_storage >= required_storage else "FAIL"
+    storage_status = (
+        "PASS" if minimum_storage >= M336K5_MINIMUM_POST_RESERVATION_STORAGE else "FAIL"
+    )
     inode_status = (
         "PASS"
         if not inode_values or minimum_inodes >= M336K5_MINIMUM_FREE_INODES
