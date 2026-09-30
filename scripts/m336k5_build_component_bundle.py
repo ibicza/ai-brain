@@ -219,6 +219,30 @@ M336K_ALLOWED_DISPOSABLE_PUBLICATION_TUPLES = frozenset(
     }
 )
 
+M336K_PUBLICATION_FIELDS = (
+    "q_root",
+    "f_root",
+    "h_root",
+    "e_root",
+    "q_subject",
+    "f_subject",
+    "h_subject",
+    "e_subject",
+)
+
+M336K13_OFFICIAL_PUBLICATION_TUPLE = (
+    "artifacts/m336k13/q38r",
+    "artifacts/m336k13/f38-freeze",
+    "artifacts/m336k13/h38",
+    "artifacts/m336k13/e38",
+    "M-33.6k.13 requalify immutable final controller launch",
+    "M-33.6k.13 freeze final Java execution",
+    "M-33.6k.13 publish sealed Java production",
+    "M-33.6k.13 publish independent Java evidence",
+)
+
+M336K_ALLOWED_DISPOSABLE_PROFILE_IDS = frozenset({"m336k8-rehearsal-v2"})
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -2233,7 +2257,18 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
     _write_rehashed(output / "q28_commit.json", q_commit)
 
     namespace = request["identity_namespace"]
-    if request.get("official_profile_id") == M336K12_PROFILE_ID:
+    if request.get("official_profile_id") == M336K13_PROFILE_ID:
+        publication_values = {
+            "branch_ref": request["branch_ref"],
+            **dict(
+                zip(
+                    M336K_PUBLICATION_FIELDS,
+                    M336K13_OFFICIAL_PUBLICATION_TUPLE,
+                    strict=True,
+                )
+            ),
+        }
+    elif request.get("official_profile_id") == M336K12_PROFILE_ID:
         publication_values = {
             "branch_ref": request["branch_ref"],
             "q_root": "artifacts/m336k12/q37",
@@ -2269,7 +2304,7 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
             "h_subject": "M-33.6k.10 publish sealed Java production",
             "e_subject": "M-33.6k.10 publish independent Java evidence",
         }
-    elif request.get("official_profile_id") is not None:
+    elif request.get("official_profile_id") in M336K_ALLOWED_DISPOSABLE_PROFILE_IDS:
         names = (
             "branch_ref",
             "q_root",
@@ -2303,6 +2338,8 @@ def _write_m336k7_legacy_bindings(output: Path, request: dict) -> None:
             or publication_tuple not in M336K_ALLOWED_DISPOSABLE_PUBLICATION_TUPLES
         ):
             raise M336K2ProtocolError("M336K9 publication contract changed")
+    elif request.get("official_profile_id") is not None:
+        raise M336K2ProtocolError("M336K9 publication contract changed")
     elif namespace == "m336k8":
         publication_values = {
             "branch_ref": request["branch_ref"],
