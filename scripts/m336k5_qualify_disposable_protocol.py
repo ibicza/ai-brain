@@ -1819,6 +1819,11 @@ def _identity_observations(
     ):
         raise M336K2ProtocolError("M336K5 controller identity observation differs")
     verified = 1
+    route_ledger_bindings = _route_ledger_binding_observations(
+        final_request=final_request,
+        validation=validation,
+        bundle=bundle,
+    )
     verify_m336k5_route_ledger_identity(
         M336K2RouteLedger(
             Path(final_request.route_ledger), git_worktrees=(repository,)
@@ -1826,6 +1831,7 @@ def _identity_observations(
         bundle=bundle,
         exact_f30_sha=final_request.exact_f30_sha,
         preledger_receipt_hash=validation["receipt_hash"],
+        **route_ledger_bindings,
     )
     verified += 1
     private = Path(final_request.private_root)
@@ -1905,6 +1911,52 @@ def _identity_observations(
     if verified != 7:
         raise M336K2ProtocolError("M336K5 identity observer closure changed")
     return verified
+
+
+def _route_ledger_binding_observations(*, final_request, validation, bundle) -> dict:
+    """Recover the exact binding tuple used by the inner final controller."""
+
+    binding_names = (
+        "official_acquisition_binding_receipt_hash",
+        "official_executable_binding_receipt_hash",
+        "native_stage_plan_binding_hash",
+        "producer_consumer_parity_receipt_hash",
+        "dispatch_contract_hash",
+        "final_controller_plan_binding_receipt_hash",
+    )
+    body = dict(validation)
+    claimed = body.pop("receipt_hash", None)
+    body = {name: value for name, value in body.items() if value is not None}
+    binding_hashes = tuple(validation.get(name) for name in binding_names)
+    exact_field = {
+        "M336K5_SIDE_EFFECT_FREE_PRELEDGER_INVOCATION_RECEIPT": (
+            "prospective_or_exact_f30_sha"
+        ),
+        "M336K7_SIDE_EFFECT_FREE_PRELEDGER_INVOCATION_RECEIPT": "exact_f32_sha",
+        "M336K8_SIDE_EFFECT_FREE_PRELEDGER_INVOCATION_RECEIPT": "exact_freeze_sha",
+    }.get(validation.get("contract_role"))
+    if (
+        not isinstance(claimed, str)
+        or content_hash(body) != claimed
+        or exact_field is None
+        or validation.get("status") != "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER"
+        or validation.get(exact_field) != final_request.exact_f30_sha
+        or validation.get("route_identity_bundle_hash") != bundle.bundle_hash
+        or validation.get("final_controller_plan_binding_receipt_hash")
+        != getattr(final_request, "final_controller_plan_binding_receipt_hash", None)
+        or (binding_hashes[2] is None) != (binding_hashes[3] is None)
+        or any(
+            value is not None
+            and (
+                not isinstance(value, str)
+                or len(value) != 64
+                or any(character not in "0123456789abcdef" for character in value)
+            )
+            for value in binding_hashes
+        )
+    ):
+        raise M336K2ProtocolError("M336K13 preledger binding observation changed")
+    return dict(zip(binding_names, binding_hashes, strict=True))
 
 
 def _verify_identity_observation(value: dict, bundle) -> None:

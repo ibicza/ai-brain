@@ -493,6 +493,96 @@ def test_m336k13_disposable_harness_reuses_one_exact_plan_source() -> None:
     assert 'execution_scope="REHEARSAL"' in helper
 
 
+def _m336k13_route_binding_fixture(tmp_path: Path):
+    hashes = {
+        name: character * 64
+        for name, character in zip(
+            ("native", "parity", "dispatch", "final_plan", "bundle"),
+            "12345",
+            strict=True,
+        )
+    }
+    validation_body = {
+        "schema_version": 4,
+        "contract_role": "M336K8_SIDE_EFFECT_FREE_PRELEDGER_INVOCATION_RECEIPT",
+        "exact_freeze_sha": "a" * 40,
+        "route_identity_bundle_hash": hashes["bundle"],
+        "official_acquisition_binding_receipt_hash": None,
+        "official_executable_binding_receipt_hash": None,
+        "native_stage_plan_binding_hash": None,
+        "producer_consumer_parity_receipt_hash": None,
+        "dispatch_contract_hash": None,
+        "final_controller_plan_binding_receipt_hash": hashes["final_plan"],
+        "status": "FINAL_INVOCATION_ACCEPTED_PRE_LEDGER",
+    }
+    request = SimpleNamespace(
+        final_controller_plan_binding_receipt_hash=hashes["final_plan"],
+        exact_f30_sha="a" * 40,
+    )
+    bundle = SimpleNamespace(bundle_hash=hashes["bundle"])
+    validation = {
+        **validation_body,
+        "receipt_hash": content_hash(
+            {
+                name: value
+                for name, value in validation_body.items()
+                if value is not None
+            }
+        ),
+    }
+    return request, bundle, validation, hashes
+
+
+def test_m336k13_disposable_route_observer_reuses_inner_binding_tuple(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    monkeypatch.syspath_prepend(str(root / "scripts"))
+    from m336k5_qualify_disposable_protocol import (
+        _route_ledger_binding_observations,
+    )
+
+    request, bundle, validation, hashes = _m336k13_route_binding_fixture(tmp_path)
+    assert _route_ledger_binding_observations(
+        final_request=request,
+        validation=validation,
+        bundle=bundle,
+    ) == {
+        "official_acquisition_binding_receipt_hash": None,
+        "official_executable_binding_receipt_hash": None,
+        "native_stage_plan_binding_hash": None,
+        "producer_consumer_parity_receipt_hash": None,
+        "dispatch_contract_hash": None,
+        "final_controller_plan_binding_receipt_hash": hashes["final_plan"],
+    }
+
+
+def test_m336k13_disposable_route_observer_rejects_rehashed_preledger_mismatch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    monkeypatch.syspath_prepend(str(root / "scripts"))
+    from m336k5_qualify_disposable_protocol import (
+        _route_ledger_binding_observations,
+    )
+
+    request, bundle, validation, _hashes = _m336k13_route_binding_fixture(tmp_path)
+    validation["final_controller_plan_binding_receipt_hash"] = "f" * 64
+    body = dict(validation)
+    body.pop("receipt_hash")
+    validation["receipt_hash"] = content_hash(
+        {name: value for name, value in body.items() if value is not None}
+    )
+    with pytest.raises(
+        M336K2ProtocolError, match="preledger binding observation changed"
+    ):
+        _route_ledger_binding_observations(
+            final_request=request,
+            validation=validation,
+            bundle=bundle,
+        )
+
+
 def test_m336k13_controller_source_domain_uses_v13_target() -> None:
     root = Path(__file__).resolve().parents[1]
     authorization = SimpleNamespace(official_profile_id="m336k8-final-v6")
