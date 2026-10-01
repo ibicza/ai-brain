@@ -1,0 +1,34 @@
+{
+  "active_native_stage_binding_consumers": [
+    "M336K13NativeExecutionCapsuleReceipt",
+    "M336K13OfficialControllerExecutableBinding",
+    "M336K13NativeRouteManifest",
+    "M336K13OfficialExecutableBindingReceipt",
+    "M336K13FinalAuthorization",
+    "M336K13PostFreezeInputBundle"
+  ],
+  "active_parity_consumers": [
+    "M336K13NativeExecutionCapsuleReceipt",
+    "M336K13OfficialControllerExecutableBinding",
+    "M336K13NativeRouteManifest",
+    "M336K13OfficialExecutableBindingReceipt",
+    "M336K13FinalAuthorization",
+    "M336K13PostFreezeInputBundle"
+  ],
+  "base_projection_private_verifier_consumer_count": 1,
+  "base_projection_public_consumer_count": 0,
+  "contract_role": "PUBLIC_SAFE_M336K13_NATIVE_STAGE_GRAPH_CLOSURE",
+  "generation1_active_consumer_count": 0,
+  "graph_database_sha256": "81ec7075bab44264f64bbc7c7a7728665e9519d27838eeb663ed6fcc4809738d",
+  "q38r_current_publication_consumer_count": 0,
+  "raw_private_path_count": 0,
+  "receipt_hash": "e89737fdedc7f5d604473fb19edc188adca7e3785ba7db5c045d29100e0432ca",
+  "schema_version": 1,
+  "source_graph_unresolved_difference_count": 0,
+  "status": "PASS",
+  "v5_verifier_direct_v6_caller_count": 0,
+  "v6_active_native_stage_binding_producer_count": 1,
+  "v6_active_parity_producer_count": 1,
+  "v6_component_builder_call_site_count": 1,
+  "v6_verifier_producer_count": 1
+}

@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Self
 
 from ai_brain.stage2.facts.canonical import bytes_hash, canonical_json, content_hash
+from ai_brain.stage3.acquisition.m336k2_execution import M336K2PrivateExecutionPlan
 from ai_brain.stage3.acquisition.m336k2_protocol import M336K2ProtocolError
 from ai_brain.stage3.acquisition.m336k5_startup import (
     M336K5_REQUIRED_INTERPRETER_ARGUMENTS,
@@ -34,11 +35,13 @@ from ai_brain.stage3.acquisition.m336k11_execution import (
 from ai_brain.stage3.acquisition.m336k12_dispatch import (
     M336K12NativeExecutionCapsuleReceipt,
     M336K12NativeRouteManifest,
+    M336K12NativeStageDispatch,
     M336K12NativeStagePlanBinding,
     M336K12OfficialControllerExecutableBinding,
     M336K12OfficialExecutableBindingReceipt,
     M336K12PostFreezeInputBundle,
     M336K12ProducerConsumerParityReceipt,
+    verify_m336k12_native_stage_plan,
 )
 
 M336K13_PROFILE_ID = "m336k8-final-v6"
@@ -1411,6 +1414,100 @@ class M336K13NativeStagePlanBinding(M336K12NativeStagePlanBinding):
         return result
 
 
+def project_m336k13_native_stage_plan_binding_to_v12(
+    plan_binding: M336K13NativeStagePlanBinding,
+) -> M336K12NativeStagePlanBinding:
+    """Build the one canonical v5 view used to run the complete v5 verifier."""
+
+    if type(plan_binding) is not M336K13NativeStagePlanBinding:
+        raise M336K2ProtocolError("M336K13 native stage binding type changed")
+    plan_binding.verify()
+    base_field_names = tuple(
+        field.name for field in fields(M336K12NativeStagePlanBinding)
+    )
+    extended_field_names = tuple(
+        field.name for field in fields(M336K13NativeStagePlanBinding)
+    )
+    if extended_field_names != (
+        *base_field_names,
+        "final_controller_plan_binding_receipt_hash",
+    ):
+        raise M336K2ProtocolError("M336K13 native stage extension fields changed")
+    body = {
+        "schema_version": 1,
+        "contract_role": M336K12NativeStagePlanBinding.ROLE,
+        **{
+            name: getattr(plan_binding, name)
+            for name in base_field_names
+            if name not in {"schema_version", "contract_role", "plan_binding_hash"}
+        },
+    }
+    projected = M336K12NativeStagePlanBinding(
+        **body, plan_binding_hash=content_hash(body)
+    )
+    projected.verify()
+    return projected
+
+
+def verify_m336k13_native_stage_plan(
+    *,
+    plan: M336K2PrivateExecutionPlan,
+    dispatches: tuple[M336K12NativeStageDispatch, ...],
+    plan_binding: M336K13NativeStagePlanBinding,
+    expected_base_plan_binding: M336K12NativeStagePlanBinding,
+    expected_final_controller_plan_binding_receipt_hash: str,
+    repository: Path,
+    python_executable: Path | None = None,
+) -> M336K12ProducerConsumerParityReceipt:
+    """Verify v6 through one strict v5 projection, then rebind active parity."""
+
+    if type(plan_binding) is not M336K13NativeStagePlanBinding:
+        raise M336K2ProtocolError("M336K13 native stage binding type changed")
+    if type(expected_base_plan_binding) is not M336K12NativeStagePlanBinding:
+        raise M336K2ProtocolError("M336K13 base native stage binding type changed")
+    plan_binding.verify()
+    expected_base_plan_binding.verify()
+    if (
+        not _is_hash(expected_final_controller_plan_binding_receipt_hash)
+        or plan_binding.final_controller_plan_binding_receipt_hash
+        != expected_final_controller_plan_binding_receipt_hash
+    ):
+        raise M336K2ProtocolError(
+            "M336K13 native stage final-controller binding changed"
+        )
+    projected = project_m336k13_native_stage_plan_binding_to_v12(plan_binding)
+    if projected != expected_base_plan_binding:
+        raise M336K2ProtocolError("M336K13 native stage base projection changed")
+    base_parity = verify_m336k12_native_stage_plan(
+        plan=plan,
+        dispatches=dispatches,
+        plan_binding=projected,
+        repository=repository,
+        python_executable=python_executable,
+    )
+    base_parity.verify()
+    body = {
+        field.name: getattr(base_parity, field.name)
+        for field in fields(M336K12ProducerConsumerParityReceipt)
+        if field.name != "receipt_hash"
+    }
+    body["native_stage_plan_binding_hash"] = plan_binding.plan_binding_hash
+    active_parity = M336K12ProducerConsumerParityReceipt(
+        **body, receipt_hash=content_hash(body)
+    )
+    active_parity.verify()
+    differences = {
+        name
+        for name, value in base_parity.canonical_object().items()
+        if active_parity.canonical_object()[name] != value
+    }
+    if differences != {"native_stage_plan_binding_hash", "receipt_hash"}:
+        raise M336K2ProtocolError("M336K13 parity rebinding changed")
+    if active_parity.native_stage_plan_binding_hash != plan_binding.plan_binding_hash:
+        raise M336K2ProtocolError("M336K13 active parity binding changed")
+    return active_parity
+
+
 @dataclass(frozen=True)
 class M336K13NativeExecutionCapsuleReceipt(M336K12NativeExecutionCapsuleReceipt):
     final_controller_plan_binding_receipt_hash: str
@@ -1676,6 +1773,7 @@ class M336K13OfficialExecutableBindingReceipt(M336K12OfficialExecutableBindingRe
                 capsule.native_stage_plan_binding_hash
                 != plan_binding.plan_binding_hash,
                 route.native_stage_plan_binding_hash != plan_binding.plan_binding_hash,
+                parity.native_stage_plan_binding_hash != plan_binding.plan_binding_hash,
                 binding.producer_consumer_parity_receipt_hash != parity.receipt_hash,
                 capsule.producer_consumer_parity_receipt_hash != parity.receipt_hash,
                 route.producer_consumer_parity_receipt_hash != parity.receipt_hash,

@@ -1,0 +1,21 @@
+{
+  "acquisition_event_count": 0,
+  "candidate_body_count": 0,
+  "contract_role": "PUBLIC_SAFE_M336K13_NATIVE_STAGE_VERIFIER_FAILURE_FORENSICS",
+  "evaluator_event_count": 0,
+  "exact_q38r_sha": "ee34ca2bb9e90bbcb5a916af51fefbdffe375158",
+  "failed_comparison": "M336K13NativeStagePlanBinding != reconstructed M336K12NativeStagePlanBinding",
+  "last_successful_semantic_operation": "M336K13NativeStagePlanBinding.verify",
+  "official_vault_file_count": 0,
+  "plan_write_count": 0,
+  "raw_private_path_count": 0,
+  "receipt_hash": "b6cfb377e7deef040f796d9f17f3b9a827a7b5ee1f82d1deb4895851a3e60846",
+  "reproduction_output_sha256": "668c6280faeda66ee7b1623aae1cc2860b743d83c35e16c50cc5d8eade61938f",
+  "reservation_release_count": 0,
+  "route_event_count": 0,
+  "schema_version": 1,
+  "selector_event_count": 0,
+  "source_request_count": 0,
+  "status": "EXPECTED_REJECTION",
+  "terminal_error": "M336K12 live plan binding changed"
+}

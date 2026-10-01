@@ -1,0 +1,16 @@
+{
+  "contract_role": "PUBLIC_SAFE_M336K13_GENERATION1_RESERVATION_INTACT",
+  "exact_implementation_tip": "a1fd9a74928cb82b6f57628461493001c11cb394",
+  "exact_qualification_sha": "ee34ca2bb9e90bbcb5a916af51fefbdffe375158",
+  "modified": false,
+  "non_sparse": true,
+  "raw_private_path_count": 0,
+  "receipt_hash": "8116450359e4d6c52e3b566a0e17dc821b1248459590dd823c58a9718bed59d6",
+  "released": false,
+  "reservation_content_hash": "64a325e105acc75cb7e96d5712f9188af8a984eb248dec8d4d30cda47bfb14d1",
+  "reservation_receipt_hash": "a4f6db20b9c357b474d0098de5eb6c45143d8393e9a8e1c670968d2c67923783",
+  "reservation_size_bytes": 2563642326,
+  "reused": false,
+  "schema_version": 1,
+  "status": "PASS"
+}

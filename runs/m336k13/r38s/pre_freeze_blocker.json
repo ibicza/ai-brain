@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "contract_role": "PUBLIC_SAFE_M336K13_R38S_PRE_FREEZE_BLOCKER_RUN",
+  "outcome": "PRE_FREEZE_BLOCKED",
+  "exact_q38r_sha": "ee34ca2bb9e90bbcb5a916af51fefbdffe375158",
+  "initial_blocker_reproduction_sha256": "668c6280faeda66ee7b1623aae1cc2860b743d83c35e16c50cc5d8eade61938f",
+  "direct_verifier_tests": {
+    "passed": 19,
+    "failed": 0
+  },
+  "official_component_builder": {
+    "real_entrypoint_invoked": true,
+    "fresh_repository": true,
+    "fresh_private_root": true,
+    "fresh_staging_root": true,
+    "old_partial_staging_reuse_count": 0,
+    "v6_native_stage_verification_passed": true,
+    "v6_freeze_assembly_passed": true,
+    "compatibility_gate_passed": false,
+    "bundle_completion": false,
+    "official_side_effect_count": 0
+  },
+  "compatibility_gate": {
+    "error": "M336K8 compatibility gate V2 is invalid",
+    "allowed_consumed_counts": [24, 29, 33],
+    "required_v6_consumed_count": 38,
+    "failure_signature_hash": "a49a944f8df9dd0c5d1f92fb470d21161aef44ef305fc9bb018e3135031b0326"
+  },
+  "q38s_created": false,
+  "generation2_created": false,
+  "f38_created": false,
+  "status": "PRE_FREEZE_BLOCKED"
+}

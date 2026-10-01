@@ -1,0 +1,17 @@
+{
+  "contract_role": "PUBLIC_SAFE_M336K13_PRE_PATCH_NATIVE_STAGE_GRAPH",
+  "edge_count": 143471,
+  "exact_source_sha": "ee34ca2bb9e90bbcb5a916af51fefbdffe375158",
+  "file_count": 1284,
+  "graph_database_sha256": "e965b9a018de0f895aaabebb393ce6a0cb052151c36cbe7064db10f58db05855",
+  "imports_ambiguous": 0,
+  "imports_resolved": 2101,
+  "imports_updated": 5607,
+  "loaded_edge_count": 141071,
+  "loaded_unique_node_count": 16122,
+  "node_count": 18756,
+  "raw_private_path_count": 0,
+  "receipt_hash": "5a7fe94c1910dd6af1eb8d652a9128405a04aecfefd6548aa250d8cd886db721",
+  "schema_version": 1,
+  "status": "PASS"
+}

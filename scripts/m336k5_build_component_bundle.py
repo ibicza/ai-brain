@@ -170,6 +170,7 @@ from ai_brain.stage3.acquisition.m336k13_plan import (
     M336K13OfficialExecutableBindingReceipt,
     M336K13PostFreezeInputBundle,
     verify_m336k13_final_controller_plan_binding,
+    verify_m336k13_native_stage_plan,
 )
 
 _LABEL = re.compile(r"[a-z0-9][a-z0-9-]{3,63}")
@@ -231,11 +232,11 @@ M336K_PUBLICATION_FIELDS = (
 )
 
 M336K13_OFFICIAL_PUBLICATION_TUPLE = (
-    "artifacts/m336k13/q38r",
+    "artifacts/m336k13/q38s",
     "artifacts/m336k13/f38-freeze",
     "artifacts/m336k13/h38",
     "artifacts/m336k13/e38",
-    "M-33.6k.13 requalify immutable final controller launch",
+    "M-33.6k.13 requalify v6 native-stage verification",
     "M-33.6k.13 freeze final Java execution",
     "M-33.6k.13 publish sealed Java production",
     "M-33.6k.13 publish independent Java evidence",
@@ -780,12 +781,26 @@ def main() -> None:
                 if profile_id == M336K13_PROFILE_ID
                 else base_plan_binding
             )
-            producer_consumer_parity = verify_m336k12_native_stage_plan(
-                plan=private_plan,
-                dispatches=native_stage_dispatches,
-                plan_binding=plan_binding,
-                repository=repository,
-                python_executable=Path(request["executable_handles"]["python"]),
+            producer_consumer_parity = (
+                verify_m336k13_native_stage_plan(
+                    plan=private_plan,
+                    dispatches=native_stage_dispatches,
+                    plan_binding=plan_binding,
+                    expected_base_plan_binding=base_plan_binding,
+                    expected_final_controller_plan_binding_receipt_hash=(
+                        final_plan_binding.receipt_hash
+                    ),
+                    repository=repository,
+                    python_executable=Path(request["executable_handles"]["python"]),
+                )
+                if profile_id == M336K13_PROFILE_ID
+                else verify_m336k12_native_stage_plan(
+                    plan=private_plan,
+                    dispatches=native_stage_dispatches,
+                    plan_binding=plan_binding,
+                    repository=repository,
+                    python_executable=Path(request["executable_handles"]["python"]),
+                )
             )
             base_native_capsule = M336K12NativeExecutionCapsuleReceipt.build(
                 base_capsule=base_capsule,
@@ -1793,6 +1808,10 @@ def _write_m336k13_executable_binding_receipt(
         (capsule.final_controller_plan_binding_receipt_hash, plan_hash),
         (route.final_controller_plan_binding_receipt_hash, plan_hash),
         (plan_binding.final_controller_plan_binding_receipt_hash, plan_hash),
+        (
+            parity.native_stage_plan_binding_hash,
+            plan_binding.plan_binding_hash,
+        ),
     )
     executable_mismatches = sum(left != right for left, right in relations)
     semantic_anchor = content_hash(

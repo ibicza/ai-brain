@@ -1635,6 +1635,12 @@ M336K12_POST_FREEZE_CONSUMED_COMPONENTS = (
     "freeze_assembly_receipt",
     "frozen_contract_compatibility_v2",
 )
+M336K13_POST_FREEZE_CONSUMED_COMPONENTS = (
+    *(item[0] for item in _M336K13_ASSEMBLY_COMPONENTS),
+    "freeze_assembly_plan",
+    "freeze_assembly_receipt",
+    "frozen_contract_compatibility_v2",
+)
 
 
 @dataclass(frozen=True)
@@ -1718,6 +1724,7 @@ class M336K8FrozenContractCompatibilityGateV2:
                 len(M336K8_POST_FREEZE_CONSUMED_COMPONENTS),
                 len(M336K11_POST_FREEZE_CONSUMED_COMPONENTS),
                 len(M336K12_POST_FREEZE_CONSUMED_COMPONENTS),
+                len(M336K13_POST_FREEZE_CONSUMED_COMPONENTS),
             }
             or self.compatibility_artifact_count != len(self.artifacts)
             or self.semantic_check_count < self.compatibility_artifact_count
@@ -2243,17 +2250,20 @@ def m336k8_semantic_binding_mismatches(
         mismatches += int(final_plan_binding.get("path_collision_count") != 0)
         mismatches += int(final_plan_binding.get("status") != "PASS")
     elif name == "actual_launcher_plan_receipt_schema":
-        mismatches += int(
-            actual_launcher_schema.get("contract_role")
-            != "M336K13_ACTUAL_LAUNCHER_PLAN_RECEIPT_SCHEMA"
+        schema_role = actual_launcher_schema.get("contract_role")
+        expected_producer_repository_path = (
+            "scripts/m336k13_final_controller_bootstrap.py"
+            if schema_role == "M336K13_ACTUAL_LAUNCHER_PLAN_RECEIPT_SCHEMA"
+            else "scripts/m336k5_python_bootstrap.py"
         )
+        mismatches += int(schema_role != "M336K13_ACTUAL_LAUNCHER_PLAN_RECEIPT_SCHEMA")
         mismatches += int(
             actual_launcher_schema.get("receipt_contract_role")
             != "M336K13_ACTUAL_LAUNCHER_PLAN_RECEIPT"
         )
         mismatches += int(
             actual_launcher_schema.get("producer_repository_path")
-            != "scripts/m336k5_python_bootstrap.py"
+            != expected_producer_repository_path
         )
         mismatches += int(
             actual_launcher_schema.get("write_order") != "BEFORE_TARGET_DISPATCH"
