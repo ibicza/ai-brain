@@ -188,6 +188,7 @@ def _copy_current_source(repository: Path) -> tuple[str, str]:
             "user.email=m336k13-test@example.invalid",
             "commit",
             "--quiet",
+            "--allow-empty",
             "-m",
             "M336K13 temporary verifier fixture",
         ),
