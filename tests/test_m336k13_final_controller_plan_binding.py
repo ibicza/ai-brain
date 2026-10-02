@@ -85,6 +85,16 @@ _K13_DISPOSABLE_PUBLICATION_TUPLE = (
     "M-33.6k.13 publish disposable sealed production",
     "M-33.6k.13 publish disposable independent evidence",
 )
+_K13_OFFICIAL_PUBLICATION_TUPLE = (
+    "artifacts/m336k13/q38t",
+    "artifacts/m336k13/f38-freeze",
+    "artifacts/m336k13/h38",
+    "artifacts/m336k13/e38",
+    "M-33.6k.13 requalify freeze-readiness closure",
+    "M-33.6k.13 freeze final Java execution",
+    "M-33.6k.13 publish sealed Java production",
+    "M-33.6k.13 publish independent Java evidence",
+)
 _K10_DISPOSABLE_PUBLICATION_TUPLE = (
     "artifacts/m336k10/disposable/q35-like",
     "artifacts/m336k10/disposable/f35-like-freeze",
@@ -291,6 +301,7 @@ def _admit_publication_tuple(
     e_publication_tuple: tuple[str, ...] | None = None,
     contract_branch: str = "refs/heads/disposable/m336k13-r38e-rehearsal-v1",
     request_branch: str | None = None,
+    profile_id: str = "m336k8-rehearsal-v2",
 ) -> None:
     h_values = _publication_values(contract_branch, publication_tuple)
     e_values = (
@@ -307,7 +318,7 @@ def _admit_publication_tuple(
         output,
         {
             "identity_namespace": "m336k8",
-            "official_profile_id": "m336k8-rehearsal-v2",
+            "official_profile_id": profile_id,
             "branch_ref": request_branch or contract_branch,
             "exact_implementation_tip": "1" * 40,
             "exact_q30_sha": "2" * 40,
@@ -327,6 +338,18 @@ def test_m336k13_exact_disposable_publication_tuple_is_admitted(
     )
     assert tuple(getattr(loaded, field) for field in _PUBLICATION_FIELDS) == (
         _K13_DISPOSABLE_PUBLICATION_TUPLE
+    )
+
+
+def test_m336k13_exact_official_q38t_publication_tuple_is_admitted(
+    tmp_path: Path,
+) -> None:
+    branch = "refs/heads/exp/stage3-m336k13-final-controller-plan-binding-v23"
+    _admit_publication_tuple(
+        tmp_path,
+        _K13_OFFICIAL_PUBLICATION_TUPLE,
+        contract_branch=branch,
+        profile_id="m336k8-final-v6",
     )
 
 
@@ -436,6 +459,31 @@ def test_m336k13_official_publication_authority_is_not_expanded(
         M336K2ProtocolError, match="M336K9 publication contract changed"
     ):
         _admit_publication_tuple(tmp_path, official)
+
+
+def test_m336k13_superseded_q38s_publication_tuple_is_not_current(
+    tmp_path: Path,
+) -> None:
+    superseded = (
+        "artifacts/m336k13/q38s",
+        "artifacts/m336k13/f38-freeze",
+        "artifacts/m336k13/h38",
+        "artifacts/m336k13/e38",
+        "M-33.6k.13 requalify v6 native-stage verification",
+        "M-33.6k.13 freeze final Java execution",
+        "M-33.6k.13 publish sealed Java production",
+        "M-33.6k.13 publish independent Java evidence",
+    )
+    with pytest.raises(
+        M336K2ProtocolError, match="M336K9 publication contract changed"
+    ):
+        _admit_publication_tuple(
+            tmp_path,
+            superseded,
+            contract_branch=(
+                "refs/heads/exp/stage3-m336k13-final-controller-plan-binding-v23"
+            ),
+        )
 
 
 def test_m336k13_disposable_publication_tuple_contains_no_private_values() -> None:

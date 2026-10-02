@@ -17,6 +17,14 @@ from ai_brain.stage3.acquisition.m336k2_protocol import (
 from ai_brain.stage3.acquisition.m336k7_freeze import (
     M336K7_REQUIRED_FREEZE_COMPONENTS,
 )
+from ai_brain.stage3.acquisition.m336k13_readiness import (
+    M336K13_READINESS_BRANCH as M336K13_BRANCH,
+)
+from ai_brain.stage3.acquisition.m336k13_readiness import (
+    M336K13_READINESS_STATUS,
+    M336K13FreezeReadinessSeal,
+    verify_m336k13_freeze_readiness_sources,
+)
 
 M336K8_READY_STATUS = "READY_FOR_SOURCE_DOMAIN_BOUND_FINAL_JAVA_EXECUTION_V8"
 M336K8_BRANCH = "exp/stage3-m336k8-source-domain-final-v17"
@@ -33,8 +41,7 @@ M336K11_F36_ROOT = Path("artifacts/m336k11/f36-freeze")
 M336K12_READY_STATUS = "READY_FOR_NATIVE_STAGE_DISPATCH_BOUND_FINAL_JAVA_EXECUTION_V12"
 M336K12_BRANCH = "exp/stage3-m336k12-native-stage-dispatch-v21"
 M336K12_F37_ROOT = Path("artifacts/m336k12/f37-freeze")
-M336K13_READY_STATUS = "READY_FOR_IMMUTABLE_FINAL_CONTROLLER_PLAN_BOUND_EXECUTION_V13"
-M336K13_BRANCH = "exp/stage3-m336k13-final-controller-plan-binding-v23"
+M336K13_READY_STATUS = M336K13_READINESS_STATUS
 M336K13_F38_ROOT = Path("artifacts/m336k13/f38-freeze")
 M336K8_REQUIRED_FREEZE_COMPONENTS = frozenset(
     (set(M336K7_REQUIRED_FREEZE_COMPONENTS) - {"frozen_contract_compatibility"})
@@ -842,14 +849,24 @@ def materialize_m336k8_freeze(
             exact_qualification_sha,
             expected_branch,
         )
-    readiness_value = _verified_object(readiness, "readiness_hash")
-    if (
-        readiness_value["status"] != readiness_status
-        or readiness_value["exact_implementation_tip"] != exact_implementation_tip
-        or readiness_value["official_one_shot_counter_count"] != 0
-        or readiness_value["new_final_source_body_bytes"] != 0
-    ):
-        raise M336K2ProtocolError("M336K8 readiness is not sealed and unspent")
+    if freeze_role == M336K8FreezeManifest.ROLE_V6:
+        readiness_seal = M336K13FreezeReadinessSeal.from_dict(_object(readiness))
+        readiness_seal.verify_for_materialization(
+            exact_implementation_tip=exact_implementation_tip,
+            expected_status=readiness_status,
+            expected_branch=expected_branch,
+        )
+        verify_m336k13_freeze_readiness_sources(readiness, readiness_seal)
+        readiness_value = readiness_seal.canonical_object()
+    else:
+        readiness_value = _verified_object(readiness, "readiness_hash")
+        if (
+            readiness_value["status"] != readiness_status
+            or readiness_value["exact_implementation_tip"] != exact_implementation_tip
+            or readiness_value["official_one_shot_counter_count"] != 0
+            or readiness_value["new_final_source_body_bytes"] != 0
+        ):
+            raise M336K2ProtocolError("M336K8 readiness is not sealed and unspent")
     destination.mkdir(parents=True)
     try:
         component_root = destination / "components"

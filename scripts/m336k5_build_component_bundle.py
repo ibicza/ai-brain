@@ -232,11 +232,11 @@ M336K_PUBLICATION_FIELDS = (
 )
 
 M336K13_OFFICIAL_PUBLICATION_TUPLE = (
-    "artifacts/m336k13/q38s",
+    "artifacts/m336k13/q38t",
     "artifacts/m336k13/f38-freeze",
     "artifacts/m336k13/h38",
     "artifacts/m336k13/e38",
-    "M-33.6k.13 requalify v6 native-stage verification",
+    "M-33.6k.13 requalify freeze-readiness closure",
     "M-33.6k.13 freeze final Java execution",
     "M-33.6k.13 publish sealed Java production",
     "M-33.6k.13 publish independent Java evidence",
