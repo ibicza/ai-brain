@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import runpy
 import struct
+import subprocess
 import warnings
 import zipfile
 from dataclasses import asdict, replace
@@ -636,16 +637,52 @@ def test_historical_acquisition_receipt_uses_exact_license_not_substring(
     assert review["qualification_status"] == "REVIEW_REQUIRED"
 
 
-def test_historical_role_manifest_roundtrip_and_f15_h15_e15_protocol():
+def test_historical_role_manifest_roundtrip_and_f15_h15_e15_protocol(tmp_path):
     raw = (ROOT / "evaluation/m336_final_java/role_manifest.json").read_bytes()
     manifest = load_final_artifact_role_manifest(raw)
     assert dump_final_artifact_role_manifest(manifest) == raw
+    historical_root = tmp_path / "remote-tracking-only"
+    subprocess.run(
+        [
+            "git",
+            "clone",
+            "--quiet",
+            "--shared",
+            "--no-checkout",
+            str(ROOT),
+            str(historical_root),
+        ],
+        check=True,
+    )
+    branch = "exp/stage3-m336-fresh-java-freeze"
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(historical_root),
+            "update-ref",
+            f"refs/remotes/origin/{branch}",
+            E15,
+        ],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(historical_root),
+            "update-ref",
+            "-d",
+            f"refs/heads/{branch}",
+        ],
+        check=True,
+    )
     report = verify_m336_git_freeze_protocol(
-        ROOT,
+        historical_root,
         f15_sha=F15,
         h15_sha=H15,
         e15_sha=E15,
-        upstream="origin/exp/stage3-m336-fresh-java-freeze",
+        upstream=f"origin/{branch}",
     )
     assert report.passed and report.protocol_integrity == "PASS"
     assert report.committed_role_manifest_matches

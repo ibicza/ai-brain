@@ -471,7 +471,7 @@ def verify_m336_git_freeze_protocol(
         == M336_COMMIT_MESSAGES
     )
     merge_count = sum(len(value) != 1 for value in parents.values())
-    tip = _exact_commit(root, branch)
+    tip = _exact_local_or_origin_branch_commit(root, branch)
     upstream_sha = _exact_commit(root, upstream)
     outside = not _is_ancestor(root, shas["excluded"], shas["e15"])
     complete = {name: _git_tree(root, shas[name], ()) for name in ("f15", "h15", "e15")}
@@ -736,6 +736,22 @@ def _exact_commit(repository: str, value: str) -> str:
     sha = _git(repository, "rev-parse", "--verify", f"{value}^{{commit}}")
     _git(repository, "cat-file", "-e", f"{sha}^{{commit}}")
     return sha
+
+
+def _exact_local_or_origin_branch_commit(repository: str, branch: str) -> str:
+    """Resolve a frozen branch from a local or fresh-clone tracking ref."""
+
+    local_ref = f"refs/heads/{branch}"
+    local_probe = subprocess.run(
+        ["git", "-C", repository, "show-ref", "--verify", "--quiet", local_ref],
+        check=False,
+        capture_output=True,
+    )
+    if local_probe.returncode == 0:
+        return _exact_commit(repository, local_ref)
+    if local_probe.returncode != 1:
+        raise ValueError("Git local branch query failed")
+    return _exact_commit(repository, f"refs/remotes/origin/{branch}")
 
 
 def _is_ancestor(repository: str, ancestor: str, descendant: str) -> bool:
