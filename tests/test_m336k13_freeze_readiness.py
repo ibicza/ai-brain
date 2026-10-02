@@ -612,9 +612,7 @@ def test_exact_official_precommit_materializer_accepts_f38_receipt_name(
     )
 
     output = root / "artifacts/m336k13/f38-freeze"
-    manifest = json.loads(
-        (output / "freeze_manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = json.loads((output / "freeze_manifest.json").read_text(encoding="utf-8"))
     assert result["status"] == "PASS"
     assert manifest["self_reference_safe_exclusions"] == [
         "artifacts/m336k13/f38-freeze/freeze_manifest.json",
@@ -641,9 +639,7 @@ def test_f38_entrypoint_accepts_exact_official_precommit_configuration(
             "exact_implementation_tip": implementation,
             "exact_qualification_sha": qualification,
             "readiness": str(readiness),
-            "component_sources": {
-                name: str(path) for name, path in components.items()
-            },
+            "component_sources": {name: str(path) for name, path in components.items()},
             "output": str(output),
             "expected_branch": M336K13_BRANCH,
             "freeze_relative_root": "artifacts/m336k13/f38-freeze",

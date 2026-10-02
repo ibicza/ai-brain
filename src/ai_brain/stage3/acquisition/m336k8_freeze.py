@@ -265,10 +265,7 @@ class M336K8FreezeManifest:
         """
 
         primary = self._build_receipt_name()
-        if (
-            self.contract_role == self.ROLE_V6
-            and self.exact_freeze_sha == "0" * 40
-        ):
+        if self.contract_role == self.ROLE_V6 and self.exact_freeze_sha == "0" * 40:
             return frozenset({primary, "f38_build_receipt.json"})
         return frozenset({primary})
 
