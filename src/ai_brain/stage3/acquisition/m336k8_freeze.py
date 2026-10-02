@@ -253,6 +253,25 @@ class M336K8FreezeManifest:
             return "f34_build_receipt.json"
         return "f33_build_receipt.json"
 
+    def _allowed_build_receipt_names(self) -> frozenset[str]:
+        """Return every receipt name valid for the manifest's encoded state.
+
+        A ROLE_V6 pre-commit manifest cannot distinguish the rehearsal and
+        official materialization contexts from its SHA fields alone: both bind
+        a distinct qualification SHA while the freeze SHA is still zero.  The
+        self-reference exclusions are hash-bound, so admit the two explicitly
+        defined V6 receipt names at that one prospective boundary.  Every
+        other role/state retains its single canonical receipt name.
+        """
+
+        primary = self._build_receipt_name()
+        if (
+            self.contract_role == self.ROLE_V6
+            and self.exact_freeze_sha == "0" * 40
+        ):
+            return frozenset({primary, "f38_build_receipt.json"})
+        return frozenset({primary})
+
     def verify(self, repository: Path, *, allow_prospective: bool = False) -> None:
         root = repository.resolve(strict=True)
         names = {item.name for item in self.components}
@@ -290,10 +309,11 @@ class M336K8FreezeManifest:
         native_dispatch_bound = self.contract_role in {self.ROLE_V5, self.ROLE_V6}
         final_plan_bound = self.contract_role == self.ROLE_V6
         prospective = self.exact_freeze_sha == "0" * 40
-        expected_names = {
-            "freeze_manifest.json",
-            self._build_receipt_name(),
-        }
+        exclusion_names = {Path(item).name for item in exclusions}
+        expected_name_sets = tuple(
+            {"freeze_manifest.json", receipt_name}
+            for receipt_name in self._allowed_build_receipt_names()
+        )
         required_components = (
             M336K13_REQUIRED_FREEZE_COMPONENTS
             if final_plan_bound
@@ -361,7 +381,7 @@ class M336K8FreezeManifest:
             or not _is_sha(self.committed_freeze_tree)
             or any(not _is_hash(value) for value in hashes)
             or len(exclusion_roots) != 1
-            or {Path(item).name for item in exclusions} != expected_names
+            or not any(exclusion_names == expected for expected in expected_name_sets)
             or prospective != (self.committed_freeze_tree == "0" * 40)
             or prospective
             and not allow_prospective

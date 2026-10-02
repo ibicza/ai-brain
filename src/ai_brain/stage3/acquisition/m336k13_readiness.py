@@ -28,7 +28,7 @@ M336K13_READINESS_STATUS = (
 M336K13_READINESS_BRANCH = "exp/stage3-m336k13-final-controller-plan-binding-v23"
 M336K13_READINESS_BRANCH_REF = f"refs/heads/{M336K13_READINESS_BRANCH}"
 M336K13_ACTIVE_PROFILE_ID = "m336k8-final-v6"
-M336K13_QUALIFICATION_LABEL = "Q38T"
+M336K13_QUALIFICATION_LABEL = "Q38U"
 
 _HASH = re.compile(r"[0-9a-f]{64}\Z")
 _SHA = re.compile(r"[0-9a-f]{40}\Z")
@@ -139,8 +139,8 @@ class M336K13FreezeReadinessSeal:
             "private_artifact_count": 0,
             "raw_private_path_count": 0,
             "active_generation_count": 1,
-            "preserved_superseded_generation_count": 2,
-            "preserved_reservation_count": 5,
+            "preserved_superseded_generation_count": 3,
+            "preserved_reservation_count": 6,
         }
         hashes = (
             self.active_official_profile_hash,
@@ -337,12 +337,12 @@ def build_m336k13_freeze_readiness(
     current_reservation_hash = current_storage_reservation.semantic_hash
     if (
         active_generation_count != 1
-        or preserved_generation_count != 2
-        or preserved_reservation_count != 5
-        or post_resource_gate.field("generation3_reservation_receipt_hash")
+        or preserved_generation_count != 3
+        or preserved_reservation_count != 6
+        or post_resource_gate.field("generation4_reservation_receipt_hash")
         != current_reservation_hash
-        or post_resource_gate.field("generation3_reservation_released") is not False
-        or post_resource_gate.field("generation3_reservation_reused") is not False
+        or post_resource_gate.field("generation4_reservation_released") is not False
+        or post_resource_gate.field("generation4_reservation_reused") is not False
         or _require_int(post_resource_gate, "total_released_reservation_count") != 0
     ):
         raise M336K2ProtocolError("M336K13 generation readiness changed")
@@ -425,13 +425,13 @@ def verify_m336k13_freeze_readiness_sources(
     )
     leak = M336K13VerifiedReceipt.from_dict(_load_object(root / "leak_report.json"))
     reservation = M336K13VerifiedReceipt.from_dict(
-        _load_object(root / "generation3_storage_reservation.json")
+        _load_object(root / "generation4_storage_reservation.json")
     )
     pre_gate = M336K13VerifiedReceipt.from_dict(
-        _load_object(root / "generation3_pre_resource_gate.json")
+        _load_object(root / "generation4_pre_resource_gate.json")
     )
     post_gate = M336K13VerifiedReceipt.from_dict(
-        _load_object(root / "generation3_post_resource_gate.json")
+        _load_object(root / "generation4_post_resource_gate.json")
     )
     evidence_binding = M336K13VerifiedReceipt.from_dict(
         _load_object(root / "evidence_binding_manifest.json")

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
+import sys
 from collections.abc import Callable
 from copy import deepcopy
 from pathlib import Path
@@ -30,6 +32,7 @@ from ai_brain.stage3.acquisition.m336k13_readiness import (
 )
 
 _TIP = "a" * 40
+_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _receipt(**values: Any) -> dict[str, Any]:
@@ -79,23 +82,23 @@ def _fixture(
             private_artifact_count=0,
             raw_private_path_count=0,
         ),
-        "generation3_storage_reservation": reservation,
-        "generation3_pre_resource_gate": _receipt(
+        "generation4_storage_reservation": reservation,
+        "generation4_pre_resource_gate": _receipt(
             exact_implementation_tip=tip,
-            preserved_reservation_count=4,
+            preserved_reservation_count=5,
         ),
-        "generation3_post_resource_gate": _receipt(
+        "generation4_post_resource_gate": _receipt(
             exact_implementation_tip=tip,
-            generation3_reservation_receipt_hash=reservation["receipt_hash"],
-            generation3_reservation_released=False,
-            generation3_reservation_reused=False,
-            total_preserved_reservation_count=5,
+            generation4_reservation_receipt_hash=reservation["receipt_hash"],
+            generation4_reservation_released=False,
+            generation4_reservation_reused=False,
+            total_preserved_reservation_count=6,
             total_released_reservation_count=0,
         ),
         "generation_supersession": _receipt(
             exact_implementation_tip=tip,
             active_generation_count=1,
-            preserved_superseded_generation_count=2,
+            preserved_superseded_generation_count=3,
         ),
         "evidence_binding_manifest": _receipt(exact_implementation_tip=tip),
     }
@@ -110,13 +113,13 @@ def _fixture(
         ],
         official_unspent_state=verified["official_unspent_state"],
         leak_report=verified["leak_report"],
-        current_storage_reservation=verified["generation3_storage_reservation"],
-        pre_resource_gate=verified["generation3_pre_resource_gate"],
-        post_resource_gate=verified["generation3_post_resource_gate"],
+        current_storage_reservation=verified["generation4_storage_reservation"],
+        pre_resource_gate=verified["generation4_pre_resource_gate"],
+        post_resource_gate=verified["generation4_post_resource_gate"],
         generation_supersession=verified["generation_supersession"],
         evidence_binding_manifest=verified["evidence_binding_manifest"],
         exact_implementation_tip=tip,
-        qualification_label="Q38T",
+        qualification_label="Q38U",
     )
     return seal, raw
 
@@ -157,7 +160,7 @@ def _write_readiness_evidence(
     return path
 
 
-def test_exact_q38t_readiness_is_accepted(tmp_path: Path) -> None:
+def test_exact_q38u_readiness_is_accepted(tmp_path: Path) -> None:
     seal, raw = _fixture()
     path = _write_readiness_evidence(tmp_path, seal, raw)
 
@@ -248,13 +251,14 @@ def test_materialization_binding_rejects_wrong_implementation_tip() -> None:
         "artifacts/m336k13/q38/readiness.json",
         "artifacts/m336k13/q38r/readiness.json",
         "artifacts/m336k13/q38s/readiness.json",
+        "artifacts/m336k13/q38t/readiness.json",
     ),
 )
 def test_historical_readiness_is_diagnostic_only(artifact: str) -> None:
     root = Path(__file__).resolve().parents[1]
     value = json.loads((root / artifact).read_text(encoding="utf-8"))
 
-    with pytest.raises(M336K2ProtocolError, match="fields changed"):
+    with pytest.raises(M336K2ProtocolError, match="fields changed|is invalid"):
         M336K13FreezeReadinessSeal.from_dict(value)
 
 
@@ -275,8 +279,8 @@ def test_historical_readiness_is_diagnostic_only(artifact: str) -> None:
             "preserved_superseded_generation_count",
             1,
         ),
-        ("generation3_post_resource_gate", "total_preserved_reservation_count", 4),
-        ("generation3_post_resource_gate", "total_released_reservation_count", 1),
+        ("generation4_post_resource_gate", "total_preserved_reservation_count", 5),
+        ("generation4_post_resource_gate", "total_released_reservation_count", 1),
     ),
 )
 def test_builder_rejects_fully_rehashed_source_mutations(
@@ -298,13 +302,13 @@ def test_builder_rejects_fully_rehashed_source_mutations(
             ],
             official_unspent_state=verified["official_unspent_state"],
             leak_report=verified["leak_report"],
-            current_storage_reservation=verified["generation3_storage_reservation"],
-            pre_resource_gate=verified["generation3_pre_resource_gate"],
-            post_resource_gate=verified["generation3_post_resource_gate"],
+            current_storage_reservation=verified["generation4_storage_reservation"],
+            pre_resource_gate=verified["generation4_pre_resource_gate"],
+            post_resource_gate=verified["generation4_post_resource_gate"],
             generation_supersession=verified["generation_supersession"],
             evidence_binding_manifest=verified["evidence_binding_manifest"],
             exact_implementation_tip=_TIP,
-            qualification_label="Q38T",
+            qualification_label="Q38U",
         )
 
 
@@ -484,7 +488,7 @@ def _build_materializer_repository(
         _git(root, "commit", "-m", "intermediate evidence")
 
     seal, raw = _fixture(implementation)
-    readiness_root = root / "artifacts/m336k13/q38t"
+    readiness_root = root / "artifacts/m336k13/q38u"
     readiness_value = seal.canonical_object()
     if readiness_mutator is not None:
         readiness_value = readiness_mutator(deepcopy(readiness_value))
@@ -547,6 +551,33 @@ def _call_materializer(
     )
 
 
+def _call_official_materializer(
+    root: Path,
+    readiness: Path,
+    implementation: str,
+    qualification: str,
+    components: dict[str, Path],
+) -> dict[str, Any]:
+    git = shutil.which("git")
+    assert git is not None
+    return materialize_m336k8_freeze(
+        repository=root,
+        git_executable=Path(git),
+        exact_implementation_tip=implementation,
+        exact_qualification_sha=qualification,
+        readiness=readiness,
+        component_sources=components,
+        output=root / "artifacts/m336k13/f38-freeze",
+        expected_branch=M336K13_BRANCH,
+        freeze_relative_root="artifacts/m336k13/f38-freeze",
+        readiness_status=M336K13_READY_STATUS,
+        freeze_role=M336K8FreezeManifest.ROLE_V6,
+        required_components=M336K13_REQUIRED_FREEZE_COMPONENTS,
+        build_receipt_name="f38_build_receipt.json",
+        allow_unpublished_qualification=False,
+    )
+
+
 def test_exact_materializer_accepts_typed_readiness_in_complete_git_chain(
     tmp_path: Path,
 ) -> None:
@@ -566,6 +597,84 @@ def test_exact_materializer_accepts_typed_readiness_in_complete_git_chain(
     assert len(tuple((output / "components").iterdir())) == len(
         M336K13_REQUIRED_FREEZE_COMPONENTS
     )
+
+
+def test_exact_official_precommit_materializer_accepts_f38_receipt_name(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "official-success"
+    readiness, implementation, qualification, components = (
+        _build_materializer_repository(root)
+    )
+
+    result = _call_official_materializer(
+        root, readiness, implementation, qualification, components
+    )
+
+    output = root / "artifacts/m336k13/f38-freeze"
+    manifest = json.loads(
+        (output / "freeze_manifest.json").read_text(encoding="utf-8")
+    )
+    assert result["status"] == "PASS"
+    assert manifest["self_reference_safe_exclusions"] == [
+        "artifacts/m336k13/f38-freeze/freeze_manifest.json",
+        "artifacts/m336k13/f38-freeze/f38_build_receipt.json",
+    ]
+    assert (output / "f38_build_receipt.json").is_file()
+    assert not (output / "prospective_freeze_build_receipt.json").exists()
+
+
+def test_f38_entrypoint_accepts_exact_official_precommit_configuration(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "official-entrypoint-success"
+    readiness, implementation, qualification, components = (
+        _build_materializer_repository(root)
+    )
+    output = root / "artifacts/m336k13/f38-freeze"
+    configuration = tmp_path / "f38-configuration.json"
+    _write_json(
+        configuration,
+        {
+            "repository": str(root),
+            "git_executable": str(Path(shutil.which("git") or "git")),
+            "exact_implementation_tip": implementation,
+            "exact_qualification_sha": qualification,
+            "readiness": str(readiness),
+            "component_sources": {
+                name: str(path) for name, path in components.items()
+            },
+            "output": str(output),
+            "expected_branch": M336K13_BRANCH,
+            "freeze_relative_root": "artifacts/m336k13/f38-freeze",
+        },
+    )
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = os.pathsep.join(
+        filter(
+            None,
+            (str(_ROOT / "src"), environment.get("PYTHONPATH", "")),
+        )
+    )
+
+    completed = subprocess.run(
+        (
+            sys.executable,
+            str(_ROOT / "scripts/m336k13_materialize_f38.py"),
+            "--configuration",
+            str(configuration),
+        ),
+        cwd=_ROOT,
+        env=environment,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    receipt = json.loads(completed.stdout)
+    assert receipt["status"] == "PASS"
+    assert (output / "f38_build_receipt.json").is_file()
+    assert not (output / "prospective_freeze_build_receipt.json").exists()
 
 
 def _remove_source_body(value: dict[str, Any]) -> dict[str, Any]:

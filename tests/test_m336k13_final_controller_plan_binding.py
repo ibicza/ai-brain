@@ -86,11 +86,11 @@ _K13_DISPOSABLE_PUBLICATION_TUPLE = (
     "M-33.6k.13 publish disposable independent evidence",
 )
 _K13_OFFICIAL_PUBLICATION_TUPLE = (
-    "artifacts/m336k13/q38t",
+    "artifacts/m336k13/q38u",
     "artifacts/m336k13/f38-freeze",
     "artifacts/m336k13/h38",
     "artifacts/m336k13/e38",
-    "M-33.6k.13 requalify freeze-readiness closure",
+    "M-33.6k.13 requalify official freeze materialization",
     "M-33.6k.13 freeze final Java execution",
     "M-33.6k.13 publish sealed Java production",
     "M-33.6k.13 publish independent Java evidence",
@@ -341,7 +341,7 @@ def test_m336k13_exact_disposable_publication_tuple_is_admitted(
     )
 
 
-def test_m336k13_exact_official_q38t_publication_tuple_is_admitted(
+def test_m336k13_exact_official_q38u_publication_tuple_is_admitted(
     tmp_path: Path,
 ) -> None:
     branch = "refs/heads/exp/stage3-m336k13-final-controller-plan-binding-v23"
