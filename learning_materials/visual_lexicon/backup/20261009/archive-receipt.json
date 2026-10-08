@@ -1,0 +1,37 @@
+{
+  "exclusions": [],
+  "input_manifest_sha256": "ea449391a36e8046a81f25d030438d17a164ca77e2c7054c6f50ad104005160c",
+  "limits": "integrity/coverage only; OCR and semantic labels remain draft; originals outside corpus require their separate existing backup",
+  "max_part_bytes": 41943040,
+  "merge_audit": {
+    "effective_ocr_pages": 1763,
+    "effective_pages": 1763,
+    "limit": "integrity and coverage only, not semantic/OCR accuracy or training admission",
+    "media_rows_checked": 27523,
+    "merge_sha256": "8d786d46fb9b5d7dcb7e11bb397758727e04c6e9a4e80aba2b97752d07185b44",
+    "raw_assets_checked": 27290,
+    "status": "INDEPENDENT_HASH_CONFINEMENT_EFFECTIVE_PAGE_OCR_AND_SUPERSEDED_EXCLUSION_VERIFIED",
+    "superseded_files_excluded": 292,
+    "training_admitted": false
+  },
+  "parts": 14,
+  "parts_manifest_sha256": "adfc5eb8ed00c5527f368e58062157995109b4494da69540c079a11f874c25f0",
+  "reconstructed_stream_verification": {
+    "files_verified": 29961,
+    "restored": false,
+    "total_bytes_verified": 774897383
+  },
+  "source_before_after_identity_verified": true,
+  "source_bytes": 774897383,
+  "source_deleted_or_modified": false,
+  "source_files": 29961,
+  "status": "COMPLETE_SOURCE_PRESERVING_ZIP_AND_RECONSTRUCTED_PART_STREAM_VERIFIED",
+  "training_started": false,
+  "whole_zip_verification": {
+    "files_verified": 29961,
+    "restored": false,
+    "total_bytes_verified": 774897383
+  },
+  "zip_bytes": 553580232,
+  "zip_sha256": "9866d4934b2cc8195775ec5ac38a252a219d8f3f2a89aa4a0af0fdd8a7bc02f7"
+}

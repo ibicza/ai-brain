@@ -1,0 +1,11 @@
+{
+  "effective_ocr_pages": 1763,
+  "effective_pages": 1763,
+  "limit": "integrity and coverage only, not semantic/OCR accuracy or training admission",
+  "media_rows_checked": 27523,
+  "merge_sha256": "8d786d46fb9b5d7dcb7e11bb397758727e04c6e9a4e80aba2b97752d07185b44",
+  "raw_assets_checked": 27290,
+  "status": "INDEPENDENT_HASH_CONFINEMENT_EFFECTIVE_PAGE_OCR_AND_SUPERSEDED_EXCLUSION_VERIFIED",
+  "superseded_files_excluded": 292,
+  "training_admitted": false
+}

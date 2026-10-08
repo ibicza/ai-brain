@@ -22,3 +22,6 @@
 *.ckpt binary
 *.safetensors binary
 *.gguf binary
+
+# Permanent lexicon exports and integrity manifests require exact source bytes.
+learning_materials/visual_lexicon/** -text
