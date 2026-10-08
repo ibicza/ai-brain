@@ -171,9 +171,12 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
         source = Path(review["path"])
         if sha(source) != review["sha256"]:
             raise ValueError("Review changed before queue export")
-        for book in json.loads(source.read_text(encoding="utf-8")).get("books", []):
+        review_data = json.loads(source.read_text(encoding="utf-8"))
+        if not isinstance(review_data, dict):
+            continue
+        for book in review_data.get("books", []):
             reviewed_pages.update(
-                (book["filename"], page) for page in book["pages_visually_reviewed"]
+                (book["filename"], page) for page in book.get("pages_visually_reviewed", [])
             )
     queue = output / "review_queue.csv"
     with queue.open("w", encoding="utf-8-sig", newline="") as stream:

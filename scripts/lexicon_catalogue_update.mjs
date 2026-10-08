@@ -27,17 +27,27 @@ const wb = await SpreadsheetFile.importXlsx(await FileBlob.load(input));
 console.log((await wb.inspect({kind:'workbook,sheet,table',maxChars:1700,tableMaxRows:1,tableMaxCols:3})).ndjson);
 const words = wb.worksheets.getItem('Словарь');
 const media = wb.worksheets.getItem('Медиа');
-const oldWordCount = data.stats.concepts - data.stats.new_visual_concepts;
-const oldWordRows = words.getRange(`A9:M${8+oldWordCount}`).values;
-const oldMediaCount = data.media.length-data.stats.reviewed_occurrences-data.raw_assets.length;
+const oldWordCount = data.input_rows?.words ?? data.stats.concepts - data.stats.new_visual_concepts;
+const oldWordWidth = data.input_headers?.words?.length ?? 13;
+const oldWordRows = words.getRangeByIndexes(8,0,oldWordCount,oldWordWidth).values;
+const oldMediaCount = data.input_rows?.media ?? data.media.length-data.stats.reviewed_occurrences-data.raw_assets.length;
 assert(oldMediaCount>=0);
-const oldMediaRows = oldMediaCount ? media.getRange(`A9:L${8+oldMediaCount}`).values : [];
+const oldMediaWidth = data.input_headers?.media?.length ?? 12;
+const oldMediaRows = oldMediaCount ? media.getRangeByIndexes(8,0,oldMediaCount,oldMediaWidth).values : [];
 const normal = v => v === '' || v === undefined ? null : v;
 for (let i=0; i<oldWordRows.length; i++) {
   assert.deepEqual(oldWordRows[i].slice(0,13).map(normal), data.words[i].slice(0,13).map(normal), 'User word changed');
+  if(oldWordWidth===14) assert(String(data.words[i][13]||'').startsWith(String(oldWordRows[i][13]||'')), 'Old unassigned links removed');
 }
 for (let i=0; i<oldMediaRows.length; i++) {
-  assert.deepEqual(oldMediaRows[i].slice(0,12).map(normal), data.media[i].slice(0,12).map(normal), 'User media changed');
+  assert.deepEqual(oldMediaRows[i].map(normal), data.media[i].slice(0,oldMediaWidth).map(normal), 'User media changed');
+}
+if(data.incremental) {
+  for(const [name,key] of [['Словарь','words'],['Медиа','media'],['Текст','text'],['Покрытие','coverage']]) {
+    const sheet=wb.worksheets.getItem(name);
+    assert.deepEqual(sheet.getRangeByIndexes(7,0,1,data.input_headers[key].length).values[0],data.input_headers[key], 'Input schema changed');
+    if(key==='text'||key==='coverage') assert.deepEqual(sheet.getRangeByIndexes(8,0,data.input_rows[key],data.input_headers[key].length).values.map(r=>r.map(normal)),data[key].slice(0,data.input_rows[key]).map(r=>r.map(normal)), 'Existing sheet edited by preparation');
+  }
 }
 const literal = rows => rows.map(row => row.map(value => {
   assert(typeof value !== 'string' || value.length <= 32767, 'Excel string too long');
@@ -55,9 +65,18 @@ function title(sheet, text, instructions) {
   sheet.freezePanes.freezeRows(8);
   sheet.freezePanes.freezeColumns(2);
 }
-function table(sheet, name, headers, rows, widths, existing=false) {
+function table(sheet, name, headers, rows, widths, existing=false, oldCount=0) {
   console.log(`Writing ${name}: ${rows.length} rows`);
   const last=rows.length+8;
+  if(data.incremental && existing) {
+    const native=sheet.tables.items.find(t=>t.name===name);
+    assert(native,'Missing expected native table');
+    if(rows.length>oldCount) native.rows.add(null,literal(rows.slice(oldCount)));
+    if(name==='VisualConcepts') sheet.getRangeByIndexes(8,13,oldCount,1).values=literal(rows.slice(0,oldCount).map(r=>[r[13]]));
+    if(rows.length>oldCount) sheet.getRangeByIndexes(8+oldCount,0,rows.length-oldCount,headers.length).format=body;
+    console.log(`Completed append-only ${name}`);
+    return last;
+  }
   if (existing) sheet.tables.items.find(t=>t.name===name).delete();
   sheet.getRangeByIndexes(7,0,rows.length+1,headers.length).values = literal([headers,...rows]);
   let end=''; let number=headers.length;
@@ -80,7 +99,7 @@ title(words, 'Визуальный словарь — постоянный ка�
   'Новые картинки находятся в колонке N: разбиение пока не назначено. Полный текст и сомнения — на листе «Текст».',
   'Правьте этот сохранённый файл. Новый смысл = новый ID. Обучение по учебникам не запускалось.',
 ]);
-const wordLast=table(words,'VisualConcepts',data.words_headers,data.words,[12,25,53,25,28,27,17,19,38,38,39,40,57,52],true);
+const wordLast=table(words,'VisualConcepts',data.words_headers,data.words,[12,25,53,25,28,27,17,19,38,38,39,40,57,52],true,oldWordCount);
 words.getRange(`F9:F${wordLast}`).dataValidation={rule:{type:'list',values:statuses}};
 words.getRange(`G9:G${wordLast}`).dataValidation={rule:{type:'decimal',operator:'between',formula1:0,formula2:1}};
 words.getRange(`G9:G${wordLast}`).setNumberFormat('0.0%');
@@ -91,26 +110,26 @@ title(media,'Медиафайлы и происхождение',[
   'Нет допуска обучения. Пользователь ещё не подтвердил предложенные подписи; сырые ресурсы — черновики.',
   'Связанные сцены и дубли нельзя разделять между обучением и контролем. Регрессия не является новым слепым экзаменом.',
 ]);
-const mediaLast=table(media,'VisualMedia',data.media_headers,data.media,[16,13,45,20,25,25,65,56,31,36,40,30,38,45,28,18,42,18,32],true);
+const mediaLast=table(media,'VisualMedia',data.media_headers,data.media,[16,13,45,20,25,25,65,56,31,36,40,30,38,45,28,18,42,18,32],true,oldMediaCount);
 media.getRange(`D9:D${mediaLast}`).dataValidation={rule:{type:'list',values:['Не назначено','train','dev','calibration','regression','fresh_final']}};
 media.getRange(`L9:L${mediaLast}`).dataValidation={rule:{type:'list',values:['Черновик','Агент проверил; ожидает пользователя','Проверено','Карантин']}};
 media.getRange(`P9:P${mediaLast}`).dataValidation={rule:{type:'list',values:['Нет']}};
-const text = wb.worksheets.add('Текст');
+const text = data.incremental ? wb.worksheets.getItem('Текст') : wb.worksheets.add('Текст');
 title(text,'Слова и формы из полного текста',[
   'Все страницы: текст PDF + Windows OCR. Ошибки распознавания, имена и неоднозначные значения требуют проверки.',
   'Возможный ID — только совпадение написания/леммы, не доказательство смысла. Слова и картинки не склеиваются вслепую.',
   'Числа, знаки и исходные строки не удалены: они сохранены в полном тексте и OCR-файлах на листе «Медиа».',
   'PDF и OCR перекрываются. Служебные символы показаны как \\uXXXX; исходный текст сохранён без изменений.',
 ]);
-table(text,'TextCandidates',data.text_headers,data.text,[18,25,45,24,20,18,14,37,42,53,60,70,50]);
-const coverage=wb.worksheets.add('Покрытие');
+table(text,'TextCandidates',data.text_headers,data.text,[18,25,45,24,20,18,14,37,42,53,60,70,50],!!data.incremental,data.input_rows?.text??0);
+const coverage=data.incremental ? wb.worksheets.getItem('Покрытие') : wb.worksheets.add('Покрытие');
 title(coverage,'Покрытие и границы проверки',[
   'Сохранены все 1763 страницы 13 книг. Автоматическое извлечение не заменяет семантическую проверку иллюстраций.',
   'Визуальные страницы — первый выборочный проход агентов; просмотр не означает разметку каждого объекта страницы.',
   '13 геометрических исправлений заменяют целые записи страниц; старые ресурсы явно исключены из текущего каталога.',
   'Нет обучения, новых метрик модели или полностью подтверждённого человеком учебного корпуса.',
 ]);
-table(coverage,'BookCoverage',data.coverage_headers,data.coverage,[63,40,18,21,18,24,23,20,85]);
+table(coverage,'BookCoverage',data.coverage_headers,data.coverage,[63,40,18,21,18,24,23,20,85],!!data.incremental,data.input_rows?.coverage??0);
 wb.recalculate();
 console.log((await wb.inspect({kind:'match',searchTerm:'#REF!|#DIV/0!|#VALUE!|#NAME\\?|#N/A|#NUM!|#NULL!',options:{useRegex:true,maxResults:10},maxChars:1500})).ndjson);
 console.log((await wb.inspect({kind:'table',range:'Словарь!A8:H11',include:'values,formulas',tableMaxRows:4,tableMaxCols:8,maxChars:1800})).ndjson);

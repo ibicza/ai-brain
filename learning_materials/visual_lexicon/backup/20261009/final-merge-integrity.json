@@ -1,0 +1,11 @@
+{
+  "status": "INDEPENDENT_HASH_CONFINEMENT_EFFECTIVE_PAGE_OCR_AND_SUPERSEDED_EXCLUSION_VERIFIED",
+  "merge_sha256": "42993fa30d3dd8aff650086bf497876938e867c3a41d814dda0f76fbdc8c979a",
+  "raw_assets_checked": 27290,
+  "media_rows_checked": 27523,
+  "effective_pages": 1763,
+  "effective_ocr_pages": 1763,
+  "superseded_files_excluded": 292,
+  "training_admitted": false,
+  "limit": "integrity and coverage only, not semantic/OCR accuracy or training admission"
+}

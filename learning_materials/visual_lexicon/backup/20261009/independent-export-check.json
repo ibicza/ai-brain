@@ -1,0 +1,59 @@
+{
+  "audit": "INDEPENDENT_READ_ONLY_EXPORTED_XLSX_XML_CHECK",
+  "status": "PASS",
+  "input_snapshot": "D:\\ai-brain-data\\visual-lexicon\\backups\\visual_lexicon-before-books-20261009.xlsx",
+  "input_snapshot_sha256": "c7b1599da73f913075793133ead7b0442957b4051b6827c8d78cf61a317f30e1",
+  "merge_json": "D:\\ai-brain-data\\visual-lexicon\\merge-final-xml-safe.json",
+  "merge_sha256": "42993fa30d3dd8aff650086bf497876938e867c3a41d814dda0f76fbdc8c979a",
+  "final_workbook": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\outputs\\visual-lexicon-20261009-books\\visual_lexicon.xlsx",
+  "final_workbook_sha256": "da5dcd82aae6053d3ca736af48ccd57334419bb42dd14a85bef94dcdf53cb06b",
+  "compared_cells": 735430,
+  "saved_word_rows_verified": 338,
+  "saved_media_rows_verified": 0,
+  "rows": {
+    "words": 460,
+    "media": 27523,
+    "text": 15499,
+    "coverage": 13
+  },
+  "sheet_names": [
+    "Словарь",
+    "Медиа",
+    "Текст",
+    "Покрытие"
+  ],
+  "tables": [
+    {
+      "sheet": "Словарь",
+      "name": "VisualConcepts",
+      "ref": "A8:N468",
+      "autofilter_ref": "A8:N468"
+    },
+    {
+      "sheet": "Медиа",
+      "name": "VisualMedia",
+      "ref": "A8:S27531",
+      "autofilter_ref": "A8:S27531"
+    },
+    {
+      "sheet": "Текст",
+      "name": "TextCandidates",
+      "ref": "A8:M15507",
+      "autofilter_ref": "A8:M15507"
+    },
+    {
+      "sheet": "Покрытие",
+      "name": "BookCoverage",
+      "ref": "A8:I21",
+      "autofilter_ref": "A8:I21"
+    }
+  ],
+  "formulas": [],
+  "excel_errors": [],
+  "failure_count": 0,
+  "failures": [],
+  "mismatches": [],
+  "training_started": false,
+  "training_admitted": false,
+  "limits": "ZIP/XML cell identity, tables, filters and freeze verified; does not certify image captions, visual layout, model learning or user acceptance."
+}

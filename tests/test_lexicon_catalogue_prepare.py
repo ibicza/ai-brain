@@ -351,7 +351,9 @@ def test_saved_user_control_requires_migration_not_automatic_escaping(bundle):
     changed = tuple(original)
     changed[1][0][12] = "user\u0001note"
     before = prepare.digest(bundle.workbook)
-    with patch.object(prepare, "read_saved_workbook", return_value=changed):
-        with pytest.raises(ValueError, match="Saved user cell|migration"):
-            run_bundle(bundle)
+    with (
+        patch.object(prepare, "read_saved_workbook", return_value=changed),
+        pytest.raises(ValueError, match="Saved user cell|migration"),
+    ):
+        run_bundle(bundle)
     assert prepare.digest(bundle.workbook) == before

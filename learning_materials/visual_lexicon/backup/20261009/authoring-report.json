@@ -1,0 +1,21 @@
+{
+  "input_sha256": "c7b1599da73f913075793133ead7b0442957b4051b6827c8d78cf61a317f30e1",
+  "output_sha256": "da5dcd82aae6053d3ca736af48ccd57334419bb42dd14a85bef94dcdf53cb06b",
+  "stats": {
+    "concepts": 460,
+    "new_visual_concepts": 122,
+    "reviewed_occurrences": 233,
+    "media_rows": 27523,
+    "text_entries": 15499,
+    "effective_pages": 1763,
+    "ocr_pages": 1763,
+    "pages_visually_reviewed": 84,
+    "corrected_pages": 13,
+    "missing_ocr": [],
+    "lexical_occurrence_matches_not_sense_proofs": 49003,
+    "limits": "Visual review is a sampled first pass. PDF/OCR tokens and lemma candidates require contextual review.",
+    "xml_display_escaped_cells": 330
+  },
+  "training_started": false,
+  "qa_completed": true
+}

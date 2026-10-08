@@ -1,0 +1,2727 @@
+{
+  "schema": 2,
+  "workbook_sha256": "da5dcd82aae6053d3ca736af48ccd57334419bb42dd14a85bef94dcdf53cb06b",
+  "preserved_input_workbook_sha256": "c7b1599da73f913075793133ead7b0442957b4051b6827c8d78cf61a317f30e1",
+  "all_saved_cells_match": true,
+  "formulas": 0,
+  "tables_and_filters": 4,
+  "training_started": false,
+  "training_admitted": false,
+  "stats": {
+    "concepts": 460,
+    "new_visual_concepts": 122,
+    "reviewed_occurrences": 233,
+    "media_rows": 27523,
+    "text_entries": 15499,
+    "effective_pages": 1763,
+    "ocr_pages": 1763,
+    "pages_visually_reviewed": 84,
+    "corrected_pages": 13,
+    "missing_ocr": [],
+    "lexical_occurrence_matches_not_sense_proofs": 49003,
+    "limits": "Visual review is a sampled first pass. PDF/OCR tokens and lemma candidates require contextual review.",
+    "xml_display_escaped_cells": 330
+  },
+  "review_inputs": [
+    {
+      "path": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\reviews\\math\\independent-audit.json",
+      "sha256": "1e9388bf04c940c7e226dec95f284c9148f9e1d5c04b67c0b82a97201dc8268c"
+    },
+    {
+      "path": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\reviews\\world_language\\independent-math-audit.json",
+      "sha256": "cec82d52d32e5d56db32ba79d0d0edb62b604d009c10a52559e9d26498bb7a61"
+    },
+    {
+      "path": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\reviews\\math\\blind-image-queue.json",
+      "sha256": "69113b926f7826069a88e3d7c66c2b2b049fa918a085e65b97151cf1f1a94734"
+    },
+    {
+      "path": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\reviews\\math\\annotations.json",
+      "sha256": "8f494ea70a17d70ee1df50a409b74777969f91a98dfa2b7b50a3bd2f7cddb036"
+    },
+    {
+      "path": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\reviews\\world_language\\annotations.json",
+      "sha256": "3f7246a256675867dd38b92b8e68a6ba6b2cfa42c0aead28349c1aeec575ea2d"
+    },
+    {
+      "path": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\reviews\\world_language\\supplemental-annotations.json",
+      "sha256": "a4105c13dca629d4bfa946e3c70e4aa7d0437bb3a876a3ec8061dd8ce3544291"
+    }
+  ],
+  "spreadsheet_text_escapes": [
+    {
+      "sheet_key": "text",
+      "row": 156,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 165,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 169,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 207,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 237,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 275,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 290,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 293,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 380,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 429,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 458,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 544,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 645,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 647,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 651,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 698,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 786,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 790,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 793,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 848,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 924,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 968,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1009,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1014,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1015,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1051,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1052,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1054,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1056,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1082,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1130,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1184,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1195,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1217,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1226,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1251,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1353,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1355,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1400,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1401,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1410,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1417,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1471,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1530,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1566,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1581,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1602,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1706,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1712,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1733,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1823,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 1932,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2057,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2102,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2122,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2197,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2203,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2224,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2232,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2234,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2271,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2335,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2427,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2430,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2459,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2537,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2589,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2591,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2627,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2647,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2697,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2707,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2711,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2868,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2918,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2962,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 2964,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3091,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3106,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3129,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3278,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3280,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3287,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3303,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3366,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3396,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3462,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3531,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3547,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3561,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3562,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3755,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3778,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3790,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3875,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 3954,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4044,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4150,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4321,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4335,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4346,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4406,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4432,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4442,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4444,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4459,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4508,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4579,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4580,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4635,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4636,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4654,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4669,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4675,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4718,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4737,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4787,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4938,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4983,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4991,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 4997,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5102,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5110,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5219,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5252,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5262,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5283,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5303,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5346,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5518,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5549,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5586,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5652,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5718,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5735,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5762,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5911,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 5995,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6010,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6060,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6065,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6066,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6081,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6082,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6089,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6180,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6198,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6230,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6232,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6324,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6386,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6434,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6511,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6517,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6518,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6554,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6621,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6785,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6802,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6805,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 6838,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7004,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7067,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7137,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7292,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7294,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7356,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7357,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7381,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7449,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7495,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7517,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7519,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7901,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7934,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 7954,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8036,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8037,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8056,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8109,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8110,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8135,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8146,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8206,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8507,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8509,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8511,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8564,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8656,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8745,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8861,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 8982,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9120,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9178,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9198,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9366,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9541,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9564,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9801,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9812,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9950,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9951,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 9972,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10008,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10020,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10023,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10118,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10171,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10277,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10386,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10410,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10466,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10476,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10492,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10589,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10655,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10724,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10727,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10785,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10802,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10859,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 10863,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11012,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11058,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11076,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11112,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11159,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11200,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11255,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11367,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11375,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11402,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11420,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11479,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11481,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11539,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11547,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11586,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11608,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11617,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11646,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11698,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11723,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11728,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11781,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11792,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11798,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11799,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11831,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11873,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11927,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11950,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 11963,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12032,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12034,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12183,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12204,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12220,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12328,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12348,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12356,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12450,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12456,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12521,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12683,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12732,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12793,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 12818,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13081,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13101,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13146,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13156,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13222,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13228,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13269,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13375,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13416,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13469,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13480,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13517,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13528,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13579,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13593,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13607,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13654,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13705,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 13798,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14228,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14264,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14267,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14295,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14331,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14336,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14462,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14466,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14486,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14500,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14523,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14524,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14609,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14610,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14618,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14727,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14731,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14798,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14836,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14929,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14939,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14954,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 14977,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15061,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15071,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15136,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15156,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15176,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15233,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15237,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15238,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15258,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15259,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15287,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15288,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15294,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15301,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15318,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15330,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15356,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15382,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15386,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    },
+    {
+      "sheet_key": "text",
+      "row": 15412,
+      "column": 12,
+      "codepoints": [
+        "U+001A"
+      ]
+    }
+  ],
+  "csv_policy": "UTF-8 BOM; semicolon; quoted multiline; literal leading =+-@ strings escaped, typed numbers unchanged",
+  "exports": [
+    {
+      "file": "concepts.csv",
+      "sha256": "ffa7e2ee0f5081863f27de1db71dbd99e33cdee6b38332a55b88836aa0dec2d6",
+      "bytes": 166512
+    },
+    {
+      "file": "media.csv",
+      "sha256": "75d66bd48d16a0e77b6ece4fa843a66acf2ef901589613e53fff9fc416f9ec89",
+      "bytes": 22236704
+    },
+    {
+      "file": "text_candidates.csv",
+      "sha256": "77e0d9f49f1abdb9d0c5e6f0a178f5403ebfee78225c6116bb121f2c053a9ff1",
+      "bytes": 15349529
+    },
+    {
+      "file": "coverage.csv",
+      "sha256": "eef436e482a716d7b39345d08bd801ace11b831104f4535ff8cf86bc8a7c13b9",
+      "bytes": 3682
+    },
+    {
+      "file": "review_queue.csv",
+      "sha256": "acceb237b8077b90b4cafba58e395f604ad28616fa05f5dcba8aeba7c30caf8b",
+      "bytes": 513138
+    },
+    {
+      "file": "catalogue.json.gz",
+      "sha256": "ae92f6caa80c1d44c65bb64f942fbd5643546805d576474146ed45bae2bd7a45",
+      "bytes": 3969993
+    }
+  ],
+  "limits": "Visual review is a sampled first pass. PDF/OCR tokens and lemma candidates require contextual review."
+}
