@@ -1,4 +1,5 @@
-# Original textbooks are local until redistribution/backup destination is resolved.
+# New, unreviewed originals must not be published accidentally. The thirteen
+# verified originals are explicitly tracked after noncommercial authorization.
 originals/
 # Rendered pages, text extraction and annotations are not automatically training gold.
 derived/
