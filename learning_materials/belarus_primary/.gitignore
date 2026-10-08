@@ -1,0 +1,5 @@
+# Original textbooks are local until redistribution/backup destination is resolved.
+originals/
+# Rendered pages, text extraction and annotations are not automatically training gold.
+derived/
+annotations_draft/
