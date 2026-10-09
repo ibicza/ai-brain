@@ -1,0 +1,300 @@
+{
+  "specification_sha256": "39ee011225358467b43dbb5407adf37760269655e7ba22cc18ffe3b7eea268e1",
+  "mappings": [
+    {
+      "concept_id": "vc1495",
+      "word": "тёмно-зелёный",
+      "description": "Зелёный оттенок с небольшой светлотой; видимый цвет зависит от освещения.",
+      "category": "Цвет",
+      "alias": "dark green",
+      "course_answer": "тёмно-зелёный",
+      "training_scope": "procedural color/shape/pattern"
+    },
+    {
+      "concept_id": "vc1496",
+      "word": "однотонный",
+      "description": "Имеющий один основной цвет без различимого узора в рассматриваемой области.",
+      "category": "Видимый узор",
+      "alias": "solid-colored; plain",
+      "course_answer": "однотонный",
+      "training_scope": "procedural color/shape/pattern"
+    },
+    {
+      "concept_id": "vc1497",
+      "word": "полосатый",
+      "description": "Имеющий различимый узор из полос на рассматриваемой поверхности.",
+      "category": "Видимый узор",
+      "alias": "striped",
+      "course_answer": "полосатый",
+      "training_scope": "procedural color/shape/pattern"
+    },
+    {
+      "concept_id": "vc1498",
+      "word": "пятнистый",
+      "description": "Имеющий различимые пятна на рассматриваемой поверхности.",
+      "category": "Видимый узор",
+      "alias": "spotted",
+      "course_answer": "пятнистый",
+      "training_scope": "procedural color/shape/pattern"
+    },
+    {
+      "concept_id": "vc1499",
+      "word": "пятно (узор)",
+      "description": "Ограниченная область поверхности, отличающаяся цветом от окружающей области.",
+      "category": "Элемент узора",
+      "alias": "пятно; spot; patch",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1500",
+      "word": "полоса (узор)",
+      "description": "Вытянутая область поверхности, отличающаяся цветом от соседних областей.",
+      "category": "Элемент узора",
+      "alias": "полоса; stripe",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1501",
+      "word": "вытянутый (форма)",
+      "description": "Имеющий заметно большую протяжённость в одном направлении, чем в поперечном.",
+      "category": "Геометрический признак",
+      "alias": "вытянутый; elongated",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1502",
+      "word": "округлый (форма)",
+      "description": "Имеющий преимущественно плавный закруглённый контур; не обязательно правильный круг.",
+      "category": "Геометрический признак",
+      "alias": "округлый; rounded",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1503",
+      "word": "узор (поверхность)",
+      "description": "Различимое расположение линий, пятен или других элементов на поверхности.",
+      "category": "Видимый признак",
+      "alias": "узор; pattern",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1504",
+      "word": "поверхность (предмет)",
+      "description": "Наружная граница предмета, часть которой может быть видна на изображении.",
+      "category": "Часть предмета",
+      "alias": "поверхность; surface",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1505",
+      "word": "видимый (на изображении)",
+      "description": "Различимый в рассматриваемом изображении при его доступном качестве и масштабе.",
+      "category": "Наблюдаемость",
+      "alias": "видимый; visible",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1506",
+      "word": "скрытый (на изображении)",
+      "description": "Закрытый другим объектом или недоступный наблюдению в рассматриваемом изображении.",
+      "category": "Наблюдаемость",
+      "alias": "скрытый; occluded; hidden",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1507",
+      "word": "туловище (животного)",
+      "description": "Основная часть тела животного без головы, шеи, хвоста и конечностей.",
+      "category": "Часть тела животного",
+      "alias": "туловище; torso",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1508",
+      "word": "шея (животного)",
+      "description": "Часть тела животного, соединяющая голову с туловищем.",
+      "category": "Часть тела животного",
+      "alias": "шея; neck",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1509",
+      "word": "голова (животного)",
+      "description": "Часть тела животного, на которой обычно расположены рот и основные органы чувств.",
+      "category": "Часть тела животного",
+      "alias": "голова; head",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1510",
+      "word": "морда (млекопитающего)",
+      "description": "Передняя часть головы млекопитающего с носом и ртом.",
+      "category": "Часть тела животного",
+      "alias": "морда; muzzle",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1511",
+      "word": "ухо (млекопитающего)",
+      "description": "Видимая наружная часть органа слуха млекопитающего; форма зависит от вида.",
+      "category": "Часть тела животного",
+      "alias": "ухо; уши; ear",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1512",
+      "word": "нога (животного)",
+      "description": "Конечность животного, используемая для опоры и передвижения.",
+      "category": "Часть тела животного",
+      "alias": "нога; ноги; leg",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1513",
+      "word": "копыто",
+      "description": "Роговое покрытие конца пальца у копытных животных.",
+      "category": "Часть тела животного",
+      "alias": "hoof",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1514",
+      "word": "хвост (животного)",
+      "description": "Часть тела животного, продолжающая его задний конец за туловищем.",
+      "category": "Часть тела животного",
+      "alias": "хвост; tail",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1515",
+      "word": "оссикон",
+      "description": "Костный вырост на голове жирафа или окапи, покрытый кожей и обычно шерстью.",
+      "category": "Часть тела животного",
+      "alias": "оссиконы; ossicone",
+      "source": "https://giraffeconservation.org/facts-about-giraffe/do-all-giraffe-have-horns/",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1516",
+      "word": "шерсть (животного)",
+      "description": "Волосяной покров тела млекопитающего; цвет и узор зависят от животного.",
+      "category": "Покров животного",
+      "alias": "шерсть; coat; fur",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1517",
+      "word": "кожура (плода)",
+      "description": "Наружный покров плода, отделяемый от его внутренней части.",
+      "category": "Часть плода",
+      "alias": "кожура; rind; peel",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1518",
+      "word": "мякоть (плода)",
+      "description": "Мягкая внутренняя ткань плода; её видимость зависит от разреза или повреждения покрова.",
+      "category": "Часть плода",
+      "alias": "мякоть; flesh; pulp",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1519",
+      "word": "целый (предмет)",
+      "description": "Не разделённый на части в рассматриваемом контексте; изображение не всегда позволяет проверить целостность.",
+      "category": "Состояние предмета",
+      "alias": "целый; whole",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1520",
+      "word": "разрезанный (предмет)",
+      "description": "Разделённый разрезом; на изображении может быть видна открытая внутренняя поверхность.",
+      "category": "Состояние предмета",
+      "alias": "разрезанный; cut",
+      "training_scope": "not trained"
+    },
+    {
+      "concept_id": "vc1521",
+      "word": "срез (поверхность)",
+      "description": "Поверхность предмета, открывшаяся после разрезания.",
+      "category": "Часть предмета",
+      "alias": "срез; cut surface",
+      "training_scope": "not trained"
+    }
+  ],
+  "existing": [
+    {
+      "id": "vc0001",
+      "word": "красный"
+    },
+    {
+      "id": "vc0002",
+      "word": "синий"
+    },
+    {
+      "id": "vc0003",
+      "word": "зелёный"
+    },
+    {
+      "id": "vc0004",
+      "word": "жёлтый"
+    },
+    {
+      "id": "vc0030",
+      "word": "белый"
+    },
+    {
+      "id": "vc0031",
+      "word": "чёрный"
+    },
+    {
+      "id": "vc0033",
+      "word": "коричневый"
+    },
+    {
+      "id": "vc0007",
+      "word": "круг"
+    },
+    {
+      "id": "vc0008",
+      "word": "овал"
+    },
+    {
+      "id": "vc0009",
+      "word": "квадрат"
+    },
+    {
+      "id": "vc0010",
+      "word": "прямоугольник"
+    },
+    {
+      "id": "vc0042",
+      "word": "длинный"
+    },
+    {
+      "id": "vc0802",
+      "word": "семя"
+    },
+    {
+      "id": "vc1488",
+      "word": "часть"
+    },
+    {
+      "id": "vc0098",
+      "word": "жираф"
+    },
+    {
+      "id": "vc0177",
+      "word": "арбуз"
+    }
+  ],
+  "observation_policy": {
+    "generic_knowledge": "Species descriptions and typical anatomy are separate from what is visible in a particular image.",
+    "hidden_parts": "Not visible means UNKNOWN, not absent and not inferred from the class name.",
+    "identity": "Colors, patterns and parts are evidence, not sufficient hard rules for object identity.",
+    "giraffe": "Neck, torso, head, muzzle, visible legs, ears, tail, coat patches and ossicones require per-image localization and visibility annotation.",
+    "watermelon": "Whole fruit and cut fruit need separate observations. Green color, oval contour and stripes are not individually mandatory.",
+    "completeness": "Describe every supported visible attribute and explicitly mark uncertainty; never promise all properties of an object from one image."
+  }
+}

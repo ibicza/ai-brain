@@ -79,3 +79,25 @@ and their hashes for future use. `word_review_queue.csv` preserves all 15,499 ra
 candidate records, with proposed IDs where reviewed and unresolved entries intact.
 Unselected entries are not automatically judged invalid or merged into the main
 dictionary. Training was not started or admitted by these additions.
+
+## Compositional pilot vocabulary, 2026-10-09
+
+The current catalogue additionally contains 27 explicit meanings for visual
+attributes, visibility, animal anatomy and fruit parts: 1521 concepts total.
+Existing 1494 concept rows and all previous media/text/coverage rows are preserved.
+There are 45 new full-frame procedural image associations (32571 media rows total),
+with exact source pixels, explicit left/right targets, split roles and hashes.
+These are experimental training/regression resources, not isolated animal crops.
+
+`composition_vocabulary.json` defines the additions and observation policy;
+`composition_vocabulary_mapping.json` binds them to stable catalogue IDs.
+Only dark green and the three pattern names participate in this procedural course.
+Animal/fruit-part meanings are planned, not learned. Percentages remain blank:
+the experimental course does not certify general understanding of those words.
+Current weights are NOT production-admitted. See `docs/m33_primary_composition.md`
+and `composition_result_v1.json` / `composition_result_v2.json` for the failures and
+improvements. Numerical replay is separate from independent semantic/blind review.
+
+Never replace observed anatomy with typical species anatomy: a hidden leg is
+unknown, not missing or implicitly seen. Known final scenes are regression assets
+now. These additions do not admit any previously unreviewed textbook media.

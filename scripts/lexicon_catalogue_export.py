@@ -110,6 +110,43 @@ def comparable(value, expected):
     )
 
 
+def validate_new_media(data: dict, rows: list) -> None:
+    """Default book gate unchanged; own procedural assets need an exact registry."""
+    registry = data.get("composition_media_registry")
+    if registry is None:
+        if any(row[15] != "Нет" or row[3] != "Не назначено" for row in rows):
+            raise ValueError("Unexpected training admission/split")
+        return
+    if (
+        registry.get("kind") != "own_procedural_attribute_pilot"
+        or registry.get("production_admitted") is not False
+        or registry.get("book_training_admitted") is not False
+        or len({row[0] for row in rows}) != len(rows)
+        or set(registry["rows"]) != {row[0] for row in rows}
+    ):
+        raise ValueError("Invalid bounded procedural registry")
+    for key in ("dataset", "records"):
+        if sha(Path(registry[key + "_path"])) != registry[key + "_sha256"]:
+            raise ValueError("Procedural dataset/record bytes changed")
+    root = Path(registry["asset_root"]).resolve()
+    for row in rows:
+        path = Path(row[2]).resolve()
+        if (
+            row != registry["rows"][row[0]]
+            or not row[0].startswith("cmp-v2-")
+            or row[3] not in ("train", "regression")
+            or row[15]
+            != ("Только процедурный эксперимент" if row[3] == "train" else "Нет")
+            or row[16] != "Полный кадр эксперимента"
+            or not path.is_relative_to(root)
+            or path.suffix != ".png"
+            or sha(path) != row[10]
+            or not str(row[7]).startswith("composition-v2/")
+            or not str(row[9]).startswith("composition-v2/")
+        ):
+            raise ValueError("Procedural row differs or escapes its bounded assets")
+
+
 def run(workbook: Path, prepared: Path, output: Path) -> dict:
     data = json.loads(prepared.read_text(encoding="utf-8"))
     export_stats = dict(data["stats"])
@@ -146,11 +183,7 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
                         f"Saved export mismatch {name}!row{n}/column{c}: {value!r} != {wanted!r}"
                     )
     old_media_count = data.get("input_rows", {}).get("media", 0)
-    if any(
-        row[15] != "Нет" or row[3] != "Не назначено"
-        for row in sheets["Медиа"]["rows"][old_media_count:]
-    ):
-        raise ValueError("Unexpected training admission/split")
+    validate_new_media(data, sheets["Медиа"]["rows"][old_media_count:])
     old_count = data.get("input_rows", {}).get(
         "words", data["stats"]["concepts"] - data["stats"]["new_visual_concepts"]
     )
@@ -241,6 +274,9 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
         "authoritative_file": "visual_lexicon.xlsx",
         "training_admitted": False,
         "object_pilot": data.get("object_pilot"),
+        "composition_vocabulary": data.get("composition_vocabulary"),
+        "composition_pilot": data.get("composition_pilot"),
+        "composition_media_registry": data.get("composition_media_registry"),
         "stats": export_stats,
         "sheets": sheets,
     }

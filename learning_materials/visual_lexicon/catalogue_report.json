@@ -1,8 +1,12 @@
 {
   "schema": 2,
-  "workbook_sha256": "40bef10fbedb65f61538bb8b2c7a7d12e415ffb07b092fe48d107bdadedd7730",
-  "preserved_input_workbook_sha256": "bfb8689c66f0d6241a3224581fcdf374912d2bf83cbcc78b530791fa58b08aa1",
-  "previous_prepared_history": "D:\\ai-brain-data\\visual-lexicon\\objects-reliability-20261009\\publication\\prepared.json",
+  "workbook_sha256": "5fc720687dd2d277f9ee7f432e4f56550311a0eb811b0e53b853e9dd95c89b4e",
+  "preserved_input_workbook_sha256": "40bef10fbedb65f61538bb8b2c7a7d12e415ffb07b092fe48d107bdadedd7730",
+  "previous_prepared_history": {
+    "path": "D:\\ai-brain-data\\visual-lexicon\\workbook-qa-pass2-20261009\\combined-prepared.json",
+    "sha256": "7a5e83c9ba2308fb07a7470058347d2e09e8b1c56841460ccff00e5bfd98aa46",
+    "policy": "Saved values authoritative; earlier review metadata retained; no name-based sense merging."
+  },
   "sense_inputs": [
     {
       "path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\actions-senses.json",
@@ -31032,8 +31036,8 @@
     "training_started": true,
     "object_gate": false,
     "production_admitted": false,
-    "report_sha256": "dcf2a223d4175ff112c7ea6455e1f3e0fa565750d6a230137143536213108432",
-    "image_registry_sha256": "73a0ce31eeb78cdf80556bfa6e177d60c2a6eb6e9055bbd0801c0e8f9d042e7e",
+    "report_sha256": "d696ecbf099ad53a5e0dc7bd28a8ede9dec5ff60874900a7094cceef0b8ff46f",
+    "image_registry_sha256": "73bad02db7624b18bdc581b974490decfcdca384bad27580f560b5415cd9c23e",
     "updated_concepts": [
       "vc0175",
       "vc0179",
@@ -31043,17 +31047,16 @@
       "vc0369",
       "vc0158",
       "vc0205"
-    ],
-    "selection_receipt_sha256": "fd970150c551ee387ab0ceb38b6c5b2ac1e60ff86e393623035aac9b0afc6467"
+    ]
   },
   "training_admitted": false,
   "stats": {
-    "input_concepts": 847,
+    "input_concepts": 1494,
     "input_media_rows": 32526,
-    "concepts": 1494,
+    "concepts": 1521,
     "new_visual_concepts": 0,
-    "media_rows": 32526,
-    "new_media_rows": 0,
+    "media_rows": 32571,
+    "new_media_rows": 45,
     "text_entries": 15499,
     "effective_pages": 1763,
     "ocr_pages": 1763,
@@ -31064,7 +31067,7 @@
     "reviewed_occurrences": 0,
     "xml_display_escaped_cells": 330,
     "limits": "Lexical and textbook entries remain scoped drafts, not blanket training admission. Separate measured object-training results are recorded in object_pilot; they do not certify definitions, properties, photos, or textbook mastery.",
-    "new_word_concepts": 647,
+    "new_word_concepts": 27,
     "lexical_senses_reviewed": 662,
     "lexical_existing_mappings": 15
   },
@@ -36843,13 +36846,13 @@
   "exports": [
     {
       "file": "concepts.csv",
-      "sha256": "2032c2d12b3541bf32bb12606c49717f9d746b4dab489acd54abffc0bf0e2abc",
-      "bytes": 2180247
+      "sha256": "17a827a7b669c18a5dee517bbe2749875fd2f173e7a38177de1e51f6fcace189",
+      "bytes": 2201245
     },
     {
       "file": "media.csv",
-      "sha256": "0ad5435057ec82d8a1cd8beab3b4735c61d5bbd0972df481eff1d7c313ddfc44",
-      "bytes": 28667000
+      "sha256": "b06949ba9d67373a6129a01e78e2f54fec7867375c6e45fba0a072a136bf2d86",
+      "bytes": 28705580
     },
     {
       "file": "text_candidates.csv",
@@ -36868,8 +36871,8 @@
     },
     {
       "file": "catalogue.json.gz",
-      "sha256": "44612e79f1b23a7757438ae0a2f50f719ab997323150ace6063560e04590e60a",
-      "bytes": 4547034
+      "sha256": "cbecc1116b8d54e19ce400c16c64e3c4d65c8e5a872b0d9a95b95c3a0d897e51",
+      "bytes": 4558436
     }
   ],
   "limits": "Lexical and textbook entries remain scoped drafts, not blanket training admission. Separate measured object-training results are recorded in object_pilot; they do not certify definitions, properties, photos, or textbook mastery."

@@ -1,0 +1,515 @@
+{
+  "schema": 1,
+  "status": "NEEDS_WORK_NOT_PRODUCTION",
+  "production_admitted": false,
+  "scope": "Procedural two-object color/shape/pattern + bounded RU/EN queries. No animal names, anatomy, photographs, textbooks or free-form text learned.",
+  "winner": "joint",
+  "checkpoint_sha256": "9fd67e08f370ca5c9ab5ff20d9f6a2522cfc27da4af7cb7242d94edc27a64a03",
+  "inherited_checkpoint_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+  "inherited_tensors_byte_preserved": true,
+  "legacy_retention": {
+    "tasks": {
+      "count": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "shape": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "color": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "same_shape": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "same_color": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "horizontal": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "vertical": {
+        "examples": 6,
+        "logits_exact_equal": true
+      }
+    },
+    "limits": "Exact delegated legacy-forward and inherited tensor checks; not a new seven-skill acceptance exam."
+  },
+  "reports": {
+    "dev": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 1440,
+          "accepted": 1246,
+          "false_assertions": 569,
+          "accepted_error_rate": 0.456661316211878,
+          "answerable_recall": 0.5175840978593272,
+          "unknown_recall": 0.9166666666666666
+        },
+        "tasks": {
+          "color": {
+            "examples": 480,
+            "accepted": 424,
+            "false_assertions": 130,
+            "accepted_error_rate": 0.30660377358490565,
+            "answerable_recall": 0.6743119266055045,
+            "unknown_recall": 0.8181818181818182
+          },
+          "shape": {
+            "examples": 480,
+            "accepted": 407,
+            "false_assertions": 274,
+            "accepted_error_rate": 0.6732186732186732,
+            "answerable_recall": 0.30504587155963303,
+            "unknown_recall": 0.9772727272727273
+          },
+          "pattern": {
+            "examples": 480,
+            "accepted": 415,
+            "false_assertions": 165,
+            "accepted_error_rate": 0.39759036144578314,
+            "answerable_recall": 0.573394495412844,
+            "unknown_recall": 0.9545454545454546
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 436,
+          "all_three_correct_rate": 0.14220183486238533
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 164,
+            "both_correct_rate": 0.34146341463414637
+          },
+          "shape": {
+            "eligible_scene_pairs": 155,
+            "both_correct_rate": 0.05806451612903226
+          },
+          "pattern": {
+            "eligible_scene_pairs": 130,
+            "both_correct_rate": 0.13846153846153847
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 1440,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accepted_error_rate": null,
+          "answerable_recall": 0.0,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 436,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 164,
+            "both_correct_rate": 0.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 155,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 130,
+            "both_correct_rate": 0.0
+          }
+        }
+      },
+      "image_count": 240,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam."
+    },
+    "final": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 1440,
+          "accepted": 1252,
+          "false_assertions": 604,
+          "accepted_error_rate": 0.48242811501597443,
+          "answerable_recall": 0.4954128440366973,
+          "unknown_recall": 0.9015151515151515
+        },
+        "tasks": {
+          "color": {
+            "examples": 480,
+            "accepted": 423,
+            "false_assertions": 152,
+            "accepted_error_rate": 0.35933806146572106,
+            "answerable_recall": 0.6215596330275229,
+            "unknown_recall": 0.8409090909090909
+          },
+          "shape": {
+            "examples": 480,
+            "accepted": 409,
+            "false_assertions": 281,
+            "accepted_error_rate": 0.687041564792176,
+            "answerable_recall": 0.29357798165137616,
+            "unknown_recall": 0.9772727272727273
+          },
+          "pattern": {
+            "examples": 480,
+            "accepted": 420,
+            "false_assertions": 171,
+            "accepted_error_rate": 0.40714285714285714,
+            "answerable_recall": 0.5711009174311926,
+            "unknown_recall": 0.8863636363636364
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 436,
+          "all_three_correct_rate": 0.11467889908256881
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 184,
+            "both_correct_rate": 0.29891304347826086
+          },
+          "shape": {
+            "eligible_scene_pairs": 152,
+            "both_correct_rate": 0.09210526315789473
+          },
+          "pattern": {
+            "eligible_scene_pairs": 125,
+            "both_correct_rate": 0.112
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 1440,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accepted_error_rate": null,
+          "answerable_recall": 0.0,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 436,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 184,
+            "both_correct_rate": 0.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 152,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 125,
+            "both_correct_rate": 0.0
+          }
+        }
+      },
+      "image_count": 240,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam."
+    },
+    "combinations": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 1440,
+          "accepted": 1268,
+          "false_assertions": 714,
+          "accepted_error_rate": 0.5630914826498423,
+          "answerable_recall": 0.4235474006116208,
+          "unknown_recall": 0.7878787878787878
+        },
+        "tasks": {
+          "color": {
+            "examples": 480,
+            "accepted": 429,
+            "false_assertions": 156,
+            "accepted_error_rate": 0.36363636363636365,
+            "answerable_recall": 0.6261467889908257,
+            "unknown_recall": 0.7045454545454546
+          },
+          "shape": {
+            "examples": 480,
+            "accepted": 421,
+            "false_assertions": 400,
+            "accepted_error_rate": 0.9501187648456056,
+            "answerable_recall": 0.0481651376146789,
+            "unknown_recall": 0.8409090909090909
+          },
+          "pattern": {
+            "examples": 480,
+            "accepted": 418,
+            "false_assertions": 158,
+            "accepted_error_rate": 0.37799043062200954,
+            "answerable_recall": 0.5963302752293578,
+            "unknown_recall": 0.8181818181818182
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 436,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 100,
+            "both_correct_rate": 0.07
+          },
+          "shape": {
+            "eligible_scene_pairs": 100,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 121,
+            "both_correct_rate": 0.06611570247933884
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 1440,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accepted_error_rate": null,
+          "answerable_recall": 0.0,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 436,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 100,
+            "both_correct_rate": 0.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 100,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 121,
+            "both_correct_rate": 0.0
+          }
+        }
+      },
+      "image_count": 240,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam."
+    },
+    "transfer": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 1440,
+          "accepted": 1250,
+          "false_assertions": 575,
+          "accepted_error_rate": 0.46,
+          "answerable_recall": 0.5160550458715596,
+          "unknown_recall": 0.8787878787878788
+        },
+        "tasks": {
+          "color": {
+            "examples": 480,
+            "accepted": 432,
+            "false_assertions": 146,
+            "accepted_error_rate": 0.33796296296296297,
+            "answerable_recall": 0.6559633027522935,
+            "unknown_recall": 0.6818181818181818
+          },
+          "shape": {
+            "examples": 480,
+            "accepted": 408,
+            "false_assertions": 275,
+            "accepted_error_rate": 0.6740196078431373,
+            "answerable_recall": 0.30504587155963303,
+            "unknown_recall": 0.9772727272727273
+          },
+          "pattern": {
+            "examples": 480,
+            "accepted": 410,
+            "false_assertions": 154,
+            "accepted_error_rate": 0.375609756097561,
+            "answerable_recall": 0.5871559633027523,
+            "unknown_recall": 0.9772727272727273
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 436,
+          "all_three_correct_rate": 0.12614678899082568
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 172,
+            "both_correct_rate": 0.27906976744186046
+          },
+          "shape": {
+            "eligible_scene_pairs": 154,
+            "both_correct_rate": 0.032467532467532464
+          },
+          "pattern": {
+            "eligible_scene_pairs": 131,
+            "both_correct_rate": 0.16793893129770993
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 1440,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accepted_error_rate": null,
+          "answerable_recall": 0.0,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 480,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 436,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 172,
+            "both_correct_rate": 0.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 154,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 131,
+            "both_correct_rate": 0.0
+          }
+        }
+      },
+      "image_count": 240,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam."
+    }
+  },
+  "new_word_tokens": [
+    "color",
+    "left",
+    "on",
+    "pattern",
+    "right",
+    "shape",
+    "левого",
+    "правого",
+    "предмета",
+    "узор"
+  ],
+  "capacity": {
+    "inherited_parameters": 974889,
+    "new_trainable_parameters": 114224
+  },
+  "thresholds": {
+    "color": null,
+    "shape": null,
+    "pattern": null
+  },
+  "limits": "No claim that these procedural attributes transfer to photographs, giraffes, watermelons or textbooks. Language is closed RU/EN queries, not a generative language model. Successful stage is not production admission."
+}
