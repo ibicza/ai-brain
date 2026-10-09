@@ -27,6 +27,7 @@ from torch.nn import functional as F
 
 from ai_brain.training import primary_objects as obj
 from ai_brain.training import primary_relations as old
+from ai_brain.training.primary_object_augmentation import diverse_view
 
 PREVIOUS_SHA = "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae"
 POLICY_SHA = "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6"
@@ -180,6 +181,8 @@ def verify_inputs(args, protocol):
         or sha(args.data / "dataset.json") != protocol["dataset_sha256"]
     ):
         raise ValueError("Immutable inputs changed during experiment")
+    if args.warm_start and sha(args.warm_start) != protocol["warm_start_sha256"]:
+        raise ValueError("Warm-start own checkpoint changed")
 
 
 def main():
@@ -204,6 +207,9 @@ def main():
     )
     parser.add_argument("--development-only", action="store_true")
     parser.add_argument("--object-unknown-adapter", action="store_true")
+    parser.add_argument("--warm-start", type=Path)
+    parser.add_argument("--diversity-augmentation", action="store_true")
+    parser.add_argument("--illustration-fraction", type=float, default=0)
     parser.add_argument("--evaluate-checkpoint", type=Path)
     parser.add_argument("--selection-receipt", type=Path)
     parser.add_argument(
@@ -216,6 +222,10 @@ def main():
         or args.eval_every < 1
         or (args.steps < 1 and not args.evaluate_checkpoint)
         or args.learning_rate <= 0
+        or not 0 <= args.illustration_fraction <= 0.5
+        or (
+            args.warm_start and (not args.protect_inherited or args.evaluate_checkpoint)
+        )
         or (
             (args.vision_extension_channels or args.object_unknown_adapter)
             and not args.protect_inherited
@@ -269,6 +279,7 @@ def main():
         },
         "previous_sha256": PREVIOUS_SHA,
         "previous_policy_sha256": POLICY_SHA,
+        "warm_start_sha256": sha(args.warm_start) if args.warm_start else None,
         "dataset_sha256": sha(args.data / "dataset.json"),
         "pixels_sha256": manifest["pixels_sha256"],
         "capsule_sha256": os.environ.get("AI_BRAIN_CAPSULE_SHA256", "LOCAL_NO_CAPSULE"),
@@ -300,6 +311,17 @@ def main():
     )
     model.load_previous(source_checkpoint["model"])
     model.compatible_legacy_vocabulary = args.protect_inherited
+    if args.warm_start:
+        warm = obj.ObjectsModel.from_checkpoint(
+            torch.load(args.warm_start, map_location="cpu", weights_only=True)
+        )
+        if (
+            warm.vision_extension_config != model.vision_extension_config
+            or not warm.compatible_legacy_vocabulary
+        ):
+            raise ValueError("Warm-start architecture/policy mismatch")
+        verify_inherited(warm, source_checkpoint["model"])
+        model.load_state_dict(warm.state_dict(), strict=True)
     if args.protect_inherited:
         for name, parameter in model.named_parameters():
             parameter.requires_grad_(
@@ -348,21 +370,17 @@ def main():
     archive = np.load(args.data / "pixels.npz", allow_pickle=False)
     owners = {}
     for split, records in manifest["records"].items():
+        split_pixels = archive[split + "_pixels"]
         if archive[split + "_ids"].tolist() != [row["source_id"] for row in records]:
             raise ValueError("Source IDs not aligned with dataset provenance")
         if archive[split + "_answers"].tolist() != [row["answer"] for row in records]:
             raise ValueError("Labels not aligned with dataset provenance")
         for index, row in enumerate(records):
             if row["role"] == "SHARED_CONSTANT_CONTROL":
-                if (
-                    row["answer"] != "UNKNOWN"
-                    or archive[split + "_pixels"][index].any()
-                ):
+                if row["answer"] != "UNKNOWN" or split_pixels[index].any():
                     raise ValueError("Invalid shared absence control")
                 continue
-            pixel_sha = hashlib.sha256(
-                archive[split + "_pixels"][index].tobytes()
-            ).hexdigest()
+            pixel_sha = hashlib.sha256(split_pixels[index].tobytes()).hexdigest()
             if pixel_sha != row["pixel_sha256"]:
                 raise ValueError("Pixel provenance mismatch")
             for identity in (row["source_id"], row["family_id"], pixel_sha):
@@ -407,6 +425,23 @@ def main():
         torch.nonzero(train_new.answers == v).flatten()
         for v in (*obj.OBJECT_IDS.values(), obj.UNKNOWN)
     ]
+    illustration_mask = torch.tensor(
+        [
+            row["role"] == "VISUALLY_CURATED_NONBLIND_COLOR_ILLUSTRATION"
+            for row in manifest["records"]["train"]
+        ],
+        device=device,
+    )
+    illustration_by_label = [
+        torch.nonzero((train_new.answers == v) & illustration_mask).flatten()
+        for v in (*obj.OBJECT_IDS.values(), obj.UNKNOWN)
+    ]
+    if args.illustration_fraction and any(
+        not len(ids) for ids in illustration_by_label
+    ):
+        raise ValueError(
+            "Illustration-balanced replay requires all eight names and UNKNOWN"
+        )
     history, best = [], float("inf")
     started = time.monotonic()
     for step in range(1, args.steps + 1):
@@ -417,7 +452,14 @@ def main():
         choices = torch.randint(len(new_by_label), (32,), device=device).cpu().tolist()
         new_ids = torch.tensor(
             [
-                int(new_by_label[i][torch.randint(len(new_by_label[i]), ())])
+                int(
+                    (
+                        pool := illustration_by_label[i]
+                        if args.illustration_fraction
+                        and torch.rand(()).item() < args.illustration_fraction
+                        else new_by_label[i]
+                    )[torch.randint(len(pool), ())]
+                )
                 for i in choices
             ],
             device=device,
@@ -425,7 +467,11 @@ def main():
         old_images, old_words, old_labels = train_old.batch(old_ids)
         new_images, new_words, new_labels = train_new.batch(new_ids)
         # Preserve outline semantics; no fabricated object/count labels.
-        new_images = brightness_view(new_images)
+        new_images = (
+            diverse_view(new_images)
+            if args.diversity_augmentation
+            else brightness_view(new_images)
+        )
         images = torch.cat((new_images, old_images))
         words = torch.cat((new_words, old_words))
         labels = torch.cat((new_labels, old_labels))

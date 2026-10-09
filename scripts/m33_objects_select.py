@@ -20,6 +20,10 @@ def select(candidates, output, *, tuning=False):
             (root / "development-report.json").read_text(encoding="utf-8")
         )
         protocol = json.loads((root / "protocol.json").read_text(encoding="utf-8"))
+        if reports and protocol.get("warm_start_sha256") != reports[0].get(
+            "warm_start_sha256"
+        ):
+            raise ValueError("Candidates used different own warm-start checkpoints")
         if (
             report["status"] != "DEVELOPMENT_ONLY_NO_CALIBRATION_OR_FINAL"
             or report["production_admitted"]
@@ -74,6 +78,13 @@ def select(candidates, output, *, tuning=False):
                 "parameters": report["parameters"],
                 "learning_rate": protocol["config"].get("learning_rate", 0.0001),
                 "capsule_sha256": protocol.get("capsule_sha256"),
+                "warm_start_sha256": protocol.get("warm_start_sha256"),
+                "training_options": {
+                    k: protocol["config"].get(
+                        k, False if k == "diversity_augmentation" else 0
+                    )
+                    for k in ("diversity_augmentation", "illustration_fraction")
+                },
             }
         )
     configs = {

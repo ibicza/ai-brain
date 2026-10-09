@@ -28,6 +28,7 @@ def build(repo, data, review, output):
         "m33_objects_data.py",
         "m33_objects_prepare.py",
         "m33_objects_expand_prepare.py",
+        "m33_objects_illustrations.py",
         "m33_objects_select.py",
         "m33_verify_objects_evidence.py",
     ):
@@ -41,6 +42,7 @@ def build(repo, data, review, output):
         "test_primary_objects_expand_prepare.py",
         "test_primary_objects_evidence.py",
         "test_primary_objects_selection.py",
+        "test_primary_objects_diversity.py",
         "conftest.py",
     ):
         sources.append((repo / "tests" / name, "tests/" + name))

@@ -30,6 +30,11 @@ def assign_groups(records, groups, seed=20261010):
     for indices in grouped.values():
         labels = {records[i]["answer"] for i in indices}
         owners = {records[i]["split"] for i in indices if records[i].get("parent")}
+        owners.update(
+            records[i]["declared_split"]
+            for i in indices
+            if records[i].get("declared_split") and not records[i].get("parent")
+        )
         if len(labels) != 1 or len(owners) > 1:
             excluded.extend(
                 {
@@ -71,7 +76,36 @@ def assign_groups(records, groups, seed=20261010):
     return admitted, excluded, fresh_counts
 
 
-def build(parent: Path, root: Path, review: Path, output: Path):
+def declared_groups(records, groups):
+    """Union pixel families with explicit related artwork families."""
+    parent = list(range(len(records)))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    seen = {}
+    for i, record in enumerate(records):
+        keys = [("pixel", groups[i])]
+        if record.get("declared_family"):
+            keys.append(("declared", record["declared_family"]))
+        for key in keys:
+            if key in seen:
+                parent[find(i)] = find(seen[key])
+            else:
+                seen[key] = i
+    return [find(i) for i in range(len(records))]
+
+
+def build(
+    parent: Path,
+    root: Path,
+    review: Path,
+    output: Path,
+    illustrations: Path | None = None,
+):
     if output.exists():
         raise ValueError("Fresh prepared destination required")
     parent_path = parent / "dataset.json"
@@ -104,12 +138,13 @@ def build(parent: Path, root: Path, review: Path, output: Path):
     records, pixels, rejected = [], [], []
     archive = np.load(parent / "pixels.npz", allow_pickle=False)
     for split, rows in parent_manifest["records"].items():
+        split_pixels = archive[split + "_pixels"]
         if archive[split + "_ids"].tolist() != [
             r["source_id"] for r in rows
         ] or archive[split + "_answers"].tolist() != [r["answer"] for r in rows]:
             raise ValueError("Parent arrays/records mismatch")
         for n, row in enumerate(rows):
-            pixel = archive[split + "_pixels"][n]
+            pixel = split_pixels[n]
             if row["role"] == "SHARED_CONSTANT_CONTROL":
                 if pixel.any() or row["answer"] != "UNKNOWN":
                     raise ValueError("Invalid parent absence control")
@@ -183,7 +218,89 @@ def build(parent: Path, root: Path, review: Path, output: Path):
             pixels.append(raster(row))
     if len({r["source_id"] for r in records}) != len(records):
         raise ValueError("Source ID overlap between parent/new acquisition")
-    assigned, conflicts, fresh_counts = assign_groups(records, families(pixels))
+    illustration_sha = None
+    if illustrations:
+        from m33_objects_illustrations import normalized
+
+        acquired_images, illustration_sha = bound_json(
+            illustrations / "acquisition.json"
+        )
+        protected_inputs[illustrations / "acquisition.json"] = illustration_sha
+        excluded_ids = specification["illustrations"]["excluded_ids"]
+        source_ids = {r["source_id"] for r in acquired_images["sources"]}
+        if (
+            len(set(excluded_ids)) != len(excluded_ids)
+            or not set(excluded_ids) <= source_ids
+        ):
+            raise ValueError("Invalid explicit illustration review")
+        for row in acquired_images["sources"]:
+            path = Path(row["source_file"])
+            if (
+                not path.resolve().is_relative_to(illustrations.resolve())
+                or sha(path) != row["source_file_sha256"]
+            ):
+                raise ValueError("Illustration source/path changed")
+            protected_inputs[path] = row["source_file_sha256"]
+            config = acquired_images["publishers"][row["publisher"]]
+            licence = illustrations / row["publisher"] / config["licence_file"]
+            if sha(licence) != row["licence_sha256"]:
+                raise ValueError("Illustration licence changed")
+            protected_inputs[licence] = row["licence_sha256"]
+            if row["source_id"] in excluded_ids:
+                rejected.append(
+                    {
+                        "source_id": row["source_id"],
+                        "reason": "Explicit visual exclusion: teacup/saucer or visible volume text",
+                    }
+                )
+                continue
+            if row["declared_split"] != (
+                "final" if row["publisher"] == "openmoji" else "train"
+            ) or row["proposed_answer"] not in (*CLASSES.values(), "UNKNOWN"):
+                raise ValueError("Predeclared publisher scope changed")
+            records.append(
+                row
+                | {
+                    "answer": row["proposed_answer"],
+                    "parent": False,
+                    "concept_id": parent_manifest["concept_ids"].get(
+                        row["proposed_answer"]
+                    ),
+                    "role": "VISUALLY_CURATED_NONBLIND_COLOR_ILLUSTRATION",
+                }
+            )
+            pixels.append(np.asarray(normalized(path)))
+        groups = declared_groups(records, families(pixels))
+        grouped = defaultdict(list)
+        for i, group in enumerate(groups):
+            grouped[group].append(i)
+        remove = set()
+        for indices in grouped.values():
+            labels = {records[i]["answer"] for i in indices}
+            owners = {records[i]["split"] for i in indices if records[i].get("parent")}
+            owners.update(
+                records[i]["declared_split"]
+                for i in indices
+                if records[i].get("declared_split") and not records[i].get("parent")
+            )
+            if len(labels) > 1 or len(owners) > 1:
+                # Reject new bridges; never silently remove old evaluation rows.
+                remove.update(i for i in indices if not records[i].get("parent"))
+        for i in sorted(remove):
+            rejected.append(
+                {
+                    "source_id": records[i]["source_id"],
+                    "reason": "New conflicting-label/partition bridge excluded; all parent rows retained",
+                }
+            )
+        records, pixels = (
+            [r for i, r in enumerate(records) if i not in remove],
+            [p for i, p in enumerate(pixels) if i not in remove],
+        )
+        groups = declared_groups(records, families(pixels))
+    else:
+        groups = families(pixels)
+    assigned, conflicts, fresh_counts = assign_groups(records, groups)
     rejected.extend(conflicts)
     if any(fresh_counts.get(label, 0) < 20 for label in CLASSES.values()):
         raise ValueError("Too few fresh independent positive families")
@@ -244,6 +361,7 @@ def build(parent: Path, root: Path, review: Path, output: Path):
         "parent_dataset_sha256": parent_sha,
         "parent_pixels_sha256": parent_manifest["pixels_sha256"],
         "acquisition_sha256": acquisition_sha,
+        "illustrations_acquisition_sha256": illustration_sha,
         "review_sha256": review_sha,
         "licence_snapshot_sha256": protected_inputs[root / "LICENSE.quickdraw"],
         "pixels_sha256": sha(output / "pixels.npz"),
@@ -259,7 +377,7 @@ def build(parent: Path, root: Path, review: Path, output: Path):
             for split, rows in prepared.items()
         },
         "training_started": False,
-        "limits": "Non-blind visually curated QuickDraw sketches, not photos/general sight. All old final images held as known regression, never training. Global source/exact/mirror/coarse-mask-IoU>=.88 families; mixed prior owners/conflicting labels quarantined. Fresh final only newly acquired families with no prior members. No artist IDs/exhaustive semantic independence. Seven known textbook diagnostics never select weights/thresholds. Shared absence controls not independent evidence.",
+        "limits": "Non-blind visually curated QuickDraw sketches and optional licensed color illustrations, not photos/general sight. All old final images held as known regression, never training. Global source/exact/mirror/coarse-mask-IoU>=.88 and declared artwork families. With illustrations, new conflicting bridges excluded while every parent row retained; publisher OpenMoji entirely final. Fresh final only newly acquired sources with no prior members. No artist IDs/exhaustive semantic independence. Related illustration variants are not independent families. Seven known textbook diagnostics never select weights/thresholds. Shared absence controls not independent evidence.",
     }
     write_json(output / "dataset.json", result)
     write_json(output / "image-registry.json", registry)
@@ -272,8 +390,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("parent", "root", "review", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--illustrations", type=Path)
     args = parser.parse_args()
-    result = build(args.parent, args.root, args.review, args.output)
+    result = build(args.parent, args.root, args.review, args.output, args.illustrations)
     print(
         json.dumps(
             {

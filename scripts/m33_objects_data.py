@@ -69,6 +69,7 @@ def acquire(
     negative: int = 60,
     *,
     exclude_acquisition: Path | None = None,
+    additional_exclusions: tuple[Path, ...] = (),
     negative_categories: tuple[str, ...] = NEGATIVE,
 ) -> None:
     if root.exists():
@@ -85,9 +86,14 @@ def acquire(
         raise ValueError("Invalid negative-category scope")
     excluded: dict[str, set[str]] = {}
     exclude_sha = None
-    if exclude_acquisition is not None:
-        exclude_sha = sha(exclude_acquisition)
-        previous = json.loads(exclude_acquisition.read_text(encoding="utf-8"))
+    exclusion_hashes = {}
+    for exclusion in (
+        (exclude_acquisition,) if exclude_acquisition else ()
+    ) + additional_exclusions:
+        exclusion_hashes[exclusion] = sha(exclusion)
+        if exclusion == exclude_acquisition:
+            exclude_sha = exclusion_hashes[exclusion]
+        previous = json.loads(exclusion.read_text(encoding="utf-8"))
         for item in previous["files"]:
             category = Path(item["file"]).stem
             excluded.setdefault(category, set()).update(map(str, item["selected_ids"]))
@@ -153,7 +159,7 @@ def acquire(
             ),
             flush=True,
         )
-    if exclude_acquisition is not None and sha(exclude_acquisition) != exclude_sha:
+    if any(sha(p) != expected for p, expected in exclusion_hashes.items()):
         raise ValueError("Previous acquisition changed during fetching")
     write_json(
         root / "acquisition.json",
@@ -167,6 +173,7 @@ def acquire(
             "classes": CLASSES,
             "negative_categories": negative_categories,
             "excluded_acquisition_sha256": exclude_sha,
+            "excluded_acquisitions_sha256": sorted(set(exclusion_hashes.values())),
             "files": files,
             "limits": "Requested category and recognized flag are unverified proposals, not human truth or model mastery.",
             "training_started": False,
@@ -204,6 +211,7 @@ if __name__ == "__main__":
     parser.add_argument("--positive", type=int, default=150)
     parser.add_argument("--negative", type=int, default=60)
     parser.add_argument("--exclude-acquisition", type=Path)
+    parser.add_argument("--additional-exclusions", type=Path, nargs="*", default=[])
     parser.add_argument("--negative-categories", nargs="+", default=list(NEGATIVE))
     parser.add_argument("--no-render", action="store_true")
     args = parser.parse_args()
@@ -212,6 +220,7 @@ if __name__ == "__main__":
         args.positive,
         args.negative,
         exclude_acquisition=args.exclude_acquisition,
+        additional_exclusions=tuple(args.additional_exclusions),
         negative_categories=tuple(args.negative_categories),
     )
     if not args.no_render:

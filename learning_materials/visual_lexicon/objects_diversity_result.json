@@ -1,0 +1,420 @@
+{
+  "schema": 1,
+  "focused_tests": {
+    "passed": 270,
+    "skipped": 2,
+    "log_sha256": "7b799ad86866b7d1c8d744aad5d274a06b3a3163cb196c8fdbfe67ead074e73a",
+    "skip_reason": "Project venv lacks pdfplumber; unrelated PDF tests skipped."
+  },
+  "date": "2026-10-09",
+  "status": "REJECTED_NOT_PRODUCTION",
+  "training_host": "karina",
+  "scope": "Eight object names, own weights; bounded RU/EN prompts and Russian answers.",
+  "data": {
+    "new_admitted_images": 1016,
+    "new_sketches": 926,
+    "new_illustrations": 90,
+    "counts": {
+      "train": 2073,
+      "dev": 336,
+      "calibration": 507,
+      "final": 172,
+      "regression": 375,
+      "textbook_diagnostic": 7
+    },
+    "dataset_sha256": "874d86c59be6d532a68baf4b2c744eef87465a86cf3329025e2d682fc0dda702",
+    "pixels_sha256": "b4156e2f24b358ad7e960bd357f929d6d91a18676e4800ca41856d3ee072bc44",
+    "registry_path": "D:\\ai-brain-data\\visual-lexicon\\objects-diversity-20261009\\prepared-v1\\image-registry.json",
+    "registry_sha256": "daec7831833a5fa30103fdc77dd3b72bf882768c10e534fa39931df3c9d13a7f",
+    "lineage": {
+      "status": "ALL_PARENT_NONCONSTANT_ROWS_PRESERVED",
+      "parent_sources": 2449,
+      "prior_final_never_training": true,
+      "openmoji_training_and_dev_sources": 0,
+      "illustrations_by_split": {
+        "train": 62,
+        "dev": 0,
+        "calibration": 0,
+        "final": 28
+      },
+      "dataset_sha256": "874d86c59be6d532a68baf4b2c744eef87465a86cf3329025e2d682fc0dda702",
+      "limits": "Source/pixel/label/owner bookkeeping, not independent blind semantic truth. Full curator review required separately."
+    },
+    "old_final_role": "KNOWN_REGRESSION_NEVER_TRAINING",
+    "OpenMoji_role": "FINAL_ONLY_HELD_OUT_STYLE"
+  },
+  "selection": {
+    "schema": 1,
+    "selection_used": "DEVELOPMENT_ONLY",
+    "dataset_sha256": "874d86c59be6d532a68baf4b2c744eef87465a86cf3329025e2d682fc0dda702",
+    "round_id": 10921,
+    "learning_rate": 0.0003,
+    "comparison": "DEVELOPMENT_HYPERPARAMETER_TUNING_NOT_WEIGHT_SIZE_CAUSAL_PROOF",
+    "candidates": [
+      {
+        "name": "plain_lr1",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-diversity-20261009\\development-v1\\plain_lr1",
+        "checkpoint_sha256": "63a33dacc3873bc669742680316007e699751346acf8534a5c96cced58428d3a",
+        "development_report_sha256": "98dab206ad532bd8a131a06898c41fdaef3aed9f58166d66eceaf0d7a666a639",
+        "protocol_sha256": "be358f66edaa33b6c1acf4bcacb3651f288d3a129800b43e03f07dbb2a6b5430",
+        "best_dev_loss": 0.28547895059451334,
+        "best_step": 2500,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2,
+          "object_unknown_adapter": true
+        },
+        "parameters": 974889,
+        "learning_rate": 0.0001,
+        "capsule_sha256": "042ccfa94234744e60cdae8de83e4ce97d1974034a70144d6ec1e8c0e8426ce1",
+        "warm_start_sha256": "cdc3187ebcc127824fa7e5a4bbf35751ae26fad1d8dbeb68a71633ded4b8f272",
+        "training_options": {
+          "diversity_augmentation": false,
+          "illustration_fraction": 0.0
+        }
+      },
+      {
+        "name": "diverse_lr1",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-diversity-20261009\\development-v1\\diverse_lr1",
+        "checkpoint_sha256": "773ef806a830a3af526dd8f3f1492ad5aee2a1e79bf7fa439e5ccf9a4dd7c8b1",
+        "development_report_sha256": "d13c592dab34633ec94c8d4155a1741fed6f3d1cdd6fd85480ebf1cb3df9e489",
+        "protocol_sha256": "969a8f49ae642cbf97927458393bd8780127fcfb1e957815b86e71009df4e398",
+        "best_dev_loss": 0.23554490347716286,
+        "best_step": 9000,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2,
+          "object_unknown_adapter": true
+        },
+        "parameters": 974889,
+        "learning_rate": 0.0001,
+        "capsule_sha256": "042ccfa94234744e60cdae8de83e4ce97d1974034a70144d6ec1e8c0e8426ce1",
+        "warm_start_sha256": "cdc3187ebcc127824fa7e5a4bbf35751ae26fad1d8dbeb68a71633ded4b8f272",
+        "training_options": {
+          "diversity_augmentation": true,
+          "illustration_fraction": 0.35
+        }
+      },
+      {
+        "name": "diverse_lr3",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-diversity-20261009\\development-v1\\diverse_lr3",
+        "checkpoint_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+        "development_report_sha256": "6ad5cade1566e82429cc3c581697154f6fc297e04c6e3e5ce1ee2725103a2f39",
+        "protocol_sha256": "db2016482533a2b5f0ff1b4391d7f0c25b99d75fee740d7cf0f547bf1668296c",
+        "best_dev_loss": 0.2133498737454688,
+        "best_step": 7500,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2,
+          "object_unknown_adapter": true
+        },
+        "parameters": 974889,
+        "learning_rate": 0.0003,
+        "capsule_sha256": "042ccfa94234744e60cdae8de83e4ce97d1974034a70144d6ec1e8c0e8426ce1",
+        "warm_start_sha256": "cdc3187ebcc127824fa7e5a4bbf35751ae26fad1d8dbeb68a71633ded4b8f272",
+        "training_options": {
+          "diversity_augmentation": true,
+          "illustration_fraction": 0.35
+        }
+      }
+    ],
+    "winner": {
+      "name": "diverse_lr3",
+      "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-diversity-20261009\\development-v1\\diverse_lr3",
+      "checkpoint_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+      "development_report_sha256": "6ad5cade1566e82429cc3c581697154f6fc297e04c6e3e5ce1ee2725103a2f39",
+      "protocol_sha256": "db2016482533a2b5f0ff1b4391d7f0c25b99d75fee740d7cf0f547bf1668296c",
+      "best_dev_loss": 0.2133498737454688,
+      "best_step": 7500,
+      "architecture": {
+        "vision_extension_channels": 64,
+        "vision_extension_depth": 2,
+        "object_unknown_adapter": true
+      },
+      "parameters": 974889,
+      "learning_rate": 0.0003,
+      "capsule_sha256": "042ccfa94234744e60cdae8de83e4ce97d1974034a70144d6ec1e8c0e8426ce1",
+      "warm_start_sha256": "cdc3187ebcc127824fa7e5a4bbf35751ae26fad1d8dbeb68a71633ded4b8f272",
+      "training_options": {
+        "diversity_augmentation": true,
+        "illustration_fraction": 0.35
+      }
+    },
+    "production_admitted": false,
+    "limits": "Candidate choice precedes all calibration/final evaluation. No fresh-final metrics used in selection. Raw development accuracy not a safe naming gate."
+  },
+  "development_raw_not_safe_policy": {
+    "examples": 336,
+    "accepted": 230,
+    "false_assertions": 26,
+    "accuracy": 0.8839285714285714,
+    "answerable_recall": 0.8908296943231441,
+    "unknown_recall": 0.8691588785046729
+  },
+  "training_peak_cuda_allocated_bytes": 1208532992,
+  "checkpoint_bytes": 3917365,
+  "checkpoint_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+  "report_path": "D:\\ai-brain-data\\visual-lexicon\\objects-diversity-20261009\\development-v1\\final-evaluation\\report.json",
+  "report_sha256": "83c99e42edd7479e91df54622e879653ce340fdfa8867f22553bdc2d9724e691",
+  "object_gate": false,
+  "regression_gate": false,
+  "production_admitted": false,
+  "fresh_final": {
+    "all": {
+      "examples": 172,
+      "accepted": 53,
+      "false_assertions": 0,
+      "accuracy": 0.7151162790697675,
+      "answerable_recall": 0.5196078431372549,
+      "unknown_recall": 1.0
+    },
+    "object": {
+      "examples": 172,
+      "accepted": 53,
+      "false_assertions": 0,
+      "accuracy": 0.7151162790697675,
+      "answerable_recall": 0.5196078431372549,
+      "unknown_recall": 1.0
+    },
+    "by_concept": {
+      "яблоко": {
+        "examples": 15,
+        "accepted": 7,
+        "false_assertions": 0,
+        "accuracy": 0.4666666666666667,
+        "answerable_recall": 0.4666666666666667,
+        "unknown_recall": null
+      },
+      "банан": {
+        "examples": 10,
+        "accepted": 4,
+        "false_assertions": 0,
+        "accuracy": 0.4,
+        "answerable_recall": 0.4,
+        "unknown_recall": null
+      },
+      "морковь": {
+        "examples": 14,
+        "accepted": 9,
+        "false_assertions": 0,
+        "accuracy": 0.6428571428571429,
+        "answerable_recall": 0.6428571428571429,
+        "unknown_recall": null
+      },
+      "рыба": {
+        "examples": 11,
+        "accepted": 3,
+        "false_assertions": 0,
+        "accuracy": 0.2727272727272727,
+        "answerable_recall": 0.2727272727272727,
+        "unknown_recall": null
+      },
+      "дерево": {
+        "examples": 16,
+        "accepted": 8,
+        "false_assertions": 0,
+        "accuracy": 0.5,
+        "answerable_recall": 0.5,
+        "unknown_recall": null
+      },
+      "кружка": {
+        "examples": 14,
+        "accepted": 10,
+        "false_assertions": 0,
+        "accuracy": 0.7142857142857143,
+        "answerable_recall": 0.7142857142857143,
+        "unknown_recall": null
+      },
+      "стул": {
+        "examples": 9,
+        "accepted": 6,
+        "false_assertions": 0,
+        "accuracy": 0.6666666666666666,
+        "answerable_recall": 0.6666666666666666,
+        "unknown_recall": null
+      },
+      "книга": {
+        "examples": 13,
+        "accepted": 6,
+        "false_assertions": 0,
+        "accuracy": 0.46153846153846156,
+        "answerable_recall": 0.46153846153846156,
+        "unknown_recall": null
+      }
+    }
+  },
+  "threshold": 0.99,
+  "calibration_grid": [
+    {
+      "threshold": 0.99,
+      "stats": {
+        "examples": 507,
+        "accepted": 183,
+        "false_assertions": 0,
+        "accuracy": 0.6804733727810651,
+        "answerable_recall": 0.5304347826086957,
+        "unknown_recall": 1.0
+      },
+      "eligible": true
+    },
+    {
+      "threshold": 0.995,
+      "stats": {
+        "examples": 507,
+        "accepted": 156,
+        "false_assertions": 0,
+        "accuracy": 0.6272189349112426,
+        "answerable_recall": 0.45217391304347826,
+        "unknown_recall": 1.0
+      },
+      "eligible": true
+    },
+    {
+      "threshold": 0.999,
+      "stats": {
+        "examples": 507,
+        "accepted": 93,
+        "false_assertions": 0,
+        "accuracy": 0.5029585798816568,
+        "answerable_recall": 0.26956521739130435,
+        "unknown_recall": 1.0
+      },
+      "eligible": true
+    },
+    {
+      "threshold": 0.9995,
+      "stats": {
+        "examples": 507,
+        "accepted": 70,
+        "false_assertions": 0,
+        "accuracy": 0.45759368836291914,
+        "answerable_recall": 0.2028985507246377,
+        "unknown_recall": 1.0
+      },
+      "eligible": true
+    },
+    {
+      "threshold": 0.9999,
+      "stats": {
+        "examples": 507,
+        "accepted": 18,
+        "false_assertions": 0,
+        "accuracy": 0.35502958579881655,
+        "answerable_recall": 0.05217391304347826,
+        "unknown_recall": 1.0
+      },
+      "eligible": false
+    }
+  ],
+  "calibration_raw_not_safe_policy": {
+    "examples": 507,
+    "accepted": 298,
+    "false_assertions": 7,
+    "accuracy": 0.8796844181459567,
+    "answerable_recall": 0.8434782608695652,
+    "unknown_recall": 0.9567901234567902
+  },
+  "retention_gates": {
+    "count": true,
+    "shape": true,
+    "color": true,
+    "same_shape": true,
+    "same_color": true,
+    "horizontal": true,
+    "vertical": true
+  },
+  "domain_diagnostics": {
+    "status": "POST_FREEZE_DOMAIN_DIAGNOSTIC_NO_TUNING",
+    "domains": {
+      "openmoji": {
+        "frozen_safe_policy": {
+          "examples": 28,
+          "accepted": 2,
+          "false_assertions": 0,
+          "accuracy": 0.6428571428571429,
+          "answerable_recall": 0.16666666666666666,
+          "unknown_recall": 1.0
+        },
+        "raw_consensus_not_safe_policy": {
+          "examples": 28,
+          "accepted": 4,
+          "false_assertions": 1,
+          "accuracy": 0.6785714285714286,
+          "answerable_recall": 0.25,
+          "unknown_recall": 1.0
+        },
+        "families": 23
+      },
+      "sketches_and_absence_control": {
+        "frozen_safe_policy": {
+          "examples": 144,
+          "accepted": 51,
+          "false_assertions": 0,
+          "accuracy": 0.7291666666666666,
+          "answerable_recall": 0.5666666666666667,
+          "unknown_recall": 1.0
+        },
+        "raw_consensus_not_safe_policy": {
+          "examples": 144,
+          "accepted": 81,
+          "false_assertions": 5,
+          "accuracy": 0.875,
+          "answerable_recall": 0.8444444444444444,
+          "unknown_recall": 0.9259259259259259
+        },
+        "families": 144
+      }
+    },
+    "checkpoint_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+    "dataset_sha256": "874d86c59be6d532a68baf4b2c744eef87465a86cf3329025e2d682fc0dda702",
+    "arithmetic_audit": {
+      "status": "VERIFIED_ARITHMETIC_NOT_INDEPENDENT_SEMANTIC_TRUTH",
+      "prediction_records": 5098,
+      "calibration_diagnostic_records": 507,
+      "report_sha256": "83c99e42edd7479e91df54622e879653ce340fdfa8867f22553bdc2d9724e691",
+      "checkpoint_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+      "object_gate": false,
+      "retention_gates": {
+        "count": true,
+        "shape": true,
+        "color": true,
+        "same_shape": true,
+        "same_color": true,
+        "horizontal": true,
+        "vertical": true
+      },
+      "limits": "Independent pure-Python selector/metric/gate bookkeeping, not independent source-label verification, blind exam, training replay, or proof of general honesty."
+    },
+    "limits": "Raw consensus is not permitted naming. Style subset is small and related variants are not independent. This final is now known and cannot be reused as fresh."
+  },
+  "arithmetic_audit": {
+    "status": "VERIFIED_ARITHMETIC_NOT_INDEPENDENT_SEMANTIC_TRUTH",
+    "prediction_records": 5098,
+    "calibration_diagnostic_records": 507,
+    "report_sha256": "83c99e42edd7479e91df54622e879653ce340fdfa8867f22553bdc2d9724e691",
+    "checkpoint_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+    "object_gate": false,
+    "retention_gates": {
+      "count": true,
+      "shape": true,
+      "color": true,
+      "same_shape": true,
+      "same_color": true,
+      "horizontal": true,
+      "vertical": true
+    },
+    "limits": "Independent pure-Python selector/metric/gate bookkeeping, not independent source-label verification, blind exam, training replay, or proof of general honesty."
+  },
+  "accepted_checkpoint_sha256": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+  "accepted_policy_sha256": "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6",
+  "accepted_model_unchanged_locally_and_remotely": true,
+  "parent_archive_commit": "5b03f850d15937f45acd413b5e355858e6b2c7fe",
+  "limits": [
+    "Curator saw categories; this is not an independent blind semantic exam.",
+    "Held-out publisher and detected families do not prove exhaustive artist/semantic independence.",
+    "Abstention and zero errors are not mastery; all original safety gates remain.",
+    "Augmentations are training views, not independent new examples.",
+    "Photos, definitions, broad language understanding, all textbooks and M34 not trained.",
+    "Outside-scope examples do not teach their names. Accepted working model not replaced."
+  ]
+}

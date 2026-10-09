@@ -19,13 +19,20 @@ PREVIOUS_SHA = "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae
 POLICY_SHA = "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6"
 
 
-def verify(root, version, output):
-    if version not in ("v1", "v2") or output.exists():
+def verify(root, version, output, series="expansion"):
+    if (
+        version not in ("v1", "v2")
+        or series not in ("expansion", "diversity")
+        or output.exists()
+    ):
         raise ValueError("Explicit version and fresh receipt required")
     capsule = root / ("source-capsule-" + version + ".tgz")
     local = root / ("development-" + version)
     remote = (
-        "/home/ibicza/ai-brain/runs/m33-primary-objects-expansion-20261009-" + version
+        "/home/ibicza/ai-brain/runs/m33-primary-objects-"
+        + series
+        + "-20261009-"
+        + version
     )
     if not local.is_dir():
         raise ValueError("Retrieved candidate directory required")
@@ -34,6 +41,10 @@ def verify(root, version, output):
         ACCEPTED + "/best.pt": PREVIOUS_SHA,
         ACCEPTED + "/frozen-calibration.json": POLICY_SHA,
     }
+    if series == "diversity":
+        expectations[remote + "/runner.py"] = sha(
+            Path(__file__).parent / "m33_objects_diversity_remote.py"
+        )
     with tarfile.open(capsule) as archive:
         manifest_blob = archive.extractfile("source-manifest.json").read()
         expectations[remote + "/source-manifest.json"] = hashlib.sha256(
@@ -84,6 +95,7 @@ def verify(root, version, output):
         "status": "VERIFIED_BYTE_IDENTICAL",
         "host": "karina",
         "version": version,
+        "series": series,
         "remote_root": remote,
         "capsule_sha256": sha(capsule),
         "accepted_checkpoint_unchanged": True,
@@ -104,8 +116,11 @@ if __name__ == "__main__":
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--version", choices=("v1", "v2"), required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--series", choices=("expansion", "diversity"), default="expansion"
+    )
     args = parser.parse_args()
-    result = verify(args.root, args.version, args.output)
+    result = verify(args.root, args.version, args.output, args.series)
     print(
         json.dumps(
             {

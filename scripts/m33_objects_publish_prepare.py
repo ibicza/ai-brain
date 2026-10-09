@@ -78,12 +78,12 @@ def build(workbook, previous_prepared, data, experiment, selection, output):
         correct = round(stats["examples"] * stats["answerable_recall"])
         overall = report["tests"]["object_final"]["all"]
         note = (
-            f"2026-10-09. Расширение предметного блока. Победитель {receipt['winner']['name']}, {report['parameters']} параметров. "
-            f"Новые контрольные рисунки: правильно названо {correct}/{stats['examples']}, уверенных ошибок по этому слову {stats['false_assertions']}. "
+            f"2026-10-09. Разнообразие предметного блока. Победитель {receipt['winner']['name']}, {report['parameters']} параметров. "
+            f"Новые контрольные изображения: правильно названо {correct}/{stats['examples']}, уверенных ошибок по этому слову {stats['false_assertions']}. "
             f"Вся новая проверка: ответов {overall['accepted']}/{overall['examples']}, уверенных ошибок {overall['false_assertions']}. "
             f"Порог предметного ответа {report['thresholds']['object']}. Приёмка блока {'пройдена в ограниченной области' if report['object_gate'] else 'не пройдена'}. "
             "Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. "
-            "Разметка рисунков не слепая; фото, определения и весь учебник не обучались. "
+            "Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. "
             f"Все изображения, разбиения и происхождение: {data / 'image-registry.json'}"
         )
         after[12] = "\n".join(filter(None, [before[12], note]))

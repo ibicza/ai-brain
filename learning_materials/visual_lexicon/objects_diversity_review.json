@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "training_started": false,
+  "review": "All 28 indexed sketch sheets and all three publisher illustration sheets visually inspected by current assistant. Nonblind curation, not independent semantic exam. Ambiguous positives are excluded, not relabelled UNKNOWN. Negatives mean only outside the eight-name answer scope. One OpenMoji publisher entirely reserved for final; its volume-text book variants and all saucer/teacup proposals excluded.",
+  "positive": {
+    "apple": {"exclude": [0,8,22,24,34,38,48,55,58,70,73,80,83,84,98]},
+    "banana": {"include": [0,3,5,6,14,15,18,19,23,25,28,29,31,32,35,36,38,39,42,43,46,47,50,51,52,53,55,56,60,61,62,64,65,66,67,69,71,75,76,77,80,83,85,86,87,88,90,91,92,93,94,97,98,99]},
+    "carrot": {"exclude": [7,8,9,21,24,34,35,38,44,66,67,75,77,87,93,98]},
+    "fish": {"exclude": [0,3,4,5,7,14,16,17,18,20,22,23,25,28,30,31,34,35,36,37,39,41,43,44,47,48,49,51,53,54,55,56,60,61,63,69,70,71,73,76,78,80,84,85,89,95,96,98]},
+    "tree": {"exclude": [1,3,13,18,26,27,39,53,54,59,66,67,70,71,73,88,90,99]},
+    "mug": {"exclude": [0,19,20,23,31,32,37,40,56,57,59,64,65,77,79,85]},
+    "chair": {"include": [0,2,5,6,7,9,10,11,12,14,15,17,23,24,25,26,27,30,32,33,35,37,38,39,40,44,47,49,50,51,52,53,54,55,56,57,61,64,66,71,74,75,78,81,82,83,91,92,93,95,96,98]},
+    "book": {"exclude": [20,23,30,31,36,37,46,50,54,57,66,71,77,80,81,86,94]}
+  },
+  "negative": {
+    "airplane": {"exclude": [1,11,14,33]},
+    "bicycle": {"exclude": [2,6,11,13,16,18,23,27,32,33,38]},
+    "cat": {"exclude": [4,20,25,36]},
+    "flower": {"exclude": [15,16,18,26,32,38]},
+    "pear": {"exclude": [0,7,14,19,23,24,26,27,32,35,38,39]},
+    "watermelon": {"include": [0,1,2,3,4,6,7,8,10,11,12,14,16,18,23,24,25,26,27,28,29,30,31,37,38,39]},
+    "moon": {"include": [0,1,3,14,26,35]},
+    "leaf": {"exclude": [3,15,17,28,32,33]},
+    "table": {"include": [0,1,3,4,7,8,10,12,13,15,17,19,20,21,22,25,26,28,29,31,32,33,35,36,37,39]},
+    "cloud": {"exclude": [5,14,16,20,23,25,32,34,35,37]},
+    "circle": {"include": [0,1,3,4,5,6,7,8,11,14,15,16,20,21,22,23,25,28,29,30,31,32,33,34,35,36,37,38,39]},
+    "square": {"exclude": [2,4,25,33]}
+  },
+  "illustrations": {
+    "excluded_ids": ["illustration/twemoji/2615", "illustration/noto/2615", "illustration/openmoji/2615", "illustration/openmoji/1f4d7", "illustration/openmoji/1f4d8", "illustration/openmoji/1f4d9"],
+    "rule": "All other 99 individually inspected sources admitted with proposed answer. No photographs, definitions, new negative-name acquisition, or bulk textbook admission. Related code/color variants within publisher and category grouped; cross-publisher pixel-near duplicates quarantined rather than leaked."
+  }
+}
