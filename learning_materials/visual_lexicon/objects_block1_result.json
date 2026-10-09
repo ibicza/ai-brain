@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "date": "2026-10-09",
+  "host": "karina",
+  "scope": "Own eight-object schematic pilot, not textbook mastery or M33 closure",
+  "concepts": ["vc0175", "vc0179", "vc0186", "vc0101", "vc0114", "vc0369", "vc0158", "vc0205"],
+  "training_started": true,
+  "production_admitted": false,
+  "accepted_previous_checkpoint_sha256": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+  "dataset_root": "D:/ai-brain-data/visual-lexicon/objects-block1-20261009",
+  "training_sources": "Visually curated participant drawings; Quick, Draw!, CC BY 4.0. Source-category proposals were not admitted blindly. No external pretrained weights.",
+  "source_repository": "https://github.com/googlecreativelab/quickdraw-dataset",
+  "reviewed_source_drawings": 1063,
+  "excluded_proposals": 377,
+  "attempts": [
+    {
+      "version": 1,
+      "steps": 10000,
+      "checkpoint_sha256": "80e68a12fbfa4a07c71b54a654f688da086b5df3a38a526902c985a6aada7dd9",
+      "report_sha256": "1220b48bac9fbbb3367e0374f529f548f3e957f8089562eece230d72ef78be33",
+      "status": "REJECTED_NOT_PRODUCTION",
+      "object_gate": false,
+      "all_seven_retention_gates": false
+    },
+    {
+      "version": 2,
+      "steps": 10000,
+      "checkpoint_sha256": "02726465fa5753d8c11e279b1c27a056325c915785e899969c8debc4635e789f",
+      "report_sha256": "d696ecbf099ad53a5e0dc7bd28a8ede9dec5ff60874900a7094cceef0b8ff46f",
+      "status": "REJECTED_NOT_PRODUCTION",
+      "object_gate": false,
+      "all_seven_retention_gates": true,
+      "legacy_parameters_byte_preserved": true,
+      "final_examples": 164,
+      "answerable_examples": 127,
+      "accepted_answers": 0,
+      "false_assertions": 0,
+      "answerable_recall": 0,
+      "evaluation": "Known object regression set, not a new blind exam. Fresh procedural legacy retention sets. Seven inspected textbook diagnostics are not training or selection inputs."
+    }
+  ],
+  "independent_check": "Pure-Python replay of selector, metrics and gates on 4371 saved prediction records per attempt. Not independent semantic annotation or a general honesty proof.",
+  "limits": "Zero errors with zero object answers is not mastery. Definitions, properties, photos, the full textbook corpus and unrestricted dialogue are not learned in this pilot.",
+  "next_step": "Improve visual-feature learning while preserving legacy skills. Do not relax safety thresholds to manufacture acceptance. A fresh independent final cohort is required before a new acceptance claim."
+}

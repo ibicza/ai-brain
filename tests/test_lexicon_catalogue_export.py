@@ -71,6 +71,22 @@ def test_preserve_old_metrics_and_admission_and_separate_overview(
     assert "Не завершена" in queue
 
 
+def test_record_object_pilot_without_admitting_book_corpus(tmp_path, monkeypatch):
+    workbook, prepared, data = fixture(tmp_path, monkeypatch)
+    data["object_pilot"] = {
+        "training_started": True,
+        "object_gate": False,
+        "production_admitted": False,
+    }
+    prepared.write_text(json.dumps(data))
+    export.run(workbook, prepared, tmp_path / "exports")
+    report = json.loads((tmp_path / "exports/catalogue_report.json").read_text())
+    assert report["training_started"] is True
+    assert report["book_training_started"] is False
+    assert report["training_admitted"] is False
+    assert report["object_pilot"]["object_gate"] is False
+
+
 @pytest.mark.parametrize("error", ["admission", "split", "metric"])
 def test_new_rows_cannot_claim_training_or_measured_mastery(
     tmp_path, monkeypatch, error

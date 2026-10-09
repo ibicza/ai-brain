@@ -112,6 +112,13 @@ def comparable(value, expected):
 
 def run(workbook: Path, prepared: Path, output: Path) -> dict:
     data = json.loads(prepared.read_text(encoding="utf-8"))
+    export_stats = dict(data["stats"])
+    if data.get("object_pilot"):
+        export_stats["limits"] = (
+            "Lexical and textbook entries remain scoped drafts, not blanket training admission. "
+            "Separate measured object-training results are recorded in object_pilot; "
+            "they do not certify definitions, properties, photos, or textbook mastery."
+        )
     workbook_sha = sha(workbook)
     sheets = saved_tables(workbook)
     specs = [
@@ -233,7 +240,8 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
         "workbook_sha256": workbook_sha,
         "authoritative_file": "visual_lexicon.xlsx",
         "training_admitted": False,
-        "stats": data["stats"],
+        "object_pilot": data.get("object_pilot"),
+        "stats": export_stats,
         "sheets": sheets,
     }
     with (
@@ -264,9 +272,13 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
         "all_saved_cells_match": True,
         "formulas": 0,
         "tables_and_filters": 4,
-        "training_started": False,
+        "training_started": bool(
+            data.get("object_pilot", {}).get("training_started", False)
+        ),
+        "book_training_started": False,
+        "object_pilot": data.get("object_pilot"),
         "training_admitted": False,
-        "stats": data["stats"],
+        "stats": export_stats,
         "review_inputs": data["review_files"],
         "overview_pages": len(overviewed_pages),
         "detailed_review_pages": len(reviewed_pages),
@@ -279,7 +291,7 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
         "spreadsheet_text_escapes": data.get("spreadsheet_text_escapes", []),
         "csv_policy": "UTF-8 BOM; semicolon; quoted multiline; literal leading =+-@ strings escaped, typed numbers unchanged",
         "exports": exports,
-        "limits": data["stats"]["limits"],
+        "limits": export_stats["limits"],
     }
     (output / "catalogue_report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -291,7 +303,7 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
             {
                 "verified": True,
                 "workbook_sha256": workbook_sha,
-                "stats": data["stats"],
+                "stats": export_stats,
                 "export_bytes": sum(e["bytes"] for e in exports),
             },
             ensure_ascii=False,

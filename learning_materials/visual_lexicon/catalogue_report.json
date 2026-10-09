@@ -1,7 +1,7 @@
 {
   "schema": 2,
-  "workbook_sha256": "94f1c7b388b1c99daf053bd455d49640ce422292b669cfd6e98a71ee537b8c51",
-  "preserved_input_workbook_sha256": "1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82",
+  "workbook_sha256": "99b76960837adcbfd8c022d42cb5ed63ff1f1ee1b9c6640608919ec76410f532",
+  "preserved_input_workbook_sha256": "94f1c7b388b1c99daf053bd455d49640ce422292b669cfd6e98a71ee537b8c51",
   "previous_prepared_history": {
     "path": "D:\\ai-brain-data\\visual-lexicon\\workbook-qa-pass2-20261009\\combined-prepared.json",
     "sha256": "7a5e83c9ba2308fb07a7470058347d2e09e8b1c56841460ccff00e5bfd98aa46",
@@ -31030,7 +31030,25 @@
   "all_saved_cells_match": true,
   "formulas": 0,
   "tables_and_filters": 4,
-  "training_started": false,
+  "training_started": true,
+  "book_training_started": false,
+  "object_pilot": {
+    "training_started": true,
+    "object_gate": false,
+    "production_admitted": false,
+    "report_sha256": "d696ecbf099ad53a5e0dc7bd28a8ede9dec5ff60874900a7094cceef0b8ff46f",
+    "image_registry_sha256": "73bad02db7624b18bdc581b974490decfcdca384bad27580f560b5415cd9c23e",
+    "updated_concepts": [
+      "vc0175",
+      "vc0179",
+      "vc0186",
+      "vc0101",
+      "vc0114",
+      "vc0369",
+      "vc0158",
+      "vc0205"
+    ]
+  },
   "training_admitted": false,
   "stats": {
     "input_concepts": 847,
@@ -31048,7 +31066,7 @@
     "overview_pages": 1763,
     "reviewed_occurrences": 0,
     "xml_display_escaped_cells": 330,
-    "limits": "Explicit scoped lexical drafts, not all senses/occurrences verified; no training or new mastery metrics.",
+    "limits": "Lexical and textbook entries remain scoped drafts, not blanket training admission. Separate measured object-training results are recorded in object_pilot; they do not certify definitions, properties, photos, or textbook mastery.",
     "new_word_concepts": 647,
     "lexical_senses_reviewed": 662,
     "lexical_existing_mappings": 15
@@ -36828,8 +36846,8 @@
   "exports": [
     {
       "file": "concepts.csv",
-      "sha256": "cecddfab0de0e0be8407fbeabfdd7e51348afe6aec4c9162bc7eadd5f18fb6a6",
-      "bytes": 1812573
+      "sha256": "30108d31d7def0453359d487b98dbdc6c8ed5bea4b17450e005fbc0d0337c943",
+      "bytes": 1879552
     },
     {
       "file": "media.csv",
@@ -36853,9 +36871,9 @@
     },
     {
       "file": "catalogue.json.gz",
-      "sha256": "9c743926a5e957745c360ff4d649bf83186759d324b50b1eab00cfee207c1ac5",
-      "bytes": 4449980
+      "sha256": "214c95239ef02f05a1ae2b266268ebe57fcafe4f92005080b5680864f50bfe29",
+      "bytes": 4459866
     }
   ],
-  "limits": "Explicit scoped lexical drafts, not all senses/occurrences verified; no training or new mastery metrics."
+  "limits": "Lexical and textbook entries remain scoped drafts, not blanket training admission. Separate measured object-training results are recorded in object_pilot; they do not certify definitions, properties, photos, or textbook mastery."
 }

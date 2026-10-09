@@ -1,0 +1,47 @@
+{
+  "host": "karina",
+  "files": [
+    {
+      "path": "legacy-final-predictions.json",
+      "sha256": "e9bbba65a03a3fcf9335074d32942e7d1ceef772cfad92f8e00c2a876d14a629"
+    },
+    {
+      "path": "replay-split-audit.json",
+      "sha256": "228980d7d793a8e6465dec7b9e8c57cd4292866083b5a1089a62e94863121daa"
+    },
+    {
+      "path": "report.json",
+      "sha256": "d696ecbf099ad53a5e0dc7bd28a8ede9dec5ff60874900a7094cceef0b8ff46f"
+    },
+    {
+      "path": "object-final-predictions.json",
+      "sha256": "6c010af594c162eee2cf6f2a660d633e9086bc3f8ac37debfbf914458d162aed"
+    },
+    {
+      "path": "replay-teacher-audit.json",
+      "sha256": "95cb8b7a879d1bc09d68af42e83a77c4b0fa464d2fd8ea805c438a6812ea24ed"
+    },
+    {
+      "path": "protocol.json",
+      "sha256": "4682948031695e5bd994daafde32d4b812d5e3d3803862ff6d0437fc234c2f33"
+    },
+    {
+      "path": "legacy-transfer-predictions.json",
+      "sha256": "009747cef0674f476c9f07f147db9d3e04addbd10bb80e75c17b61acbf30ca06"
+    },
+    {
+      "path": "best.pt",
+      "sha256": "02726465fa5753d8c11e279b1c27a056325c915785e899969c8debc4635e789f"
+    },
+    {
+      "path": "textbook-diagnostic-predictions.json",
+      "sha256": "0051e0eedfff007c478152040cd7205fd8679b392f913c16ed9125652de2bf05"
+    },
+    {
+      "path": "frozen-calibration.json",
+      "sha256": "f23a3cebad1759c5691f4a4fe585e62785b2e67ed512dcb0f8517cc02580f5f5"
+    }
+  ],
+  "previous_checkpoint_unchanged": true,
+  "scope": "Read-only remote byte comparison; not a training replay or semantic exam"
+}
