@@ -1,5 +1,11 @@
 # Visual lexicon: permanent project catalogue
 
+The 2026-10-10 procedural continuation is documented in
+`docs/m33_primary_composition_continuation.md`. Existing workbook rows/IDs remain
+unchanged; result/replay/comparison JSON files preserve candidate outcomes
+separately. Experimental capacity is not admission of animal-part recognition,
+photographs, textbooks or general language.
+
 Canonical editable workbook: `visual_lexicon.xlsx` in this directory. The earlier
 `outputs/visual-lexicon-20261009/visual_lexicon.xlsx` is the initial export, not the
 current catalogue. Do not regenerate the canonical workbook from that old seed.

@@ -1,0 +1,253 @@
+"""Tiny end-to-end train/freeze/replay and hostile receipt modifications."""
+
+import gzip
+import importlib.util
+import json
+import tarfile
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+import torch
+
+from ai_brain.training import primary_objects as old
+
+
+def script(name):
+    spec = importlib.util.spec_from_file_location(
+        name, Path(__file__).parents[1] / "scripts" / (name + ".py")
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+pilot = script("m33_primary_composition_pilot")
+verifier = script("m33_composition_verify")
+
+
+@pytest.fixture(scope="module")
+def sealed(tmp_path_factory):
+    root = tmp_path_factory.mktemp("composition-pipeline")
+    torch.manual_seed(500)
+    prior = old.ObjectsModel(width=32, layers=1)
+    previous = root / "previous.pt"
+    torch.save(
+        {
+            "model": prior.state_dict(),
+            "width": 32,
+            "layers": 1,
+            "compatible_legacy_vocabulary": True,
+        },
+        previous,
+    )
+    capsule = root / "source-capsule.tgz"
+    probe = root / "source-probe.txt"
+    probe.write_text("sealed fixture, not a real source capsule", encoding="utf-8")
+    manifest = {
+        "schema": 1,
+        "files": [{"file": probe.name, "sha256": verifier.sha(probe)}],
+    }
+    (root / "source-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    with tarfile.open(capsule, "w:gz") as archive:
+        archive.add(probe, arcname=probe.name)
+        archive.add(root / "source-manifest.json", arcname="source-manifest.json")
+    # The monkeypatch context must not escape this module-scoped setup.
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setenv("AI_BRAIN_CAPSULE_SHA256", verifier.sha(capsule))
+        pilot.run(
+            SimpleNamespace(
+                output=root / "experiment",
+                spatial_readout=False,
+                shape_edges=False,
+                label_smoothing=0.0,
+                previous=previous,
+                warm_candidate=None,
+                dataset_profile="diverse",
+                seed=12000,
+                steps=2,
+                eval_every=2,
+                train_images=12,
+                holdout_images=12,
+                device="cpu",
+            )
+        )
+    return root
+
+
+def check(root, name):
+    verifier.verify(
+        root / "experiment",
+        root / "previous.pt",
+        root / "source-capsule.tgz",
+        root / name,
+        "cpu",
+    )
+
+
+def test_exact_inference_and_arithmetic_replay(sealed):
+    check(sealed, "verified.json")
+    report = json.loads((sealed / "verified.json").read_text())
+    assert report["status"] == "INFERENCE_AND_ARITHMETIC_VERIFIED"
+    assert report["blank_inference_replayed"]
+    assert report["question_and_oracle_correspondence_verified"]
+    assert not report["production_admitted"]
+
+
+def test_replay_pre_spatial_constructor_without_source_rewrite(sealed, monkeypatch):
+    current = verifier.c.CompositionModel
+
+    def pre_spatial(inherited, *, attribute_attention=True):
+        return current(inherited, attribute_attention=attribute_attention)
+
+    monkeypatch.setattr(verifier.c, "CompositionModel", pre_spatial)
+    check(sealed, "verified-pre-spatial.json")
+    assert (sealed / "verified-pre-spatial.json").exists()
+
+
+def test_dataset_archive_expands_each_array_only_once(sealed, monkeypatch):
+    original_load = verifier.np.load
+    accessed = {}
+
+    class CountedArchive:
+        def __init__(self, archive):
+            self.archive = archive
+            self.files = archive.files
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            self.archive.close()
+
+        def __getitem__(self, key):
+            accessed[key] = accessed.get(key, 0) + 1
+            return self.archive[key]
+
+    monkeypatch.setattr(
+        verifier.np,
+        "load",
+        lambda *args, **kwargs: CountedArchive(original_load(*args, **kwargs)),
+    )
+    check(sealed, "verified-single-decompression.json")
+    assert len(accessed) == 24
+    assert set(accessed.values()) == {1}
+
+
+def test_source_manifest_cannot_be_rewritten_alongside_source(sealed):
+    path = sealed / "source-manifest.json"
+    original = path.read_bytes()
+    try:
+        path.write_text(json.dumps({"schema": 1, "files": []}), encoding="utf-8")
+        with pytest.raises(ValueError, match="sealed capsule"):
+            check(sealed, "must-not-exist-source.json")
+        assert not (sealed / "must-not-exist-source.json").exists()
+    finally:
+        path.write_bytes(original)
+
+
+@pytest.mark.parametrize("field", ("answerable_recall", "false_assertions"))
+def test_report_metric_tamper_rejected(sealed, field):
+    path = sealed / "experiment/result.json"
+    original = path.read_bytes()
+    try:
+        report = json.loads(original)
+        report["reports"]["final"]["selected"]["overall"][field] += 1
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(ValueError, match="Metric mismatch"):
+            check(sealed, "must-not-exist-" + field + ".json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_raw_task_metric_tamper_rejected(sealed):
+    path = sealed / "experiment/result.json"
+    original = path.read_bytes()
+    try:
+        report = json.loads(original)
+        report["reports"]["final"]["raw_argmax"]["tasks"]["shape"]["accepted"] += 1
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(ValueError, match="Metric mismatch"):
+            check(sealed, "must-not-exist-raw.json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_blank_image_result_is_recomputed_not_trusted(sealed):
+    path = sealed / "experiment/blank-image-ablation.json"
+    original = path.read_bytes()
+    try:
+        report = json.loads(original)
+        report["overall"]["accepted"] += 1
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(ValueError, match="Metric mismatch"):
+            check(sealed, "must-not-exist-blank.json")
+    finally:
+        path.write_bytes(original)
+
+
+@pytest.mark.parametrize(
+    "field,value", (("checkpoint_sha256", "forged"), ("winner", "forged"))
+)
+def test_result_lineage_tamper_rejected(sealed, field, value):
+    path = sealed / "experiment/result.json"
+    original = path.read_bytes()
+    try:
+        report = json.loads(original)
+        report[field] = value
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(ValueError, match="lineage metadata"):
+            check(sealed, "must-not-exist-lineage-" + field + ".json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_result_threshold_tamper_rejected(sealed):
+    path = sealed / "experiment/result.json"
+    original = path.read_bytes()
+    try:
+        report = json.loads(original)
+        report["thresholds"]["shape"] = 0.5
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(ValueError, match="thresholds differ"):
+            check(sealed, "must-not-exist-threshold.json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_smoothing_does_not_average_masked_negative_infinity():
+    logits = torch.tensor([[2.0, 1.0, float("-inf")]], requires_grad=True)
+    labels = torch.tensor([0])
+    loss = pilot.masked_smoothing_loss(logits, labels, 0.02)
+    assert torch.isfinite(loss)
+    loss.backward()
+    assert torch.isfinite(logits.grad).all()
+    assert logits.grad[0, 2] == 0
+    assert torch.equal(
+        pilot.masked_smoothing_loss(logits, labels, 0),
+        torch.nn.functional.cross_entropy(logits, labels),
+    )
+    with pytest.raises(ValueError):
+        pilot.masked_smoothing_loss(logits, torch.tensor([2]), 0.02)
+    with pytest.raises(ValueError):
+        pilot.masked_smoothing_loss(logits, labels, float("nan"))
+
+
+def test_record_question_target_tamper_rejected(sealed):
+    path = sealed / "experiment/dataset-records.json.gz"
+    freeze_path = sealed / "experiment/candidate-freeze.json"
+    original, original_freeze = path.read_bytes(), freeze_path.read_bytes()
+    try:
+        records = json.loads(gzip.decompress(original))
+        records["final"]["records"][0]["side"] = (
+            1 - records["final"]["records"][0]["side"]
+        )
+        path.write_bytes(gzip.compress(json.dumps(records).encode()))
+        freeze = json.loads(original_freeze)
+        freeze["records_sha256"] = verifier.sha(path)
+        freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
+        with pytest.raises(ValueError, match="correspondence"):
+            check(sealed, "must-not-exist-target.json")
+    finally:
+        path.write_bytes(original)
+        freeze_path.write_bytes(original_freeze)

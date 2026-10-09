@@ -5,6 +5,7 @@ import gzip
 import hashlib
 import json
 import math
+import tarfile
 from pathlib import Path
 
 import numpy as np
@@ -70,7 +71,7 @@ def decisions(p, records, thresholds):
     ]
 
 
-def replay(model, arrays, split, device):
+def replay(model, arrays, split, device, *, blank=False):
     pieces = []
     with torch.no_grad():
         for start in range(0, len(arrays[split + "_labels"]), 96):
@@ -85,6 +86,8 @@ def replay(model, arrays, split, device):
             questions = torch.from_numpy(
                 arrays[split + "_questions"][start : start + 96]
             ).to(device)
+            if blank:
+                pixels = torch.full_like(pixels, 0.5)
             pieces.append(model(pixels, questions).softmax(-1).cpu().numpy())
     return np.concatenate(pieces)
 
@@ -111,6 +114,16 @@ def verify(root, previous, capsule, output, device):
     ):
         raise ValueError("Frozen inputs/status changed")
     sources = read(root.parent / "source-manifest.json")
+    with tarfile.open(capsule) as archive:
+        sealed_sources = json.load(archive.extractfile("source-manifest.json"))
+    if sources != sealed_sources:
+        raise ValueError("Source manifest differs from sealed capsule")
+    if (
+        protocol.get("candidate_anchor_sha256") is not None
+        and sha(root.parent / "warm-candidate.pt")
+        != protocol["candidate_anchor_sha256"]
+    ):
+        raise ValueError("Warm candidate anchor changed")
     for row in sources["files"]:
         if sha(root.parent / row["file"]) != row["sha256"]:
             raise ValueError("Frozen source capsule file changed")
@@ -130,12 +143,25 @@ def verify(root, previous, capsule, output, device):
         or checkpoint["new_words"] != c.NEW_WORDS
     ):
         raise ValueError("Vocabulary or inherited weight mismatch")
+    if (
+        result["checkpoint_sha256"] != sha(checkpoint_path)
+        or result["inherited_checkpoint_sha256"] != sha(previous)
+        or result["winner"] != freeze["winner"]["schedule"]
+        or result["capacity"] != protocol["capacity"]
+    ):
+        raise ValueError("Result lineage metadata differs from freeze")
     prior = torch.load(previous, map_location="cpu", weights_only=True)
     torch.set_num_threads(2)
+    model_options = {"attribute_attention": checkpoint["attribute_attention"]}
+    # Replay pre-spatial capsules without rewriting their frozen source module.
+    if checkpoint.get("spatial_readout", False):
+        model_options["spatial_readout"] = True
+    if checkpoint.get("shape_edges", False):
+        model_options["shape_edges"] = True
     model = (
         c.CompositionModel(
             old.ObjectsModel.from_checkpoint(prior),
-            attribute_attention=checkpoint["attribute_attention"],
+            **model_options,
         )
         .to(device)
         .eval()
@@ -146,7 +172,11 @@ def verify(root, previous, capsule, output, device):
         for k, v in prior["model"].items()
     ):
         raise ValueError("Inherited tensors changed")
-    arrays = np.load(root / "dataset.npz", allow_pickle=False)
+    # NpzFile decompresses on EVERY __getitem__. Question correspondence and
+    # replay loops must use an eagerly loaded immutable snapshot, not repeatedly
+    # expand multi-megabyte arrays for each of tens of thousands of questions.
+    with np.load(root / "dataset.npz", allow_pickle=False) as stored_arrays:
+        arrays = {key: stored_arrays[key] for key in stored_arrays.files}
     with gzip.open(root / "dataset-records.json.gz", "rt", encoding="utf-8") as f:
         source_records = json.load(f)
     for split in source_records:
@@ -159,8 +189,30 @@ def verify(root, previous, capsule, output, device):
                 r["image_sha256"] != digest for r in records[index * 6 : index * 6 + 6]
             ):
                 raise ValueError("Exact pixel input hash differs")
+        for index, record in enumerate(records):
+            if (
+                c.encode_question(record["question"])
+                != arrays[split + "_questions"][index].tolist()
+                or c.QUERIES[record["question"]] != (record["task"], record["side"])
+                or int(arrays[split + "_image_index"][index]) != index // 6
+            ):
+                raise ValueError("Question target/input correspondence differs")
+            stored_scene = source_records[split]["scenes"][index // 6]
+            scene = c.Scene(
+                stored_scene["identity"],
+                stored_scene["seed"],
+                tuple(c.Item(**item) for item in stored_scene["items"]),
+                stored_scene["style"],
+            )
+            if (
+                record["scene_id"] != scene.identity
+                or scene.gold(record["task"], record["side"]) != record["answer"]
+            ):
+                raise ValueError("Oracle scene and target label differ")
     calibration = replay(model, arrays, "calibration", device)
     thresholds = {task: entry["threshold"] for task, entry in policy["tasks"].items()}
+    if thresholds != result["thresholds"]:
+        raise ValueError("Result thresholds differ from frozen calibration")
     records = source_records["calibration"]["records"]
     predicted = decisions(calibration, records, thresholds)
     for task in c.VALUES:
@@ -174,6 +226,20 @@ def verify(root, previous, capsule, output, device):
             or actual["accepted"] < policy["minimum_accepted_per_task"]
         ):
             raise ValueError("Invalid calibration selection")
+        eligible = []
+        task_records = [records[i] for i in indices]
+        task_gold = [r["answer"] for r in task_records]
+        for threshold in (0.9, 0.95, 0.97, 0.98, 0.99, 0.995, 0.999, 0.9999):
+            candidate = decisions(calibration[indices], task_records, {task: threshold})
+            metrics = measure(task_gold, candidate)
+            if (
+                metrics["false_assertions"] == 0
+                and metrics["accepted"] >= policy["minimum_accepted_per_task"]
+            ):
+                eligible.append((metrics["accepted"], threshold))
+        best = max(eligible) if eligible else None
+        if thresholds[task] != (best[1] if best else None):
+            raise ValueError("Calibration threshold not selected by frozen rule")
     checks = {}
     for split in ("dev", "final", "combinations", "transfer"):
         with gzip.open(
@@ -189,6 +255,11 @@ def verify(root, previous, capsule, output, device):
             raise ValueError("Model inference replay differs")
         predicted = decisions(p, records, thresholds)
         if (
+            decisions(actual_p, records, thresholds) != predicted
+            or actual_p.argmax(1).tolist() != saved["raw_predictions"]
+        ):
+            raise ValueError("Replayed decisions differ despite close probabilities")
+        if (
             predicted != saved["selected"]
             or p.argmax(1).tolist() != saved["raw_predictions"]
         ):
@@ -202,6 +273,33 @@ def verify(root, previous, capsule, output, device):
             equal(
                 measure([gold[i] for i in indices], [predicted[i] for i in indices]),
                 report["selected"]["tasks"][task],
+            )
+            equal(
+                measure(
+                    [gold[i] for i in indices],
+                    [saved["raw_predictions"][i] for i in indices],
+                ),
+                report["raw_argmax"]["tasks"][task],
+            )
+            offset = list(c.VALUES).index(task)
+            pairs = [
+                (i + offset, i + 3 + offset)
+                for i in range(0, len(gold), 6)
+                if gold[i + offset] != gold[i + 3 + offset]
+                and c.UNKNOWN not in (gold[i + offset], gold[i + 3 + offset])
+            ]
+            equal(
+                {
+                    "eligible_scene_pairs": len(pairs),
+                    "both_correct_rate": sum(
+                        predicted[a] == gold[a] and predicted[b] == gold[b]
+                        for a, b in pairs
+                    )
+                    / len(pairs)
+                    if pairs
+                    else None,
+                },
+                report["selected"]["target_binding"][task],
             )
         visible = [
             predicted[i : i + 3] == gold[i : i + 3]
@@ -220,6 +318,12 @@ def verify(root, previous, capsule, output, device):
             "arithmetic_verified": True,
             **measure(gold, predicted),
         }
+    blank_p = replay(model, arrays, "final", device, blank=True)
+    final_records = source_records["final"]["records"]
+    blank_predictions = decisions(blank_p, final_records, thresholds)
+    blank_gold = [r["answer"] for r in final_records]
+    blank_metrics = measure(blank_gold, blank_predictions)
+    equal(blank_metrics, read(root / "blank-image-ablation.json")["overall"])
     gate = all(
         all(
             m["false_assertions"] == 0
@@ -229,6 +333,33 @@ def verify(root, previous, capsule, output, device):
         )
         for split in ("final", "combinations", "transfer")
     )
+    if "acceptance" in protocol:
+        if protocol["acceptance"] != {
+            "task_positive_recall_min": 0.8,
+            "task_unknown_recall_min": 0.9,
+            "accepted_errors_max": 0,
+            "complete_description_recall_min": 0.8,
+            "both_targets_correct_min": 0.8,
+            "blank_image_accepted_max": 0,
+        }:
+            raise ValueError("Acceptance protocol weakened or changed")
+        gate = (
+            gate
+            and blank_metrics["accepted"] == 0
+            and all(
+                result["reports"][split]["selected"]["complete_visible_descriptions"][
+                    "all_three_correct_rate"
+                ]
+                >= 0.8
+                and all(
+                    m["both_correct_rate"] is not None and m["both_correct_rate"] >= 0.8
+                    for m in result["reports"][split]["selected"][
+                        "target_binding"
+                    ].values()
+                )
+                for split in ("final", "combinations", "transfer")
+            )
+        )
     if gate != (result["status"] == "BOUNDED_SYNTHETIC_SCREEN_PASSED"):
         raise ValueError("Reported gate contradicts measurements")
     receipt = {
@@ -240,9 +371,9 @@ def verify(root, previous, capsule, output, device):
         "dataset_sha256": sha(root / "dataset.npz"),
         "checks": checks,
         "inherited_tensors_byte_preserved": True,
-        "blank_input_accepted": read(root / "blank-image-ablation.json")["overall"][
-            "accepted"
-        ],
+        "blank_input_accepted": blank_metrics["accepted"],
+        "blank_inference_replayed": True,
+        "question_and_oracle_correspondence_verified": True,
         "production_admitted": False,
         "limits": "Separate arithmetic implementation and inference replay, not independent semantic annotation or external-source blind examination.",
     }

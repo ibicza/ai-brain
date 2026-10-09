@@ -52,6 +52,27 @@ class Prepared:
         )
 
 
+def masked_smoothing_loss(logits, labels, amount):
+    """Smooth only supported answers; masked -inf must not enter the average."""
+    if (
+        type(amount) not in (float, int)
+        or not math.isfinite(amount)
+        or not 0 <= amount <= 0.2
+    ):
+        raise ValueError("Invalid bounded smoothing")
+    if not torch.isfinite(
+        logits[torch.arange(len(labels), device=labels.device), labels]
+    ).all():
+        raise ValueError("Training label outside supported answers")
+    ordinary = F.cross_entropy(logits, labels)
+    if amount == 0:
+        return ordinary
+    allowed = torch.isfinite(logits)
+    logp = logits.log_softmax(-1).masked_fill(~allowed, 0)
+    smooth = -(logp.sum(-1) / allowed.sum(-1)).mean()
+    return (1 - amount) * ordinary + amount * smooth
+
+
 @torch.no_grad()
 def probabilities(model, prepared, batch=96, ablation=None):
     model.eval()
@@ -201,15 +222,35 @@ def run(args):
     inherited_state = {
         k: v.detach().cpu().clone() for k, v in previous["model"].items()
     }
-    model = course.CompositionModel(old.ObjectsModel.from_checkpoint(previous)).to(
-        device
-    )
+    model = course.CompositionModel(
+        old.ObjectsModel.from_checkpoint(previous),
+        spatial_readout=args.spatial_readout,
+        shape_edges=args.shape_edges,
+    ).to(device)
+    candidate_anchor = None
+    if args.warm_candidate is not None:
+        candidate_anchor = sha(args.warm_candidate)
+        warm = torch.load(args.warm_candidate, map_location="cpu", weights_only=True)
+        if (
+            warm["previous_sha256"] != warm_sha
+            or tuple(warm["answers"]) != course.ANSWERS
+            or warm["new_words"] != course.NEW_WORDS
+            or warm["attribute_attention"] != model.attribute_attention_enabled
+        ):
+            raise ValueError("Incompatible own composition warm start")
+        if warm.get("spatial_readout", False) and not model.spatial_readout_enabled:
+            raise ValueError("Cannot remove a learned spatial readout")
+        if warm.get("shape_edges", False) and not model.shape_edges_enabled:
+            raise ValueError("Cannot silently remove the learned shape edge view")
+        model.load_warm_candidate(warm["candidate"])
     initial = model.candidate_state()
     root.mkdir(parents=True)
     protocol = {
         "schema": 1,
         "source_capsule_sha256": os.environ.get("AI_BRAIN_CAPSULE_SHA256"),
         "previous_sha256": warm_sha,
+        "candidate_anchor_sha256": candidate_anchor,
+        "dataset_profile": args.dataset_profile,
         "seed": args.seed,
         "steps_per_schedule": args.steps,
         "batch_size": 64,
@@ -219,7 +260,18 @@ def run(args):
         "held_combinations": sorted(course.HELD_COMBINATIONS),
         "scope": "Procedural two-object color/shape/pattern + bounded RU/EN queries. No animal names, anatomy, photographs, textbooks or free-form text learned.",
         "production_admitted": False,
+        "acceptance": {
+            "task_positive_recall_min": 0.8,
+            "task_unknown_recall_min": 0.9,
+            "accepted_errors_max": 0,
+            "complete_description_recall_min": 0.8,
+            "both_targets_correct_min": 0.8,
+            "blank_image_accepted_max": 0,
+        },
         "attribute_attention": model.attribute_attention_enabled,
+        "spatial_readout": model.spatial_readout_enabled,
+        "shape_edges": model.shape_edges_enabled,
+        "label_smoothing": args.label_smoothing,
         "literature": [
             "https://proceedings.mlr.press/v119/koh20a.html",
             "https://arxiv.org/abs/1904.12584",
@@ -242,6 +294,7 @@ def run(args):
                 split,
                 args.train_images if split == "train" else args.holdout_images,
                 args.seed * 100000 + offset * 10000,
+                profile=args.dataset_profile,
             )
         )
         for offset, split in enumerate(
@@ -299,7 +352,7 @@ def run(args):
                 0.2 + 0.8 * 0.5 * (1 + math.cos(math.pi * step / args.steps))
             )
             optimizer.zero_grad(set_to_none=True)
-            loss = F.cross_entropy(model(x, q), y)
+            loss = masked_smoothing_loss(model(x, q), y, args.label_smoothing)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(
                 [p for p in model.parameters() if p.requires_grad], 1.0
@@ -330,6 +383,8 @@ def run(args):
                             "step": step,
                             "schedule": schedule,
                             "attribute_attention": model.attribute_attention_enabled,
+                            "spatial_readout": model.spatial_readout_enabled,
+                            "shape_edges": model.shape_edges_enabled,
                         },
                         trial / "best.pt",
                     )
@@ -417,15 +472,30 @@ def run(args):
     verify_inherited(model, inherited_state)
     if (
         sha(args.previous) != warm_sha
+        or (
+            args.warm_candidate is not None
+            and sha(args.warm_candidate) != candidate_anchor
+        )
         or sha(winner["checkpoint"]) != winner["checkpoint_sha256"]
     ):
         raise ValueError("Source or frozen checkpoint changed")
-    passed = all(
+    passed = blank["overall"]["accepted"] == 0 and all(
         all(
             task["false_assertions"] == 0
             and task["answerable_recall"] >= 0.8
             and task["unknown_recall"] >= 0.9
             for task in reports[split]["selected"]["tasks"].values()
+        )
+        for split in ("final", "combinations", "transfer")
+    )
+    passed = passed and all(
+        reports[split]["selected"]["complete_visible_descriptions"][
+            "all_three_correct_rate"
+        ]
+        >= 0.8
+        and all(
+            m["both_correct_rate"] is not None and m["both_correct_rate"] >= 0.8
+            for m in reports[split]["selected"]["target_binding"].values()
         )
         for split in ("final", "combinations", "transfer")
     )
@@ -470,6 +540,15 @@ if __name__ == "__main__":
     parser.add_argument("--train-images", type=int, default=1200)
     parser.add_argument("--holdout-images", type=int, default=240)
     parser.add_argument("--seed", type=int, default=11031)
+    parser.add_argument(
+        "--dataset-profile",
+        choices=("legacy", "diverse", "diverse_clear"),
+        default="legacy",
+    )
+    parser.add_argument("--warm-candidate", type=Path)
+    parser.add_argument("--spatial-readout", action="store_true")
+    parser.add_argument("--shape-edges", action="store_true")
+    parser.add_argument("--label-smoothing", type=float, default=0.0)
     args = parser.parse_args()
     if min(args.steps, args.eval_every, args.train_images, args.holdout_images) < 1:
         parser.error("Positive experiment sizes required")

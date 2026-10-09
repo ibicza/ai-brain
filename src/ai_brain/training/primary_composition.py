@@ -45,6 +45,8 @@ VALUES = {"color": COLORS, "shape": SHAPES, "pattern": PATTERNS}
 ANSWERS = (*COLORS, *SHAPES, *PATTERNS, "UNKNOWN")
 UNKNOWN = len(ANSWERS) - 1
 HELD_COMBINATIONS = {("зелёный", "овал"), ("синий", "квадрат")}
+DIVERSE_MAX_RADIUS = 15.0
+DIVERSE_CENTER_JITTER = 2.0
 TEMPLATES = {
     "color": (
         "Какой цвет у {side} предмета?",
@@ -120,7 +122,15 @@ class Scene:
     def validate(self):
         if (
             len(self.items) != 2
-            or self.style not in ("standard", "transfer")
+            or self.style
+            not in (
+                "standard",
+                "transfer",
+                "diverse",
+                "challenge",
+                "diverse_clear",
+                "challenge_clear",
+            )
             or type(self.seed) is not int
             or self.seed < 0
         ):
@@ -145,6 +155,8 @@ class Scene:
 def render(scene: Scene) -> np.ndarray:
     """Reproducible graphics with independent backgrounds; never annotated pixels."""
     scene.validate()
+    if scene.style in ("diverse", "challenge", "diverse_clear", "challenge_clear"):
+        return render_diverse(scene)
     rng = np.random.default_rng(scene.seed)
     scale, size = 3, base.IMAGE_SIZE
     background = tuple(int(v) for v in rng.integers(105, 175, 3))
@@ -213,12 +225,116 @@ def render(scene: Scene) -> np.ndarray:
     ).copy()
 
 
-def scenes(split: str, count: int, seed: int) -> list[Scene]:
+def render_diverse(scene: Scene) -> np.ndarray:
+    """Broader procedural family; challenge texture families never used to train.
+
+    Shapes are wholly contained in separate input halves, including rotation.
+    The visible base color occupies a majority of the surface. Textures and
+    backgrounds are sampled independently of labels. No labels are painted.
+    """
+    scene.validate()
+    rng = np.random.default_rng(scene.seed)
+    scale, size = 3, base.IMAGE_SIZE
+    h = size * scale
+    yy, xx = np.mgrid[:h, :h]
+    background = rng.uniform(100, 180, 3)
+    gradient = (xx / h - 0.5) * rng.uniform(-30, 30, 3)[:, None, None]
+    gradient = gradient.transpose(1, 2, 0)
+    noise = rng.normal(0, rng.uniform(0, 2), (h, h, 1))
+    canvas = Image.fromarray(
+        np.clip(background + gradient + noise, 0, 255).astype(np.uint8)
+    )
+    for side, item in enumerate(scene.items):
+        cx = (24, 72)[side] + float(
+            rng.uniform(-DIVERSE_CENTER_JITTER, DIVERSE_CENTER_JITTER)
+        )
+        cy = float(rng.uniform(31, 65))
+        radius = float(rng.uniform(10, DIVERSE_MAX_RADIUS))
+        elongated = item.shape in ("овал", "прямоугольник")
+        rx, ry = (
+            radius,
+            radius * float(rng.uniform(0.48, 0.64)) if elongated else radius,
+        )
+        angle = float(rng.uniform(-np.pi / 2, np.pi / 2))
+        if scene.style.endswith("_clear") and scene.seed % 5 == 0:
+            angle = 0.0
+        # sqrt(2)*15 < 24-2: even rotated square corners remain inside a half.
+        dx, dy = xx / scale - cx, yy / scale - cy
+        u = dx * np.cos(angle) + dy * np.sin(angle)
+        v = -dx * np.sin(angle) + dy * np.cos(angle)
+        inside = (
+            (u / rx) ** 2 + (v / ry) ** 2 <= 1
+            if item.shape in ("круг", "овал")
+            else (np.abs(u) <= rx) & (np.abs(v) <= ry)
+        )
+        rgb = np.clip(
+            np.asarray(RGB[COLORS.index(item.color)]) + rng.uniform(-7, 7, 3), 0, 255
+        )
+        surface = np.broadcast_to(rgb, (h, h, 3)).copy()
+        ink = np.clip(rgb + (-65 if rng.random() < 0.5 else 65), 0, 255)
+        if scene.style.endswith("_clear"):
+            # Do not label nearly white-on-white / black-on-black markings as
+            # clearly observable. This changes only NEW scenes, never old gold.
+            if rgb.mean() > 195:
+                ink = np.clip(rgb - 65, 0, 255)
+            elif rgb.mean() < 55:
+                ink = np.clip(rgb + 65, 0, 255)
+        if item.pattern == "полосатый":
+            theta = float(rng.uniform(-np.pi, np.pi))
+            stripe_axis = dx * np.cos(theta) + dy * np.sin(theta)
+            if scene.style.startswith("challenge"):
+                orthogonal = -dx * np.sin(theta) + dy * np.cos(theta)
+                stripe_axis += rng.uniform(1.5, 2.5) * np.sin(
+                    orthogonal / rng.uniform(3, 5)
+                )
+            period = float(rng.uniform(5, 9))
+            marked = (
+                stripe_axis + rng.uniform(0, period)
+            ) % period < period * rng.uniform(0.20, 0.30)
+            surface[marked] = ink
+        elif item.pattern == "пятнистый":
+            marked = Image.new("L", (h, h))
+            pen = ImageDraw.Draw(marked)
+            for px in np.arange(cx - rx + 3, cx + rx, rng.uniform(7, 9)):
+                for py in np.arange(cy - rx + 3, cy + rx, rng.uniform(7, 9)):
+                    x, y = (np.asarray((px, py)) + rng.uniform(-1.5, 1.5, 2)) * scale
+                    a, b = rng.uniform(1.2, 2.4, 2) * scale
+                    if scene.style.startswith("challenge"):
+                        points = []
+                        for phi in np.linspace(0, 2 * np.pi, 7, endpoint=False):
+                            factor = rng.uniform(0.7, 1.25)
+                            points.append(
+                                (
+                                    x + a * factor * np.cos(phi),
+                                    y + b * factor * np.sin(phi),
+                                )
+                            )
+                        pen.polygon(points, fill=255)
+                    else:
+                        pen.ellipse((x - a, y - b, x + a, y + b), fill=255)
+            surface[np.asarray(marked) != 0] = ink
+        mask = Image.fromarray(inside.astype(np.uint8) * 255)
+        canvas.paste(Image.fromarray(surface.astype(np.uint8)), (0, 0), mask)
+        if item.hidden:
+            # Full half-plane cover; generic anatomy/attributes cannot answer it.
+            ImageDraw.Draw(canvas).rectangle(
+                (side * 48 * scale, 6 * scale, (side + 1) * 48 * scale - 1, 90 * scale),
+                fill=(85, 85, 85),
+            )
+    return np.asarray(
+        canvas.resize((size, size), Image.Resampling.LANCZOS), dtype=np.uint8
+    ).copy()
+
+
+def scenes(
+    split: str, count: int, seed: int, *, profile: str = "legacy"
+) -> list[Scene]:
     if (
         split
         not in ("train", "dev", "calibration", "final", "combinations", "transfer")
         or count < 1
         or seed < 0
+        or profile not in ("legacy", "diverse", "diverse_clear")
     ):
         raise ValueError("Invalid corpus request")
     combos = [
@@ -246,7 +362,17 @@ def scenes(split: str, count: int, seed: int) -> list[Scene]:
                 f"{split}/{i}",
                 seed + i,
                 tuple(items),
-                "transfer" if split == "transfer" else "standard",
+                ("transfer" if split == "transfer" else "standard")
+                if profile == "legacy"
+                else (
+                    ("challenge_clear" if profile == "diverse_clear" else "challenge")
+                    if split == "transfer"
+                    else "diverse_clear"
+                    if profile == "diverse_clear"
+                    else "standard"
+                    if i % 5 == 0
+                    else "diverse"
+                ),
             )
         )
     return rows
@@ -307,12 +433,25 @@ class CompositionModel(nn.Module):
     """New course uses the SAME inherited causal core, with bounded new readout."""
 
     def __init__(
-        self, inherited: old.ObjectsModel, *, attribute_attention: bool = True
+        self,
+        inherited: old.ObjectsModel,
+        *,
+        attribute_attention: bool = True,
+        spatial_readout: bool = False,
+        shape_edges: bool = False,
     ):
         super().__init__()
         if type(attribute_attention) is not bool:
             raise ValueError("Attribute attention flag must be boolean")
         self.attribute_attention_enabled = attribute_attention
+        if type(spatial_readout) is not bool or (
+            spatial_readout and not attribute_attention
+        ):
+            raise ValueError("Spatial readout requires attribute attention")
+        self.spatial_readout_enabled = spatial_readout
+        if type(shape_edges) is not bool or (shape_edges and not spatial_readout):
+            raise ValueError("Shape edge view requires spatial readout")
+        self.shape_edges_enabled = shape_edges
         self.inherited = inherited
         for p in self.inherited.parameters():
             p.requires_grad_(False)
@@ -346,6 +485,25 @@ class CompositionModel(nn.Module):
             )
         else:
             self.readout = nn.Linear(width, len(ANSWERS))
+        if spatial_readout:
+            # Keep input-grid layout when estimating shape. No renderer boxes,
+            # masks, scene labels or coordinates of an annotated target enter.
+            self.spatial_features = nn.Sequential(
+                nn.AdaptiveAvgPool2d((6, 6)),
+                nn.Flatten(),
+                nn.Linear(width * 36, width * 2),
+                nn.GELU(),
+                nn.Linear(width * 2, width),
+                nn.GELU(),
+            )
+            self.spatial_answer = nn.Sequential(
+                nn.LayerNorm(width * 2),
+                nn.Linear(width * 2, width * 2),
+                nn.GELU(),
+                nn.Linear(width * 2, len(ANSWERS)),
+            )
+            nn.init.zeros_(self.spatial_answer[-1].weight)
+            nn.init.zeros_(self.spatial_answer[-1].bias)
         texts = list(QUERIES)
         self.register_buffer(
             "supported_questions",
@@ -375,6 +533,15 @@ class CompositionModel(nn.Module):
         matches = (questions[:, None] == self.supported_questions[None]).all(-1)
         if not matches.any(-1).all():
             raise ValueError("Unsupported composition question")
+        if self.shape_edges_enabled:
+            # Query-conditioned RGB-only edge view, not a shape/name rule.
+            shape_query = self.allowed_answers[
+                matches.long().argmax(-1), ANSWERS.index("круг")
+            ]
+            if shape_query.any():
+                images = torch.where(
+                    shape_query[:, None, None, None], shape_edge_pixels(images), images
+                )
         features = self.inherited.vision(images) + self.pixel_residual(images)
         patches = features.flatten(2).transpose(1, 2)
         core = self.inherited.core
@@ -436,6 +603,10 @@ class CompositionModel(nn.Module):
             logits = self.readout(torch.cat((hidden[:, -1], attended[:, 0]), -1))
         else:
             logits = self.readout(hidden[:, -1])
+        if self.spatial_readout_enabled:
+            logits = logits + self.spatial_answer(
+                torch.cat((self.spatial_features(features), summary), -1)
+            )
         # Output scope depends only on input words, never on renderer facts.
         return logits.masked_fill(
             ~self.allowed_answers[matches.long().argmax(-1)], float("-inf")
@@ -468,6 +639,35 @@ class CompositionModel(nn.Module):
         missing = self.load_state_dict(state, strict=False).missing_keys
         if any(not k.startswith("inherited.") for k in missing):
             raise ValueError("Unexpected missing course parameter")
+
+    def load_warm_candidate(self, state):
+        """Allow only a zero-output, function-preserving spatial append."""
+        expected = self.candidate_state()
+        added = {
+            k
+            for k in expected
+            if k.startswith(("spatial_features.", "spatial_answer."))
+        }
+        if set(state) == set(expected):
+            self.load_candidate(state)
+        elif self.spatial_readout_enabled and set(state) == set(expected) - added:
+            if torch.count_nonzero(
+                self.spatial_answer[-1].weight
+            ) or torch.count_nonzero(self.spatial_answer[-1].bias):
+                raise ValueError("Spatial append is not function preserving")
+            self.load_candidate({**{k: expected[k] for k in added}, **state})
+        else:
+            raise ValueError("Incompatible warm candidate keys")
+
+
+def shape_edge_pixels(images):
+    """RGB-channel permutation and intensity-inversion invariant local edges."""
+    dx = torch.nn.functional.pad(images[:, :, :, 1:] - images[:, :, :, :-1], (0, 1))
+    dy = torch.nn.functional.pad(
+        images[:, :, 1:, :] - images[:, :, :-1, :], (0, 0, 0, 1)
+    )
+    magnitude = torch.sqrt((dx.square() + dy.square()).sum(1, keepdim=True) + 1e-12)
+    return (magnitude * 2).clamp(0, 1).expand(-1, 3, -1, -1)
 
 
 def statistics(gold, predictions):

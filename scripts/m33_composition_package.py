@@ -21,7 +21,9 @@ def build(repo, output):
     ]
     for name in (
         "scripts/m33_primary_composition_pilot.py",
+        "scripts/m33_composition_verify.py",
         "tests/test_primary_composition.py",
+        "tests/test_primary_composition_pipeline.py",
         "tests/conftest.py",
     ):
         sources.append((repo / name, name))

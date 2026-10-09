@@ -123,3 +123,182 @@ def test_abstention_and_metrics_fail_closed():
     assert metrics["answerable_recall"] == 0
     with pytest.raises(ValueError):
         c.select(p, [-1, 0.99, 0.99])
+
+
+@pytest.mark.parametrize("style", ("diverse", "challenge"))
+def test_diversity_renderer_reproducible(style):
+    scene = c.Scene(
+        "variant",
+        246,
+        (
+            c.Item("синий", "квадрат", "полосатый"),
+            c.Item("зелёный", "овал", "пятнистый"),
+        ),
+        style,
+    )
+    assert np.array_equal(c.render(scene), c.render(scene))
+    assert c.render(scene).shape == (96, 96, 3)
+    other = c.Scene(scene.identity, scene.seed, scene.items, "standard")
+    assert not np.array_equal(c.render(scene), c.render(other))
+
+
+def test_diverse_profile_preserves_holdouts_and_challenge_exclusion():
+    groups = {
+        split: c.prepare(c.scenes(split, 12, 50000 + i * 1000, profile="diverse"))
+        for i, split in enumerate(
+            ("train", "dev", "calibration", "final", "combinations", "transfer")
+        )
+    }
+    assert c.audit(groups)["unique_images"] == 72
+    assert {s["style"] for s in groups["train"]["scenes"]} == {"standard", "diverse"}
+    assert {s["style"] for s in groups["transfer"]["scenes"]} == {"challenge"}
+    with pytest.raises(ValueError):
+        c.scenes("train", 1, 1, profile="invented")
+
+
+def test_fully_hidden_diverse_half_has_no_attribute_pixels():
+    for style in ("diverse", "challenge"):
+        scene = c.Scene(
+            "masked",
+            99,
+            (
+                c.Item("белый", "квадрат", "пятнистый", True),
+                c.Item("синий", "овал", "полосатый"),
+            ),
+            style,
+        )
+        changed = c.Scene(
+            scene.identity,
+            scene.seed,
+            (c.Item("красный", "круг", "однотонный", True), scene.items[1]),
+            style,
+        )
+        # Full cover eliminates all hidden attribute pixels; RNG consumption is
+        # deliberately not claimed to be counterfactually identical on the right.
+        assert np.array_equal(
+            c.render(scene)[10:85, :43], c.render(changed)[10:85, :43]
+        )
+
+
+def test_spatial_append_function_preserving_and_trainable(model):
+    expanded = c.CompositionModel(
+        old.ObjectsModel(width=32, layers=1), spatial_readout=True
+    ).eval()
+    expanded.inherited.load_state_dict(model.inherited.state_dict())
+    expanded.load_warm_candidate(model.candidate_state())
+    pixels = (
+        torch.from_numpy(c.render(c.scenes("train", 1, 678, profile="diverse")[0]))
+        .permute(2, 0, 1)[None]
+        .float()
+        / 255
+    )
+    q = torch.tensor([c.encode_question(c.question("shape", 1))])
+    model.eval()
+    assert torch.equal(expanded(pixels, q), model(pixels, q))
+    expanded.train()
+    torch.nn.functional.cross_entropy(
+        expanded(pixels, q), torch.tensor([c.ANSWERS.index("круг")])
+    ).backward()
+    assert expanded.spatial_answer[-1].weight.grad.abs().sum() > 0
+    assert all(p.grad is None for p in expanded.inherited.parameters())
+    assert (
+        sum(isinstance(m, type(model.inherited.core)) for m in expanded.modules()) == 1
+    )
+
+
+def test_spatial_append_strict_warm_keys_and_roundtrip():
+    plain = c.CompositionModel(old.ObjectsModel(width=32, layers=1))
+    expanded = c.CompositionModel(
+        old.ObjectsModel(width=32, layers=1), spatial_readout=True
+    )
+    with pytest.raises(ValueError, match="Incomplete"):
+        expanded.load_candidate(plain.candidate_state())
+    with pytest.raises(ValueError, match="Incompatible"):
+        expanded.load_warm_candidate({})
+    copied = c.CompositionModel(
+        old.ObjectsModel(width=32, layers=1), spatial_readout=True
+    )
+    copied.load_candidate(expanded.candidate_state())
+    expanded.spatial_answer[-1].bias.data.fill_(1)
+    with pytest.raises(ValueError, match="function preserving"):
+        expanded.load_warm_candidate(plain.candidate_state())
+    with pytest.raises(ValueError):
+        c.CompositionModel(
+            old.ObjectsModel(width=32, layers=1),
+            attribute_attention=False,
+            spatial_readout=True,
+        )
+
+
+@pytest.mark.parametrize("color", ("белый", "чёрный"))
+@pytest.mark.parametrize("pattern", ("полосатый", "пятнистый"))
+def test_clear_profile_marks_light_and_dark_surfaces_visibly(color, pattern):
+    scene = c.Scene(
+        "contrast",
+        250,
+        (c.Item(color, "круг", pattern), c.Item("синий", "квадрат", "однотонный")),
+        "diverse_clear",
+    )
+    plain = c.Scene(
+        scene.identity,
+        scene.seed,
+        (c.Item(color, "круг", "однотонный"), scene.items[1]),
+        scene.style,
+    )
+    difference = np.abs(
+        c.render(scene)[:, :45].astype(int) - c.render(plain)[:, :45].astype(int)
+    ).max(-1)
+    assert (difference > 40).sum() >= 40
+    assert scene.gold("pattern", 0) != c.UNKNOWN
+
+
+def test_shape_edge_view_color_invariance():
+    torch.manual_seed(500)
+    pixels = torch.rand(2, 3, 96, 96)
+    edge = c.shape_edge_pixels(pixels)
+    assert edge.shape == pixels.shape
+    assert torch.allclose(edge, c.shape_edge_pixels(pixels[:, [2, 0, 1]]), atol=1e-6)
+    assert torch.allclose(edge, c.shape_edge_pixels(1 - pixels), atol=1e-6)
+
+
+def test_rotated_geometry_bound_has_positive_border_and_half_plane_clearance():
+    bounding_radius = np.sqrt(2) * c.DIVERSE_MAX_RADIUS
+    assert bounding_radius < 24 - c.DIVERSE_CENTER_JITTER
+    assert 31 - bounding_radius > 0
+    assert 65 + bounding_radius < 96
+
+
+def test_shape_preprocessing_does_not_change_color_or_legacy_forward():
+    plain = c.CompositionModel(
+        old.ObjectsModel(width=32, layers=1), spatial_readout=True
+    ).eval()
+    edges = c.CompositionModel(
+        old.ObjectsModel(width=32, layers=1), spatial_readout=True, shape_edges=True
+    ).eval()
+    edges.inherited.load_state_dict(plain.inherited.state_dict())
+    edges.load_candidate(plain.candidate_state())
+    pixels = (
+        torch.from_numpy(
+            c.render(c.scenes("train", 1, 579, profile="diverse_clear")[0])
+        )
+        .permute(2, 0, 1)[None]
+        .float()
+        / 255
+    )
+    color_q = torch.tensor([c.encode_question(c.question("color", 1))])
+    assert torch.equal(edges(pixels, color_q), plain(pixels, color_q))
+    shape_q = torch.tensor([c.encode_question(c.question("shape", 1))])
+    assert torch.allclose(
+        edges(pixels, shape_q), edges(pixels[:, [2, 0, 1]], shape_q), atol=1e-6
+    )
+    legacy_q = torch.tensor([old.encode_question(old.OBJECT_QUESTIONS[0])])
+    assert torch.equal(
+        edges.legacy_forward(pixels, legacy_q), plain.legacy_forward(pixels, legacy_q)
+    )
+
+
+def test_clear_profile_holds_out_waves_and_irregular_spots():
+    train = c.scenes("train", 20, 32100, profile="diverse_clear")
+    transfer = c.scenes("transfer", 20, 33100, profile="diverse_clear")
+    assert {s.style for s in train} == {"diverse_clear"}
+    assert {s.style for s in transfer} == {"challenge_clear"}
