@@ -105,6 +105,7 @@ def build(
     review: Path,
     output: Path,
     illustrations: Path | None = None,
+    reviewed_media: Path | None = None,
 ):
     if output.exists():
         raise ValueError("Fresh prepared destination required")
@@ -270,7 +271,26 @@ def build(
                 }
             )
             pixels.append(np.asarray(normalized(path)))
-        groups = declared_groups(records, families(pixels))
+    photo_sha = None
+    if reviewed_media:
+        from m33_objects_illustrations import normalized
+        from m33_objects_photo_prepare import reviewed_rows
+
+        photos, exclusions, protected = reviewed_rows(
+            reviewed_media, specification["photos"]
+        )
+        protected_inputs.update(protected)
+        photo_sha = protected[reviewed_media / "acquisition.json"]
+        rejected.extend(exclusions)
+        for row in photos:
+            records.append(
+                row | {"concept_id": parent_manifest["concept_ids"].get(row["answer"])}
+            )
+            pixels.append(np.asarray(normalized(row["source_file"])))
+    if illustrations or reviewed_media:
+        from m33_objects_photo_prepare import photo_aware_families
+
+        groups = declared_groups(records, photo_aware_families(pixels, records))
         grouped = defaultdict(list)
         for i, group in enumerate(groups):
             grouped[group].append(i)
@@ -297,12 +317,23 @@ def build(
             [r for i, r in enumerate(records) if i not in remove],
             [p for i, p in enumerate(pixels) if i not in remove],
         )
-        groups = declared_groups(records, families(pixels))
+        groups = declared_groups(records, photo_aware_families(pixels, records))
     else:
         groups = families(pixels)
     assigned, conflicts, fresh_counts = assign_groups(records, groups)
     rejected.extend(conflicts)
-    if any(fresh_counts.get(label, 0) < 20 for label in CLASSES.values()):
+    old_groups = {groups[i] for i, row in enumerate(records) if row.get("parent")}
+    new_support = {
+        label: len(
+            {
+                groups[i]
+                for i, _, _ in assigned
+                if records[i]["answer"] == label and groups[i] not in old_groups
+            }
+        )
+        for label in CLASSES.values()
+    }
+    if any(new_support[label] < 20 for label in CLASSES.values()):
         raise ValueError("Too few fresh independent positive families")
     prepared = {split: [] for split in SPLITS}
     prepared_pixels = {split: [] for split in SPLITS}
@@ -362,10 +393,12 @@ def build(
         "parent_pixels_sha256": parent_manifest["pixels_sha256"],
         "acquisition_sha256": acquisition_sha,
         "illustrations_acquisition_sha256": illustration_sha,
+        "photos_acquisition_sha256": photo_sha,
         "review_sha256": review_sha,
         "licence_snapshot_sha256": protected_inputs[root / "LICENSE.quickdraw"],
         "pixels_sha256": sha(output / "pixels.npz"),
         "fresh_family_counts": fresh_counts,
+        "fresh_parent_free_family_support": new_support,
         "records": prepared,
         "excluded": rejected,
         "counts": {
@@ -377,7 +410,7 @@ def build(
             for split, rows in prepared.items()
         },
         "training_started": False,
-        "limits": "Non-blind visually curated QuickDraw sketches and optional licensed color illustrations, not photos/general sight. All old final images held as known regression, never training. Global source/exact/mirror/coarse-mask-IoU>=.88 and declared artwork families. With illustrations, new conflicting bridges excluded while every parent row retained; publisher OpenMoji entirely final. Fresh final only newly acquired sources with no prior members. No artist IDs/exhaustive semantic independence. Related illustration variants are not independent families. Seven known textbook diagnostics never select weights/thresholds. Shared absence controls not independent evidence.",
+        "limits": "Non-blind visually curated sketches, optional color illustrations and separately reviewed bounded source photo thumbnails, not general sight. Old finals only known regression, never training. Source/exact/mirror checks global; sketches use coarse-mask-IoU>=.88, photos RGB24 mean distance<=6/255 plus declared author/category families. New conflicting bridges excluded while parent rows retained. Photo authors own one predeclared split across categories; author aliases/semantic independence not exhaustive. Related variants not independent. Seven known textbook diagnostics never select weights/thresholds. Full photo original bytes not acquired; source thumbnails, metadata and individual rights retained.",
     }
     write_json(output / "dataset.json", result)
     write_json(output / "image-registry.json", registry)
@@ -391,8 +424,16 @@ if __name__ == "__main__":
     for name in ("parent", "root", "review", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--illustrations", type=Path)
+    parser.add_argument("--reviewed-media", type=Path)
     args = parser.parse_args()
-    result = build(args.parent, args.root, args.review, args.output, args.illustrations)
+    result = build(
+        args.parent,
+        args.root,
+        args.review,
+        args.output,
+        args.illustrations,
+        args.reviewed_media,
+    )
     print(
         json.dumps(
             {

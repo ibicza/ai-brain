@@ -721,7 +721,7 @@ vc0098;жираф;Копытное млекопитающее с длинной 
 vc0099;лев;"Крупная кошка; грива обычно характерна для взрослых самцов.";Животное;;Запланировано;;;;;;;;"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0035.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\c3b508ef9abf7f5a\pages\0047.jpg"
 vc0100;тигр;Крупная кошка, обычно с полосатой окраской.;Животное;;Запланировано;;;;;;;;D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\c3b508ef9abf7f5a\pages\0018.jpg
-vc0101;рыба;Водное позвоночное животное, обычно с жабрами и плавниками.;Животное;рыбка;Требует доработки;0.2727272727272727;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6533813398142976.png
+vc0101;рыба;Водное позвоночное животное, обычно с жабрами и плавниками.;Животное;рыбка;Требует доработки;0.08333333333333333;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6533813398142976.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5748517316329472.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5422743342284800.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5788109578960896.png
@@ -904,7 +904,33 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\6e
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\53956bac55a1487977e318900db46a19a33af9cd29746b791e5f0b36137c0e18.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\ad3776c8fdbf5aa14007d19094fa8e3db1639f8eb9bde4c8fb4f886af51ec673.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\aa47d0dfc377fd0d2eb267192ff60dd39edeec57c5741206ca284ad1c1f63e69.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\ca1348eaeff2c1e33a71dff0b63f92dbe1024abc696dcf7459242342bd2de162.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5410471492452352.png
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\ca1348eaeff2c1e33a71dff0b63f92dbe1024abc696dcf7459242342bd2de162.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a85870ed2ef347046554a5ace9d6c73f1c0737e031c95142c7c36d2cdf4dfdbd.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\97bf8de6da9ee424ef5c1445cc8dec576a5d297259837fe62b6fc0ae34e4ae69.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\022ed6e682eccaf87d76d5f34c9d31aac6726939cf88507b6e8083e721ba358d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5dee0a08d6311a806aecce9ffbfce6d67bfc41fe487a4b046a7335566fe0f4c5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a364ecd0f7cedf621983303a4b95991921b3317a2e7f8c65092554eeeb2235ae.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f52c8c218ed0fec9ef8ebdadc2297f0f32bb47178707089500197d4681edc009.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a9f1b32da9077e59bc00a268c03d65c7e8c93b3d6af2c2a9a4fc852d691b9129.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c42cf46fd0c255e087d06b618ac5084aba333975ac6cb37c15bbfd3477c6a0a1.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e1b463abf143be432bb1c0485fdfe2c00a388c320afa721b4f290e83b1375550.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\313e9a91f8e822c570aac188c22a24c33c7a29bf9908a12a8c75480cfd7f2175.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6d39ab6c555ff726193bf65a7c040c5769513191ea1bb24be4395190d52b0419.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ff16f5daa405c0bf2b47380af9dea9d7b644761f1996b1ee74920c455d084759.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f20cb57cbf72b849bc27fcf11e32db428fa9ea2717659ad9cb7dedba43a5fe76.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\88c4cda5676ae3fdfbbbfc1d98d51ea58c811265f0e60b766da828ac02147530.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\247ef344b09610a6e4023925806b91cc85ae0cb5225bcee8abb6a6e1dfa0200b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f3031ff0bb63e494c70ddb329089339a6f1e268937a023adc74597e07f15c304.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e756c73a2c7f04d5460472916f16219c9385dc62401c625e2a3183ac851158e8.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\34ede485179675d85923cc29b8abbdff59db9f50b13c5a1e7c33687a6abb24eb.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\0d343633f64a73f9e239bd8a02f4344357faa9a6d6480031588ffc8267ee2a24.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\0382be0f8d107f335a77db882f3222c4266d08df3627d9334f278bc5ce86a2ef.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f987b795236bbac7861d0d9ef3283c6b66a574a134aa527a66de54450320e08f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\49a4bf47c7ba2f9d9e67c547d5c68c65f5e531f93773921dc69b2a83ef5c7250.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7387cba2b5f3f40f9d21b7716906ff8913c304628521e390f61a39e7eee9fe2a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\19cd6f80d56c16c77cff5b8b74759d04931a3069fdbd711841d3de748fe8ec6d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\814d1a4696276fa6b023fa2b5be1f2ee4bf7e4aeae983ec1e05b274349f32965.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5555667761b5cb713badac09d73c5485c8ea5634bcbf9cc3d3f82a060a162140.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5410471492452352.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4621249697284096.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5070914548924416.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4973912947425280.png
@@ -952,9 +978,34 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\0c
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\6955c27688853608fcb736f0fc0e6d7fee4c51158bfaef5736bbf17978d32172.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\62a0963a013b2e9ec421f1a2f7a0123f6678079dbf98570cea93353486c2ec6a.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\9d6dd5c8d385b842b2f6b2b9179c3549d4e77b35380101ec936988e805295fdd.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\feec3644295c8eb19824282ce2bc284630b446d14dfade482606eca31be8d9d6.png";9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c;D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/18, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\feec3644295c8eb19824282ce2bc284630b446d14dfade482606eca31be8d9d6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5757a5f25a0dc81f7824edaa62dcc86a1a3c9fddc382b6c0f4b01b80b327fa73.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\29a1316eb0894d965ab4c74d3ccc1dfb0d66074bb888fe376d3c16d1279a5cdd.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\09fe1a9cda62cbda97b46dea953ad05cbb4f4ba3cae2e9eb860a6746e698b66a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9d88cbe496bd165ebc531e94de9beb4b9f85505c8840f8b2da7803cd67142e6b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\cc165cc175e497a5ff573623b1a1cecfda925c9af062891820d293860210e417.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6a6632f6d98df7bd789d31dffa8312eb7258015f942a06225454eecce61400cf.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5ee0a528351fda51cd3c7ef663c02bcaeb3fce94c5121ab4acc7620da103f92a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\0652753ba30eccdad9566e7b77de30ef43305409df314fc53fb25b2f1a3352a6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2e2e01df838ea0653f5a06ef0a57ebcd6765686ba589c9480757ad16f10255a2.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\181e986dccb5bc122cf87c575774c6d0bb198d4a5bd1ca25d5f8235cfe4b8ca4.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e8797bd59719bf378f732017aae88c7db5cdbeeb7bbd67592d66cca6b90abce0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6714c0bc08b4c55081be42dbb625215a6b57eefa990ea0fa30da6712eaeb075b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f3ed04b17f921b09bf8b3e8e8ead7263916c51d288f71654bc57aacde9866ed2.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6283219db6c8bc18ac82b58835aeda64f2623120db694760f19718bddc51994b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d6ebea842a7afe0079c249a92f48b6111846ac220b909cbbc6f9a774ff5e5568.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a991218c66558f7bc60b108b33b85771c33fdbcdbb7f6ebb8c5f6b51c51ceb4f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\bdaf7703d70c63be2611c56299cf4a061109660f0c1fe3180eed532946c6ee67.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\0f337b598a809f3d1d2ce5121f0e467249b43f40f4260c6b5b600fdf9b6f6049.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2cd050b693602bb30afe5b4a7b108294ae11aa75567e1f9573ac4ef4a820269d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b08d6f0e8394e1198f7c2c2963a6f91b9d19f5471de81050e8d33a4c0e521f5a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\42c9ad5d48ccbc7498affe06c4ef0cc67117899e0c280e86cd6ea55e6d684beb.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e9709599d70d3f82abc9e30e51f54d42348e1e76f33d6b46d3c31548239de23f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\26eb42ae846498482dda0d0a0d66fd450ca347139f61ac6f846cedce51917bce.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\731cc57dbecefbd99c6e00542c1e670fe2f1becaa2067244323b55a84fc4d642.png";f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a;D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/18, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
 2026-10-09. Расширение предметного блока. Победитель vision64_lr3, 974889 параметров. Новые контрольные рисунки: правильно названо 0/20, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 0/212, уверенных ошибок 0. Порог предметного ответа None. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка рисунков не слепая; фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-expansion-20261009\prepared-v1\image-registry.json
-2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 3/11, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\math\crops\math-041-book1-page0076.png
+2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 3/11, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json
+2026-10-09. Разнообразие предметного блока. Победитель photo35_lr1, 974889 параметров. Новые контрольные изображения: правильно названо 2/24, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 34/138, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. Определения и весь учебник не обучались. Фото в новой проверке: ответов 0/49, уверенных ошибок 0. Старый контроль: уверенных ошибок 0. Учебные иллюстрации: уверенных ошибок 0. Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\math\crops\math-041-book1-page0076.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\world_language\Chel_i_mir_1kl_Trafimova_rus_2023\crop-0005.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0005.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0012.jpg
@@ -1214,7 +1265,7 @@ D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\56a1fad813b3bea7\pages\0104.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\56a1fad813b3bea7\pages\0146.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0027.jpg"
-vc0114;дерево;Древесное растение с выраженным стволом. Родовое понятие для ели и берёзы.;Природа;;Требует доработки;0.5;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5482305009221632.png
+vc0114;дерево;Древесное растение с выраженным стволом. Родовое понятие для ели и берёзы.;Природа;;Требует доработки;0.8888888888888888;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5482305009221632.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5294749034479616.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6580049320869888.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6718527320883200.png
@@ -1411,7 +1462,49 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\07
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\daca2c12cb7618e6a61a784ab3256dd51d68570fadf9e8b02e21b990ffe2b9ff.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\9dbdfd19699774c143f4d34d22135bcc5ef15737bee934c470ee3ddbc39a1c63.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\d844eb4546461df55653cf6f515ad1c063256f5d49718349058dfdfe3327534e.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\3c24c3dbaf3d3848e9ab7c276c132a096ac9278b4fb8e778d77c757cee8a3a19.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5492345296388096.png
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\3c24c3dbaf3d3848e9ab7c276c132a096ac9278b4fb8e778d77c757cee8a3a19.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\fe50bbd2570d7d7a9129d5bdeb91b7b7147cc1206d2fbeda7182d84322601f2d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\488fb6131380a094c143ed449043b9efaf33c9d40b95918afa0adb467032e469.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\518e8fb3113c9059c3adfebfd00e46ca7cdeb9928b1a724305c282feb0eb478c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\08ea3f285f2c6de16212e20dd4b882e4e117fbe707b9f1f2feb071cf0c59a7da.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c3a8f712abfca74d50c6578acf280e51691085313635d3c14e961d8af945d14f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9687010361ded9d09fe608db0b12ef4f41e886a014bbe4fb0c09a5db48673795.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\134b977fccff3ba4c26142567c4a24e6dd62bb9c33a5ce8deb44440ff971ce40.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\15084dba18433700893a622ef92532cde55540fe65500a94b2eb7588ed7b89c0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\156fa6d979ace7246d0e17910bb0aaa67e40d95610d84f09c552695e191ab246.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7867acfc1585cd28c5a334ef0b0a9da7ec02092be70159b6141968c7a0505ea0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\61db82dcb0b421a0f5e08703faf8884b391a76822bae7bafa126fb063534e338.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\04e3813125d91539609541fb7b8b9b68f041072092a2ddbfd3adf48f09697139.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2bc15785a474357d62d73c31fb878801a5b48bc89138d3d3d8de0414dae4d692.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d0aae62727ff1e3a6f8730f6fa0c3e05fbcb141f6897a9f106174432cc82f008.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\affd1bff8264e70c908895557aa83627bf6d5b538ea5e6d2a1d0a544325ffa7a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\06845ceb0928485d20de2b8983cfd1f1de98cf5a3fb45291cf3cb4f28e438781.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6880ad71bc651f20903e010d0ca1a7a3674b5ad4f69c461c4c158ec1d95c8dc5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\dd63618b00752bc6c178e6784c7433a2d98681078ba23d40449de9e0c9797baa.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\dd936a1a832f09fce04f43862c3e745495c870aa01f62446ee43e16d7db83653.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d23394846814000c4b84266c6be8ba58797733423e606a130c57b0cf64012352.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ac79aaa8f25409530d275ce2d84de8ac4f19e4b226bd7f04074e9c0a9936013e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\99e6aa16c74cab7869f5f74e445a22ef868c27c95d4b7801f0db68c49908f02e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\152bf8eb1117ba08193bf20c3027d25c46ff9c8f447f867db74c21ec882a3484.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f5d3d953931b1e134c6750a179ffffa11143147f11e933686eeaf08a1b871f75.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\95d49574d4f2f108382bacf5e6bd8469ddaef7996d8773c64a9ee07992bfd93e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e1fa3018b696c4df1f461e3421bec024c8e5d21f126c4aee7d6728bf31b52baf.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c145d2b4dc7caf9d894ead0cc8f512ae394059b84fcfac6c08667eea538aa5cd.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e3ce6473d3adcc36a07d5987764cb4c6b5c558d69766f47fbef7a4b122f3c97a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7aa88cf14cbe73fb78c3ff5c897310a99e9b5d3b58701f18ecc2c3bb6f63d498.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c8624e417a3a1287300a97399eecf36b3c88e29dd8fffe1720027b6efe1a7be5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f85bcc07f15c9ef63a98e365737ca94bd9f71b21b9d2b05ae8d9c4c20ae3384e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\dbf801fbf720ae9aafbcfc518659843faeb9df2148277e92b6267f7862105ec5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a5c672e2356845353f6133f87970ff557b9cfaca63bae2574c70a0b75dafdcde.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2088e7e25b30b0fc94595db2beab2bef5286ee9282a9a0755394ec5993908d5c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\477be1828bd433be9b5bf9eb19a5c948e7f81ba19fa8ecc845c177a43b39b3ea.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\31cf590ec284fc9f9283ab91604f44e07bd37210311f20ef89ed0d944d0cd8f4.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\82f3944a4171ae9656a04e8271e2663050539c4131515a9373c6b71642a39b83.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\3ce98661afffff3d82452ecea9600f43423dabc6dd0bac1acd4672b837852f78.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\edf18bafc35c49e0f443660ee3223d8212e27f7700b46e4d2ab4a5b69b126626.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ab48788b166222bf66dacb552e3f0cd955e8c486dd3c619598836c4aeb45aea3.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\14316bd3ec7f87c78756414977d37b6e722d4165a4ebb57913874151be370ff6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4bceac058670fd92b9b60636ecccf78e86b00f6eacaf105d17634f80b9dc8171.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5492345296388096.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5467157494235136.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4545132676251648.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5009649608687616.png
@@ -1463,9 +1556,19 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\93
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\3b10bf5c21037abe2c37e80cc1b2618d4e6c24e3d457248bacabca63f62534a5.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\3aa74384a635775005b5da7a130732965e1fb4224c002e04cdc92a79d0dc2086.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\e3248cddcc6f0d86be7cd4a2751d81f6707fb5a360e62c81867d5e4c7f2dc44f.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\30a84478f612ed484c5109f7bb8fdadc3b342c426344974517525332e5cc62ff.png";9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c;D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/18, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\30a84478f612ed484c5109f7bb8fdadc3b342c426344974517525332e5cc62ff.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\cee07270c5de6d829f52511fc7e0a2a315e69d17141d22cdb419c9fd59503a1f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4e73de81a7d78ed955ee3f0b684d2a1b33feee72e4c794f3132dcf3ee8676312.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d53100448fe9794ba7fca9a3c2316465ef219f7ee68fb80c2f2d6afd799fd9d2.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ce2e3f3371d70d9c5f4b4ab753eedf94cdf5ab898886f46caa93921579954e0a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9fcb9fe6011cd39e8032ea24fca2bd76b8b48f9a0fc9d7f933fd38ffdea57bef.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\217146ec7f38a1f83e079e3cfac41155299e1a8430bb4637c326f15f5cd0c43f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6d6d52df3f92497bd73e8a40417d41726c850c64cbcb2f7ce755f5042f6e02d6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5a410e68b8ee0c5b9f6ffbfcf9832f6573e00fa1681a234f3462f60720d35106.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\98fcbe4056fb393c5daead7e3e65e0ae346eed48b4dc6b195b7547851e6d7687.png";f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a;D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/18, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
 2026-10-09. Расширение предметного блока. Победитель vision64_lr3, 974889 параметров. Новые контрольные рисунки: правильно названо 0/19, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 0/212, уверенных ошибок 0. Порог предметного ответа None. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка рисунков не слепая; фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-expansion-20261009\prepared-v1\image-registry.json
-2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 8/16, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\math\crops\math-002-book1-page0010.png
+2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 8/16, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json
+2026-10-09. Разнообразие предметного блока. Победитель photo35_lr1, 974889 параметров. Новые контрольные изображения: правильно названо 8/9, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 34/138, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. Определения и весь учебник не обучались. Фото в новой проверке: ответов 0/49, уверенных ошибок 0. Старый контроль: уверенных ошибок 0. Учебные иллюстрации: уверенных ошибок 0. Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\math\crops\math-002-book1-page0010.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\world_language\Chel_i_mir_1kl_Trafimova_rus_2023\crop-0002.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\world_language\OBJ_2kl_Abroskina_rus_2024\crop-0089.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\f67490e30c873cb4\pages\0041.jpg
@@ -1905,7 +2008,7 @@ D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\fe07c06f46d9de13\
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\fe07c06f46d9de13\pages\0087.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\fe07c06f46d9de13\pages\0097.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\fe07c06f46d9de13\pages\0100.jpg"
-vc0158;стул;Предмет мебели для сидения одного человека, обычно со спинкой.;Дом и мебель;;Требует доработки;0.6666666666666666;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5945985383530496.png
+vc0158;стул;Предмет мебели для сидения одного человека, обычно со спинкой.;Дом и мебель;;Требует доработки;0.5555555555555556;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5945985383530496.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5566554664075264.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6463660673204224.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5481036764938240.png
@@ -2039,7 +2142,31 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\3e
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\5e8b95f2de074382c2e7bd0d5e1ff27af5f9fe688b01cd00ffffbd0b76c73d9e.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\7910201a2cd02322c318e706d8eb47e33c53eece79f39ac6b8c45d86b62fe77d.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\6d10908741ca50df10fc4ce06054e86380739749e561ad63fea857fb6a207f4a.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\b1c59bb7ec8f8a03344a4bd86a3464daa5d254c376817b870a422371935b679c.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5274121569042432.png
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\b1c59bb7ec8f8a03344a4bd86a3464daa5d254c376817b870a422371935b679c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5fae02ef477157f2f7c68f7212a885b80e569531e4ccef24a4fb10d995703beb.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f78b3cc9261df7b69cc01b65e0d522d5872fdffbd0349d872f17549ec10975a0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2b148aac20721039f57ebefa24ed3905c441273f78b5c78556e90a98a5c02a4c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8be581931d2b1cf62bb9de7c84463d18a071f4194fa1d83c5330d7a4692e5c33.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\48ab748fbec5b870814ad528fc1d640828f3e435db3e8b1acccd162e2fa41b64.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\cb20bf48d9d032137907a0b294d57c45897c38734e752ad114e771d65f87536a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\03f01e8e251dd3475026ff096cf9129898063b5708adccbf4f260219b3815664.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a241e5abbeafee64ff3d5cee43e5672c93c15824026b9bca553e1ac9c8c0774b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\922a49c2850c8e17223f038cb1a73af4eea6dfc248d1a6de130f728855e1b0ca.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\1b883f578ab55e45b3a233fc6951d00949eef699f575f85a07dfc9d76dda3350.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8b128f598e88b06a489f026ecfc926cbeea31e7cb46d54b0c0034c20d87087d6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\63d00262be70f6ccd24383c9117b81b93030f274c46bace62edd36e0c4298774.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\67f6b8ea73f02c86dd0d480cf74db38956722c7e1571e8118ad1ffb4f90c1aff.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\cca9fbbb90048b648d275d76cc7988a15a33d735ed2d8df70c92956b9b89335e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8b2a85fa335084ce9a171463dcba071b83090fdf7f60213120c9fb51d735e669.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\64bb14200060096a429b8b0b8e36053ee21f98378ff9de2b4d13846f0a0f97f4.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\fbd9906fbfa9ad7defe163ef7adad850f2c7d53160457fca9069671bb410c6c5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c5cf46812095c6b139c467a968619f23e109a308844896f0677935fe9e41cb9b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a76718b361a29b4c2d2d2f39d703d42ea85f7cc05398874478db707d6beea7e8.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4a205f58d2a89235059c6877075fe1546ffed5e3256326d3d24203d488556bcd.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\02761b8e28408c31800ac45eb62750bbafff6be13f9a6024b03bc4c483935b49.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d0f9523cc48d272f0bf4f49f11888c51d588ecb23448d590db71d894cabfafc5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\605f21637b80e8249231c35f1c49bd22f41a07d0451aa7f5f6ca6b8edc6d0f62.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c74139732dc8f3879e0521b26b4db0deead4f2279bf628961ba0d7e1c02ae8eb.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5274121569042432.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5632698116734976.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5330853972410368.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5605260594774016.png
@@ -2073,9 +2200,19 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\e1
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\3c5d98388ddd7244f6481a192c3c747c623a60afa9cef29fc2e93404cc7611a3.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\c6b3db50efbd94cb1243d0f2d3f986edb4d7d587396b8440bb99c3f3ab373d20.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\b3dc1b441e772886e2131e383d5b9c95674a33c69613ac826b6dae714e9e5c6b.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\c1f16b5e5d9c17c1ae57634745d6fc3582089915ae3bd7047c44519141bf9a35.png";9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c;D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/15, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\c1f16b5e5d9c17c1ae57634745d6fc3582089915ae3bd7047c44519141bf9a35.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\11abab3644d025a31b53b6c3f9d83dc8d3a150a5a82bfd3521628d75133de76d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b33aeb1277846e2fc1f19ede270a761b0bba2284b93f5d34d8573921a08dd1e5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ba5bf992ef60a5f0a85ea72083bf8f164139d8f61b0653782f634e447f373527.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5bb85b5a2d678859d1064b7bbaa9d2ea224065f55e471e7b6879ce60bdc92679.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a9cfa6bf710458f76f8934cf38e08e8f91d0f58475af130d069fbe309e28e692.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\be5e08646d6cf678baca8d2a3e4680df6f43a62cded503107a1715e5c3a34740.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4deca04b3565583552fdcdba35ddd4aa3b0f7efa97f3e76832bfd03e9aef56ee.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9719d3400217c99747d528679ae6dd89d43e987c26254602cc91a626a5e85e98.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\88043dc216328522defb5dec79cd53d8d14579dcb08bf8f778c04ac8a75bc6d3.png";f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a;D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/15, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
 2026-10-09. Расширение предметного блока. Победитель vision64_lr3, 974889 параметров. Новые контрольные рисунки: правильно названо 0/11, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 0/212, уверенных ошибок 0. Порог предметного ответа None. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка рисунков не слепая; фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-expansion-20261009\prepared-v1\image-registry.json
-2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 6/9, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\world_language\lit_chtenie_2k_ch1_Voropaeva_rus_2022\crop-0072.png
+2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 6/9, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json
+2026-10-09. Разнообразие предметного блока. Победитель photo35_lr1, 974889 параметров. Новые контрольные изображения: правильно названо 5/9, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 34/138, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. Определения и весь учебник не обучались. Фото в новой проверке: ответов 0/49, уверенных ошибок 0. Старый контроль: уверенных ошибок 0. Учебные иллюстрации: уверенных ошибок 0. Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\world_language\lit_chtenie_2k_ch1_Voropaeva_rus_2022\crop-0072.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\f67490e30c873cb4\pages\0017.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0009.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0042.jpg
@@ -2232,7 +2369,7 @@ D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\c3b508ef9abf7f5a\pages\0064.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\c3b508ef9abf7f5a\pages\0065.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\fe07c06f46d9de13\pages\0083.jpg"
-vc0175;яблоко;Плод яблони. Цвет, размер и форма различаются.;Еда;;Требует доработки;0.4666666666666667;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4788046492860416.png
+vc0175;яблоко;Плод яблони. Цвет, размер и форма различаются.;Еда;;Требует доработки;0.5;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4788046492860416.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6456634324811776.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4992579747708928.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6244965350899712.png
@@ -2436,7 +2573,40 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\50
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\8fcce51dc5841a80c697e8787044beaf9e03d986b0e1e495cc035623c8cab7cd.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\97eba0f827c240139162d6a002eefd7de6fbe21af6af9a03691e4dee98b4fe9c.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\677fa792311a6d1e58585100a7d18dcabf238ef54b99a4981bf0a2ec5cfda2ff.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\422dd660c8b361293c7d6591124567fb9ae45a957cdfdc80a73dcdab8b3095b7.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4587619411296256.png
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\422dd660c8b361293c7d6591124567fb9ae45a957cdfdc80a73dcdab8b3095b7.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7b0f159eb8a8a787f8b707fe7e73db369928c0d48cf14bd974b814be3436c4c8.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\63b11538123c3ce2a633bc55b70b1baf0743b1fe94ed3fb9b9be3de20c203a96.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a42cc8afaac095b59a0a3b0b5ba99f8001448e1c8e033c70ed21d7fd2067027a.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8227cf763270a6c33fba3eac30e7cc740fed29c90070f141975502f5a6a26610.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a06b6d0dab38f7523be0e2f528b59508ef112f76bbd904379c3decd5356540a5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d90ff33183878a10bb11cae8a30212f88a922629840406a9b42d56890169e4d6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\684982088b487bd5aaadf701624995f5227d081ec6f9254b30ef2bdaebfbac71.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d03ef27e48ce2f73ba40a6a730613a1d11b2693b643bc7d35a5246c0e8d45161.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a803fefbbefe70c1f398f396ca53d34eddf85307511127cdae7bb6dd21a94c70.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\87fc0a33cd8c8b734d36f63b50f98c91ab688c77c1ced5f1f0aea0d24ce64ae4.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d228d529449f9c2812b07bfabd1218e2bf31370b9a7712ba45370f178403f718.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ff2f1abc9396edb09611bfb57825fb9cd84cdabc5e9aca782abf3a37639177c6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\515fbc9e38126880ac8a1d91a2913863f210653d09dc1f1ab4876f594be8dad7.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7ab8999682a84701033865bb640a96f2dbccd6f1bb118299abd1e9746892436d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\1c5c531b42e985117b2f9f45b0b3c532fa58ff5c9922773bdb039750eb5cd659.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\0f441b92d2deb9b006f126d02b91a0b6fc4a35e2485e73e0381f1453f0c5ce14.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\cbc2a7c04aa9f1e764821adb82bdb763e363f0227f3742ef329854f7eb11fa7b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\bfe0d2121128a082e2e5b18a07c252e3dd2557b8376d2e8303b4abe689158336.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\be531c8f2747ca5ecb2cbbfadb52bd83ddb8159b8bbf55128c0d769ef9e3be6b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\46775ae99e59ac01080af1bf4eb29a06e54764bbb91895668855cd2ff1d97929.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\af8024af4b06fc83e47078e142471f31ef8e18fa4e7ac46a19766d1a124cf26c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f65507968bbed1baf169e024134d7fd0dae992dd91a059ea36bf8522af4f9ffa.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d2af212e35a0ca747440978d150c887f2827814c90da59e78d271dd1f523f938.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\3442856f2c9249b805fa19bf872349b25c4655e2bf9d91c773174d3b8eddbaa5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\3792cdff990cb26308d5351ad85aa5970abfd69b1b89e0306c6427fe17eedfdf.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\bf32ea3f67ccae0d04b7358922b0fe3215259bd4541db10e6cb6b94827f1e497.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\257ea9f5c44a07e1137003b55936baef8b7ae9cae4843b0d504a7b07c8e330fe.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f46ca494cc650a71bc5e7a59828f27fe797944970a163dbf2d03d9ff4fe11222.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\483d96ffbb0151d403a6065dcfc5d459724e950a5fdacbe012fd6d179d50710c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\162e602a795e0a301e600b9e2aaa7b0d6c9efca382d0d156aa8ebb869de785d4.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\1de013d3b7003bbc9c0555c8b0953c641659cad14aca0ebfcbc137cd207a8c39.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ffeacb3cdecd778d5e568bb2fc6acfaabdbc59faf4285a29dbdcd8c2bb689195.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8caa5da82393b5910bb3f7f3ccd2348c67b6ec7b1719f4bc48e97122f3cf5907.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4587619411296256.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6339676359098368.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5725771349884928.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5952003639345152.png
@@ -2488,9 +2658,20 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\98
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\d8867b9d40a6f995d42f62deaa2f8a7fe4ce9a3ec932567dfe810b23eea88394.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\cbf1a038e338a6e98e067f5dd98c6b374632716c4f2270d20b1c2453454373f2.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\6d22bde893685aafccb9824e0c434378c43501a2918ebc873806dfb655106c8c.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\2918218292c5591fce0c59a7693cbd9d78c06887b9cf4bd772bbf941f2aac426.png";9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c;D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/18, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\2918218292c5591fce0c59a7693cbd9d78c06887b9cf4bd772bbf941f2aac426.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b318e48c824c6fd4f31f3e00151fc78860ffc7d5b86140444167459478474dcc.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4de2b17c44ff7be34ad95ca08b1efeea254de70b2e70e988acf71338b9f584bc.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\10eabb30e5cd78c4289b1952783d7be1f7f24553d0e677d36e96863cbca07646.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\13d6b9eb4f34e8b254746f2e78ef9ded961fd7f80021e758122ec9dee47a51a1.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\cf23302f7308c6248387de95040fe1fdfee2d8ad1181b322c4cd845e1d0edf92.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c7a5c342e00e23a1bd2fb9f54cec3a03bb2fa2730dfa7aaa1531b1131fadc23f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\afd38560f05947616ce0748e922e0457d7ace709c602caae14aa73b7d8cfffba.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c7d3092155b0ffcbf4006d931fc301137b5514ee627b155d01ed4599d6d055f8.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6246263dc42492cc84ab47166d4fd5e59739be2f742fa3ff6baa1d720d7791c7.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8dbf299db3bfc8392db12327f12ff386202a31481141a2485eda7ac5abf1ba22.png";f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a;D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/18, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
 2026-10-09. Расширение предметного блока. Победитель vision64_lr3, 974889 параметров. Новые контрольные рисунки: правильно названо 0/20, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 0/212, уверенных ошибок 0. Порог предметного ответа None. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка рисунков не слепая; фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-expansion-20261009\prepared-v1\image-registry.json
-2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 7/15, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ef1feb98ee3ea554\pages\0134.jpg
+2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 7/15, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json
+2026-10-09. Разнообразие предметного блока. Победитель photo35_lr1, 974889 параметров. Новые контрольные изображения: правильно названо 5/10, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 34/138, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. Определения и весь учебник не обучались. Фото в новой проверке: ответов 0/49, уверенных ошибок 0. Старый контроль: уверенных ошибок 0. Учебные иллюстрации: уверенных ошибок 0. Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ef1feb98ee3ea554\pages\0134.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0023.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0030.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0037.jpg
@@ -2537,7 +2718,7 @@ D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\fe07c06f46d9de13\
 vc0177;арбуз;Крупный плод бахчевого растения. Целый плод и разрез выглядят по-разному.;Еда;;Запланировано;;;;;;;;"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0116.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\c3b508ef9abf7f5a\pages\0048.jpg"
 vc0178;дыня;Плод бахчевого растения, разнообразный по форме и окраске.;Еда;;Запланировано;;;;;;;;D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0116.jpg
-vc0179;банан;Плод банана, часто продолговатый и изогнутый.;Еда;;Требует доработки;0.4;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6060084914290688.png
+vc0179;банан;Плод банана, часто продолговатый и изогнутый.;Еда;;Требует доработки;0.16666666666666666;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6060084914290688.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5325869390233600.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4560893700472832.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5714610608930816.png
@@ -2631,7 +2812,32 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\a3
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\a0076ee0f53b049817adf6ed17d4ded49a995f7b49c921eac2b86615cd8344ea.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\e3aa67e77774fc45b9771730bf1e9f06a81ca134658118ddd1ce1a8d2433c42c.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\6dedf1466c55db3d1f26de6edd728b3e8540c688ae61deab89b754b630e98218.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\96d78a063ba04b237fed0fd1af929792b40d61915f85841c13a5801135c275b6.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6642736692199424.png
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\96d78a063ba04b237fed0fd1af929792b40d61915f85841c13a5801135c275b6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\19f997ec43afef5bf0afb357cee1ea969ce9c6bfd425adf94ba51fdefb5a563d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\1840b1c0df70993687b0f08d4487d2bf0dc7f46285e27498dbd7c62afaeea0b8.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2f6e5def31d64966b72aca7347afaf6dce67e75adf182e867e1a5a9b2e8eab64.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\22b48eece9b0a308d7c2de1eb2fdc5dedb491d0e4cb150dcc46f604e59932a70.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\02b222c6105edd639b7554274d9de88930da824d2bd2e4a0f291fa9aed7c8017.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4bfab06df9575517cf935e0acfcea5f1d4bbf954594c208a993e0a673e338c6f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8caeff94423bd38f9f36fe3467e116439026ff5508061107866ce487caecace7.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\132e27007dbac81c407dbf8e027652079ca3d6e1f975c4786578dbd6a491902c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4367fdeb608906531e5e61c45d4a8e618b5acb6c1b8818c9932aadb9dabf10f0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\874a906d8af22929644cdcec9a5f52d1258d8f17ca3c67958c9f62ba8ad50500.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c12046c6ab03afc7036e3c3990468babcb123bc335ac095b0982e7b5e7b798bf.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c7544206b679b4b95344b54f17be0e365723d2440bac16518a2c07c3719fbb18.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\46c02b96ff24ac150f9849fbd0eb452a3d3055edac434606c8a857b0042ac716.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e653faf83b6c4cd24121712459ca886d90dd12dbc4a3633e75193a7eacaee7bd.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\36288a7f36a35ca5ccdf6b7e1f7e04e4acdca9f93b735ec774f9592f0d5cc0cc.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\bdc159668b45b549d46ef9fb4cc64871f09cc8d98963ac863a7810d38b26c26e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\1d3ea7a48d777c3fe281b7698b5fd24de83a8856ee610b6a483c76dd4b2b5a15.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\cc5b037afa0343ec27b90323e5f68210b69e5b028c5f6282e0467ec07d9e8ba5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\1d7e15133f9e8101b0af2a52e2a7e85d3a0a3ab82f267b401a5e9b4f75e0db93.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\622af0d37141f0cb50cad04b7616ceb0d96c9084889cd78dc08cd247bac63a4d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2e621cf4f4b7562af5e2e2aea9ccce419df70bf769cf2ac4b1bece4893b15b32.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8e77c936a41ac1168240ca002be809908438403e2ff9c6fd996cf1d4bfb3747f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\55735bb48a5c33fd266e59187e0a8465c539625b908b0588948dd05703b57cbe.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5c9254193621ef34b8206a24bf0fd27a6cfa8411982a2f948f3ab9bcccd6be6c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f600d08a1d318f5885e405bb673b4b766989bf035928c0eb67828535a580157d.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6642736692199424.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5140135731527680.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4744089129975808.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5237881985564672.png
@@ -2656,9 +2862,22 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\af
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\a1e9efa024c814fbcaedb929f324c3e489b031a5c7309bea905c9e4cf9fb4c1d.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\47a0b74948211b5fe3ae19c33fae922fbcfaaf17df3e228a86ca2ae575fd5bc8.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\82c95b2abfe821698f28dbc7de19b58bd673f0d212d4b0ed37ff42a8257968e4.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\35d89f0cb346e1f339dbe0038cb8e277bfe85045c21aa35a7df845bfa9d56c04.png";9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c;D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/6, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\35d89f0cb346e1f339dbe0038cb8e277bfe85045c21aa35a7df845bfa9d56c04.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\1659bc9e5057fda114f9df83b627e4cf70eb6da17799bc0f5b78d92dbb0fd1b0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f5a8a94bdd448110ac5e3156eae3d270b5a10248821ba29a5de95bc0995d6ec9.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4c8f3d7a7a1054bb56bc36951dac3277a3f446120a3848cfc53e0d37c3b558b3.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8ff1a49a4a281d6bba49bd53a66b8c75894bb0b8912e3aeaf0344280c131e60c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2daacf8833744284e4a0aabf6b90515dfc36067ac886aab096e1701382532c7c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\14c1e06920008b2968b6dbb76ad7f0c2ae269b1c56b48bb17de62875a17ccd82.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\018f6d67b681b3709b327794bc7b0dbf22b8151a6fe3e2b1fb5b03990e06aba9.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c2bc7edd0a4ff0b123c3e13a803eeaac3b7a5cd5b5e646cf5da6df20eba4bcb7.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9c385fa930b13d5fc5d500de258a30301d0c40376b4f57afad16c77e8732a719.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d915323629c853adf101f4eebd09fd8bff2cc46a50c4a573814ea4858c4361cb.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b0650409a68446a8499529dbd685ed573b5f70df9352b4839fc2bbf6bf9c72e7.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9939a39704e494caba18a69c99db5c70eaf94de1907f4290f1c542d416251d35.png";f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a;D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/6, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
 2026-10-09. Расширение предметного блока. Победитель vision64_lr3, 974889 параметров. Новые контрольные рисунки: правильно названо 0/10, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 0/212, уверенных ошибок 0. Порог предметного ответа None. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка рисунков не слепая; фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-expansion-20261009\prepared-v1\image-registry.json
-2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 4/10, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ef1feb98ee3ea554\pages\0134.jpg
+2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 4/10, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json
+2026-10-09. Разнообразие предметного блока. Победитель photo35_lr1, 974889 параметров. Новые контрольные изображения: правильно названо 2/12, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 34/138, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. Определения и весь учебник не обучались. Фото в новой проверке: ответов 0/49, уверенных ошибок 0. Старый контроль: уверенных ошибок 0. Учебные иллюстрации: уверенных ошибок 0. Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ef1feb98ee3ea554\pages\0134.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\56a1fad813b3bea7\pages\0142.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0072.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0123.jpg
@@ -2685,7 +2904,7 @@ vc0185;картофель;В этом значении: клубень карт�
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0087.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\c3b508ef9abf7f5a\pages\0041.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\e85d040069a13e07\pages\0034.jpg"
-vc0186;морковь;В этом значении: корнеплод моркови как продукт питания.;Еда;;Требует доработки;0.6428571428571429;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5931090281758720.png
+vc0186;морковь;В этом значении: корнеплод моркови как продукт питания.;Еда;;Требует доработки;0.4166666666666667;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5931090281758720.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5435897820479488.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4848666068123648.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6068678988660736.png
@@ -2884,7 +3103,45 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\c6
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\f30443e38ca3857a49fd4d226a42ae9bff45fa04d5ddfb9a4bab6f8cb2d3b979.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\fdc1a99ce66485ed163e081501cf442e24a7716c5e4527efcfd24a9ccb1f7045.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\2607d6f86a98bdd22b931ed0d3f37cbb606e1a9f8e911c05c0adf0133f564e84.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\cb6a42284489a2c878be5342b27614c32652138022a93a7a0317f2a19d98abab.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6401490853822464.png
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\cb6a42284489a2c878be5342b27614c32652138022a93a7a0317f2a19d98abab.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\81b11d07f3541ed37b2366ce717271bccded9562a42801596d9e4265b0ed0169.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9d9d6f2bd4d27c1e4c513751129edafaa9d534b52eeab837b33271175c792ffc.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e8da5323c63d8f35f67a2438ab3de3491d81e0084b54a1462a4770f343177947.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\40fd2df21c96fe086b16b510c6ff52dc792df734e014d8eb27bb53601067216c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4cdb74d1fcdac01777c60114e0e074f16464d27d54cb4057905866afcd0666c8.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\63d69c7deb4ea868dee84f205ea6eae0eff535dd3e384d3d5f3f2a34fd454e2f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\3d5212dec4cb5f8b9072c497e99a1a95926f8b3aed3423d7ed736dbaac516f6c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\dd75e54a01bee844cfc1fc5801812ee19e2c339920c3ed736acc7d5080d06240.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e1886197108a37c73071d2503fe236b7ebc92644ec1e10fd3388f50fa15ff779.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\383345e07deb636b959066f4d4f540f27a3c34477e62a3fd9e62d8e9e587f143.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b41880b73cc386c54ec4eb33f49ffc415e7ff8da562a0b7a6c55f3996b9ab1db.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\db3f22e9e9572731696241ebe380f9f7530995201be89d7a43aac5f13153f7da.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\51777924633b4afa0b7be81a0040f7f426ab555ac0257e420bd9213742814c33.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\cd17653cc197b9175550ccbb66ad1fcd68fd9b0712eda9ea8c55345b16491d91.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\df785cb8614c13789ca0a94b72dabbbc14f693df2969a3159f79aac13206544e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9b4f28ff0fa6cf042a4f6041bf49e966ecd282d70723d867235d7aab489e9ca1.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\827c5650eac474c895e800026ff9594e49ef167bc7c77dc2c3e39f7c71be20b3.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\0d686039fe3d27f49278e2a3065c4246d02a24670f85ec0fc8b6fe2cb05b3045.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2530b93d698d84235b7c2290829238140ee067bd9450fab120e3d5b23397e47e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7a2fa244046d652ba3273780306e84f6f2dcc94ea0183caa6345bf9be6d2b379.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\15bcb3b9cb2cb85b053bddb44dab37f3be27c5288613161055671ef8da6bfcc0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5b5c23ed85727d848a75239a14f7659d3d6894d1bfae0418de29d1a2b9608a08.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\03002d318b6d5c1add0a951907c8e4a4c6ff2a85c8651fbfdf145c301801ba2d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\113134bede9a89aaa8e1eabc2c393ecb22cc5200f7c63819df4f659114f9fdb2.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e19e7e39f506bed9d7108b9105319091d0e7784fd2fa40a7619a72e86f596cbf.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6b7f561bc93ab87d5770797b1bd691f5d4bdf9625d2e124d6d51046cad39a038.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f840c244e55a980303ddee12aa1b16db49eaee4f10deb88522a0837679eee9b6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4e521f8d7adcf5dd6b4a50f95fb7984a2542993d5542cd8189e6d1e41daf5511.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5e865eb5262688804be750fd5687f7dceea164b33ec04e3ed257c87043a04aea.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\bbbce62e0c7b9ce27a3997561ec8b1d6dfc78884098d7d6e36607a506c74336d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ec979ad2f01d0675d9a7c36db7306686c2e631a23aca439965f945b553e3e45f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6614b879c0211b38c56e1c702f888efbc04c5f3102542a19a7da7a4da10bb555.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\16283a6596091ef8347cbb6a9ea12af3fd566874f434bf84ae9736847cedd7ac.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a9429b6306c21cd62ecf4e3e510f6e8c7b3e7d03bd4c9f6b1b4e2e6d16eb1639.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\68bdfe288f3d861afadc52ffad6deb404c22e0034b0916bf40a9b598e709350f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e4aafeb5212ee1768d80a3d8d782725e41093b879a0e60fb4428ba320b58a471.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d042a66f5b1f9fb04c45955615a482dae8d5262eb8fc1feba560906fc2397117.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7ef5dc5c6d6d378536ee822d1cd9a8fb9f21a066c5fb804721451a6358eb3ab0.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6401490853822464.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4912687119073280.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6226075648524288.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5474272212418560.png
@@ -2935,9 +3192,22 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\90
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\5ee5cc65e501b4fe2455f59c881e9f3ab929680fceb42af55287f155d1ae7b34.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\35286d4311be5e01f809aae0a5b24d8e69a390f67a6463fe9a9fbd68f18e63ac.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\c608841b803d63c4268335429a4c6078f327915aa925e491f5152a4c723f0798.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\0f9c5c9ae4e7232f4e40772b8d03c2770eb6fc61066114b358fcf174ffec5daa.png";9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c;D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/19, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\0f9c5c9ae4e7232f4e40772b8d03c2770eb6fc61066114b358fcf174ffec5daa.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6708335d792c72f660b9e0006fbd1f8e48dc326ad736f5610d70e297841db988.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7c251d127d6c84c9865e97e2d727ac5d564ad469b8eaa9f9772bcc5b63f87ec7.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\ee6c29d9704769e410b5cd193b21b6e7b11b6b7c0f3a37d725cc34248c885a1f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b9ab95b8f815603ff55d0fc6b27a02d49eea1a461cd046fe181f639af7a17121.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8d17bc2a6e60447d2b5acb73036f0a0a04bc2a38dd9b91609b49053e687a84d2.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a31772f9fca5381d33f4640e23f3a8e5ed8baed66f1aa924769cebcd1e33094d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\3d0809511bdf3a4cc9f8a474ba8c4bd4eee76e393eac27c953d713d197e481a3.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\61915ee569b82ee7644b325cb7b97a2419e96328a7aa06b9b0586957706342ca.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4394ec1c0360935394e84a03affd55ad0d6857aeb2e55da199ee229061958343.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f0a2448c9001f4d331db7db0e7289796327de83ab2ccd274f3f4b482659baefb.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b32b5ad04cb045140921f599283800dcb30626cf29a1eff256cf7e727734d1c6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4bb5f108358b316c553db8f5038142ff1048c5368bb216c832438645548f0876.png";f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a;D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/19, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
 2026-10-09. Расширение предметного блока. Победитель vision64_lr3, 974889 параметров. Новые контрольные рисунки: правильно названо 0/19, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 0/212, уверенных ошибок 0. Порог предметного ответа None. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка рисунков не слепая; фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-expansion-20261009\prepared-v1\image-registry.json
-2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 9/14, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\math\crops\math-021-book1-page0028.png
+2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 9/14, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json
+2026-10-09. Разнообразие предметного блока. Победитель photo35_lr1, 974889 параметров. Новые контрольные изображения: правильно названо 5/12, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 34/138, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. Определения и весь учебник не обучались. Фото в новой проверке: ответов 0/49, уверенных ошибок 0. Старый контроль: уверенных ошибок 0. Учебные иллюстрации: уверенных ошибок 0. Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\math\crops\math-021-book1-page0028.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ef1feb98ee3ea554\pages\0134.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0022.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0042.jpg
@@ -3011,7 +3281,7 @@ vc0203;печенье;Небольшое выпечное изделие, раз
 vc0204;сок;Напиток из сока плодов или других растений. Содержимое требует подтверждения.;Еда;;Запланировано;;;;;;;;"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0071.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\87b1e0db7b0b7831\pages\0030.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0119.jpg"
-vc0205;книга;Издание с последовательностью страниц. Возможны разные переплёты и форматы.;Школьные принадлежности;;Требует доработки;0.46153846153846156;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5996507952054272.png
+vc0205;книга;Издание с последовательностью страниц. Возможны разные переплёты и форматы.;Школьные принадлежности;;Требует доработки;0.4444444444444444;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5996507952054272.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6325174032924672.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6679952994861056.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4655691174248448.png
@@ -3185,7 +3455,46 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\e6
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\475cd0c4f126f5bf079754e33d86bd939efe8e85c204af15f98c1be580d437e6.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\e7bb710e13f7a8504d6faaad75576e778c4f9fa0a19856e2d3ba5678657e7907.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\c796ebe887c9e1c0f22a079b6bd5d186e4571b4327afc87b819f2fd3c413a350.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\50daac6e44bc6195f80dca1b138e4effbd516ef835a3590ef800497ec0917410.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6345450024075264.png
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\50daac6e44bc6195f80dca1b138e4effbd516ef835a3590ef800497ec0917410.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\095a8245103926cbd9fe5ba0eba7c5adaf37f1fca0a297250be595805f662685.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\347f5347524881fdd8267f2705d7e95e92d07de20a938ff84c06edc793b281ab.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\50cb57b746bc094a61046342da538903952632ed2b11f001eb3eabddbb86498c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\11995fef31dda599d38fafde3b578b11afc3dfae255dbc6fc545141f966b7410.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b631e488d6856eacdf9171db56adb46e87db60f985e0a178be3835d9575a01b1.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b857f5484ab97dbf8761ae6fb920f4e1bc6102cb9dd7f22eeefc7638b0c0cd84.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7c6b0bb99568509bf7c4810025431f90eaacdee78c45ec85139daac25726fa5b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\94d8a9a6e75867370516b7e38b5926dbeebf3229b89411f1c61fe0553f7ece30.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\bd9fdfd32a25724c233930cdf6be5de3a5b0b3807d826adc2223e35d9826fcf8.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\a51d30624df3228f7ab606452d6262e8dd9d41dff153b169c4e846488a117937.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\7463f9bfeb016ec400ea2cdbb460b4af9a7b309c2626643f1ef12b34f8975466.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\fac021d2f46cf1263e359475dfac8fa0cd37987db68d6c885aa1656321c2b6b3.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f7aca933cc65924d40fc7cbd04498ea20689344d5999edfcae240d36cf79a359.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\27aab06e4f870478eb08dfb904fa86bc59039acb6b9fe5bd973a16a353fdb887.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\989e6090d6c8daca437e67068a6cc60f23593efa6b7d41ee7f6e0f2cd2923957.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\21213f16ecd210646da7860cf5a091bab5933033fd281af887057c506eecf5e2.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\50b03a18a7efccd25c07696ffd6febc8f7f9e159b58382ebed5524ee64220651.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\587ddb74a7e46e8fde356b2e1ab0582b90751da3b452d51b18b25e9b120e8958.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\55eaeac18e53a44a3c6c70e5fe7fa9aabaf5cf9c28700de2b7af110b3346d0f0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\c2929eecac59a1f93b280e016116fcc45bb5eb7545aa7fd6631f77964a0b897c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\3094d0703ac7fde8c036f5e031bfc9f78f91ce6485e01963bdf4204960d038f2.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f2aa74fa223bb2da560c539ad5f8780bea5cdb8b07fc158d4c484314ee83f76f.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d97a653b3bf1f8964df918dab0161ea57b0f2eb7709354b79a093170f2ebfcc3.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8230a43385c944c1e8ff298d26f35bbe993b637e09311fc85221df43bd0b3974.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\32adcf293f075f71b2614bae7bd048e7d7be0bac0d6481712306c0a0c5696599.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d41d8eac00a250dce2c81d90e80f40124e9ddd8821fb2a4655a53dcfdd97505e.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\e3e48543633fb6a808cd22b8ae1f5f995eaae08affc998c81777a6ab2c8d8ff2.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\aa0b52a2345ebe6c55580061a1932645bb3fc9a2d1f02a7994c71224d245da0d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\da48f28ebfc22d3fcf3ac173b9958d851d070726400a25fd4761a8329d6996ca.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\fd32822d7da2e34e6a4e8aa1412eef918bad4cac999117e8b832b91367782f08.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8fe00f65c200e98d6dbe4d9672e82edd2a5aa6327b260d58658e4f11c3e9b6b5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\02c7b7cbfad6d843367099f8cc648b63c61f6465140a9f0bfa2df98eca61fc04.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\256dd56eacb72106f819c32e6b70cd7800246673e668fe03cd80358f1e8a81d0.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b4b5118401e2a82acfac8f289589e481704f8d1b512bb3b38bd214553bb128e7.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\8d55b36e0e67413f2765c9990f874e8d4b520e9b0dd428f5745cd1b37b70ba24.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\5afe58ab6c964efd48340936a4b5d96251a2a71184a9dfcc2d3cb77469c70e95.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\1acf6cea993dcb425ad0221bee737215cdd4bdef01043714bc9598d61e161d8b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d88a6e1b52845c5c20589150bc55dc355ea60df1ff1e6327614a2609fce53746.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\fd1f44d473d974f4c0d75970bcaec65b14472efd46404fc8f38160a4519fd02b.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6345450024075264.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6557698529165312.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6176347061747712.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4555098376110080.png
@@ -3229,9 +3538,19 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\6c
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\9415fe9c871e0a75c9a1ec28b0450ae9455308404429bfb5c67b592857204b40.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\7c7f7c5b4543f2c47430c7e612701423bddff56c225f76ece42ae1c8df5b7e4a.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\9479635680b027873ff7f8384d0e37d778c12e2d6e344227cc773d00c1a9b474.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\d3818f2955189d614c39503e77aac468c11393c7d230e0bc1b7195597ea1690d.png";9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c;D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/15, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\d3818f2955189d614c39503e77aac468c11393c7d230e0bc1b7195597ea1690d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d94b59747f13dd6e1166a2527c20d1ef69dcab3cc83077fe712e48f1e098687b.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\653c01ad0bea2ff48ce4e5782e8b887a9fc4f2c35c70f9a611b0fd5b6cf54def.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\41b6f0d5940a2b8a929dc5803fd94ea4829a62820afe97ab996383d5936414b6.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\6028b0e13a4a19a0852e9b3f9472614917a78dd9d0ebf469397e87f0b9e6cf60.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\3d33fb6abead8dfbbf39b620b70faf2c9182af24e8b4ddcefbde1cd9e77b7cae.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\758ddd023bbab89b1c0e87023e90b459785bd69e31978ede6507ddc91f061f06.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4ac889ce00e3d5dfbef1d84eecdf3b737c23b0200e9e86e92007db69230b21a8.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\d18ff9d0fa3748f63cf7a49fb57c9fe991211f546ed65a38057b77df53cde4ec.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\4ad6081d877d6e614e3f66ce558df69b0ba5f6b073dc395c6754fca74d82bbaa.png";f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a;D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\development-v1\final-evaluation\report.json;"2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/15, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
 2026-10-09. Расширение предметного блока. Победитель vision64_lr3, 974889 параметров. Новые контрольные рисунки: правильно названо 0/17, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 0/212, уверенных ошибок 0. Порог предметного ответа None. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка рисунков не слепая; фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-expansion-20261009\prepared-v1\image-registry.json
-2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 6/13, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\world_language\lit_chtenie_2k_ch2_Voropaeva_rus_2022\crop-0083.png
+2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 6/13, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json
+2026-10-09. Разнообразие предметного блока. Победитель photo35_lr1, 974889 параметров. Новые контрольные изображения: правильно названо 4/9, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 34/138, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. Определения и весь учебник не обучались. Фото в новой проверке: ответов 0/49, уверенных ошибок 0. Старый контроль: уверенных ошибок 0. Учебные иллюстрации: уверенных ошибок 0. Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\world_language\lit_chtenie_2k_ch2_Voropaeva_rus_2022\crop-0083.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\world_language\Rus_yaz_2kl_ch1_Guleckaya_rus_2022\crop-0094.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0008.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\0029feb5ba132920\pages\0009.jpg
@@ -5207,7 +5526,7 @@ vc0368;блокнот;Небольшая книжка из листов для �
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\87b1e0db7b0b7831\pages\0018.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0065.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0067.jpg"
-vc0369;кружка;Сосуд для питья, обычно с ручкой.;Предметы и сцены;;Требует доработки;0.7142857142857143;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5606881319976960.png
+vc0369;кружка;Сосуд для питья, обычно с ручкой.;Предметы и сцены;;Требует доработки;0.3333333333333333;0;"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5606881319976960.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5785098941104128.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5976712850440192.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\6266544159981568.png
@@ -5411,7 +5730,8 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\f2
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\4183e1afb0ce4f9777ecdf5280bd8ae2612fab68c2d548f4df7b86213ceb474c.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\5206c5b6aaf6b2b09e9bebc46f9fbfd8bfabed4f0c3f1aed3ac4ec307ebb6e24.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\1531eedbb420de5ba184a4eea8bf62bd7681991fad90194c64f9bb6c8a3910af.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\4c3129f30cfa8f3c567137abdedc89bc02c907695a332068c0c9f72857360e8d.png";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5477893272502272.png
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\4c3129f30cfa8f3c567137abdedc89bc02c907695a332068c0c9f72857360e8d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\publication\catalogue-link-indices\vc0369-train.json";"D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5477893272502272.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4699994445578240.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\5535202409447424.png
 D:\ai-brain-data\visual-lexicon\objects-block1-20261009\prepared-v1\images\4670020963532800.png
@@ -5463,10 +5783,20 @@ D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\3f
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\6c88cae52312f7a4d73117c834bca0f8d6c24525f06987bc7c231b56fcbd7661.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\4c09d9fb6dbc3c7ea57e41108ab7ced75bda8cee37c6b479d2d6af9d880ea7d2.png
 D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\d4213f1fd7483d0b4c2fbd76786c0b07e67d8ad673567549ef23810e2983a213.png
-D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\74d7f4ceecf888847adeeda0123915f2181f4ca9aa6f261768829385a78d60a9.png";9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c;D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\development-v1\final-evaluation\report.json;"Подпись предложена агентом по изображению; требуется пользовательское подтверждение. Обучение не запускалось.
+D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\images\74d7f4ceecf888847adeeda0123915f2181f4ca9aa6f261768829385a78d60a9.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b48c19e463098507e98163ec57e68b7dee9646bb568de523f4a7b09a7d353565.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\87d86d4c1cb29d17c21348504923d1e8ab45cd7411a1a56f3e3fd79b6f79cc21.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\f03835e5cf60affc45dd2bd3ea9b7471553dcccf7f6dbe74278329000b73016c.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\b2e2044c4a7dcecbc53aa2eedb5f63f1cf8d884f8430ffef70f347c1821f17d5.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\59793382351de4211aecd8fced3e8547e0b0e370080bf3e3ce4a81cd9fbbf48d.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\2ea6fc6b861811b1f7799a8520d1cce737ba3196b6fa187ee950d7a48fe170de.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\09d4d6758e10cc0445cf39c2e8c76e777b423959013e6ced10d78a84bb15da13.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\83516f3e1ce965d2009cbf47f9a2cf9d002ea75355288b296dfdb1c215c56e18.png
+D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\images\9d33447603e706ba4b9329717f323d56fde6fafb5952c2731e11aad893555db4.png";f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a;D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\development-v1\final-evaluation\report.json;"Подпись предложена агентом по изображению; требуется пользовательское подтверждение. Обучение не запускалось.
 2026-10-09. Предметный блок 1, две удалённые итерации. Приёмка не пройдена. v2: правильно названо 0/18, уверенных ошибок 0, все ответы UNKNOWN. 0 ошибок при 0 ответов не означает знание. Старые семь навыков сохранены в v2. Рисованные схемы Quick, Draw!, не фото; определения и свойства не обучались. Колонка J: известный контрольный набор, не новый слепой экзамен. Все разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-block1-20261009\image-registry.json
 2026-10-09. Расширение предметного блока. Победитель vision64_lr3, 974889 параметров. Новые контрольные рисунки: правильно названо 0/21, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 0/212, уверенных ошибок 0. Порог предметного ответа None. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка рисунков не слепая; фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-expansion-20261009\prepared-v1\image-registry.json
-2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 10/14, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\math\crops\math-068-book3-page0080.png
+2026-10-09. Разнообразие предметного блока. Победитель diverse_lr3, 974889 параметров. Новые контрольные изображения: правильно названо 10/14, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 53/172, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-diversity-20261009\prepared-v1\image-registry.json
+2026-10-09. Разнообразие предметного блока. Победитель photo35_lr1, 974889 параметров. Новые контрольные изображения: правильно названо 3/9, уверенных ошибок по этому слову 0. Вся новая проверка: ответов 34/138, уверенных ошибок 0. Порог предметного ответа 0.99. Приёмка блока не пройдена. Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. Определения и весь учебник не обучались. Фото в новой проверке: ответов 0/49, уверенных ошибок 0. Старый контроль: уверенных ошибок 0. Учебные иллюстрации: уверенных ошибок 0. Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. Все изображения, разбиения и происхождение: D:\ai-brain-data\visual-lexicon\objects-reliability-20261009\prepared-v1\image-registry.json";"D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\reviews\math\crops\math-068-book3-page0080.png
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ee85174895ea1e21\pages\0061.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0005.jpg
 D:\ai-brain-data\visual-lexicon\belarus-primary-20261009\books\ddf715adede67a61\pages\0118.jpg

@@ -95,8 +95,15 @@ if(mode==='verify'){
 }
 if(mode==='preview'){
   const first=data.changes[0].row;
-  const blob=await wb.render({sheetName:'Словарь',range:`A${first}:H${first+1}`,scale:1,format:'png'});
+  // The renderer can return a one-byte sentinel for distant ranges. Copy only
+  // the read-verified source cells into a disposable visible viewport. No XLSX
+  // is exported here and the saved user workbook remains hash-identical.
+  words.getRange('A9:H10').copyFrom(words.getRange(`A${first}:H${first+1}`),'all');
+  const blob=await wb.render({sheetName:'Словарь',range:'A8:H10',scale:1,format:'png'});
+  assert(blob.size===undefined || blob.size>100,'Baseline render failed');
   await fs.writeFile(path.join(qa,'before.png'),new Uint8Array(await blob.arrayBuffer()));
+  assert((await fs.stat(path.join(qa,'before.png'))).size>100,'Invalid baseline PNG');
+  assert.equal(await sha(input),data.input_workbook_sha256);
   console.log('Baseline rendered; no workbook edits');
   process.exit(0);
 }
@@ -110,7 +117,8 @@ for(const change of data.changes){
 assert.equal(await sha(input),data.input_workbook_sha256,'Workbook changed during editing');
 await (await SpreadsheetFile.exportXlsx(wb)).save(output);
 for(const change of data.changes){
-  const blob=await wb.render({sheetName:'Словарь',range:`A${change.row}:H${change.row}`,scale:1,format:'png'});
+  words.getRange('A9:H9').copyFrom(words.getRange(`A${change.row}:H${change.row}`),'all');
+  const blob=await wb.render({sheetName:'Словарь',range:'A8:H10',scale:1,format:'png'});
   await fs.writeFile(path.join(qa,`${change.id}.png`),new Uint8Array(await blob.arrayBuffer()));
 }
 await fs.writeFile(path.join(qa,'authoring-report.json'),JSON.stringify({input_sha256:data.input_workbook_sha256,output_sha256:await sha(output),changed_concepts:data.changes.map(c=>c.id),object_training_started:true,object_gate:data.object_gate ?? false,production_admitted:false},null,2));

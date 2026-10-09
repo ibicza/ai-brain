@@ -22,7 +22,7 @@ POLICY_SHA = "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6"
 def verify(root, version, output, series="expansion"):
     if (
         version not in ("v1", "v2")
-        or series not in ("expansion", "diversity")
+        or series not in ("expansion", "diversity", "reliability")
         or output.exists()
     ):
         raise ValueError("Explicit version and fresh receipt required")
@@ -41,9 +41,9 @@ def verify(root, version, output, series="expansion"):
         ACCEPTED + "/best.pt": PREVIOUS_SHA,
         ACCEPTED + "/frozen-calibration.json": POLICY_SHA,
     }
-    if series == "diversity":
+    if series in ("diversity", "reliability"):
         expectations[remote + "/runner.py"] = sha(
-            Path(__file__).parent / "m33_objects_diversity_remote.py"
+            Path(__file__).parent / ("m33_objects_" + series + "_remote.py")
         )
     with tarfile.open(capsule) as archive:
         manifest_blob = archive.extractfile("source-manifest.json").read()
@@ -117,7 +117,9 @@ if __name__ == "__main__":
     parser.add_argument("--version", choices=("v1", "v2"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
-        "--series", choices=("expansion", "diversity"), default="expansion"
+        "--series",
+        choices=("expansion", "diversity", "reliability"),
+        default="expansion",
     )
     args = parser.parse_args()
     result = verify(args.root, args.version, args.output, args.series)

@@ -15,11 +15,21 @@ def select(candidates, output, *, tuning=False):
         raise ValueError("Predeclared candidates and fresh receipt required")
     reports = []
     dataset, round_id, learning_rate, normalization = None, None, None, None
+    score_contract = None
     for root in candidates:
         report = json.loads(
             (root / "development-report.json").read_text(encoding="utf-8")
         )
         protocol = json.loads((root / "protocol.json").read_text(encoding="utf-8"))
+        domain_score = protocol["config"].get("domain_balanced_dev", False)
+        if type(domain_score) is not bool:
+            raise ValueError("Invalid development scoring contract")
+        if score_contract is None:
+            score_contract = domain_score
+        elif score_contract != domain_score:
+            raise ValueError(
+                "Different development scoring contracts cannot be compared"
+            )
         if reports and protocol.get("warm_start_sha256") != reports[0].get(
             "warm_start_sha256"
         ):
@@ -83,7 +93,11 @@ def select(candidates, output, *, tuning=False):
                     k: protocol["config"].get(
                         k, False if k == "diversity_augmentation" else 0
                     )
-                    for k in ("diversity_augmentation", "illustration_fraction")
+                    for k in (
+                        "diversity_augmentation",
+                        "illustration_fraction",
+                        "domain_balanced_dev",
+                    )
                 },
             }
         )

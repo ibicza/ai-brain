@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import shutil
 import time
@@ -163,6 +164,26 @@ def loss_on(data, probs):
     )
 
 
+def domain_balanced_loss(data, probs, records):
+    """Development-only domains have equal weight, irrespective of row count."""
+    if len(records) != len(probs) or len(probs) != len(data.answers):
+        raise ValueError("Development domain alignment mismatch")
+    domains = {}
+    for row, probability, label in zip(
+        records, probs, data.answers.cpu().tolist(), strict=True
+    ):
+        role = row["role"]
+        name = (
+            "photo"
+            if role == "VISUALLY_CURATED_NONBLIND_PHOTOGRAPH"
+            else "illustration"
+            if role == "VISUALLY_CURATED_NONBLIND_COLOR_ILLUSTRATION"
+            else "sketch_and_control"
+        )
+        domains.setdefault(name, []).append(-math.log(max(probability[label], 1e-30)))
+    return sum(sum(v) / len(v) for v in domains.values()) / len(domains)
+
+
 def verify_inherited(model, source_state):
     for name, value in source_state.items():
         current = model.state_dict()[name].cpu()
@@ -210,6 +231,7 @@ def main():
     parser.add_argument("--warm-start", type=Path)
     parser.add_argument("--diversity-augmentation", action="store_true")
     parser.add_argument("--illustration-fraction", type=float, default=0)
+    parser.add_argument("--domain-balanced-dev", action="store_true")
     parser.add_argument("--evaluate-checkpoint", type=Path)
     parser.add_argument("--selection-receipt", type=Path)
     parser.add_argument(
@@ -222,7 +244,7 @@ def main():
         or args.eval_every < 1
         or (args.steps < 1 and not args.evaluate_checkpoint)
         or args.learning_rate <= 0
-        or not 0 <= args.illustration_fraction <= 0.5
+        or not 0 <= args.illustration_fraction <= 0.75
         or (
             args.warm_start and (not args.protect_inherited or args.evaluate_checkpoint)
         )
@@ -427,7 +449,11 @@ def main():
     ]
     illustration_mask = torch.tensor(
         [
-            row["role"] == "VISUALLY_CURATED_NONBLIND_COLOR_ILLUSTRATION"
+            row["role"]
+            in (
+                "VISUALLY_CURATED_NONBLIND_COLOR_ILLUSTRATION",
+                "VISUALLY_CURATED_NONBLIND_PHOTOGRAPH",
+            )
             for row in manifest["records"]["train"]
         ],
         device=device,
@@ -505,9 +531,12 @@ def main():
         if step % args.eval_every == 0 or step == args.steps:
             new_probs = probabilities(model, dev_new, consensus=False)
             old_probs = probabilities(model, dev_old, consensus=False)
-            score = 0.5 * loss_on(dev_new, new_probs) + 0.5 * loss_on(
-                dev_old, old_probs
+            new_loss = (
+                domain_balanced_loss(dev_new, new_probs, manifest["records"]["dev"])
+                if args.domain_balanced_dev
+                else loss_on(dev_new, new_probs)
             )
+            score = 0.5 * new_loss + 0.5 * loss_on(dev_old, old_probs)
             record = {
                 "step": step,
                 "dev_loss": score,

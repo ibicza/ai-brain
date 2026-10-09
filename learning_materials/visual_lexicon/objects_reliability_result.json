@@ -1,0 +1,869 @@
+{
+  "schema": 1,
+  "focused_tests": {
+    "passed": 284,
+    "skipped": 2,
+    "log_sha256": "924877b48de0be76fe8033f7099d50733ba127fde0145676f6c2164154ff1071",
+    "skip_reason": "Project venv lacks pdfplumber; unrelated PDF tests skipped."
+  },
+  "date": "2026-10-09",
+  "status": "REJECTED_NOT_PRODUCTION",
+  "training_host": "karina",
+  "scope": "Eight object names, own weights; bounded RU/EN prompts and Russian answers.",
+  "data": {
+    "new_admitted_images": 791,
+    "new_sketches": 552,
+    "new_illustrations": 0,
+    "new_photographs": 239,
+    "counts": {
+      "train": 2527,
+      "dev": 431,
+      "calibration": 612,
+      "final": 138,
+      "regression": 546,
+      "textbook_diagnostic": 7
+    },
+    "dataset_sha256": "5c2f7780b37efe725e1842384f8d25e1514f7d81897dc75079907f847e4b7386",
+    "pixels_sha256": "15193eba172a37d7b724c1bb08d29291bbedbffd38317dcf8173f41361e0ad31",
+    "registry_path": "D:\\ai-brain-data\\visual-lexicon\\objects-reliability-20261009\\prepared-v1\\image-registry.json",
+    "registry_sha256": "db49846db7e639cfc3bab3bb6ceaa71c099c97d2a543f5a0786e85b7ef91c120",
+    "lineage": {
+      "status": "ALL_PARENT_NONCONSTANT_ROWS_PRESERVED",
+      "parent_sources": 3465,
+      "prior_final_never_training": true,
+      "photo_author_owners": {
+        "1087df30f58f309ac0b9e4bac1ac3ad73a8d86706c52a343fc773c178ff8bee1": "train",
+        "186aee0fb94269ae4305e9c943c43edfdcae1fdbbac03a3102095ffb11a3b273": "train",
+        "62c20f22ff9f8fd8cd5bec341feadcf40e8af03619fc36a970db4b490cbe87ec": "train",
+        "df63402b7b652f5290fae316305885ef4dc69b606863fc72c48c0b379aa63a8e": "train",
+        "08422d50d041011757e72d5bbc0166dbcd025c05947705628f468a090037f025": "train",
+        "822ab3be16adcaf86a35dcab786b680f813543a8d7cd7064cceef40a06a5ed07": "train",
+        "153904d809d3d1c9788260436b57a0b391b7dd58c88a0a6c0bd72ded6f123835": "train",
+        "1fb3db94519b6b82a72dba7c688f948934ba4282f951af0c4f64b7f62dc36716": "train",
+        "559f32ef14a53f833b789343aadeaf1042adfff228d64ff15be4537cd7b470f2": "train",
+        "f98bc0136c36b812266fb0e2f0e796970f1557a5480e34841042e01c8586ff04": "train",
+        "2504bef6707c6fc705dd2bf19d0e66f91b75dad49d4d5cca8956fd3674314cef": "train",
+        "d57e2ecd4ff2fa7d12cb6152e45eb5e056551f34b99cad848dd34b600e3d10ea": "train",
+        "b04efd3142ea45691f3492a7f73129666bf7a3c36e5510de67cf4befa902c0a7": "train",
+        "4a0a6373ce522708ab4084ebbd18bc5386e80c77bb5c1ed7b156d57dac71303c": "train",
+        "445a67e32bc514fa302e79576b9531b90969a42971ede6cdc1678c572799a52d": "train",
+        "be53221bfa5628818e12a9180ecdcaf0b581c3e8e2ac812f6904fba9231fbb16": "train",
+        "99dd3bd6688f3da666fe98bfc58c53f9335c72ce4d78594b7fe3d574d66a3f76": "train",
+        "51d355fc5c6f68f1bd20f048fe9464fa34a70981ce2b02f07343b3fdf9f64f89": "train",
+        "782b77bf4ff8e6f1ab737b54f53a23410515bd569051718e3f36423e131a3a06": "train",
+        "6e5a6c4912adc8d63aef854947005d63f891c055029a67b68ec73b6913f790a3": "train",
+        "7db8860a4b386e2477f6df9aec7a6e96a53c2efbbbc191256006ca7b9d8fae3f": "train",
+        "6449c9e8d7c13f5e3029d635ebfed561abe33162a3c96be63df7957e6c8c6e6d": "train",
+        "2a64cf93ad8b5c63cf42c33486ef2f47ed3001cd84baa570517ea46046d070e0": "train",
+        "819514c44933dcffabc05ea79a545619534afacb54e2aa2437445051af1ae289": "train",
+        "48e81395626f03ba41175ab0b9405315111275340ce30d5fba930b16dfdf9526": "train",
+        "5a5610456e2e52be5f602447d0b12ebdbde23db08ffb5bf3e9bffcaa71a7ca9c": "train",
+        "14ea3a74f10e1fad71a868787df57117341afba9e1024112b218cd5f8e2ba2fc": "train",
+        "3a20bc12874a25866be73b661ebfc3528dfeac220f05dfae3aaa9a5bf3d7787a": "train",
+        "1a980b16f605d7a42650a2271c7913198fcfdd1975972c38812c92059172e483": "train",
+        "b48dab141a9a9441355ea2f00bf04e90e444c40c5d3dbc0d264369edb864cf1d": "train",
+        "4e7297137c2f6c4b607b981586f410ef2752de1c528656fa161bfca078fd49fc": "train",
+        "cba64704657acb6ee06e0eba7667c08755aa4b16096a696d64ddb926b8e798e0": "train",
+        "32894506e79ffdd7c1943a4a5e371893f62e3789acba3b1ee2692a63091fe5a3": "train",
+        "12f343858021c5687f11af923db94f01d17ffbbe0dc537085bd1cbb1fde1eefe": "train",
+        "937fb55d639ef8a2f2aaf2cfae6c2ed15196b6cc087e1fd7428c04b5e5c533e6": "train",
+        "62593feb009ee43f143d8965f6dd483f53028fa8b5c3fc1728444432d03ea9ec": "train",
+        "48b257be6a40af95cbf512679be13a4236a33ffa4bad349ba5e59d35ee071e82": "train",
+        "6ff837db49677dc07dae4ce81259a7ef914b4095937ac2e651edfb245495dfe4": "train",
+        "f8c08d522e781d1ae6d737cd874e7f071f773e745de02033ca30d6ae25857453": "train",
+        "1d7dec3d9bb111818666ef03b7e8629cb4ace25d5c95869026713e3375c09cc3": "train",
+        "aaa6cf7394bb7ba0ddcd98c6dad5019ed036a31646ab80005e5ef4ae8a9ac866": "train",
+        "6b43471452b9ef1deca70b0ea3011d143988c5954c89f4dd00ffe0320f536a48": "train",
+        "63159a9a6eda87329c82f31cabc21ec41ea419a0a0b12e9ea1b32e38a550b889": "train",
+        "343c3f84a84f5b41e4770dfa02e08487caa71979e0e0be5bc91e139bd503ab6d": "train",
+        "185365aca15532809a96c0432a7e7ca5691ca2cf87af5a649081e523146eec9b": "train",
+        "4dea211abb4146be522ba01e74abb42409ea8df5404458fb845fc7527c359f7d": "train",
+        "93c44144d40beb482539f5473e84bdf35f3b021e6853401b2aebb22f39fc814e": "train",
+        "bb634c7cfe933e9bc94034b022b5a8e5183f3d576fe865ae4361610adef925eb": "train",
+        "00f9f57b79796835c728a67bcf361d26e06bd733f4aeb41bbbf1028745ec206d": "train",
+        "b5ce86bd535be5422f7d3d90f4617483aa8ac38d39eb3ba96bf51d7cc51f26d9": "train",
+        "46cebd2532306aec7135e34e464e548f7559ced0d145b8e656e9dcb0f61457bd": "train",
+        "4d91e102f8e938ce743bc888e6b70d89a6b5f5c02b54aced8ccce000f78f568e": "train",
+        "dd2fc856180544d840e84c7dabc071e29f3a737fd25f8197198d2b9cf2dc9927": "train",
+        "162b98203cd4822eca859abaf4ad44c868cb383a451afcb074a93a550b2741e5": "train",
+        "2efea24562200c021fa217ebb4aeafd0e38d79ea74cefcf5cd4c4a09f6509534": "train",
+        "cc590981bbfb459ddd6bc5c31491537341f2ba193740fb39d2824be94965ea79": "train",
+        "cea0f859db2d26bc5fbe1c47d9ac9f14eb11c88826757c9324f7071cc28807f9": "train",
+        "cc97b4a036818c70f19caaf1d664dfa42f055dc23aec05525bf98ff076dd5ff7": "train",
+        "8bb8f35faaf0d0bfc44f2ef9a21f23485e8830ea4239367a9ec4f4c714fa6a7e": "train",
+        "e0089f96b1deede05eb725f70b76b7c113db9de44346e56aec11aaa93b84d74b": "train",
+        "432b02b5c36550776b7bff5dcf4409996ab485faa4d32056196bced6affcb842": "train",
+        "6f44cc6594b2911588f31b8bf24cd0c29681dd376f9d8224c0013beb61666327": "train",
+        "d3889a97c4d582f4a6a9bd737f0c43558ab19420779be6ac26e614129011291e": "train",
+        "a4936847598e63e92bb57ef3e1a1b7b4bfe0bae99867490b1055a7d27e5971cd": "train",
+        "a29fb2acf6f1a848596014020f8e3b69865965607f2dd27c25bbaf4ff0d943aa": "train",
+        "fc3e3d7bbeaec9b43aafd5307c53b99326c37d2c367a38ab074aae725eee0f9e": "train",
+        "8f17e3be90af9df72f1cc755451309f2c2078a7a73abac37f2e007fd30365c85": "train",
+        "76535f3807123ce91efdeaa39edd4fab327d2efe1958a09e09047451dbfdc23c": "train",
+        "102c7bcfc12c909cee224ef7b83ce02fcbec2f5ef57de85742d5fa548b6f719d": "train",
+        "e4353453e71edfe72a9715fca0e523042a9dafe0b5ccbd0568cd7e2bebede2de": "train",
+        "ba2bb48a67e16a683ce860bab877785be36818e14c78282ff908db4269d49522": "train",
+        "c7ee07067ce6ad1fa49ce13e9bcb31c93945ca0367c64696faa91a65cc09dff0": "train",
+        "b81d7761a1a220a3bac68781cfadb06da32a895b8610eaab92e0feb1a9882c6e": "train",
+        "347b23532ca500125dde83f2d5c3454542a905fc1e0bc4961a2b96de889782c9": "train",
+        "76db8064456572a80fab306b853d29f4508ae5586dbdeef8c2a399531fe4616b": "train",
+        "55c1a27ce31a0c9c8d3366204e4856322d91df86defe3393c1f3f2d843c2cb09": "train",
+        "37a37f9b7d72c53676ded9be1cf74bf1cc4a1b457ccb96ec2db21fd080d11214": "train",
+        "7d445240c97cb8b39b22030981d77679608f91c7a4000e41a1794cde953a1846": "train",
+        "14b9f2b8bd3f8f8c75db5f0b95a3391a9bb3c346e135f7381129a55f2aeeb931": "train",
+        "3f06afd63e990f2de4730dc0e1d9fbcc9b7edef69f96ca9eacbdbf5f0496a9ea": "train",
+        "cef5cad24273e2f788ecab5b6aaafc3631285de2dd8264dba58e9f31639d440b": "train",
+        "71e267bedbd72500f6e333b9a72877dadbcc8b31960d2b0340557273e64a636c": "train",
+        "4c3c8957e3ded9cc0f2d5724a43f65833a23fce6f9c64b0f74425b94cd01958c": "train",
+        "41ff8b1f8874e7763d421867504d7a8157a3543e75b0427b4bf8c6b5dd6b4813": "train",
+        "dce47cb3e32b899a850152e10dd883bd0175bd3d9d54d571aa3a932b3289091d": "train",
+        "e07d6b40106b69a99cd548b2f5b77e025fd958adb22e74d5befd848df1c4596c": "train",
+        "b1efa7109ff239007b6e9e04ce7e5a035c1613de8a30a9caf7f12efb26f7ab7d": "train",
+        "62b4c73f845df1889b699f07a335426de1756cb6024db040ab01e00c555f1ee1": "train",
+        "1a2bed5db9c377ca9a04f975fd8af21673f3c22261ee5b2b8cf570add2bc86ac": "train",
+        "56b6b7fcfd5c8f5967a4c123a0a363d11cc8d64a2513b25c0b804f9b43f318c3": "train",
+        "1856152e7252996eb78d53545582fa98a58973a0dd86219ed28756071ed3bbcc": "train",
+        "ca705659a4104a0095dac2ebdf4be8b6fbe28011e0a52755d58894d365bf303a": "dev",
+        "7410e5cfb25a51c7ca767f68b2d19b299dc3ad91d33cfbb8a12c20e64f6e4dc9": "dev",
+        "5a9aab6a5144cfc427c0fa9e1fefb902137e90af8f6654d0423cd62b60435371": "dev",
+        "f59c767bd5ad0ff7cda2545d9f0ad45251765fc94e79087a92d35dc3350aa797": "dev",
+        "e75faba8c4d456fe0fb4d38712f2ecee272a17048ccc36aa9f07651a62264d6f": "dev",
+        "cdd13ad00b2fbf975156d93233d86bfb8a4cdb20980f4bf500b4d81f2eb0b05e": "dev",
+        "01d0562ccdfc565336cc1a614328b182a0500668d90278069f32220bba1f4094": "dev",
+        "39ea1bdcb213c2d2bff6e2ab6e3de31b8c900008beff761d746b0290ce306ad8": "dev",
+        "ea48d1de2443c60ce2ed11b86b980bc2c4e8673fb609e1068b5285aecbda9d1a": "dev",
+        "cb6fcdf08af089d2f3bda169a1590b4b33454d6273636ee8bb1d830023c054c9": "dev",
+        "89f6973e00ebedfc2c5c11d3a7ae3d961ce804647f1225b021d8d52cffe860f6": "dev",
+        "6d0e866d9e07123684950d818eef07200e8bb0a167c0ab5f182229695e1279f2": "dev",
+        "7fea9ab98cae5a382fe6315dedc4a085655c6679f5cd43944e2d9972b2f112cf": "dev",
+        "dd6abd1f0a9e59c383eed760b3f02ee76a02a2b701e07db96253418052cee58f": "dev",
+        "b8ed37d4730b56d36c26011e554ca9b534f98550a8604ef1bf2848c2e1d66656": "dev",
+        "b8bb5262c915e351220f30db3532b9302d0943f37eddb4d5e72d2128ff4107a1": "dev",
+        "77b43da64dff486f7ca6b0e97b492be044ff2162017df02eabbb2df25207b7fd": "dev",
+        "a1f73325aee123b5e6750931a6da01521e9810c0935a98539731a47b1db5cbe6": "dev",
+        "9cc4e043c42dcb315a40206ad7c95a2704bb24f723f04b699a119288297007c2": "dev",
+        "b287aa85a5f63d6ede631abfd4f5dc9bf7f78a7ce28710596d6b9834b05a5677": "dev",
+        "7f1479fa4ca80855845897b07778eac944538c5af57fed40b410fd3ea97d37dc": "calibration",
+        "733de82bbb14779ec19d17696970461e1fabaf5ad0b425be4678b7db832d8898": "calibration",
+        "7c25a519996d762d7471c975b14ea26ecf96d0cc1c1e1c1fa8b63242d84914d7": "calibration",
+        "4db6a60171090b9f5a0e5cb2f79bab8b196e69429edd50b0375d0bbd1fc35b77": "calibration",
+        "641c8a25c9a6e2b40b09c170082f8483bc64ce50c9330564bd35eb864c85e939": "calibration",
+        "074eced63c41bd08e1f41b867c631cf181fa99f5a96811a479454d483611766d": "calibration",
+        "70f243df4dd01268721078092548707cc105edd9eb0ba51efd1817785cfa0f7b": "calibration",
+        "5d594a30f4d98aaa8574d98efa50449b67586ef0858c3f66951d929d4d20fd2b": "calibration",
+        "d674ddcf80be599f3bef389c761deab1eebf009421ae7eaa68e8ba821acb79bd": "calibration",
+        "f8bc86eafbed8dc6706eb5937d0b65856f2d07f6be7e8a68125ddab3c39e9b9c": "calibration",
+        "7ca989e9e3a8d676a10a14934d33429786e1549324feb467306978fb547e6767": "calibration",
+        "ba16f9a08befef61216901b392d6cea3d44fe824f900c6dd1f9fcc62a707f556": "calibration",
+        "1e2a41ef6120c17682776f2c2109f1d5f06da1b4714bd896cdb56b0919c35e7c": "calibration",
+        "f685a44c0a705c39a747f96adc3ad3a858fe05f7c935c8963b6ea59d2414fcf9": "calibration",
+        "bfe88da6b1ded8b4ac2b91456a525084bf65ef5428de2c6f138c877e3e88a920": "calibration",
+        "fae827ef218b7062dc45f5dca9a5091ed0ef7fc85f3b9a2e19819c7b44343ef5": "calibration",
+        "100b3d08a746c712acaf36b1e0f8de2fbf19dab1e68381fc06512507428bdd15": "calibration",
+        "8e9299b8b2d4e56887e521ff37757d2bfb61e73cbac3801e1a1a3ee5d4f0676e": "calibration",
+        "4b9ca514988b5695915ffa4a60393aaa92eac571d387cdf4d25e0212fec0f45b": "calibration",
+        "d7b634b47c475a7e42e2fdeabc85d66811b97707fc191ccff69b6af21d26f0d7": "calibration",
+        "011950678371261c288af8c1db4d1586ca18ce76d51acab36270cee95c4d3707": "final",
+        "eedd5fc9c13144b6fbffccf9c8887255862f73d247cd4ad4a393126be5c12613": "final",
+        "c9df3acc2dcc7310c002bea0f7f34dad7e62dd4eff253820b828410feac1a264": "final",
+        "f22eeee6086bf46d94fc43d558e804dc0ff1c644db39dd76ba16903a1fad96fe": "final",
+        "7c8347791dc096daed16b0b0f2770cd2f47b4bc0c8287e3bf0d8059f338d9f75": "final",
+        "a9bcf87f1fa25a16971dd5a6700cee439060da224bbf62e1e69ff29a63e01b08": "final",
+        "a7a55a280a9f5a06c836c935dd773d6b0913db0076ba3f91b652da7646d7b9c5": "final",
+        "f993dd8d56062cf10920a7d81a53a7e7031b87a1dbd894379b78691ef59b71fb": "final",
+        "fa3707d93ce0dc0ee6649c61d753ae380b7ba661a82e9edbe78323dda39d020b": "final",
+        "1aa67aa792d8d5612cf9644ea4d6465295c0d6b770f42d631ba2c413f95741ae": "final",
+        "c2b70894b48b3518a2a921d489e21172b72094c8ff87e09c00ec50ca440132b4": "final",
+        "f03952ccef545b9ad520a51577e34f23497cab818bfb13dd7b394f9d04fe7993": "final",
+        "6da9f90e839bdc2dbe45a0a666c4a9602b025800543799742f2bb49d769630dd": "final",
+        "74b7ca86ed697245760e7d611da5c9b08474ecffb0206a1531342815c36d3c52": "final",
+        "fd16b5dab55c12adca104ee92a9f0990ecf8b0d7bda43095b25cec76a42e53a3": "final",
+        "f5b0c6344aa854f9e6626567059e29ef0955e6531e97ce20f2221ad4c31e23f1": "final",
+        "8f52d12bc5a6977053bd8aaedcffcda90115dbc80851ed1a5616540a00fb2c83": "final",
+        "28764c3471dadcdf70c6defcd6b090a4687afb3ad1be5c8f50203c7c00c46732": "final",
+        "7d31084ae4c12e314619d1a796a1763a5750fa0e7a15aee43ffa6f3de9517d6e": "final",
+        "724f92f8cb38408715702812909881c9089bb6873d204398178da562ba2720ac": "final",
+        "0bc281d1d09f29851c2740407cf93bbd179f6c42054f946020200edfbec24ac6": "final",
+        "71280793046a8ca879958f9d481947ec562a489258c0f0585b50b0a371a20e9c": "final",
+        "ccd40321b8ba16f723f0eb7a9d74150786d24c0109f59d2d9478ff635c724983": "final",
+        "2666ebfa22ae10153bcfc69f947d2492b333420d634ff1531ac2638f2d3b7e62": "final"
+      },
+      "photos_by_split": {
+        "train": 127,
+        "dev": 40,
+        "calibration": 23,
+        "final": 49
+      },
+      "dataset_sha256": "5c2f7780b37efe725e1842384f8d25e1514f7d81897dc75079907f847e4b7386",
+      "review_sha256": "b25066f6b99b522c38cc3ae7544fe001bd74cc5a1921ec7b379b7ebf8fa9d1ff",
+      "limits": "Bookkeeping against visually curated labels, not independent blind semantic truth. Thumbnail source bytes retained; full photo original not acquired."
+    },
+    "old_final_role": "KNOWN_REGRESSION_NEVER_TRAINING",
+    "photo_source_boundary": "Verified acquired thumbnail bytes and API metadata. Full original bytes not downloaded or independently verified."
+  },
+  "selection": {
+    "schema": 1,
+    "selection_used": "DEVELOPMENT_ONLY",
+    "dataset_sha256": "5c2f7780b37efe725e1842384f8d25e1514f7d81897dc75079907f847e4b7386",
+    "round_id": 10931,
+    "learning_rate": 0.0001,
+    "comparison": "DEVELOPMENT_HYPERPARAMETER_TUNING_NOT_WEIGHT_SIZE_CAUSAL_PROOF",
+    "candidates": [
+      {
+        "name": "photo35_lr1",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-reliability-20261009\\development-v1\\photo35_lr1",
+        "checkpoint_sha256": "f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a",
+        "development_report_sha256": "f8f71250de0d18886933d8b15f4eeb37cbf571e24e39e5c869d9524ed56e48e9",
+        "protocol_sha256": "c0845834c3183362bfd732b6a07d4febb9ba14f4bf29b0859438326d0ee5c553",
+        "best_dev_loss": 0.6491577413440816,
+        "best_step": 3000,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2,
+          "object_unknown_adapter": true
+        },
+        "parameters": 974889,
+        "learning_rate": 0.0001,
+        "capsule_sha256": "1999d4fd1dcaa683caa1da12a841d835ee54993512273fc7c6930ec46805a38a",
+        "warm_start_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+        "training_options": {
+          "diversity_augmentation": true,
+          "illustration_fraction": 0.35,
+          "domain_balanced_dev": true
+        }
+      },
+      {
+        "name": "photo65_lr1",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-reliability-20261009\\development-v1\\photo65_lr1",
+        "checkpoint_sha256": "d09171dd4a4d7cf8ec04926d57fa46ddab612b65b50622b6bbbd28b4ab25e05c",
+        "development_report_sha256": "b6014f5194484aed2000618150df1df2d30e65bf5335f1c56f13e93d98d54dc9",
+        "protocol_sha256": "c3ab2ccb49defb2b21ae335b1e4f06a0829a8cc96075f801680f136e3ebeab6d",
+        "best_dev_loss": 0.6803639585269609,
+        "best_step": 2000,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2,
+          "object_unknown_adapter": true
+        },
+        "parameters": 974889,
+        "learning_rate": 0.0001,
+        "capsule_sha256": "1999d4fd1dcaa683caa1da12a841d835ee54993512273fc7c6930ec46805a38a",
+        "warm_start_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+        "training_options": {
+          "diversity_augmentation": true,
+          "illustration_fraction": 0.65,
+          "domain_balanced_dev": true
+        }
+      },
+      {
+        "name": "photo65_lr3",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-reliability-20261009\\development-v1\\photo65_lr3",
+        "checkpoint_sha256": "ff9ab217898f094e4794c6e21c5747e39ec83ee46b8c401d3d8d83bf704b5836",
+        "development_report_sha256": "2d7ac28e16b988b4fc3b2c7f7e07ef175246df07ef8f5cadd905380442e0e31a",
+        "protocol_sha256": "d1db01a695130b782aedce4bb0069a2f0986f679ee0f31b6b68c57452ea46cf3",
+        "best_dev_loss": 0.6701669174646654,
+        "best_step": 6000,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2,
+          "object_unknown_adapter": true
+        },
+        "parameters": 974889,
+        "learning_rate": 0.0003,
+        "capsule_sha256": "1999d4fd1dcaa683caa1da12a841d835ee54993512273fc7c6930ec46805a38a",
+        "warm_start_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+        "training_options": {
+          "diversity_augmentation": true,
+          "illustration_fraction": 0.65,
+          "domain_balanced_dev": true
+        }
+      }
+    ],
+    "winner": {
+      "name": "photo35_lr1",
+      "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-reliability-20261009\\development-v1\\photo35_lr1",
+      "checkpoint_sha256": "f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a",
+      "development_report_sha256": "f8f71250de0d18886933d8b15f4eeb37cbf571e24e39e5c869d9524ed56e48e9",
+      "protocol_sha256": "c0845834c3183362bfd732b6a07d4febb9ba14f4bf29b0859438326d0ee5c553",
+      "best_dev_loss": 0.6491577413440816,
+      "best_step": 3000,
+      "architecture": {
+        "vision_extension_channels": 64,
+        "vision_extension_depth": 2,
+        "object_unknown_adapter": true
+      },
+      "parameters": 974889,
+      "learning_rate": 0.0001,
+      "capsule_sha256": "1999d4fd1dcaa683caa1da12a841d835ee54993512273fc7c6930ec46805a38a",
+      "warm_start_sha256": "9f68aa1a3b51dfdef7d0624545d2d8226c46b9976f5bb8a430c20c0a1463415c",
+      "training_options": {
+        "diversity_augmentation": true,
+        "illustration_fraction": 0.35,
+        "domain_balanced_dev": true
+      }
+    },
+    "production_admitted": false,
+    "limits": "Candidate choice precedes all calibration/final evaluation. No fresh-final metrics used in selection. Raw development accuracy not a safe naming gate."
+  },
+  "development_raw_not_safe_policy": {
+    "examples": 431,
+    "accepted": 291,
+    "false_assertions": 42,
+    "accuracy": 0.8468677494199536,
+    "answerable_recall": 0.8498293515358362,
+    "unknown_recall": 0.8405797101449275
+  },
+  "training_peak_cuda_allocated_bytes": 1223195648,
+  "checkpoint_bytes": 3917365,
+  "checkpoint_sha256": "f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a",
+  "report_path": "D:\\ai-brain-data\\visual-lexicon\\objects-reliability-20261009\\development-v1\\final-evaluation\\report.json",
+  "report_sha256": "6e01038fd1acdeab9f59c313096eb0ebd37ebbe36f7107cbb02150a0b2b36290",
+  "object_gate": false,
+  "regression_gate": false,
+  "production_admitted": false,
+  "fresh_final": {
+    "all": {
+      "examples": 138,
+      "accepted": 34,
+      "false_assertions": 0,
+      "accuracy": 0.5652173913043478,
+      "answerable_recall": 0.3617021276595745,
+      "unknown_recall": 1.0
+    },
+    "object": {
+      "examples": 138,
+      "accepted": 34,
+      "false_assertions": 0,
+      "accuracy": 0.5652173913043478,
+      "answerable_recall": 0.3617021276595745,
+      "unknown_recall": 1.0
+    },
+    "by_concept": {
+      "яблоко": {
+        "examples": 10,
+        "accepted": 5,
+        "false_assertions": 0,
+        "accuracy": 0.5,
+        "answerable_recall": 0.5,
+        "unknown_recall": null
+      },
+      "банан": {
+        "examples": 12,
+        "accepted": 2,
+        "false_assertions": 0,
+        "accuracy": 0.16666666666666666,
+        "answerable_recall": 0.16666666666666666,
+        "unknown_recall": null
+      },
+      "морковь": {
+        "examples": 12,
+        "accepted": 5,
+        "false_assertions": 0,
+        "accuracy": 0.4166666666666667,
+        "answerable_recall": 0.4166666666666667,
+        "unknown_recall": null
+      },
+      "рыба": {
+        "examples": 24,
+        "accepted": 2,
+        "false_assertions": 0,
+        "accuracy": 0.08333333333333333,
+        "answerable_recall": 0.08333333333333333,
+        "unknown_recall": null
+      },
+      "дерево": {
+        "examples": 9,
+        "accepted": 8,
+        "false_assertions": 0,
+        "accuracy": 0.8888888888888888,
+        "answerable_recall": 0.8888888888888888,
+        "unknown_recall": null
+      },
+      "кружка": {
+        "examples": 9,
+        "accepted": 3,
+        "false_assertions": 0,
+        "accuracy": 0.3333333333333333,
+        "answerable_recall": 0.3333333333333333,
+        "unknown_recall": null
+      },
+      "стул": {
+        "examples": 9,
+        "accepted": 5,
+        "false_assertions": 0,
+        "accuracy": 0.5555555555555556,
+        "answerable_recall": 0.5555555555555556,
+        "unknown_recall": null
+      },
+      "книга": {
+        "examples": 9,
+        "accepted": 4,
+        "false_assertions": 0,
+        "accuracy": 0.4444444444444444,
+        "answerable_recall": 0.4444444444444444,
+        "unknown_recall": null
+      }
+    }
+  },
+  "old_regression": {
+    "all": {
+      "examples": 546,
+      "accepted": 213,
+      "false_assertions": 0,
+      "accuracy": 0.7197802197802198,
+      "answerable_recall": 0.5819672131147541,
+      "unknown_recall": 1.0
+    },
+    "object": {
+      "examples": 546,
+      "accepted": 213,
+      "false_assertions": 0,
+      "accuracy": 0.7197802197802198,
+      "answerable_recall": 0.5819672131147541,
+      "unknown_recall": 1.0
+    },
+    "by_concept": {
+      "яблоко": {
+        "examples": 53,
+        "accepted": 33,
+        "false_assertions": 0,
+        "accuracy": 0.6226415094339622,
+        "answerable_recall": 0.6226415094339622,
+        "unknown_recall": null
+      },
+      "банан": {
+        "examples": 26,
+        "accepted": 11,
+        "false_assertions": 0,
+        "accuracy": 0.4230769230769231,
+        "answerable_recall": 0.4230769230769231,
+        "unknown_recall": null
+      },
+      "морковь": {
+        "examples": 52,
+        "accepted": 37,
+        "false_assertions": 0,
+        "accuracy": 0.7115384615384616,
+        "answerable_recall": 0.7115384615384616,
+        "unknown_recall": null
+      },
+      "рыба": {
+        "examples": 49,
+        "accepted": 25,
+        "false_assertions": 0,
+        "accuracy": 0.5102040816326531,
+        "answerable_recall": 0.5102040816326531,
+        "unknown_recall": null
+      },
+      "дерево": {
+        "examples": 53,
+        "accepted": 31,
+        "false_assertions": 0,
+        "accuracy": 0.5849056603773585,
+        "answerable_recall": 0.5849056603773585,
+        "unknown_recall": null
+      },
+      "кружка": {
+        "examples": 53,
+        "accepted": 25,
+        "false_assertions": 0,
+        "accuracy": 0.4716981132075472,
+        "answerable_recall": 0.4716981132075472,
+        "unknown_recall": null
+      },
+      "стул": {
+        "examples": 35,
+        "accepted": 21,
+        "false_assertions": 0,
+        "accuracy": 0.6,
+        "answerable_recall": 0.6,
+        "unknown_recall": null
+      },
+      "книга": {
+        "examples": 45,
+        "accepted": 30,
+        "false_assertions": 0,
+        "accuracy": 0.6666666666666666,
+        "answerable_recall": 0.6666666666666666,
+        "unknown_recall": null
+      }
+    }
+  },
+  "textbook_diagnostic": {
+    "all": {
+      "examples": 7,
+      "accepted": 0,
+      "false_assertions": 0,
+      "accuracy": 0.5714285714285714,
+      "answerable_recall": 0.0,
+      "unknown_recall": 1.0
+    },
+    "object": {
+      "examples": 7,
+      "accepted": 0,
+      "false_assertions": 0,
+      "accuracy": 0.5714285714285714,
+      "answerable_recall": 0.0,
+      "unknown_recall": 1.0
+    },
+    "by_concept": {
+      "морковь": {
+        "examples": 1,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "кружка": {
+        "examples": 1,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "книга": {
+        "examples": 1,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      }
+    }
+  },
+  "failure_analysis": {
+    "status": "CANDIDATE_REJECTED_NOT_DEPLOYED",
+    "checkpoint_sha256": "f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a",
+    "report_sha256": "6e01038fd1acdeab9f59c313096eb0ebd37ebbe36f7107cbb02150a0b2b36290",
+    "confident_errors": {
+      "object-final": [],
+      "object-regression": [],
+      "textbook-diagnostic": []
+    },
+    "prior_known_error_controls": {
+      "object-final": [],
+      "object-regression": [
+        {
+          "source_id": "quickdraw/6675675261960192",
+          "gold": "яблоко",
+          "previous_selected": "рыба",
+          "selected": "UNKNOWN",
+          "outcome": "ABSTAINED_NOT_RECOGNITION"
+        }
+      ],
+      "textbook-diagnostic": [
+        {
+          "source_id": "textbook/e3719534d7e31cd87ae9e985fbe75b85a8009bf966085a8e7b898b63f822c409",
+          "gold": "кружка",
+          "previous_selected": "рыба",
+          "selected": "UNKNOWN",
+          "outcome": "ABSTAINED_NOT_RECOGNITION"
+        }
+      ]
+    },
+    "previous_error_receipt_sha256": "24d2a9552d3372f54d53fe55b01d374a7a2ffed4961da6f57c857cb90bcf4615",
+    "next_data": "New independently reviewed fish lookalikes, mugs and apples across richer styles; hold new families out. Never move these known control images to training.",
+    "limits": "Observed confusions, not a causal diagnosis. Do not tune thresholds against this final or claim general honesty."
+  },
+  "threshold": 0.99,
+  "calibration_grid": [
+    {
+      "threshold": 0.99,
+      "stats": {
+        "examples": 612,
+        "accepted": 207,
+        "false_assertions": 0,
+        "accuracy": 0.6633986928104575,
+        "answerable_recall": 0.5012106537530266,
+        "unknown_recall": 1.0
+      },
+      "eligible": true
+    },
+    {
+      "threshold": 0.995,
+      "stats": {
+        "examples": 612,
+        "accepted": 176,
+        "false_assertions": 0,
+        "accuracy": 0.6127450980392157,
+        "answerable_recall": 0.4261501210653753,
+        "unknown_recall": 1.0
+      },
+      "eligible": true
+    },
+    {
+      "threshold": 0.999,
+      "stats": {
+        "examples": 612,
+        "accepted": 118,
+        "false_assertions": 0,
+        "accuracy": 0.5179738562091504,
+        "answerable_recall": 0.2857142857142857,
+        "unknown_recall": 1.0
+      },
+      "eligible": true
+    },
+    {
+      "threshold": 0.9995,
+      "stats": {
+        "examples": 612,
+        "accepted": 87,
+        "false_assertions": 0,
+        "accuracy": 0.4673202614379085,
+        "answerable_recall": 0.2106537530266344,
+        "unknown_recall": 1.0
+      },
+      "eligible": true
+    },
+    {
+      "threshold": 0.9999,
+      "stats": {
+        "examples": 612,
+        "accepted": 28,
+        "false_assertions": 0,
+        "accuracy": 0.3709150326797386,
+        "answerable_recall": 0.06779661016949153,
+        "unknown_recall": 1.0
+      },
+      "eligible": false
+    }
+  ],
+  "calibration_raw_not_safe_policy": {
+    "examples": 612,
+    "accepted": 344,
+    "false_assertions": 14,
+    "accuracy": 0.8496732026143791,
+    "answerable_recall": 0.7990314769975787,
+    "unknown_recall": 0.9547738693467337
+  },
+  "retention_gates": {
+    "count": true,
+    "shape": true,
+    "color": true,
+    "same_shape": true,
+    "same_color": true,
+    "horizontal": true,
+    "vertical": true
+  },
+  "domain_diagnostics": {
+    "status": "POST_FREEZE_DOMAIN_DIAGNOSTIC_NO_TUNING",
+    "domains": {
+      "photographs": {
+        "frozen_safe_policy": {
+          "examples": 49,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.24489795918367346,
+          "answerable_recall": 0.0,
+          "unknown_recall": 1.0
+        },
+        "raw_consensus_not_safe_policy": {
+          "examples": 49,
+          "accepted": 11,
+          "false_assertions": 8,
+          "accuracy": 0.2857142857142857,
+          "answerable_recall": 0.08108108108108109,
+          "unknown_recall": 0.9166666666666666
+        },
+        "families": 27,
+        "by_concept": {
+          "UNKNOWN": {
+            "examples": 12,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 1.0,
+            "answerable_recall": null,
+            "unknown_recall": 1.0
+          },
+          "банан": {
+            "examples": 7,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "морковь": {
+            "examples": 4,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "рыба": {
+            "examples": 19,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "стул": {
+            "examples": 3,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "яблоко": {
+            "examples": 4,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          }
+        }
+      },
+      "sketches_and_absence_control": {
+        "frozen_safe_policy": {
+          "examples": 89,
+          "accepted": 34,
+          "false_assertions": 0,
+          "accuracy": 0.7415730337078652,
+          "answerable_recall": 0.5964912280701754,
+          "unknown_recall": 1.0
+        },
+        "raw_consensus_not_safe_policy": {
+          "examples": 89,
+          "accepted": 51,
+          "false_assertions": 2,
+          "accuracy": 0.8876404494382022,
+          "answerable_recall": 0.8596491228070176,
+          "unknown_recall": 0.9375
+        },
+        "families": 89,
+        "by_concept": {
+          "UNKNOWN": {
+            "examples": 32,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 1.0,
+            "answerable_recall": null,
+            "unknown_recall": 1.0
+          },
+          "банан": {
+            "examples": 5,
+            "accepted": 2,
+            "false_assertions": 0,
+            "accuracy": 0.4,
+            "answerable_recall": 0.4,
+            "unknown_recall": null
+          },
+          "дерево": {
+            "examples": 9,
+            "accepted": 8,
+            "false_assertions": 0,
+            "accuracy": 0.8888888888888888,
+            "answerable_recall": 0.8888888888888888,
+            "unknown_recall": null
+          },
+          "книга": {
+            "examples": 9,
+            "accepted": 4,
+            "false_assertions": 0,
+            "accuracy": 0.4444444444444444,
+            "answerable_recall": 0.4444444444444444,
+            "unknown_recall": null
+          },
+          "кружка": {
+            "examples": 9,
+            "accepted": 3,
+            "false_assertions": 0,
+            "accuracy": 0.3333333333333333,
+            "answerable_recall": 0.3333333333333333,
+            "unknown_recall": null
+          },
+          "морковь": {
+            "examples": 8,
+            "accepted": 5,
+            "false_assertions": 0,
+            "accuracy": 0.625,
+            "answerable_recall": 0.625,
+            "unknown_recall": null
+          },
+          "рыба": {
+            "examples": 5,
+            "accepted": 2,
+            "false_assertions": 0,
+            "accuracy": 0.4,
+            "answerable_recall": 0.4,
+            "unknown_recall": null
+          },
+          "стул": {
+            "examples": 6,
+            "accepted": 5,
+            "false_assertions": 0,
+            "accuracy": 0.8333333333333334,
+            "answerable_recall": 0.8333333333333334,
+            "unknown_recall": null
+          },
+          "яблоко": {
+            "examples": 6,
+            "accepted": 5,
+            "false_assertions": 0,
+            "accuracy": 0.8333333333333334,
+            "answerable_recall": 0.8333333333333334,
+            "unknown_recall": null
+          }
+        }
+      }
+    },
+    "checkpoint_sha256": "f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a",
+    "dataset_sha256": "5c2f7780b37efe725e1842384f8d25e1514f7d81897dc75079907f847e4b7386",
+    "arithmetic_audit": {
+      "status": "VERIFIED_ARITHMETIC_NOT_INDEPENDENT_SEMANTIC_TRUTH",
+      "prediction_records": 5167,
+      "calibration_diagnostic_records": 612,
+      "report_sha256": "6e01038fd1acdeab9f59c313096eb0ebd37ebbe36f7107cbb02150a0b2b36290",
+      "checkpoint_sha256": "f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a",
+      "object_gate": false,
+      "retention_gates": {
+        "count": true,
+        "shape": true,
+        "color": true,
+        "same_shape": true,
+        "same_color": true,
+        "horizontal": true,
+        "vertical": true
+      },
+      "limits": "Independent pure-Python selector/metric/gate bookkeeping, not independent source-label verification, blind exam, training replay, or proof of general honesty."
+    },
+    "limits": "Raw consensus is not permitted naming. Missing class/domain support is unavailable, not zero-error mastery. Small related variants are not independent. This final is now known and cannot be reused as fresh. These diagnostics do not change acceptance gates or choose weights."
+  },
+  "arithmetic_audit": {
+    "status": "VERIFIED_ARITHMETIC_NOT_INDEPENDENT_SEMANTIC_TRUTH",
+    "prediction_records": 5167,
+    "calibration_diagnostic_records": 612,
+    "report_sha256": "6e01038fd1acdeab9f59c313096eb0ebd37ebbe36f7107cbb02150a0b2b36290",
+    "checkpoint_sha256": "f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a",
+    "object_gate": false,
+    "retention_gates": {
+      "count": true,
+      "shape": true,
+      "color": true,
+      "same_shape": true,
+      "same_color": true,
+      "horizontal": true,
+      "vertical": true
+    },
+    "limits": "Independent pure-Python selector/metric/gate bookkeeping, not independent source-label verification, blind exam, training replay, or proof of general honesty."
+  },
+  "accepted_checkpoint_sha256": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+  "accepted_policy_sha256": "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6",
+  "accepted_model_unchanged_locally_and_remotely": true,
+  "parent_archive_commit": "3a000ce04ba13ee72ceb68dccd06734655bb6c28",
+  "limits": [
+    "Curator saw categories; this is not an independent blind semantic exam.",
+    "Held-out publisher and detected families do not prove exhaustive artist/semantic independence.",
+    "Abstention and zero errors are not mastery; all original safety gates remain.",
+    "Augmentations are training views, not independent new examples.",
+    "Only eight naming classes. Definitions, broad language understanding, all textbooks and M34 not trained.",
+    "Photograph support is insufficient per class to assert general photo mastery. Author alias or semantic overlap is not exhaustively excluded.",
+    "Outside-scope examples do not teach their names. Accepted working model not replaced."
+  ]
+}

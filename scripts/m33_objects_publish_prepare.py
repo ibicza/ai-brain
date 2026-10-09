@@ -9,7 +9,19 @@ from pathlib import Path
 
 from lexicon_catalogue_export import saved_tables, sha
 from m33_objects_data import write_json
-from m33_verify_objects_evidence import verify
+from m33_verify_objects_evidence import statistics, verify
+
+
+def extend_links(previous, links, index_path):
+    """Never drop an existing link or silently exceed Excel's text limit."""
+    old = list(dict.fromkeys((previous or "").splitlines()))
+    merged = "\n".join(dict.fromkeys([*old, *links]))
+    if len(merged) <= 32767:
+        return merged, False
+    fallback = "\n".join(dict.fromkeys([*old, str(index_path)]))
+    if len(fallback) > 32767:
+        raise ValueError("Existing links leave no space for a complete-list pointer")
+    return fallback, True
 
 
 def build(workbook, previous_prepared, data, experiment, selection, output):
@@ -45,7 +57,18 @@ def build(workbook, previous_prepared, data, experiment, selection, output):
         prepared[key + "_headers"] = sheets[sheet]["headers"]
         prepared["input_rows"][key] = len(prepared[key])
         prepared["input_headers"][key] = prepared[key + "_headers"]
-    changes, measured = [], {}
+    changes, measured, indices = [], {}, []
+    photos = any(r.get("role") == "VISUALLY_CURATED_NONBLIND_PHOTOGRAPH" for r in media)
+    photo_ids = {
+        r["source_id"]
+        for r in media
+        if r.get("role") == "VISUALLY_CURATED_NONBLIND_PHOTOGRAPH"
+    }
+    predictions = json.loads(
+        (experiment / "object-final-predictions.json").read_text(encoding="utf-8")
+    )
+    photo_final = [r for r in predictions if r["source_id"] in photo_ids]
+    photo_stats = statistics(photo_final) if photo_final else None
     for word, identifier in dataset["concept_ids"].items():
         matches = [i for i, r in enumerate(prepared["words"]) if r[0] == identifier]
         if len(matches) != 1:
@@ -68,9 +91,29 @@ def build(workbook, previous_prepared, data, experiment, selection, output):
                 and r["split"] == split
                 and not r.get("parent")
             ]
-            after[column] = "\n".join(
-                dict.fromkeys([*(before[column] or "").splitlines(), *links])
+            index_path = (
+                output / "catalogue-link-indices" / f"{identifier}-{split}.json"
             )
+            after[column], indirect = extend_links(before[column], links, index_path)
+            if indirect:
+                indices.append(
+                    (
+                        index_path,
+                        {
+                            "concept_id": identifier,
+                            "split": split,
+                            "dataset_sha256": sha(data / "dataset.json"),
+                            "images": [
+                                r
+                                for r in media
+                                if r["concept_id"] == identifier
+                                and r["split"] == split
+                                and not r.get("parent")
+                            ],
+                            "limits": "Complete new-image links; prior cell links retained. This index is not a training admission policy.",
+                        },
+                    )
+                )
         after[10], after[11] = (
             report["checkpoint_sha256"],
             str(experiment / "report.json"),
@@ -83,8 +126,21 @@ def build(workbook, previous_prepared, data, experiment, selection, output):
             f"Вся новая проверка: ответов {overall['accepted']}/{overall['examples']}, уверенных ошибок {overall['false_assertions']}. "
             f"Порог предметного ответа {report['thresholds']['object']}. Приёмка блока {'пройдена в ограниченной области' if report['object_gate'] else 'не пройдена'}. "
             "Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. "
-            "Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото, определения и весь учебник не обучались. "
-            f"Все изображения, разбиения и происхождение: {data / 'image-registry.json'}"
+            + (
+                "Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. "
+                if photos
+                else "Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото не обучались. "
+            )
+            + "Определения и весь учебник не обучались. "
+            + (
+                f"Фото в новой проверке: ответов {photo_stats['accepted']}/{photo_stats['examples']}, уверенных ошибок {photo_stats['false_assertions']}. "
+                if photo_stats
+                else ""
+            )
+            + f"Старый контроль: уверенных ошибок {report['tests'].get('object_regression', {}).get('all', {}).get('false_assertions', 'нет данных')}. "
+            + f"Учебные иллюстрации: уверенных ошибок {report['tests']['textbook_diagnostic']['all']['false_assertions']}. "
+            + "Если список новых ссылок не помещается в ячейку, дана ссылка на полный JSON-индекс без удаления старых ссылок. "
+            + f"Все изображения, разбиения и происхождение: {data / 'image-registry.json'}"
         )
         after[12] = "\n".join(filter(None, [before[12], note]))
         if any(
@@ -105,6 +161,10 @@ def build(workbook, previous_prepared, data, experiment, selection, output):
         "selection_receipt_sha256": sha(selection),
     }
     output.mkdir()
+    if indices:
+        (output / "catalogue-link-indices").mkdir()
+        for path, value in indices:
+            write_json(path, value)
     write_json(
         output / "changes.json",
         {

@@ -60,6 +60,20 @@ def test_winner_selected_by_development_loss_and_frozen(tmp_path):
         selector.select([], tmp_path / "selection.json")
 
 
+def test_development_loss_contract_cannot_change_with_tuning(tmp_path):
+    roots = candidates(tmp_path)
+    path = roots[1] / "protocol.json"
+    protocol = json.loads(path.read_text())
+    protocol["config"]["domain_balanced_dev"] = True
+    path.write_text(json.dumps(protocol))
+    report_path = roots[1] / "development-report.json"
+    report = json.loads(report_path.read_text())
+    report["protocol_sha256"] = selector.sha(path)
+    report_path.write_text(json.dumps(report))
+    with pytest.raises(ValueError, match="scoring contracts"):
+        selector.select(roots, tmp_path / "tuning.json", tuning=True)
+
+
 def test_tuning_mode_allows_recorded_learning_rate_changes_not_dataset_changes(
     tmp_path,
 ):

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 from m33_objects_data import sha, write_json
@@ -11,15 +12,21 @@ from m33_objects_expansion_archive import ANCHOR, POLICY, bundle
 from m33_verify_objects_evidence import verify
 
 PARENT = "5b03f850d15937f45acd413b5e355858e6b2c7fe"
+PARENTS = {
+    "diversity": PARENT,
+    "reliability": "3a000ce04ba13ee72ceb68dccd06734655bb6c28",
+}
 
 
 def load(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def result(root, repo):
+def result(root, repo, series="diversity"):
     test_log = root / "focused-regression.log"
-    if "270 passed, 2 skipped" not in test_log.read_text(encoding="utf-8-sig"):
+    log = test_log.read_text(encoding="utf-8-sig")
+    tests = re.search(r"(\d+) passed, (\d+) skipped in", log)
+    if tests is None or "failed" in log or int(tests[1]) < 270 or int(tests[2]) != 2:
         raise ValueError("Expected focused regression evidence missing")
     data = root / "prepared-v1"
     experiment = root / "development-v1/final-evaluation"
@@ -64,7 +71,14 @@ def result(root, repo):
         for r in registry
         if not r.get("parent") and r.get("role") != "SHARED_CONSTANT_CONTROL"
     ]
-    artwork = [r for r in fresh if r.get("publisher")]
+    artwork = [
+        r
+        for r in fresh
+        if r.get("role") == "VISUALLY_CURATED_NONBLIND_COLOR_ILLUSTRATION"
+    ]
+    photographs = [
+        r for r in fresh if r.get("role") == "VISUALLY_CURATED_NONBLIND_PHOTOGRAPH"
+    ]
     development = load(
         Path(selection["winner"]["candidate_path"]) / "development-report.json"
     )
@@ -74,8 +88,8 @@ def result(root, repo):
     value = {
         "schema": 1,
         "focused_tests": {
-            "passed": 270,
-            "skipped": 2,
+            "passed": int(tests[1]),
+            "skipped": int(tests[2]),
             "log_sha256": sha(test_log),
             "skip_reason": "Project venv lacks pdfplumber; unrelated PDF tests skipped.",
         },
@@ -85,8 +99,9 @@ def result(root, repo):
         "scope": "Eight object names, own weights; bounded RU/EN prompts and Russian answers.",
         "data": {
             "new_admitted_images": len(fresh),
-            "new_sketches": len(fresh) - len(artwork),
+            "new_sketches": len(fresh) - len(artwork) - len(photographs),
             "new_illustrations": len(artwork),
+            "new_photographs": len(photographs),
             "counts": {s: len(r) for s, r in dataset["records"].items()},
             "dataset_sha256": sha(data / "dataset.json"),
             "pixels_sha256": sha(data / "pixels.npz"),
@@ -94,7 +109,7 @@ def result(root, repo):
             "registry_sha256": sha(data / "image-registry.json"),
             "lineage": load(root / "preparation-lineage.json"),
             "old_final_role": "KNOWN_REGRESSION_NEVER_TRAINING",
-            "OpenMoji_role": "FINAL_ONLY_HELD_OUT_STYLE",
+            "photo_source_boundary": "Verified acquired thumbnail bytes and API metadata. Full original bytes not downloaded or independently verified.",
         },
         "selection": selection,
         "development_raw_not_safe_policy": best["object_dev"],
@@ -107,6 +122,9 @@ def result(root, repo):
         "regression_gate": report["regression_gate"],
         "production_admitted": False,
         "fresh_final": report["tests"]["object_final"],
+        "old_regression": report["tests"]["object_regression"],
+        "textbook_diagnostic": report["tests"]["textbook_diagnostic"],
+        "failure_analysis": load(root / "failure-analysis.json"),
         "threshold": report["thresholds"]["object"],
         "calibration_grid": diagnostic["grid"],
         "calibration_raw_not_safe_policy": diagnostic["raw_consensus"],
@@ -116,17 +134,18 @@ def result(root, repo):
         "accepted_checkpoint_sha256": ANCHOR,
         "accepted_policy_sha256": POLICY,
         "accepted_model_unchanged_locally_and_remotely": True,
-        "parent_archive_commit": PARENT,
+        "parent_archive_commit": PARENTS[series],
         "limits": [
             "Curator saw categories; this is not an independent blind semantic exam.",
             "Held-out publisher and detected families do not prove exhaustive artist/semantic independence.",
             "Abstention and zero errors are not mastery; all original safety gates remain.",
             "Augmentations are training views, not independent new examples.",
-            "Photos, definitions, broad language understanding, all textbooks and M34 not trained.",
+            "Only eight naming classes. Definitions, broad language understanding, all textbooks and M34 not trained.",
+            "Photograph support is insufficient per class to assert general photo mastery. Author alias or semantic overlap is not exhaustively excluded.",
             "Outside-scope examples do not teach their names. Accepted working model not replaced.",
         ],
     }
-    output = repo / "learning_materials/visual_lexicon/objects_diversity_result.json"
+    output = repo / f"learning_materials/visual_lexicon/objects_{series}_result.json"
     if output.exists():
         raise ValueError("Existing diversity result must remain immutable")
     write_json(output, value)
@@ -137,12 +156,12 @@ def result(root, repo):
     }
 
 
-def archive(root, repo, output):
+def archive(root, repo, output, series="diversity"):
     output.mkdir(exist_ok=False)
     sources = []
     for name in (
         "raw-proposals",
-        "illustrations",
+        "photos-v2" if series == "reliability" else "illustrations",
         "prepared-v1",
         "development-v1",
         "source-capsule-v1.tgz",
@@ -155,7 +174,7 @@ def archive(root, repo, output):
         )
     sources.extend((p.name, p) for p in root.glob("*.json"))
     sources.append(("focused-regression.log", root / "focused-regression.log"))
-    for name in ("objects_diversity_review.json", "objects_diversity_result.json"):
+    for name in (f"objects_{series}_review.json", f"objects_{series}_result.json"):
         sources.append(
             ("catalogue/" + name, repo / "learning_materials/visual_lexicon" / name)
         )
@@ -166,7 +185,16 @@ def archive(root, repo, output):
                 repo / "artifacts/m33-primary-relations-20261008-v5" / name,
             )
         )
-    course = bundle(output / "diversity-course-evidence.zip", sources)
+    # Separate substantial photograph bytes to reduce ordinary Git blob sizes.
+    # bundle() enforces the hard 100 MB limit; the recommended 50 MB size is
+    # advisory and a self-contained replay capsule may still exceed it.
+    bundles = []
+    if series == "reliability":
+        photo_sources = [s for s in sources if s[0].startswith("photos-v2/")]
+        sources = [s for s in sources if not s[0].startswith("photos-v2/")]
+        bundles.append(bundle(output / "photograph-source-evidence.zip", photo_sources))
+    course = bundle(output / f"{series}-course-evidence.zip", sources)
+    bundles.append(course)
     publication = root / "publication"
     evidence = bundle(
         output / "publication-evidence.zip",
@@ -182,13 +210,13 @@ def archive(root, repo, output):
         output / "backup-manifest.json",
         {
             "schema": 1,
-            "parent_archive_commit": PARENT,
+            "parent_archive_commit": PARENTS[series],
             "object_gate": load(
-                repo / "learning_materials/visual_lexicon/objects_diversity_result.json"
+                repo / f"learning_materials/visual_lexicon/objects_{series}_result.json"
             )["object_gate"],
             "production_admitted": False,
             "restore_root": str(root),
-            "bundles": [course, evidence],
+            "bundles": [*bundles, evidence],
             "workbook_sha256": sha(publication / "visual_lexicon.xlsx"),
             "accepted_checkpoint_sha256": ANCHOR,
             "accepted_policy_sha256": POLICY,
@@ -197,7 +225,7 @@ def archive(root, repo, output):
     )
     return {
         "bundles": [
-            {k: b[k] for k in ("file", "sha256", "bytes")} for b in (course, evidence)
+            {k: b[k] for k in ("file", "sha256", "bytes")} for b in [*bundles, evidence]
         ]
     }
 
@@ -208,11 +236,12 @@ if __name__ == "__main__":
     for name in ("root", "repo"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--series", choices=tuple(PARENTS), default="diversity")
     args = parser.parse_args()
     print(
         json.dumps(
-            result(args.root, args.repo)
+            result(args.root, args.repo, args.series)
             if args.mode == "result"
-            else archive(args.root, args.repo, args.output)
+            else archive(args.root, args.repo, args.output, args.series)
         )
     )
