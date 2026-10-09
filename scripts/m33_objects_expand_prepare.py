@@ -21,6 +21,22 @@ def bound_json(path):
     return json.loads(blob), hashlib.sha256(blob).hexdigest()
 
 
+def retained_sketch_lineage(parent_manifest):
+    """Photo-only additions retain the last sketch acquisition/licence for later expansions."""
+    values = tuple(
+        parent_manifest[key]
+        for key in ("acquisition_sha256", "licence_snapshot_sha256")
+    )
+    if any(
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(c not in "0123456789abcdef" for c in value)
+        for value in values
+    ):
+        raise ValueError("Missing inherited sketch provenance")
+    return values
+
+
 def assign_groups(records, groups, seed=20261010):
     """Existing split owners are immutable; mixed-owner/label bridges quarantined."""
     grouped = defaultdict(list)
@@ -131,7 +147,8 @@ def build(
             raise ValueError(
                 "Photo-only expansion cannot silently ignore sketch review"
             )
-        acquired, acquisition_sha = {"files": []}, None
+        acquisition_sha, retained_licence_sha = retained_sketch_lineage(parent_manifest)
+        acquired = {"files": []}
     else:
         acquired, acquisition_sha = bound_json(root / "acquisition.json")
         protected_inputs[root / "acquisition.json"] = acquisition_sha
@@ -419,7 +436,7 @@ def build(
         "review_sha256": review_sha,
         "licence_snapshot_sha256": protected_inputs[root / "LICENSE.quickdraw"]
         if root is not None
-        else None,
+        else retained_licence_sha,
         "pixels_sha256": sha(output / "pixels.npz"),
         "fresh_family_counts": fresh_counts,
         "fresh_parent_free_family_support": new_support,

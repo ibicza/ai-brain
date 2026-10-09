@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "status": "POST_SEAL_PREPARATION_LINEAGE_HARDENING",
+  "experiment_backup_commit": "8147d93501e691f6ec719d32f95f69f72a752ae9",
+  "experiment_result_sha256_unchanged": "ff59a3ad7dcc2009c9566d124938eb27f2256c06f15984174fa4b9a122daa0dd",
+  "change": "Photo-only expansions retain the inherited last QuickDraw acquisition and licence SHA, instead of nulling them and preventing subsequent mixed sketch/photo expansion. Missing inherited provenance is rejected. No model training, thresholds, saved results, or existing prepared data changed by this post-seal fix.",
+  "source_sha256": "afeadf9f467476231eb6071c1fb2c48af6cd79930b53553d661847141acd8545",
+  "test_source_sha256": "d7ca2de84895ec4f37d08838311605eed9dba7d80b5247d80afd408ec7c0ad52",
+  "focused_tests": {
+    "passed": 190,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_sha256": "379ae01a1afd5fc666adb02c8d8d8562591ca2b711a424494cf228e054874fa9",
+    "backup_path": "learning_materials/visual_lexicon/backup/objects-photo-transfer-20261009/postseal-focused-tests.xml"
+  },
+  "production_admitted": false,
+  "limits": "Development-only experiment source remains the exact sealed 449-file capsule. This later fix applies only to future data preparation and does not relabel the unsuccessful development probe as successful or the insufficient new data as ready. Existing source/control preservation and per-class/photo-cohort readiness guards remain strict."
+}

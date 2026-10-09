@@ -4,6 +4,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 spec = importlib.util.spec_from_file_location(
@@ -57,3 +59,10 @@ def test_fresh_family_partitioning_deterministic_and_no_split_leakage():
         split: sum(owner == split for _, owner, _ in assigned)
         for split in ("train", "dev", "calibration", "final")
     } == {"train": 24, "dev": 4, "calibration": 6, "final": 6}
+
+
+def test_photo_only_round_keeps_sketch_lineage_for_a_later_mixed_expansion():
+    parent = {"acquisition_sha256": "a" * 64, "licence_snapshot_sha256": "b" * 64}
+    assert module.retained_sketch_lineage(parent) == ("a" * 64, "b" * 64)
+    with pytest.raises(ValueError, match="sketch provenance"):
+        module.retained_sketch_lineage(parent | {"acquisition_sha256": None})
