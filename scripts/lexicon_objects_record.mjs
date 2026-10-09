@@ -62,8 +62,18 @@ for(const change of data.changes){
   assert.deepEqual(change.before.slice(0,5),change.after.slice(0,5),'Identity/meaning changed');
   assert.equal(change.before[13],change.after[13],'Unassigned book links changed');
   assert.equal(change.after[5],'Требует доработки');
-  assert.equal(change.after[6],0);
-  assert.equal(change.after[7],0);
+  if(data.measured_object_results){
+    const measured=data.measured_object_results[change.id];
+    assert(measured && Number.isFinite(measured.answerable_recall) && measured.answerable_recall>=0 && measured.answerable_recall<=1);
+    assert(Number.isInteger(measured.false_assertions) && measured.false_assertions>=0);
+    assert.equal(change.after[6],measured.answerable_recall);
+    assert.equal(change.after[7],measured.false_assertions);
+    assert.equal(change.after[10],data.checkpoint_sha256);
+    assert.equal(change.after[11],data.report_path);
+  }else{
+    assert.equal(change.after[6],0);
+    assert.equal(change.after[7],0);
+  }
   assert(change.after[12].startsWith(change.before[12] || ''),'Existing notes removed');
   const actual=words.getRange(`A${change.row}:N${change.row}`).values[0];
   assert.deepEqual(actual.map(normal),(mode==='verify'?change.after:change.before).map(normal),'Saved row differs');
@@ -103,5 +113,5 @@ for(const change of data.changes){
   const blob=await wb.render({sheetName:'Словарь',range:`A${change.row}:H${change.row}`,scale:1,format:'png'});
   await fs.writeFile(path.join(qa,`${change.id}.png`),new Uint8Array(await blob.arrayBuffer()));
 }
-await fs.writeFile(path.join(qa,'authoring-report.json'),JSON.stringify({input_sha256:data.input_workbook_sha256,output_sha256:await sha(output),changed_concepts:data.changes.map(c=>c.id),object_training_started:true,object_gate:false,production_admitted:false},null,2));
+await fs.writeFile(path.join(qa,'authoring-report.json'),JSON.stringify({input_sha256:data.input_workbook_sha256,output_sha256:await sha(output),changed_concepts:data.changes.map(c=>c.id),object_training_started:true,object_gate:data.object_gate ?? false,production_admitted:false},null,2));
 console.log(JSON.stringify({output,sha256:await sha(output),changed_concepts:8}));

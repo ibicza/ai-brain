@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import time
 from pathlib import Path
 
@@ -53,7 +54,7 @@ class ObjectPrepared:
         names = archive[split + "_answers"].tolist()
         self.ids = archive[split + "_ids"].tolist()
         self.images = torch.from_numpy(pixels.copy()).permute(0, 3, 1, 2).to(device)
-        final = split in ("final", "textbook_diagnostic")
+        final = split in ("final", "regression", "textbook_diagnostic")
         indices = (6, 7) if final else tuple(range(6))
         self.texts = [
             obj.OBJECT_QUESTIONS[indices[i % len(indices)]] for i in range(len(names))
@@ -161,6 +162,26 @@ def loss_on(data, probs):
     )
 
 
+def verify_inherited(model, source_state):
+    for name, value in source_state.items():
+        current = model.state_dict()[name].cpu()
+        inherited = (
+            current[: value.shape[0]] if current.shape != value.shape else current
+        )
+        if not torch.equal(inherited, value.cpu()):
+            raise ValueError("Protected inherited tensor changed: " + name)
+
+
+def verify_inputs(args, protocol):
+    if (
+        sha(args.previous) != PREVIOUS_SHA
+        or sha(args.previous_policy) != POLICY_SHA
+        or sha(args.data / "pixels.npz") != protocol["pixels_sha256"]
+        or sha(args.data / "dataset.json") != protocol["dataset_sha256"]
+    ):
+        raise ValueError("Immutable inputs changed during experiment")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
@@ -175,13 +196,39 @@ def main():
     parser.add_argument("--holdout-scenes", type=int, default=300)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cuda")
     parser.add_argument("--protect-inherited", action="store_true")
+    parser.add_argument(
+        "--vision-extension-channels", type=int, choices=(0, 32, 64), default=0
+    )
+    parser.add_argument(
+        "--vision-extension-depth", type=int, choices=(0, 1, 2), default=0
+    )
+    parser.add_argument("--development-only", action="store_true")
+    parser.add_argument("--object-unknown-adapter", action="store_true")
+    parser.add_argument("--evaluate-checkpoint", type=Path)
+    parser.add_argument("--selection-receipt", type=Path)
+    parser.add_argument(
+        "--evaluation-note",
+        default="Known v1 object regression cohort, not a fresh blind exam.",
+    )
     args = parser.parse_args()
     if (
         args.output.exists()
-        or min(args.steps, args.eval_every) < 1
+        or args.eval_every < 1
+        or (args.steps < 1 and not args.evaluate_checkpoint)
         or args.learning_rate <= 0
+        or (
+            (args.vision_extension_channels or args.object_unknown_adapter)
+            and not args.protect_inherited
+        )
     ):
         raise ValueError("Fresh experiment and valid budget required")
+    if args.evaluate_checkpoint:
+        if args.steps != 0 or args.development_only or not args.selection_receipt:
+            raise ValueError(
+                "Frozen evaluation requires steps=0 and predeclared selection receipt"
+            )
+    elif args.selection_receipt:
+        raise ValueError("Selection receipt only valid for frozen evaluation")
     if sha(args.previous) != PREVIOUS_SHA or sha(args.previous_policy) != POLICY_SHA:
         raise ValueError("Unverified previous own checkpoint/policy")
     manifest = json.loads((args.data / "dataset.json").read_text(encoding="utf-8"))
@@ -189,6 +236,23 @@ def main():
         raise ValueError("Dataset pixels changed")
     if tuple(manifest["classes"].values()) != obj.OBJECTS:
         raise ValueError("Object scope mismatch")
+    if args.evaluate_checkpoint:
+        receipt = json.loads(args.selection_receipt.read_text(encoding="utf-8"))
+        winner = receipt["winner"]
+        expected_architecture = {
+            "vision_extension_channels": args.vision_extension_channels,
+            "vision_extension_depth": args.vision_extension_depth,
+        }
+        if args.object_unknown_adapter:
+            expected_architecture["object_unknown_adapter"] = True
+        if (
+            winner["checkpoint_sha256"] != sha(args.evaluate_checkpoint)
+            or receipt["dataset_sha256"] != sha(args.data / "dataset.json")
+            or receipt["selection_used"] != "DEVELOPMENT_ONLY"
+            or winner["architecture"] != expected_architecture
+            or receipt["round_id"] != args.round_id
+        ):
+            raise ValueError("Frozen winner/selection boundary mismatch")
     device = torch.device(args.device)
     if args.device == "cuda" and not torch.cuda.is_available():
         raise ValueError("CUDA unavailable; no silent fallback")
@@ -217,13 +281,23 @@ def main():
         "textbook_gate": "Only seven inspected non-blind diagnostics; never used for selection/tuning and never certify textbook mastery. Any accepted wrong diagnostic disallows object acceptance.",
         "limits": manifest["limits"],
         "training_admission": "Only this SHA-bound reviewed subset and fresh procedural replay; catalogue remains drafts, not blanket training admission.",
-        "protected_mode": "When enabled: all inherited tensors and old slices frozen; optimizer weight decay zero; compatibility mask derived only from supported question tokens retains old vocabulary normalization and exact old policy. Only appended word/answer/intent rows train. No parallel answer model at inference.",
-        "evaluation_reuse": "Protected v2 reuses the v1 object holdout as a known regression set, not a fresh blind final; no v1 final source enters training. Procedural retention seeds fresh. Inspected textbook diagnostics remain non-tuning diagnostics.",
+        "protected_mode": "When enabled: inherited tensors/old slices frozen, decay zero, old question-input vocabulary normalization/policy retained. Appended word/answer/intent rows and optional question-gated pixel residual train. One inherited causal core, no separate answer model.",
+        "object_unknown_adapter": "When enabled, a zero-initialized linear correction to the inherited UNKNOWN logit learns from the same causal-core hidden state for supported object questions only. Object-question output vocabulary is eight admitted names plus UNKNOWN; legacy output vocabulary unchanged. No source/gold routing or lowered safety threshold.",
+        "evaluation_reuse": args.evaluation_note,
+        "development_only": args.development_only,
+        "selection_receipt_sha256": sha(args.selection_receipt)
+        if args.selection_receipt
+        else None,
     }
     write(args.output / "protocol.json", protocol)
     source_checkpoint = torch.load(args.previous, map_location="cpu", weights_only=True)
     width = source_checkpoint["width"]
-    model = obj.ObjectsModel(width=width)
+    model = obj.ObjectsModel(
+        width=width,
+        vision_extension_channels=args.vision_extension_channels,
+        vision_extension_depth=args.vision_extension_depth,
+        object_unknown_adapter=args.object_unknown_adapter,
+    )
     model.load_previous(source_checkpoint["model"])
     model.compatible_legacy_vocabulary = args.protect_inherited
     if args.protect_inherited:
@@ -236,6 +310,7 @@ def main():
                     "question_intent.weight",
                     "question_intent.bias",
                 }
+                or name.startswith(("vision_extension.", "object_unknown_adapter."))
             )
         model.core.token_embedding.weight.register_hook(
             lambda gradient: torch.cat(
@@ -403,14 +478,54 @@ def main():
                     {
                         "model": model.state_dict(),
                         "width": width,
+                        "layers": model.core.config.num_layers,
+                        "architecture": model.vision_extension_config,
                         "step": step,
                         "previous_sha256": PREVIOUS_SHA,
                         "compatible_legacy_vocabulary": args.protect_inherited,
                     },
                     args.output / "best.pt",
                 )
+    if args.evaluate_checkpoint:
+        shutil.copyfile(args.evaluate_checkpoint, args.output / "best.pt")
     chosen = torch.load(args.output / "best.pt", map_location=device, weights_only=True)
+    if (
+        chosen.get("architecture", {}) != model.vision_extension_config
+        or chosen.get("compatible_legacy_vocabulary") is not args.protect_inherited
+    ):
+        raise ValueError("Checkpoint architecture/normalizer mismatch")
     model.load_state_dict(chosen["model"])
+    if args.protect_inherited:
+        verify_inherited(model, source_checkpoint["model"])
+    verify_inputs(args, protocol)
+    if args.development_only:
+        write(
+            args.output / "development-report.json",
+            {
+                "schema": 1,
+                "status": "DEVELOPMENT_ONLY_NO_CALIBRATION_OR_FINAL",
+                "history": history,
+                "best_step": chosen["step"],
+                "best_dev_loss": best,
+                "architecture": model.vision_extension_config,
+                "inherited_tensors_byte_preserved": args.protect_inherited,
+                "parameters": sum(p.numel() for p in model.parameters()),
+                "trainable_parameters": sum(
+                    p.numel() for p in model.parameters() if p.requires_grad
+                ),
+                "trainable_parameter_count_note": "Whole trainable tensors counted; old embedding/head/intent slices are additionally frozen by gradient hooks and verified byte-identical.",
+                "checkpoint_sha256": sha(args.output / "best.pt"),
+                "protocol_sha256": sha(args.output / "protocol.json"),
+                "dataset_sha256": protocol["dataset_sha256"],
+                "production_admitted": False,
+                "elapsed_seconds": time.monotonic() - started,
+                "peak_cuda_allocated_bytes": torch.cuda.max_memory_allocated()
+                if device.type == "cuda"
+                else None,
+                "limits": "Selection uses development data only. No calibration thresholds, final, regression, or textbook predictions are produced.",
+            },
+        )
+        return
     calibration_new = ObjectPrepared(archive, "calibration", device)
     calibration_old = OldPrepared(replay["calibration"], device)
     new_probs = probabilities(model, calibration_new)
@@ -424,15 +539,7 @@ def main():
         # Old parameters AND full old normalization are unchanged; use the exact
         # accepted old policy, not a lower support recalibration of that policy.
         thresholds.update(old_thresholds)
-        for name, value in source_checkpoint["model"].items():
-            current = model.state_dict()[name]
-            if not torch.equal(
-                current[: value.shape[0]].cpu()
-                if current.shape != value.shape
-                else current.cpu(),
-                value,
-            ):
-                raise ValueError("Protected inherited tensor changed")
+        verify_inherited(model, source_checkpoint["model"])
     checkpoint_sha = sha(args.output / "best.pt")
     write(
         args.output / "frozen-calibration.json",
@@ -452,6 +559,9 @@ def main():
         "best_step": chosen["step"],
         "thresholds": thresholds,
         "parameters": sum(p.numel() for p in model.parameters()),
+        "architecture": model.vision_extension_config,
+        "inherited_tensors_byte_preserved": args.protect_inherited,
+        "selection_receipt_sha256": protocol["selection_receipt_sha256"],
         "calibration": summary(calibration_new, new_probs, thresholds),
         "tests": {},
         "limits": protocol["limits"],
@@ -459,8 +569,8 @@ def main():
         "production_admitted": False,
     }
 
-    def evaluate(name, data):
-        p = probabilities(model, data)
+    def evaluate(name, data, mode="normal"):
+        p = probabilities(model, data, mode=mode)
         stats = summary(data, p, thresholds)
         ids = (
             data.ids
@@ -492,8 +602,19 @@ def main():
     final_new = ObjectPrepared(archive, "final", device)
     report["tests"]["object_final"] = evaluate("object-final", final_new)
     for mode in ("blank", "shuffled"):
-        report["tests"]["object_" + mode] = summary(
-            final_new, probabilities(model, final_new, mode=mode), thresholds
+        report["tests"]["object_" + mode] = evaluate(
+            "object-" + mode, final_new, mode=mode
+        )
+    regression_gate = True
+    if "regression" in manifest["records"]:
+        report["tests"]["object_regression"] = evaluate(
+            "object-regression", ObjectPrepared(archive, "regression", device)
+        )
+        rstats = report["tests"]["object_regression"]["all"]
+        regression_gate = (
+            rstats["false_assertions"] == 0
+            and (rstats["answerable_recall"] or 0) >= 0.8
+            and (rstats["unknown_recall"] or 0) >= 0.9
         )
     report["tests"]["textbook_diagnostic"] = evaluate(
         "textbook-diagnostic", ObjectPrepared(archive, "textbook_diagnostic", device)
@@ -524,9 +645,13 @@ def main():
         and (stats["answerable_recall"] or 0) >= 0.80
         and (stats["unknown_recall"] or 0) >= 0.90
     )
-    object_gate = object_gate and all(
-        v["accepted"] >= 5 and (v["answerable_recall"] or 0) >= 0.80
-        for v in report["tests"]["object_final"]["by_concept"].values()
+    object_gate = (
+        object_gate
+        and len(report["tests"]["object_final"]["by_concept"]) == 8
+        and all(
+            v["accepted"] >= 5 and (v["answerable_recall"] or 0) >= 0.80
+            for v in report["tests"]["object_final"]["by_concept"].values()
+        )
     )
     for mode in ("blank", "shuffled"):
         object_gate = (
@@ -543,8 +668,9 @@ def main():
         {
             "object_gate": bool(object_gate),
             "retention_gates": {k: bool(v) for k, v in retention.items()},
+            "regression_gate": bool(regression_gate),
             "status": "BOUNDED_OBJECT_GATE_PASSED_NOT_PRODUCTION"
-            if object_gate and all(retention.values())
+            if object_gate and all(retention.values()) and regression_gate
             else "REJECTED_NOT_PRODUCTION",
             "elapsed_seconds": time.monotonic() - started,
             "torch": torch.__version__,
@@ -558,12 +684,7 @@ def main():
         }
     )
     write(args.output / "report.json", report)
-    if (
-        sha(args.previous) != PREVIOUS_SHA
-        or sha(args.previous_policy) != POLICY_SHA
-        or sha(args.data / "pixels.npz") != manifest["pixels_sha256"]
-    ):
-        raise ValueError("Immutable inputs changed during training")
+    verify_inputs(args, protocol)
     print(
         json.dumps(
             {

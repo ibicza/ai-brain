@@ -120,12 +120,18 @@ def verify(root: Path, data: Path):
     ):
         raise ValueError("Frozen evidence hashes/policy mismatch")
     total = 0
-    for name, key, source_split in (
+    cohorts = [
         ("object-final", "object_final", "final"),
         ("textbook-diagnostic", "textbook_diagnostic", "textbook_diagnostic"),
         ("legacy-final", "legacy_final", None),
         ("legacy-transfer", "legacy_transfer", None),
-    ):
+    ]
+    if "object_regression" in report["tests"]:
+        cohorts.append(("object-regression", "object_regression", "regression"))
+    for mode in ("blank", "shuffled"):
+        if (root / ("object-" + mode + "-predictions.json")).exists():
+            cohorts.append(("object-" + mode, "object_" + mode, "final"))
+    for name, key, source_split in cohorts:
         rows = read(root / (name + "-predictions.json"))
         for row in rows:
             if row["gold"] not in LABELS.values() or row["selected"] != selected(
@@ -197,9 +203,19 @@ def verify(root: Path, data: Path):
                 >= (baseline["answerable_recall"] or 0) - 0.02
             )
             retention[task] = retention.get(task, True) and passed
+    regression_gate = True
+    if "object_regression" in report["tests"]:
+        rstat = report["tests"]["object_regression"]["all"]
+        regression_gate = (
+            rstat["false_assertions"] == 0
+            and (rstat["answerable_recall"] or 0) >= 0.8
+            and (rstat["unknown_recall"] or 0) >= 0.9
+        )
+        if regression_gate != report["regression_gate"]:
+            raise ValueError("Saved regression gate mismatch")
     status = (
         "BOUNDED_OBJECT_GATE_PASSED_NOT_PRODUCTION"
-        if object_gate and all(retention.values())
+        if object_gate and all(retention.values()) and regression_gate
         else "REJECTED_NOT_PRODUCTION"
     )
     if (
@@ -208,9 +224,58 @@ def verify(root: Path, data: Path):
         or status != report["status"]
     ):
         raise ValueError("Saved gate/status mismatch")
+    calibration_records = 0
+    diagnostic_path = root / "calibration-diagnostics.json"
+    if diagnostic_path.exists():
+        diagnostic = read(diagnostic_path)
+        if (
+            diagnostic["checkpoint_sha256"] != sha(root / "best.pt")
+            or diagnostic["dataset_sha256"] != sha(data / "dataset.json")
+            or diagnostic["frozen_policy_sha256"]
+            != sha(root / "frozen-calibration.json")
+        ):
+            raise ValueError("Calibration diagnostic hashes changed")
+        rows = diagnostic["records"]
+        if [(r["source_id"], r["gold"]) for r in rows] != [
+            (r["source_id"], r["answer"]) for r in dataset["records"]["calibration"]
+        ]:
+            raise ValueError("Calibration diagnostic source/gold mismatch")
+        if any(r["selected"] != selected(r["probabilities"], 0) for r in rows):
+            raise ValueError("Calibration raw selector mismatch")
+        if statistics(rows) != diagnostic["raw_consensus"]:
+            raise ValueError("Calibration raw arithmetic mismatch")
+        if [v["threshold"] for v in diagnostic["grid"]] != [
+            0.99,
+            0.995,
+            0.999,
+            0.9995,
+            0.9999,
+        ]:
+            raise ValueError("Calibration threshold grid changed")
+        eligible = []
+        for entry in diagnostic["grid"]:
+            stats = statistics(
+                [
+                    dict(r, selected=selected(r["probabilities"], entry["threshold"]))
+                    for r in rows
+                ]
+            )
+            admitted = stats["accepted"] >= 50 and stats["false_assertions"] == 0
+            if stats != entry["stats"] or admitted != entry["eligible"]:
+                raise ValueError("Calibration threshold arithmetic mismatch")
+            if admitted:
+                eligible.append((stats["accepted"], entry["threshold"]))
+        expected_threshold = max(eligible)[1] if eligible else None
+        if (
+            expected_threshold != diagnostic["frozen_threshold"]
+            or expected_threshold != frozen["thresholds"]["object"]
+        ):
+            raise ValueError("Frozen calibration selection mismatch")
+        calibration_records = len(rows)
     return {
         "status": "VERIFIED_ARITHMETIC_NOT_INDEPENDENT_SEMANTIC_TRUTH",
         "prediction_records": total,
+        "calibration_diagnostic_records": calibration_records,
         "report_sha256": sha(root / "report.json"),
         "checkpoint_sha256": sha(root / "best.pt"),
         "object_gate": bool(object_gate),

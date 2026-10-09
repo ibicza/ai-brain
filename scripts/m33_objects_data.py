@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 from urllib.request import urlopen
 
@@ -62,11 +63,34 @@ def raster(record: dict) -> np.ndarray:
     return np.asarray(canvas.resize((96, 96), Image.Resampling.LANCZOS))
 
 
-def acquire(root: Path, positive: int = 150, negative: int = 60) -> None:
+def acquire(
+    root: Path,
+    positive: int = 150,
+    negative: int = 60,
+    *,
+    exclude_acquisition: Path | None = None,
+    negative_categories: tuple[str, ...] = NEGATIVE,
+) -> None:
     if root.exists():
         raise ValueError("Fresh acquisition directory required")
     if min(positive, negative) < 1 or max(positive, negative) > 1000:
         raise ValueError("Bounded acquisition budget required")
+    if (
+        not negative_categories
+        or len(negative_categories) > 20
+        or len(set(negative_categories)) != len(negative_categories)
+        or set(negative_categories) & set(CLASSES)
+        or any(not re.fullmatch(r"[a-z_]+", value) for value in negative_categories)
+    ):
+        raise ValueError("Invalid negative-category scope")
+    excluded: dict[str, set[str]] = {}
+    exclude_sha = None
+    if exclude_acquisition is not None:
+        exclude_sha = sha(exclude_acquisition)
+        previous = json.loads(exclude_acquisition.read_text(encoding="utf-8"))
+        for item in previous["files"]:
+            category = Path(item["file"]).stem
+            excluded.setdefault(category, set()).update(map(str, item["selected_ids"]))
     root.mkdir(parents=True)
     raw = root / "raw"
     raw.mkdir()
@@ -76,16 +100,17 @@ def acquire(root: Path, positive: int = 150, negative: int = 60) -> None:
         raise ValueError("Unexpected licence; stop acquisition")
     (root / "LICENSE.quickdraw").write_bytes(license_bytes)
     files = []
-    for category in (*CLASSES, *NEGATIVE):
+    for category in (*CLASSES, *negative_categories):
         requested = positive if category in CLASSES else negative
         url = BASE + category + ".ndjson"
         output = raw / (category + ".ndjson")
         selected, scanned, ids = [], 0, set()
+        previous_ids = excluded.get(category, set())
         with urlopen(url, timeout=45) as response, output.open("xb") as stream:
             metadata = dict(response.headers)
             for line in response:
                 scanned += 1
-                if scanned > requested * 10 or len(line) > 200000:
+                if scanned > (requested + len(previous_ids)) * 10 or len(line) > 200000:
                     raise ValueError("Acquisition bounds exceeded")
                 record = json.loads(line)
                 if record["word"] != category:
@@ -93,6 +118,8 @@ def acquire(root: Path, positive: int = 150, negative: int = 60) -> None:
                 if record.get("recognized") is not True:
                     continue
                 identifier = str(record["key_id"])
+                if identifier in previous_ids:
+                    continue
                 if identifier in ids:
                     raise ValueError("Repeated source identity")
                 drawing = record.get("drawing")
@@ -116,6 +143,7 @@ def acquire(root: Path, positive: int = 150, negative: int = 60) -> None:
                 "bytes": output.stat().st_size,
                 "selected_ids": selected,
                 "records_scanned": scanned,
+                "prior_ids_excluded": len(previous_ids),
                 "response_metadata": metadata,
             }
         )
@@ -125,6 +153,8 @@ def acquire(root: Path, positive: int = 150, negative: int = 60) -> None:
             ),
             flush=True,
         )
+    if exclude_acquisition is not None and sha(exclude_acquisition) != exclude_sha:
+        raise ValueError("Previous acquisition changed during fetching")
     write_json(
         root / "acquisition.json",
         {
@@ -135,7 +165,8 @@ def acquire(root: Path, positive: int = 150, negative: int = 60) -> None:
             "documentation": "https://github.com/googlecreativelab/quickdraw-dataset",
             "modifications": "Small streamed subset; strokes rendered at RGB96x96 for review/training. Original selected NDJSON bytes retained.",
             "classes": CLASSES,
-            "negative_categories": NEGATIVE,
+            "negative_categories": negative_categories,
+            "excluded_acquisition_sha256": exclude_sha,
             "files": files,
             "limits": "Requested category and recognized flag are unverified proposals, not human truth or model mastery.",
             "training_started": False,
@@ -172,8 +203,16 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--positive", type=int, default=150)
     parser.add_argument("--negative", type=int, default=60)
+    parser.add_argument("--exclude-acquisition", type=Path)
+    parser.add_argument("--negative-categories", nargs="+", default=list(NEGATIVE))
     parser.add_argument("--no-render", action="store_true")
     args = parser.parse_args()
-    acquire(args.output, args.positive, args.negative)
+    acquire(
+        args.output,
+        args.positive,
+        args.negative,
+        exclude_acquisition=args.exclude_acquisition,
+        negative_categories=tuple(args.negative_categories),
+    )
     if not args.no_render:
         review_sheets(args.output)

@@ -64,15 +64,63 @@ def encode_question(text: str) -> list[int]:
 
 
 class ObjectsModel(previous.RelationsModel):
-    """Same inherited forward; only append vocabulary and supervised intent rows."""
+    """Inherited causal core with optional question-gated pixel/UNKNOWN adapters."""
 
-    def __init__(self, *, width: int = 96, layers: int = 2) -> None:
+    def __init__(
+        self,
+        *,
+        width: int = 96,
+        layers: int = 2,
+        vision_extension_channels: int = 0,
+        vision_extension_depth: int = 0,
+        object_unknown_adapter: bool = False,
+    ) -> None:
+        if vision_extension_channels not in (
+            0,
+            32,
+            64,
+        ) or vision_extension_depth not in (0, 1, 2):
+            raise ValueError("Unsupported bounded vision extension")
+        if not vision_extension_channels and vision_extension_depth:
+            raise ValueError("Extension depth requires extension channels")
+        if type(object_unknown_adapter) is not bool:
+            raise ValueError("Unknown adapter flag must be boolean")
         super().__init__(width=width, layers=layers)
         self.core.config = replace(self.core.config, vocab_size=VOCAB_SIZE)
         self.core.token_embedding = nn.Embedding(VOCAB_SIZE, width)
         self.core.lm_head = nn.Linear(width, VOCAB_SIZE, bias=False)
         self.question_intent = nn.Linear(width, len(TASKS))
         self.compatible_legacy_vocabulary = False
+        self.vision_extension_config = {
+            "vision_extension_channels": vision_extension_channels,
+            "vision_extension_depth": vision_extension_depth,
+        }
+        self.object_unknown_adapter = None
+        if object_unknown_adapter:
+            self.vision_extension_config["object_unknown_adapter"] = True
+            self.object_unknown_adapter = nn.Linear(width, 1)
+            nn.init.zeros_(self.object_unknown_adapter.weight)
+            nn.init.zeros_(self.object_unknown_adapter.bias)
+        self.vision_extension = None
+        if vision_extension_channels:
+            channels = vision_extension_channels
+            blocks = [
+                nn.Conv2d(3, channels, 3, padding=1),
+                nn.GELU(),
+                nn.Conv2d(channels, channels * 2, 3, stride=2, padding=1),
+                nn.GELU(),
+                nn.Conv2d(channels * 2, channels * 2, 3, stride=2, padding=1),
+                nn.GELU(),
+            ]
+            for _ in range(vision_extension_depth):
+                blocks.extend(
+                    [nn.Conv2d(channels * 2, channels * 2, 3, padding=1), nn.GELU()]
+                )
+            blocks.append(nn.Conv2d(channels * 2, width, 3, stride=2, padding=1))
+            self.vision_extension = nn.Sequential(*blocks)
+            # Start as an exact zero residual, not an unrelated replacement.
+            nn.init.zeros_(self.vision_extension[-1].weight)
+            nn.init.zeros_(self.vision_extension[-1].bias)
         self.register_buffer(
             "object_questions",
             torch.tensor([encode_question(text) for text in OBJECT_QUESTIONS]),
@@ -86,12 +134,75 @@ class ObjectsModel(previous.RelationsModel):
         logits, intents = result if return_intent else (result, None)
         # Closed supported-word compatibility policy, not a gold/task input.
         # Unchanged legacy questions retain their previous vocabulary normalizer.
-        is_object = (questions[:, None] == self.object_questions[None]).all(-1).any(-1)
+        is_object = self.is_object_question(questions)
         tail = logits[:, previous.VOCAB_SIZE :].masked_fill(
             ~is_object[:, None], float("-inf")
         )
         logits = torch.cat((logits[:, : previous.VOCAB_SIZE], tail), dim=-1)
         return (logits, intents) if return_intent else logits
+
+    def is_object_question(self, questions: torch.Tensor) -> torch.Tensor:
+        return (questions[:, None] == self.object_questions[None]).all(-1).any(-1)
+
+    def visual_features(
+        self, images: torch.Tensor, questions: torch.Tensor
+    ) -> torch.Tensor:
+        original = super().visual_features(images, questions)
+        if self.vision_extension is None:
+            return original
+        mask = self.is_object_question(questions)
+        # Question-input routing only. No gold, source category, or task argument.
+        # Legacy rows do not even execute the new branch.
+        indices = torch.nonzero(mask).flatten()
+        if not len(indices):
+            return original
+        residual = self.vision_extension(images[indices])
+        return original.index_copy(0, indices, original[indices] + residual)
+
+    def answer_logits(self, embeddings, key_mask, questions):
+        if (
+            self.object_unknown_adapter is None
+            or not self.is_object_question(questions).any()
+        ):
+            return super().answer_logits(embeddings, key_mask, questions)
+        logits, hidden = self.core.forward_embeddings(
+            embeddings, attention_key_mask=key_mask, return_hidden=True
+        )
+        logits = logits[:, -1]
+        mask = self.is_object_question(questions)
+        indices = torch.nonzero(mask).flatten()
+        correction = torch.zeros_like(logits)
+        correction[indices, UNKNOWN] = self.object_unknown_adapter(
+            hidden[indices, -1]
+        ).flatten()
+        logits = logits + correction
+        # The admitted object task has exactly eight names plus abstention.
+        # Counts/colors/shapes and word tokens are not object answers. Scope comes
+        # from the supported question input, never source category or gold.
+        allowed = torch.zeros(VOCAB_SIZE, dtype=torch.bool, device=logits.device)
+        allowed[list(OBJECT_IDS.values()) + [UNKNOWN]] = True
+        return logits.masked_fill(mask[:, None] & ~allowed[None], float("-inf"))
+
+    @classmethod
+    def from_checkpoint(cls, checkpoint: dict) -> ObjectsModel:
+        """Reconstruct architecture and normalization; reject incomplete metadata."""
+        architecture = checkpoint.get("architecture", {})
+        if set(architecture) - {
+            "vision_extension_channels",
+            "vision_extension_depth",
+            "object_unknown_adapter",
+        }:
+            raise ValueError("Unknown architecture metadata")
+        if type(checkpoint.get("compatible_legacy_vocabulary")) is not bool:
+            raise ValueError("Missing legacy normalization policy")
+        model = cls(
+            width=checkpoint["width"],
+            layers=checkpoint.get("layers", 2),
+            **architecture,
+        )
+        model.load_state_dict(checkpoint["model"], strict=True)
+        model.compatible_legacy_vocabulary = checkpoint["compatible_legacy_vocabulary"]
+        return model
 
     def load_previous(self, state: dict[str, torch.Tensor]) -> None:
         original = previous.RelationsModel(

@@ -1,0 +1,382 @@
+{
+  "schema": 1,
+  "date": "2026-10-09",
+  "status": "REJECTED_NOT_PRODUCTION",
+  "training_host": "karina",
+  "scope": "Eight visually curated schematic object labels; bounded RU/EN question templates, Russian name answers. Own inherited weights, no external pretrained model.",
+  "data": {
+    "new_proposals": 1920,
+    "visually_excluded": 541,
+    "new_admitted_drawings": 1379,
+    "counts": {
+      "train": 1458,
+      "dev": 246,
+      "calibration": 367,
+      "final": 212,
+      "regression": 164,
+      "textbook_diagnostic": 7
+    },
+    "dataset_sha256": "fc33d74906cbdb160c22d5657ad73ebe7a67daa78cfd9c48d3f1f1238f20fb4c",
+    "pixels_sha256": "d94d5f1851fa0b98af363a4292b3b7b08572b10927d372e01583fb0c2bd4a4ed",
+    "registry_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\prepared-v1\\image-registry.json",
+    "registry_sha256": "ac28b4f962ef0b7d78b55983827d8f100a61f53bcc2421542d902e601ec1531c",
+    "new_negative_categories": 12,
+    "old_final_role": "KNOWN_REGRESSION_NEVER_TRAINING"
+  },
+  "selection": {
+    "schema": 1,
+    "selection_used": "DEVELOPMENT_ONLY",
+    "dataset_sha256": "fc33d74906cbdb160c22d5657ad73ebe7a67daa78cfd9c48d3f1f1238f20fb4c",
+    "round_id": 10911,
+    "learning_rate": 0.0003,
+    "comparison": "DEVELOPMENT_HYPERPARAMETER_TUNING_NOT_WEIGHT_SIZE_CAUSAL_PROOF",
+    "candidates": [
+      {
+        "name": "head0",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v1\\head0",
+        "checkpoint_sha256": "62ed2ed31f8d2c2346dcdc2d7132c90901f929c194d2d9edc02a9dcbc3a45a18",
+        "development_report_sha256": "a4859a8d49b4c6c641455882455fbe3100465ee9a049410b62bbb17b4bb424b5",
+        "protocol_sha256": "61aba89db6a771e9e4217e332257137aeed0eb0a4f20f32bfbbc7cdbd45902e5",
+        "best_dev_loss": 1.3492370161688716,
+        "best_step": 10000,
+        "architecture": {
+          "vision_extension_channels": 0,
+          "vision_extension_depth": 0
+        },
+        "parameters": 345704,
+        "learning_rate": 0.0001,
+        "capsule_sha256": "e861ad99fb6d700cde277cc90d624203ffd2a3cd49a7e0fa42d07a435a4298bd"
+      },
+      {
+        "name": "vision32",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v1\\vision32",
+        "checkpoint_sha256": "44e4809173dbb8a09f81221108f5bc4c1d7f73612deb374fbd2f7af254ac0736",
+        "development_report_sha256": "ed080cff6d4e1f4f30895ea3511e6144146969772e6534db213ed00b9401fafb",
+        "protocol_sha256": "65beeb1de89ead891be26f8d46991d404aec30b316d609df12e3f038a3db1805",
+        "best_dev_loss": 0.855373608430477,
+        "best_step": 10000,
+        "architecture": {
+          "vision_extension_channels": 32,
+          "vision_extension_depth": 0
+        },
+        "parameters": 457416,
+        "learning_rate": 0.0001,
+        "capsule_sha256": "e861ad99fb6d700cde277cc90d624203ffd2a3cd49a7e0fa42d07a435a4298bd"
+      },
+      {
+        "name": "vision64",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v1\\vision64",
+        "checkpoint_sha256": "2b006a3dbd4cc468032e9f1b9ab399e7599875e8d0732e539e67a31770b4aba8",
+        "development_report_sha256": "91467a7369d1e1d3c11d7a648ae148466ea2a9f7686287d790d325ca456a7779",
+        "protocol_sha256": "cf84a18b2708355628213492ada9eb190d5a994f4f8e45349f61cc50001df1d3",
+        "best_dev_loss": 0.49220184223391383,
+        "best_step": 10000,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2
+        },
+        "parameters": 974792,
+        "learning_rate": 0.0001,
+        "capsule_sha256": "e861ad99fb6d700cde277cc90d624203ffd2a3cd49a7e0fa42d07a435a4298bd"
+      },
+      {
+        "name": "head0",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v2\\head0",
+        "checkpoint_sha256": "8c73432d5629f7b4faf4e7d8ba861e3f95e28ae33d850fefff13135754f381d7",
+        "development_report_sha256": "b2f1661bc6e873123f429b1c8c3845bba366ce73e566b24d3a9af4480bef68f4",
+        "protocol_sha256": "bb492c2a3197934bc1ec9ea2d9fe98ef826571846359acf0a73e4ac338f1fae1",
+        "best_dev_loss": 0.5953957253558765,
+        "best_step": 10000,
+        "architecture": {
+          "vision_extension_channels": 0,
+          "vision_extension_depth": 0,
+          "object_unknown_adapter": true
+        },
+        "parameters": 345801,
+        "learning_rate": 0.001,
+        "capsule_sha256": "2c1f7b1c0424d4c92cc8191ee36bd307a5c321e9b9b32981cd2439c11d920b37"
+      },
+      {
+        "name": "vision32",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v2\\vision32",
+        "checkpoint_sha256": "811768317ee15770c2378b17af344bbd49381fe42a1706c062f9a832966a12a9",
+        "development_report_sha256": "71cfd6230b133ef29b7a1038b3b3d853c41bc918980e072b72fe55b6379b5f52",
+        "protocol_sha256": "fa7b510f97e934f064edc7dd5e1a34a59c0f1230005e4f8ed089cc1d9bba73d3",
+        "best_dev_loss": 0.3950305149745104,
+        "best_step": 4000,
+        "architecture": {
+          "vision_extension_channels": 32,
+          "vision_extension_depth": 0,
+          "object_unknown_adapter": true
+        },
+        "parameters": 457513,
+        "learning_rate": 0.001,
+        "capsule_sha256": "2c1f7b1c0424d4c92cc8191ee36bd307a5c321e9b9b32981cd2439c11d920b37"
+      },
+      {
+        "name": "vision64",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v2\\vision64",
+        "checkpoint_sha256": "99e09e57d2a666257ce5cad99619606102bcfa990459d247271799319e176d97",
+        "development_report_sha256": "e3a1b0cd361b2a82c90de7af7ed46b3fbae360cc87433a8d8da810e6d4187b4d",
+        "protocol_sha256": "99189a62955710e68205b938b2a7e5d57d8111fb9ac2829b5e4a98c21842db64",
+        "best_dev_loss": 0.7725276489861302,
+        "best_step": 10000,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2,
+          "object_unknown_adapter": true
+        },
+        "parameters": 974889,
+        "learning_rate": 0.001,
+        "capsule_sha256": "2c1f7b1c0424d4c92cc8191ee36bd307a5c321e9b9b32981cd2439c11d920b37"
+      },
+      {
+        "name": "vision64_lr3",
+        "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v2\\vision64_lr3",
+        "checkpoint_sha256": "cdc3187ebcc127824fa7e5a4bbf35751ae26fad1d8dbeb68a71633ded4b8f272",
+        "development_report_sha256": "454e17232671166b0be3f89193b56db58a2f823f2b1234705e597c944f6a8c66",
+        "protocol_sha256": "3d9c3c7cf1b86de7716f4e070b1a8bc7a7aea3c46bfc0ae79d4e276581c3b086",
+        "best_dev_loss": 0.33929342894859604,
+        "best_step": 3500,
+        "architecture": {
+          "vision_extension_channels": 64,
+          "vision_extension_depth": 2,
+          "object_unknown_adapter": true
+        },
+        "parameters": 974889,
+        "learning_rate": 0.0003,
+        "capsule_sha256": "2c1f7b1c0424d4c92cc8191ee36bd307a5c321e9b9b32981cd2439c11d920b37"
+      }
+    ],
+    "winner": {
+      "name": "vision64_lr3",
+      "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v2\\vision64_lr3",
+      "checkpoint_sha256": "cdc3187ebcc127824fa7e5a4bbf35751ae26fad1d8dbeb68a71633ded4b8f272",
+      "development_report_sha256": "454e17232671166b0be3f89193b56db58a2f823f2b1234705e597c944f6a8c66",
+      "protocol_sha256": "3d9c3c7cf1b86de7716f4e070b1a8bc7a7aea3c46bfc0ae79d4e276581c3b086",
+      "best_dev_loss": 0.33929342894859604,
+      "best_step": 3500,
+      "architecture": {
+        "vision_extension_channels": 64,
+        "vision_extension_depth": 2,
+        "object_unknown_adapter": true
+      },
+      "parameters": 974889,
+      "learning_rate": 0.0003,
+      "capsule_sha256": "2c1f7b1c0424d4c92cc8191ee36bd307a5c321e9b9b32981cd2439c11d920b37"
+    },
+    "production_admitted": false,
+    "limits": "Candidate choice precedes all calibration/final evaluation. No fresh-final metrics used in selection. Raw development accuracy not a safe naming gate."
+  },
+  "development_best_step_raw_stats_not_safe_policy": {
+    "examples": 246,
+    "accepted": 180,
+    "false_assertions": 38,
+    "accuracy": 0.8008130081300813,
+    "answerable_recall": 0.8208092485549133,
+    "unknown_recall": 0.7534246575342466
+  },
+  "training_peak_cuda_allocated_bytes": 1138335232,
+  "checkpoint_bytes": 3917365,
+  "checkpoint_sha256": "cdc3187ebcc127824fa7e5a4bbf35751ae26fad1d8dbeb68a71633ded4b8f272",
+  "report_path": "D:\\ai-brain-data\\visual-lexicon\\objects-expansion-20261009\\development-v2\\final-evaluation\\report.json",
+  "report_sha256": "b7685c9d4363b2be004e488b26d36e90343a78a5a017c6588bb5fc1545ab6f6c",
+  "object_gate": false,
+  "regression_gate": false,
+  "production_admitted": false,
+  "fresh_final": {
+    "all": {
+      "examples": 212,
+      "accepted": 0,
+      "false_assertions": 0,
+      "accuracy": 0.35377358490566035,
+      "answerable_recall": 0.0,
+      "unknown_recall": 1.0
+    },
+    "object": {
+      "examples": 212,
+      "accepted": 0,
+      "false_assertions": 0,
+      "accuracy": 0.35377358490566035,
+      "answerable_recall": 0.0,
+      "unknown_recall": 1.0
+    },
+    "by_concept": {
+      "СЏР±Р»РѕРєРѕ": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "Р±Р°РЅР°РЅ": {
+        "examples": 10,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "РјРѕСЂРєРѕРІСЊ": {
+        "examples": 19,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "СЂС‹Р±Р°": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "РґРµСЂРµРІРѕ": {
+        "examples": 19,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "РєСЂСѓР¶РєР°": {
+        "examples": 21,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "СЃС‚СѓР»": {
+        "examples": 11,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "РєРЅРёРіР°": {
+        "examples": 17,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      }
+    }
+  },
+  "calibration_grid": [
+    {
+      "threshold": 0.99,
+      "stats": {
+        "examples": 367,
+        "accepted": 29,
+        "false_assertions": 0,
+        "accuracy": 0.3760217983651226,
+        "answerable_recall": 0.1124031007751938,
+        "unknown_recall": 1.0
+      },
+      "eligible": false
+    },
+    {
+      "threshold": 0.995,
+      "stats": {
+        "examples": 367,
+        "accepted": 14,
+        "false_assertions": 0,
+        "accuracy": 0.335149863760218,
+        "answerable_recall": 0.05426356589147287,
+        "unknown_recall": 1.0
+      },
+      "eligible": false
+    },
+    {
+      "threshold": 0.999,
+      "stats": {
+        "examples": 367,
+        "accepted": 2,
+        "false_assertions": 0,
+        "accuracy": 0.3024523160762943,
+        "answerable_recall": 0.007751937984496124,
+        "unknown_recall": 1.0
+      },
+      "eligible": false
+    },
+    {
+      "threshold": 0.9995,
+      "stats": {
+        "examples": 367,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.2970027247956403,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "eligible": false
+    },
+    {
+      "threshold": 0.9999,
+      "stats": {
+        "examples": 367,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.2970027247956403,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "eligible": false
+    }
+  ],
+  "calibration_raw_consensus_not_safe_policy": {
+    "examples": 367,
+    "accepted": 182,
+    "false_assertions": 7,
+    "accuracy": 0.7547683923705722,
+    "answerable_recall": 0.6782945736434108,
+    "unknown_recall": 0.9357798165137615
+  },
+  "threshold": null,
+  "retention_gates": {
+    "count": true,
+    "shape": true,
+    "color": true,
+    "same_shape": true,
+    "same_color": true,
+    "horizontal": true,
+    "vertical": true
+  },
+  "accepted_checkpoint_sha256": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+  "accepted_policy_sha256": "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6",
+  "accepted_model_unchanged_locally_and_remotely": true,
+  "arithmetic_audit": {
+    "status": "VERIFIED_ARITHMETIC_NOT_INDEPENDENT_SEMANTIC_TRUTH",
+    "prediction_records": 5007,
+    "calibration_diagnostic_records": 367,
+    "report_sha256": "b7685c9d4363b2be004e488b26d36e90343a78a5a017c6588bb5fc1545ab6f6c",
+    "checkpoint_sha256": "cdc3187ebcc127824fa7e5a4bbf35751ae26fad1d8dbeb68a71633ded4b8f272",
+    "object_gate": false,
+    "retention_gates": {
+      "count": true,
+      "shape": true,
+      "color": true,
+      "same_shape": true,
+      "same_color": true,
+      "horizontal": true,
+      "vertical": true
+    },
+    "limits": "Independent pure-Python selector/metric/gate bookkeeping, not independent source-label verification, blind exam, training replay, or proof of general honesty."
+  },
+  "parent_archive_commit": "07dc1ef3757f4ab62b8ae24da6fb0749b45e94c1",
+  "limits": [
+    "No independent blind semantic labeling exam; curator saw source categories.",
+    "Fresh control families exclude prior owners and detected pixel/mirror/coarse-mask duplicates, not every possible semantic or artist overlap.",
+    "Object threshold absent: grid produced fewer than 50 accepted zero-error calibration answers. All final object answers abstain; zero errors is not mastery.",
+    "Seven candidates differ in size, normalization and learning rate; winner is not causal proof that increasing size alone helps.",
+    "Photos, word definitions, general bilingual understanding, all textbook objects and M34 were not trained.",
+    "Twelve negative categories mean outside this eight-name answer scope, not acquisition of those twelve names."
+  ],
+  "next_iteration": "Improve independently curated real illustrations and hard negatives, then freeze development selection and evaluate new untouched families; do not lower safety gates or reuse this final as fresh."
+}
