@@ -37,6 +37,7 @@ def build(repo, data, review, output):
         "m33_objects_capacity_probe_remote.py",
         "m33_objects_topup_remote.py",
         "m33_objects_readout_remote.py",
+        "m33_objects_five_iterations.py",
         "m33_objects_domain_diagnostics.py",
         "m33_objects_context_probe_remote.py",
         "m33_objects_context_probe_report.py",
@@ -59,6 +60,7 @@ def build(repo, data, review, output):
         "test_primary_objects_photo_coverage.py",
         "test_primary_objects_photo_merge.py",
         "test_primary_objects_readout.py",
+        "test_primary_object_objectives.py",
         "conftest.py",
     ):
         sources.append((repo / "tests" / name, "tests/" + name))

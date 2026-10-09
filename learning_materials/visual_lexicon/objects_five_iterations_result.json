@@ -1,0 +1,3251 @@
+{
+  "schema": 1,
+  "date": "2026-10-09",
+  "status": "FIVE_ITERATIONS_COMPLETED_NOT_PRODUCTION",
+  "scope": "Own eight-object paired-view feature training; not general sight or M33 closure.",
+  "production_admitted": false,
+  "fresh_exam_performed": false,
+  "arithmetic_audit": {
+    "status": "FIVE_ITERATIONS_ARITHMETIC_LINEAGE_VERIFIED_NOT_BLIND",
+    "training_steps": 50000,
+    "iterations": [
+      {
+        "iteration": 1,
+        "name": "iteration1_pair_js",
+        "warm_path": "/home/ibicza/ai-brain/runs/m33-primary-objects-five-iterations-20261009-v1/warm.pt",
+        "warm_sha256": "54d1767db8befa55fc8d6633cff788453eafff6e951ab04c65fa64338a4e2590",
+        "champion_score_before": 0.5525907767059708,
+        "object_readout_adapter": false,
+        "trial": {
+          "name": "iteration1_pair_js",
+          "consistency_weight": 1.0,
+          "supervised_contrastive_weight": 0,
+          "vicreg_weight": 0,
+          "object_readout_adapter": false,
+          "object_prompt_balancing": false,
+          "reason": "Train aligned labels on two views and penalize inconsistent answer distributions."
+        },
+        "production_admitted": false,
+        "best_step": 1000,
+        "best_dev_loss": 0.49781877032160143,
+        "checkpoint_sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+        "inherited_tensors_byte_preserved": true,
+        "fixed_99_five_view_dev": {
+          "examples": 144,
+          "accepted": 5,
+          "false_assertions": 0,
+          "accuracy": 0.14583333333333334,
+          "answerable_recall": 0.0390625,
+          "unknown_recall": 1.0
+        },
+        "by_concept": {
+          "банан": {
+            "examples": 10,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "дерево": {
+            "examples": 28,
+            "accepted": 3,
+            "false_assertions": 0,
+            "accuracy": 0.10714285714285714,
+            "answerable_recall": 0.10714285714285714,
+            "unknown_recall": null
+          },
+          "книга": {
+            "examples": 20,
+            "accepted": 2,
+            "false_assertions": 0,
+            "accuracy": 0.1,
+            "answerable_recall": 0.1,
+            "unknown_recall": null
+          },
+          "кружка": {
+            "examples": 14,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "морковь": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "рыба": {
+            "examples": 5,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "стул": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "яблоко": {
+            "examples": 25,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          }
+        },
+        "raw_single_view": {
+          "examples": 144,
+          "accepted": 133,
+          "false_assertions": 70,
+          "accuracy": 0.4583333333333333,
+          "answerable_recall": 0.4921875,
+          "unknown_recall": 0.1875
+        },
+        "raw_five_view": {
+          "examples": 144,
+          "accepted": 54,
+          "false_assertions": 15,
+          "accuracy": 0.3680555555555556,
+          "answerable_recall": 0.3046875,
+          "unknown_recall": 0.875
+        },
+        "promoted_by_development_loss": true,
+        "dev_screen_viable": false,
+        "fresh_acceptance_passed": false
+      },
+      {
+        "iteration": 2,
+        "name": "iteration2_supcon",
+        "warm_path": "/home/ibicza/ai-brain/runs/m33-primary-objects-five-iterations-20261009-v1/development-v1/iteration1_pair_js/best.pt",
+        "warm_sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+        "champion_score_before": 0.49781877032160143,
+        "object_readout_adapter": false,
+        "trial": {
+          "name": "iteration2_supcon",
+          "consistency_weight": 1.0,
+          "supervised_contrastive_weight": 0.05,
+          "vicreg_weight": 0,
+          "object_readout_adapter": false,
+          "object_prompt_balancing": false,
+          "reason": "Learn same-name visual clusters; heterogeneous UNKNOWN excluded from SupCon."
+        },
+        "production_admitted": false,
+        "best_step": 1000,
+        "best_dev_loss": 0.5181388649030195,
+        "checkpoint_sha256": "f32c9385a4c1ed30460800d758aa3c4c6bb14b2d423aa5b017d2a6d54a9cd9e5",
+        "inherited_tensors_byte_preserved": true,
+        "fixed_99_five_view_dev": {
+          "examples": 144,
+          "accepted": 6,
+          "false_assertions": 0,
+          "accuracy": 0.1527777777777778,
+          "answerable_recall": 0.046875,
+          "unknown_recall": 1.0
+        },
+        "by_concept": {
+          "банан": {
+            "examples": 10,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "дерево": {
+            "examples": 28,
+            "accepted": 4,
+            "false_assertions": 0,
+            "accuracy": 0.14285714285714285,
+            "answerable_recall": 0.14285714285714285,
+            "unknown_recall": null
+          },
+          "книга": {
+            "examples": 20,
+            "accepted": 2,
+            "false_assertions": 0,
+            "accuracy": 0.1,
+            "answerable_recall": 0.1,
+            "unknown_recall": null
+          },
+          "кружка": {
+            "examples": 14,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "морковь": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "рыба": {
+            "examples": 5,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "стул": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "яблоко": {
+            "examples": 25,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          }
+        },
+        "raw_single_view": {
+          "examples": 144,
+          "accepted": 129,
+          "false_assertions": 65,
+          "accuracy": 0.4722222222222222,
+          "answerable_recall": 0.5,
+          "unknown_recall": 0.25
+        },
+        "raw_five_view": {
+          "examples": 144,
+          "accepted": 62,
+          "false_assertions": 19,
+          "accuracy": 0.3888888888888889,
+          "answerable_recall": 0.3359375,
+          "unknown_recall": 0.8125
+        },
+        "promoted_by_development_loss": false,
+        "dev_screen_viable": false,
+        "fresh_acceptance_passed": false
+      },
+      {
+        "iteration": 3,
+        "name": "iteration3_vicreg",
+        "warm_path": "/home/ibicza/ai-brain/runs/m33-primary-objects-five-iterations-20261009-v1/development-v1/iteration1_pair_js/best.pt",
+        "warm_sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+        "champion_score_before": 0.49781877032160143,
+        "object_readout_adapter": false,
+        "trial": {
+          "name": "iteration3_vicreg",
+          "consistency_weight": 1.0,
+          "supervised_contrastive_weight": 0,
+          "vicreg_weight": 0.01,
+          "object_readout_adapter": false,
+          "object_prompt_balancing": false,
+          "reason": "Check feature invariance with explicit anti-collapse variance and decorrelation."
+        },
+        "production_admitted": false,
+        "best_step": 1000,
+        "best_dev_loss": 0.5333685720989794,
+        "checkpoint_sha256": "04a54492aef49d29acb702fa718c1b3aa40c658d9aa5402540597ca014396445",
+        "inherited_tensors_byte_preserved": true,
+        "fixed_99_five_view_dev": {
+          "examples": 144,
+          "accepted": 5,
+          "false_assertions": 0,
+          "accuracy": 0.14583333333333334,
+          "answerable_recall": 0.0390625,
+          "unknown_recall": 1.0
+        },
+        "by_concept": {
+          "банан": {
+            "examples": 10,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "дерево": {
+            "examples": 28,
+            "accepted": 3,
+            "false_assertions": 0,
+            "accuracy": 0.10714285714285714,
+            "answerable_recall": 0.10714285714285714,
+            "unknown_recall": null
+          },
+          "книга": {
+            "examples": 20,
+            "accepted": 2,
+            "false_assertions": 0,
+            "accuracy": 0.1,
+            "answerable_recall": 0.1,
+            "unknown_recall": null
+          },
+          "кружка": {
+            "examples": 14,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "морковь": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "рыба": {
+            "examples": 5,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "стул": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "яблоко": {
+            "examples": 25,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          }
+        },
+        "raw_single_view": {
+          "examples": 144,
+          "accepted": 131,
+          "false_assertions": 68,
+          "accuracy": 0.4583333333333333,
+          "answerable_recall": 0.4921875,
+          "unknown_recall": 0.1875
+        },
+        "raw_five_view": {
+          "examples": 144,
+          "accepted": 53,
+          "false_assertions": 14,
+          "accuracy": 0.3680555555555556,
+          "answerable_recall": 0.3046875,
+          "unknown_recall": 0.875
+        },
+        "promoted_by_development_loss": false,
+        "dev_screen_viable": false,
+        "fresh_acceptance_passed": false
+      },
+      {
+        "iteration": 4,
+        "name": "iteration4_readout_pairs",
+        "warm_path": "/home/ibicza/ai-brain/runs/m33-primary-objects-five-iterations-20261009-v1/development-v1/iteration1_pair_js/best.pt",
+        "warm_sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+        "champion_score_before": 0.49781877032160143,
+        "object_readout_adapter": true,
+        "trial": {
+          "name": "iteration4_readout_pairs",
+          "consistency_weight": 1.0,
+          "supervised_contrastive_weight": 0.05,
+          "vicreg_weight": 0,
+          "object_readout_adapter": true,
+          "object_prompt_balancing": false,
+          "reason": "Test the zero-appended 74592-parameter whole-frame readout under paired feature training."
+        },
+        "production_admitted": false,
+        "best_step": 500,
+        "best_dev_loss": 0.5219041140637068,
+        "checkpoint_sha256": "4ead8ec1e8772c4e3f97522ca60144a3cde0f84da9cb373851fbdb5146c3a20f",
+        "inherited_tensors_byte_preserved": true,
+        "fixed_99_five_view_dev": {
+          "examples": 144,
+          "accepted": 6,
+          "false_assertions": 0,
+          "accuracy": 0.1527777777777778,
+          "answerable_recall": 0.046875,
+          "unknown_recall": 1.0
+        },
+        "by_concept": {
+          "банан": {
+            "examples": 10,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "дерево": {
+            "examples": 28,
+            "accepted": 4,
+            "false_assertions": 0,
+            "accuracy": 0.14285714285714285,
+            "answerable_recall": 0.14285714285714285,
+            "unknown_recall": null
+          },
+          "книга": {
+            "examples": 20,
+            "accepted": 2,
+            "false_assertions": 0,
+            "accuracy": 0.1,
+            "answerable_recall": 0.1,
+            "unknown_recall": null
+          },
+          "кружка": {
+            "examples": 14,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "морковь": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "рыба": {
+            "examples": 5,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "стул": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "яблоко": {
+            "examples": 25,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          }
+        },
+        "raw_single_view": {
+          "examples": 144,
+          "accepted": 128,
+          "false_assertions": 65,
+          "accuracy": 0.4652777777777778,
+          "answerable_recall": 0.4921875,
+          "unknown_recall": 0.25
+        },
+        "raw_five_view": {
+          "examples": 144,
+          "accepted": 54,
+          "false_assertions": 15,
+          "accuracy": 0.375,
+          "answerable_recall": 0.3046875,
+          "unknown_recall": 0.9375
+        },
+        "promoted_by_development_loss": false,
+        "dev_screen_viable": false,
+        "fresh_acceptance_passed": false
+      },
+      {
+        "iteration": 5,
+        "name": "iteration5_prompts_consolidation",
+        "warm_path": "/home/ibicza/ai-brain/runs/m33-primary-objects-five-iterations-20261009-v1/development-v1/iteration1_pair_js/best.pt",
+        "warm_sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+        "champion_score_before": 0.49781877032160143,
+        "object_readout_adapter": false,
+        "trial": {
+          "name": "iteration5_prompts_consolidation",
+          "consistency_weight": 2.0,
+          "supervised_contrastive_weight": 0.025,
+          "vicreg_weight": 0,
+          "object_readout_adapter": "inherit",
+          "object_prompt_balancing": true,
+          "reason": "Consolidate current champion with independently sampled supported training prompts and stronger consistency."
+        },
+        "production_admitted": false,
+        "best_step": 1000,
+        "best_dev_loss": 0.4671890032724856,
+        "checkpoint_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+        "inherited_tensors_byte_preserved": true,
+        "fixed_99_five_view_dev": {
+          "examples": 144,
+          "accepted": 5,
+          "false_assertions": 0,
+          "accuracy": 0.14583333333333334,
+          "answerable_recall": 0.0390625,
+          "unknown_recall": 1.0
+        },
+        "by_concept": {
+          "банан": {
+            "examples": 10,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "дерево": {
+            "examples": 28,
+            "accepted": 3,
+            "false_assertions": 0,
+            "accuracy": 0.10714285714285714,
+            "answerable_recall": 0.10714285714285714,
+            "unknown_recall": null
+          },
+          "книга": {
+            "examples": 20,
+            "accepted": 2,
+            "false_assertions": 0,
+            "accuracy": 0.1,
+            "answerable_recall": 0.1,
+            "unknown_recall": null
+          },
+          "кружка": {
+            "examples": 14,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "морковь": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "рыба": {
+            "examples": 5,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "стул": {
+            "examples": 13,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          },
+          "яблоко": {
+            "examples": 25,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accuracy": 0.0,
+            "answerable_recall": 0.0,
+            "unknown_recall": null
+          }
+        },
+        "raw_single_view": {
+          "examples": 144,
+          "accepted": 131,
+          "false_assertions": 63,
+          "accuracy": 0.4930555555555556,
+          "answerable_recall": 0.53125,
+          "unknown_recall": 0.1875
+        },
+        "raw_five_view": {
+          "examples": 144,
+          "accepted": 59,
+          "false_assertions": 14,
+          "accuracy": 0.4097222222222222,
+          "answerable_recall": 0.3515625,
+          "unknown_recall": 0.875
+        },
+        "promoted_by_development_loss": true,
+        "dev_screen_viable": false,
+        "fresh_acceptance_passed": false
+      }
+    ],
+    "winner": {
+      "name": "iteration5_prompts_consolidation",
+      "candidate_path": "/home/ibicza/ai-brain/runs/m33-primary-objects-five-iterations-20261009-v1/development-v1/iteration5_prompts_consolidation",
+      "checkpoint_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+      "best_dev_loss": 0.4671890032724856,
+      "architecture": {
+        "vision_extension_channels": 64,
+        "vision_extension_depth": 2,
+        "object_unknown_adapter": true
+      }
+    }
+  },
+  "known_regression_audit": {
+    "status": "VERIFIED_ARITHMETIC_NOT_INDEPENDENT_SEMANTIC_TRUTH",
+    "prediction_records": 5376,
+    "calibration_diagnostic_records": 0,
+    "report_sha256": "166673967d846d56e421fdf420b6d01e565f786aec9570a456e8007b81636e81",
+    "checkpoint_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "object_gate": false,
+    "retention_gates": {
+      "count": true,
+      "shape": true,
+      "color": true,
+      "same_shape": true,
+      "same_color": true,
+      "horizontal": true,
+      "vertical": true
+    },
+    "limits": "Independent pure-Python selector/metric/gate bookkeeping, not independent source-label verification, blind exam, training replay, or proof of general honesty."
+  },
+  "known_regression_tests": {
+    "object_final": {
+      "all": {
+        "examples": 162,
+        "accepted": 5,
+        "false_assertions": 1,
+        "accuracy": 0.15432098765432098,
+        "answerable_recall": 0.028368794326241134,
+        "unknown_recall": 1.0
+      },
+      "object": {
+        "examples": 162,
+        "accepted": 5,
+        "false_assertions": 1,
+        "accuracy": 0.15432098765432098,
+        "answerable_recall": 0.028368794326241134,
+        "unknown_recall": 1.0
+      },
+      "by_concept": {
+        "яблоко": {
+          "examples": 20,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "банан": {
+          "examples": 8,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "морковь": {
+          "examples": 21,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "рыба": {
+          "examples": 19,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "дерево": {
+          "examples": 18,
+          "accepted": 1,
+          "false_assertions": 0,
+          "accuracy": 0.05555555555555555,
+          "answerable_recall": 0.05555555555555555,
+          "unknown_recall": null
+        },
+        "кружка": {
+          "examples": 13,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "стул": {
+          "examples": 23,
+          "accepted": 3,
+          "false_assertions": 0,
+          "accuracy": 0.13043478260869565,
+          "answerable_recall": 0.13043478260869565,
+          "unknown_recall": null
+        },
+        "книга": {
+          "examples": 19,
+          "accepted": 1,
+          "false_assertions": 1,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        }
+      }
+    },
+    "object_blank": {
+      "all": {
+        "examples": 162,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.12962962962962962,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "object": {
+        "examples": 162,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.12962962962962962,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "by_concept": {
+        "яблоко": {
+          "examples": 20,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "банан": {
+          "examples": 8,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "морковь": {
+          "examples": 21,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "рыба": {
+          "examples": 19,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "дерево": {
+          "examples": 18,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "кружка": {
+          "examples": 13,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "стул": {
+          "examples": 23,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "книга": {
+          "examples": 19,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        }
+      }
+    },
+    "object_shuffled": {
+      "all": {
+        "examples": 162,
+        "accepted": 5,
+        "false_assertions": 5,
+        "accuracy": 0.12962962962962962,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "object": {
+        "examples": 162,
+        "accepted": 5,
+        "false_assertions": 5,
+        "accuracy": 0.12962962962962962,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "by_concept": {
+        "яблоко": {
+          "examples": 20,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "банан": {
+          "examples": 8,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "морковь": {
+          "examples": 21,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "рыба": {
+          "examples": 19,
+          "accepted": 1,
+          "false_assertions": 1,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "дерево": {
+          "examples": 18,
+          "accepted": 1,
+          "false_assertions": 1,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "кружка": {
+          "examples": 13,
+          "accepted": 2,
+          "false_assertions": 2,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "стул": {
+          "examples": 23,
+          "accepted": 1,
+          "false_assertions": 1,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "книга": {
+          "examples": 19,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        }
+      }
+    },
+    "object_regression": {
+      "all": {
+        "examples": 683,
+        "accepted": 212,
+        "false_assertions": 1,
+        "accuracy": 0.6339677891654466,
+        "answerable_recall": 0.45869565217391306,
+        "unknown_recall": 0.9955156950672646
+      },
+      "object": {
+        "examples": 683,
+        "accepted": 212,
+        "false_assertions": 1,
+        "accuracy": 0.6339677891654466,
+        "answerable_recall": 0.45869565217391306,
+        "unknown_recall": 0.9955156950672646
+      },
+      "by_concept": {
+        "яблоко": {
+          "examples": 63,
+          "accepted": 29,
+          "false_assertions": 0,
+          "accuracy": 0.4603174603174603,
+          "answerable_recall": 0.4603174603174603,
+          "unknown_recall": null
+        },
+        "банан": {
+          "examples": 38,
+          "accepted": 15,
+          "false_assertions": 0,
+          "accuracy": 0.39473684210526316,
+          "answerable_recall": 0.39473684210526316,
+          "unknown_recall": null
+        },
+        "морковь": {
+          "examples": 64,
+          "accepted": 41,
+          "false_assertions": 0,
+          "accuracy": 0.640625,
+          "answerable_recall": 0.640625,
+          "unknown_recall": null
+        },
+        "рыба": {
+          "examples": 73,
+          "accepted": 28,
+          "false_assertions": 0,
+          "accuracy": 0.3835616438356164,
+          "answerable_recall": 0.3835616438356164,
+          "unknown_recall": null
+        },
+        "дерево": {
+          "examples": 62,
+          "accepted": 33,
+          "false_assertions": 0,
+          "accuracy": 0.532258064516129,
+          "answerable_recall": 0.532258064516129,
+          "unknown_recall": null
+        },
+        "кружка": {
+          "examples": 62,
+          "accepted": 17,
+          "false_assertions": 0,
+          "accuracy": 0.27419354838709675,
+          "answerable_recall": 0.27419354838709675,
+          "unknown_recall": null
+        },
+        "стул": {
+          "examples": 44,
+          "accepted": 21,
+          "false_assertions": 0,
+          "accuracy": 0.4772727272727273,
+          "answerable_recall": 0.4772727272727273,
+          "unknown_recall": null
+        },
+        "книга": {
+          "examples": 54,
+          "accepted": 27,
+          "false_assertions": 0,
+          "accuracy": 0.5,
+          "answerable_recall": 0.5,
+          "unknown_recall": null
+        }
+      }
+    },
+    "textbook_diagnostic": {
+      "all": {
+        "examples": 7,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.5714285714285714,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "object": {
+        "examples": 7,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accuracy": 0.5714285714285714,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "by_concept": {
+        "морковь": {
+          "examples": 1,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "кружка": {
+          "examples": 1,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        },
+        "книга": {
+          "examples": 1,
+          "accepted": 0,
+          "false_assertions": 0,
+          "accuracy": 0.0,
+          "answerable_recall": 0.0,
+          "unknown_recall": null
+        }
+      }
+    },
+    "legacy_final": {
+      "all": {
+        "examples": 2100,
+        "accepted": 1220,
+        "false_assertions": 0,
+        "accuracy": 0.9952380952380953,
+        "answerable_recall": 0.991869918699187,
+        "unknown_recall": 1.0
+      },
+      "count": {
+        "examples": 300,
+        "accepted": 215,
+        "false_assertions": 0,
+        "accuracy": 1.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "same_shape": {
+        "examples": 300,
+        "accepted": 229,
+        "false_assertions": 0,
+        "accuracy": 0.99,
+        "answerable_recall": 0.9870689655172413,
+        "unknown_recall": 1.0
+      },
+      "vertical": {
+        "examples": 300,
+        "accepted": 129,
+        "false_assertions": 0,
+        "accuracy": 0.9966666666666667,
+        "answerable_recall": 0.9923076923076923,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 300,
+        "accepted": 139,
+        "false_assertions": 0,
+        "accuracy": 0.9933333333333333,
+        "answerable_recall": 0.9858156028368794,
+        "unknown_recall": 1.0
+      },
+      "horizontal": {
+        "examples": 300,
+        "accepted": 137,
+        "false_assertions": 0,
+        "accuracy": 0.9933333333333333,
+        "answerable_recall": 0.9856115107913669,
+        "unknown_recall": 1.0
+      },
+      "same_color": {
+        "examples": 300,
+        "accepted": 230,
+        "false_assertions": 0,
+        "accuracy": 0.9933333333333333,
+        "answerable_recall": 0.9913793103448276,
+        "unknown_recall": 1.0
+      },
+      "color": {
+        "examples": 300,
+        "accepted": 141,
+        "false_assertions": 0,
+        "accuracy": 1.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      }
+    },
+    "previous_baseline_final": {
+      "all": {
+        "examples": 2100,
+        "accepted": 1220,
+        "false_assertions": 0,
+        "accuracy": 0.9952380952380953,
+        "answerable_recall": 0.991869918699187,
+        "unknown_recall": 1.0
+      },
+      "count": {
+        "examples": 300,
+        "accepted": 215,
+        "false_assertions": 0,
+        "accuracy": 1.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 300,
+        "accepted": 139,
+        "false_assertions": 0,
+        "accuracy": 0.9933333333333333,
+        "answerable_recall": 0.9858156028368794,
+        "unknown_recall": 1.0
+      },
+      "color": {
+        "examples": 300,
+        "accepted": 141,
+        "false_assertions": 0,
+        "accuracy": 1.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "same_shape": {
+        "examples": 300,
+        "accepted": 229,
+        "false_assertions": 0,
+        "accuracy": 0.99,
+        "answerable_recall": 0.9870689655172413,
+        "unknown_recall": 1.0
+      },
+      "same_color": {
+        "examples": 300,
+        "accepted": 230,
+        "false_assertions": 0,
+        "accuracy": 0.9933333333333333,
+        "answerable_recall": 0.9913793103448276,
+        "unknown_recall": 1.0
+      },
+      "horizontal": {
+        "examples": 300,
+        "accepted": 137,
+        "false_assertions": 0,
+        "accuracy": 0.9933333333333333,
+        "answerable_recall": 0.9856115107913669,
+        "unknown_recall": 1.0
+      },
+      "vertical": {
+        "examples": 300,
+        "accepted": 129,
+        "false_assertions": 0,
+        "accuracy": 0.9966666666666667,
+        "answerable_recall": 0.9923076923076923,
+        "unknown_recall": 1.0
+      },
+      "invalid_raw_tokens": 0
+    },
+    "legacy_transfer": {
+      "all": {
+        "examples": 2100,
+        "accepted": 1161,
+        "false_assertions": 0,
+        "accuracy": 0.991904761904762,
+        "answerable_recall": 0.9855687606112055,
+        "unknown_recall": 1.0
+      },
+      "count": {
+        "examples": 300,
+        "accepted": 215,
+        "false_assertions": 0,
+        "accuracy": 1.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "same_shape": {
+        "examples": 300,
+        "accepted": 216,
+        "false_assertions": 0,
+        "accuracy": 0.9666666666666667,
+        "answerable_recall": 0.9557522123893806,
+        "unknown_recall": 1.0
+      },
+      "vertical": {
+        "examples": 300,
+        "accepted": 117,
+        "false_assertions": 0,
+        "accuracy": 0.9966666666666667,
+        "answerable_recall": 0.9915254237288136,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 300,
+        "accepted": 140,
+        "false_assertions": 0,
+        "accuracy": 0.9966666666666667,
+        "answerable_recall": 0.9929078014184397,
+        "unknown_recall": 1.0
+      },
+      "horizontal": {
+        "examples": 300,
+        "accepted": 107,
+        "false_assertions": 0,
+        "accuracy": 0.9866666666666667,
+        "answerable_recall": 0.963963963963964,
+        "unknown_recall": 1.0
+      },
+      "same_color": {
+        "examples": 300,
+        "accepted": 226,
+        "false_assertions": 0,
+        "accuracy": 1.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "color": {
+        "examples": 300,
+        "accepted": 140,
+        "false_assertions": 0,
+        "accuracy": 0.9966666666666667,
+        "answerable_recall": 0.9929078014184397,
+        "unknown_recall": 1.0
+      }
+    },
+    "previous_baseline_transfer": {
+      "all": {
+        "examples": 2100,
+        "accepted": 1161,
+        "false_assertions": 0,
+        "accuracy": 0.991904761904762,
+        "answerable_recall": 0.9855687606112055,
+        "unknown_recall": 1.0
+      },
+      "count": {
+        "examples": 300,
+        "accepted": 215,
+        "false_assertions": 0,
+        "accuracy": 1.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 300,
+        "accepted": 140,
+        "false_assertions": 0,
+        "accuracy": 0.9966666666666667,
+        "answerable_recall": 0.9929078014184397,
+        "unknown_recall": 1.0
+      },
+      "color": {
+        "examples": 300,
+        "accepted": 140,
+        "false_assertions": 0,
+        "accuracy": 0.9966666666666667,
+        "answerable_recall": 0.9929078014184397,
+        "unknown_recall": 1.0
+      },
+      "same_shape": {
+        "examples": 300,
+        "accepted": 216,
+        "false_assertions": 0,
+        "accuracy": 0.9666666666666667,
+        "answerable_recall": 0.9557522123893806,
+        "unknown_recall": 1.0
+      },
+      "same_color": {
+        "examples": 300,
+        "accepted": 226,
+        "false_assertions": 0,
+        "accuracy": 1.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "horizontal": {
+        "examples": 300,
+        "accepted": 107,
+        "false_assertions": 0,
+        "accuracy": 0.9866666666666667,
+        "answerable_recall": 0.963963963963964,
+        "unknown_recall": 1.0
+      },
+      "vertical": {
+        "examples": 300,
+        "accepted": 117,
+        "false_assertions": 0,
+        "accuracy": 0.9966666666666667,
+        "answerable_recall": 0.9915254237288136,
+        "unknown_recall": 1.0
+      },
+      "invalid_raw_tokens": 0
+    }
+  },
+  "calibration_thresholds": {
+    "count": 0.98,
+    "shape": 0.99,
+    "color": 0.995,
+    "same_shape": 0.99,
+    "same_color": 0.995,
+    "horizontal": 0.99,
+    "vertical": 0.995,
+    "object": 0.99
+  },
+  "retention_gates": {
+    "count": true,
+    "shape": true,
+    "color": true,
+    "same_shape": true,
+    "same_color": true,
+    "horizontal": true,
+    "vertical": true
+  },
+  "known_regression_status": "REJECTED_NOT_PRODUCTION",
+  "tests": {
+    "focused-tests-v4.xml": {
+      "tests": 236,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "remote-tests.xml": {
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "controlled_prompt_arithmetic_audit": {
+    "status": "CONTROLLED_DEV_PROMPT_ARITHMETIC_VERIFIED",
+    "unique_photos": 144,
+    "candidates": 6,
+    "prompts": 8,
+    "records_sha256": "731b8f73be033032c85cd7b08bfa7cbd809177b61182d7e61319d8b09a563808",
+    "limits": "Repeated known photos/prompt variants are not new independent sources or a fresh exam."
+  },
+  "controlled_prompt_diagnostic": {
+    "status": "CONTROLLED_KNOWN_DEV_PROMPT_DIAGNOSTIC",
+    "prompts": [
+      "Назови предмет на картинке.",
+      "Какой предмет изображён на картинке?",
+      "Что изображено на картинке?",
+      "Назови изображённый предмет.",
+      "Name the object.",
+      "What object is shown?",
+      "Какой предмет на картинке изображён?",
+      "Name the shown object."
+    ],
+    "dataset_sha256": "c71dce559b11274b16aaf21bd9f0588e22fb5d7d99e4f7656437ef3bc9c9cf21",
+    "records_sha256": "731b8f73be033032c85cd7b08bfa7cbd809177b61182d7e61319d8b09a563808",
+    "script_sha256": "e8838f281aeea617f031703a3c35d20fe4794ae749ef2bc2d2997fe076e4f2fa",
+    "candidates": {
+      "warm": {
+        "checkpoint_sha256": "54d1767db8befa55fc8d6633cff788453eafff6e951ab04c65fa64338a4e2590",
+        "prompts": {
+          "Назови предмет на картинке.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 72,
+                "accuracy": 0.4375,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 8,
+                "false_assertions": 0,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 50,
+                "false_assertions": 18,
+                "accuracy": 0.3194444444444444,
+                "answerable_recall": 0.25,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет изображён на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 128,
+                "false_assertions": 72,
+                "accuracy": 0.4166666666666667,
+                "answerable_recall": 0.4375,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 14,
+                "false_assertions": 1,
+                "accuracy": 0.19444444444444445,
+                "answerable_recall": 0.1015625,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 54,
+                "false_assertions": 20,
+                "accuracy": 0.3263888888888889,
+                "answerable_recall": 0.265625,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Что изображено на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 132,
+                "false_assertions": 67,
+                "accuracy": 0.4861111111111111,
+                "answerable_recall": 0.5078125,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 39,
+                "false_assertions": 14,
+                "accuracy": 0.2708333333333333,
+                "answerable_recall": 0.1953125,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Назови изображённый предмет.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 69,
+                "accuracy": 0.4583333333333333,
+                "answerable_recall": 0.484375,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 8,
+                "false_assertions": 0,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 49,
+                "false_assertions": 15,
+                "accuracy": 0.3472222222222222,
+                "answerable_recall": 0.265625,
+                "unknown_recall": 1.0
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 127,
+                "false_assertions": 68,
+                "accuracy": 0.4583333333333333,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.4375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 9,
+                "false_assertions": 1,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 48,
+                "false_assertions": 16,
+                "accuracy": 0.3333333333333333,
+                "answerable_recall": 0.25,
+                "unknown_recall": 1.0
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "What object is shown?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 129,
+                "false_assertions": 69,
+                "accuracy": 0.4513888888888889,
+                "answerable_recall": 0.46875,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 10,
+                "false_assertions": 1,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.0703125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 46,
+                "false_assertions": 14,
+                "accuracy": 0.3333333333333333,
+                "answerable_recall": 0.25,
+                "unknown_recall": 1.0
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет на картинке изображён?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 128,
+                "false_assertions": 72,
+                "accuracy": 0.4166666666666667,
+                "answerable_recall": 0.4375,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 14,
+                "false_assertions": 1,
+                "accuracy": 0.19444444444444445,
+                "answerable_recall": 0.1015625,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 53,
+                "false_assertions": 20,
+                "accuracy": 0.3194444444444444,
+                "answerable_recall": 0.2578125,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the shown object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 68,
+                "accuracy": 0.4791666666666667,
+                "answerable_recall": 0.4921875,
+                "unknown_recall": 0.375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 13,
+                "false_assertions": 0,
+                "accuracy": 0.2013888888888889,
+                "answerable_recall": 0.1015625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 55,
+                "false_assertions": 17,
+                "accuracy": 0.3680555555555556,
+                "answerable_recall": 0.296875,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 8,
+                "false_assertions": 0,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            }
+          }
+        }
+      },
+      "iteration1_pair_js": {
+        "checkpoint_sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+        "prompts": {
+          "Назови предмет на картинке.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 132,
+                "false_assertions": 67,
+                "accuracy": 0.4791666666666667,
+                "answerable_recall": 0.5078125,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 9,
+                "false_assertions": 0,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.0703125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 58,
+                "false_assertions": 18,
+                "accuracy": 0.3680555555555556,
+                "answerable_recall": 0.3125,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет изображён на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 72,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 11,
+                "false_assertions": 1,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 61,
+                "false_assertions": 19,
+                "accuracy": 0.3819444444444444,
+                "answerable_recall": 0.328125,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 1,
+                "accuracy": 0.1388888888888889,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 0.9375
+              }
+            }
+          },
+          "Что изображено на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 126,
+                "false_assertions": 65,
+                "accuracy": 0.4513888888888889,
+                "answerable_recall": 0.4765625,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 11,
+                "false_assertions": 1,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 55,
+                "false_assertions": 17,
+                "accuracy": 0.3611111111111111,
+                "answerable_recall": 0.296875,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Назови изображённый предмет.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 130,
+                "false_assertions": 72,
+                "accuracy": 0.4375,
+                "answerable_recall": 0.453125,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 55,
+                "false_assertions": 16,
+                "accuracy": 0.375,
+                "answerable_recall": 0.3046875,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 69,
+                "accuracy": 0.4722222222222222,
+                "answerable_recall": 0.484375,
+                "unknown_recall": 0.375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 10,
+                "false_assertions": 2,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 55,
+                "false_assertions": 15,
+                "accuracy": 0.375,
+                "answerable_recall": 0.3125,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "What object is shown?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 127,
+                "false_assertions": 68,
+                "accuracy": 0.4444444444444444,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 9,
+                "false_assertions": 1,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 59,
+                "false_assertions": 18,
+                "accuracy": 0.3888888888888889,
+                "answerable_recall": 0.3203125,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет на картинке изображён?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 72,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 11,
+                "false_assertions": 1,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 61,
+                "false_assertions": 19,
+                "accuracy": 0.3819444444444444,
+                "answerable_recall": 0.328125,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 1,
+                "accuracy": 0.1388888888888889,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 0.9375
+              }
+            }
+          },
+          "Name the shown object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 134,
+                "false_assertions": 72,
+                "accuracy": 0.4513888888888889,
+                "answerable_recall": 0.484375,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 13,
+                "false_assertions": 0,
+                "accuracy": 0.2013888888888889,
+                "answerable_recall": 0.1015625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 62,
+                "false_assertions": 17,
+                "accuracy": 0.4097222222222222,
+                "answerable_recall": 0.3515625,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 9,
+                "false_assertions": 0,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.0703125,
+                "unknown_recall": 1.0
+              }
+            }
+          }
+        }
+      },
+      "iteration2_supcon": {
+        "checkpoint_sha256": "f32c9385a4c1ed30460800d758aa3c4c6bb14b2d423aa5b017d2a6d54a9cd9e5",
+        "prompts": {
+          "Назови предмет на картинке.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 129,
+                "false_assertions": 68,
+                "accuracy": 0.4513888888888889,
+                "answerable_recall": 0.4765625,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 1,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 59,
+                "false_assertions": 19,
+                "accuracy": 0.3611111111111111,
+                "answerable_recall": 0.3125,
+                "unknown_recall": 0.75
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет изображён на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 128,
+                "false_assertions": 70,
+                "accuracy": 0.4236111111111111,
+                "answerable_recall": 0.453125,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 16,
+                "false_assertions": 2,
+                "accuracy": 0.19444444444444445,
+                "answerable_recall": 0.109375,
+                "unknown_recall": 0.875
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 63,
+                "false_assertions": 20,
+                "accuracy": 0.3819444444444444,
+                "answerable_recall": 0.3359375,
+                "unknown_recall": 0.75
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 1,
+                "accuracy": 0.1388888888888889,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 0.9375
+              }
+            }
+          },
+          "Что изображено на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 127,
+                "false_assertions": 68,
+                "accuracy": 0.4375,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 15,
+                "false_assertions": 2,
+                "accuracy": 0.19444444444444445,
+                "answerable_recall": 0.1015625,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 52,
+                "false_assertions": 18,
+                "accuracy": 0.3333333333333333,
+                "answerable_recall": 0.265625,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Назови изображённый предмет.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 130,
+                "false_assertions": 65,
+                "accuracy": 0.4791666666666667,
+                "answerable_recall": 0.5078125,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 8,
+                "false_assertions": 0,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 56,
+                "false_assertions": 16,
+                "accuracy": 0.3819444444444444,
+                "answerable_recall": 0.3125,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 127,
+                "false_assertions": 62,
+                "accuracy": 0.4930555555555556,
+                "answerable_recall": 0.5078125,
+                "unknown_recall": 0.375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 14,
+                "false_assertions": 2,
+                "accuracy": 0.19444444444444445,
+                "answerable_recall": 0.09375,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 58,
+                "false_assertions": 17,
+                "accuracy": 0.3819444444444444,
+                "answerable_recall": 0.3203125,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 9,
+                "false_assertions": 1,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "What object is shown?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 127,
+                "false_assertions": 64,
+                "accuracy": 0.4722222222222222,
+                "answerable_recall": 0.4921875,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 1,
+                "accuracy": 0.1875,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 59,
+                "false_assertions": 17,
+                "accuracy": 0.3958333333333333,
+                "answerable_recall": 0.328125,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 8,
+                "false_assertions": 0,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет на картинке изображён?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 128,
+                "false_assertions": 70,
+                "accuracy": 0.4236111111111111,
+                "answerable_recall": 0.453125,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 16,
+                "false_assertions": 2,
+                "accuracy": 0.19444444444444445,
+                "answerable_recall": 0.109375,
+                "unknown_recall": 0.875
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 63,
+                "false_assertions": 20,
+                "accuracy": 0.3819444444444444,
+                "answerable_recall": 0.3359375,
+                "unknown_recall": 0.75
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 1,
+                "accuracy": 0.1388888888888889,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 0.9375
+              }
+            }
+          },
+          "Name the shown object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 133,
+                "false_assertions": 68,
+                "accuracy": 0.4722222222222222,
+                "answerable_recall": 0.5078125,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 14,
+                "false_assertions": 0,
+                "accuracy": 0.20833333333333334,
+                "answerable_recall": 0.109375,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 61,
+                "false_assertions": 15,
+                "accuracy": 0.4166666666666667,
+                "answerable_recall": 0.359375,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 0,
+                "accuracy": 0.19444444444444445,
+                "answerable_recall": 0.09375,
+                "unknown_recall": 1.0
+              }
+            }
+          }
+        }
+      },
+      "iteration3_vicreg": {
+        "checkpoint_sha256": "04a54492aef49d29acb702fa718c1b3aa40c658d9aa5402540597ca014396445",
+        "prompts": {
+          "Назови предмет на картинке.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 130,
+                "false_assertions": 65,
+                "accuracy": 0.4791666666666667,
+                "answerable_recall": 0.5078125,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 63,
+                "false_assertions": 20,
+                "accuracy": 0.3819444444444444,
+                "answerable_recall": 0.3359375,
+                "unknown_recall": 0.75
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет изображён на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 125,
+                "false_assertions": 66,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 1,
+                "accuracy": 0.1875,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 55,
+                "false_assertions": 16,
+                "accuracy": 0.3611111111111111,
+                "answerable_recall": 0.3046875,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Что изображено на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 124,
+                "false_assertions": 67,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.4453125,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 14,
+                "false_assertions": 1,
+                "accuracy": 0.2013888888888889,
+                "answerable_recall": 0.1015625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 51,
+                "false_assertions": 18,
+                "accuracy": 0.3194444444444444,
+                "answerable_recall": 0.2578125,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 9,
+                "false_assertions": 1,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Назови изображённый предмет.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 127,
+                "false_assertions": 66,
+                "accuracy": 0.4583333333333333,
+                "answerable_recall": 0.4765625,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 53,
+                "false_assertions": 14,
+                "accuracy": 0.375,
+                "answerable_recall": 0.3046875,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 130,
+                "false_assertions": 71,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 15,
+                "false_assertions": 2,
+                "accuracy": 0.2013888888888889,
+                "answerable_recall": 0.1015625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 59,
+                "false_assertions": 18,
+                "accuracy": 0.3680555555555556,
+                "answerable_recall": 0.3203125,
+                "unknown_recall": 0.75
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 10,
+                "false_assertions": 1,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.0703125,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "What object is shown?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 125,
+                "false_assertions": 62,
+                "accuracy": 0.4722222222222222,
+                "answerable_recall": 0.4921875,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 2,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 54,
+                "false_assertions": 16,
+                "accuracy": 0.3541666666666667,
+                "answerable_recall": 0.296875,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет на картинке изображён?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 124,
+                "false_assertions": 65,
+                "accuracy": 0.4375,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 1,
+                "accuracy": 0.1875,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 55,
+                "false_assertions": 16,
+                "accuracy": 0.3611111111111111,
+                "answerable_recall": 0.3046875,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the shown object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 132,
+                "false_assertions": 67,
+                "accuracy": 0.4722222222222222,
+                "answerable_recall": 0.5078125,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 18,
+                "false_assertions": 2,
+                "accuracy": 0.2222222222222222,
+                "answerable_recall": 0.125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 62,
+                "false_assertions": 21,
+                "accuracy": 0.375,
+                "answerable_recall": 0.3203125,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 11,
+                "false_assertions": 0,
+                "accuracy": 0.1875,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 1.0
+              }
+            }
+          }
+        }
+      },
+      "iteration4_readout_pairs": {
+        "checkpoint_sha256": "4ead8ec1e8772c4e3f97522ca60144a3cde0f84da9cb373851fbdb5146c3a20f",
+        "prompts": {
+          "Назови предмет на картинке.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 128,
+                "false_assertions": 66,
+                "accuracy": 0.4583333333333333,
+                "answerable_recall": 0.484375,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 9,
+                "false_assertions": 0,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.0703125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 55,
+                "false_assertions": 20,
+                "accuracy": 0.3333333333333333,
+                "answerable_recall": 0.2734375,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет изображён на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 130,
+                "false_assertions": 71,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 14,
+                "false_assertions": 2,
+                "accuracy": 0.1875,
+                "answerable_recall": 0.09375,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 57,
+                "false_assertions": 18,
+                "accuracy": 0.3680555555555556,
+                "answerable_recall": 0.3046875,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 8,
+                "false_assertions": 1,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 0.9375
+              }
+            }
+          },
+          "Что изображено на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 124,
+                "false_assertions": 66,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.453125,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 1,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 53,
+                "false_assertions": 20,
+                "accuracy": 0.3263888888888889,
+                "answerable_recall": 0.2578125,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Назови изображённый предмет.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 129,
+                "false_assertions": 66,
+                "accuracy": 0.4722222222222222,
+                "answerable_recall": 0.4921875,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 8,
+                "false_assertions": 0,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 59,
+                "false_assertions": 17,
+                "accuracy": 0.3958333333333333,
+                "answerable_recall": 0.328125,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 121,
+                "false_assertions": 57,
+                "accuracy": 0.4930555555555556,
+                "answerable_recall": 0.5,
+                "unknown_recall": 0.4375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 13,
+                "false_assertions": 2,
+                "accuracy": 0.1875,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 52,
+                "false_assertions": 13,
+                "accuracy": 0.375,
+                "answerable_recall": 0.3046875,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "What object is shown?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 125,
+                "false_assertions": 61,
+                "accuracy": 0.4791666666666667,
+                "answerable_recall": 0.5,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 11,
+                "false_assertions": 1,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 55,
+                "false_assertions": 16,
+                "accuracy": 0.375,
+                "answerable_recall": 0.3046875,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет на картинке изображён?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 130,
+                "false_assertions": 71,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.4609375,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 1,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 0.9375
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 57,
+                "false_assertions": 18,
+                "accuracy": 0.3680555555555556,
+                "answerable_recall": 0.3046875,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 8,
+                "false_assertions": 1,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 0.9375
+              }
+            }
+          },
+          "Name the shown object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 128,
+                "false_assertions": 65,
+                "accuracy": 0.4722222222222222,
+                "answerable_recall": 0.4921875,
+                "unknown_recall": 0.3125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 16,
+                "false_assertions": 1,
+                "accuracy": 0.2152777777777778,
+                "answerable_recall": 0.1171875,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 64,
+                "false_assertions": 20,
+                "accuracy": 0.4097222222222222,
+                "answerable_recall": 0.34375,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 0,
+                "accuracy": 0.19444444444444445,
+                "answerable_recall": 0.09375,
+                "unknown_recall": 1.0
+              }
+            }
+          }
+        }
+      },
+      "iteration5_prompts_consolidation": {
+        "checkpoint_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+        "prompts": {
+          "Назови предмет на картинке.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 132,
+                "false_assertions": 64,
+                "accuracy": 0.5,
+                "answerable_recall": 0.53125,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 10,
+                "false_assertions": 0,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 67,
+                "false_assertions": 21,
+                "accuracy": 0.4166666666666667,
+                "answerable_recall": 0.359375,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет изображён на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 68,
+                "accuracy": 0.4652777777777778,
+                "answerable_recall": 0.4921875,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 10,
+                "false_assertions": 0,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 68,
+                "false_assertions": 20,
+                "accuracy": 0.4236111111111111,
+                "answerable_recall": 0.375,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Что изображено на картинке?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 129,
+                "false_assertions": 66,
+                "accuracy": 0.4583333333333333,
+                "answerable_recall": 0.4921875,
+                "unknown_recall": 0.1875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 12,
+                "false_assertions": 1,
+                "accuracy": 0.1875,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 57,
+                "false_assertions": 17,
+                "accuracy": 0.3680555555555556,
+                "answerable_recall": 0.3125,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Назови изображённый предмет.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 132,
+                "false_assertions": 65,
+                "accuracy": 0.4930555555555556,
+                "answerable_recall": 0.5234375,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 7,
+                "false_assertions": 0,
+                "accuracy": 0.1597222222222222,
+                "answerable_recall": 0.0546875,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 60,
+                "false_assertions": 14,
+                "accuracy": 0.4305555555555556,
+                "answerable_recall": 0.359375,
+                "unknown_recall": 1.0
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 59,
+                "accuracy": 0.5277777777777778,
+                "answerable_recall": 0.5625,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 10,
+                "false_assertions": 1,
+                "accuracy": 0.1736111111111111,
+                "answerable_recall": 0.0703125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 62,
+                "false_assertions": 18,
+                "accuracy": 0.3958333333333333,
+                "answerable_recall": 0.34375,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "What object is shown?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 130,
+                "false_assertions": 60,
+                "accuracy": 0.5138888888888888,
+                "answerable_recall": 0.546875,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 9,
+                "false_assertions": 1,
+                "accuracy": 0.16666666666666666,
+                "answerable_recall": 0.0625,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 62,
+                "false_assertions": 14,
+                "accuracy": 0.4375,
+                "answerable_recall": 0.375,
+                "unknown_recall": 0.9375
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 6,
+                "false_assertions": 0,
+                "accuracy": 0.1527777777777778,
+                "answerable_recall": 0.046875,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Какой предмет на картинке изображён?": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 131,
+                "false_assertions": 68,
+                "accuracy": 0.4652777777777778,
+                "answerable_recall": 0.4921875,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 10,
+                "false_assertions": 0,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 67,
+                "false_assertions": 20,
+                "accuracy": 0.4166666666666667,
+                "answerable_recall": 0.3671875,
+                "unknown_recall": 0.8125
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 5,
+                "false_assertions": 0,
+                "accuracy": 0.14583333333333334,
+                "answerable_recall": 0.0390625,
+                "unknown_recall": 1.0
+              }
+            }
+          },
+          "Name the shown object.": {
+            "single_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 134,
+                "false_assertions": 63,
+                "accuracy": 0.5208333333333334,
+                "answerable_recall": 0.5546875,
+                "unknown_recall": 0.25
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 11,
+                "false_assertions": 0,
+                "accuracy": 0.1875,
+                "answerable_recall": 0.0859375,
+                "unknown_recall": 1.0
+              }
+            },
+            "five_view": {
+              "raw_not_safe_policy": {
+                "examples": 144,
+                "accepted": 66,
+                "false_assertions": 19,
+                "accuracy": 0.4236111111111111,
+                "answerable_recall": 0.3671875,
+                "unknown_recall": 0.875
+              },
+              "fixed_099_dev_only": {
+                "examples": 144,
+                "accepted": 10,
+                "false_assertions": 0,
+                "accuracy": 0.18055555555555555,
+                "answerable_recall": 0.078125,
+                "unknown_recall": 1.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "production_admitted": false,
+    "limits": "Same known development photos for eight supported prompts, identical view randomness. Includes already known final-question phrases, not new final images. No fitting, threshold change, final or calibration inference. Repeated variants do not increase independent sample count."
+  },
+  "visible_dev_error_review": {
+    "schema": 1,
+    "date": "2026-10-09",
+    "status": "KNOWN_DEVELOPMENT_ERROR_INSPECTION_NOT_NEW_GOLD",
+    "inspected_panels": 24,
+    "candidate": "iteration1_pair_js",
+    "checkpoint_sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+    "source_sheet_sha256": "226b0195f9e7c7fd28ef06ae52cbe0ae94b4bd53a045306810360281c2e6b827",
+    "scope": "Human-like agent inspection of the model's actual RGB96x96 development inputs; selected high-confidence raw errors, not a representative or independent blind sample.",
+    "observations": [
+      {
+        "panels": [
+          1,
+          4,
+          5,
+          6,
+          9,
+          10,
+          12,
+          13,
+          14,
+          16,
+          19,
+          21,
+          22,
+          24
+        ],
+        "finding": "Clear visible object/class confusions: tree to chair, apples to carrot, carrots to banana, chairs to carrot/mug, books to carrot/banana/chair/mug. These errors cannot all be explained by wording or disputed source labels."
+      },
+      {
+        "panels": [
+          2,
+          3,
+          8,
+          17,
+          18
+        ],
+        "finding": "Unsupported-object negatives include spoon, bowl, creamer, kettle and pear; the raw classifier assigns admitted names to them. Thresholded abstention remains necessary; these negative names are NOT newly learned vocabulary."
+      },
+      {
+        "panels": [
+          7,
+          11,
+          20
+        ],
+        "finding": "Flag for separate admission review at actual input resolution: dense small-object scene, camouflaged/small underwater target, and mixed fruit scene respectively. Do not automatically correct gold from these thumbnails. Inspect acquired source bytes and the exact prepared pixels before any later relabel/exclusion."
+      }
+    ],
+    "future_data_admission_requirements": [
+      "Review the exact RGB96x96 pixels after all deterministic preparation, not only a larger source thumbnail or title.",
+      "A generic whole-frame naming question must have an identifiable admitted target at the actual input resolution; ambiguous target selection requires exclusion or a separately designed localized task.",
+      "Freeze source IDs, author grouping, pixel hashes and explicit review decisions before training; use a fresh version for every correction.",
+      "Do not infer gold from current model predictions, source category/title or the desire to improve scores.",
+      "Do not retrospectively change published metrics, known evaluation gold, or the current five-iteration dataset."
+    ],
+    "dataset_or_gold_modified": false,
+    "training_from_this_review": false,
+    "limits": "This records direct visible failure examples and review candidates, not a proof of the sole bottleneck, new verified labels, source-family independence, or general visual competence."
+  },
+  "data_sha256": "c71dce559b11274b16aaf21bd9f0588e22fb5d7d99e4f7656437ef3bc9c9cf21",
+  "transfer_receipt_sha256": "c4439457f328e4fb0d5ad7742a65f5c3a454775fa403bf5ebcdb1e32ac994e32",
+  "canonical_workbook_preserved_sha256": "40bef10fbedb65f61538bb8b2c7a7d12e415ffb07b092fe48d107bdadedd7730",
+  "accepted_core_preserved_sha256": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+  "literature": [
+    "https://arxiv.org/abs/1912.02781",
+    "https://arxiv.org/abs/2004.11362",
+    "https://arxiv.org/abs/2105.04906"
+  ],
+  "limits": "Five sequential adaptive development iterations are NOT independent exams. Known final reused once only after winner frozen, and reported only as regression. No next batch without fresh source acceptance. Labels remain nonblind curated. No threshold/gate weakening."
+}

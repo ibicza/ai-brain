@@ -29,6 +29,11 @@ from torch.nn import functional as F
 from ai_brain.training import primary_objects as obj
 from ai_brain.training import primary_relations as old
 from ai_brain.training.primary_object_augmentation import background_view, diverse_view
+from ai_brain.training.primary_object_objectives import (
+    js_consistency,
+    supervised_contrastive,
+    vicreg,
+)
 
 PREVIOUS_SHA = "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae"
 POLICY_SHA = "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6"
@@ -243,6 +248,11 @@ def main():
     parser.add_argument("--warm-start", type=Path)
     parser.add_argument("--diversity-augmentation", action="store_true")
     parser.add_argument("--background-augmentation", action="store_true")
+    parser.add_argument("--paired-object-training", action="store_true")
+    parser.add_argument("--consistency-weight", type=float, default=0)
+    parser.add_argument("--supervised-contrastive-weight", type=float, default=0)
+    parser.add_argument("--vicreg-weight", type=float, default=0)
+    parser.add_argument("--object-prompt-balancing", action="store_true")
     parser.add_argument("--illustration-fraction", type=float, default=0)
     parser.add_argument("--domain-balanced-dev", action="store_true")
     parser.add_argument("--class-domain-balanced-dev", action="store_true")
@@ -258,6 +268,26 @@ def main():
         or args.eval_every < 1
         or (args.steps < 1 and not args.evaluate_checkpoint)
         or args.learning_rate <= 0
+        or any(
+            not math.isfinite(v) or v < 0
+            for v in (
+                args.consistency_weight,
+                args.supervised_contrastive_weight,
+                args.vicreg_weight,
+            )
+        )
+        or (
+            (
+                args.consistency_weight
+                or args.supervised_contrastive_weight
+                or args.vicreg_weight
+            )
+            and not args.paired_object_training
+        )
+        or (
+            (args.supervised_contrastive_weight or args.vicreg_weight)
+            and not args.vision_extension_channels
+        )
         or not 0 <= args.illustration_fraction <= 0.75
         or (args.class_domain_balanced_dev and not args.domain_balanced_dev)
         or (
@@ -501,6 +531,18 @@ def main():
             "Illustration-balanced replay requires all eight names and UNKNOWN"
         )
     history, best = [], float("inf")
+    captured_features = []
+    feature_handle = None
+    if args.supervised_contrastive_weight or args.vicreg_weight:
+        # The same own CNN's mean/max features; no separate pretrained encoder.
+        feature_handle = model.vision_extension.register_forward_hook(
+            lambda module, inputs, output: captured_features.append(
+                torch.cat((output.mean((2, 3)), output.amax((2, 3))), dim=1)
+            )
+        )
+    prompt_tokens = torch.tensor(
+        [obj.encode_question(q) for q in obj.TEACHING], device=device
+    )
     started = time.monotonic()
     for step in range(1, args.steps + 1):
         model.train()
@@ -524,6 +566,11 @@ def main():
         )
         old_images, old_words, old_labels = train_old.batch(old_ids)
         new_images, new_words, new_labels = train_new.batch(new_ids)
+        clean_new_images = new_images
+        if args.object_prompt_balancing:
+            new_words = prompt_tokens[
+                torch.randint(len(prompt_tokens), (32,), device=device)
+            ]
         # Preserve outline semantics; no fabricated object/count labels.
         new_images = (
             diverse_view(new_images)
@@ -547,10 +594,46 @@ def main():
             images = images.flip(-1)
             words = old.mirror_questions(words)
         optimizer.zero_grad(set_to_none=True)
+        captured_features.clear()
         logits, intent_logits = model(images, words, return_intent=True)
         loss = F.cross_entropy(logits, labels) + 0.2 * F.cross_entropy(
             intent_logits, intents
         )
+        if args.paired_object_training:
+            # Pair from the same source; use the very transformations required
+            # by five-view inference. No crops inventing partial-object labels.
+            second_images = brightness_view(clean_new_images)
+            view_index = int(torch.randint(4, ()).item())
+            if view_index == 1:
+                second_images = translated_view(second_images, 1, 1)
+            elif view_index == 2:
+                second_images = translated_view(second_images, -1, -1)
+            elif view_index == 3:
+                second_images = second_images.flip(-1)
+            second_logits = model(second_images, new_words)
+            # Baseline object CE had half-batch weight .5: keep total .5
+            # across two views rather than silently doubling object weighting.
+            loss = loss - 0.25 * F.cross_entropy(logits[:32], new_labels)
+            loss = loss + 0.25 * F.cross_entropy(second_logits, new_labels)
+            allowed = list(obj.OBJECT_IDS.values()) + [obj.UNKNOWN]
+            loss = loss + args.consistency_weight * js_consistency(
+                logits[:32, allowed], second_logits[:, allowed]
+            )
+            if args.supervised_contrastive_weight:
+                loss = (
+                    loss
+                    + args.supervised_contrastive_weight
+                    * supervised_contrastive(
+                        captured_features[0],
+                        captured_features[1],
+                        new_labels,
+                        unknown=obj.UNKNOWN,
+                    )
+                )
+            if args.vicreg_weight:
+                loss = loss + args.vicreg_weight * vicreg(
+                    captured_features[0], captured_features[1]
+                )
         keep = eligible[old_ids]
         if keep.any() and not args.protect_inherited:
             loss = loss + F.kl_div(
@@ -559,6 +642,7 @@ def main():
                 reduction="batchmean",
             )
         loss.backward()
+        captured_features.clear()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
         optimizer.step()
         scheduler.step()
@@ -600,6 +684,8 @@ def main():
                     },
                     args.output / "best.pt",
                 )
+    if feature_handle is not None:
+        feature_handle.remove()
     if args.evaluate_checkpoint:
         shutil.copyfile(args.evaluate_checkpoint, args.output / "best.pt")
     chosen = torch.load(args.output / "best.pt", map_location=device, weights_only=True)

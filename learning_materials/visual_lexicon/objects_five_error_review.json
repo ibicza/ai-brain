@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "date": "2026-10-09",
+  "status": "KNOWN_DEVELOPMENT_ERROR_INSPECTION_NOT_NEW_GOLD",
+  "inspected_panels": 24,
+  "candidate": "iteration1_pair_js",
+  "checkpoint_sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+  "source_sheet_sha256": "226b0195f9e7c7fd28ef06ae52cbe0ae94b4bd53a045306810360281c2e6b827",
+  "scope": "Human-like agent inspection of the model's actual RGB96x96 development inputs; selected high-confidence raw errors, not a representative or independent blind sample.",
+  "observations": [
+    {
+      "panels": [1, 4, 5, 6, 9, 10, 12, 13, 14, 16, 19, 21, 22, 24],
+      "finding": "Clear visible object/class confusions: tree to chair, apples to carrot, carrots to banana, chairs to carrot/mug, books to carrot/banana/chair/mug. These errors cannot all be explained by wording or disputed source labels."
+    },
+    {
+      "panels": [2, 3, 8, 17, 18],
+      "finding": "Unsupported-object negatives include spoon, bowl, creamer, kettle and pear; the raw classifier assigns admitted names to them. Thresholded abstention remains necessary; these negative names are NOT newly learned vocabulary."
+    },
+    {
+      "panels": [7, 11, 20],
+      "finding": "Flag for separate admission review at actual input resolution: dense small-object scene, camouflaged/small underwater target, and mixed fruit scene respectively. Do not automatically correct gold from these thumbnails. Inspect acquired source bytes and the exact prepared pixels before any later relabel/exclusion."
+    }
+  ],
+  "future_data_admission_requirements": [
+    "Review the exact RGB96x96 pixels after all deterministic preparation, not only a larger source thumbnail or title.",
+    "A generic whole-frame naming question must have an identifiable admitted target at the actual input resolution; ambiguous target selection requires exclusion or a separately designed localized task.",
+    "Freeze source IDs, author grouping, pixel hashes and explicit review decisions before training; use a fresh version for every correction.",
+    "Do not infer gold from current model predictions, source category/title or the desire to improve scores.",
+    "Do not retrospectively change published metrics, known evaluation gold, or the current five-iteration dataset."
+  ],
+  "dataset_or_gold_modified": false,
+  "training_from_this_review": false,
+  "limits": "This records direct visible failure examples and review candidates, not a proof of the sole bottleneck, new verified labels, source-family independence, or general visual competence."
+}

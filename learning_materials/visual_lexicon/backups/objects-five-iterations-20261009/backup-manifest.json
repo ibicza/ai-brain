@@ -1,0 +1,481 @@
+{
+  "schema": 1,
+  "parent_backup_commit": "734df7b702fc8a894e986af81960ee7e4647a0be",
+  "status": "FIVE_ITERATIONS_COMPLETED_NOT_PRODUCTION",
+  "result_sha256": "8de146dbdd9474be538d1cf36b2e18f991572e404d5d6ebdc016db3034c3b5fa",
+  "bundles": [
+    {
+      "file": "evidence-01.zip",
+      "sha256": "ca7cf254f71498d635f1e0a4552cb0311a33cef1473896062e58d94c16aace28",
+      "bytes": 25117794,
+      "entries": [
+        {
+          "file": "dev-error-review-v1.json",
+          "sha256": "0b3ffe31b9096202fa6130fa2db110d5070fb727c13fdf51d54b576cfa28209e",
+          "bytes": 6812
+        },
+        {
+          "file": "dev-error-review-v1.png",
+          "sha256": "226b0195f9e7c7fd28ef06ae52cbe0ae94b4bd53a045306810360281c2e6b827",
+          "bytes": 427066
+        },
+        {
+          "file": "evidence-contract-tests.xml",
+          "sha256": "5f217eb261e3e53cd78307ec845171830f987d6ee14b1c90d286285a0542378e",
+          "bytes": 4510
+        },
+        {
+          "file": "five-iterations-result.json",
+          "sha256": "8de146dbdd9474be538d1cf36b2e18f991572e404d5d6ebdc016db3034c3b5fa",
+          "bytes": 109091
+        },
+        {
+          "file": "focused-tests-v1.xml",
+          "sha256": "eb288c6b5e98b22834da079ed705b576294a9077abde3306c208c4dfcb250c4b",
+          "bytes": 232
+        },
+        {
+          "file": "focused-tests-v2.xml",
+          "sha256": "90ceb0a50539f94e21b30f321737de2b6fa243f040371d9b1f000961190d1d14",
+          "bytes": 36750
+        },
+        {
+          "file": "focused-tests-v3.xml",
+          "sha256": "fe6976df1035a32d63a3e116e86ca8a55105817eb04ac8a2a01c597257ccb212",
+          "bytes": 37379
+        },
+        {
+          "file": "focused-tests-v4.xml",
+          "sha256": "f803046358e5d14f2880223ae9bdefabc3dab41fb802896634485ce0b715bd5d",
+          "bytes": 37379
+        },
+        {
+          "file": "graph-final-build.log",
+          "sha256": "28dbcf7f65e637b1fd074c6d8204b943ba167681656098ac5e35591dfd581a2f",
+          "bytes": 927
+        },
+        {
+          "file": "lineage-tests-v2.xml",
+          "sha256": "73e898e59fb86d67c74a563f1bef1f79a3a69b362809a416a757457b07423c66",
+          "bytes": 871
+        },
+        {
+          "file": "lineage-tests.xml",
+          "sha256": "d089fe5c29bf98b2478cd29f2a3ffa6e938494cc384eab0a6eef05d943ad79c6",
+          "bytes": 871
+        },
+        {
+          "file": "live-receipts/iteration1_pair_js-dev-photo.json",
+          "sha256": "509484ddbeaf65d4cba8510350784769bfe3a31a5fcc3c8e3ca63929e96fe32c",
+          "bytes": 1162169
+        },
+        {
+          "file": "live-receipts/iteration1_pair_js-receipt.json",
+          "sha256": "c1fb09b8cbd0e4286f8029b39ad74e9ee16302f95726a7fc70323724224cae43",
+          "bytes": 3093
+        },
+        {
+          "file": "live-receipts/iteration2_supcon-receipt.json",
+          "sha256": "7d108c65ca04b56d28b8221bdbf32febba7e57539313a0473e9d878eccbce4ed",
+          "bytes": 3115
+        },
+        {
+          "file": "live-receipts/iteration3_vicreg-receipt.json",
+          "sha256": "69468d10798a0e961daac48239eb06a884fe110ac12187aee2cd49bfc52cbb6c",
+          "bytes": 3128
+        },
+        {
+          "file": "remote-results/controlled-prompt-arithmetic-audit.json",
+          "sha256": "a7b423f1c2ddbc1312b947d1033c417577bdcaff502cbb39b86271943f238bd6",
+          "bytes": 309
+        },
+        {
+          "file": "remote-results/development-v1/initial-anchor-score.json",
+          "sha256": "ac8891b407f3eff8d3045bcb28793f632827515c769b6257a20eab23d52dd1df",
+          "bytes": 194
+        },
+        {
+          "file": "remote-results/development-v1/iteration1_pair_js-lineage.json",
+          "sha256": "ec8867d794b5e6c055b76242ffb15d059a534426e6ca59718f2c2f22b1bfa21c",
+          "bytes": 673
+        },
+        {
+          "file": "remote-results/development-v1/iteration1_pair_js-receipt.json",
+          "sha256": "c1fb09b8cbd0e4286f8029b39ad74e9ee16302f95726a7fc70323724224cae43",
+          "bytes": 3093
+        },
+        {
+          "file": "remote-results/development-v1/iteration1_pair_js.log",
+          "sha256": "ba81236ab59d969d34dae87fb637b64f8bf635c5328e39e9b80155da29689b32",
+          "bytes": 5218
+        },
+        {
+          "file": "remote-results/development-v1/iteration1_pair_js/best.pt",
+          "sha256": "8642422699f008cb3d3f60307cedb054d111a9383ae498e1d80bfd9964b7cb19",
+          "bytes": 3917365
+        },
+        {
+          "file": "remote-results/development-v1/iteration1_pair_js/development-report.json",
+          "sha256": "df87cd3b9fe5dbf2503acc1ede07051bf8044efdf58ca5887e62db823827616b",
+          "bytes": 8121
+        },
+        {
+          "file": "remote-results/development-v1/iteration1_pair_js/protocol.json",
+          "sha256": "74ebedd103bdfcea2341fef04dad2a7a374bfce59472fe9ba566430ac249bba0",
+          "bytes": 5807
+        },
+        {
+          "file": "remote-results/development-v1/iteration1_pair_js/replay-split-audit.json",
+          "sha256": "d119f33f4d3fc5c5ae3cba39d6fa444c6cb551f8e944c6d07111efa1ac45386d",
+          "bytes": 3311
+        },
+        {
+          "file": "remote-results/development-v1/iteration1_pair_js/replay-teacher-audit.json",
+          "sha256": "6c2cd0feae86056796908e52856ebd99c9415ff79c20f1ab404bf02ba38c813f",
+          "bytes": 166
+        },
+        {
+          "file": "remote-results/development-v1/iteration2_supcon-lineage.json",
+          "sha256": "ebc3be37f97089bc249ab5a947be4d37f0639faefd1e4cb1243ebe8f46c68000",
+          "bytes": 704
+        },
+        {
+          "file": "remote-results/development-v1/iteration2_supcon-receipt.json",
+          "sha256": "7d108c65ca04b56d28b8221bdbf32febba7e57539313a0473e9d878eccbce4ed",
+          "bytes": 3115
+        },
+        {
+          "file": "remote-results/development-v1/iteration2_supcon.log",
+          "sha256": "8008bc7b10c435d15eb326986b33a51ec5bfa07d8c9e6e607edf1cc2b68fe663",
+          "bytes": 5211
+        },
+        {
+          "file": "remote-results/development-v1/iteration2_supcon/best.pt",
+          "sha256": "f32c9385a4c1ed30460800d758aa3c4c6bb14b2d423aa5b017d2a6d54a9cd9e5",
+          "bytes": 3917365
+        },
+        {
+          "file": "remote-results/development-v1/iteration2_supcon/development-report.json",
+          "sha256": "2c3f6d2469eceee01ee264b7497f501e0784d88fc1332a3e7569efc68f6f5909",
+          "bytes": 8112
+        },
+        {
+          "file": "remote-results/development-v1/iteration2_supcon/protocol.json",
+          "sha256": "505b24a297047232abdfca9e466160e1a2ff3d8a34bf3a7557f2b0165464cdf1",
+          "bytes": 5841
+        },
+        {
+          "file": "remote-results/development-v1/iteration2_supcon/replay-split-audit.json",
+          "sha256": "d119f33f4d3fc5c5ae3cba39d6fa444c6cb551f8e944c6d07111efa1ac45386d",
+          "bytes": 3311
+        },
+        {
+          "file": "remote-results/development-v1/iteration2_supcon/replay-teacher-audit.json",
+          "sha256": "6c2cd0feae86056796908e52856ebd99c9415ff79c20f1ab404bf02ba38c813f",
+          "bytes": 166
+        },
+        {
+          "file": "remote-results/development-v1/iteration3_vicreg-lineage.json",
+          "sha256": "4f8e437d80949cffecc326841f4ba4d1af707bd4a7b5624c8ad84225aef32665",
+          "bytes": 708
+        },
+        {
+          "file": "remote-results/development-v1/iteration3_vicreg-receipt.json",
+          "sha256": "69468d10798a0e961daac48239eb06a884fe110ac12187aee2cd49bfc52cbb6c",
+          "bytes": 3128
+        },
+        {
+          "file": "remote-results/development-v1/iteration3_vicreg.log",
+          "sha256": "6c8893002bdb3aafe93c43daac58a7b1dd384bcf7b41156a1e812d7567169cd9",
+          "bytes": 5235
+        },
+        {
+          "file": "remote-results/development-v1/iteration3_vicreg/best.pt",
+          "sha256": "04a54492aef49d29acb702fa718c1b3aa40c658d9aa5402540597ca014396445",
+          "bytes": 3917365
+        },
+        {
+          "file": "remote-results/development-v1/iteration3_vicreg/development-report.json",
+          "sha256": "d336cd3e1ac81801b66508d415d9f29879b48d7bdee46408d923c739db8cd251",
+          "bytes": 8136
+        },
+        {
+          "file": "remote-results/development-v1/iteration3_vicreg/protocol.json",
+          "sha256": "04116c7e28242d9bfe5b08fc1e39a720b4131edc218b9ddd4e11464b2caac0b7",
+          "bytes": 5841
+        },
+        {
+          "file": "remote-results/development-v1/iteration3_vicreg/replay-split-audit.json",
+          "sha256": "d119f33f4d3fc5c5ae3cba39d6fa444c6cb551f8e944c6d07111efa1ac45386d",
+          "bytes": 3311
+        },
+        {
+          "file": "remote-results/development-v1/iteration3_vicreg/replay-teacher-audit.json",
+          "sha256": "6c2cd0feae86056796908e52856ebd99c9415ff79c20f1ab404bf02ba38c813f",
+          "bytes": 166
+        },
+        {
+          "file": "remote-results/development-v1/iteration4_readout_pairs-lineage.json",
+          "sha256": "9537dce62b3cf5d848e0b86e4980fb4cd3116a82dd613d760311c19afc26dbef",
+          "bytes": 729
+        },
+        {
+          "file": "remote-results/development-v1/iteration4_readout_pairs-receipt.json",
+          "sha256": "0eb7420bec23a3071325560a01268b877b329e1265d1e0542f6a2367d3322c82",
+          "bytes": 3132
+        },
+        {
+          "file": "remote-results/development-v1/iteration4_readout_pairs.log",
+          "sha256": "f7e657c08ffcd216f5640eab4e8288697f0d909179f138658f2159d9c4adf1a7",
+          "bytes": 5214
+        },
+        {
+          "file": "remote-results/development-v1/iteration4_readout_pairs/best.pt",
+          "sha256": "4ead8ec1e8772c4e3f97522ca60144a3cde0f84da9cb373851fbdb5146c3a20f",
+          "bytes": 4217489
+        },
+        {
+          "file": "remote-results/development-v1/iteration4_readout_pairs/development-report.json",
+          "sha256": "f871f20958bb72953ebeca5226c042b28c6bdb8b5b9d016fdce6bc7eae0dd91c",
+          "bytes": 8151
+        },
+        {
+          "file": "remote-results/development-v1/iteration4_readout_pairs/protocol.json",
+          "sha256": "3fac9fd74a25f26abf57b5316a9ec3bbe6cdfd34ac157c8130c8d380bff994c4",
+          "bytes": 5847
+        },
+        {
+          "file": "remote-results/development-v1/iteration4_readout_pairs/replay-split-audit.json",
+          "sha256": "d119f33f4d3fc5c5ae3cba39d6fa444c6cb551f8e944c6d07111efa1ac45386d",
+          "bytes": 3311
+        },
+        {
+          "file": "remote-results/development-v1/iteration4_readout_pairs/replay-teacher-audit.json",
+          "sha256": "6c2cd0feae86056796908e52856ebd99c9415ff79c20f1ab404bf02ba38c813f",
+          "bytes": 166
+        },
+        {
+          "file": "remote-results/development-v1/iteration5_prompts_consolidation-lineage.json",
+          "sha256": "cd13d6014a11723302d3682049c5ed4e50cce4df82e3858a68b7848a27ddd7cd",
+          "bytes": 770
+        },
+        {
+          "file": "remote-results/development-v1/iteration5_prompts_consolidation-receipt.json",
+          "sha256": "1d43f12a3cbc36fe29c362b025e1914d7fc56abfeea3ee99375653f7412e228e",
+          "bytes": 3187
+        },
+        {
+          "file": "remote-results/development-v1/iteration5_prompts_consolidation.log",
+          "sha256": "2bd9791732388744f044ed1f7d79005ca38b1234730d3f6acf35779a779f92d9",
+          "bytes": 5221
+        },
+        {
+          "file": "remote-results/development-v1/iteration5_prompts_consolidation/best.pt",
+          "sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+          "bytes": 3917365
+        },
+        {
+          "file": "remote-results/development-v1/iteration5_prompts_consolidation/development-report.json",
+          "sha256": "887c6e2ed8f4b063559796cc64d374701d373e28dff540b952484ef337df0cf1",
+          "bytes": 8122
+        },
+        {
+          "file": "remote-results/development-v1/iteration5_prompts_consolidation/protocol.json",
+          "sha256": "62292b2f5265f164b847e1abeadd911594336a1bf89b7805fd9b1e3cd7ce9213",
+          "bytes": 5856
+        },
+        {
+          "file": "remote-results/development-v1/iteration5_prompts_consolidation/replay-split-audit.json",
+          "sha256": "d119f33f4d3fc5c5ae3cba39d6fa444c6cb551f8e944c6d07111efa1ac45386d",
+          "bytes": 3311
+        },
+        {
+          "file": "remote-results/development-v1/iteration5_prompts_consolidation/replay-teacher-audit.json",
+          "sha256": "6c2cd0feae86056796908e52856ebd99c9415ff79c20f1ab404bf02ba38c813f",
+          "bytes": 166
+        },
+        {
+          "file": "remote-results/development-v1/plan.json",
+          "sha256": "4fb6d6e9b703ac0818f6422caa145df60b4208a9f083d6cfb9be4ae7fb13d64b",
+          "bytes": 3187
+        },
+        {
+          "file": "remote-results/iteration1_pair_js-dev-photo.json",
+          "sha256": "509484ddbeaf65d4cba8510350784769bfe3a31a5fcc3c8e3ca63929e96fe32c",
+          "bytes": 1162169
+        },
+        {
+          "file": "remote-results/iteration2_supcon-dev-photo.json",
+          "sha256": "ccbbe2c29f900ede964e11de4cc11f3960a2bf261f52f4eb424f710a083d3f7d",
+          "bytes": 1162284
+        },
+        {
+          "file": "remote-results/iteration3_vicreg-dev-photo.json",
+          "sha256": "c0a7f66af19626d11cb2afb28048f9119e15c7eb06eb137acdc675f07ef862ea",
+          "bytes": 1162338
+        },
+        {
+          "file": "remote-results/iteration4_readout_pairs-dev-photo.json",
+          "sha256": "fa148e71822374a582c2d6ee67cb3e4c51b3821e0b44a1a05c11954ad8cb421d",
+          "bytes": 1162379
+        },
+        {
+          "file": "remote-results/iteration5_prompts_consolidation-dev-photo.json",
+          "sha256": "4e89ff3d7582e8292b8b91b38ab425dea968afac70899a342ebd11924b3375dd",
+          "bytes": 1162436
+        },
+        {
+          "file": "remote-results/known-regression-arithmetic-audit.json",
+          "sha256": "0107efc6500dbbe5c428c109d33b8c0705cfafa98edf785e731aa65004c90175",
+          "bytes": 692
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/best.pt",
+          "sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+          "bytes": 3917365
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/frozen-calibration.json",
+          "sha256": "601461c1e5294402a33e18b0dd95209f3bcc0ae64994f8f722023be8c06c13ff",
+          "bytes": 379
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/legacy-final-predictions.json",
+          "sha256": "ef5fd8bff7c9fa82fde0cfc27c598bf8d0bc385516c3604cee19a4c556fd8c21",
+          "bytes": 2443965
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/legacy-transfer-predictions.json",
+          "sha256": "0dcbf97bfcad3421518f7589c71fb3fa80d920c5910ca95e34d20ab02886c405",
+          "bytes": 2448997
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/object-blank-predictions.json",
+          "sha256": "b316ae2ba0b725c986ec8e58002739b97abe35988a6540cf8a4da20abf35b7a0",
+          "bytes": 186396
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/object-final-predictions.json",
+          "sha256": "6189c667767b4d2118c0a72dd65b19b3be1fda1e02a5b772b5b5c030fb9735ff",
+          "bytes": 188735
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/object-regression-predictions.json",
+          "sha256": "a64b982cd3f440fbe201530f2a818fb641a829f027020eb5d19e086aa8c70b26",
+          "bytes": 805428
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/object-shuffled-predictions.json",
+          "sha256": "dd133e1fd291cd324e5f0f81446585c599a3ba0bce2ce0a936a751cd98f3791e",
+          "bytes": 188983
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/protocol.json",
+          "sha256": "9037653d392b1b61d8253666624bbbc2fc6eecd05869d1ecebfe9770ffd237a7",
+          "bytes": 5772
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/replay-split-audit.json",
+          "sha256": "d119f33f4d3fc5c5ae3cba39d6fa444c6cb551f8e944c6d07111efa1ac45386d",
+          "bytes": 3311
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/replay-teacher-audit.json",
+          "sha256": "6c2cd0feae86056796908e52856ebd99c9415ff79c20f1ab404bf02ba38c813f",
+          "bytes": 166
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/report.json",
+          "sha256": "166673967d846d56e421fdf420b6d01e565f786aec9570a456e8007b81636e81",
+          "bytes": 22006
+        },
+        {
+          "file": "remote-results/known-regression-evaluation/textbook-diagnostic-predictions.json",
+          "sha256": "4fbc93a34aa9b328e463b7471c36ea496548a2b7c4b796b274ec49122a39eae2",
+          "bytes": 8503
+        },
+        {
+          "file": "remote-results/post_prompt_diagnostic.py",
+          "sha256": "e8838f281aeea617f031703a3c35d20fe4794ae749ef2bc2d2997fe076e4f2fa",
+          "bytes": 7254
+        },
+        {
+          "file": "remote-results/postcheck.log",
+          "sha256": "80c0a72815ecd33a961b28eb9175f0fac136d1e59beca4a1c59d5f79ffb3faa0",
+          "bytes": 442
+        },
+        {
+          "file": "remote-results/postcheck_source.py",
+          "sha256": "98af3e37cf77cd249b87a27622461d63b2e6931342dc0bffc7d4de207266326c",
+          "bytes": 3040
+        },
+        {
+          "file": "remote-results/previous-policy.json",
+          "sha256": "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6",
+          "bytes": 359
+        },
+        {
+          "file": "remote-results/previous.pt",
+          "sha256": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+          "bytes": 1382153
+        },
+        {
+          "file": "remote-results/prompt-dev-diagnostic.json",
+          "sha256": "3ea7122b1caa27372142099707441d062b3b091890916d5ecb553feabd58181c",
+          "bytes": 62169
+        },
+        {
+          "file": "remote-results/prompt-dev-records.json.gz",
+          "sha256": "731b8f73be033032c85cd7b08bfa7cbd809177b61182d7e61319d8b09a563808",
+          "bytes": 896829
+        },
+        {
+          "file": "remote-results/remote-tests.xml",
+          "sha256": "18f2b688043c28c9d1754681262053bd43231eb7126a2964033c75a132a5ec9e",
+          "bytes": 4821
+        },
+        {
+          "file": "remote-results/runner.log",
+          "sha256": "757139784f53d69dc33549772098ecabc4fd9f2ee1cbbb20661488724ed4691c",
+          "bytes": 14729
+        },
+        {
+          "file": "remote-results/selection-development-only.json",
+          "sha256": "551302c6834fd1c5827310643ce3bef6efebf66bcc370c96e7cd053559cde3f5",
+          "bytes": 18890
+        },
+        {
+          "file": "remote-results/source-manifest.json",
+          "sha256": "15d0aae7861a13d5bde0530afe1b175a746db7eba5ee8d019950424dc5ed9077",
+          "bytes": 82098
+        }
+      ]
+    },
+    {
+      "file": "evidence-02.zip",
+      "sha256": "d55026f7e69329ad66c68a1a026f49ec698489204310f73ffd41c11af29ff293",
+      "bytes": 28712995,
+      "entries": [
+        {
+          "file": "remote-results/warm.pt",
+          "sha256": "54d1767db8befa55fc8d6633cff788453eafff6e951ab04c65fa64338a4e2590",
+          "bytes": 3917365
+        },
+        {
+          "file": "source-capsule-v1.tgz",
+          "sha256": "3f47d89a2891da4014c6b98d55eb6496f5332d954422a51cb9be831d586d54aa",
+          "bytes": 25074420
+        },
+        {
+          "file": "transfer-receipt.json",
+          "sha256": "c4439457f328e4fb0d5ad7742a65f5c3a454775fa403bf5ebcdb1e32ac994e32",
+          "bytes": 104576
+        }
+      ]
+    }
+  ],
+  "no_original_source_media_duplicate": true,
+  "prepared_pixels_note": "Frozen source capsule retains prepared RGB96x96 training inputs; original source-media archive remains in the parent backup.",
+  "parent_corpus_dataset_sha256": "c71dce559b11274b16aaf21bd9f0588e22fb5d7d99e4f7656437ef3bc9c9cf21",
+  "source_files_verified": 461
+}
