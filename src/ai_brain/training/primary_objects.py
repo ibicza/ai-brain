@@ -74,6 +74,7 @@ class ObjectsModel(previous.RelationsModel):
         vision_extension_channels: int = 0,
         vision_extension_depth: int = 0,
         object_unknown_adapter: bool = False,
+        vision_global_context: bool = False,
     ) -> None:
         if vision_extension_channels not in (
             0,
@@ -85,6 +86,12 @@ class ObjectsModel(previous.RelationsModel):
             raise ValueError("Extension depth requires extension channels")
         if type(object_unknown_adapter) is not bool:
             raise ValueError("Unknown adapter flag must be boolean")
+        if type(vision_global_context) is not bool or (
+            vision_global_context and not vision_extension_channels
+        ):
+            raise ValueError(
+                "Global context requires a pixel extension and boolean flag"
+            )
         super().__init__(width=width, layers=layers)
         self.core.config = replace(self.core.config, vocab_size=VOCAB_SIZE)
         self.core.token_embedding = nn.Embedding(VOCAB_SIZE, width)
@@ -102,6 +109,7 @@ class ObjectsModel(previous.RelationsModel):
             nn.init.zeros_(self.object_unknown_adapter.weight)
             nn.init.zeros_(self.object_unknown_adapter.bias)
         self.vision_extension = None
+        self.vision_global_context = None
         if vision_extension_channels:
             channels = vision_extension_channels
             blocks = [
@@ -121,6 +129,16 @@ class ObjectsModel(previous.RelationsModel):
             # Start as an exact zero residual, not an unrelated replacement.
             nn.init.zeros_(self.vision_extension[-1].weight)
             nn.init.zeros_(self.vision_extension[-1].bias)
+        if vision_global_context:
+            self.vision_extension_config["vision_global_context"] = True
+            # Content-only full-frame summary supplements local features without
+            # changing the inherited core, old questions, or output vocabulary.
+            # Zero residual makes migration exactly identity before training.
+            self.vision_global_context = nn.Sequential(
+                nn.Linear(width * 2, width), nn.GELU(), nn.Linear(width, width)
+            )
+            nn.init.zeros_(self.vision_global_context[-1].weight)
+            nn.init.zeros_(self.vision_global_context[-1].bias)
         self.register_buffer(
             "object_questions",
             torch.tensor([encode_question(text) for text in OBJECT_QUESTIONS]),
@@ -157,6 +175,9 @@ class ObjectsModel(previous.RelationsModel):
         if not len(indices):
             return original
         residual = self.vision_extension(images[indices])
+        if self.vision_global_context is not None:
+            pooled = torch.cat((residual.mean((2, 3)), residual.amax((2, 3))), dim=1)
+            residual = residual + self.vision_global_context(pooled)[:, :, None, None]
         return original.index_copy(0, indices, original[indices] + residual)
 
     def answer_logits(self, embeddings, key_mask, questions):
@@ -191,6 +212,7 @@ class ObjectsModel(previous.RelationsModel):
             "vision_extension_channels",
             "vision_extension_depth",
             "object_unknown_adapter",
+            "vision_global_context",
         }:
             raise ValueError("Unknown architecture metadata")
         if type(checkpoint.get("compatible_legacy_vocabulary")) is not bool:
@@ -203,6 +225,46 @@ class ObjectsModel(previous.RelationsModel):
         model.load_state_dict(checkpoint["model"], strict=True)
         model.compatible_legacy_vocabulary = checkpoint["compatible_legacy_vocabulary"]
         return model
+
+    def load_object_warm_start(self, checkpoint: dict) -> None:
+        """Exact same architecture, or append only the zero global-context branch."""
+        warm = self.from_checkpoint(checkpoint)
+        if not warm.compatible_legacy_vocabulary:
+            raise ValueError("Warm-start legacy policy mismatch")
+        target_arch = self.vision_extension_config
+        source_arch = warm.vision_extension_config
+        if source_arch == target_arch:
+            self.load_state_dict(warm.state_dict(), strict=True)
+            return
+        if not (
+            target_arch.get("vision_global_context") is True
+            and "vision_global_context" not in source_arch
+            and {k: v for k, v in target_arch.items() if k != "vision_global_context"}
+            == source_arch
+        ):
+            raise ValueError("Warm-start architecture/policy mismatch")
+        if self.vision_global_context is None or any(
+            torch.count_nonzero(p).item()
+            for p in self.vision_global_context[-1].parameters()
+        ):
+            raise ValueError("Appended context must start at exact zero residual")
+        expected_missing = {
+            "vision_global_context.0.weight",
+            "vision_global_context.0.bias",
+            "vision_global_context.2.weight",
+            "vision_global_context.2.bias",
+        }
+        incompatible = self.load_state_dict(warm.state_dict(), strict=False)
+        if (
+            set(incompatible.missing_keys) != expected_missing
+            or incompatible.unexpected_keys
+        ):
+            raise ValueError("Unexpected warm-start missing or extra tensors")
+        if any(
+            not torch.equal(self.state_dict()[k], v)
+            for k, v in warm.state_dict().items()
+        ):
+            raise ValueError("Warm-start inherited object tensors changed")
 
     def load_previous(self, state: dict[str, torch.Tensor]) -> None:
         original = previous.RelationsModel(

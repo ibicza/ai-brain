@@ -101,7 +101,7 @@ def declared_groups(records, groups):
 
 def build(
     parent: Path,
-    root: Path,
+    root: Path | None,
     review: Path,
     output: Path,
     illustrations: Path | None = None,
@@ -116,26 +116,36 @@ def build(
         or sha(parent / "pixels.npz") != parent_manifest["pixels_sha256"]
     ):
         raise ValueError("Parent scope/hash mismatch")
-    acquired, acquisition_sha = bound_json(root / "acquisition.json")
     specification, review_sha = bound_json(review)
     protected_inputs = {
         parent_path: parent_sha,
         parent / "pixels.npz": parent_manifest["pixels_sha256"],
-        root / "acquisition.json": acquisition_sha,
         review: review_sha,
-        root / "LICENSE.quickdraw": sha(root / "LICENSE.quickdraw"),
     }
-    if (
-        acquired["classes"] != CLASSES
-        or acquired["excluded_acquisition_sha256"]
-        != parent_manifest["acquisition_sha256"]
-        or specification["training_started"] is not False
-    ):
+    if specification["training_started"] is not False:
         raise ValueError("Fresh acquisition/review lineage mismatch")
-    if set(specification["positive"]) != set(CLASSES):
-        raise ValueError("Review scope mismatch")
-    if set(specification["negative"]) != set(acquired["negative_categories"]):
-        raise ValueError("Negative review scope mismatch")
+    if root is None:
+        if reviewed_media is None or illustrations is not None:
+            raise ValueError("Photo-only expansion requires reviewed photos only")
+        if specification.get("positive") or specification.get("negative"):
+            raise ValueError(
+                "Photo-only expansion cannot silently ignore sketch review"
+            )
+        acquired, acquisition_sha = {"files": []}, None
+    else:
+        acquired, acquisition_sha = bound_json(root / "acquisition.json")
+        protected_inputs[root / "acquisition.json"] = acquisition_sha
+        protected_inputs[root / "LICENSE.quickdraw"] = sha(root / "LICENSE.quickdraw")
+        if (
+            acquired["classes"] != CLASSES
+            or acquired["excluded_acquisition_sha256"]
+            != parent_manifest["acquisition_sha256"]
+        ):
+            raise ValueError("Fresh acquisition/review lineage mismatch")
+        if set(specification["positive"]) != set(CLASSES):
+            raise ValueError("Review scope mismatch")
+        if set(specification["negative"]) != set(acquired["negative_categories"]):
+            raise ValueError("Negative review scope mismatch")
     records, pixels, rejected = [], [], []
     archive = np.load(parent / "pixels.npz", allow_pickle=False)
     for split, rows in parent_manifest["records"].items():
@@ -335,6 +345,18 @@ def build(
     }
     if any(new_support[label] < 20 for label in CLASSES.values()):
         raise ValueError("Too few fresh independent positive families")
+    photo_readiness = None
+    if root is None:
+        from m33_objects_photo_coverage import require_ready
+
+        photo_readiness = require_ready(
+            [
+                records[i] | {"split": split}
+                for i, split, _ in assigned
+                if not records[i].get("parent")
+                and records[i]["role"] == "VISUALLY_CURATED_NONBLIND_PHOTOGRAPH"
+            ]
+        )
     prepared = {split: [] for split in SPLITS}
     prepared_pixels = {split: [] for split in SPLITS}
     for index, split, identity in sorted(assigned):
@@ -395,10 +417,13 @@ def build(
         "illustrations_acquisition_sha256": illustration_sha,
         "photos_acquisition_sha256": photo_sha,
         "review_sha256": review_sha,
-        "licence_snapshot_sha256": protected_inputs[root / "LICENSE.quickdraw"],
+        "licence_snapshot_sha256": protected_inputs[root / "LICENSE.quickdraw"]
+        if root is not None
+        else None,
         "pixels_sha256": sha(output / "pixels.npz"),
         "fresh_family_counts": fresh_counts,
         "fresh_parent_free_family_support": new_support,
+        "photo_coverage_pretraining": photo_readiness,
         "records": prepared,
         "excluded": rejected,
         "counts": {
@@ -421,8 +446,9 @@ def build(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("parent", "root", "review", "output"):
+    for name in ("parent", "review", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--root", type=Path, help="Omit only for photo-only expansion")
     parser.add_argument("--illustrations", type=Path)
     parser.add_argument("--reviewed-media", type=Path)
     args = parser.parse_args()

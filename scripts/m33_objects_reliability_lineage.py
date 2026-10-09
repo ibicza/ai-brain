@@ -42,6 +42,11 @@ def verify(parent, data, review, photos, output):
         for row in rows:
             if row["role"] != "VISUALLY_CURATED_NONBLIND_PHOTOGRAPH":
                 continue
+            # Prior photo finals become known regression just like drawings.
+            # Their gold/bytes/owner were checked above against the parent,
+            # and must not be looked up in the new acquisition/review.
+            if row.get("parent"):
+                continue
             source = reviewed[row["source_id"]]
             if (
                 split != source["declared_split"]

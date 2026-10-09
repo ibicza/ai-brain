@@ -228,6 +228,7 @@ def main():
     )
     parser.add_argument("--development-only", action="store_true")
     parser.add_argument("--object-unknown-adapter", action="store_true")
+    parser.add_argument("--vision-global-context", action="store_true")
     parser.add_argument("--warm-start", type=Path)
     parser.add_argument("--diversity-augmentation", action="store_true")
     parser.add_argument("--illustration-fraction", type=float, default=0)
@@ -249,7 +250,11 @@ def main():
             args.warm_start and (not args.protect_inherited or args.evaluate_checkpoint)
         )
         or (
-            (args.vision_extension_channels or args.object_unknown_adapter)
+            (
+                args.vision_extension_channels
+                or args.object_unknown_adapter
+                or args.vision_global_context
+            )
             and not args.protect_inherited
         )
     ):
@@ -277,6 +282,8 @@ def main():
         }
         if args.object_unknown_adapter:
             expected_architecture["object_unknown_adapter"] = True
+        if args.vision_global_context:
+            expected_architecture["vision_global_context"] = True
         if (
             winner["checkpoint_sha256"] != sha(args.evaluate_checkpoint)
             or receipt["dataset_sha256"] != sha(args.data / "dataset.json")
@@ -308,7 +315,7 @@ def main():
         "learned_inputs": "RGB96x96 and supported RU/EN question tokens only; source/category/gold/task never forward inputs. Object answers use Russian names.",
         "weights": "Continue own accepted seven-skill checkpoint; append answer/word/intent IDs; one inherited core; no external pretrained weights.",
         "replay": "Fresh procedural seven-skill scenes; old teacher soft targets only on correct training examples confidence>=.98. Half batch new objects, eighth color, remainder old joint tasks.",
-        "selection": "minimum .5 object-dev CE + .5 replay-dev CE; calibration only after weights frozen; fixed object/binary threshold grid .99,.995,.999,.9995,.9999; five input views must agree.",
+        "selection": "minimum .5 object-dev CE + .5 replay-dev CE; domain_balanced_dev=true uses equal-domain mean object CE, otherwise per-row object CE. Calibration only after weights frozen; fixed object/binary threshold grid .99,.995,.999,.9995,.9999; five input views must agree.",
         "object_gate": "Final >=50 accepted, zero false assertions, answerable recall>=.80, unknown recall>=.90; each positive class >=5 accepted and recall>=.80. Blank/shuffle image recall drop>=.15. Counts by source, not augmented views.",
         "retention_gate": "Each of seven old skills: final/transfer >=50 accepted, zero false assertions, recall>=.80, unknown recall>=.90, recall at most .02 below previous checkpoint on same fresh scenes.",
         "textbook_gate": "Only seven inspected non-blind diagnostics; never used for selection/tuning and never certify textbook mastery. Any accepted wrong diagnostic disallows object acceptance.",
@@ -330,6 +337,7 @@ def main():
         vision_extension_channels=args.vision_extension_channels,
         vision_extension_depth=args.vision_extension_depth,
         object_unknown_adapter=args.object_unknown_adapter,
+        vision_global_context=args.vision_global_context,
     )
     model.load_previous(source_checkpoint["model"])
     model.compatible_legacy_vocabulary = args.protect_inherited
@@ -337,13 +345,10 @@ def main():
         warm = obj.ObjectsModel.from_checkpoint(
             torch.load(args.warm_start, map_location="cpu", weights_only=True)
         )
-        if (
-            warm.vision_extension_config != model.vision_extension_config
-            or not warm.compatible_legacy_vocabulary
-        ):
-            raise ValueError("Warm-start architecture/policy mismatch")
         verify_inherited(warm, source_checkpoint["model"])
-        model.load_state_dict(warm.state_dict(), strict=True)
+        model.load_object_warm_start(
+            torch.load(args.warm_start, map_location="cpu", weights_only=True)
+        )
     if args.protect_inherited:
         for name, parameter in model.named_parameters():
             parameter.requires_grad_(
@@ -354,7 +359,13 @@ def main():
                     "question_intent.weight",
                     "question_intent.bias",
                 }
-                or name.startswith(("vision_extension.", "object_unknown_adapter."))
+                or name.startswith(
+                    (
+                        "vision_extension.",
+                        "vision_global_context.",
+                        "object_unknown_adapter.",
+                    )
+                )
             )
         model.core.token_embedding.weight.register_hook(
             lambda gradient: torch.cat(

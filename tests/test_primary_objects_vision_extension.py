@@ -147,3 +147,77 @@ def test_object_unknown_adapter_preserves_legacy_and_has_no_impossible_answers()
     restored = obj.ObjectsModel.from_checkpoint(checkpoint).eval()
     with torch.no_grad():
         assert torch.equal(restored(images, words), after)
+
+
+def test_global_context_appends_identity_then_learns_only_object_rows():
+    _, warm = model(32, 0)
+    expanded = obj.ObjectsModel(
+        width=32, vision_extension_channels=32, vision_global_context=True
+    )
+    checkpoint = {
+        "width": 32,
+        "layers": 2,
+        "architecture": warm.vision_extension_config,
+        "compatible_legacy_vocabulary": True,
+        "model": warm.state_dict(),
+    }
+    expanded.load_object_warm_start(checkpoint)
+    expanded.compatible_legacy_vocabulary = True
+    warm.eval()
+    expanded.eval()
+    images = torch.rand(2, 3, 96, 96)
+    questions = torch.tensor(
+        [
+            obj.encode_question(obj.OBJECT_QUESTIONS[0]),
+            old.encode_question(base.QUESTIONS["count"][0]),
+        ]
+    )
+    with torch.no_grad():
+        baseline = warm(images, questions)
+        assert torch.equal(expanded(images, questions), baseline)
+    expanded.train()
+    (
+        -expanded(images, questions)[0].log_softmax(-1)[obj.OBJECT_IDS["яблоко"]]
+    ).backward()
+    assert expanded.vision_global_context[-1].weight.grad.abs().sum() > 0
+    with torch.no_grad():
+        expanded.vision_global_context[-1].weight.add_(0.1)
+    expanded.eval()
+    with torch.no_grad():
+        changed = expanded(images, questions)
+        assert not torch.equal(changed[0], baseline[0])
+        assert torch.equal(changed[1], baseline[1])
+    restored = obj.ObjectsModel.from_checkpoint(
+        checkpoint
+        | {
+            "architecture": expanded.vision_extension_config,
+            "model": expanded.state_dict(),
+        }
+    ).eval()
+    with torch.no_grad():
+        assert torch.equal(restored(images, questions), changed)
+
+
+def test_context_migration_cannot_drop_branch_change_channels_or_use_nonzero_residual():
+    _, warm = model(32, 0)
+    checkpoint = {
+        "width": 32,
+        "layers": 2,
+        "architecture": warm.vision_extension_config,
+        "compatible_legacy_vocabulary": True,
+        "model": warm.state_dict(),
+    }
+    target = obj.ObjectsModel(
+        width=32, vision_extension_channels=64, vision_global_context=True
+    )
+    with pytest.raises(ValueError, match="architecture"):
+        target.load_object_warm_start(checkpoint)
+    target = obj.ObjectsModel(
+        width=32, vision_extension_channels=32, vision_global_context=True
+    )
+    with torch.no_grad():
+        target.vision_global_context[-1].bias.fill_(1)
+    with pytest.raises(ValueError, match="exact zero"):
+        target.load_object_warm_start(checkpoint)
+    with pytest.raises(ValueError):
+        obj.ObjectsModel(width=32, vision_global_context=True)

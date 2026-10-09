@@ -1,0 +1,502 @@
+{
+  "schema": 1,
+  "status": "DATA_EXPANSION_INCOMPLETE_DEV_PROBE_REJECTED_NOT_PRODUCTION",
+  "production_admitted": false,
+  "new_photos_trained": false,
+  "focused_tests": {
+    "tests": 189,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "new_photos": {
+    "proposed": 644,
+    "visually_curated": 255,
+    "visually_excluded": 389,
+    "review_sha256": "4d63c3b01ff8600df9026fc3dfc59cc89378c2bea2a1888fa6f32b9bd95d96d0",
+    "acquisition_sha256": "ad12a84d1eee38387e9bfb30568729fb657fb3c8b359649cbe7b6b540b123f93",
+    "registry_sha256": "9f662999c7eee4d5f583e0ecf316238991ea4baedb6e03b6503e3abea010c154",
+    "readiness": {
+      "ready": false,
+      "counts": {
+        "train": {
+          "яблоко": {
+            "images": 8,
+            "authors": 8
+          },
+          "банан": {
+            "images": 23,
+            "authors": 22
+          },
+          "морковь": {
+            "images": 9,
+            "authors": 9
+          },
+          "рыба": {
+            "images": 17,
+            "authors": 15
+          },
+          "дерево": {
+            "images": 21,
+            "authors": 17
+          },
+          "кружка": {
+            "images": 30,
+            "authors": 23
+          },
+          "стул": {
+            "images": 8,
+            "authors": 8
+          },
+          "книга": {
+            "images": 13,
+            "authors": 11
+          },
+          "UNKNOWN": {
+            "images": 32,
+            "authors": 27
+          }
+        },
+        "dev": {
+          "яблоко": {
+            "images": 2,
+            "authors": 2
+          },
+          "банан": {
+            "images": 1,
+            "authors": 1
+          },
+          "морковь": {
+            "images": 1,
+            "authors": 1
+          },
+          "рыба": {
+            "images": 2,
+            "authors": 2
+          },
+          "дерево": {
+            "images": 1,
+            "authors": 1
+          },
+          "кружка": {
+            "images": 3,
+            "authors": 3
+          },
+          "стул": {
+            "images": 1,
+            "authors": 1
+          },
+          "книга": {
+            "images": 0,
+            "authors": 0
+          },
+          "UNKNOWN": {
+            "images": 3,
+            "authors": 3
+          }
+        },
+        "calibration": {
+          "яблоко": {
+            "images": 2,
+            "authors": 2
+          },
+          "банан": {
+            "images": 8,
+            "authors": 6
+          },
+          "морковь": {
+            "images": 4,
+            "authors": 4
+          },
+          "рыба": {
+            "images": 7,
+            "authors": 5
+          },
+          "дерево": {
+            "images": 3,
+            "authors": 2
+          },
+          "кружка": {
+            "images": 7,
+            "authors": 7
+          },
+          "стул": {
+            "images": 5,
+            "authors": 3
+          },
+          "книга": {
+            "images": 4,
+            "authors": 3
+          },
+          "UNKNOWN": {
+            "images": 5,
+            "authors": 5
+          }
+        },
+        "final": {
+          "яблоко": {
+            "images": 0,
+            "authors": 0
+          },
+          "банан": {
+            "images": 4,
+            "authors": 4
+          },
+          "морковь": {
+            "images": 4,
+            "authors": 2
+          },
+          "рыба": {
+            "images": 7,
+            "authors": 6
+          },
+          "дерево": {
+            "images": 2,
+            "authors": 2
+          },
+          "кружка": {
+            "images": 6,
+            "authors": 6
+          },
+          "стул": {
+            "images": 2,
+            "authors": 2
+          },
+          "книга": {
+            "images": 1,
+            "authors": 1
+          },
+          "UNKNOWN": {
+            "images": 9,
+            "authors": 6
+          }
+        }
+      },
+      "missing": [
+        {
+          "split": "train",
+          "answer": "яблоко",
+          "images": 8,
+          "authors": 8,
+          "required_images": 20,
+          "required_authors": 8
+        },
+        {
+          "split": "train",
+          "answer": "морковь",
+          "images": 9,
+          "authors": 9,
+          "required_images": 20,
+          "required_authors": 8
+        },
+        {
+          "split": "train",
+          "answer": "рыба",
+          "images": 17,
+          "authors": 15,
+          "required_images": 20,
+          "required_authors": 8
+        },
+        {
+          "split": "train",
+          "answer": "стул",
+          "images": 8,
+          "authors": 8,
+          "required_images": 20,
+          "required_authors": 8
+        },
+        {
+          "split": "train",
+          "answer": "книга",
+          "images": 13,
+          "authors": 11,
+          "required_images": 20,
+          "required_authors": 8
+        },
+        {
+          "split": "dev",
+          "answer": "яблоко",
+          "images": 2,
+          "authors": 2,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "dev",
+          "answer": "банан",
+          "images": 1,
+          "authors": 1,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "dev",
+          "answer": "морковь",
+          "images": 1,
+          "authors": 1,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "dev",
+          "answer": "рыба",
+          "images": 2,
+          "authors": 2,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "dev",
+          "answer": "дерево",
+          "images": 1,
+          "authors": 1,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "dev",
+          "answer": "кружка",
+          "images": 3,
+          "authors": 3,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "dev",
+          "answer": "стул",
+          "images": 1,
+          "authors": 1,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "dev",
+          "answer": "книга",
+          "images": 0,
+          "authors": 0,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "dev",
+          "answer": "UNKNOWN",
+          "images": 3,
+          "authors": 3,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "calibration",
+          "answer": "яблоко",
+          "images": 2,
+          "authors": 2,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "calibration",
+          "answer": "морковь",
+          "images": 4,
+          "authors": 4,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "calibration",
+          "answer": "дерево",
+          "images": 3,
+          "authors": 2,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "calibration",
+          "answer": "книга",
+          "images": 4,
+          "authors": 3,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "final",
+          "answer": "яблоко",
+          "images": 0,
+          "authors": 0,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "final",
+          "answer": "банан",
+          "images": 4,
+          "authors": 4,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "final",
+          "answer": "морковь",
+          "images": 4,
+          "authors": 2,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "final",
+          "answer": "дерево",
+          "images": 2,
+          "authors": 2,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "final",
+          "answer": "стул",
+          "images": 2,
+          "authors": 2,
+          "required_images": 5,
+          "required_authors": 3
+        },
+        {
+          "split": "final",
+          "answer": "книга",
+          "images": 1,
+          "authors": 1,
+          "required_images": 5,
+          "required_authors": 3
+        }
+      ],
+      "minimum_images": {
+        "train": 20,
+        "dev": 5,
+        "calibration": 5,
+        "final": 5
+      },
+      "minimum_authors": {
+        "train": 8,
+        "dev": 3,
+        "calibration": 3,
+        "final": 3
+      },
+      "limits": "Author strings are declared families, not exhaustive semantic/session independence. Image counts alone never establish model mastery. No threshold/gate weakened.",
+      "acquisition_sha256": "ad12a84d1eee38387e9bfb30568729fb657fb3c8b359649cbe7b6b540b123f93",
+      "review_sha256": "4d63c3b01ff8600df9026fc3dfc59cc89378c2bea2a1888fa6f32b9bd95d96d0",
+      "dataset_sha256": null,
+      "reviewed_photos": 255,
+      "visually_excluded": 389,
+      "training_started": false
+    }
+  },
+  "development": {
+    "local_only": {
+      "best_step": 1500,
+      "best_dev_loss": 0.6977674900494848,
+      "parameters": 974889,
+      "architecture": {
+        "vision_extension_channels": 64,
+        "vision_extension_depth": 2,
+        "object_unknown_adapter": true
+      },
+      "checkpoint_sha256": "ea5b09c6bc55cf5415955200958c5e087d76cc746540cc0be5699f27282cd3db",
+      "inherited_tensors_byte_preserved": true,
+      "peak_cuda_allocated_bytes": 1222897664
+    },
+    "global_context": {
+      "best_step": 500,
+      "best_dev_loss": 0.6930670142239863,
+      "parameters": 1002729,
+      "architecture": {
+        "vision_extension_channels": 64,
+        "vision_extension_depth": 2,
+        "object_unknown_adapter": true,
+        "vision_global_context": true
+      },
+      "checkpoint_sha256": "2f28bb7033567c5791f39e6f6f9fb8bf7047a63c5f13e702d7d7f19da2a12cb2",
+      "inherited_tensors_byte_preserved": true,
+      "peak_cuda_allocated_bytes": 1224161792
+    }
+  },
+  "raw_dev_photo_diagnostics_not_safe_policy": {
+    "status": "AUDITED_DEV_ONLY_NO_FINAL_OR_POLICY",
+    "sources": 40,
+    "candidates": {
+      "warm": {
+        "single_view": {
+          "examples": 40,
+          "accepted": 30,
+          "false_assertions": 13,
+          "accuracy": 0.5,
+          "answerable_recall": 0.5666666666666667,
+          "unknown_recall": 0.3
+        },
+        "five_view": {
+          "examples": 40,
+          "accepted": 14,
+          "false_assertions": 2,
+          "accuracy": 0.525,
+          "answerable_recall": 0.4,
+          "unknown_recall": 0.9
+        }
+      },
+      "local_only": {
+        "single_view": {
+          "examples": 40,
+          "accepted": 24,
+          "false_assertions": 10,
+          "accuracy": 0.5,
+          "answerable_recall": 0.4666666666666667,
+          "unknown_recall": 0.6
+        },
+        "five_view": {
+          "examples": 40,
+          "accepted": 9,
+          "false_assertions": 3,
+          "accuracy": 0.375,
+          "answerable_recall": 0.2,
+          "unknown_recall": 0.9
+        }
+      },
+      "global_context": {
+        "single_view": {
+          "examples": 40,
+          "accepted": 27,
+          "false_assertions": 13,
+          "accuracy": 0.475,
+          "answerable_recall": 0.4666666666666667,
+          "unknown_recall": 0.5
+        },
+        "five_view": {
+          "examples": 40,
+          "accepted": 10,
+          "false_assertions": 1,
+          "accuracy": 0.475,
+          "answerable_recall": 0.3,
+          "unknown_recall": 1.0
+        }
+      }
+    }
+  },
+  "transfer": {
+    "status": "EXACT_FROZEN_TRANSFER_VERIFIED",
+    "source_files": 449,
+    "retrieved_files": 14,
+    "capsule_sha256": "ee29bc273e1b6d0843c4be2f1456af3c2503bb0c42d9db913e0fb002a7478d3e",
+    "anchors": {
+      "capsule.tgz": "ee29bc273e1b6d0843c4be2f1456af3c2503bb0c42d9db913e0fb002a7478d3e",
+      "warm.pt": "f5d0c9b83d3b82ec512dc35ffe754338642178b7418f24de7b19574ea835205a",
+      "previous.pt": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+      "previous-policy.json": "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6",
+      "accepted/best.pt": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+      "accepted/frozen-calibration.json": "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6",
+      "post-context-report.py": "d326e79ab3ee277d9a7c4dba30a48327a9069cddb04736b21ed37cc7b00316bc",
+      "context-photo-dev-diagnostics.json": "c558a61472390be8ef3c642f6026bfa55b8a23cfc7ca4c39bf9d1a80ee773dd8"
+    },
+    "remote_root": "/home/ibicza/ai-brain/runs/m33-primary-photo-transfer-20261009-v1"
+  },
+  "accepted_core_sha256": "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae",
+  "accepted_policy_sha256": "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6",
+  "canonical_workbook_unchanged_sha256": "bfb8689c66f0d6241a3224581fcdf374912d2bf83cbcc78b530791fa58b08aa1",
+  "conclusion": "Neither continued baseline nor appended 27840-parameter global context beats the warm model on known sparse dev photo five-view recall (warm .40, local .20, context .30). No threshold lowered, final opened for selection, or production checkpoint changed. New data needs more positive/negative author/cohort coverage before a full photo-only iteration.",
+  "limits": "4000-step known-development probe only, not independent blind semantics or M33 closure. Photo gold visually curated with source/owner visibility; artist aliases/session independence not exhaustive. Individual thumbnail rights retained; full originals not acquired; no blanket depicted-work permission. Existing catalogue learned statuses and M34 definitions unchanged.",
+  "next": "Acquire focused foreground photos for missing classes/cohorts while excluding previous finished-round source IDs/authors; visually review and verify lineage/dedup and complete coverage before full matched training, frozen calibration, fresh final and regression."
+}
