@@ -63,6 +63,9 @@ def check(photos, review, output, data=None):
     spec = json.loads(review.read_text(encoding="utf-8"))
     if spec.get("training_started") is not False:
         raise ValueError("Pretraining review required")
+    acquisition_sha = sha(photos / "acquisition.json")
+    if spec.get("acquisition_sha256", acquisition_sha) != acquisition_sha:
+        raise ValueError("Visual review acquisition binding changed")
     rows, rejected, protected = reviewed_rows(photos, spec["photos"])
     reviewed = {r["source_id"]: r for r in rows}
     dataset_sha = None

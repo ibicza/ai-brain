@@ -1,0 +1,18 @@
+{
+  "apple": ["incategory:\"Apples\"", "incategory:\"Whole apples\"", "incategory:\"Red apples\"", "incategory:\"Green apples\"", "intitle:\"Malus domestica\" fruit -flower -blossom -painting -drawing"],
+  "banana": ["incategory:\"Bananas\""],
+  "carrot": ["incategory:\"Carrots\"", "incategory:\"Carrot roots\"", "incategory:\"Daucus carota subsp. sativus\" -flower -seed", "intitle:carrots -soup -cake -salad -illustration -painting"],
+  "fish": ["incategory:\"Fish\""],
+  "tree": ["incategory:\"Trees\""],
+  "mug": ["incategory:\"Mugs\""],
+  "chair": ["incategory:\"Chairs\"", "incategory:\"Wooden chairs\"", "incategory:\"Rocking chairs\"", "incategory:\"Dining chairs\"", "intitle:chair -portrait -painting -drawing -diagram"],
+  "book": ["incategory:\"Stacks of books\"", "incategory:\"Book stacks\"", "incategory:\"Closed books\"", "incategory:\"Bookshelves\"", "intitle:\"stack of books\" -drawing -painting"],
+  "pear": ["incategory:\"Pears\""],
+  "bottle": ["incategory:\"Bottles\""],
+  "teapot": ["incategory:\"Teapots\""],
+  "leaf": ["incategory:\"Leaves\""],
+  "dolphin": ["incategory:\"Dolphins\""],
+  "spoon": ["incategory:\"Spoons\""],
+  "rock": ["incategory:\"Rocks\""],
+  "bowl": ["incategory:\"Bowls\""]
+}

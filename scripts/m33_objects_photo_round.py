@@ -39,9 +39,10 @@ VARIANTS = {
 }
 
 
-def exclusions(paths):
+def exclusions(paths, id_only=()):
     ids, authors, bindings = set(), set(), {}
-    for path in paths:
+    id_only_resolved = {path.resolve() for path in id_only}
+    for path in (*paths, *id_only):
         if str(path.resolve()) in bindings:
             raise ValueError("Repeated prior manifest")
         bindings[str(path.resolve())] = sha(path)
@@ -52,7 +53,10 @@ def exclusions(paths):
         for row in rows:
             if row["source_id"].startswith("commons/"):
                 ids.add(row["source_id"])
-                if row.get("author_identity"):
+                if (
+                    row.get("author_identity")
+                    and path.resolve() not in id_only_resolved
+                ):
                     authors.add(row["author_identity"])
         ids.update(
             row["source_id"]
@@ -192,23 +196,61 @@ def sheets(root, rows):
             canvas.save(qa / f"{category}-{start:03d}.png")
 
 
-def acquire(root, previous, *, positive=72, negative=16, pages=3, resume=False):
+def acquire(
+    root,
+    previous,
+    *,
+    positive=72,
+    negative=16,
+    pages=3,
+    resume=False,
+    id_only=(),
+    queries=None,
+    split_caps=None,
+    categories=None,
+):
     if not (1 <= positive <= 120 and 1 <= negative <= 40 and 1 <= pages <= 5):
         raise ValueError("Bounded acquisition budget required")
-    prior_ids, prior_authors, bindings = exclusions(previous)
+    prior_ids, prior_authors, bindings = exclusions(previous, id_only)
+    queries = queries or VARIANTS
+    if set(queries) != set(QUERIES) or any(
+        not isinstance(values, (list, tuple))
+        or not 1 <= len(values) <= 6
+        or any(
+            not isinstance(value, str) or not 1 <= len(value) <= 180 for value in values
+        )
+        for values in queries.values()
+    ):
+        raise ValueError("Complete bounded query plan required")
+    if split_caps is not None and (
+        set(split_caps) != {"train", "dev", "calibration", "final"}
+        or any(type(n) is not int or not 1 <= n <= 120 for n in split_caps.values())
+        or sum(split_caps.values()) < positive
+    ):
+        raise ValueError("Invalid predeclared positive cohort caps")
+    if categories is not None and (
+        not categories
+        or len(set(categories)) != len(categories)
+        or set(categories) - set(QUERIES)
+    ):
+        raise ValueError("Unique known category subset required")
     plan = {
         "schema": 1,
         "previous": bindings,
-        "variants": VARIANTS,
+        "variants": queries,
+        "id_only_previous": [str(path.resolve()) for path in id_only],
+        "positive_split_caps": split_caps,
         "positive": positive,
         "negative": negative,
         "pages": pages,
         "author_category_cap": 3,
-        "all_previous_authors_excluded": True,
+        "all_completed_round_authors_excluded": True,
         "training_started": False,
     }
     # JSON round trip normalizes the tuple query variants for exact resume checks.
     plan = json.loads(json.dumps(plan))
+    if categories is not None:
+        plan["category_scope"] = sorted(categories)
     if root.exists():
         if not resume or (root / "acquisition.json").exists():
             raise ValueError(
@@ -224,7 +266,9 @@ def acquire(root, previous, *, positive=72, negative=16, pages=3, resume=False):
             (root / directory).mkdir()
         write_json(root / "plan.json", plan)
     sources, rejected = [], []
-    for category, variants in VARIANTS.items():
+    for category, variants in queries.items():
+        if categories is not None and category not in categories:
+            continue
         limit = positive if category in CLASSES else negative
         done = False
         for variant, query in enumerate(variants):
@@ -262,6 +306,11 @@ def acquire(root, previous, *, positive=72, negative=16, pages=3, resume=False):
                         raise ValueError("Resumed query receipt mismatch")
                 else:
                     seen, counts = check_rows(sources, root)
+                    cohort_counts = Counter(
+                        r["declared_split"]
+                        for r in sources
+                        if r["source_category"] == category
+                    )
                     admitted, exclusions_page = [], []
                     current = sum(r["source_category"] == category for r in sources)
                     for page in sorted(
@@ -271,6 +320,19 @@ def acquire(root, previous, *, positive=72, negative=16, pages=3, resume=False):
                         if current >= limit:
                             break
                         try:
+                            if split_caps is not None and category in CLASSES:
+                                _, proposal_split = author_owner(
+                                    page["imageinfo"][0]["extmetadata"]["Artist"][
+                                        "value"
+                                    ]
+                                )
+                                if (
+                                    cohort_counts[proposal_split]
+                                    >= split_caps[proposal_split]
+                                ):
+                                    raise ValueError(
+                                        "Predeclared positive cohort cap reached"
+                                    )
                             row = candidate(
                                 page,
                                 category,
@@ -283,6 +345,7 @@ def acquire(root, previous, *, positive=72, negative=16, pages=3, resume=False):
                             admitted.append(row)
                             seen.add(row["source_id"])
                             counts[category, row["author_identity"]] += 1
+                            cohort_counts[row["declared_split"]] += 1
                             current += 1
                         except (
                             ValueError,
@@ -316,6 +379,14 @@ def acquire(root, previous, *, positive=72, negative=16, pages=3, resume=False):
                     raise ValueError("Prior photo/author leakage")
                 if max(counts.values(), default=0) > 3:
                     raise ValueError("Resumed author cap violated")
+                if split_caps is not None and category in CLASSES:
+                    actual = Counter(
+                        r["declared_split"]
+                        for r in sources
+                        if r["source_category"] == category
+                    )
+                    if any(actual[owner] > cap for owner, cap in split_caps.items()):
+                        raise ValueError("Resumed cohort cap violated")
                 current = sum(r["source_category"] == category for r in sources)
                 print(
                     json.dumps(
@@ -343,11 +414,11 @@ def acquire(root, previous, *, positive=72, negative=16, pages=3, resume=False):
         "schema": 2,
         "sources": sources,
         "rejected": rejected,
-        "queries": VARIANTS,
+        "queries": queries,
         "training_started": False,
         "plan_sha256": sha(root / "plan.json"),
         "previous_manifest_sha256": bindings,
-        "partition_rule": "SHA256 normalized artist mod100: train<60 dev<70 calibration<85 final otherwise. All previous authors excluded; at most 3 per author/category.",
+        "partition_rule": "SHA256 normalized artist mod100: train<60 dev<70 calibration<85 final otherwise. Completed-round authors excluded; optional same-pending-round ID-only exclusions retain author ownership. At most 3 per author/category in this acquisition. Optional positive cohort caps declared before collection; no label/prediction-driven reassignment.",
         "limits": "Proposals only. Mandatory nonblind visual review. Artist aliases/session independence not exhaustive; search metadata is not gold. Full original not acquired. Per-file rights retained.",
     }
     write_json(root / "acquisition.json", result)
@@ -367,6 +438,10 @@ if __name__ == "__main__":
     parser.add_argument("--negative", type=int, default=16)
     parser.add_argument("--pages", type=int, default=3)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--id-only-previous", type=Path, action="append", default=[])
+    parser.add_argument("--query-plan", type=Path)
+    parser.add_argument("--split-caps", type=Path)
+    parser.add_argument("--categories", nargs="+")
     args = parser.parse_args()
     print(
         json.dumps(
@@ -377,6 +452,14 @@ if __name__ == "__main__":
                 negative=args.negative,
                 pages=args.pages,
                 resume=args.resume,
+                id_only=tuple(args.id_only_previous),
+                queries=json.loads(args.query_plan.read_text(encoding="utf-8"))
+                if args.query_plan
+                else None,
+                split_caps=json.loads(args.split_caps.read_text(encoding="utf-8"))
+                if args.split_caps
+                else None,
+                categories=args.categories,
             )
         )
     )

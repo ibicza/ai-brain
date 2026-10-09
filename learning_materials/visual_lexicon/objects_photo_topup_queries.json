@@ -1,0 +1,18 @@
+{
+  "apple": ["intitle:apple -drawing -painting -logo -map -computer", "intitle:apples fruit", "apple fruit closeup photograph"],
+  "banana": ["intitle:banana -drawing -painting -map -logo", "intitle:bananas fruit", "banana fruit closeup photograph"],
+  "carrot": ["intitle:carrot -drawing -painting -map -diagram", "intitle:carrots vegetable", "carrot vegetable isolated photograph"],
+  "fish": ["intitle:fish aquarium -drawing -painting", "intitle:fish underwater", "fish animal closeup photograph"],
+  "tree": ["intitle:tree -painting -drawing -art -map -diagram", "intitle:oak tree", "intitle:birch tree", "single tree closeup photograph"],
+  "mug": ["intitle:mug -drawing -diagram -painting", "intitle:mugs", "coffee cup handle photograph"],
+  "chair": ["intitle:chair -drawing -painting -diagram -design", "intitle:chairs furniture", "wooden chair isolated photograph"],
+  "book": ["intitle:book -map -drawing -painting -clasp -cover", "intitle:books stack", "closed book photograph", "books stack photograph"],
+  "pear": ["intitle:pear fruit -drawing -map -diagram -painting", "intitle:pears"],
+  "bottle": ["intitle:bottle -drawing -map -diagram -painting", "bottle isolated photograph"],
+  "teapot": ["intitle:teapot -drawing -painting -diagram", "intitle:teapots"],
+  "leaf": ["intitle:leaf -drawing -map -diagram -painting", "intitle:leaves isolated"],
+  "dolphin": ["intitle:dolphin -drawing -painting -diagram -stamp", "intitle:dolphins swimming"],
+  "spoon": ["intitle:spoon -drawing -painting -diagram", "intitle:spoons cutlery"],
+  "rock": ["intitle:pebble", "stone isolated closeup", "intitle:stones -standing -map -painting"],
+  "bowl": ["intitle:bowl -stadium -cricket -drawing -painting", "empty bowl isolated photograph"]
+}

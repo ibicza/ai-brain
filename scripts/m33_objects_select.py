@@ -21,8 +21,13 @@ def select(candidates, output, *, tuning=False):
             (root / "development-report.json").read_text(encoding="utf-8")
         )
         protocol = json.loads((root / "protocol.json").read_text(encoding="utf-8"))
-        domain_score = protocol["config"].get("domain_balanced_dev", False)
-        if type(domain_score) is not bool:
+        domain_score = tuple(
+            protocol["config"].get(name, False)
+            for name in ("domain_balanced_dev", "class_domain_balanced_dev")
+        )
+        if any(type(flag) is not bool for flag in domain_score) or (
+            domain_score[1] and not domain_score[0]
+        ):
             raise ValueError("Invalid development scoring contract")
         if score_contract is None:
             score_contract = domain_score
@@ -97,6 +102,7 @@ def select(candidates, output, *, tuning=False):
                         "diversity_augmentation",
                         "illustration_fraction",
                         "domain_balanced_dev",
+                        "class_domain_balanced_dev",
                     )
                 },
             }

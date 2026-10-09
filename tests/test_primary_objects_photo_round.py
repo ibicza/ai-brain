@@ -28,6 +28,33 @@ def test_continuation_does_not_drop_property_pages():
             round_data.continuation({"continue": token})
 
 
+def test_targeted_scope_is_frozen_and_does_not_collect_other_names(
+    tmp_path, monkeypatch
+):
+    prior = tmp_path / "prior.json"
+    prior.write_text(
+        json.dumps({"sources": [{"source_id": "commons/1", "author_identity": "old"}]})
+    )
+    queries = []
+
+    def network(url, limit):
+        query = parse_qs(urlparse(url).query)["gsrsearch"][0]
+        queries.append(query)
+        return b'{"query": {"pages": {}}}'
+
+    monkeypatch.setattr(round_data, "get", network)
+    monkeypatch.setattr(round_data, "sheets", lambda *_: None)
+    root = tmp_path / "scope"
+    result = round_data.acquire(root, [prior], categories=["apple"], pages=1)
+    assert result["proposals"] == 0 and len(queries) == len(
+        round_data.VARIANTS["apple"]
+    )
+    assert json.loads((root / "plan.json").read_text())["category_scope"] == ["apple"]
+    for names in (["other"], [], ["apple", "apple"]):
+        with pytest.raises(ValueError, match="category subset"):
+            round_data.acquire(tmp_path / "invalid", [prior], categories=names)
+
+
 def test_exclusions_bind_all_acquired_authors_and_rejected_ids(tmp_path):
     path = tmp_path / "prior.json"
     path.write_text(
@@ -44,6 +71,22 @@ def test_exclusions_bind_all_acquired_authors_and_rejected_ids(tmp_path):
     assert bindings[str(path.resolve())] == round_data.sha(path)
     with pytest.raises(ValueError):
         round_data.exclusions([path, path])
+
+
+def test_pending_round_id_exclusions_do_not_reassign_or_exclude_its_authors(tmp_path):
+    old, pending = tmp_path / "old.json", tmp_path / "pending.json"
+    old.write_text(
+        json.dumps({"sources": [{"source_id": "commons/1", "author_identity": "old"}]})
+    )
+    pending.write_text(
+        json.dumps(
+            {"sources": [{"source_id": "commons/2", "author_identity": "pending"}]}
+        )
+    )
+    ids, authors, bindings = round_data.exclusions([old], [pending])
+    assert ids == {"commons/1", "commons/2"}
+    assert authors == {"old"}
+    assert len(bindings) == 2
 
 
 def page(artist="A fresh author"):

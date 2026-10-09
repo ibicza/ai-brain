@@ -33,7 +33,12 @@ def build(repo, data, review, output):
         "m33_objects_photo_prepare.py",
         "m33_objects_photo_round.py",
         "m33_objects_photo_coverage.py",
+        "m33_objects_photo_merge.py",
+        "m33_objects_capacity_probe_remote.py",
+        "m33_objects_topup_remote.py",
+        "m33_objects_domain_diagnostics.py",
         "m33_objects_context_probe_remote.py",
+        "m33_objects_context_probe_report.py",
         "m33_objects_select.py",
         "m33_verify_objects_evidence.py",
     ):
@@ -51,10 +56,11 @@ def build(repo, data, review, output):
         "test_primary_objects_photos.py",
         "test_primary_objects_photo_round.py",
         "test_primary_objects_photo_coverage.py",
+        "test_primary_objects_photo_merge.py",
         "conftest.py",
     ):
         sources.append((repo / "tests" / name, "tests/" + name))
-    for name in ("dataset.json", "pixels.npz"):
+    for name in ("dataset.json", "pixels.npz", "image-registry.json"):
         sources.append((data / name, "data/" + name))
     sources.append((review, "data/objects_expansion_review.json"))
     entries = []

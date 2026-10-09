@@ -1,0 +1,26 @@
+{
+  "training_started": false,
+  "status": "COMPLETE_NONBLIND_VISUAL_REVIEW_NOT_MODEL_MASTERY",
+  "acquisition_sha256": "83a146e648d138cbc073b28417622ebc6a409b4a68d8fff8958ae4934dd22327",
+  "root": "D:\\ai-brain-data\\visual-lexicon\\objects-photo-topup-20261009\\photos-targeted-v1",
+  "reviewed_category_counts": {"apple": 120, "carrot": 113, "chair": 120, "book": 120},
+  "photos": {
+    "apple": {"include": [0, 1, 2, 3, 5, 7, 8, 11, 15, 16, 18, 22, 23, 24, 26, 27, 28, 33, 34, 35, 36, 37, 44, 46, 47, 48, 52, 53, 55, 56, 58, 59, 60, 61, 62, 63, 66, 67, 74, 77, 79, 81, 82, 88, 89, 90, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 104, 105, 106, 107, 111, 113, 116, 117, 118, 119]},
+    "banana": {"include": []},
+    "carrot": {"include": [0, 4, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 24, 25, 29, 33, 34, 36, 37, 38, 42, 43, 53, 54, 56, 59, 64, 68, 69, 72, 73, 74, 75, 77, 78, 80, 81, 83, 84, 88, 89, 90, 91, 93, 101]},
+    "fish": {"include": []},
+    "tree": {"include": []},
+    "mug": {"include": []},
+    "chair": {"include": [0, 3, 4, 7, 9, 10, 11, 12, 16, 19, 22, 23, 24, 25, 28, 29, 32, 33, 41, 43, 45, 50, 55, 59, 61, 63, 67, 68, 70, 77, 78, 79, 80, 81, 83, 84, 86, 88, 92, 93, 94, 97, 99, 100, 102, 104, 105, 117]},
+    "book": {"include": [1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 15, 16, 18, 21, 22, 26, 27, 28, 29, 30, 31, 33, 35, 36, 37, 38, 42, 47, 48, 50, 56, 61, 62, 63, 65, 66, 69, 77, 78, 79, 82, 84, 86, 94, 97, 98, 100, 105, 108, 112, 114, 116, 119]},
+    "pear": {"include": []},
+    "bottle": {"include": []},
+    "teapot": {"include": []},
+    "leaf": {"include": []},
+    "dolphin": {"include": []},
+    "spoon": {"include": []},
+    "rock": {"include": []},
+    "bowl": {"include": []}
+  },
+  "limits": "All 473 proposals visually inspected on numbered contact sheets; ambiguous details enlarged. Addressed pretraining data coverage deficits only, not learned performance. Explicit manual nonblind visual curation; search category is not gold. Uncollected categories are empty; no automatic admission or training. Owner hashes unchanged. Full-frame acquired thumbnails and individual rights retained, not original full-resolution files. Books favor closed stacks/spines, not reproductions of contemporary full pages or covers. Not independent label truth or semantic mastery."
+}

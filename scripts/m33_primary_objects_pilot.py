@@ -164,7 +164,7 @@ def loss_on(data, probs):
     )
 
 
-def domain_balanced_loss(data, probs, records):
+def domain_balanced_loss(data, probs, records, *, class_balanced=False):
     """Development-only domains have equal weight, irrespective of row count."""
     if len(records) != len(probs) or len(probs) != len(data.answers):
         raise ValueError("Development domain alignment mismatch")
@@ -180,8 +180,18 @@ def domain_balanced_loss(data, probs, records):
             if role == "VISUALLY_CURATED_NONBLIND_COLOR_ILLUSTRATION"
             else "sketch_and_control"
         )
-        domains.setdefault(name, []).append(-math.log(max(probability[label], 1e-30)))
-    return sum(sum(v) / len(v) for v in domains.values()) / len(domains)
+        domains.setdefault(name, {}).setdefault(label, []).append(
+            -math.log(max(probability[label], 1e-30))
+        )
+    if class_balanced:
+        return sum(
+            sum(sum(v) / len(v) for v in labels.values()) / len(labels)
+            for labels in domains.values()
+        ) / len(domains)
+    return sum(
+        sum(sum(v) for v in labels.values()) / sum(len(v) for v in labels.values())
+        for labels in domains.values()
+    ) / len(domains)
 
 
 def verify_inherited(model, source_state):
@@ -221,7 +231,7 @@ def main():
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cuda")
     parser.add_argument("--protect-inherited", action="store_true")
     parser.add_argument(
-        "--vision-extension-channels", type=int, choices=(0, 32, 64), default=0
+        "--vision-extension-channels", type=int, choices=(0, 32, 64, 128), default=0
     )
     parser.add_argument(
         "--vision-extension-depth", type=int, choices=(0, 1, 2), default=0
@@ -233,6 +243,7 @@ def main():
     parser.add_argument("--diversity-augmentation", action="store_true")
     parser.add_argument("--illustration-fraction", type=float, default=0)
     parser.add_argument("--domain-balanced-dev", action="store_true")
+    parser.add_argument("--class-domain-balanced-dev", action="store_true")
     parser.add_argument("--evaluate-checkpoint", type=Path)
     parser.add_argument("--selection-receipt", type=Path)
     parser.add_argument(
@@ -246,6 +257,7 @@ def main():
         or (args.steps < 1 and not args.evaluate_checkpoint)
         or args.learning_rate <= 0
         or not 0 <= args.illustration_fraction <= 0.75
+        or (args.class_domain_balanced_dev and not args.domain_balanced_dev)
         or (
             args.warm_start and (not args.protect_inherited or args.evaluate_checkpoint)
         )
@@ -315,7 +327,7 @@ def main():
         "learned_inputs": "RGB96x96 and supported RU/EN question tokens only; source/category/gold/task never forward inputs. Object answers use Russian names.",
         "weights": "Continue own accepted seven-skill checkpoint; append answer/word/intent IDs; one inherited core; no external pretrained weights.",
         "replay": "Fresh procedural seven-skill scenes; old teacher soft targets only on correct training examples confidence>=.98. Half batch new objects, eighth color, remainder old joint tasks.",
-        "selection": "minimum .5 object-dev CE + .5 replay-dev CE; domain_balanced_dev=true uses equal-domain mean object CE, otherwise per-row object CE. Calibration only after weights frozen; fixed object/binary threshold grid .99,.995,.999,.9995,.9999; five input views must agree.",
+        "selection": "minimum .5 object-dev CE + .5 replay-dev CE; domain_balanced_dev=true uses equal-domain mean object CE, otherwise per-row object CE. class_domain_balanced_dev=true additionally gives each available label equal weight within each domain. Calibration only after weights frozen; fixed object/binary threshold grid .99,.995,.999,.9995,.9999; five input views must agree.",
         "object_gate": "Final >=50 accepted, zero false assertions, answerable recall>=.80, unknown recall>=.90; each positive class >=5 accepted and recall>=.80. Blank/shuffle image recall drop>=.15. Counts by source, not augmented views.",
         "retention_gate": "Each of seven old skills: final/transfer >=50 accepted, zero false assertions, recall>=.80, unknown recall>=.90, recall at most .02 below previous checkpoint on same fresh scenes.",
         "textbook_gate": "Only seven inspected non-blind diagnostics; never used for selection/tuning and never certify textbook mastery. Any accepted wrong diagnostic disallows object acceptance.",
@@ -543,7 +555,12 @@ def main():
             new_probs = probabilities(model, dev_new, consensus=False)
             old_probs = probabilities(model, dev_old, consensus=False)
             new_loss = (
-                domain_balanced_loss(dev_new, new_probs, manifest["records"]["dev"])
+                domain_balanced_loss(
+                    dev_new,
+                    new_probs,
+                    manifest["records"]["dev"],
+                    class_balanced=args.class_domain_balanced_dev,
+                )
                 if args.domain_balanced_dev
                 else loss_on(dev_new, new_probs)
             )

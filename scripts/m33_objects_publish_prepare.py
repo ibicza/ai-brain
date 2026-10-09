@@ -77,6 +77,11 @@ def build(workbook, previous_prepared, data, experiment, selection, output):
         before = list(prepared["words"][index])
         after = list(before)
         stats = report["tests"]["object_final"]["by_concept"][word]
+        word_photos = [r for r in photo_final if r["gold"] == word]
+        word_photo_ids = {r["source_id"] for r in word_photos}
+        word_authors = {
+            r["author_identity"] for r in media if r["source_id"] in word_photo_ids
+        }
         measured[identifier] = stats
         after[5:8] = [
             "Требует доработки",
@@ -122,12 +127,12 @@ def build(workbook, previous_prepared, data, experiment, selection, output):
         overall = report["tests"]["object_final"]["all"]
         note = (
             f"2026-10-09. Разнообразие предметного блока. Победитель {receipt['winner']['name']}, {report['parameters']} параметров. "
-            f"Новые контрольные изображения: правильно названо {correct}/{stats['examples']}, уверенных ошибок по этому слову {stats['false_assertions']}. "
+            f"Новые контрольные изображения: правильно названо {correct}/{stats['examples']}, уверенных ошибок на примерах этого слова {stats['false_assertions']}. "
             f"Вся новая проверка: ответов {overall['accepted']}/{overall['examples']}, уверенных ошибок {overall['false_assertions']}. "
             f"Порог предметного ответа {report['thresholds']['object']}. Приёмка блока {'пройдена в ограниченной области' if report['object_gate'] else 'не пройдена'}. "
             "Рабочая модель не заменена. Нулевое число ошибок при отказе от всех ответов не означает знание. "
             + (
-                "Разметка не слепая. Добавлены рисунки и фотографии, фото одного автора закреплены за одним разделом. По каждому слову отдельных фото в контроле пока недостаточно. "
+                f"Разметка не слепая. Корпус содержит рисунки и фотографии, фото одного автора закреплены за одним разделом. Новые контрольные фото этого слова: {len(word_photos)} снимков, {len(word_authors)} заявленных авторских групп. Независимость всех сцен и общее понимание слова этим не доказаны. "
                 if photos
                 else "Разметка не слепая; цветные иллюстрации OpenMoji оставлены только для итогового контроля. Фото не обучались. "
             )

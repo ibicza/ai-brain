@@ -80,6 +80,7 @@ class ObjectsModel(previous.RelationsModel):
             0,
             32,
             64,
+            128,
         ) or vision_extension_depth not in (0, 1, 2):
             raise ValueError("Unsupported bounded vision extension")
         if not vision_extension_channels and vision_extension_depth:
@@ -227,7 +228,7 @@ class ObjectsModel(previous.RelationsModel):
         return model
 
     def load_object_warm_start(self, checkpoint: dict) -> None:
-        """Exact same architecture, or append only the zero global-context branch."""
+        """Exact architecture, zero context append, or bounded function-preserving widening."""
         warm = self.from_checkpoint(checkpoint)
         if not warm.compatible_legacy_vocabulary:
             raise ValueError("Warm-start legacy policy mismatch")
@@ -235,6 +236,45 @@ class ObjectsModel(previous.RelationsModel):
         source_arch = warm.vision_extension_config
         if source_arch == target_arch:
             self.load_state_dict(warm.state_dict(), strict=True)
+            self.compatible_legacy_vocabulary = True
+            return
+        if (
+            source_arch["vision_extension_channels"] == 64
+            and target_arch["vision_extension_channels"] == 128
+            and {
+                k: v for k, v in source_arch.items() if k != "vision_extension_channels"
+            }
+            == {
+                k: v for k, v in target_arch.items() if k != "vision_extension_channels"
+            }
+        ):
+            target = self.state_dict()
+            for name, value in warm.state_dict().items():
+                current = target[name]
+                if current.shape == value.shape:
+                    current.copy_(value)
+                elif name.startswith("vision_extension.") and value.ndim in (1, 4):
+                    if any(
+                        a < b for a, b in zip(current.shape, value.shape, strict=True)
+                    ):
+                        raise ValueError("Widening cannot discard convolution channels")
+                    # Old output rows cannot read appended input channels.
+                    # New hidden rows keep random initial values and are live;
+                    # final output reads only inherited inputs until training.
+                    current[: value.shape[0]].zero_()
+                    slices = tuple(slice(0, n) for n in value.shape)
+                    current[slices].copy_(value)
+                else:
+                    raise ValueError("Widening changed non-pixel parameter shape")
+            self.load_state_dict(target, strict=True)
+            for name, value in warm.state_dict().items():
+                current = self.state_dict()[name]
+                slices = tuple(slice(0, n) for n in value.shape)
+                if not torch.equal(current[slices], value):
+                    raise ValueError(
+                        "Widening did not retain inherited parameter slices"
+                    )
+            self.compatible_legacy_vocabulary = True
             return
         if not (
             target_arch.get("vision_global_context") is True
@@ -265,6 +305,7 @@ class ObjectsModel(previous.RelationsModel):
             for k, v in warm.state_dict().items()
         ):
             raise ValueError("Warm-start inherited object tensors changed")
+        self.compatible_legacy_vocabulary = True
 
     def load_previous(self, state: dict[str, torch.Tensor]) -> None:
         original = previous.RelationsModel(

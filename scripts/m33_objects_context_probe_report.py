@@ -1,4 +1,4 @@
-"""Dev-only photo diagnosis for the short context probe, never a safe-answer gate."""
+"""Dev-only photo diagnosis for frozen candidates, never a safe-answer gate."""
 
 import argparse
 import json
@@ -9,7 +9,7 @@ from m33_objects_data import sha, write_json
 from m33_verify_objects_evidence import selected, statistics
 
 
-def audit(data, root, output):
+def audit(data, root, output, names=("warm", "local_only", "global_context")):
     result = json.loads(output.read_text(encoding="utf-8"))
     manifest = json.loads((data / "dataset.json").read_text(encoding="utf-8"))
     gold = [
@@ -19,7 +19,7 @@ def audit(data, root, output):
     ]
     if result["dataset_sha256"] != sha(data / "dataset.json"):
         raise ValueError("Probe diagnostic dataset changed")
-    if set(result["candidates"]) != {"warm", "local_only", "global_context"}:
+    if set(result["candidates"]) != set(names):
         raise ValueError("All three development anchors required")
     for name, value in result["candidates"].items():
         checkpoint = (
@@ -55,7 +55,7 @@ def audit(data, root, output):
     }
 
 
-def run(data, root, output):
+def run(data, root, output, names=("warm", "local_only", "global_context")):
     import numpy as np
     import torch
     from m33_primary_objects_pilot import ObjectPrepared, probabilities
@@ -77,7 +77,7 @@ def run(data, root, output):
         if r["role"] == "VISUALLY_CURATED_NONBLIND_PHOTOGRAPH"
     ]
     candidates = {}
-    for name in ("warm", "local_only", "global_context"):
+    for name in names:
         checkpoint = (
             root.parent / "warm.pt" if name == "warm" else root / name / "best.pt"
         )
@@ -86,6 +86,16 @@ def run(data, root, output):
             if (
                 report["checkpoint_sha256"] != sha(checkpoint)
                 or report["production_admitted"]
+                or report["dataset_sha256"] != sha(data / "dataset.json")
+                or report["status"] != "DEVELOPMENT_ONLY_NO_CALIBRATION_OR_FINAL"
+                or any(
+                    (root / name / f).exists()
+                    for f in (
+                        "report.json",
+                        "frozen-calibration.json",
+                        "object-final-predictions.json",
+                    )
+                )
             ):
                 raise ValueError("Probe development binding differs")
         model = (
@@ -138,10 +148,13 @@ def run(data, root, output):
             "dataset_sha256": sha(data / "dataset.json"),
             "script_sha256": sha(Path(__file__)),
             "production_admitted": False,
-            "limits": "Known sparse photo development set lacks fish/mug/chair positive examples; raw output is not the safe-answer policy. No new-photo inference, final, calibration, regression or textbook inference here.",
+            "available_photo_concepts": sorted(
+                {manifest["records"]["dev"][i]["answer"] for i in indices}
+            ),
+            "limits": "Known curated photo development only; missing concepts are unavailable, not learned. Raw output is not the safe-answer policy. No final, calibration, regression or textbook inference here; this diagnostic never replaces a frozen selection receipt.",
         },
     )
-    return audit(data, root, output)
+    return audit(data, root, output, names)
 
 
 if __name__ == "__main__":
@@ -149,5 +162,15 @@ if __name__ == "__main__":
     for name in ("data", "root", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--audit", action="store_true")
+    parser.add_argument("--capacity-probe", action="store_true")
     args = parser.parse_args()
-    print(json.dumps((audit if args.audit else run)(args.data, args.root, args.output)))
+    names = (
+        ("warm", "vision64", "vision128")
+        if args.capacity_probe
+        else ("warm", "local_only", "global_context")
+    )
+    print(
+        json.dumps(
+            (audit if args.audit else run)(args.data, args.root, args.output, names)
+        )
+    )

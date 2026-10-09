@@ -221,3 +221,61 @@ def test_context_migration_cannot_drop_branch_change_channels_or_use_nonzero_res
         target.load_object_warm_start(checkpoint)
     with pytest.raises(ValueError):
         obj.ObjectsModel(width=32, vision_global_context=True)
+
+
+def test_widening_retains_trained_features_and_new_channels_receive_gradients():
+    torch.manual_seed(191)
+    warm = obj.ObjectsModel(
+        width=32,
+        vision_extension_channels=64,
+        vision_extension_depth=2,
+        object_unknown_adapter=True,
+    ).eval()
+    warm.compatible_legacy_vocabulary = True
+    with torch.no_grad():
+        warm.vision_extension[-1].weight.normal_(0, 0.01)
+    checkpoint = {
+        "width": 32,
+        "layers": 2,
+        "model": warm.state_dict(),
+        "architecture": warm.vision_extension_config,
+        "compatible_legacy_vocabulary": True,
+    }
+    expanded = obj.ObjectsModel(
+        width=32,
+        vision_extension_channels=128,
+        vision_extension_depth=2,
+        object_unknown_adapter=True,
+    ).eval()
+    expanded.load_object_warm_start(checkpoint)
+    assert expanded.compatible_legacy_vocabulary is True
+    images = torch.rand(2, 3, 96, 96)
+    words = torch.tensor(
+        [
+            obj.encode_question(obj.OBJECT_QUESTIONS[0]),
+            old.encode_question(base.QUESTIONS["count"][0]),
+        ]
+    )
+    with torch.no_grad():
+        before, after = warm(images, words), expanded(images, words)
+        assert torch.equal(before[1], after[1])
+        assert torch.allclose(before[0], after[0], atol=3e-6, rtol=3e-6)
+    loss = -expanded(images, words)[0].log_softmax(-1)[obj.OBJECT_IDS["яблоко"]]
+    loss.backward()
+    assert expanded.vision_extension[-1].weight.grad[:, 128:].abs().sum() > 0
+    with torch.no_grad():
+        expanded.vision_extension[-1].weight.add_(
+            expanded.vision_extension[-1].weight.grad, alpha=-0.01
+        )
+    expanded.zero_grad()
+    (-expanded(images, words)[0].log_softmax(-1)[obj.OBJECT_IDS["яблоко"]]).backward()
+    assert expanded.vision_extension[0].weight.grad[64:].abs().sum() > 0
+    restored = obj.ObjectsModel.from_checkpoint(
+        checkpoint
+        | {
+            "model": expanded.state_dict(),
+            "architecture": expanded.vision_extension_config,
+        }
+    ).eval()
+    with torch.no_grad():
+        assert torch.equal(restored(images, words), expanded(images, words))

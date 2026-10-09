@@ -1,0 +1,26 @@
+{
+  "training_started": false,
+  "status": "COMPLETE_NONBLIND_VISUAL_REVIEW_NOT_MODEL_MASTERY",
+  "acquisition_sha256": "e4fb61e434b9fb7c248caa63dd18934ce153520e2275c1c04a903890f7c58d9b",
+  "root": "D:\\ai-brain-data\\visual-lexicon\\objects-photo-topup-20261009\\photos-v2",
+  "reviewed_category_counts": {"apple": 99, "banana": 88, "carrot": 91, "fish": 90, "tree": 100, "mug": 94, "chair": 92, "book": 100, "pear": 24, "bottle": 24, "teapot": 24, "leaf": 24, "dolphin": 24, "spoon": 24, "rock": 24, "bowl": 24},
+  "photos": {
+    "apple": {"include": [1, 11, 13, 16, 26, 27, 33, 37, 53, 56, 57, 68, 70, 83, 88, 89]},
+    "banana": {"include": [0, 11, 14, 16, 21, 25, 26, 27, 34, 50, 70, 71, 72, 76, 77, 83, 85, 86]},
+    "carrot": {"include": [3, 6, 11, 14, 16, 18, 36, 37, 46, 49, 57, 63, 71, 76, 81, 82]},
+    "fish": {"include": [2, 3, 4, 9, 12, 20, 23, 24, 27, 28, 35, 36, 40, 51, 53, 54, 55, 56, 59, 60, 62, 63, 65, 70, 71, 72, 73, 74, 75, 76, 77, 78, 81, 82, 86, 88, 89]},
+    "tree": {"include": [1, 3, 5, 12, 17, 22, 24, 25, 31, 33, 34, 35, 39, 41, 43, 44, 45, 50, 55, 57, 60, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 98, 99]},
+    "mug": {"include": [3, 21, 26, 28, 29, 35, 37, 42, 44, 45, 49, 52, 53, 59, 61, 62, 69, 70, 71, 73, 75, 77, 78, 80, 86, 88, 90, 92, 93]},
+    "chair": {"include": [1, 3, 7, 10, 17, 20, 21, 25, 33, 37, 42, 54, 57, 63, 68, 70, 73, 75, 82, 83, 84, 87, 88]},
+    "book": {"include": [27, 63, 65, 66, 67, 68, 74, 79, 82, 89, 93, 97, 98, 99]},
+    "pear": {"include": [6, 7, 12, 19, 20, 22]},
+    "bottle": {"include": [1, 3, 6, 7, 10, 11, 15, 16, 17, 18, 19, 23]},
+    "teapot": {"include": [0, 1, 6, 9, 10, 11, 12, 15, 18, 22, 23]},
+    "leaf": {"include": [2, 4, 5, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 22, 23]},
+    "dolphin": {"include": [7, 17, 19]},
+    "spoon": {"include": [1, 4, 5, 8, 9, 14, 16, 17, 21, 22, 23]},
+    "rock": {"include": [14, 16, 17]},
+    "bowl": {"include": [1, 5, 6, 7, 17, 18]}
+  },
+  "limits": "All sixteen categories inspected manually on numbered contact sheets, ambiguous details enlarged. Not independent blind labels. Search/category names are proposals only. Excluded apple-shaped sculpture, apple gourd, water apple and cashew fruit after larger-image inspection; no relabeling to meet quotas. Negative categories teach UNKNOWN only, not their names. Full-frame sources and per-file attribution/rights metadata retained; original full-resolution files not acquired. No training started on these images."
+}
