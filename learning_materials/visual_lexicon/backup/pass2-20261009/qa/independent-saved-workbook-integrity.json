@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\workbook-qa-pass2-20261009\\visual_lexicon.xlsx",
+  "candidate_sha256": "1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82",
+  "prepared_sha256": "7a5e83c9ba2308fb07a7470058347d2e09e8b1c56841460ccff00e5bfd98aa46",
+  "prior_saved_workbook_sha256": "da5dcd82aae6053d3ca736af48ccd57334419bb42dd14a85bef94dcdf53cb06b",
+  "saved_counts": {
+    "words": 847,
+    "media": 32526,
+    "text": 15499,
+    "coverage": 13
+  },
+  "all_saved_payload_cells_compared": 831456,
+  "native_tables_and_frozen_panes_preserved": true,
+  "old_word460_first13_exact_saved_values_preserved": true,
+  "old_media_text_coverage_exact_saved_values_preserved": true,
+  "word_N_old_prefix_only_appended": true,
+  "new_media_unassigned_unadmitted": true,
+  "old_detailed_coverage84_not_promoted": true,
+  "training_started": false,
+  "limit": "Actual saved-value/schema integrity; no OCR/object-label semantic revalidation."
+}

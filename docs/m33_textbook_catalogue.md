@@ -9,8 +9,9 @@ expansion; never replace them from a seed. Retain a hash-identified old snapshot
 ## This first pass
 
 Thirteen unchanged Russian-language Belarusian primary PDFs contain 1763 PDF
-pages. Every page has PDF text, a rendered complete context and Windows Russian
-OCR, including picture-embedded text proposals. PDF text and OCR overlap; their
+pages. Every page has an extraction record, rendered complete context and Windows
+Russian OCR output, including picture-embedded text proposals. Native PDF text
+is nonempty on 1659 pages; empty text-layer outputs are retained too. PDF text and OCR overlap; their
 counts must not be added as unique occurrences. OCR can be wrong despite finishing
 without technical errors. Tokenisation omits numbers/signs from the word-candidate
 sheet, but keeps all original lines and OCR bounding boxes in linked source files.
@@ -22,7 +23,7 @@ endpaper crops use printed labels, not independently demonstrated species
 recognition; repeated endpapers are not independent examples. Thirty-one selected
 crops received independent reading before comparison with the author proposal;
 context viewed after comparison is explicitly distinct. This is not a blind model
-exam or approval of every label. The remaining illustrations still need review.
+exam or approval of every label. Detailed object-level review is still incomplete.
 
 All 22,001 raster-placement crops are retained as raw placements, **not 22,001
 recognised objects**. Complete page contexts retain vector drawings and scenes.
@@ -31,11 +32,44 @@ Thirteen CropBox/MediaBox mismatches required complete geometry-record replaceme
 effective catalogue. Three rejected raster placements are reported, not hidden;
 their complete pages remain available.
 
+## Complete page overview, second pass
+
+Three agents actually viewed 153 contact sheets covering all 1763 pages, in three
+disjoint book groups (560 mathematics, 690 world/art/reading, 513 language/safety).
+Selected tiny or ambiguous images were rechecked at full-page resolution. The
+overview inventories retain text-only, blank and unknown pages, not just positive
+examples. Full-resolution viewing still does not mean every object was segmented.
+
+The saved first expanded workbook was read before appending: 460 prior concepts,
+all 27,523 media rows, all text rows and all coverage rows were preserved. The
+second pass adds 387 proposed concepts and 5003 concept-to-page associations,
+giving 847 concepts and 32,526 media/resource rows. Descriptions remain at most
+20 words; no new measured percentages or training claims were introduced.
+The original 338 user concepts and their results are still unchanged.
+
+New whole-page relations mean "scene contains object" or "page contains symbol",
+not isolated-object gold, verified localization, or proof of a numerical count.
+Repeated hashes/roles/concepts are deduplicated; their original page evidence is
+kept in annotation inventories and the export report. Unresolved names are kept
+as review material instead of being promoted to confident labels. The first
+84 detailed-review pages remain a separate coverage field: the overview must not
+inflate that number. `review_queue.csv` has separate columns for these two levels.
+
+A separate non-blind cross-review inspected 18 language/safety proposals on nine
+full pages: 17 agreed, one tiny pin/needle scene was marked uncertain. Full-size
+checks corrected several thumbnail guesses before publication. This sample is
+not approval of all labels or a model evaluation.
+
+Second-pass provenance is under
+`D:\ai-brain-data\visual-lexicon\book-review-pass2-20261009`, outside the sealed first
+corpus. Its inventories, annotations and receipts are included in the incremental
+Git backup. Complete first corpus assets need not be uploaded a second time.
+
 ## Workbook sheets
 
 - `Словарь`: stable concept/sense IDs, short draft descriptions, existing results;
   column N links proposed visual media without assigning train/test splits.
-- `Медиа`: 27,523 resource or file-to-concept rows, paths, hashes, pages, coordinates,
+- `Медиа`: 32,526 resource or file-to-concept rows, paths, hashes, pages, coordinates,
   scenes and review caveats. Raw placement rows have no inferred concept ID.
 - `Текст`: 15,499 candidate word/lemma records, original forms, separate PDF/OCR
   frequencies, possible concept matches, source contexts and uncertainty. Generic
@@ -80,8 +114,11 @@ escaped, typed numbers are not changed.
 
 The initial-schema migration intentionally refuses added/reordered columns,
 formulas or unexpected sheets rather than silently dropping user work. Future
-expansions must support the new four-sheet schema explicitly; do not rerun the
-initial migration on the expanded file. It is not a synchronisation daemon.
+expansions use `scripts/lexicon_catalogue_increment.py` on the actual four-sheet
+workbook; do not rerun the initial migration on the expanded file. The
+`--previous-prepared` option preserves earlier SHA-verified review metadata and
+XML-display escape audits, while keeping saved user edits authoritative. It is
+not a synchronisation daemon.
 
 Rebuild the local code-review graph for navigation, but keep its cache out of Git.
 Canonical catalogue backups must be isolated from unrelated dirty application

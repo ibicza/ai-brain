@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "payload_path": "D:\\ai-brain-data\\visual-lexicon\\workbook-qa-pass2-20261009\\combined-prepared.json",
+  "payload_sha256": "7a5e83c9ba2308fb07a7470058347d2e09e8b1c56841460ccff00e5bfd98aa46",
+  "prior_saved_workbook_sha256": "da5dcd82aae6053d3ca736af48ccd57334419bb42dd14a85bef94dcdf53cb06b",
+  "input_rows": {
+    "words": 460,
+    "media": 27523,
+    "text": 15499,
+    "coverage": 13
+  },
+  "old_word_first13_exact_saved_values_preserved": true,
+  "old_media_text_coverage_exact_saved_rows_preserved": true,
+  "word_N_prefix_preserved_only_append": true,
+  "previous_XML330_and6_reviews_preserved": true,
+  "original_PDF_SHA_verified": 13,
+  "effective_page_previews_SHA_verified": 1763,
+  "overview_pages_exact_complete_union": 1763,
+  "detailed_pages_not_promoted": 84,
+  "all_current_media_SHA_confinement_verified": 32526,
+  "new_media_effective_page_identity_verified": 5003,
+  "superseded_assets_excluded": true,
+  "weak_pin_detail_flag_present": true,
+  "training_started": false,
+  "training_admitted": false,
+  "limit": "Byte/source/page identity and saved-value checks; not independent resegmentation or verification of all labels/OCR semantics."
+}

@@ -1,0 +1,24 @@
+{
+  "input_sha256": "da5dcd82aae6053d3ca736af48ccd57334419bb42dd14a85bef94dcdf53cb06b",
+  "output_sha256": "1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82",
+  "stats": {
+    "input_concepts": 460,
+    "input_media_rows": 27523,
+    "concepts": 847,
+    "new_visual_concepts": 387,
+    "media_rows": 32526,
+    "new_media_rows": 5003,
+    "text_entries": 15499,
+    "effective_pages": 1763,
+    "ocr_pages": 1763,
+    "pages_visually_reviewed": 84,
+    "corrected_pages": 13,
+    "missing_ocr": [],
+    "overview_pages": 1763,
+    "reviewed_occurrences": 5003,
+    "xml_display_escaped_cells": 330,
+    "limits": "Preserved saved user values; supplemental overview associations remain proposals, not training gold."
+  },
+  "training_started": false,
+  "qa_completed": true
+}

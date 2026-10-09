@@ -138,11 +138,15 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
                     raise ValueError(
                         f"Saved export mismatch {name}!row{n}/column{c}: {value!r} != {wanted!r}"
                     )
+    old_media_count = data.get("input_rows", {}).get("media", 0)
     if any(
-        row[15] != "Нет" or row[3] != "Не назначено" for row in sheets["Медиа"]["rows"]
+        row[15] != "Нет" or row[3] != "Не назначено"
+        for row in sheets["Медиа"]["rows"][old_media_count:]
     ):
         raise ValueError("Unexpected training admission/split")
-    old_count = data["stats"]["concepts"] - data["stats"]["new_visual_concepts"]
+    old_count = data.get("input_rows", {}).get(
+        "words", data["stats"]["concepts"] - data["stats"]["new_visual_concepts"]
+    )
     if any(
         row[6] not in (None, "") or row[7] not in (None, "")
         for row in sheets["Словарь"]["rows"][old_count:]
@@ -167,6 +171,7 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
             {"file": filename, "sha256": sha(target), "bytes": target.stat().st_size}
         )
     reviewed_pages = set()
+    overviewed_pages = set()
     for review in data["review_files"]:
         source = Path(review["path"])
         if sha(source) != review["sha256"]:
@@ -176,7 +181,11 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
             continue
         for book in review_data.get("books", []):
             reviewed_pages.update(
-                (book["filename"], page) for page in book.get("pages_visually_reviewed", [])
+                (book["filename"], page)
+                for page in book.get("pages_visually_reviewed", [])
+            )
+            overviewed_pages.update(
+                (book["filename"], page) for page in book.get("pages_overviewed", [])
             )
     queue = output / "review_queue.csv"
     with queue.open("w", encoding="utf-8-sig", newline="") as stream:
@@ -189,6 +198,7 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
                 "Полная сцена",
                 "SHA сцены",
                 "Просмотр агента",
+                "Обзор страницы",
                 "Полная семантическая разметка",
                 "Допуск обучения",
             ]
@@ -207,6 +217,9 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
                     row[10],
                     "Просмотрено выборочно"
                     if (book, page) in reviewed_pages
+                    else "Ожидается",
+                    "Просмотрена обзорно"
+                    if (book, page) in overviewed_pages
                     else "Ожидается",
                     "Не завершена",
                     "Нет",
@@ -243,6 +256,7 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
         "schema": 2,
         "workbook_sha256": workbook_sha,
         "preserved_input_workbook_sha256": data["input_workbook_sha256"],
+        "previous_prepared_history": data.get("previous_prepared_history"),
         "all_saved_cells_match": True,
         "formulas": 0,
         "tables_and_filters": 4,
@@ -250,6 +264,14 @@ def run(workbook: Path, prepared: Path, output: Path) -> dict:
         "training_admitted": False,
         "stats": data["stats"],
         "review_inputs": data["review_files"],
+        "overview_pages": len(overviewed_pages),
+        "detailed_review_pages": len(reviewed_pages),
+        "overview_coverage": data.get("overview_coverage", []),
+        "deduplicated_evidence": data.get("deduplicated_evidence", []),
+        "unresolved_proposals": data.get("unresolved", []),
+        "omitted_cell_links_still_in_media": data.get(
+            "omitted_cell_links_still_in_media", {}
+        ),
         "spreadsheet_text_escapes": data.get("spreadsheet_text_escapes", []),
         "csv_policy": "UTF-8 BOM; semicolon; quoted multiline; literal leading =+-@ strings escaped, typed numbers unchanged",
         "exports": exports,

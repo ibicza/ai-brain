@@ -1,0 +1,18 @@
+{
+  "before_sha256": "9b9d1c00bfd669c27d23685b099424c5995169c18d14f52c1ff32e31c4fc42cf",
+  "after_sha256": "562734ee98aa0fe91432ee477a7c8dfe7468f1236b88c6bdfa2b0e6745def297",
+  "changes_only": [
+    {
+      "word": "булавка",
+      "filename": "OBJ_2kl_Abroskina_rus_2024.pdf",
+      "pdf_page": 62,
+      "field": "notes",
+      "added": " Независимый выборочный просмотр: мелкая группа игл/булавок, subtype uncertain; нужен увеличенный просмотр, не object gold."
+    }
+  ],
+  "cross_review_path": "D:\\ai-brain-data\\visual-lexicon\\book-review-pass2-20261009\\world_language\\cross-review-language.json",
+  "cross_review_sha256": "1ae2505e39735db5df5fb0ff198781979182c1b94362719aca8f2eec8d99036f",
+  "review_blind": false,
+  "review_scope": "Independent selective read of nine full pages/eighteen proposed labels; not a blind generalisation test.",
+  "training_admitted": false
+}

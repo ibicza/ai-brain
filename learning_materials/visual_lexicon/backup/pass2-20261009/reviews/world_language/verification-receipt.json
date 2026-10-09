@@ -1,0 +1,23 @@
+{
+  "books": 5,
+  "pages": 690,
+  "sheets": 60,
+  "concepts": 411,
+  "existing_id_matches": 162,
+  "visual_page_associations": 1842,
+  "pages_with_clear_objects": 483,
+  "unknown_object_pages": 2,
+  "training_started": false,
+  "training_admitted": false,
+  "immutable_pass1_hashes_verified_unchanged": {
+    "annotations.json": "3f7246a256675867dd38b92b8e68a6ba6b2cfa42c0aead28349c1aeec575ea2d",
+    "supplemental-annotations.json": "a4105c13dca629d4bfa946e3c70e4aa7d0437bb3a876a3ec8061dd8ce3544291",
+    "independent-math-audit.json": "cec82d52d32e5d56db32ba79d0d0edb62b604d009c10a52559e9d26498bb7a61"
+  },
+  "source_generator_sha256": "16f3fe548c57edf8ce741c8998849b63b4dea0265fd1d41ecb8f876d5eddda28",
+  "hashes": {
+    "page-review.json": "8e42484a96625ce2b0b7e3d32ed93f2677e97b687d371fe673cf054413649aed",
+    "supplemental-annotations.json": "4149ebe6b9ba8443e65e5a4b6a4111a88a58782d91882d5570238c21fb68fe5d",
+    "visual-page-inventory.json": "1341c351205c587b8ad14fe584724b47977d4f07dd18276b3b2f35ea8e6c6f67"
+  }
+}

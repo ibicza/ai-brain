@@ -94,7 +94,7 @@ function table(sheet, name, headers, rows, widths, existing=false, oldCount=0) {
   return last;
 }
 title(words, 'Визуальный словарь — постоянный каталог', [
-  '2026-10-09. Первичный разбор 13 учебников; предложенная разметка ещё не означает знание модели.',
+  `2026-10-09. Разбор 13 учебников; обзор страниц: ${data.stats.overview_pages??0}/1763. Разметка — предложения, не знание модели.`,
   'Пустой процент = отдельного измерения нет. Старые результаты и ID сохранены без повышения статуса.',
   'Новые картинки находятся в колонке N: разбиение пока не назначено. Полный текст и сомнения — на листе «Текст».',
   'Правьте этот сохранённый файл. Новый смысл = новый ID. Обучение по учебникам не запускалось.',
@@ -112,7 +112,9 @@ title(media,'Медиафайлы и происхождение',[
 ]);
 const mediaLast=table(media,'VisualMedia',data.media_headers,data.media,[16,13,45,20,25,25,65,56,31,36,40,30,38,45,28,18,42,18,32],true,oldMediaCount);
 media.getRange(`D9:D${mediaLast}`).dataValidation={rule:{type:'list',values:['Не назначено','train','dev','calibration','regression','fresh_final']}};
-media.getRange(`L9:L${mediaLast}`).dataValidation={rule:{type:'list',values:['Черновик','Агент проверил; ожидает пользователя','Проверено','Карантин']}};
+media.getRange(`L9:L${mediaLast}`).dataValidation={rule:{type:'list',values:['Черновик','Агент проверил; ожидает пользователя','Агент предложил; ожидает пользователя','Проверено','Карантин']}};
+const roleChoices=[...new Set(data.media.map(r=>r[4]).filter(v=>typeof v==='string'&&v))];
+if(roleChoices.join(',').length<=255) media.getRange(`E9:E${mediaLast}`).dataValidation={rule:{type:'list',values:roleChoices}};
 media.getRange(`P9:P${mediaLast}`).dataValidation={rule:{type:'list',values:['Нет']}};
 const text = data.incremental ? wb.worksheets.getItem('Текст') : wb.worksheets.add('Текст');
 title(text,'Слова и формы из полного текста',[
@@ -125,7 +127,7 @@ table(text,'TextCandidates',data.text_headers,data.text,[18,25,45,24,20,18,14,37
 const coverage=data.incremental ? wb.worksheets.getItem('Покрытие') : wb.worksheets.add('Покрытие');
 title(coverage,'Покрытие и границы проверки',[
   'Сохранены все 1763 страницы 13 книг. Автоматическое извлечение не заменяет семантическую проверку иллюстраций.',
-  'Визуальные страницы — первый выборочный проход агентов; просмотр не означает разметку каждого объекта страницы.',
+  `Обзор: ${data.stats.overview_pages??0}/1763 страниц. Колонка F сохраняет первый детальный проход (84); это разные уровни проверки.`,
   '13 геометрических исправлений заменяют целые записи страниц; старые ресурсы явно исключены из текущего каталога.',
   'Нет обучения, новых метрик модели или полностью подтверждённого человеком учебного корпуса.',
 ]);

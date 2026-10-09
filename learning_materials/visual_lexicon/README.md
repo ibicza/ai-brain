@@ -21,6 +21,13 @@ PDF hashes, pages and crop coordinates must accompany media links. Unchanged PDF
 originals remain in `../belarus_primary/originals` and their separate Git archive.
 Missing assets must be restored or regenerated and their hashes checked before use.
 
+Additional page-overview inventories and proposed associations live under
+`D:\ai-brain-data\visual-lexicon\book-review-pass2-20261009`. Their associations reuse
+the hash-verified effective complete page images, not arbitrary thumbnail guesses.
+An association means "this scene contains the concept", not a verified isolated
+object or segmentation mask. `review_queue.csv` separates detailed crop review
+from overview of a page. Both still require semantic/user approval.
+
 Word occurrence is not visual identification. Automatic text forms/lemmas and
 image placements are draft candidates. Ambiguous senses, extraction errors,
 proposed labels and words visible inside illustrations require review. Existing
@@ -39,3 +46,12 @@ Initial saved workbook backup:
 Backups and archive commits preserve older states; only the canonical workbook is
 edited going forward. Local backups do not provide protection against loss of the
 whole machine; report separately whether an off-machine Git backup was completed.
+
+The original two-sheet migration is `scripts/lexicon_catalogue_prepare.py`.
+Subsequent additions use `scripts/lexicon_catalogue_increment.py` on the actual
+saved four-sheet workbook. It preserves existing rows, appends new rows, and only
+extends existing unassigned-media links. Do not rerun the initial migration on the
+expanded workbook. Both stages emit prepared JSON; `lexicon_catalogue_update.mjs`
+imports the saved workbook and authors XLSX using the spreadsheet runtime.
+`lexicon_catalogue_export.py` independently checks the saved cells and creates the
+CSV/JSON exports. Publish only after input-SHA, export and visual QA checks pass.

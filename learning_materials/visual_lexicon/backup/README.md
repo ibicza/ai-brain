@@ -57,3 +57,21 @@ Archive preservation is not semantic approval, an open licence, a training run o
 model mastery. Source noncommercial restrictions still apply. Future backups
 should append new assets/provenance incrementally instead of repeatedly adding a
 second complete 528-MiB archive for small table edits.
+
+## Second-pass additions
+
+`backup/pass2-20261009/reviews/` preserves the supplemental page inventories,
+annotations, generating helpers and review receipts. Restore this tree to
+`D:\ai-brain-data\visual-lexicon\book-review-pass2-20261009` in a new/empty destination.
+These records reuse first-snapshot effective page images; there is no second full
+corpus ZIP. `annotations-before-pin-flag.json` preserves the exact earlier version
+read by the non-blind cross-review; its receipt describes the one caution-note
+addition rather than silently rewriting the reviewed bytes.
+
+`backup/pass2-20261009/combined-prepared.json` contains the complete append-only
+publication matrices and carries the earlier review/escape provenance. The QA
+subdirectory preserves independent payload/XLSX checks and rendered sheet samples.
+It excludes the redundant full inspection dump and transient runtime outputs.
+The current canonical workbook and CSV/gzipped JSON exports remain at the stable
+catalogue paths above, with old snapshots preserved by commit history and local
+hash-named backups. Nothing in these archives admits data to model training.

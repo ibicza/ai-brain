@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "reviewer": "textbook_math_review",
+  "created_utc": "2026-10-08T23:54:58.939441+00:00",
+  "contacts_verified": 48,
+  "pages_overviewed": 560,
+  "pages_full_resolution_reviewed": 6,
+  "concepts_linked_existing": 169,
+  "new_defined_proposals": 156,
+  "occurrences": 3035,
+  "unresolved_labels": 48,
+  "files": [
+    {
+      "path": "D:\\ai-brain-data\\visual-lexicon\\book-review-pass2-20261009\\math\\page-review.json",
+      "sha256": "6d5b207b9e5537c545a2904946b3faa0fa456fa6fcf0566d1aeeb72a085cbd3c",
+      "bytes": 1865915
+    },
+    {
+      "path": "D:\\ai-brain-data\\visual-lexicon\\book-review-pass2-20261009\\math\\supplemental-annotations.json",
+      "sha256": "f70ee4b7aaa8e7050a1103432e24e90c9f89e285ea37d57eae685cdebf6f8be9",
+      "bytes": 4216882
+    }
+  ],
+  "training_started": false,
+  "training_admitted": false,
+  "no_corpus_writes": true
+}

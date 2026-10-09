@@ -1,0 +1,56 @@
+{
+  "audit": "INDEPENDENT_INCREMENTAL_READ_ONLY_XLSX_XML",
+  "status": "PASS",
+  "candidate": "D:\\ai-brain-data\\visual-lexicon\\workbook-qa-pass2-20261009\\visual_lexicon.xlsx",
+  "candidate_sha256": "1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82",
+  "snapshot": "D:\\ai-brain-data\\visual-lexicon\\backups\\visual_lexicon-da5dcd82aae6053d3ca736af48ccd57334419bb42dd14a85bef94dcdf53cb06b.xlsx",
+  "snapshot_sha256": "da5dcd82aae6053d3ca736af48ccd57334419bb42dd14a85bef94dcdf53cb06b",
+  "prepared": "D:\\ai-brain-data\\visual-lexicon\\workbook-qa-pass2-20261009\\combined-prepared.json",
+  "prepared_sha256": "7a5e83c9ba2308fb07a7470058347d2e09e8b1c56841460ccff00e5bfd98aa46",
+  "previous_prepared": "D:\\ai-brain-data\\visual-lexicon\\merge-final-xml-safe.json",
+  "previous_prepared_sha256": "42993fa30d3dd8aff650086bf497876938e867c3a41d814dda0f76fbdc8c979a",
+  "compared_cells": 1562032,
+  "preserved_previous_word_rows": 460,
+  "preserved_previous_media_rows": 27523,
+  "preserved_previous_text_rows": 15499,
+  "preserved_previous_coverage_rows": 13,
+  "rows": {
+    "words": 847,
+    "media": 32526,
+    "text": 15499,
+    "coverage": 13
+  },
+  "tables": [
+    {
+      "sheet": "Словарь",
+      "name": "VisualConcepts",
+      "ref": "A8:N855",
+      "autofilter_ref": "A8:N855"
+    },
+    {
+      "sheet": "Медиа",
+      "name": "VisualMedia",
+      "ref": "A8:S32534",
+      "autofilter_ref": "A8:S32534"
+    },
+    {
+      "sheet": "Текст",
+      "name": "TextCandidates",
+      "ref": "A8:M15507",
+      "autofilter_ref": "A8:M15507"
+    },
+    {
+      "sheet": "Покрытие",
+      "name": "BookCoverage",
+      "ref": "A8:I21",
+      "autofilter_ref": "A8:I21"
+    }
+  ],
+  "formula_count": 0,
+  "error_count": 0,
+  "failure_count": 0,
+  "failures": [],
+  "mismatches": [],
+  "training_started": false,
+  "limits": "Cell values, exact previous-row preservation, append-only N reference membership, native tables/filters/panes. Not visual caption accuracy, all-object segmentation or learned knowledge."
+}
