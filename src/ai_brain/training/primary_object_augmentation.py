@@ -39,3 +39,33 @@ def diverse_view(images: torch.Tensor) -> torch.Tensor:
     output = output * exposure + background
     output = output + torch.randn_like(output) * 0.005
     return output.clamp(0, 1)
+
+
+def background_view(images: torch.Tensor) -> torch.Tensor:
+    """Place the intact full frame on a varied canvas; no inferred foreground mask.
+
+    This changes padding/context only, not the actual photographed background.
+    It is train-only robustness augmentation, never independent new evidence.
+    """
+    if (
+        images.ndim != 4
+        or images.shape[1:] != (3, 96, 96)
+        or not images.is_floating_point()
+    ):
+        raise ValueError("Expected floating RGB96x96 batch")
+    count, device = len(images), images.device
+    scale = 0.80 + torch.rand(count, device=device) * 0.20
+    theta = torch.zeros(count, 2, 3, device=device, dtype=images.dtype)
+    theta[:, 0, 0] = theta[:, 1, 1] = 1 / scale
+    grid = F.affine_grid(theta, images.shape, align_corners=False)
+    foreground = F.grid_sample(images, grid, align_corners=False)
+    occupancy = F.grid_sample(torch.ones_like(images[:, :1]), grid, align_corners=False)
+    canvas = torch.rand(count, 3, 1, 1, device=device, dtype=images.dtype)
+    texture = F.interpolate(
+        torch.rand(count, 3, 6, 6, device=device, dtype=images.dtype),
+        (96, 96),
+        mode="bilinear",
+        align_corners=False,
+    )
+    canvas = canvas * 0.85 + texture * 0.15
+    return (foreground + canvas * (1 - occupancy)).clamp(0, 1)

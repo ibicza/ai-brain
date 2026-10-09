@@ -20,7 +20,7 @@ def audit(data, root, output, names=("warm", "local_only", "global_context")):
     if result["dataset_sha256"] != sha(data / "dataset.json"):
         raise ValueError("Probe diagnostic dataset changed")
     if set(result["candidates"]) != set(names):
-        raise ValueError("All three development anchors required")
+        raise ValueError("All declared development anchors required")
     for name, value in result["candidates"].items():
         checkpoint = (
             root.parent / "warm.pt" if name == "warm" else root / name / "best.pt"

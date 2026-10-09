@@ -1,0 +1,3 @@
+# Image preparation and primary-object tests. Install into the project venv.
+# PyTorch/CUDA is managed separately; do not replace it through this file.
+Pillow==12.3.0

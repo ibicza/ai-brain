@@ -103,6 +103,7 @@ def select(candidates, output, *, tuning=False):
                         "illustration_fraction",
                         "domain_balanced_dev",
                         "class_domain_balanced_dev",
+                        "background_augmentation",
                     )
                 },
             }

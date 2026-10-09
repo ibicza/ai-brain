@@ -75,6 +75,7 @@ class ObjectsModel(previous.RelationsModel):
         vision_extension_depth: int = 0,
         object_unknown_adapter: bool = False,
         vision_global_context: bool = False,
+        object_readout_adapter: bool = False,
     ) -> None:
         if vision_extension_channels not in (
             0,
@@ -93,6 +94,11 @@ class ObjectsModel(previous.RelationsModel):
             raise ValueError(
                 "Global context requires a pixel extension and boolean flag"
             )
+        if type(object_readout_adapter) is not bool or (
+            object_readout_adapter
+            and (not vision_extension_channels or not object_unknown_adapter)
+        ):
+            raise ValueError("Object readout requires pixel and UNKNOWN adapters")
         super().__init__(width=width, layers=layers)
         self.core.config = replace(self.core.config, vocab_size=VOCAB_SIZE)
         self.core.token_embedding = nn.Embedding(VOCAB_SIZE, width)
@@ -111,6 +117,7 @@ class ObjectsModel(previous.RelationsModel):
             nn.init.zeros_(self.object_unknown_adapter.bias)
         self.vision_extension = None
         self.vision_global_context = None
+        self.object_readout_adapter = None
         if vision_extension_channels:
             channels = vision_extension_channels
             blocks = [
@@ -140,6 +147,18 @@ class ObjectsModel(previous.RelationsModel):
             )
             nn.init.zeros_(self.vision_global_context[-1].weight)
             nn.init.zeros_(self.vision_global_context[-1].bias)
+        if object_readout_adapter:
+            self.vision_extension_config["object_readout_adapter"] = True
+            # Learned whole-frame visual summary plus the shared causal READ
+            # state, not class prototypes, source metadata or a separate model.
+            self.object_readout_adapter = nn.Sequential(
+                nn.LayerNorm(width * 3),
+                nn.Linear(width * 3, width * 2),
+                nn.GELU(),
+                nn.Linear(width * 2, width),
+            )
+            nn.init.zeros_(self.object_readout_adapter[-1].weight)
+            nn.init.zeros_(self.object_readout_adapter[-1].bias)
         self.register_buffer(
             "object_questions",
             torch.tensor([encode_question(text) for text in OBJECT_QUESTIONS]),
@@ -194,9 +213,21 @@ class ObjectsModel(previous.RelationsModel):
         mask = self.is_object_question(questions)
         indices = torch.nonzero(mask).flatten()
         correction = torch.zeros_like(logits)
-        correction[indices, UNKNOWN] = self.object_unknown_adapter(
-            hidden[indices, -1]
-        ).flatten()
+        object_hidden = hidden[indices, -1]
+        if self.object_readout_adapter is not None:
+            visual = embeddings[indices, : base.IMAGE_TOKENS]
+            pooled = torch.cat((visual.mean(1), visual.amax(1), object_hidden), dim=1)
+            adapted = object_hidden + self.object_readout_adapter(pooled)
+            # Difference form is exactly zero at migration, even when separate
+            # GEMM batch shapes round differently from the inherited core.
+            correction[indices] = self.core.lm_head(adapted) - self.core.lm_head(
+                object_hidden
+            )
+            object_hidden = adapted
+        correction[indices, UNKNOWN] = (
+            self.object_unknown_adapter(object_hidden).flatten()
+            + correction[indices, UNKNOWN]
+        )
         logits = logits + correction
         # The admitted object task has exactly eight names plus abstention.
         # Counts/colors/shapes and word tokens are not object answers. Scope comes
@@ -214,6 +245,7 @@ class ObjectsModel(previous.RelationsModel):
             "vision_extension_depth",
             "object_unknown_adapter",
             "vision_global_context",
+            "object_readout_adapter",
         }:
             raise ValueError("Unknown architecture metadata")
         if type(checkpoint.get("compatible_legacy_vocabulary")) is not bool:
@@ -236,6 +268,32 @@ class ObjectsModel(previous.RelationsModel):
         source_arch = warm.vision_extension_config
         if source_arch == target_arch:
             self.load_state_dict(warm.state_dict(), strict=True)
+            self.compatible_legacy_vocabulary = True
+            return
+        if (
+            target_arch.get("object_readout_adapter") is True
+            and "object_readout_adapter" not in source_arch
+            and {k: v for k, v in target_arch.items() if k != "object_readout_adapter"}
+            == source_arch
+        ):
+            if any(
+                torch.count_nonzero(p).item()
+                for p in self.object_readout_adapter[-1].parameters()
+            ):
+                raise ValueError("Appended readout must start at exact zero residual")
+            expected_missing = {
+                k for k in self.state_dict() if k.startswith("object_readout_adapter.")
+            }
+            incompatible = self.load_state_dict(warm.state_dict(), strict=False)
+            if (
+                set(incompatible.missing_keys) != expected_missing
+                or incompatible.unexpected_keys
+                or any(
+                    not torch.equal(self.state_dict()[k], v)
+                    for k, v in warm.state_dict().items()
+                )
+            ):
+                raise ValueError("Unexpected readout migration tensors")
             self.compatible_legacy_vocabulary = True
             return
         if (

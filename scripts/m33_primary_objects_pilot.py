@@ -28,7 +28,7 @@ from torch.nn import functional as F
 
 from ai_brain.training import primary_objects as obj
 from ai_brain.training import primary_relations as old
-from ai_brain.training.primary_object_augmentation import diverse_view
+from ai_brain.training.primary_object_augmentation import background_view, diverse_view
 
 PREVIOUS_SHA = "a4a168a362f6afb20b9dc579ad91c47ca725ab0cbadb6a556a3d6e257e6c1fae"
 POLICY_SHA = "21529d9cfd6e0b71f0fd58b6694dd3d32b7d680fd91d7bb002491c9c635591f6"
@@ -239,8 +239,10 @@ def main():
     parser.add_argument("--development-only", action="store_true")
     parser.add_argument("--object-unknown-adapter", action="store_true")
     parser.add_argument("--vision-global-context", action="store_true")
+    parser.add_argument("--object-readout-adapter", action="store_true")
     parser.add_argument("--warm-start", type=Path)
     parser.add_argument("--diversity-augmentation", action="store_true")
+    parser.add_argument("--background-augmentation", action="store_true")
     parser.add_argument("--illustration-fraction", type=float, default=0)
     parser.add_argument("--domain-balanced-dev", action="store_true")
     parser.add_argument("--class-domain-balanced-dev", action="store_true")
@@ -266,6 +268,7 @@ def main():
                 args.vision_extension_channels
                 or args.object_unknown_adapter
                 or args.vision_global_context
+                or args.object_readout_adapter
             )
             and not args.protect_inherited
         )
@@ -296,6 +299,8 @@ def main():
             expected_architecture["object_unknown_adapter"] = True
         if args.vision_global_context:
             expected_architecture["vision_global_context"] = True
+        if args.object_readout_adapter:
+            expected_architecture["object_readout_adapter"] = True
         if (
             winner["checkpoint_sha256"] != sha(args.evaluate_checkpoint)
             or receipt["dataset_sha256"] != sha(args.data / "dataset.json")
@@ -335,6 +340,8 @@ def main():
         "training_admission": "Only this SHA-bound reviewed subset and fresh procedural replay; catalogue remains drafts, not blanket training admission.",
         "protected_mode": "When enabled: inherited tensors/old slices frozen, decay zero, old question-input vocabulary normalization/policy retained. Appended word/answer/intent rows and optional question-gated pixel residual train. One inherited causal core, no separate answer model.",
         "object_unknown_adapter": "When enabled, a zero-initialized linear correction to the inherited UNKNOWN logit learns from the same causal-core hidden state for supported object questions only. Object-question output vocabulary is eight admitted names plus UNKNOWN; legacy output vocabulary unchanged. No source/gold routing or lowered safety threshold.",
+        "object_readout_adapter": "Optional zero-initialized learned residual from whole-frame visual mean/max and the shared causal READ state into the same vocabulary head; supported object questions only. No external pretrained weights, class prototypes or metadata inputs; legacy rows bypass it.",
+        "background_augmentation": "Train-only intact full-frame zoom-out onto varied padding canvas. No foreground segmentation or changes to photographed scene background; transformations are not independent source evidence.",
         "evaluation_reuse": args.evaluation_note,
         "development_only": args.development_only,
         "selection_receipt_sha256": sha(args.selection_receipt)
@@ -350,6 +357,7 @@ def main():
         vision_extension_depth=args.vision_extension_depth,
         object_unknown_adapter=args.object_unknown_adapter,
         vision_global_context=args.vision_global_context,
+        object_readout_adapter=args.object_readout_adapter,
     )
     model.load_previous(source_checkpoint["model"])
     model.compatible_legacy_vocabulary = args.protect_inherited
@@ -376,6 +384,7 @@ def main():
                         "vision_extension.",
                         "vision_global_context.",
                         "object_unknown_adapter.",
+                        "object_readout_adapter.",
                     )
                 )
             )
@@ -521,6 +530,8 @@ def main():
             if args.diversity_augmentation
             else brightness_view(new_images)
         )
+        if args.background_augmentation:
+            new_images = background_view(new_images)
         images = torch.cat((new_images, old_images))
         words = torch.cat((new_words, old_words))
         labels = torch.cat((new_labels, old_labels))

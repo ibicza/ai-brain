@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "parent_backup_commit": "eee4ec3e7ea99bc788c4be8feb9915b56fb5c46b",
+  "restore_root": "D:\\ai-brain-data\\visual-lexicon\\objects-readout-20261009",
+  "remote_root": "/home/ibicza/ai-brain/runs/m33-primary-objects-readout-20261009-v1",
+  "bundles": [
+    {
+      "file": "evidence-01.zip",
+      "sha256": "c2ed8111f3022afcde5ebf1eda8c306c43933983420df896c4c45bbc00d66263",
+      "bytes": 15943201,
+      "entries": [
+        {
+          "file": "additional-tests-v1.xml",
+          "sha256": "54b112c81abc8d512c3e372699f6cb0b650c2f998a1881690d99a0300d984a0f",
+          "bytes": 4635
+        },
+        {
+          "file": "dev-photo-arithmetic-audit.json",
+          "sha256": "81e3b14681176c1716e0505d72cb7a82214335c4df83f421060b8b954eae9ffe",
+          "bytes": 2455
+        },
+        {
+          "file": "dev-photo-diagnostic.json",
+          "sha256": "25e713695a22e3ed823538212f16db9fd40485f02da4439df46e31e7ab337854",
+          "bytes": 2904289
+        },
+        {
+          "file": "development-result.json",
+          "sha256": "d3601756ed590e35ef9c528989b97613b1951c05c2cb7b4a3ceec1864a2331e9",
+          "bytes": 69135
+        },
+        {
+          "file": "development-v1/baseline_canvas.log",
+          "sha256": "85a9150a964324aa811ac6badb778755f0e769cd7fd9930bf6d4d8c2c71d6042",
+          "bytes": 5211
+        },
+        {
+          "file": "development-v1/baseline_canvas/best.pt",
+          "sha256": "54d1767db8befa55fc8d6633cff788453eafff6e951ab04c65fa64338a4e2590",
+          "bytes": 3917365
+        },
+        {
+          "file": "development-v1/baseline_canvas/development-report.json",
+          "sha256": "b5e244e2ea5e9e9cd51d8e7f3a557165de763c74770d3cd5fec22dc21db17c60",
+          "bytes": 8112
+        },
+        {
+          "file": "development-v1/baseline_canvas/protocol.json",
+          "sha256": "abd1ea7a66b4668c0a60e00902a582260f3da89cf7c8b7b23b782e44c5562879",
+          "bytes": 5698
+        },
+        {
+          "file": "development-v1/baseline_canvas/replay-split-audit.json",
+          "sha256": "bbbb5c8955e7dc1e29f6be4e3ce02f00d26b4c7f422ad04a503cc32c36c71357",
+          "bytes": 3310
+        },
+        {
+          "file": "development-v1/baseline_canvas/replay-teacher-audit.json",
+          "sha256": "d7dc374781051e6c44be0d9c3ce77cdb8e9ef69f4490cdb44333fdffd8cff021",
+          "bytes": 166
+        },
+        {
+          "file": "development-v1/baseline_native.log",
+          "sha256": "dfce1b134411fb5f7db5938243897de26029cebc7993d425951f900aebba0875",
+          "bytes": 5254
+        },
+        {
+          "file": "development-v1/baseline_native/best.pt",
+          "sha256": "4624e170baae0320776f4000b66514df0f567daa75c27276ea8355fd8dd8d281",
+          "bytes": 3917365
+        },
+        {
+          "file": "development-v1/baseline_native/development-report.json",
+          "sha256": "f7caa9821eac4e364be4ba8156f502fddc20ea9862a5e5d8b554cd5d6e614e75",
+          "bytes": 8154
+        },
+        {
+          "file": "development-v1/baseline_native/protocol.json",
+          "sha256": "855e7cfb33e9f157dc6f580565d207534e337b81217891fbcb578348e0e385b6",
+          "bytes": 5699
+        },
+        {
+          "file": "development-v1/baseline_native/replay-split-audit.json",
+          "sha256": "bbbb5c8955e7dc1e29f6be4e3ce02f00d26b4c7f422ad04a503cc32c36c71357",
+          "bytes": 3310
+        },
+        {
+          "file": "development-v1/baseline_native/replay-teacher-audit.json",
+          "sha256": "d7dc374781051e6c44be0d9c3ce77cdb8e9ef69f4490cdb44333fdffd8cff021",
+          "bytes": 166
+        },
+        {
+          "file": "development-v1/plan.json",
+          "sha256": "6861b99a985795adffb38c90769c2382d2465f1fc528a42fa7bea8e7418c7ea7",
+          "bytes": 990
+        },
+        {
+          "file": "development-v1/readout_canvas.log",
+          "sha256": "798ea366d315dd4f27d4bc3b4fa60139bfe0fbab4e99879f52ca0530d135d1ba",
+          "bytes": 5269
+        },
+        {
+          "file": "development-v1/readout_canvas/best.pt",
+          "sha256": "2a9fac5a7c4d4d704a9e22db029fb66d53a99924fa3bfeea5dd5636cc7b097fc",
+          "bytes": 4217489
+        },
+        {
+          "file": "development-v1/readout_canvas/development-report.json",
+          "sha256": "fbb8c200ccec9174d0b0020a4cd64f0dd88c16a8ef9f19396c7babcf0053bf60",
+          "bytes": 8207
+        },
+        {
+          "file": "development-v1/readout_canvas/protocol.json",
+          "sha256": "03908a2ebdbab4210d36bbd23b19022c220366635fe4c8d34cf92f1605b9e72b",
+          "bytes": 5696
+        },
+        {
+          "file": "development-v1/readout_canvas/replay-split-audit.json",
+          "sha256": "bbbb5c8955e7dc1e29f6be4e3ce02f00d26b4c7f422ad04a503cc32c36c71357",
+          "bytes": 3310
+        },
+        {
+          "file": "development-v1/readout_canvas/replay-teacher-audit.json",
+          "sha256": "d7dc374781051e6c44be0d9c3ce77cdb8e9ef69f4490cdb44333fdffd8cff021",
+          "bytes": 166
+        },
+        {
+          "file": "development-v1/readout_native.log",
+          "sha256": "8961d5f38bdeeb39d4b7f952a0b2fa2cc54250a2d76c652fb1037318ada40eae",
+          "bytes": 5244
+        },
+        {
+          "file": "development-v1/readout_native/best.pt",
+          "sha256": "6bb778e7140161ca5bc690fc01cfedb06c0189cf1f2e7d59709053ded88418d4",
+          "bytes": 4217489
+        },
+        {
+          "file": "development-v1/readout_native/development-report.json",
+          "sha256": "0aeb42aa29c5813371d0101792c1e5acf5ebae7741f665347d20e3f1a8c1b3f5",
+          "bytes": 8182
+        },
+        {
+          "file": "development-v1/readout_native/protocol.json",
+          "sha256": "02da0f11a148e236a8e8d062a2134c96c3301212c0c372e5ca2d2f8b76cbd59f",
+          "bytes": 5697
+        },
+        {
+          "file": "development-v1/readout_native/replay-split-audit.json",
+          "sha256": "bbbb5c8955e7dc1e29f6be4e3ce02f00d26b4c7f422ad04a503cc32c36c71357",
+          "bytes": 3310
+        },
+        {
+          "file": "development-v1/readout_native/replay-teacher-audit.json",
+          "sha256": "d7dc374781051e6c44be0d9c3ce77cdb8e9ef69f4490cdb44333fdffd8cff021",
+          "bytes": 166
+        },
+        {
+          "file": "environment.json",
+          "sha256": "e2ccaae93cb2481659e682d21a53b592b271d9e1db830b559865eac0d28c6ea1",
+          "bytes": 393
+        },
+        {
+          "file": "focused-tests-v1.xml",
+          "sha256": "52f66143d7fc2eb9f051e28a230e6050b7e9668d1a2e6d469664465e7dae024c",
+          "bytes": 36364
+        },
+        {
+          "file": "focused-tests-v2.xml",
+          "sha256": "9dd16e0323287a90390eb02c1c7995058526f4122eb2e96ed5c5bf8c1192f103",
+          "bytes": 36925
+        },
+        {
+          "file": "frozen-diagnostic-source.py",
+          "sha256": "8f417e1bd44375c76a3ac3034e8dc6cf01b1aca3cdd7dfa498c9fe7dd12c8d8a",
+          "bytes": 7153
+        },
+        {
+          "file": "model-contract-tests-v2.xml",
+          "sha256": "0eb2237c45f02d32a7b6f61259d778f4dfc6a9d3a3ec7e67b8eadcc4d86c0227",
+          "bytes": 5273
+        },
+        {
+          "file": "model-contract-tests.xml",
+          "sha256": "bbafaec66ff513eabe1d0b21ee2481e38dab291474b9f40b99aaaf10896c3027",
+          "bytes": 4985
+        },
+        {
+          "file": "post-prompt-diagnostic.py",
+          "sha256": "e8838f281aeea617f031703a3c35d20fe4794ae749ef2bc2d2997fe076e4f2fa",
+          "bytes": 7254
+        },
+        {
+          "file": "postprocessing/requirements-primary-vision.txt",
+          "sha256": "40cc12f79d6afd14d7da3ee66993cd5745e11d3c8d2a7e344316fda209261b7e",
+          "bytes": 167
+        },
+        {
+          "file": "prompt-dev-diagnostic.json",
+          "sha256": "f4bb741ce9c3d2ac8ddef595e6b558bd5c74abd46a66333b3aae7a3ac6a58f77",
+          "bytes": 51999
+        },
+        {
+          "file": "prompt-dev-records.json.gz",
+          "sha256": "9be17d6c9e15d6231babc79e58f626540e22faaa21edf89636b1aa9fc648ecf0",
+          "bytes": 743203
+        },
+        {
+          "file": "remote-tests-predependency.xml",
+          "sha256": "3decc08378179e9b29b859b97126aedfccb21999e9ba7907f3b0a7c1fdce7510",
+          "bytes": 1231
+        },
+        {
+          "file": "remote-tests.xml",
+          "sha256": "a6caed892611a967c47b886d0387e9033846532fe35e9e06fa4e0f3887208a9d",
+          "bytes": 6470
+        },
+        {
+          "file": "selection-development-only.json",
+          "sha256": "d2e165fc6ef43b3c1cd08555186e986ce052c197a10ef00bbbe9c23a74004e7e",
+          "bytes": 6333
+        }
+      ]
+    },
+    {
+      "file": "evidence-02.zip",
+      "sha256": "8f0f02d17f290867a2526e156eedf6933f363c598e1ab7e7f4b005dc1abe81cd",
+      "bytes": 28728082,
+      "entries": [
+        {
+          "file": "source-capsule-v1.tgz",
+          "sha256": "2682fca97ce667c301d6300bf0f514f204e332c0ae263afe4f5ea77f253e029f",
+          "bytes": 25066975
+        },
+        {
+          "file": "source-manifest.json",
+          "sha256": "f3cf5ed500231d756117143d902a80e0916c2e355d4ad339ef92a374adf6d757",
+          "bytes": 81565
+        },
+        {
+          "file": "transfer-receipt.json",
+          "sha256": "6bb6e3d8e47ed49e40f0fb045d4eab2c3a476f1c353bfee0b2a112705c98fb02",
+          "bytes": 92818
+        },
+        {
+          "file": "warm.pt",
+          "sha256": "69788a227e95c7ed326f80f2bb3ba9d58d7ad171c2b6ac61d5b054ae7932d92f",
+          "bytes": 3917365
+        }
+      ]
+    }
+  ],
+  "production_admitted": false,
+  "restore_notes": "Extract parts under restore_root; source capsule contains exact model/training source and dataset arrays. Parent backup supplies photos, normalized image links, canonical workbook and accepted core. This stage performs known development only; old final is not fresh and workbook metrics remain historical."
+}
