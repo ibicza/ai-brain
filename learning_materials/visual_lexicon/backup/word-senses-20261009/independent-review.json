@@ -1,0 +1,389 @@
+{
+  "schema": 1,
+  "reviewer": "independent_word_actions_review_20261009",
+  "read_only_review": true,
+  "training_started": false,
+  "training_admitted": false,
+  "helper_sha256": "b85fe2250e108af27f347f9ff4774623d2c6c6ddbc910893f09ab327132262e5",
+  "tests_sha256": "8136ca6d6bdf596f23bca4d321b5bcdc478a3c85ec5981478afbcc96764b3c2e",
+  "prepared_sha256": "b2562d046ef255b96d7e52b5c6c160ea8bc7f380c5647c4bd4466be8ff5060e2",
+  "baseline_workbook_sha256": "1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82",
+  "baseline_rows": {
+    "words": 847,
+    "media": 32526,
+    "text": 15499,
+    "coverage": 13
+  },
+  "new_concepts": 647,
+  "mappings": 662,
+  "raw_source_files_verified": 1127,
+  "checks": {
+    "input_sha_matches_current_workbook": true,
+    "all847_old14_cells_preserved": true,
+    "all_old_media_cells_preserved": true,
+    "all_old_text_cells_preserved": true,
+    "all_old_coverage_cells_preserved": true,
+    "no_training": true,
+    "authored_examples_all_explicit": true,
+    "occurrences_not_claimed_disambiguated": true,
+    "source_sha_all_verified": true,
+    "curation_sha_all_verified": true,
+    "all_reused_definitions_exact": true,
+    "new_metrics_and_media_empty": true,
+    "actual_payload_replay_idempotent": true
+  },
+  "targeted_semantic_sample": [
+    {
+      "word": "язык (общение)",
+      "sense_key": "language.communication",
+      "definition": "Система слов и правил, с помощью которой люди общаются.",
+      "candidate_ids": [
+        "tx-a04e11acd741dded"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0007.txt",
+      "source_sha256": "5077b49a61791e8796b910637056a6323d754597687335b6b79305932d9971e1",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "язык (орган)",
+      "sense_key": "tongue.organ",
+      "definition": "Подвижный орган во рту, участвующий в ощущении вкуса и других функциях.",
+      "candidate_ids": [
+        "tx-a04e11acd741dded"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0094.txt",
+      "source_sha256": "2e99de964168cfba90afba4304808b318ad11240e8f9d0049ecdf3d16401378b",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "ключ (от замка)",
+      "sense_key": "key.lock",
+      "definition": "Предмет, которым открывают или закрывают замок.",
+      "candidate_ids": [
+        "tx-06d9231e6308fa7b"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\ee85174895ea1e21\\text\\0145.txt",
+      "source_sha256": "0be4a553a25209287fd8aaa9ad680bf405d5168fa8a7bd30f6c9b48e2773bcde",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "ключ (гаечный инструмент)",
+      "sense_key": "wrench.tool",
+      "definition": "Инструмент для поворота гаек, болтов и некоторых других деталей.",
+      "candidate_ids": [
+        "tx-06d9231e6308fa7b"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\ee85174895ea1e21\\text\\0145.txt",
+      "source_sha256": "0be4a553a25209287fd8aaa9ad680bf405d5168fa8a7bd30f6c9b48e2773bcde",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "произведение (художественное)",
+      "sense_key": "work.art",
+      "definition": "Результат литературного или другого художественного творчества.",
+      "candidate_ids": [
+        "tx-f2c8d526e04d5935"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\be619e8e5341a267\\text\\0105.txt",
+      "source_sha256": "09dbe1c8b77128a3dc1a232d5f3217b464059f8a0786ca5b4f6bf22756b101d4",
+      "source_in_prepared_hashed_sources": false,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "произведение (результат умножения)",
+      "sense_key": "product.math",
+      "definition": "Результат умножения чисел.",
+      "candidate_ids": [
+        "tx-f2c8d526e04d5935"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\56a1fad813b3bea7\\text\\0100.txt",
+      "source_sha256": "2fea40b10a90185f493a7961b0922fc9159c259252e05eebeb03b4a8ab1072ed",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "класс (учебная группа)",
+      "sense_key": "class.school_group",
+      "definition": "Группа школьников, которые учатся вместе на одном этапе обучения.",
+      "candidate_ids": [
+        "tx-05665bc6548f7ce0"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\56a1fad813b3bea7\\text\\0074.txt",
+      "source_sha256": "24b5692ba430b39472e013550182b6893f285b149db250961d8e5adeb1cbcccc",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "класс (помещение)",
+      "sense_key": "class.classroom",
+      "definition": "Помещение школы, предназначенное для учебных занятий.",
+      "candidate_ids": [
+        "tx-05665bc6548f7ce0"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0022.txt",
+      "source_sha256": "bffee6e5e2cf74039352180a2560b96ebb2a237274ad736438c0aea2e1565934",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "класс (ступень обучения)",
+      "sense_key": "class.school_year",
+      "definition": "Ступень школьного обучения, обычно соответствующая одному учебному году.",
+      "candidate_ids": [
+        "tx-05665bc6548f7ce0"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0007.txt",
+      "source_sha256": "5077b49a61791e8796b910637056a6323d754597687335b6b79305932d9971e1",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "значение выражения",
+      "sense_key": "value.expression",
+      "definition": "Число, полученное после вычисления числового выражения.",
+      "candidate_ids": [
+        "tx-d692bc0523e453bd"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\56a1fad813b3bea7\\text\\0017.txt",
+      "source_sha256": "d017ba4c632c0c2298eb50b90f227605f89972b7fa6d06d79b55b68c30f754fc",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "в (порядок)",
+      "sense_key": "sequence",
+      "definition": "Показывает, в каком порядке выполняют действия или располагают предметы.",
+      "candidate_ids": [
+        "tx-78a9b3e4a5467b92"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\0029feb5ba132920\\ocr\\0003.json",
+      "source_sha256": "e5e7732250bc7e6eb09c10df9ba7bd3fbbb11c939ac86bd120037548d220c128",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "вместе (совместное действие)",
+      "sense_key": "jointly",
+      "definition": "Несколько участников выполняют названное действие совместно.",
+      "candidate_ids": [
+        "tx-7dca84bea95ae980"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0102.txt",
+      "source_sha256": "59815bf80ee68977f88def8799607023a01a7214184789f03ecfe7c55cd0a24c",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "мягкий (материал)",
+      "sense_key": "material-soft",
+      "definition": "Легко меняющий форму при нажатии или изгибе.",
+      "candidate_ids": [
+        "tx-d0df2e316659e516"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0042.txt",
+      "source_sha256": "d8558ca82886a604601d2c9eabc34caac2d2ac9e3fd2b0caa78de899bb1c5cb7",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "мягкий (согласный)",
+      "sense_key": "palatalized-consonant",
+      "definition": "Согласный звук, при произнесении которого средняя часть языка дополнительно поднимается к нёбу.",
+      "candidate_ids": [
+        "tx-d0df2e316659e516"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\ee85174895ea1e21\\text\\0047.txt",
+      "source_sha256": "bac9499bc2ccf87d64266c86a56c3e9fe9826c0b0305e53b971defb05bca00a3",
+      "source_in_prepared_hashed_sources": false,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "зелёный",
+      "sense_key": "green-color",
+      "definition": "Название цвета: зелёный. Цвет изображения зависит от освещения и отображения.",
+      "candidate_ids": [
+        "tx-cea25d834e178bf0"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0044.txt",
+      "source_sha256": "3e39ba67e5662a7dbee05d30787291f33c3d332d51f9e507bac96339ef40ac2e",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "большой (значимость)",
+      "sense_key": "importance",
+      "definition": "Имеющий высокую значимость в названном отношении.",
+      "candidate_ids": [
+        "tx-85112eda58bb6728"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0046.txt",
+      "source_sha256": "e751d59d3e8c6a74a1246763956ba025605f96de691981b28d3f64dcdb3cb8ad",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "глухой (лес)",
+      "sense_key": "dense-forest",
+      "definition": "Труднодоступный, удалённый от жилья; о лесном месте.",
+      "candidate_ids": [
+        "tx-682450323694a6fb"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\a292fba568b1fcc2\\text\\0041.txt",
+      "source_sha256": "0653417185f883ce76d14dc949edd091bd3c489abb92ef27bb0f80749b376f1f",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "твёрдый (состояние вещества)",
+      "sense_key": "solid-state",
+      "definition": "Сохраняющий собственную форму и объём в обычных условиях.",
+      "candidate_ids": [
+        "tx-52f7f19762b26c82"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\2a05762013544e1a\\text\\0025.txt",
+      "source_sha256": "63c32ca8fde772c17ae600279346620f3136fcb0226b2bef5a146e1b2456bd18",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "из-за (направление)",
+      "sense_key": "from-behind",
+      "definition": "Указывает движение из места позади предмета.",
+      "candidate_ids": [
+        "tx-0459f5af4f0f797e"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\be619e8e5341a267\\text\\0042.txt",
+      "source_sha256": "54f0edb6e0a814991288ffe3e82c7f5961b0d7ecc2abcfeca8fe04a21b1ada9f",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    },
+    {
+      "word": "бесхозный (владелец неизвестен)",
+      "sense_key": "unknown-owner",
+      "definition": "Имеющий неизвестного владельца в данной ситуации.",
+      "candidate_ids": [
+        "tx-a0e8cdc9c84e4f8c"
+      ],
+      "authored_example": true,
+      "reviewed_source": "D:\\ai-brain-data\\visual-lexicon\\belarus-primary-20261009\\books\\ef1feb98ee3ea554\\text\\0073.txt",
+      "source_sha256": "7b47729355cea4c629e0c3321cd805f070ab6444ff82f6bdec0356f1123ee83b",
+      "source_in_prepared_hashed_sources": true,
+      "status": "scoped_draft_acceptable",
+      "all_occurrences_reviewed": false
+    }
+  ],
+  "sample_count": 20,
+  "sample_method": "Targeted nonrandom review of nouns and qualities; not a blind model evaluation or corpus-wide semantic accuracy estimate.",
+  "validation": {
+    "independent_pure_tests": {
+      "passed": 21,
+      "deselected": 5,
+      "reason": "Integration tests create fixtures; independently reviewed source/hash guards and verified actual publication payload without writing fixtures."
+    },
+    "independent_negative_reproductions_after_fixes": {
+      "wrong_existing_meaning_rejected": true,
+      "concept_order_permutation_stable": true,
+      "replay_without_registry_preserved": true,
+      "replay_with_registry_preserved": true,
+      "csv_formula_literals_escaped": true
+    },
+    "source_code_guards_reviewed": {
+      "all_three_output_files_fresh_required": true,
+      "raw_paths_confined_to_sealed_corpus": true,
+      "raw_hashes_rechecked_after_prepare": true,
+      "actual_saved_workbook_and_previous_history_hashes_rechecked": true
+    }
+  },
+  "findings": [
+    {
+      "issue": "Explicit existing ID could previously merge a weapon meaning into a food concept.",
+      "status": "fixed_and_reproduced_rejection",
+      "severity": "resolved"
+    },
+    {
+      "issue": "Input ordering previously reassigned IDs and replay added duplicate senses.",
+      "status": "fixed_with_sorted_inputs_and_saved_sense_registry; actual_payload_replay_confirmed",
+      "severity": "resolved"
+    },
+    {
+      "issue": "Review queue previously exported source text without CSV formula-literal protection.",
+      "status": "fixed_and_reproduced",
+      "severity": "resolved"
+    },
+    {
+      "issue": "Sidecar catalogue and queue previously could overwrite existing files.",
+      "status": "fixed_source_guard_reviewed",
+      "severity": "resolved"
+    },
+    {
+      "issue": "Together definition previously combined joint action with shared location.",
+      "status": "fixed_to_joint_action_scoped_sense",
+      "severity": "resolved"
+    },
+    {
+      "issue": "Ownerless safety word needed an explicit unknown-owner scope.",
+      "status": "fixed_visible_qualifier_and_scope",
+      "severity": "resolved"
+    },
+    {
+      "issue": "Two semantic corroborating files found during this targeted review were not in prepared.sense_source_files.",
+      "status": "retained_below_with_exact_sha; receipt_evidence_only_not_corpus_wide_claim",
+      "severity": "limitation",
+      "words": [
+        "произведение (художественное)",
+        "мягкий (согласный)"
+      ]
+    }
+  ],
+  "saved_workbook_review_receipt": "D:/ai-brain-data/visual-lexicon/word-senses-20261009/independent-saved-xlsx-review.json",
+  "saved_workbook_sha256": "94f1c7b388b1c99daf053bd455d49640ce422292b669cfd6e98a71ee537b8c51",
+  "saved_workbook_cells_checked": 840514,
+  "saved_workbook_mismatches": 0,
+  "limits": [
+    "No training, model weights, workbook, repository scripts or Git were modified by this independent review.",
+    "The 20 examples are targeted semantic draft checks, not random coverage, gold labels, human approval, mastered model vocabulary or all-occurrence disambiguation.",
+    "A word/sense ID is persistent through its saved registry; sequential IDs are not a global content hash across unrelated catalogue baselines."
+  ]
+}

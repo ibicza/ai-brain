@@ -1,0 +1,27 @@
+{
+  "input_sha256": "1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82",
+  "output_sha256": "94f1c7b388b1c99daf053bd455d49640ce422292b669cfd6e98a71ee537b8c51",
+  "stats": {
+    "input_concepts": 847,
+    "input_media_rows": 32526,
+    "concepts": 1494,
+    "new_visual_concepts": 0,
+    "media_rows": 32526,
+    "new_media_rows": 0,
+    "text_entries": 15499,
+    "effective_pages": 1763,
+    "ocr_pages": 1763,
+    "pages_visually_reviewed": 84,
+    "corrected_pages": 13,
+    "missing_ocr": [],
+    "overview_pages": 1763,
+    "reviewed_occurrences": 0,
+    "xml_display_escaped_cells": 330,
+    "limits": "Explicit scoped lexical drafts, not all senses/occurrences verified; no training or new mastery metrics.",
+    "new_word_concepts": 647,
+    "lexical_senses_reviewed": 662,
+    "lexical_existing_mappings": 15
+  },
+  "training_started": false,
+  "qa_completed": true
+}

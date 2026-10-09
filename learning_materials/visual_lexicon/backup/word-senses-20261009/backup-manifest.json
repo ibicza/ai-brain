@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "archive_parent_commit": "22f6b470c7b7fe6034dc92553d2da1c593f41ef3",
+  "baseline_workbook_sha256": "1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82",
+  "published_workbook_sha256": "94f1c7b388b1c99daf053bd455d49640ce422292b669cfd6e98a71ee537b8c51",
+  "training_started": false,
+  "training_admitted": false,
+  "files": [
+    {
+      "stored_path": "actions-senses.json",
+      "restore_path": "actions-senses.json",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\actions-senses.json",
+      "source_sha256": "7ad07a4164c388f5783818b870f268b4db83bc95d4bf9e2025f4e800081dc41a",
+      "source_bytes": 603442,
+      "stored_sha256": "7ad07a4164c388f5783818b870f268b4db83bc95d4bf9e2025f4e800081dc41a",
+      "stored_bytes": 603442
+    },
+    {
+      "stored_path": "nouns-senses.json",
+      "restore_path": "nouns-senses.json",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\nouns-senses.json",
+      "source_sha256": "9bd15c9d681a175fa081297063a1c14a0dd30dc46bd0fd0e60742d303a708314",
+      "source_bytes": 398450,
+      "stored_sha256": "9bd15c9d681a175fa081297063a1c14a0dd30dc46bd0fd0e60742d303a708314",
+      "stored_bytes": 398450
+    },
+    {
+      "stored_path": "qualities-senses.json",
+      "restore_path": "qualities-senses.json",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\qualities-senses.json",
+      "source_sha256": "2ec0b8fd18300163c0bbececef585a7a646caa35de0fbb029106c32af4b0d535",
+      "source_bytes": 573394,
+      "stored_sha256": "2ec0b8fd18300163c0bbececef585a7a646caa35de0fbb029106c32af4b0d535",
+      "stored_bytes": 573394
+    },
+    {
+      "stored_path": "independent-review.json",
+      "restore_path": "independent-review.json",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\independent-review.json",
+      "source_sha256": "413f50ec37e4b4640a18ee9d5fd488ea56dbb876f6dc8dca87167cfd685b54c1",
+      "source_bytes": 18318,
+      "stored_sha256": "413f50ec37e4b4640a18ee9d5fd488ea56dbb876f6dc8dca87167cfd685b54c1",
+      "stored_bytes": 18318
+    },
+    {
+      "stored_path": "independent-saved-xlsx-review.json",
+      "restore_path": "independent-saved-xlsx-review.json",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\independent-saved-xlsx-review.json",
+      "source_sha256": "6e02384795175894b06f7c5428c0c1c47ce56933bd597a5ee3b5ad75bc5c945f",
+      "source_bytes": 5531,
+      "stored_sha256": "6e02384795175894b06f7c5428c0c1c47ce56933bd597a5ee3b5ad75bc5c945f",
+      "stored_bytes": 5531
+    },
+    {
+      "stored_path": "inventory.json.gz",
+      "restore_path": "inventory.json",
+      "encoding": "gzip",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\inventory.json",
+      "source_sha256": "0367c15116c3b33aa894a3d9e64bec1e8f8aa1054e61e9969e46e6880cb476f7",
+      "source_bytes": 24753982,
+      "stored_sha256": "4b5b7c8bb376d010d7ce1f63598fdd7a8291dc280ed7b7b9423d8dfafb3c261a",
+      "stored_bytes": 3045052
+    },
+    {
+      "stored_path": "publication/prepared.json.gz",
+      "restore_path": "publication/prepared.json",
+      "encoding": "gzip",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\publication\\prepared.json",
+      "source_sha256": "b2562d046ef255b96d7e52b5c6c160ea8bc7f380c5647c4bd4466be8ff5060e2",
+      "source_bytes": 58541507,
+      "stored_sha256": "be56913f71f826f5629f421409034050ed77ee3d15e80b7d66a1e408aa16fcd3",
+      "stored_bytes": 4798100
+    },
+    {
+      "stored_path": "inventory.py",
+      "restore_path": "inventory.py",
+      "encoding": "bytes",
+      "source_path": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\tmp\\visual-lexicon-words-20261009\\inventory.py",
+      "source_sha256": "dc0dea4a47038b9ffb6e8ac09817380757186df0d4971f4ea8dacd3da01a8028",
+      "source_bytes": 2527,
+      "stored_sha256": "dc0dea4a47038b9ffb6e8ac09817380757186df0d4971f4ea8dacd3da01a8028",
+      "stored_bytes": 2527
+    },
+    {
+      "stored_path": "backup_word_senses.py",
+      "restore_path": "backup_word_senses.py",
+      "encoding": "bytes",
+      "source_path": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\tmp\\visual-lexicon-words-20261009\\backup_word_senses.py",
+      "source_sha256": "af947b8b8fe741fd338008d87f39b9da017a7ee9b18dfcca5d0b749fe0e13530",
+      "source_bytes": 3745,
+      "stored_sha256": "af947b8b8fe741fd338008d87f39b9da017a7ee9b18dfcca5d0b749fe0e13530",
+      "stored_bytes": 3745
+    },
+    {
+      "stored_path": "publication/renders/authoring-report.json",
+      "restore_path": "publication/renders/authoring-report.json",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\publication\\renders\\authoring-report.json",
+      "source_sha256": "4a1575feacfe4b0eb7389f562ffcdda879d671040637725c10cd2db698b53b17",
+      "source_bytes": 891,
+      "stored_sha256": "4a1575feacfe4b0eb7389f562ffcdda879d671040637725c10cd2db698b53b17",
+      "stored_bytes": 891
+    },
+    {
+      "stored_path": "publication/renders/words.png",
+      "restore_path": "publication/renders/words.png",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\publication\\renders\\words.png",
+      "source_sha256": "acba20798fce5b451b00de353f8831679424e4f4d8dc530b0f3c5142b0a6a35b",
+      "source_bytes": 57336,
+      "stored_sha256": "acba20798fce5b451b00de353f8831679424e4f4d8dc530b0f3c5142b0a6a35b",
+      "stored_bytes": 57336
+    },
+    {
+      "stored_path": "publication/renders/new-words.png",
+      "restore_path": "publication/renders/new-words.png",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\publication\\renders\\new-words.png",
+      "source_sha256": "e9d0829c1ebe8c84069a1fefa1c3e8f974f12723cbfaef61222a618db4219a7a",
+      "source_bytes": 45150,
+      "stored_sha256": "e9d0829c1ebe8c84069a1fefa1c3e8f974f12723cbfaef61222a618db4219a7a",
+      "stored_bytes": 45150
+    },
+    {
+      "stored_path": "publication/renders/media.png",
+      "restore_path": "publication/renders/media.png",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\publication\\renders\\media.png",
+      "source_sha256": "5d14901f60401f86f04a8315df2c73c1f78ee614331a5b384a80fe353a63c85d",
+      "source_bytes": 107346,
+      "stored_sha256": "5d14901f60401f86f04a8315df2c73c1f78ee614331a5b384a80fe353a63c85d",
+      "stored_bytes": 107346
+    },
+    {
+      "stored_path": "publication/renders/text.png",
+      "restore_path": "publication/renders/text.png",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\publication\\renders\\text.png",
+      "source_sha256": "39561cd5f4dffb372c8dad6b8c509679a81ca1a007919e13ab11f4336bf4e743",
+      "source_bytes": 55085,
+      "stored_sha256": "39561cd5f4dffb372c8dad6b8c509679a81ca1a007919e13ab11f4336bf4e743",
+      "stored_bytes": 55085
+    },
+    {
+      "stored_path": "publication/renders/coverage.png",
+      "restore_path": "publication/renders/coverage.png",
+      "encoding": "bytes",
+      "source_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\publication\\renders\\coverage.png",
+      "source_sha256": "8152a7b3fdd1bab6d66b196eb88efa26117a7171994f961a986459cb23c58eef",
+      "source_bytes": 50306,
+      "stored_sha256": "8152a7b3fdd1bab6d66b196eb88efa26117a7171994f961a986459cb23c58eef",
+      "stored_bytes": 50306
+    }
+  ],
+  "limits": "Draft lexical senses; no occurrence labels, training or new mastery metrics. Canonical workbook/exports are archived at their stable repository paths; earlier corpus parts and pass2 review archive are reused."
+}

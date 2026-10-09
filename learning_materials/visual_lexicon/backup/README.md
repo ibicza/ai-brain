@@ -75,3 +75,21 @@ It excludes the redundant full inspection dump and transient runtime outputs.
 The current canonical workbook and CSV/gzipped JSON exports remain at the stable
 catalogue paths above, with old snapshots preserved by commit history and local
 hash-named backups. Nothing in these archives admits data to model training.
+
+## Word-sense additions
+
+`backup/word-senses-20261009/` preserves the three reviewed lexical proposal files,
+the morphology inventory, the append-only publication payload and independent
+review receipts. Large JSON inputs are gzip-compressed; decompress them without
+changing their JSON bytes. `backup-manifest.json` records both stored and original
+hashes. The inventory helper is included for provenance, not as a training job.
+The existing corpus and second-pass archives are reused, not duplicated.
+
+Restore this addition to
+`D:\ai-brain-data\visual-lexicon\word-senses-20261009` in a new destination. Its
+`publication/prepared.json` references the unchanged earlier corpus/review roots;
+restore those first. Canonical `sense_catalogue.json` and `word_review_queue.csv`
+are at the stable catalogue location, alongside the workbook and other exports.
+The authored examples are explicitly marked drafts, not quotations. Source-word
+occurrence is not proof of every sense, an occurrence-level label, or model mastery.
+No new media assignments or training metrics were added in this word-sense pass.

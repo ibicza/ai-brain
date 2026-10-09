@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "reviewer": "independent_word_actions_saved_xml_review_20261009",
+  "training_started": false,
+  "training_admitted": false,
+  "candidate_path": "D:\\ai-brain-data\\visual-lexicon\\word-senses-20261009\\publication\\visual_lexicon.xlsx",
+  "candidate_sha256": "94f1c7b388b1c99daf053bd455d49640ce422292b669cfd6e98a71ee537b8c51",
+  "prepared_sha256": "b2562d046ef255b96d7e52b5c6c160ea8bc7f380c5647c4bd4466be8ff5060e2",
+  "compared_cells": 840514,
+  "mismatches": [],
+  "sheets": {
+    "Словарь": {
+      "rows": 1494,
+      "columns": 14,
+      "tables_present": true,
+      "freeze_present": true,
+      "baseline_cells_preserved": true
+    },
+    "Медиа": {
+      "rows": 32526,
+      "columns": 19,
+      "tables_present": true,
+      "freeze_present": true,
+      "baseline_cells_preserved": true
+    },
+    "Текст": {
+      "rows": 15499,
+      "columns": 13,
+      "tables_present": true,
+      "freeze_present": true,
+      "baseline_cells_preserved": true
+    },
+    "Покрытие": {
+      "rows": 13,
+      "columns": 9,
+      "tables_present": true,
+      "freeze_present": true,
+      "baseline_cells_preserved": true
+    }
+  },
+  "candidate_unchanged_during_check": true,
+  "review_mode": "read-only saved XML; no workbook edit/export",
+  "baseline_sha256": "1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82",
+  "baseline_path": "D:\\ai-brain-data\\visual-lexicon\\backups\\visual_lexicon-1472ce1acebdb56bc961879399193d7d6a05cbd405ab7a8c82b68694b1641a82.xlsx",
+  "candidate_native_features": {
+    "tables": [
+      {
+        "xml": "xl/tables/table1.xml",
+        "name": "VisualConcepts",
+        "range": "A8:N1502",
+        "filter_range": "A8:N1502"
+      },
+      {
+        "xml": "xl/tables/table2.xml",
+        "name": "VisualMedia",
+        "range": "A8:S32534",
+        "filter_range": "A8:S32534"
+      },
+      {
+        "xml": "xl/tables/table3.xml",
+        "name": "TextCandidates",
+        "range": "A8:M15507",
+        "filter_range": "A8:M15507"
+      },
+      {
+        "xml": "xl/tables/table4.xml",
+        "name": "BookCoverage",
+        "range": "A8:I21",
+        "filter_range": "A8:I21"
+      }
+    ],
+    "panes": [
+      {
+        "xml": "xl/worksheets/sheet1.xml",
+        "pane": {
+          "xSplit": "2",
+          "ySplit": "8",
+          "topLeftCell": "C9",
+          "activePane": "bottomRight",
+          "state": "frozen"
+        }
+      },
+      {
+        "xml": "xl/worksheets/sheet2.xml",
+        "pane": {
+          "xSplit": "2",
+          "ySplit": "8",
+          "topLeftCell": "C9",
+          "activePane": "bottomRight",
+          "state": "frozen"
+        }
+      },
+      {
+        "xml": "xl/worksheets/sheet3.xml",
+        "pane": {
+          "xSplit": "2",
+          "ySplit": "8",
+          "topLeftCell": "C9",
+          "activePane": "bottomRight",
+          "state": "frozen"
+        }
+      },
+      {
+        "xml": "xl/worksheets/sheet4.xml",
+        "pane": {
+          "xSplit": "2",
+          "ySplit": "8",
+          "topLeftCell": "C9",
+          "activePane": "bottomRight",
+          "state": "frozen"
+        }
+      }
+    ]
+  },
+  "baseline_native_features": {
+    "tables": [
+      {
+        "xml": "xl/tables/table1.xml",
+        "name": "VisualConcepts",
+        "range": "A8:N855",
+        "filter_range": "A8:N855"
+      },
+      {
+        "xml": "xl/tables/table2.xml",
+        "name": "VisualMedia",
+        "range": "A8:S32534",
+        "filter_range": "A8:S32534"
+      },
+      {
+        "xml": "xl/tables/table3.xml",
+        "name": "TextCandidates",
+        "range": "A8:M15507",
+        "filter_range": "A8:M15507"
+      },
+      {
+        "xml": "xl/tables/table4.xml",
+        "name": "BookCoverage",
+        "range": "A8:I21",
+        "filter_range": "A8:I21"
+      }
+    ],
+    "panes": [
+      {
+        "xml": "xl/worksheets/sheet1.xml",
+        "pane": {
+          "xSplit": "2",
+          "ySplit": "8",
+          "topLeftCell": "C9",
+          "activePane": "bottomRight",
+          "state": "frozen"
+        }
+      },
+      {
+        "xml": "xl/worksheets/sheet2.xml",
+        "pane": {
+          "xSplit": "2",
+          "ySplit": "8",
+          "topLeftCell": "C9",
+          "activePane": "bottomRight",
+          "state": "frozen"
+        }
+      },
+      {
+        "xml": "xl/worksheets/sheet3.xml",
+        "pane": {
+          "xSplit": "2",
+          "ySplit": "8",
+          "topLeftCell": "C9",
+          "activePane": "bottomRight",
+          "state": "frozen"
+        }
+      },
+      {
+        "xml": "xl/worksheets/sheet4.xml",
+        "pane": {
+          "xSplit": "2",
+          "ySplit": "8",
+          "topLeftCell": "C9",
+          "activePane": "bottomRight",
+          "state": "frozen"
+        }
+      }
+    ]
+  },
+  "four_native_tables": true,
+  "all_four_native_filters_cover_tables": true,
+  "all_four_frozen_panes_exactly_preserved": true,
+  "baseline_binding": "Immutable baseline SHA equals the exact saved source used for independent full-cell baseline comparison.",
+  "new_concepts": 647,
+  "new_metrics_model_train_regression_fields_empty": true,
+  "new_unassigned_media_column_empty": true,
+  "new_admission_assignment_added": false,
+  "verification_limits": [
+    "Values, table/filter ranges and frozen panes verified from saved XLSX ZIP/XML.",
+    "No workbook editing or re-export; no training; not a native Microsoft Excel UI or visual layout test.",
+    "Semantic sample and raw source SHA audit are in independent-review.json."
+  ]
+}

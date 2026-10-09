@@ -55,3 +55,27 @@ expanded workbook. Both stages emit prepared JSON; `lexicon_catalogue_update.mjs
 imports the saved workbook and authors XLSX using the spreadsheet runtime.
 `lexicon_catalogue_export.py` independently checks the saved cells and creates the
 CSV/JSON exports. Publish only after input-SHA, export and visual QA checks pass.
+
+## Lexical senses, 2026-10-09
+
+`scripts/lexicon_word_senses_prepare.py` appends reviewed draft word senses to the
+actual saved catalogue. Each new row has one explicitly scoped meaning, a stable
+concept ID, a short description, and an authored example in column M. Inflected
+source forms stay grouped on `Текст`; spelling matches never decide the sense.
+Different senses of `есть`, `считать`, `мягкий`, `язык`, `лист`, `класс` and other
+ambiguous words are separate records. Exact existing definitions can be reused
+explicitly; neither fuzzy names nor aliases alone merge concept IDs.
+
+This batch reviews 662 sense proposals: 647 new rows and 15 existing-ID mappings,
+giving 1494 concepts. Existing 847 rows and all media/text/coverage values are
+preserved. The new rows have no training/control files, model hashes or measured
+percentages. Definitions/examples are lexical drafts, not independently verified
+textbook assertions or evidence that the model understands a word. A source text
+ID establishes spelling occurrence; it does not assign every occurrence to that
+sense. Aspects/synonyms and additional meanings can be reviewed further in M34.
+
+`sense_catalogue.json` keeps explicit lemma/sense keys, examples, source references
+and their hashes for future use. `word_review_queue.csv` preserves all 15,499 raw
+candidate records, with proposed IDs where reviewed and unresolved entries intact.
+Unselected entries are not automatically judged invalid or merged into the main
+dictionary. Training was not started or admitted by these additions.
