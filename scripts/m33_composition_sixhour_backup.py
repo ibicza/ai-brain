@@ -341,6 +341,7 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-balanced-full-v1.xml",
         "qa-balanced-supplement-v1.xml",
         "qa-balanced-backup-v1.xml",
+        "qa-balanced-backup-v2.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))

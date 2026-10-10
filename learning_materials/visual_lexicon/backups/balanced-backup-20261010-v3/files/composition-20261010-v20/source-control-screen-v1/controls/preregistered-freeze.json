@@ -1,0 +1,103 @@
+{
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-capsule.tgz": "59c87f06258bbd3b63fb668edf71700c4eccc3cc234b9ad84277061c363f44ff",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/curriculum/best.pt": "1b742d02a6dd2736c43b9c07d0ee9dede585c97adc0aa102d3617d445d6644be",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/protocol.json": "700fd38a3faf28e1997ac66781088a89996cf83a8fe9d8f606e5064318a97953",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/candidate-freeze.json": "07d07880115a69bdaed5cf8892b890ad21562e646c6c749aae6885142034a7b5",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/policy-frozen.json": "d2222ef61624eee3984ecebba1bc97cdfbd9c6177d8c64da25cb0e90983273a1",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/result.json": "030c20b1d43c9bc6597f5e60a9616d42d50bf8f3f3c08c88d0ba36279ab8f3e7",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/dataset-records.json.gz": "36cc6d1c15fa3e674c3a0684eb05a0973dda2a7a43dbc484c5776ee651ad5a44"
+  },
+  "screen_source_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/scripts/m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/scripts/m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/scripts/m33_composition_source_dataset.py": "7c5c83e482fdfeaf31060c7329117a99c2c2f23df57f6c7f8da2450ecb7d4b67"
+  },
+  "source_preparation_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/prepared-source/source-annotations.json": "ed3a2105a4cf3c802607c6e6d4009ae0a87037436dc3f819828beb05c088faf2",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/prepared-source/dataset.npz": "4ac56f3da8bc27353e19dd9761663be34223ec7406ccdf9dc03aab9f4b5910c3",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/prepared-source/records.json.gz": "d6bd5ecae8d043ffb6d0380095a5d21dbf749eb9d8d505ee4ef1c10697a28e4f",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/prepared-source/source-crops.npz": "9c7614791b0a1fb0026442c8a0f7eddb97a83ad6757e1bda0ba936b22bd75324",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/prepared-source/preparation-freeze.json": "221f65b3df9dc9f3b585bed1bd5916e1285f33e5a54773c409ffc0a0bcc1c414",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/prepared-source/preparation-executed.py": "9f4f0c15f3ee2079cf7f63e3c01252d98c311f599a7ed0ca2514019c7cf63632",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v1/prepared-source/preparation-receipt.json": "320a70fd0e499b0fa11424a38f9574a20d23034a053a0e38d6d5b170f7bbb86b"
+  },
+  "source_preparation_receipt": {
+    "status": "SOURCE_CONTROL_TENSORS_PREPARED_NOT_EVALUATED",
+    "annotation_manifest_sha256": "ed3a2105a4cf3c802607c6e6d4009ae0a87037436dc3f819828beb05c088faf2",
+    "answers": [
+      "красный",
+      "синий",
+      "зелёный",
+      "жёлтый",
+      "тёмно-зелёный",
+      "коричневый",
+      "белый",
+      "чёрный",
+      "круг",
+      "овал",
+      "квадрат",
+      "прямоугольник",
+      "однотонный",
+      "полосатый",
+      "пятнистый",
+      "UNKNOWN"
+    ],
+    "unique_source_assets": 6,
+    "unique_pdf_books": 1,
+    "unique_pdf_pages": 1,
+    "paired_scenes": 30,
+    "questions": 180,
+    "independent_source_examples": false,
+    "fresh_original_rendering_verified": true,
+    "training_or_calibration": false,
+    "production_admitted": false,
+    "dataset_sha256": "4ac56f3da8bc27353e19dd9761663be34223ec7406ccdf9dc03aab9f4b5910c3",
+    "records_sha256": "d6bd5ecae8d043ffb6d0380095a5d21dbf749eb9d8d505ee4ef1c10697a28e4f",
+    "source_crops_sha256": "9c7614791b0a1fb0026442c8a0f7eddb97a83ad6757e1bda0ba936b22bd75324",
+    "preparation_freeze_sha256": "221f65b3df9dc9f3b585bed1bd5916e1285f33e5a54773c409ffc0a0bcc1c414",
+    "limits": "Six raw source assets on one previously unassessed page. Thirty ordered pairings and 180 questions reuse those assets and are correlated. This is a new page, not an independent author family or semantic blind exam. The bright blue/cyan bar was excluded before any model inference because its color naming is ambiguous at this head's vocabulary boundary. No whole-page mathematics, object names, letters or counting is evaluated. After first assessment this page is exposed."
+  },
+  "count": 30,
+  "seed": 20061,
+  "families": [
+    "firstpart-yellow-square",
+    "firstpart-yellow-circle",
+    "firstpart-red-circle",
+    "firstpart-yellow-triangle",
+    "firstpart-green-rectangle",
+    "firstpart-empty-paper"
+  ],
+  "group_kind": "source_asset",
+  "thresholds": {
+    "color": 0.97,
+    "shape": null,
+    "pattern": 0.97
+  },
+  "numeric_backend": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "acceptance": {
+    "accepted_errors_max": 0,
+    "positive_recall_min": 0.8,
+    "unknown_recall_min": 0.9,
+    "per_family_and_task": true,
+    "blank_accepted_max": 0
+  },
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Six raw source assets on one previously unassessed page. Thirty ordered pairings and 180 questions reuse those assets and are correlated. This is a new page, not an independent author family or semantic blind exam. The bright blue/cyan bar was excluded before any model inference because its color naming is ambiguous at this head's vocabulary boundary. No whole-page mathematics, object names, letters or counting is evaluated. After first assessment this page is exposed."
+}

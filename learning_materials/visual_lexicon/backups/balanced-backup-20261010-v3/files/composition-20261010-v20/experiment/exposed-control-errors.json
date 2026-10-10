@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "split": "control_final",
+  "status": "EXPOSED_FINAL_ERRORS_NOT_FRESH_TEST",
+  "production_admitted": false,
+  "false_assertions": 0,
+  "errors": [],
+  "preview_records": [],
+  "sha256": {
+    "control_final-predictions.json.gz": "0bf268c73cccf8adc2f95c4e0fbabc2ae7a71a2a31b68d3fbd25c90fb611812b",
+    "dataset-records.json.gz": "36cc6d1c15fa3e674c3a0684eb05a0973dda2a7a43dbc484c5776ee651ad5a44",
+    "dataset.npz": "acfa4aef399d69035e1e18921fdd5054dc7efa6fe3d896a08ce6e13bfc3c4271",
+    "exposed-control-errors.png": "22090ead32b3f5ee48f754bb5762212b5da656a131f53670a3beaedaa3a0540a"
+  },
+  "limits": "Previously evaluated errors only. No fitting, policy changes, fresh-test claim, or calibrated probability claim."
+}

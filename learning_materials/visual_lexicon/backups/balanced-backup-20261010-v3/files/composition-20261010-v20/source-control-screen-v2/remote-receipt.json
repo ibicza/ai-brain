@@ -1,0 +1,23 @@
+{
+  "status": "REMOTE_FROZEN_SOURCE_CONTROLS_REPLAYED",
+  "remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2",
+  "reference_remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20",
+  "original_capsule_sha256": "59c87f06258bbd3b63fb668edf71700c4eccc3cc234b9ad84277061c363f44ff",
+  "transport_executed_sha256": "32d8a3d508b90e0407ce191815372a75549b057e92877de0ced67c8b7a424737",
+  "screen_source_hashes": {
+    "m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8",
+    "m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de",
+    "m33_composition_source_dataset.py": "7c5c83e482fdfeaf31060c7329117a99c2c2f23df57f6c7f8da2450ecb7d4b67"
+  },
+  "source_inputs": {
+    "source-annotations.json": "e62b781a4de8739b02318853768a5a7d70f390633c3e5c19eee43977eb229fee",
+    "dataset.npz": "8091b213fc812bb817bf1b3a8671154413ac717830379fb447587ff3010e856b",
+    "records.json.gz": "3a36f5d1f6c76c3ef9692c58bf8649c3c33a33f0be3d791373c73a66f4152782",
+    "source-crops.npz": "95a548ce565e45a782da00587f4cde849101733974bbe59cd0f09708d7a57eb4",
+    "preparation-freeze.json": "9a680d9944aa2f18112718f3e167603f4d9314aa241fe05a1c8f2029e29b8a2d",
+    "preparation-executed.py": "9f4f0c15f3ee2079cf7f63e3c01252d98c311f599a7ed0ca2514019c7cf63632",
+    "preparation-receipt.json": "1f7c006f458552e1c1875e83f336d5dfe6f8f85ddbdd575ca03e26ceac40256c"
+  },
+  "controls_result_sha256": "80be95200b7ccbd66c47b8a948670095150e7674b854db5fabc4c43f9bf50475",
+  "production_admitted": false
+}

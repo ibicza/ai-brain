@@ -1,0 +1,166 @@
+{
+  "raw_argmax": {
+    "overall": {
+      "examples": 3600,
+      "accepted": 3262,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.9966391689581424,
+      "unknown_recall": 1.0
+    },
+    "tasks": {
+      "color": {
+        "examples": 1200,
+        "accepted": 1091,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 1200,
+        "accepted": 1080,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9899175068744271,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 1200,
+        "accepted": 1091,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 1091,
+      "all_three_correct_rate": 0.9899175068744271
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 237,
+        "both_correct_rate": 1.0
+      },
+      "shape": {
+        "eligible_scene_pairs": 237,
+        "both_correct_rate": 0.9662447257383966
+      },
+      "pattern": {
+        "eligible_scene_pairs": 347,
+        "both_correct_rate": 1.0
+      }
+    }
+  },
+  "selected": {
+    "overall": {
+      "examples": 3600,
+      "accepted": 3079,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.9407271616254201,
+      "unknown_recall": 1.0
+    },
+    "tasks": {
+      "color": {
+        "examples": 1200,
+        "accepted": 1088,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.997250229147571,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 1200,
+        "accepted": 1036,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9495875343721356,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 1200,
+        "accepted": 955,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.8753437213565536,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 1091,
+      "all_three_correct_rate": 0.8304307974335472
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 237,
+        "both_correct_rate": 0.9957805907172996
+      },
+      "shape": {
+        "eligible_scene_pairs": 237,
+        "both_correct_rate": 0.8565400843881856
+      },
+      "pattern": {
+        "eligible_scene_pairs": 347,
+        "both_correct_rate": 0.7463976945244957
+      }
+    }
+  },
+  "image_count": 600,
+  "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam.",
+  "single_view_raw_argmax": {
+    "overall": {
+      "examples": 3600,
+      "accepted": 3273,
+      "false_assertions": 6,
+      "accepted_error_rate": 0.0018331805682859762,
+      "answerable_recall": 0.998166819431714,
+      "unknown_recall": 1.0
+    },
+    "tasks": {
+      "color": {
+        "examples": 1200,
+        "accepted": 1091,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 1200,
+        "accepted": 1091,
+        "false_assertions": 6,
+        "accepted_error_rate": 0.005499541704857928,
+        "answerable_recall": 0.9945004582951421,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 1200,
+        "accepted": 1091,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 1091,
+      "all_three_correct_rate": 0.9945004582951421
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 237,
+        "both_correct_rate": 1.0
+      },
+      "shape": {
+        "eligible_scene_pairs": 237,
+        "both_correct_rate": 0.9873417721518988
+      },
+      "pattern": {
+        "eligible_scene_pairs": 347,
+        "both_correct_rate": 1.0
+      }
+    }
+  }
+}

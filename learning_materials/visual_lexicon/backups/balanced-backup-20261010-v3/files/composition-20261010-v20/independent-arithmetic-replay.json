@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "status": "INFERENCE_AND_ARITHMETIC_VERIFIED",
+  "model_status": "NEEDS_WORK_NOT_PRODUCTION",
+  "capsule_sha256": "59c87f06258bbd3b63fb668edf71700c4eccc3cc234b9ad84277061c363f44ff",
+  "checkpoint_sha256": "1b742d02a6dd2736c43b9c07d0ee9dede585c97adc0aa102d3617d445d6644be",
+  "dataset_sha256": "acfa4aef399d69035e1e18921fdd5054dc7efa6fe3d896a08ce6e13bfc3c4271",
+  "numeric_backend_actual": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "checks": {
+    "dev": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 2074,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.6336694164375191,
+      "unknown_recall": 1.0
+    },
+    "final": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 2078,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.6348915368163764,
+      "unknown_recall": 1.0
+    },
+    "combinations": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 2063,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.6303085853956615,
+      "unknown_recall": 1.0
+    },
+    "transfer": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 2000,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.6110601894286587,
+      "unknown_recall": 1.0
+    },
+    "control_final": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 1674,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.7560975609756098,
+      "unknown_recall": 1.0
+    }
+  },
+  "inherited_tensors_byte_preserved": true,
+  "blank_input_accepted": 0,
+  "blank_inference_replayed": true,
+  "question_and_oracle_correspondence_verified": true,
+  "production_admitted": false,
+  "limits": "Separate arithmetic implementation and inference replay, not independent semantic annotation or external-source blind examination."
+}

@@ -1,0 +1,56 @@
+{
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-capsule.tgz": "59c87f06258bbd3b63fb668edf71700c4eccc3cc234b9ad84277061c363f44ff",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/curriculum/best.pt": "1b742d02a6dd2736c43b9c07d0ee9dede585c97adc0aa102d3617d445d6644be",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/protocol.json": "700fd38a3faf28e1997ac66781088a89996cf83a8fe9d8f606e5064318a97953",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/candidate-freeze.json": "07d07880115a69bdaed5cf8892b890ad21562e646c6c749aae6885142034a7b5",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/policy-frozen.json": "d2222ef61624eee3984ecebba1bc97cdfbd9c6177d8c64da25cb0e90983273a1",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/result.json": "030c20b1d43c9bc6597f5e60a9616d42d50bf8f3f3c08c88d0ba36279ab8f3e7",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/dataset-records.json.gz": "36cc6d1c15fa3e674c3a0684eb05a0973dda2a7a43dbc484c5776ee651ad5a44"
+  },
+  "screen_source_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/cold-family-screen-v1/scripts/m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/cold-family-screen-v1/scripts/m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8"
+  },
+  "source_preparation_hashes": {},
+  "source_preparation_receipt": null,
+  "count": 600,
+  "seed": 20061,
+  "families": [
+    "semicircle",
+    "teardrop",
+    "chevron"
+  ],
+  "group_kind": "shape_family",
+  "thresholds": {
+    "color": 0.97,
+    "shape": null,
+    "pattern": 0.97
+  },
+  "numeric_backend": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "acceptance": {
+    "accepted_errors_max": 0,
+    "positive_recall_min": 0.8,
+    "unknown_recall_min": 0.9,
+    "per_family_and_task": true,
+    "blank_accepted_max": 0
+  },
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Cold authored unsupported contours, shared Pillow; no photos or independent semantic examiner. UNKNOWN means unsupported by the four-shape readout."
+}

@@ -50,7 +50,8 @@ examples; closed-head UNKNOWN examples are not a proof of universal OOD rejectio
 ## Results
 
 V19 completed authentic remote training and frozen inference/arithmetic replay.
-V20 is training under its preregistered unchanged intervention.
+V20 also completed authentic remote training and frozen inference/arithmetic
+replay under its preregistered unchanged intervention. Both are rejected.
 Permanent dictionary, originals, prior failures and user working-tree changes
 remain untouched. Four prior textbook panels, if rechecked, are exposed
 regression diagnostics, not independent semantic blind sources.
@@ -81,7 +82,10 @@ old object-course/textbook-inventory tests. Combined disjoint collection:
 902 passed / 58 skipped. The 58 skips are 26 absent foreground contracts,
 9 absent aspect contracts, 10 absent paper contracts, 11 absent strict-calibration
 contracts and 2 absent auxiliary contracts. The backup-helper allowlist extension
-was separately checked with 16 passing tests. No final accuracy claim yet.
+was separately checked with 16 passing tests, including the final source/document
+allowlist additions. The full collection was not rerun after helper-only changes.
+V20 remote preflight independently passed 572 / 58 (910.07 s). These timings
+are not a speed comparison: its CPU preflight overlapped V19 GPU training.
 
 A read-only comparison with the hash-verified V18 archived control renderer
 confirmed exact RGB equality for 100 generated paper scenes. Actual V19 training
@@ -123,3 +127,77 @@ color assertions and 2 solid-to-spotted pattern assertions. Exact original
 coverage with unsafe residual assertions, not an accepted model or evidence of
 photographic/object-name mastery. V19 status: NEEDS_WORK_NOT_PRODUCTION.
 No candidate is activated and no catalogue mastery percentage is raised.
+The cold failure is specifically chevron-pattern positive recall 62.996%
+(143 correct accepted / 227 positives); global task averages are higher and
+do not conceal this weak group. The screen has 253 chevron-pattern questions,
+including 26 genuine UNKNOWN/hidden cases.
+
+Intermediate code/protocol backup: `ecb15a1d821e76b582bdc33629f9e68d963e0815`.
+Completed V19 data/weights/replays backup:
+`fb171b9cd5042f0931966da3df4a1466628bd538`. Both used scoped non-forced pushes;
+the main HEAD/index/workbook are unchanged. Later V20 work is not yet included
+in those completed backup receipts.
+
+### Completed V20 (same data, foreground KL 0.1)
+
+Joint 10,000 steps: best DEV CE 0.0267506251 (step 9,000), 679.26 s total.
+Curriculum 10,000 steps: best DEV CE 0.0260769064 (step 9,000), 714.16 s total;
+selected checkpoint SHA256
+`1b742d02a6dd2736c43b9c07d0ee9dede585c97adc0aa102d3617d445d6644be`.
+Frozen thresholds: color 0.97, shape NULL, pattern 0.97. No shape threshold
+qualifies under the unchanged calibration constraints; inference therefore
+refuses every shape answer. This is not restored shape competence.
+
+| V20 assessment | Accepted errors | Correct positive recall | Outcome |
+| --- | ---: | ---: | --- |
+| Ordinary final | 0 | 63.49% | Shape coverage zero, fail |
+| Held combinations | 0 | 63.03% | Shape coverage zero, fail |
+| Altered-style transfer | 0 | 61.11% | Shape coverage zero, fail |
+| Authored paper final | 0 | 75.61% | Shape coverage zero, fail |
+| Exposed V4 math panel | 0 | 57.14% | Fail |
+| Exposed V3 language panel | 0 | 55.56% | Fail |
+| Exposed V2 art panel | 0 | 67.33% | Fail |
+| Exposed V1 math panels | 0 | 52.05% | Fail |
+| Paired cold contour screen | 0 | 80.76% | Shape coverage zero and weak pattern family, fail |
+
+All four source screens and the cold screen have authentic remote receipts
+replaying the original frozen candidate and independently recomputing arithmetic.
+Chevron-pattern recall is 70.04% (159 / 227), still below its per-family gate.
+Complete eligible three-attribute descriptions are zero throughout, because
+shape is refused. The reviewed error-preview PNG is correctly empty: there are
+zero accepted authored-final errors, not zero recognition errors or refusals.
+Before rejection/consensus, single-view authored argmax has 488 wrong assertions;
+its 98.74% positive recall does not justify enabling those answers.
+
+### Paired conclusion and handoff
+
+Read-only NPZ comparison confirmed all 40 base arrays byte/value-identical
+between V19 and V20. V20 adds only `exposure_foreground`, confined to TRAIN.
+Both use 15,000 training scenes (90,000 question records), the same warm anchor
+and all 447 matching source files. Both ran joint and curriculum schedules,
+40,000 total optimizer steps across the two experiments. Capacity is unchanged:
+974,889 frozen inherited parameters and 923,232 trainable parameters. Peak
+observed VRAM was 2,964 MiB / 3,370 MiB respectively on the remote notebook.
+
+Balanced V19 restores useful calibrated shape answering compared with V18,
+but retains unsafe unsupported-color and pattern assertions. The paired V20
+foreground intervention removes observed accepted errors on these panels at
+the expense of shape coverage. One seed and one loss coefficient cannot establish
+general superiority, and selection must not favor either using final outcomes.
+Neither is activated; catalogue statuses/percentages, workbook and PDF originals
+remain unchanged. This is color/shape/pattern work, not new animal or object-name
+recognition and not strict-U/M33 closure.
+
+Next bounded experiment should diversify unsupported hues near known color
+boundaries and separate contour/pattern evidence from foreground localization.
+Use a new preregistered seed/policy, TRAIN-only annotations and untouched final
+families; do not fit the preserved error inputs or reuse these panels as blind
+tests. Review a genuinely separate source-family training/calibration/final split
+before admitting real illustrations. Do not expand capacity or lower confidence
+merely to hide the measured refusal/error tradeoff.
+
+The final scoped backup receipt is stored under
+`D:\ai-brain-data\visual-lexicon\balanced-backup-20261010-v3\push-receipt.json`.
+It is authoritative for the final commit; no receipt is claimed until its push
+and remote ref are verified. Backup storage is not self-contained: preserve the
+D: archive junction, its C: target and the W: main Git object store.

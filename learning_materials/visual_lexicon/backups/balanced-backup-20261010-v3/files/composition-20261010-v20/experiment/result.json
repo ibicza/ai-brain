@@ -1,0 +1,913 @@
+{
+  "schema": 1,
+  "status": "NEEDS_WORK_NOT_PRODUCTION",
+  "production_admitted": false,
+  "numeric_backend": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "scope": "Procedural two-object color/shape/pattern + bounded RU/EN queries. No animal names, anatomy, photographs, textbooks or free-form text learned.",
+  "winner": "curriculum",
+  "checkpoint_sha256": "1b742d02a6dd2736c43b9c07d0ee9dede585c97adc0aa102d3617d445d6644be",
+  "inherited_checkpoint_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+  "inherited_tensors_byte_preserved": true,
+  "legacy_retention": {
+    "tasks": {
+      "count": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "shape": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "color": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "same_shape": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "same_color": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "horizontal": {
+        "examples": 6,
+        "logits_exact_equal": true
+      },
+      "vertical": {
+        "examples": 6,
+        "logits_exact_equal": true
+      }
+    },
+    "limits": "Exact delegated legacy-forward and inherited tensor checks; not a new seven-skill acceptance exam."
+  },
+  "reports": {
+    "dev": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3241,
+          "false_assertions": 2,
+          "accepted_error_rate": 0.000617093489663684,
+          "answerable_recall": 0.9896119767797128,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1059,
+            "false_assertions": 2,
+            "accepted_error_rate": 0.0018885741265344666,
+            "answerable_recall": 0.9688359303391384,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9688359303391384
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 371,
+            "both_correct_rate": 0.9299191374663073
+          },
+          "pattern": {
+            "eligible_scene_pairs": 323,
+            "both_correct_rate": 1.0
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2074,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.6336694164375191,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1062,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9734188817598534,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1012,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9275893675527039,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 0.9576470588235294
+          },
+          "shape": {
+            "eligible_scene_pairs": 371,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 323,
+            "both_correct_rate": 0.8452012383900929
+          }
+        }
+      },
+      "image_count": 600,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam.",
+      "single_view_raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3273,
+          "false_assertions": 7,
+          "accepted_error_rate": 0.0021387106630003055,
+          "answerable_recall": 0.9978612893369997,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 7,
+            "accepted_error_rate": 0.006416131989000917,
+            "answerable_recall": 0.9935838680109991,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9935838680109991
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 371,
+            "both_correct_rate": 0.9865229110512129
+          },
+          "pattern": {
+            "eligible_scene_pairs": 323,
+            "both_correct_rate": 1.0
+          }
+        }
+      }
+    },
+    "final": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3237,
+          "false_assertions": 4,
+          "accepted_error_rate": 0.001235712079085573,
+          "answerable_recall": 0.9877787962114268,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1055,
+            "false_assertions": 4,
+            "accepted_error_rate": 0.0037914691943127963,
+            "answerable_recall": 0.9633363886342805,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9633363886342805
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 419,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 372,
+            "both_correct_rate": 0.9247311827956989
+          },
+          "pattern": {
+            "eligible_scene_pairs": 342,
+            "both_correct_rate": 1.0
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2078,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.6348915368163764,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1062,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9734188817598534,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1016,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9312557286892759,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 419,
+            "both_correct_rate": 0.9498806682577565
+          },
+          "shape": {
+            "eligible_scene_pairs": 372,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 342,
+            "both_correct_rate": 0.8713450292397661
+          }
+        }
+      },
+      "image_count": 600,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam.",
+      "single_view_raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3273,
+          "false_assertions": 15,
+          "accepted_error_rate": 0.00458295142071494,
+          "answerable_recall": 0.995417048579285,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 15,
+            "accepted_error_rate": 0.013748854262144821,
+            "answerable_recall": 0.9862511457378552,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9862511457378552
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 419,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 372,
+            "both_correct_rate": 0.9731182795698925
+          },
+          "pattern": {
+            "eligible_scene_pairs": 342,
+            "both_correct_rate": 1.0
+          }
+        }
+      }
+    },
+    "combinations": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3249,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9926672777268561,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1067,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9780018331805683,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9780018331805683
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 237,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 237,
+            "both_correct_rate": 0.9578059071729957
+          },
+          "pattern": {
+            "eligible_scene_pairs": 347,
+            "both_correct_rate": 1.0
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2063,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.6303085853956615,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1036,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9495875343721356,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1027,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9413382218148487,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 237,
+            "both_correct_rate": 0.8818565400843882
+          },
+          "shape": {
+            "eligible_scene_pairs": 237,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 347,
+            "both_correct_rate": 0.8760806916426513
+          }
+        }
+      },
+      "image_count": 600,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam.",
+      "single_view_raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3272,
+          "false_assertions": 6,
+          "accepted_error_rate": 0.0018337408312958435,
+          "answerable_recall": 0.9978612893369997,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1090,
+            "false_assertions": 6,
+            "accepted_error_rate": 0.005504587155963303,
+            "answerable_recall": 0.9935838680109991,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9935838680109991
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 237,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 237,
+            "both_correct_rate": 0.9873417721518988
+          },
+          "pattern": {
+            "eligible_scene_pairs": 347,
+            "both_correct_rate": 1.0
+          }
+        }
+      }
+    },
+    "transfer": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3246,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9917506874427131,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1072,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9825847846012832,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1083,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9926672777268561,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9752520623281393
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 357,
+            "both_correct_rate": 0.9551820728291317
+          },
+          "pattern": {
+            "eligible_scene_pairs": 336,
+            "both_correct_rate": 0.9880952380952381
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2000,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.6110601894286587,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1049,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9615032080659945,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 951,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8716773602199817,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 0.9317647058823529
+          },
+          "shape": {
+            "eligible_scene_pairs": 357,
+            "both_correct_rate": 0.0
+          },
+          "pattern": {
+            "eligible_scene_pairs": 336,
+            "both_correct_rate": 0.7559523809523809
+          }
+        }
+      },
+      "image_count": 600,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam.",
+      "single_view_raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3273,
+          "false_assertions": 9,
+          "accepted_error_rate": 0.002749770852428964,
+          "answerable_recall": 0.997250229147571,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 5,
+            "accepted_error_rate": 0.00458295142071494,
+            "answerable_recall": 0.995417048579285,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1091,
+            "false_assertions": 4,
+            "accepted_error_rate": 0.0036663611365719525,
+            "answerable_recall": 0.9963336388634281,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9917506874427131
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 357,
+            "both_correct_rate": 0.988795518207283
+          },
+          "pattern": {
+            "eligible_scene_pairs": 336,
+            "both_correct_rate": 0.9940476190476191
+          }
+        }
+      }
+    },
+    "control_final": {
+      "raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2357,
+          "false_assertions": 197,
+          "accepted_error_rate": 0.08358082308018668,
+          "answerable_recall": 0.975609756097561,
+          "unknown_recall": 0.8614718614718615
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 929,
+            "false_assertions": 191,
+            "accepted_error_rate": 0.20559741657696448,
+            "answerable_recall": 1.0,
+            "unknown_recall": 0.5865800865800865
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 342,
+            "false_assertions": 2,
+            "accepted_error_rate": 0.005847953216374269,
+            "answerable_recall": 0.9214092140921409,
+            "unknown_recall": 0.9987966305655837
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1086,
+            "false_assertions": 4,
+            "accepted_error_rate": 0.003683241252302026,
+            "answerable_recall": 0.9774164408310749,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 239,
+          "all_three_correct_rate": 0.9121338912133892
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 201,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 336,
+            "both_correct_rate": 0.9672619047619048
+          }
+        }
+      },
+      "selected": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 1674,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.7560975609756098,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 694,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.940379403794038,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 980,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8852755194218609,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 239,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 201,
+            "both_correct_rate": 0.8805970149253731
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 336,
+            "both_correct_rate": 0.7946428571428571
+          }
+        }
+      },
+      "image_count": 600,
+      "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam.",
+      "single_view_raw_argmax": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2674,
+          "false_assertions": 488,
+          "accepted_error_rate": 0.1824981301421092,
+          "answerable_recall": 0.987353206865402,
+          "unknown_recall": 0.6666666666666666
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1095,
+            "false_assertions": 357,
+            "accepted_error_rate": 0.32602739726027397,
+            "answerable_recall": 1.0,
+            "unknown_recall": 0.22727272727272727
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 472,
+            "false_assertions": 118,
+            "accepted_error_rate": 0.25,
+            "answerable_recall": 0.959349593495935,
+            "unknown_recall": 0.8736462093862816
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1107,
+            "false_assertions": 13,
+            "accepted_error_rate": 0.011743450767841012,
+            "answerable_recall": 0.988256549232159,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 239,
+          "all_three_correct_rate": 0.9539748953974896
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 201,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 336,
+            "both_correct_rate": 0.9851190476190477
+          }
+        }
+      }
+    }
+  },
+  "new_word_tokens": [
+    "color",
+    "left",
+    "on",
+    "pattern",
+    "right",
+    "shape",
+    "левого",
+    "правого",
+    "предмета",
+    "узор"
+  ],
+  "capacity": {
+    "inherited_parameters": 974889,
+    "new_trainable_parameters": 923232
+  },
+  "thresholds": {
+    "color": 0.97,
+    "shape": null,
+    "pattern": 0.97
+  },
+  "reflection_consensus": true,
+  "limits": "No claim that these procedural attributes transfer to photographs, giraffes, watermelons or textbooks. Language is closed RU/EN queries, not a generative language model. Successful stage is not production admission."
+}

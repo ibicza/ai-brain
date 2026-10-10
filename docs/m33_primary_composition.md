@@ -114,18 +114,36 @@ an independent semantic blind examination. See the journal's completed-results
 table and original receipts. No candidate has been activated.
 
 Historical initial checks comprised 26 focused tests locally/remotely and 227
-combined course/catalogue tests locally. The latest six-hour patch has **832
+combined course/catalogue tests locally. The historical six-hour patch had **832
 passed, 32 explicitly inapplicable-contract skips**, zero failures/errors.
-Model/training definitions did not change afterward. A final backup-document
+Model/training definitions did not change before its final backup. A backup-document
 allowlist repair was checked separately with 16 passing backup tests; the full
 suite was not rerun after that helper-only repair. A separate arithmetic implementation
 replays the selected model on calibration and all reported cohorts, independently
 recomputes decisions, recalls, false assertions and complete-description rates,
 and checks source/data/checkpoint hashes. This is independent calculation, not
-independent semantic annotation. The current candidate is rejected for production.
+independent semantic annotation.
 
-Next: investigate foreground/paper separation and the underrepresented authored
-known-shape training group. Distinguish actual wrong/disagreeing views from
+The subsequent authorized [balanced/foreground continuation](m33_composition_balanced_foreground.md)
+completed V19/V20 on the remote notebook, each with 10,000 joint and 10,000
+curriculum steps. Authored training doubled to 6,000 scenes and sampling is
+balanced by cohort/task/answer. V20 alone adds TRAIN-only foreground attention
+KL; no masks enter inference. Their 40 base dataset arrays match exactly.
+V19 ordinary accepted-correct positive recall is 93.03%, but authored final
+contains 63 accepted mistakes. V20 has zero accepted mistakes on the assessed
+final/source panels but rejects every shape answer (ordinary recall 63.49%).
+All four exposed textbook panels and the cold contour screen still fail for
+both. Neither is admitted or activated; the permanent dictionary is unchanged.
+Current scoped engineering collection: **902 passed / 58 explicit contract skips**,
+plus 16 backup-helper tests after its allowlist extension. Each remote preflight
+passed 572 / 58. Failed intermediate archive-count assertions are retained in
+their original XML receipts. These are experimental regressions, not an
+independent semantic blind exam or M33 closure.
+
+Next: improve near-boundary unsupported-color diversity and contour/pattern
+evidence while preserving useful shape coverage; the first balanced sampling
+and foreground-supervision interventions are now measured, not merely planned.
+Distinguish actual wrong/disagreeing views from
 correct low-score predictions; changing confidence alone cannot fix the former.
 Compare one preregistered intervention at a time, then freeze before new
 evaluation. Retain explicit target-binding, UNKNOWN and old-skill
