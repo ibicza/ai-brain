@@ -608,3 +608,51 @@ Do NOT reuse this evidence base for another pytest run. Actual cold-tool fixture
 contact sheet viewed: bounded visible semicircles/drops/chevrons and supported
 shapes, distinct patterns retained. This is generator QA, not model mastery.
 Only77691and39498 are live; don't duplicate. Still3h47m before earliest finish.
+
+01:26 UTC: scoped V4 backup60971 completed and independently git ls-remote
+confirmed commit46dff68b0b878cf0cbe7dac7d233d4c20811e4e3 (76 changed paths),
+including completed V10, immutable failed V11, new tool/source and completed QA
+receipts. Actual receipt is sixhour-backup-20261010-v4/push-receipt.json.
+Do not infer backup failure from an earlier read attempt at nonexistent
+backup-receipt.json. Main HEAD/index/workbook remain unchanged, SHA verified.
+Next backup expected parent46dff68b0b878cf0cbe7dac7d233d4c20811e4e3.
+New full regression39498 and V12 outcomes are not yet included in that commit.
+D free824MB, W439MB. No files deleted; avoid duplicate older large datasets.
+
+Primary NS-CL full text reread https://arxiv.org/html/1904.12584v1, sections3.2,
+AppendixE/F.2: staged learning increases scene/question complexity; their random
+visual-initialization ablation retained most concept accuracy with a small shape
+drop. This supports testing own weights and gradual curricula, not importing
+their pretrained ResNet or claiming the current closed-template network is
+NS-CL. Their reported CLEVR result does not establish photo/textbook transfer
+for our model. Readout attributes remain evidence rather than identity rules.
+
+01:32 UTC checkpoint (NOT completion): latest combined regression39498 FINISHED
+614passed/2inapplicable skips486.16s, XML SHA
+cdefa14f664dca5b160867b9a412132437d0c743b3e8cbcc13d3a4c2706cf538.
+Separate new cold-transport guard suite8passed0.51s, clean Ruff; these8were added
+after combined file-list selection and are NOT falsely called one622-test run.
+V12 **77691** preflight finished338passed/2inapplicable skips384.58s. Actual
+remote experiment now contains90,657,600-byte dataset.npz, frozen protocol,
+records/split/RNG receipts/contactsheet and joint directory; no final claim.
+It is the ONLY live model run. Full regression/backup60971/graphs54040and74193
+are complete; never restart old handles38133,37245,39498,69477 or30660.
+
+Cold follow-up helper scripts/m33_composition_novel_remote.py is ready but NOT
+run against V12 yet. After77691completes and its remote-receipt.json is present:
+pin helper into D:/ai-brain-data/visual-lexicon/transport-cold-v12-input.py, run
+with --repo W:/toolbox_IDEA/programs/IdeaProjects/ai-brain --reference
+D:/ai-brain-data/visual-lexicon/composition-20261010-v12 --key
+C:/Users/artio/.ssh/id_ed25519_ai_brain_m192 --count600 --seed2211041000
+--child cold-family-screen-v1. Requires NEW child; authenticates original parent
+capsule, source snapshots, actual inference hashes and every downloaded file.
+Original reference model/numeric/policy frozen; no fitting or calibration.
+If V12 base screen fails, retain failure and diagnose it; cold diagnostics may
+still expose generalization but cannot make failed base model admitted.
+
+Source-only small V5 backup planned next, expected parent46dff68b...; no old
+large datasets recopied. D free823.9MB, W439.4MB; preserve all existing evidence.
+Goal/heartbeat remainACTIVE until at least05:11:22UTC (~3h39m still required).
+Continue meaningful work, not only repeated status polling. If both bounded
+screens pass, audit exact provenance/inference and proceed to real-source image
+controls and the next image block; neither synthetic screen closes strictM33U.

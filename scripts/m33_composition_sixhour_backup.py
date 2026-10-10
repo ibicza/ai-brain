@@ -36,6 +36,7 @@ SOURCE_FILES = (
     "scripts/m33_composition_numeric_probe.py",
     "scripts/m33_composition_novel_controls.py",
     "scripts/m33_composition_novel_screen.py",
+    "scripts/m33_composition_novel_remote.py",
     "scripts/requirements-primary-materials.txt",
     "scripts/m33_composition_sixhour_backup.py",
     "tests/test_primary_composition.py",
@@ -50,6 +51,7 @@ SOURCE_FILES = (
     "tests/test_primary_composition_backgrounds.py",
     "tests/test_primary_composition_novel_controls.py",
     "tests/test_primary_composition_novel_screen.py",
+    "tests/test_primary_composition_novel_remote.py",
     "tests/test_primary_zero.py",
     "tests/test_primary_relations.py",
     "docs/m33_composition_six_hour_work.md",
@@ -199,6 +201,7 @@ def run(repo, data, output, parent, run_names):
         "qa-sixhour-cold-contours-v1.xml",
         "qa-sixhour-cold-pipeline-v1.xml",
         "qa-sixhour-cold-pipeline-v2.xml",
+        "qa-sixhour-cold-transport-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))
