@@ -1248,3 +1248,83 @@ This supports the background-contourshortcut hypothesis, NOTa causalproof.
 No goldchanged, cropedited, finalfitted orpolicyretuned. V17alreadypreregistered
 paperpatchvariation beforethis exposedanalysis andbeforeitsownfinals.
 Colour/patternremainacceptedcorrect onthethreeknownmarkers; scopeclosed3tasks.
+
+04:08 UTC V12backup13454 COMPLETE344paths, fullcommit
+2136961fa6ba44756c25504cb255eb8683794070, includescompletedV14/V15 andfailed
+untrainedV16. Independentcloudrefcheckrequired/doneinthiscontinuation;
+nextbackup expected-parentFULL2136961fa6ba44756c25504cb255eb8683794070.
+V17capsuleSHAe9e174e75dc9727e8a9a53790ddae56f67d58f3f0e5324639cc89bb9f47d0d95.
+ProtectedmainHEAD,index, canonicalworkbook sameoriginalSHA inbackupreceipt.
+CurrentDfree~2.61GB/C~13.09GB/W~437MB, no deletions. Localfull16912 and
+remote26305preflight stilllive, nodeadlinecompletion/noactivation.
+
+04:12 UTC NEWfreshpagecontrolsV4 manuallyfrozen BEFOREV17finals (preflight53%).
+Fileexamples/m33/visual_source_controls_v4.json SHA
+ed3a2105a4cf3c802607c6e6d4009ae0a87037436dc3f819828beb05c088faf2.
+PDFmatematika-muravjova-1kl-ch1-rus_2024.pdf originalSHA
+0029feb5ba132920dac33308336441fcedaee31467fb0f65fa089ace9a6c55d8,
+PDF12/printed6, previewSHA5ea2b98b64977930442f454c69c857967cda621283f0fc95999e3ca392bb72a5,
+750×1083 at110dpi. COMPLETEpage andallactualROI/modelinputgalleriesVIEWED.
+6rawassets: yellowsquare,yellowcircle,redcircle,yellowtriangle,greenrectangle,
+blankpaper. Brightcyanbar excluded BEFOREANYmodelassessment becausecolour
+namingboundaryambiguous, disclosedinmanifest; notresult-basedselection.
+SamepreviouslyEXPOSEDmathAUTHORfamily, but NEWunassessedpage; no independent
+author/semanticblind-examclaim. Only6assets,30pairedscenes,180correlatedqueries.
+PreparedNEWDsource-controls-20261010-v10; freshPDFMediaBoxrenderpixel/SHA
+verified againststoredpreview, no originaledits. Independentreassemblyloader
+passedALLpixel/question/gold/hashguards. Nativecsource44fc... matchesV17.
+DatasetSHA4ac56f3da8bc27353e19dd9761663be34223ec7406ccdf9dc03aab9f4b5910c3,
+recordsSHA8cb2c9e93dddd95afd4bfc9fc3e8e16b2dc2f2309ca0fdf42d7b6d49e82e47e5,
+rawcropsSHA9c7614791b0a1fb0026442c8a0f7eddb97a83ad6757e1bda0ba936b22bd75324,
+freezeSHA174af29379575f96cb836bd2a5678eb031488ce22c589f558a9635c8af36b696.
+NOmodelinference/training/calibrationonthisnewpage yet. FirstassessonfrozenV17
+usingchildsource-control-screen-v1; then exposedlanguage/art/math subjectto
+explicitboundedtransportslots. Backupwhitelist nowaddsV4manifest/preparedv10.
+ReadonlyPDFtextsearch foundno textlayer; usedrealfull-pageimages instead.
+Initialquickprobe tried PdfPage contextmanager (unsupported), correctedclose;
+initialloaderinspectionmistook4-tupleforadict AFTERsuccessfulload, corrected
+inspectionconfirms30×96×96×3. No source/datachangesneededforthoseprobeerrors.
+
+04:16 UTC V17 **26305 COMPLETEFAILEDpreflight**, 1failed/502passed/32skips
+628.56s, beforeANYactualtraining. Newmocktransporttest imported optional
+paramiko onGPUworker where itisnotinstalled; transportitselfrunsoncoordinator.
+Preservedfailedcapsulee9e174... andREMOTE_PREFLIGHT_FAILED_NOT_TRAINED,
+testsSHA39cc4a8b3f03826cc96f17f92f6e8860bc7fc0dafc3491aa999aaae0d9719e39.
+Fixedtest toinjectONLYfakeparamiko.SSHClient BEFOREmoduleimport, monkeypatch
+restoresoriginalmodulesaftertest, no actualnetwork/dependencyinstallrequired.
+FixV3 **41298 COMPLETE31passed11.96s**, includesactualisolatedcapsulecalibration
+collection andruntimeprefixmock. This isnotmodelresult; V16/V17 untrained.
+Source transport nowallows EXACTfour boundedsourcechildren, CLI/runtime/shared
+allowlist/backup allmatched. Guardsrequirepreparedsource,nooverwrite,reject
+fifthslot/pathescape. **30passed1.54s** fourth-slot/backup checks, XML
+qa-sixhour-fourth-source-slot-v1.xml. Sourceprepare+backupnewpage38passed4.01s,
+XMLqa-sixhour-fourth-page-backup-v1.xml. Ruffclean.
+
+NEWV18 **1529 LIVE** freshname, samepredeclaredseed15049/sizes/paperprofile/
+strictcalibration andwarmV15DEV-selectedcurriculum38562...; attemptsV16/V17
+nevertrained/sawfinals, so no changeofexperimentcriterion. Pinnedcoordinator
+driver45177696e92ea2d8767207dc997fbf5bdacef185b5ac0df6b04561dd3b56f9bb,
+new FOUR-slot assessmentdriver32d8a3d508b90e0407ce191815372a75549b057e92877de0ced67c8b7a424737.
+RemoteV18preflightstilllive, training/freeze/final/replay/download pending.
+Firstsourceassess freshpageV4/prepv10 count30 childv1; ONLYthenexposed
+languageV3/prepv9 count12 childv2, artV2/prepv7 count156 childv3, mathV1/prepv8
+count110 childv4. Allsame44fc...nativecsource; no sourceprep regeneration.
+Neverreuseold3-slotDdriverforthosefourjobs. FreshV4becomesexposedafterFIRSTtest.
+Localfull16912 stilllive~58%; itwascollected BEFORElatestmock/fourthslotchanges,
+so doNOTcall it alone a fulltest ofcurrentpatch. Newfocused31+30 checkscover
+thosechanges; plan final-full-regression-v2 afterv1endswithfreshfixturebase.
+Graph20219 COMPLETE1005files. Nextbackupparent remainsFULL2136961fa6ba44756c25504cb255eb8683794070.
+Goal/heartbeatACTIVE,~55minutesremain; no activation/no earlycompletion.
+
+04:19 UTC localfull **16912 COMPLETE830passed/32skips927.39s**, noerrors.
+This collected BEFORElateparamiko-mock/fourth-slotpatches, separatelycoveredby
+31/30focusedproofs; doNOTmislabel ascurrentlatestfullpatch. NOWfreshlatest
+final-full-v2 launched45files,Cfixturebaseai-brain-m33-sixhour-final-full-20261010-v2,
+XMLqa-sixhour-final-full-regression-v2.xml. No furthermodel/source/transport
+changes plannedwhileit runs. Backupfinal-whitelist15passed1.15s; XMLpreserved.
+V18capsuleSHA01be70d0e9714d01fdaeed453ef39860875dbfc7c5b9ab925be08d30cee09753.
+V18coordinator1529stillREMOTEpreflightrunning; noactualtrainingresultyet.
+Primaryliterature https://arxiv.org/html/2004.07780v5 read: highin-distribution
+scorescancome from unintended cues; intention-generalization cannotbe inferred
+fromsimilarbenchmarksuccessalone. Ouractualpaper-contourhypothesisneedsnew
+frozenassessment, notthatpaper's authority. No causalproof claimed.

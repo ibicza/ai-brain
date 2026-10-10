@@ -98,6 +98,7 @@ def test_failed_preflight_cannot_be_treated_as_completed_model(inputs):
         "source-control-screen-v1",
         "source-control-screen-v2",
         "source-control-screen-v3",
+        "source-control-screen-v4",
     ),
 )
 def test_all_bounded_source_slots_are_allowed_but_never_overwrite(inputs, child):
@@ -112,15 +113,16 @@ def test_all_bounded_source_slots_are_allowed_but_never_overwrite(inputs, child)
     assert marker.read_text(encoding="utf-8") == "old receipt"
 
 
-def test_third_source_slot_requires_explicit_prepared_sources(inputs):
-    inputs.child = "source-control-screen-v3"
+@pytest.mark.parametrize("child", ["source-control-screen-v3", "source-control-screen-v4"])
+def test_new_source_slots_require_explicit_prepared_sources(inputs, child):
+    inputs.child = child
     with pytest.raises(ValueError, match="Scoped fresh bounded"):
         remote.run(inputs)
     assert not (inputs.reference / inputs.child).exists()
 
 
-def test_fourth_source_slot_is_not_an_unbounded_directory_extension(inputs):
-    inputs.child = "source-control-screen-v4"
+def test_fifth_source_slot_is_not_an_unbounded_directory_extension(inputs):
+    inputs.child = "source-control-screen-v5"
     inputs.prepared_source = inputs.reference / "unused-source-inputs"
     with pytest.raises(ValueError, match="Scoped fresh bounded"):
         remote.run(inputs)

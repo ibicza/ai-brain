@@ -98,7 +98,6 @@ def test_remote_runtime_prefix_exposes_both_capsule_source_roots(tmp_path, monke
         "composition_remote_under_test", REPO / "scripts/m33_composition_remote.py"
     )
     remote = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(remote)
     uploaded, commands = {}, []
 
     class StopBeforeExecution(Exception):
@@ -133,7 +132,10 @@ def test_remote_runtime_prefix_exposes_both_capsule_source_roots(tmp_path, monke
         def close(self):
             pass
 
-    monkeypatch.setattr(remote.paramiko, "SSHClient", Client)
+    # Transport runs on the coordinator, not on the GPU worker. This fake
+    # runtime test must not require its optional SSH dependency on that worker.
+    monkeypatch.setitem(sys.modules, "paramiko", SimpleNamespace(SSHClient=Client))
+    spec.loader.exec_module(remote)
     previous, warm = tmp_path / "previous.pt", tmp_path / "warm.pt"
     previous.write_bytes(b"fixture-previous")
     warm.write_bytes(b"fixture-warm")

@@ -18,6 +18,7 @@ SCREEN_CHILDREN = (
     "source-control-screen-v1",
     "source-control-screen-v2",
     "source-control-screen-v3",
+    "source-control-screen-v4",
 )
 
 
