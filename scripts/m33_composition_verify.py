@@ -246,6 +246,11 @@ def verify(root, previous, capsule, output, device):
         from ai_brain.training import primary_composition_controls as controls
 
         exposure_profile = protocol.get("exposure_profile", "standard")
+        if (
+            exposure_profile == "palette_paper_aspects"
+            and protocol.get("paper_rng_policy") != controls.PAPER_RNG_POLICY
+        ):
+            raise ValueError("Paper exposure RNG policy differs from source")
         if exposure_profile not in controls.EXPOSURE_PROFILES:
             raise ValueError("Invalid control exposure profile")
         if "exposure_profile" in protocol and (
@@ -377,6 +382,7 @@ def verify(root, previous, capsule, output, device):
     if thresholds != result["thresholds"]:
         raise ValueError("Result thresholds differ from frozen calibration")
     records = source_records["calibration"]["records"]
+    cohort_names = ["native"] * len(records)
     if auxiliary_count:
         calibration = np.concatenate(
             (
@@ -385,6 +391,31 @@ def verify(root, previous, capsule, output, device):
             )
         )
         records = records + source_records["control_calibration"]["records"]
+        cohort_names += ["authored"] * len(
+            source_records["control_calibration"]["records"]
+        )
+    calibration_rule = protocol.get("calibration_rule", "maximum_coverage")
+    if (
+        calibration_rule not in ("maximum_coverage", "coverage_guarded_strict")
+        or policy.get("selection_rule", "maximum_coverage") != calibration_rule
+    ):
+        raise ValueError("Calibration rule differs from preregistered protocol")
+    if (
+        policy.get("selection_split") != "calibration_only"
+        or type(policy.get("minimum_accepted_per_task")) is not int
+        or policy["minimum_accepted_per_task"] != 40
+        or type(policy.get("allowed_observed_calibration_errors")) is not int
+        or policy["allowed_observed_calibration_errors"] != 0
+    ):
+        raise ValueError("Calibration support/error contract differs from source")
+    strict_calibration = calibration_rule == "coverage_guarded_strict"
+    if strict_calibration and (
+        protocol.get("calibration_constraints")
+        != {"minimum_answerable_recall": 0.8, "minimum_unknown_recall": 0.9}
+        or policy.get("cohort_constraints") != protocol["calibration_constraints"]
+        or policy.get("cohort_names") != sorted(set(cohort_names))
+    ):
+        raise ValueError("Strict calibration cohort constraints differ")
     predicted = decisions(calibration, records, thresholds)
     for task in c.VALUES:
         indices = [i for i, r in enumerate(records) if r["task"] == task]
@@ -400,16 +431,50 @@ def verify(root, previous, capsule, output, device):
         eligible = []
         task_records = [records[i] for i in indices]
         task_gold = [r["answer"] for r in task_records]
+        positions_by_cohort = (
+            {
+                name: [j for j, i in enumerate(indices) if cohort_names[i] == name]
+                for name in sorted(set(cohort_names))
+            }
+            if strict_calibration
+            else {}
+        )
+        if strict_calibration:
+            grouped_actual = {
+                name: measure(
+                    [task_gold[j] for j in js], [predicted[indices[j]] for j in js]
+                )
+                for name, js in positions_by_cohort.items()
+            }
+            stored_cohorts = policy["tasks"][task]["cohort_metrics"]
+            if grouped_actual.keys() != stored_cohorts.keys():
+                raise ValueError("Strict calibration cohort metrics differ")
+            for name, measured in grouped_actual.items():
+                equal(measured, stored_cohorts[name])
         for threshold in (0.9, 0.95, 0.97, 0.98, 0.99, 0.995, 0.999, 0.9999):
             candidate = decisions(calibration[indices], task_records, {task: threshold})
             metrics = measure(task_gold, candidate)
+            cohort_metrics = {
+                name: measure([task_gold[j] for j in js], [candidate[j] for j in js])
+                for name, js in positions_by_cohort.items()
+            }
+            recall_ok = all(
+                (m["answerable_recall"] is None or m["answerable_recall"] >= 0.8)
+                and (m["unknown_recall"] is None or m["unknown_recall"] >= 0.9)
+                for m in cohort_metrics.values()
+            )
             if (
                 metrics["false_assertions"] == 0
                 and metrics["accepted"] >= policy["minimum_accepted_per_task"]
+                and recall_ok
             ):
-                eligible.append((metrics["accepted"], threshold))
+                eligible.append(
+                    (threshold, metrics["accepted"])
+                    if strict_calibration
+                    else (metrics["accepted"], threshold)
+                )
         best = max(eligible) if eligible else None
-        if thresholds[task] != (best[1] if best else None):
+        if thresholds[task] != (best[0 if strict_calibration else 1] if best else None):
             raise ValueError("Calibration threshold not selected by frozen rule")
     checks = {}
     final_splits = ("final", "combinations", "transfer") + (

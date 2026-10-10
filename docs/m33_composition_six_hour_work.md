@@ -1079,3 +1079,76 @@ Backupwhitelist includesv3child. In-flightV14driver/pinnedsourcev13driverunchang
 newthirdslot appliesONLYnewlypinnedfuturehelper. Graphrefresh54328LIVEafterAPI.
 No priorcapsule rewritten, currentcsource44fc...unchanged. NEXTV10source-only
 backup parentFULL42003d2f54f06206aec14d8fd86c4b12913eb65d, freshroot, no--run.
+
+03:15 UTC V10backup82074 COMPLETE139paths, independentlyremoteconfirmed
+9921954493034146045331dbf75e0a72a796c315. NEXTbackup thisFULLparent, NOT42003....
+Latestfull730/11 XMLSHA5631b9ec6b62e49e969525c58452334f50368a4431865ea26b95a3cf35433a97.
+Graph54328complete1005files, third-source allowlist/sourceV3/v9/backups verified.
+
+Prepared NEWfuturepaper prototypepalette_paper_aspects: own M3PBbackground
+streamdrawsgray/nearwhite30-42px rectangleswithindependentRGBgradients, under
+foregroundfigure. Noitem/shape/colour/question/goldinputstopaperfunction.
+Oldgeometry/palette/labelstreamsnotchanged; broaderaspect geometry usesM3AH
+as before. Renderingprofileisexplicitinrecords; paper_rng_policy sealedbefore
+training and source verifierchecksactualcontract. Old profileskeep samepixels;
+newpapervariant NOTtrained yet. Prototypeunit33passed3.61s; actualtinyfull
+pipeline **28620 LIVE**. Verifierpapercontractguard movedafterlocalcontrolsimport
+before anytraining so itneverreferencesanunboundmodule. No failingrun hidden.
+Whole actual12-image exposurecontactsheet viewed from tinysealedfixture;
+paperpatches are lowcontrast and insidehalfplanes, foregroundcontourswhole,
+unsupportedshapespresent; this is inputQA, NOTcompetence proof. OriginalPDFs
+and sourcecontrolsneverpainted/edited. This is a hypothesis test inspiredby
+domainrandomization, NOTcausalproof or reproduction ofa paper'srobotresults.
+V14model47857curriculum8400observed; originalf95driver/capsule unchanged.
+ItsV14final/inference/replay/download stillpending. Don'trestartliveprocess.
+
+03:35 UTC actualV14model47857 COMPLETE, winnerjoint
+289c68c05ce1ae795782a1a2745d5a4d71ea5756074a4cc560f8e0f31c8867c0,
+capsule2c5dbcaaf9fa9237bdf048d7c5913936d4c151a11a1e4f02e558a664714ec222.
+Originalthresholdall.9. Final/combinations/transfer each0falseassertions,
+positive.99511152/.99755576/.99419493. Heldauthoredcontrol163falseassertions,
+unknown.88281812, positive.98098687 -> NEEDS_WORK_NOT_PRODUCTION. This
+independent-colour change is NOTa successfulOODimprovement. Art95399 COMPLETE
+14falseassertions (was55V13), positive.88, unknown1, blank0. Math90078 COMPLETE
+25falseassertions (was13V13), positive.81818, unknown.90909, blank0. Bothare
+EXPOSEDdiagnostic repeats, notnewblindtests. ScoresdoNOToverridezero-errorgate.
+Allfailedresults preserved, noactivation/thresholdretune.
+
+V15 **83927 LIVE** freshseed14047, warmactualV14joint; nativebroadaspects +
+authoredpalette_aspects ONLYtrainingdatavariation, notpaper/strictcalibration.
+Originaldriver pinnedDtransport-v15-input.py before subsequentcalibrationsource
+changes. RemoteV15 preflight COMPLETE444passed/21deliberatelyinapplicable skips
+591.56s. Training/freeze/final/replay/downloadpending. Neverrestartfromcurrent
+globalcode; originalV15capsule ownsitsmaxcoverageoldpolicyandcountcontracts.
+
+FuturepaperprototypeunitV2 COMPLETE38passed3.95s (adds5compatibilityhashcases).
+ActualV10source 3d3feb9221642accd0a86e1bdfadbbb8eaf50e3110571eac9d0e02ce659f907e
+independentlycompiledfromGitcommit99219544..., compared ALL5oldprofiles×30scenes
+to latestrenderer: asdictANDpixels byteequal on150cases. Committedtestexpectations
+derivedfromARCHIVEDsource notcurrentpatch. This is boundedcompatibilityproof,
+NOTallpossibleimages. Tinyactualpaperpipeline28620COMPLETE20passed74.96s;
+papercontracthostile41765COMPLETE1passed233deselected18.49s. No actualpapertrainingyet.
+
+ImplementedNEWopt-in calibration rule coverage_guarded_strict forFUTUREexperiments:
+samefixedthresholdgrid, zeroobservedcalerrors, min40accepted/task; choosehighest
+threshold ONLYwhen BOTHnative/authoredcalibration cohorts separatelyretain
+positive≥.8 andunknown≥.9. Rule/constraints preregistered BEFOREtraining;
+modelselectedbybalancedRAWDEV CE beforecalibration. No final/sourceexamples used
+tochoose thresholds. Oldmaximum_coverage defaultisunchanged and oldcapsulespolicy
+notrewritten. Noeligiblerule yieldsNONE/UNKNOWN, notinventedsafeanswers.
+Policyverifier independentlyrecomputescohortmetrics and WHOLEgridselection,
+checks sourcefixedmin40/notbool, zeroobservedallowederror/notbool, calonlysplit,
+rule/protocol/constraintsidentity. No inferencegold/masks asmodelinputs.
+This is an engineering empirical risk/coverageexperiment, NOTSGRpaperalgorithm,
+NOTformalriskbound and NOTproofzeroerrorsonallfutureimages; correlatedquestions
+are NOTindependent samples. Literature1705.08500 assumptions preventthatclaim.
+12newpureselectiontests passed2.00s; strictactualtinytraining/freeze/replay1380
+COMPLETE21passed74.70s. Ruffcleanafterimportsorting. Additional3hostiletests
+nowrunning; latestcombinedfull45files runningfreshfixturebase
+C:/Users/artio/AppData/Local/Temp/ai-brain-m33-sixhour-paper-strict-full-20261010-v1,
+XMLqa-sixhour-paper-strict-full-regression-v1.xml. No freshmodelusesstrictflagyet.
+Thirdsource slots allowfutureV15languagev9FIRST(childv1), artv7EXPOSED(childv2),
+mathv8EXPOSED(childv3) usingfreshlypinnedlatestnoveltransport, notoldv13driver.
+Nativecsource44fc...unchanged, so preparedv7/v8/v9stillmatchV15capsule.
+NextV11backup shoulduseFULL9921954493034146045331dbf75e0a72a796c315 and --runv14
+--stream-chunks, notpreviousoldrunrecopy. Allgoals/heartbeatACTIVE,~1h36mremain.

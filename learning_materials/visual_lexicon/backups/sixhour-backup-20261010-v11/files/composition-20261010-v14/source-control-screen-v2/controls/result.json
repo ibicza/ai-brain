@@ -1,0 +1,406 @@
+{
+  "status": "SOURCE_CONTROL_FAILURE_NOT_PRODUCTION",
+  "selected": {
+    "overall": {
+      "examples": 660,
+      "accepted": 385,
+      "false_assertions": 25,
+      "accepted_error_rate": 0.06493506493506493,
+      "answerable_recall": 0.8181818181818182,
+      "unknown_recall": 0.9090909090909091
+    },
+    "tasks": {
+      "color": {
+        "examples": 220,
+        "accepted": 125,
+        "false_assertions": 25,
+        "accepted_error_rate": 0.2,
+        "answerable_recall": 0.8333333333333334,
+        "unknown_recall": 0.8
+      },
+      "shape": {
+        "examples": 220,
+        "accepted": 60,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.5,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 220,
+        "accepted": 200,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 80,
+      "all_three_correct_rate": 0.25
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 22,
+        "both_correct_rate": 0.7272727272727273
+      },
+      "shape": {
+        "eligible_scene_pairs": 24,
+        "both_correct_rate": 0.16666666666666666
+      },
+      "pattern": {
+        "eligible_scene_pairs": 0,
+        "both_correct_rate": null
+      }
+    }
+  },
+  "single_view_raw_argmax": {
+    "overall": {
+      "examples": 660,
+      "accepted": 475,
+      "false_assertions": 95,
+      "accepted_error_rate": 0.2,
+      "answerable_recall": 0.8636363636363636,
+      "unknown_recall": 0.8409090909090909
+    },
+    "tasks": {
+      "color": {
+        "examples": 220,
+        "accepted": 140,
+        "false_assertions": 40,
+        "accepted_error_rate": 0.2857142857142857,
+        "answerable_recall": 0.8333333333333334,
+        "unknown_recall": 0.8
+      },
+      "shape": {
+        "examples": 220,
+        "accepted": 135,
+        "false_assertions": 55,
+        "accepted_error_rate": 0.4074074074074074,
+        "answerable_recall": 0.6666666666666666,
+        "unknown_recall": 0.85
+      },
+      "pattern": {
+        "examples": 220,
+        "accepted": 200,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 80,
+      "all_three_correct_rate": 0.25
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 22,
+        "both_correct_rate": 0.7272727272727273
+      },
+      "shape": {
+        "eligible_scene_pairs": 24,
+        "both_correct_rate": 0.3333333333333333
+      },
+      "pattern": {
+        "eligible_scene_pairs": 0,
+        "both_correct_rate": null
+      }
+    }
+  },
+  "per_source_asset": {
+    "red-triangle": {
+      "color": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "green-triangle": {
+      "color": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "yellow-circle": {
+      "color": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "red-circle": {
+      "color": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "green-square": {
+      "color": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "lightblue-square": {
+      "color": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 20,
+        "accepted_error_rate": 1.0,
+        "answerable_recall": null,
+        "unknown_recall": 0.0
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "green-rectangle": {
+      "color": {
+        "examples": 20,
+        "accepted": 5,
+        "false_assertions": 5,
+        "accepted_error_rate": 1.0,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "orange-parallelogram": {
+      "color": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "pink-rectangle": {
+      "color": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": null
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "lightblue-quadrilateral": {
+      "color": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 20,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": null
+      }
+    },
+    "empty-paper": {
+      "color": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 20,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      }
+    }
+  },
+  "blank_accepted": 0,
+  "independent_inference_and_arithmetic_replayed": true,
+  "dataset_sha256": "045892b93315b0c26398ac233d677b276564f16af12686cc3ee0dcded7854890",
+  "records_sha256": "00e376a27b614af4b8e82e5b27540363e88d06a0f66d5217427745122eba5da5",
+  "preregistered_freeze_sha256": "54915db1b64a9bb7c96cd0ad785ee8fbcf168e4dfd8c5f73d134894d78e23ae9",
+  "original_inference_capsule_sha256": "2c5dbcaaf9fa9237bdf048d7c5913936d4c151a11a1e4f02e558a664714ec222",
+  "production_admitted": false
+}

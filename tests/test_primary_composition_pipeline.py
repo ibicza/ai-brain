@@ -28,7 +28,7 @@ verifier = script("m33_composition_verify")
 
 @pytest.fixture(
     scope="module",
-    params=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+    params=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
     ids=(
         "single-view",
         "four-view",
@@ -40,6 +40,8 @@ verifier = script("m33_composition_verify")
         "ieee-rich-palette",
         "ieee-rich-independent-palette",
         "ieee-aspect-palette",
+        "ieee-paper-aspect-palette",
+        "ieee-strict-paper-aspect-palette",
     ),
 )
 def sealed(tmp_path_factory, request):
@@ -79,7 +81,12 @@ def sealed(tmp_path_factory, request):
                 reflection_consensus=request.param > 0,
                 auxiliary_images=12 if request.param >= 2 else 0,
                 consistency_loss=0.2 if request.param >= 2 else 0.0,
-                exposure_profile="palette_aspects"
+                calibration_rule="coverage_guarded_strict"
+                if request.param == 11
+                else "maximum_coverage",
+                exposure_profile="palette_paper_aspects"
+                if request.param >= 10
+                else "palette_aspects"
                 if request.param == 9
                 else "palette_independent"
                 if request.param == 8
@@ -93,7 +100,7 @@ def sealed(tmp_path_factory, request):
                 warm_candidate=None,
                 dataset_profile=(
                     "aspect_rich_curve_background_clear"
-                    if request.param == 9
+                    if request.param >= 9
                     else "rich_curve_background_clear"
                     if request.param >= 7
                     else "curve_background_clear"
@@ -192,6 +199,71 @@ def test_aspect_contract_cannot_be_rewritten_even_with_resealed_protocol(sealed)
     finally:
         path.write_bytes(original)
         freeze_path.write_bytes(frozen_original)
+
+
+def test_paper_contract_cannot_be_rewritten_even_with_resealed_protocol(sealed):
+    path = sealed / "experiment/protocol.json"
+    freeze_path = sealed / "experiment/candidate-freeze.json"
+    original, frozen_original = path.read_bytes(), freeze_path.read_bytes()
+    protocol = json.loads(original)
+    if protocol["exposure_profile"] != "palette_paper_aspects":
+        pytest.skip("No paper background contract in this fixture")
+    try:
+        protocol["paper_rng_policy"] = "paper reads shape labels"
+        path.write_text(json.dumps(protocol), encoding="utf-8")
+        freeze = json.loads(frozen_original)
+        freeze["protocol_sha256"] = verifier.sha(path)
+        freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
+        with pytest.raises(ValueError, match="Paper exposure RNG policy"):
+            check(sealed, "must-not-exist-paper-contract.json")
+    finally:
+        path.write_bytes(original)
+        freeze_path.write_bytes(frozen_original)
+
+
+def test_calibration_rule_cannot_change_after_candidate_freeze(sealed):
+    path = sealed / "experiment/policy-frozen.json"
+    original = path.read_bytes()
+    try:
+        policy = json.loads(original)
+        policy["selection_rule"] = (
+            "maximum_coverage"
+            if policy["selection_rule"] == "coverage_guarded_strict"
+            else "coverage_guarded_strict"
+        )
+        path.write_text(json.dumps(policy), encoding="utf-8")
+        with pytest.raises(ValueError, match="Calibration rule differs"):
+            check(sealed, "must-not-exist-calibration-rule.json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_calibration_support_count_cannot_be_reduced_or_bool_aliased(sealed):
+    path = sealed / "experiment/policy-frozen.json"
+    original = path.read_bytes()
+    try:
+        policy = json.loads(original)
+        policy["minimum_accepted_per_task"] = True
+        path.write_text(json.dumps(policy), encoding="utf-8")
+        with pytest.raises(ValueError, match="support/error contract"):
+            check(sealed, "must-not-exist-calibration-support.json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_strict_calibration_constraints_cannot_be_weakened(sealed):
+    path = sealed / "experiment/policy-frozen.json"
+    original = path.read_bytes()
+    policy = json.loads(original)
+    if policy["selection_rule"] != "coverage_guarded_strict":
+        pytest.skip("No strict calibration cohort guard in this fixture")
+    try:
+        policy["cohort_constraints"]["minimum_answerable_recall"] = 0
+        path.write_text(json.dumps(policy), encoding="utf-8")
+        with pytest.raises(ValueError, match="Strict calibration cohort constraints"):
+            check(sealed, "must-not-exist-calibration-constraints.json")
+    finally:
+        path.write_bytes(original)
 
 
 def test_exact_inference_and_arithmetic_replay(sealed):

@@ -25,12 +25,15 @@ EXPOSURE_PROFILES = {
     "palette": PALETTE_EXPOSURE_SHAPES,
     "palette_independent": PALETTE_EXPOSURE_SHAPES,
     "palette_aspects": PALETTE_EXPOSURE_SHAPES,
+    "palette_paper_aspects": PALETTE_EXPOSURE_SHAPES,
 }
 HELD_OUT_SHAPES = ("star", "pentagon", "trapezoid")
 LABEL_RNG_DOMAIN = 0x4D33434C
 PALETTE_LABEL_DOMAIN = 0x4D33504C
 PALETTE_VISUAL_DOMAIN = 0x4D335056
 ASPECT_VISUAL_DOMAIN = 0x4D334148
+PAPER_VISUAL_DOMAIN = 0x4D335042
+PAPER_RNG_POLICY = "SeedSequence(scene_seed, side, M3PB); independent 30-42px light paper rectangles with gray RGB gradients behind visible foreground; never reads attribute labels"
 PALETTE_UNKNOWN_RGB = {
     "оранжевый": (245, 140, 35),
     "розовый": (240, 135, 180),
@@ -66,7 +69,8 @@ class ControlScene:
             len(self.items) != 2
             or type(self.seed) is not int
             or self.seed < 0
-            or self.renderer_profile not in ("standard", "palette", "palette_aspects")
+            or self.renderer_profile
+            not in ("standard", "palette", "palette_aspects", "palette_paper_aspects")
         ):
             raise ValueError("Invalid authored control scene")
         for item in self.items:
@@ -171,6 +175,38 @@ def vertices(shape):
     raise ValueError("Not an authored polygon")
 
 
+def paper_patch(seed, side, scale=4):
+    """Background nuisance pixels only; no item/answer/shape arguments."""
+    if (
+        type(seed) is not int
+        or seed < 0
+        or type(side) is not int
+        or side not in (0, 1)
+        or type(scale) is not int
+        or not 1 <= scale <= 4
+    ):
+        raise ValueError("Invalid independent paper rendering request")
+    rng = np.random.default_rng(
+        np.random.SeedSequence([seed, side, PAPER_VISUAL_DOMAIN])
+    )
+    width, height = (rng.integers(30, 43, 2) * scale).tolist()
+    yy, xx = np.mgrid[:height, :width]
+    brightness = rng.uniform(220, 250)
+    tint = rng.uniform(-4, 4, 3)
+    gradient = rng.uniform(-22, 22) * (xx / (width - 1) - 0.5) + rng.uniform(
+        -22, 22
+    ) * (yy / (height - 1) - 0.5)
+    return np.clip(brightness + tint + gradient[:, :, None], 0, 255).astype(np.uint8)
+
+
+def renderer_profile(exposure_profile):
+    if exposure_profile not in EXPOSURE_PROFILES:
+        raise ValueError("Invalid authored exposure renderer request")
+    if exposure_profile in ("palette_aspects", "palette_paper_aspects"):
+        return exposure_profile
+    return "palette" if exposure_profile.startswith("palette") else "standard"
+
+
 def render(scene):
     scene.validate()
     rng = np.random.default_rng(scene.seed)
@@ -189,7 +225,10 @@ def render(scene):
         center = 22 * scale
         if item.shape in c.SHAPES:
             ry = radius * 0.55 if item.shape in ("овал", "прямоугольник") else radius
-            if scene.renderer_profile == "palette_aspects" and item.shape in (
+            if scene.renderer_profile in (
+                "palette_aspects",
+                "palette_paper_aspects",
+            ) and item.shape in (
                 "овал",
                 "прямоугольник",
             ):
@@ -255,6 +294,16 @@ def render(scene):
                     )
         cx, cy = (24, 72)[side], float(rng.uniform(29, 67))
         position = ((cx - 22) * scale, int((cy - 22) * scale))
+        if scene.renderer_profile == "palette_paper_aspects" and not item.hidden:
+            paper = Image.fromarray(paper_patch(scene.seed, side, scale))
+            canvas.paste(
+                paper,
+                (
+                    int(cx * scale - paper.width // 2),
+                    int(cy * scale - paper.height // 2),
+                ),
+            )
+            paper.close()
         canvas.paste(surface, position, mask)
         if item.hidden:
             ImageDraw.Draw(canvas).rectangle(
@@ -313,7 +362,8 @@ def scenes(
             color = colors[int(rng.integers(len(colors)))]
             choose_unknown_color = (
                 palette_labels.random() < 1 / 3
-                if exposure_profile in ("palette_independent", "palette_aspects")
+                if exposure_profile
+                in ("palette_independent", "palette_aspects", "palette_paper_aspects")
                 else (i + side) % 3 == 1
             )
             if exposure_profile.startswith("palette") and choose_unknown_color:
@@ -336,11 +386,7 @@ def scenes(
                 f"authored-{cohort or split}/{i}",
                 seed + i,
                 tuple(items),
-                "palette_aspects"
-                if exposure_profile == "palette_aspects"
-                else "palette"
-                if exposure_profile.startswith("palette")
-                else "standard",
+                renderer_profile(exposure_profile),
             )
         )
     return rows
@@ -392,12 +438,8 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
                 raise ValueError("Auxiliary scene identity leakage")
             if split not in auxiliary:
                 continue
-            if scene.get("renderer_profile", "standard") != (
-                "palette_aspects"
-                if exposure_profile == "palette_aspects"
-                else "palette"
-                if exposure_profile.startswith("palette")
-                else "standard"
+            if scene.get("renderer_profile", "standard") != renderer_profile(
+                exposure_profile
             ):
                 raise ValueError("Authored renderer profile differs from exposure")
             for item in scene["items"]:

@@ -98,7 +98,7 @@ def run(args):
         try:
             command(
                 prefix
-                + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_composition_package.py tests/test_primary_numeric_backend.py tests/test_primary_composition_backgrounds.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
+                + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_calibration.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_composition_package.py tests/test_primary_numeric_backend.py tests/test_primary_composition_backgrounds.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
             )
         except RuntimeError:
             # Preserve the exact failed preflight instead of inferring later
@@ -144,6 +144,8 @@ def run(args):
             + str(args.consistency_loss)
             + " --numeric-precision "
             + args.numeric_precision
+            + " --calibration-rule "
+            + getattr(args, "calibration_rule", "maximum_coverage")
         )
         command(
             prefix
@@ -211,10 +213,16 @@ if __name__ == "__main__":
             "palette",
             "palette_independent",
             "palette_aspects",
+            "palette_paper_aspects",
         ),
         default="standard",
     )
     parser.add_argument("--consistency-loss", type=float, default=0.0)
+    parser.add_argument(
+        "--calibration-rule",
+        choices=("maximum_coverage", "coverage_guarded_strict"),
+        default="maximum_coverage",
+    )
     parser.add_argument(
         "--numeric-precision", choices=("legacy", "ieee"), default="legacy"
     )

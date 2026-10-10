@@ -222,7 +222,9 @@ def test_palette_new_contours_have_no_right_angles_and_are_bounded(shape):
         assert controls.render(scene).shape == (96, 96, 3)
 
 
-@pytest.mark.parametrize("profile", ("palette_independent", "palette_aspects"))
+@pytest.mark.parametrize(
+    "profile", ("palette_independent", "palette_aspects", "palette_paper_aspects")
+)
 def test_independent_palette_covers_unknown_colors_on_every_supported_shape(profile):
     rows = controls.scenes(
         "exposure", 3000, 1304500000 + 60000, exposure_profile=profile
@@ -290,3 +292,88 @@ def test_aspect_profile_changes_only_elongated_geometry_not_labels_or_other_item
         assert np.array_equal(a[:, 48:], b[:, 48:])
         assert np.array_equal(b, controls.render(row))
     assert changed >= 25
+
+
+def test_paper_background_has_its_own_deterministic_label_free_stream():
+    for side in (0, 1):
+        for seed in range(201000, 201025):
+            pixels = controls.paper_patch(seed, side)
+            assert pixels.dtype == np.uint8 and pixels.shape[-1] == 3
+            assert all(120 <= n <= 168 for n in pixels.shape[:2])
+            assert pixels.min() >= 194 and pixels.max() <= 255
+            assert np.ptp(pixels.astype(int), axis=-1).max() <= 8
+            assert np.array_equal(pixels, controls.paper_patch(seed, side))
+        assert not np.array_equal(
+            controls.paper_patch(201000, side), controls.paper_patch(201001, side)
+        )
+
+
+@pytest.mark.parametrize(
+    "seed,side,scale",
+    [
+        (True, 0, 4),
+        (-1, 0, 4),
+        (1, True, 4),
+        (1, 2, 4),
+        (1, 0, 0),
+        (1, 0, True),
+        (1, 0, 5),
+    ],
+)
+def test_paper_rejects_unbounded_or_aliased_requests(seed, side, scale):
+    with pytest.raises(ValueError, match="independent paper"):
+        controls.paper_patch(seed, side, scale)
+
+
+def test_paper_changes_background_but_preserves_visible_solid_foreground_rgb():
+    from dataclasses import replace
+
+    rows = controls.scenes("exposure", 15, 202000, exposure_profile="palette_aspects")
+    for row in rows:
+        row = replace(
+            row,
+            items=(
+                controls.ControlItem("красный", "круг", "однотонный"),
+                controls.ControlItem("синий", "овал", "однотонный"),
+            ),
+        )
+        paper = replace(row, renderer_profile="palette_paper_aspects")
+        a, b = controls.render(row), controls.render(paper)
+        assert not np.array_equal(a, b)
+        for side in (0, 1):
+            half = a[:, side * 48 : (side + 1) * 48]
+            colors, counts = np.unique(half.reshape(-1, 3), axis=0, return_counts=True)
+            chromatic = np.ptp(colors.astype(int), axis=-1) > 100
+            foreground = colors[chromatic][np.argmax(counts[chromatic])]
+            assert np.all(b == foreground, axis=-1).sum() >= 100
+        assert np.array_equal(b, controls.render(paper))
+
+
+@pytest.mark.parametrize(
+    "profile,digest",
+    [
+        (
+            "standard",
+            "5eaa863773e745c00bcc65cb7f60eff8f18a40f32754d89163ec6b5c8b1967ea",
+        ),
+        ("diverse", "799528f436a3f44461f3ab0b73caba3055dd1d169eb5014f4ad73bacca95887f"),
+        ("palette", "132cdee8e991b20f6b7613ac2e54c8ebc0b4837a03a434295e1b967ec24c73c2"),
+        (
+            "palette_independent",
+            "38df7630ecc6e9f476e491cfaaceac5a37be17d12d0f23a2d534b8e4a8e8d7d1",
+        ),
+        (
+            "palette_aspects",
+            "c5ab3f29c5dd37186b74f56df91c405f38773a33c04f557a1a5a32fac0890bd0",
+        ),
+    ],
+)
+def test_old_renderer_pixels_match_frozen_v10_source(profile, digest):
+    import hashlib
+
+    # Expected pixels were independently produced by the actual sealed V10 Git
+    # source 3d3feb922164... before paper rendering existed, not by this patch.
+    hasher = hashlib.sha256()
+    for scene in controls.scenes("exposure", 30, 202500, exposure_profile=profile):
+        hasher.update(controls.render(scene).tobytes())
+    assert hasher.hexdigest() == digest

@@ -54,6 +54,7 @@ def build(repo, output):
         "scripts/m33_composition_rng_audit.py",
         "tests/test_primary_composition.py",
         "tests/test_primary_composition_pipeline.py",
+        "tests/test_primary_composition_calibration.py",
         "tests/test_primary_composition_views.py",
         "tests/test_primary_composition_controls.py",
         "tests/test_primary_zero.py",

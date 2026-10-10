@@ -22,6 +22,12 @@ from ai_brain.training import primary_objects as old
 from ai_brain.training import primary_relations as relations
 from ai_brain.training import primary_zero as base
 
+CALIBRATION_RULES = ("maximum_coverage", "coverage_guarded_strict")
+STRICT_COHORT_CONSTRAINTS = {
+    "minimum_answerable_recall": 0.8,
+    "minimum_unknown_recall": 0.9,
+}
+
 
 def sha(path):
     with Path(path).open("rb") as f:
@@ -177,7 +183,21 @@ def evaluate(prepared, p, thresholds):
     }
 
 
-def calibrate(prepared, p, min_accepted=40):
+def calibrate(prepared, p, min_accepted=40, *, rule="maximum_coverage", cohorts=None):
+    if (
+        rule not in CALIBRATION_RULES
+        or type(min_accepted) is not int
+        or min_accepted < 1
+    ):
+        raise ValueError("Invalid calibration rule or support count")
+    if rule == "coverage_guarded_strict" and (
+        cohorts is None
+        or not isinstance(cohorts, (list, tuple))
+        or len(cohorts) != len(prepared.data["records"])
+        or not cohorts
+        or any(v not in ("native", "authored") for v in cohorts)
+    ):
+        raise ValueError("Explicit aligned calibration cohorts required")
     thresholds, report = {}, {}
     for task in course.VALUES:
         indices = [
@@ -185,12 +205,45 @@ def calibrate(prepared, p, min_accepted=40):
         ]
         pp = p[indices]
         gold = prepared.data["labels"][indices].tolist()
+        group_indices = (
+            {
+                name: [j for j, i in enumerate(indices) if cohorts[i] == name]
+                for name in sorted(set(cohorts))
+            }
+            if rule == "coverage_guarded_strict"
+            else {}
+        )
         choices = []
         for threshold in (0.9, 0.95, 0.97, 0.98, 0.99, 0.995, 0.999, 0.9999):
-            metrics = course.statistics(gold, course.select(pp, [threshold] * len(pp)))
-            if metrics["false_assertions"] == 0 and metrics["accepted"] >= min_accepted:
-                choices.append((metrics["accepted"], threshold, metrics))
-        best = max(choices, key=lambda v: (v[0], v[1])) if choices else None
+            predictions = course.select(pp, [threshold] * len(pp))
+            metrics = course.statistics(gold, predictions)
+            grouped = {
+                name: course.statistics(
+                    [gold[j] for j in js], [predictions[j] for j in js]
+                )
+                for name, js in group_indices.items()
+            }
+            recall_ok = all(
+                (v["answerable_recall"] is None or v["answerable_recall"] >= 0.8)
+                and (v["unknown_recall"] is None or v["unknown_recall"] >= 0.9)
+                for v in grouped.values()
+            )
+            if (
+                metrics["false_assertions"] == 0
+                and metrics["accepted"] >= min_accepted
+                and recall_ok
+            ):
+                choices.append((metrics["accepted"], threshold, metrics, grouped))
+        best = (
+            max(
+                choices,
+                key=lambda v: (
+                    (v[1], v[0]) if rule == "coverage_guarded_strict" else (v[0], v[1])
+                ),
+            )
+            if choices
+            else None
+        )
         thresholds[task] = best[1] if best else None
         report[task] = {
             "threshold": thresholds[task],
@@ -198,8 +251,26 @@ def calibrate(prepared, p, min_accepted=40):
             if best
             else course.statistics(gold, [course.UNKNOWN] * len(gold)),
         }
+        if rule == "coverage_guarded_strict":
+            report[task]["cohort_metrics"] = (
+                best[3]
+                if best
+                else {
+                    name: course.statistics(
+                        [gold[j] for j in js], [course.UNKNOWN] * len(js)
+                    )
+                    for name, js in group_indices.items()
+                }
+            )
     return thresholds, {
         "selection_split": "calibration_only",
+        "selection_rule": rule,
+        "cohort_constraints": STRICT_COHORT_CONSTRAINTS
+        if rule == "coverage_guarded_strict"
+        else None,
+        "cohort_names": sorted(set(cohorts))
+        if rule == "coverage_guarded_strict"
+        else [],
         "minimum_accepted_per_task": min_accepted,
         "allowed_observed_calibration_errors": 0,
         "tasks": report,
@@ -257,6 +328,9 @@ def run(args):
     exposure_profile = getattr(args, "exposure_profile", "standard")
     if exposure_profile not in controls.EXPOSURE_PROFILES:
         raise ValueError("Invalid control exposure profile")
+    calibration_rule = getattr(args, "calibration_rule", "maximum_coverage")
+    if calibration_rule not in CALIBRATION_RULES:
+        raise ValueError("Invalid calibration selection rule")
     consistency_amount = getattr(args, "consistency_loss", 0.0)
     if type(auxiliary_images) is not int or not 0 <= auxiliary_images <= 10000:
         raise ValueError("Bounded auxiliary scene count required")
@@ -330,6 +404,10 @@ def run(args):
         "learning_rate": 0.001,
         "schedules": ["joint", "curriculum"],
         "selection": "Lowest balanced dev CE only; native/authored dev have equal weight when auxiliary data exists. Calibration and final cohorts accessed after candidate freeze.",
+        "calibration_rule": calibration_rule,
+        "calibration_constraints": STRICT_COHORT_CONSTRAINTS
+        if calibration_rule == "coverage_guarded_strict"
+        else None,
         "held_combinations": sorted(course.HELD_COMBINATIONS),
         "scope": "Procedural two-object color/shape/pattern + bounded RU/EN queries. No animal names, anatomy, photographs, textbooks or free-form text learned.",
         "production_admitted": False,
@@ -350,6 +428,9 @@ def run(args):
         "auxiliary_images": auxiliary_images,
         "exposure_profile": exposure_profile,
         "exposure_shapes": controls.EXPOSURE_PROFILES[exposure_profile],
+        "paper_rng_policy": controls.PAPER_RNG_POLICY
+        if exposure_profile == "palette_paper_aspects"
+        else None,
         "held_control_shapes": controls.HELD_OUT_SHAPES,
         "auxiliary_calibration": auxiliary_images > 0,
         "held_control_final": auxiliary_images > 0,
@@ -587,7 +668,15 @@ def run(args):
         else raw["calibration"]
     )
     calibration = Prepared(calibration_data, device)
-    thresholds, policy = calibrate(calibration, probabilities(model, calibration))
+    cohorts = ["native"] * len(raw["calibration"]["records"])
+    if auxiliary_images:
+        cohorts += ["authored"] * len(raw["control_calibration"]["records"])
+    thresholds, policy = calibrate(
+        calibration,
+        probabilities(model, calibration),
+        rule=calibration_rule,
+        cohorts=cohorts,
+    )
     write(root / "policy-frozen.json", policy)
     final_splits = ("final", "combinations", "transfer") + (
         ("control_final",) if auxiliary_images else ()
@@ -743,6 +832,9 @@ if __name__ == "__main__":
         default="standard",
     )
     parser.add_argument("--consistency-loss", type=float, default=0.0)
+    parser.add_argument(
+        "--calibration-rule", choices=CALIBRATION_RULES, default="maximum_coverage"
+    )
     parser.add_argument(
         "--numeric-precision", choices=("legacy", "ieee"), default="legacy"
     )

@@ -47,6 +47,7 @@ SOURCE_FILES = (
     "scripts/m33_composition_sixhour_backup.py",
     "tests/test_primary_composition.py",
     "tests/test_primary_composition_pipeline.py",
+    "tests/test_primary_composition_calibration.py",
     "tests/test_primary_composition_views.py",
     "tests/test_primary_composition_controls.py",
     "tests/test_primary_composition_backup.py",
@@ -310,6 +311,14 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-sixhour-aspect-contract-v1.xml",
         "qa-sixhour-aspect-full-regression-v1.xml",
         "qa-sixhour-third-source-transport-v1.xml",
+        "qa-sixhour-paper-unit-v1.xml",
+        "qa-sixhour-paper-pipeline-v1.xml",
+        "qa-sixhour-paper-unit-v2.xml",
+        "qa-sixhour-paper-contract-v1.xml",
+        "qa-sixhour-strict-calibration-unit-v1.xml",
+        "qa-sixhour-strict-calibration-pipeline-v1.xml",
+        "qa-sixhour-strict-calibration-hostile-v1.xml",
+        "qa-sixhour-paper-strict-full-regression-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))
