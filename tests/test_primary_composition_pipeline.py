@@ -7,6 +7,7 @@ import tarfile
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 import torch
 
@@ -28,7 +29,7 @@ verifier = script("m33_composition_verify")
 
 @pytest.fixture(
     scope="module",
-    params=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+    params=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13),
     ids=(
         "single-view",
         "four-view",
@@ -42,6 +43,8 @@ verifier = script("m33_composition_verify")
         "ieee-aspect-palette",
         "ieee-paper-aspect-palette",
         "ieee-strict-paper-aspect-palette",
+        "balanced-paper-aspect-palette",
+        "balanced-foreground-paper-aspect-palette",
     ),
 )
 def sealed(tmp_path_factory, request):
@@ -81,8 +84,12 @@ def sealed(tmp_path_factory, request):
                 reflection_consensus=request.param > 0,
                 auxiliary_images=12 if request.param >= 2 else 0,
                 consistency_loss=0.2 if request.param >= 2 else 0.0,
+                sampling_rule="balanced_task_answer_32_32"
+                if request.param >= 12
+                else "legacy_48_16",
+                foreground_loss=0.1 if request.param == 13 else 0.0,
                 calibration_rule="coverage_guarded_strict"
-                if request.param == 11
+                if request.param >= 11
                 else "maximum_coverage",
                 exposure_profile="palette_paper_aspects"
                 if request.param >= 10
@@ -128,6 +135,49 @@ def check(root, name):
         root / name,
         "cpu",
     )
+
+
+def test_training_group_audit_cannot_be_forged(sealed):
+    path = sealed / "experiment/training-group-audit.json"
+    original = path.read_bytes()
+    try:
+        data = json.loads(original)
+        data["native_batch"] = 63
+        path.write_text(json.dumps(data), encoding="utf-8")
+        with pytest.raises(ValueError, match="group balance audit"):
+            check(sealed, "must-not-exist-training-groups.json")
+    finally:
+        path.write_bytes(original)
+
+
+@pytest.mark.parametrize("attack", ("test-mask", "alter-training-mask"))
+def test_foreground_supervision_cannot_leak_into_evaluation_or_change_after_seal(
+    sealed, attack
+):
+    protocol = json.loads((sealed / "experiment/protocol.json").read_text())
+    if not protocol.get("foreground_loss"):
+        pytest.skip("No foreground training contract in this fixture")
+    path = sealed / "experiment/dataset.npz"
+    freeze_path = sealed / "experiment/candidate-freeze.json"
+    original, original_freeze = path.read_bytes(), freeze_path.read_bytes()
+    try:
+        with np.load(path, allow_pickle=False) as saved:
+            arrays = {k: saved[k] for k in saved.files}
+        if attack == "test-mask":
+            arrays["final_foreground"] = arrays["exposure_foreground"].copy()
+        else:
+            arrays["exposure_foreground"] = 255 - arrays["exposure_foreground"]
+        np.savez_compressed(path, **arrays)
+        freeze = json.loads(original_freeze)
+        freeze["dataset_sha256"] = verifier.sha(path)
+        freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
+        with pytest.raises(
+            ValueError, match="masks must exist only|mask/pixel supervision differs"
+        ):
+            check(sealed, "must-not-exist-foreground.json")
+    finally:
+        path.write_bytes(original)
+        freeze_path.write_bytes(original_freeze)
 
 
 def test_rng_audit_cannot_be_rewritten(sealed):
@@ -311,10 +361,11 @@ def test_dataset_archive_expands_each_array_only_once(sealed, monkeypatch):
         lambda *args, **kwargs: CountedArchive(original_load(*args, **kwargs)),
     )
     check(sealed, "verified-single-decompression.json")
-    auxiliary = verifier.read(sealed / "experiment/protocol.json").get(
-        "auxiliary_images", 0
+    protocol = verifier.read(sealed / "experiment/protocol.json")
+    auxiliary = protocol.get("auxiliary_images", 0)
+    assert len(accessed) == (40 if auxiliary else 24) + bool(
+        protocol.get("foreground_loss", 0)
     )
-    assert len(accessed) == (40 if auxiliary else 24)
     assert set(accessed.values()) == {1}
 
 

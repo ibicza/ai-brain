@@ -63,6 +63,7 @@ def build(repo, output):
         "tests/test_primary_composition_package.py",
         "tests/test_primary_numeric_backend.py",
         "tests/test_primary_composition_backgrounds.py",
+        "tests/test_primary_composition_supervision.py",
         "tests/conftest.py",
     )
     for name in script_dependencies(repo, explicit):

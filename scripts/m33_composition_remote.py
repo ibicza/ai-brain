@@ -98,7 +98,7 @@ def run(args):
         try:
             command(
                 prefix
-                + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_calibration.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_composition_package.py tests/test_primary_numeric_backend.py tests/test_primary_composition_backgrounds.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
+                + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_calibration.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_composition_package.py tests/test_primary_numeric_backend.py tests/test_primary_composition_backgrounds.py tests/test_primary_composition_supervision.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
             )
         except RuntimeError:
             # Preserve the exact failed preflight instead of inferring later
@@ -146,6 +146,10 @@ def run(args):
             + args.numeric_precision
             + " --calibration-rule "
             + getattr(args, "calibration_rule", "maximum_coverage")
+            + " --sampling-rule "
+            + getattr(args, "sampling_rule", "legacy_48_16")
+            + " --foreground-loss "
+            + str(getattr(args, "foreground_loss", 0.0))
         )
         command(
             prefix
@@ -218,6 +222,12 @@ if __name__ == "__main__":
         default="standard",
     )
     parser.add_argument("--consistency-loss", type=float, default=0.0)
+    parser.add_argument(
+        "--sampling-rule",
+        choices=("legacy_48_16", "balanced_task_answer_32_32"),
+        default="legacy_48_16",
+    )
+    parser.add_argument("--foreground-loss", type=float, default=0.0)
     parser.add_argument(
         "--calibration-rule",
         choices=("maximum_coverage", "coverage_guarded_strict"),

@@ -18,6 +18,7 @@ from m33_composition_package import sha
 SOURCE_FILES = (
     "src/ai_brain/training/primary_composition.py",
     "src/ai_brain/training/primary_composition_views.py",
+    "src/ai_brain/training/primary_composition_supervision.py",
     "src/ai_brain/training/primary_composition_controls.py",
     "src/ai_brain/training/primary_composition_rng_audit.py",
     "src/ai_brain/training/primary_numeric_backend.py",
@@ -50,6 +51,7 @@ SOURCE_FILES = (
     "tests/test_primary_composition_pipeline.py",
     "tests/test_primary_composition_calibration.py",
     "tests/test_primary_composition_views.py",
+    "tests/test_primary_composition_supervision.py",
     "tests/test_primary_composition_controls.py",
     "tests/test_primary_composition_backup.py",
     "tests/test_primary_composition_package.py",
@@ -66,6 +68,7 @@ SOURCE_FILES = (
     "tests/test_primary_relations.py",
     "docs/m33_composition_six_hour_work.md",
     "docs/m33_primary_composition.md",
+    "docs/m33_composition_balanced_foreground.md",
     "docs/m33_primary_composition_continuation.md",
     "learning_materials/visual_lexicon/README.md",
 )
@@ -331,6 +334,13 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-sixhour-final-full-regression-v2.xml",
         "qa-sixhour-backup-final-whitelist-v1.xml",
         "qa-sixhour-final-overview-backup-v1.xml",
+        "qa-balanced-unit-v1.xml",
+        "qa-balanced-pipeline-v1.xml",
+        "qa-balanced-hostile-v1.xml",
+        "qa-balanced-hostile-v2.xml",
+        "qa-balanced-full-v1.xml",
+        "qa-balanced-supplement-v1.xml",
+        "qa-balanced-backup-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))
@@ -345,6 +355,10 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "source-controls-20261010-v8",
         "source-controls-20261010-v9",
         "source-controls-20261010-v10",
+        "source-controls-20261010-v11",
+        "source-controls-20261010-v12",
+        "source-controls-20261010-v13",
+        "source-controls-20261010-v14",
     ):
         root = base / name
         if not root.exists():

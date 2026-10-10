@@ -70,7 +70,7 @@ def consistent_probabilities(model, images, questions):
     return unanimous_scores(torch.stack(probabilities))
 
 
-def augment_batch(images, questions, rng):
+def augment_batch(images, questions, rng, *, supervision=None):
     """Independent fair reflections per example; all attribute labels unchanged."""
     horizontal = torch.as_tensor(
         rng.integers(0, 2, size=len(images)), device=images.device, dtype=torch.bool
@@ -81,4 +81,12 @@ def augment_batch(images, questions, rng):
     x = torch.where(horizontal[:, None, None, None], images.flip(3), images)
     x = torch.where(vertical[:, None, None, None], x.flip(2), x)
     q = torch.where(horizontal[:, None], swap_sides(questions), questions)
+    if supervision is not None:
+        if supervision.shape != (len(images), 1, 96, 96):
+            raise ValueError("Aligned target foreground required")
+        mask = torch.where(
+            horizontal[:, None, None, None], supervision.flip(3), supervision
+        )
+        mask = torch.where(vertical[:, None, None, None], mask.flip(2), mask)
+        return x, q, mask
     return x, q

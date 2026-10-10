@@ -207,7 +207,9 @@ def renderer_profile(exposure_profile):
     return "palette" if exposure_profile.startswith("palette") else "standard"
 
 
-def render(scene):
+def render(scene, *, return_foreground=False):
+    if type(return_foreground) is not bool:
+        raise ValueError("Boolean foreground supervision request required")
     scene.validate()
     rng = np.random.default_rng(scene.seed)
     palette_rng = np.random.default_rng(
@@ -218,6 +220,7 @@ def render(scene):
     if scene.renderer_profile.startswith("palette"):
         background = tuple(int(x) for x in palette_rng.integers(246, 256, 3))
     canvas = Image.new("RGB", (size * scale, size * scale), background)
+    foreground = []
     for side, item in enumerate(scene.items):
         radius = rng.uniform(11, 14.5) * scale
         mask = Image.new("L", (44 * scale, 44 * scale))
@@ -305,12 +308,20 @@ def render(scene):
             )
             paper.close()
         canvas.paste(surface, position, mask)
+        if return_foreground:
+            visible = Image.new("L", canvas.size, 0)
+            if not item.hidden:
+                visible.paste(mask, position)
+            foreground.append(
+                np.asarray(visible.resize((size, size), Image.Resampling.BOX)).copy()
+            )
         if item.hidden:
             ImageDraw.Draw(canvas).rectangle(
                 (side * 48 * scale, 0, (side + 1) * 48 * scale - 1, 96 * scale),
                 fill=background,
             )
-    return np.asarray(canvas.resize((size, size), Image.Resampling.BOX)).copy()
+    pixels = np.asarray(canvas.resize((size, size), Image.Resampling.BOX)).copy()
+    return (pixels, np.stack(foreground)) if return_foreground else pixels
 
 
 def scenes(
@@ -392,8 +403,11 @@ def scenes(
     return rows
 
 
-def prepare(rows):
-    pixels = np.stack([render(row) for row in rows])
+def prepare(rows, *, include_foreground=False):
+    if type(include_foreground) is not bool:
+        raise ValueError("Boolean training supervision request required")
+    rendered = [render(row, return_foreground=include_foreground) for row in rows]
+    pixels = np.stack([r[0] for r in rendered] if include_foreground else rendered)
     questions, labels, indices, records = [], [], [], []
     for i, scene in enumerate(rows):
         digest = hashlib.sha256(pixels[i].tobytes()).hexdigest()
@@ -414,7 +428,7 @@ def prepare(rows):
                         "answer": label,
                     }
                 )
-    return {
+    data = {
         "pixels": pixels,
         "questions": np.asarray(questions, dtype=np.int64),
         "labels": np.asarray(labels, dtype=np.int64),
@@ -422,6 +436,9 @@ def prepare(rows):
         "records": records,
         "scenes": [asdict(row) for row in rows],
     }
+    if include_foreground:
+        data["foreground"] = np.stack([r[1] for r in rendered])
+    return data
 
 
 def audit(auxiliary, native, *, exposure_profile="standard"):

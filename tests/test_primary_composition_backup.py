@@ -18,6 +18,9 @@ def test_scoped_backup_preserves_current_overview_and_both_work_journals():
         "docs/m33_primary_composition.md",
         "docs/m33_primary_composition_continuation.md",
         "docs/m33_composition_six_hour_work.md",
+        "docs/m33_composition_balanced_foreground.md",
+        "src/ai_brain/training/primary_composition_supervision.py",
+        "tests/test_primary_composition_supervision.py",
     }
     assert required.issubset(backup.SOURCE_FILES)
     assert len(backup.SOURCE_FILES) == len(set(backup.SOURCE_FILES))

@@ -213,6 +213,70 @@ def verify(root, previous, capsule, output, device):
         arrays = {key: stored_arrays[key] for key in stored_arrays.files}
     with gzip.open(root / "dataset-records.json.gz", "rt", encoding="utf-8") as f:
         source_records = json.load(f)
+    from ai_brain.training import primary_composition_supervision as supervision
+
+    sampling_rule = protocol.get("sampling_rule", "legacy_48_16")
+    foreground_amount = protocol.get("foreground_loss", 0.0)
+    if (
+        sampling_rule not in supervision.SAMPLING_RULES
+        or (sampling_rule != "legacy_48_16" and not protocol.get("auxiliary_images", 0))
+        or type(foreground_amount) not in (int, float)
+        or not math.isfinite(foreground_amount)
+        or not 0 <= foreground_amount <= 1
+    ):
+        raise ValueError("Invalid sealed training supervision policy")
+    masks_keys = {k for k in arrays if k.endswith("_foreground")}
+    if masks_keys != ({"exposure_foreground"} if foreground_amount else set()):
+        raise ValueError("Foreground masks must exist only for authored TRAIN")
+    if foreground_amount:
+        from ai_brain.training import primary_composition_controls as mask_controls
+
+        original_masks = arrays["exposure_foreground"]
+        scenes = source_records["exposure"]["scenes"]
+        if (
+            original_masks.shape != (len(scenes), 2, 96, 96)
+            or original_masks.dtype != np.uint8
+        ):
+            raise ValueError("Invalid original training foreground arrays")
+        for i, row in enumerate(scenes):
+            scene = mask_controls.ControlScene(
+                row["identity"],
+                row["seed"],
+                tuple(mask_controls.ControlItem(**item) for item in row["items"]),
+                row.get("renderer_profile", "standard"),
+            )
+            pixels, masks = mask_controls.render(scene, return_foreground=True)
+            if not np.array_equal(
+                pixels, arrays["exposure_pixels"][i]
+            ) or not np.array_equal(masks, original_masks[i]):
+                raise ValueError(
+                    "TRAIN mask/pixel supervision differs from sealed renderer"
+                )
+    if "sampling_rule" in protocol:
+        auxiliary = protocol.get("auxiliary_images", 0) > 0
+        expected_groups = {
+            "sampling_rule": sampling_rule,
+            "native": supervision.GroupSampler(
+                source_records["train"]["records"]
+            ).audit(),
+            "authored": supervision.GroupSampler(
+                source_records["exposure"]["records"]
+            ).audit()
+            if auxiliary
+            else None,
+            "native_batch": 32
+            if sampling_rule != "legacy_48_16"
+            else 48
+            if auxiliary
+            else 64,
+            "authored_batch": 32
+            if sampling_rule != "legacy_48_16"
+            else 16
+            if auxiliary
+            else 0,
+        }
+        if read(root / "training-group-audit.json") != expected_groups:
+            raise ValueError("Training group balance audit differs")
     auxiliary_count = protocol.get("auxiliary_images", 0)
     if (
         protocol["dataset_profile"].endswith("background_clear")

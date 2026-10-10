@@ -645,7 +645,13 @@ class CompositionModel(nn.Module):
             allowed[i, [ANSWERS.index(a) for a in VALUES[task]] + [UNKNOWN]] = True
         self.register_buffer("allowed_answers", allowed, persistent=False)
 
-    def forward(self, images: torch.Tensor, questions: torch.Tensor):
+    def forward(
+        self, images: torch.Tensor, questions: torch.Tensor, *, return_attention=False
+    ):
+        if type(return_attention) is not bool or (
+            return_attention and not self.attribute_attention_enabled
+        ):
+            raise ValueError("Training attention requires enabled attribute attention")
         if (
             images.ndim != 4
             or images.shape[1:] != (3, base.IMAGE_SIZE, base.IMAGE_SIZE)
@@ -729,6 +735,15 @@ class CompositionModel(nn.Module):
                 visual,
                 need_weights=False,
             )
+            if return_attention:
+                # Separate training-only calculation leaves the ordinary
+                # inference kernel/output unchanged; no gold mask enters here.
+                _, weights = self.attribute_attention(
+                    self.query_projection(summary)[:, None],
+                    keys,
+                    visual,
+                    need_weights=True,
+                )
             logits = self.readout(torch.cat((hidden[:, -1], attended[:, 0]), -1))
         else:
             logits = self.readout(hidden[:, -1])
@@ -737,9 +752,10 @@ class CompositionModel(nn.Module):
                 torch.cat((self.spatial_features(features), summary), -1)
             )
         # Output scope depends only on input words, never on renderer facts.
-        return logits.masked_fill(
+        logits = logits.masked_fill(
             ~self.allowed_answers[matches.long().argmax(-1)], float("-inf")
         )
+        return (logits, weights[:, 0]) if return_attention else logits
 
     def legacy_forward(self, images, questions):
         return self.inherited(images, questions)

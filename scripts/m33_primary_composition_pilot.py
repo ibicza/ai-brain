@@ -17,6 +17,7 @@ from torch.nn import functional as F
 
 from ai_brain.training import primary_composition as course
 from ai_brain.training import primary_composition_controls as controls
+from ai_brain.training import primary_composition_supervision as supervision
 from ai_brain.training import primary_composition_views as views
 from ai_brain.training import primary_objects as old
 from ai_brain.training import primary_relations as relations
@@ -51,6 +52,12 @@ class Prepared:
         self.questions = torch.from_numpy(data["questions"]).to(device)
         self.labels = torch.from_numpy(data["labels"]).to(device)
         self.image_index = torch.from_numpy(data["image_index"]).to(device)
+        self.foreground = (
+            torch.from_numpy(data["foreground"]).float().to(device) / 255
+            if "foreground" in data
+            else None
+        )
+        self.sides = torch.tensor([r["side"] for r in data["records"]], device=device)
 
     def batch(self, indices):
         return (
@@ -58,6 +65,11 @@ class Prepared:
             self.questions[indices],
             self.labels[indices],
         )
+
+    def target_masks(self, indices):
+        if self.foreground is None:
+            raise ValueError("Training foreground supervision not prepared")
+        return self.foreground[self.image_index[indices], self.sides[indices]][:, None]
 
 
 def join_data(left, right):
@@ -331,6 +343,19 @@ def run(args):
     calibration_rule = getattr(args, "calibration_rule", "maximum_coverage")
     if calibration_rule not in CALIBRATION_RULES:
         raise ValueError("Invalid calibration selection rule")
+    sampling_rule = getattr(args, "sampling_rule", "legacy_48_16")
+    foreground_amount = getattr(args, "foreground_loss", 0.0)
+    if sampling_rule not in supervision.SAMPLING_RULES or (
+        sampling_rule != "legacy_48_16" and not auxiliary_images
+    ):
+        raise ValueError("Balanced cohort sampling requires authored training data")
+    if (
+        type(foreground_amount) not in (float, int)
+        or not math.isfinite(foreground_amount)
+        or not 0 <= foreground_amount <= 1
+        or (foreground_amount and not auxiliary_images)
+    ):
+        raise ValueError("Bounded foreground loss requires authored training data")
     consistency_amount = getattr(args, "consistency_loss", 0.0)
     if type(auxiliary_images) is not int or not 0 <= auxiliary_images <= 10000:
         raise ValueError("Bounded auxiliary scene count required")
@@ -401,6 +426,9 @@ def run(args):
         "numeric_backend": numeric_backend,
         "steps_per_schedule": args.steps,
         "batch_size": 64,
+        "sampling_rule": sampling_rule,
+        "foreground_loss": foreground_amount,
+        "foreground_scope": "Authored exposure TRAIN only; per-query visible foreground KL, empty targets skipped; masks never model inputs or evaluation inputs.",
         "learning_rate": 0.001,
         "schedules": ["joint", "curriculum"],
         "selection": "Lowest balanced dev CE only; native/authored dev have equal weight when auxiliary data exists. Calibration and final cohorts accessed after candidate freeze.",
@@ -486,7 +514,8 @@ def run(args):
                     args.seed * 100000 + (6 + offset) * 10000,
                     cohort=split,
                     exposure_profile=exposure_profile,
-                )
+                ),
+                include_foreground=bool(foreground_amount) and split == "exposure",
             )
             for offset, split in enumerate(
                 ("exposure", "control_calibration", "control_final")
@@ -510,6 +539,8 @@ def run(args):
     for split, group in raw.items():
         for key in ("pixels", "questions", "labels", "image_index"):
             arrays[split + "_" + key] = group[key]
+        if "foreground" in group:
+            arrays[split + "_foreground"] = group["foreground"]
     np.savez_compressed(root / "dataset.npz", **arrays)
     with gzip.open(root / "dataset-records.json.gz", "wt", encoding="utf-8") as f:
         json.dump(
@@ -536,6 +567,30 @@ def run(args):
     auxiliary_dev = Prepared(raw["control_dev"], device) if auxiliary_images else None
     if auxiliary_train is not None:
         auxiliary_tasks = np.asarray([r["task"] for r in raw["exposure"]["records"]])
+    native_sampler = supervision.GroupSampler(raw["train"]["records"])
+    authored_sampler = (
+        supervision.GroupSampler(raw["exposure"]["records"])
+        if auxiliary_images
+        else None
+    )
+    write(
+        root / "training-group-audit.json",
+        {
+            "sampling_rule": sampling_rule,
+            "native": native_sampler.audit(),
+            "authored": authored_sampler.audit() if authored_sampler else None,
+            "native_batch": 32
+            if sampling_rule != "legacy_48_16"
+            else 48
+            if auxiliary_images
+            else 64,
+            "authored_batch": 32
+            if sampling_rule != "legacy_48_16"
+            else 16
+            if auxiliary_images
+            else 0,
+        },
+    )
     trials = []
     for schedule in ("joint", "curriculum"):
         torch.manual_seed(args.seed + 1)
@@ -560,7 +615,13 @@ def run(args):
                 else np.arange(len(train.labels))
             )
             indices = torch.tensor(
-                rng.choice(pool, size=48 if auxiliary_train is not None else 64),
+                native_sampler.sample(
+                    rng,
+                    32,
+                    omit_pattern=schedule == "curriculum" and step <= args.steps // 3,
+                )
+                if sampling_rule != "legacy_48_16"
+                else rng.choice(pool, size=48 if auxiliary_train is not None else 64),
                 device=device,
             )
             x, q, y = train.batch(indices)
@@ -570,18 +631,49 @@ def run(args):
                     if schedule == "curriculum" and step <= args.steps // 3
                     else np.arange(len(auxiliary_train.labels))
                 )
-                ax, aq, ay = auxiliary_train.batch(
-                    torch.tensor(rng.choice(auxiliary_pool, size=16), device=device)
+                auxiliary_indices = torch.tensor(
+                    authored_sampler.sample(
+                        rng,
+                        32,
+                        omit_pattern=schedule == "curriculum"
+                        and step <= args.steps // 3,
+                    )
+                    if sampling_rule != "legacy_48_16"
+                    else rng.choice(auxiliary_pool, size=16),
+                    device=device,
                 )
+                ax, aq, ay = auxiliary_train.batch(auxiliary_indices)
                 x, q, y = torch.cat((x, ax)), torch.cat((q, aq)), torch.cat((y, ay))
+            masks = None
+            if foreground_amount:
+                # Native portion has no mask supervision; a zero mask means no
+                # auxiliary term, not that the native object is absent.
+                masks = torch.cat(
+                    (
+                        torch.zeros(len(indices), 1, 96, 96, device=device),
+                        auxiliary_train.target_masks(auxiliary_indices),
+                    )
+                )
             if model.reflection_consensus:
-                x, q = views.augment_batch(x, q, rng)
+                if masks is None:
+                    x, q = views.augment_batch(x, q, rng)
+                else:
+                    x, q, masks = views.augment_batch(x, q, rng, supervision=masks)
             optimizer.param_groups[0]["lr"] = 0.001 * (
                 0.2 + 0.8 * 0.5 * (1 + math.cos(math.pi * step / args.steps))
             )
             optimizer.zero_grad(set_to_none=True)
-            logits = model(x, q)
+            if masks is None:
+                logits = model(x, q)
+            else:
+                logits, attention = model(x, q, return_attention=True)
             loss = masked_smoothing_loss(logits, y, args.label_smoothing)
+            foreground_term = (
+                supervision.foreground_attention_loss(attention, masks)
+                if masks is not None
+                else loss * 0
+            )
+            loss = loss + foreground_amount * foreground_term
             if consistency_amount:
                 second_x, second_q = views.augment_batch(x, q, rng)
                 loss = loss + consistency_amount * consistency_loss(
@@ -609,6 +701,7 @@ def run(args):
                 point = {
                     "step": step,
                     "train_loss": float(loss.detach()),
+                    "foreground_kl": float(foreground_term.detach()),
                     "balanced_dev_ce": score,
                     "native_balanced_dev_ce": native_score,
                     "auxiliary_balanced_dev_ce": auxiliary_score,
@@ -832,6 +925,10 @@ if __name__ == "__main__":
         default="standard",
     )
     parser.add_argument("--consistency-loss", type=float, default=0.0)
+    parser.add_argument(
+        "--sampling-rule", choices=supervision.SAMPLING_RULES, default="legacy_48_16"
+    )
+    parser.add_argument("--foreground-loss", type=float, default=0.0)
     parser.add_argument(
         "--calibration-rule", choices=CALIBRATION_RULES, default="maximum_coverage"
     )
