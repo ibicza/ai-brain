@@ -36,6 +36,7 @@ SOURCE_FILES = (
     "tests/test_primary_composition_views.py",
     "tests/test_primary_composition_controls.py",
     "tests/test_primary_composition_backup.py",
+    "tests/test_primary_composition_package.py",
     "tests/test_primary_zero.py",
     "tests/test_primary_relations.py",
     "docs/m33_composition_six_hour_work.md",
@@ -55,6 +56,7 @@ RUN_ROOT_FILES = (
     "development-diagnostics.json",
     "known-transfer-error-2447.png",
     "scientific-validity-notice.json",
+    "remote-preflight-failure.json",
 )
 
 
@@ -129,16 +131,16 @@ def run(repo, data, output, parent, run_names):
     evidence = []
     for name in run_names:
         root = base / name
-        if (
-            root.resolve().parent != base
-            or not (root / "remote-receipt.json").is_file()
+        if root.resolve().parent != base:
+            raise ValueError("Scoped run required")
+        completed = root / "remote-receipt.json"
+        failed = root / "remote-preflight-failure.json"
+        receipt = completed if completed.is_file() else failed
+        if not receipt.is_file() or json.loads(receipt.read_text())["status"] not in (
+            "REMOTE_CONTINUATION_REPLAYED",
+            "REMOTE_PREFLIGHT_FAILED_NOT_TRAINED",
         ):
-            raise ValueError("Finished, scoped run receipt required")
-        if (
-            json.loads((root / "remote-receipt.json").read_text())["status"]
-            != "REMOTE_CONTINUATION_REPLAYED"
-        ):
-            raise ValueError("Run has no completed independent replay")
+            raise ValueError("Completed replay or preserved preflight failure required")
         selected = [root / n for n in RUN_ROOT_FILES if (root / n).is_file()]
         for child in ("experiment", "control-screen-v1", "background-probe-v1"):
             if (root / child).exists():

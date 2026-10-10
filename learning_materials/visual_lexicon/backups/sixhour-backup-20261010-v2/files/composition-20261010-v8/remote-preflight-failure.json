@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "status": "REMOTE_PREFLIGHT_FAILED_NOT_TRAINED",
+  "source_capsule_sha256": "47263c78e833bc81b73d44cd373ab4be6a4ac15b573e1b1cb99c4418fb597bc6",
+  "tests_sha256": "8125ffc6c820a62cd2ea75ecf81c4460a848b7f8c977a5c9715f4b6c03fe5f44",
+  "remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v8",
+  "passed": 217,
+  "failed": 1,
+  "failure": "ModuleNotFoundError: m33_primary_relations_pilot in legacy-policy test; its transitive m33_primary_zero_pilot script was also omitted from the capsule.",
+  "training_started": false,
+  "original_capsule_rewritten": false,
+  "production_admitted": false
+}

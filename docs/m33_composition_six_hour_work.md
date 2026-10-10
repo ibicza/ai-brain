@@ -231,3 +231,98 @@ Future transport hashes downloaded local bytes against the original remote
 file's SHA256 computed remotely, avoiding a second slow whole-dataset SFTP read.
 V7 keeps its original transport unchanged; its current download must finish.
 These are storage/transport changes, not changes to model inference or scores.
+
+00:08 UTC: scoped V6/full source audit backup pushed and independently confirmed
+at `368f086e6dd6014897f251a7d9350286f487ce2a` (83 changed paths). Receipt:
+`D:/ai-brain-data/visual-lexicon/sixhour-backup-20261010-v1/push-receipt.json`.
+No main checkout/index/workbook modification; no original evidence deleted.
+
+V7 remote inference/arithmetic replay is complete, model FAILED: native final /
+held-pair / transfer accepted errors 0/0/0, authored held-control errors 16;
+authored safe positive recall 97.29%, unknown recall 98.43%. Native pattern scores
+still carry the separate RNG confound limitation. Selected curriculum candidate
+SHA256 `03d4394b9b24cbab57aa10f3c23f092695561166c4f0443fed49d5071ed3f938`;
+dataset SHA256 `d7424c17a2423a80ce80bf0838e84b348c65ecfe57d4572eeb10be3040e8fbff`.
+V7 slow original transport is serially re-reading the large dataset for SHA;
+keep session 28348 alive to preserve its completed download receipt. Remote GPU
+is idle (2MiB memory), so this is not an active training job. A separate fresh
+SCP bridge checkpoint `composition-20261010-v7/frozen-selected-bridge.pt` was
+downloaded and its bytes match the exact independently replayed candidate above.
+V8 may therefore start from these verified own weights without waiting for the
+old redundant dataset transfer, and without duplicating any V7 GPU job.
+
+V8 started in orchestration session **83663** at 00:09 UTC, local root
+`D:/ai-brain-data/visual-lexicon/composition-20261010-v8`, remote
+`/home/ibicza/ai-brain/runs/m33-composition-20261010-v8`.
+Sealed source SHA256
+`47263c78e833bc81b73d44cd373ab4be6a4ac15b573e1b1cb99c4418fb597bc6`.
+Exact new transport copied as `transport-executed.py`. Pre-training tests run
+before generation or GPU training. Do not duplicate this run. Old V7 session
+28348 continues only its original slow evidence download/hash checks. Local
+V7 dataset hash is independently confirmed equal to the remote verifier digest.
+All 16 V7 authored accepted errors are shape assertions; color/pattern errors
+are zero. A supplementary `scientific-validity-notice.json` records native RNG
+confounding without altering the sealed model/source/numerical results.
+Next actions: finish V7 transfer, inspect V8 data audit/test progress, and analyse
+development-only OOD shape evidence for a later iteration. No production weights
+or workbook mastery percentages are activated/updated. Roughly five hours remain
+before the user-approved earliest finish; goal and heartbeat stay ACTIVE.
+
+Literature follow-up for future OOD shape work: Outlier Exposure
+https://arxiv.org/html/1812.04606v3 (discussion sections) finds auxiliary diversity
+and closeness of low-level statistics important, not just sample count; Gaussian
+noise or easy synthetic anomalies may teach unintended cues. Its multiclass OOD
+detector outperforms its tested explicit reject-class option. Our current UNKNOWN
+head is therefore not automatically the best novelty detector, and training only
+triangle/cross cannot establish broad unseen-shape safety. Future alternatives
+may test richer disjoint exposure shapes or a dev-selected own-weight ensemble;
+never add star/pentagon/trapezoid finals to exposure and call them blind again.
+OpenMax primary abstract https://arxiv.org/abs/1511.06233 motivates feature-space
+open-set rejection rather than softmax threshold alone; its full algorithm has
+not been reproduced here. CVF HTML was unavailable (403), so do not claim it read.
+NumPy official RNG stream guidance was checked at
+https://numpy.org/doc/stable/reference/random/parallel.html ; our label domains
+use deterministic SeedSequence input lists, not resetting the rendering stream.
+
+00:12 UTC continuation boundary (not completion): V8 session 83663 is running its
+remote pre-training pytest, confirmed by live process PID 310394. V7 28348 is
+still verifying/downloading original evidence, not using GPU. Resume these two
+specific sessions; do not launch duplicate training or repeat V6 backup. Latest
+backup parent is 368f086e6dd6014897f251a7d9350286f487ce2a. Both canonical XLSX
+and main Git HEAD/index remain unchanged. Earliest finish is still 05:11:22 UTC.
+
+00:14 UTC V8 terminal preflight failure: session 83663 ended with one missing
+script-import test (217 passed, 1 failed); no training was started. Source capsule
+is preserved unchanged. Retrieved original XML SHA256
+`8125ffc6c820a62cd2ea75ecf81c4460a848b7f8c977a5c9715f4b6c03fe5f44`;
+failure receipt `composition-20261010-v8/remote-preflight-failure.json`.
+Missing relations pilot transitively imports zero pilot. Packaging now includes
+these dependencies by AST import closure, and includes its own packaging module
+for an isolated-capsule test. That test imports legacy pilots from an extracted
+capsule, with no checkout scripts on PYTHONPATH. Ten focused capsule/backup/policy
+tests pass locally; new driver preserves failed preflight XML automatically.
+V9 is the replacement independent-label training iteration: exact same V8
+preregistration/settings/seed 11038 and verified V7 warm checkpoint, since V8
+never accessed training/final data. Fresh local/remote v9 paths/capsule required;
+do not overwrite or pretend V8 passed. Source/tests change only packaging here.
+
+Replacement V9 started in session **5408**, local
+`D:/ai-brain-data/visual-lexicon/composition-20261010-v9`, remote
+`/home/ibicza/ai-brain/runs/m33-composition-20261010-v9`.
+Sealed source SHA256
+`65e977f97004c3470e876fadeafa238de11ae86f0140bf88a3e3b1b1d409e80d`.
+Exact driver copied as transport-executed.py. V7 session 28348 has now completed
+its original download/hash checks, receipt REMOTE_CONTINUATION_REPLAYED,
+elapsed 1845.34 seconds; it is no longer live. V8 83663 is terminal failed before
+training. Only V9 5408 is active; never restart V7/V8. Next backup parent remains
+368f086e6dd6014897f251a7d9350286f487ce2a; include completed V7 and preserved V8
+preflight failure, not a duplicate V6 bundle.
+
+V9 remote preflight passed 221 tests in 133.01s; the isolated-capsule test is
+included. V7 known-final shape failure breakdown is pentagon 10 / trapezoid 6;
+max accepted error score 0.956791. These are now diagnostic known examples, not
+fresh blind tests. Do not fix their original thresholds and claim success.
+The next safe study can compare dev-only own joint/curriculum model agreement
+or expand disjoint auxiliary shape diversity, guided by OOD literature. It must
+preserve held star/pentagon/trapezoid from exposure and use a new frozen final.
+Next backup includes completed V7 and the preserved untrained V8 preflight fail.

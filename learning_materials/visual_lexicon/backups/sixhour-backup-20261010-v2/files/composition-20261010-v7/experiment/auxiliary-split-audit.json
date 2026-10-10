@@ -1,0 +1,15 @@
+{
+  "unique_scene_seeds": 15600,
+  "unique_scene_identities": 15600,
+  "unique_images": 15600,
+  "exposure_shapes": [
+    "triangle",
+    "cross"
+  ],
+  "held_control_shapes": [
+    "star",
+    "pentagon",
+    "trapezoid"
+  ],
+  "limits": "Authored generator separation, shared Pillow, not external-source independence."
+}

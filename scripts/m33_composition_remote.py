@@ -92,10 +92,29 @@ def run(args):
             + " "
         )
         command(prefix + "-c " + shlex.quote(unpack))
-        command(
-            prefix
-            + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
-        )
+        try:
+            command(
+                prefix
+                + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_composition_package.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
+            )
+        except RuntimeError:
+            # Preserve the exact failed preflight instead of inferring later
+            # that nothing trained from missing experiment files.
+            source = remote + "/remote-tests.xml"
+            sftp.get(source, str(root / "remote-tests.xml"))
+            if remote_digest(source) != sha(root / "remote-tests.xml"):
+                raise ValueError("Failed-test receipt byte mismatch")
+            failure = {
+                "status": "REMOTE_PREFLIGHT_FAILED_NOT_TRAINED",
+                "source_capsule_sha256": manifest["capsule_sha256"],
+                "tests_sha256": sha(root / "remote-tests.xml"),
+                "remote": remote,
+                "production_admitted": False,
+            }
+            (root / "remote-preflight-failure.json").write_text(
+                json.dumps(failure, indent=2) + "\n", encoding="utf-8"
+            )
+            raise
         started = time.monotonic()
         command(
             prefix
