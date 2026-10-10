@@ -222,9 +222,10 @@ def test_palette_new_contours_have_no_right_angles_and_are_bounded(shape):
         assert controls.render(scene).shape == (96, 96, 3)
 
 
-def test_independent_palette_covers_unknown_colors_on_every_supported_shape():
+@pytest.mark.parametrize("profile", ("palette_independent", "palette_aspects"))
+def test_independent_palette_covers_unknown_colors_on_every_supported_shape(profile):
     rows = controls.scenes(
-        "exposure", 3000, 1304500000 + 60000, exposure_profile="palette_independent"
+        "exposure", 3000, 1304500000 + 60000, exposure_profile=profile
     )
     pairs = {
         (item.color, item.shape)
@@ -246,7 +247,7 @@ def test_independent_palette_covers_unknown_colors_on_every_supported_shape():
                 counts[item.color in c.COLORS, item.shape in c.SHAPES] += 1
     assert min(counts.values()) > 400
     held = controls.scenes(
-        "held_control", 600, 1304500000 + 80000, exposure_profile="palette_independent"
+        "held_control", 600, 1304500000 + 80000, exposure_profile=profile
     )
     assert not {i.color for s in rows for i in s.items} & set(controls.PALETTE_HELD_RGB)
     assert not {i.shape for s in rows for i in s.items} & set(controls.HELD_OUT_SHAPES)
@@ -263,3 +264,29 @@ def test_old_palette_profile_remains_the_archival_conditional_color_design():
         for item in scene.items
         if item.color not in c.COLORS
     )
+
+
+def test_aspect_profile_changes_only_elongated_geometry_not_labels_or_other_items():
+    from dataclasses import replace
+
+    old_rows = controls.scenes(
+        "exposure", 30, 151000, exposure_profile="palette_independent"
+    )
+    rows = controls.scenes("exposure", 30, 151000, exposure_profile="palette_aspects")
+    assert [(s.seed, s.items) for s in rows] == [(s.seed, s.items) for s in old_rows]
+    changed = 0
+    for prior in old_rows:
+        prior = replace(
+            prior,
+            items=(
+                controls.ControlItem("красный", "овал", "однотонный"),
+                controls.ControlItem("синий", "star", "полосатый"),
+            ),
+        )
+        row = replace(prior, renderer_profile="palette_aspects")
+        a, b = controls.render(prior), controls.render(row)
+        # Close aspect draws can coincide after supersampled raster rounding.
+        changed += not np.array_equal(a[:, :48], b[:, :48])
+        assert np.array_equal(a[:, 48:], b[:, 48:])
+        assert np.array_equal(b, controls.render(row))
+    assert changed >= 25

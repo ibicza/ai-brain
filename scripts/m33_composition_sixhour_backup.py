@@ -32,6 +32,7 @@ SOURCE_FILES = (
     "scripts/m33_composition_background_probe.py",
     "scripts/m33_composition_rng_audit.py",
     "scripts/m33_composition_dev_probe.py",
+    "scripts/m33_composition_diagnostics.py",
     "scripts/m33_composition_dev_remote.py",
     "scripts/m33_composition_numeric_probe.py",
     "scripts/m33_composition_novel_controls.py",
@@ -50,6 +51,7 @@ SOURCE_FILES = (
     "tests/test_primary_composition_backup.py",
     "tests/test_primary_composition_package.py",
     "tests/test_primary_composition_dev_probe.py",
+    "tests/test_primary_composition_diagnostics.py",
     "tests/test_primary_composition_numeric_probe.py",
     "tests/test_primary_numeric_backend.py",
     "tests/test_primary_composition_backgrounds.py",
@@ -78,6 +80,10 @@ RUN_ROOT_FILES = (
     "known-transfer-error-2075.png",
     "scientific-validity-notice.json",
     "remote-preflight-failure.json",
+    "exposed-transfer-errors.json",
+    "exposed-transfer-errors.png",
+    "exposed-control-errors.json",
+    "exposed-control-errors.png",
 )
 
 
@@ -292,6 +298,13 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-sixhour-source-metadata-v1.xml",
         "qa-sixhour-palette-full-regression-v1.xml",
         "qa-sixhour-palette-full-regression-v2.xml",
+        "qa-sixhour-exposed-diagnostics-v1.xml",
+        "qa-sixhour-diagnostic-backup-v1.xml",
+        "qa-sixhour-diagnostic-backup-v2.xml",
+        "qa-sixhour-aspect-unit-v1.xml",
+        "qa-sixhour-aspect-unit-v2.xml",
+        "qa-sixhour-aspect-pipeline-v1.xml",
+        "qa-sixhour-aspect-contract-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))
@@ -302,6 +315,8 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "source-controls-20261010-v4",
         "source-controls-20261010-v5",
         "source-controls-20261010-v6",
+        "source-controls-20261010-v7",
+        "source-controls-20261010-v8",
     ):
         root = base / name
         if not root.exists():

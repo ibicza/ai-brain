@@ -313,11 +313,15 @@ def run(args):
         if args.dataset_profile.endswith("background_clear")
         else None,
         "curve_rng_policy": course.RICH_CURVE_RNG_POLICY
-        if args.dataset_profile == "rich_curve_background_clear"
+        if args.dataset_profile
+        in ("rich_curve_background_clear", "aspect_rich_curve_background_clear")
         else course.CURVE_RNG_POLICY
         if args.dataset_profile == "curve_background_clear"
         else None,
         "label_rng_policy": course.LABEL_RNG_POLICY,
+        "aspect_rng_policy": course.ASPECT_RNG_POLICY
+        if args.dataset_profile == "aspect_rich_curve_background_clear"
+        else None,
         "independent_labels": True,
         "seed": args.seed,
         "numeric_backend": numeric_backend,

@@ -28,7 +28,7 @@ verifier = script("m33_composition_verify")
 
 @pytest.fixture(
     scope="module",
-    params=(0, 1, 2, 3, 4, 5, 6, 7, 8),
+    params=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
     ids=(
         "single-view",
         "four-view",
@@ -39,6 +39,7 @@ verifier = script("m33_composition_verify")
         "ieee-quadratic-background",
         "ieee-rich-palette",
         "ieee-rich-independent-palette",
+        "ieee-aspect-palette",
     ),
 )
 def sealed(tmp_path_factory, request):
@@ -78,7 +79,9 @@ def sealed(tmp_path_factory, request):
                 reflection_consensus=request.param > 0,
                 auxiliary_images=12 if request.param >= 2 else 0,
                 consistency_loss=0.2 if request.param >= 2 else 0.0,
-                exposure_profile="palette_independent"
+                exposure_profile="palette_aspects"
+                if request.param == 9
+                else "palette_independent"
                 if request.param == 8
                 else "palette"
                 if request.param == 7
@@ -89,7 +92,9 @@ def sealed(tmp_path_factory, request):
                 previous=previous,
                 warm_candidate=None,
                 dataset_profile=(
-                    "rich_curve_background_clear"
+                    "aspect_rich_curve_background_clear"
+                    if request.param == 9
+                    else "rich_curve_background_clear"
                     if request.param >= 7
                     else "curve_background_clear"
                     if request.param == 6
@@ -141,6 +146,7 @@ def test_quadratic_policy_cannot_be_rewritten(sealed, reseal):
     if protocol["dataset_profile"] not in (
         "curve_background_clear",
         "rich_curve_background_clear",
+        "aspect_rich_curve_background_clear",
     ):
         return
     try:
@@ -153,7 +159,8 @@ def test_quadratic_policy_cannot_be_rewritten(sealed, reseal):
         expected = (
             (
                 "Rich curve exposure RNG policy differs"
-                if protocol["dataset_profile"] == "rich_curve_background_clear"
+                if protocol["dataset_profile"]
+                in ("rich_curve_background_clear", "aspect_rich_curve_background_clear")
                 else "Quadratic exposure RNG policy differs"
             )
             if reseal
@@ -162,6 +169,26 @@ def test_quadratic_policy_cannot_be_rewritten(sealed, reseal):
         with pytest.raises(ValueError, match=expected):
             check(sealed, "must-not-exist-curve.json")
         assert not (sealed / "must-not-exist-curve.json").exists()
+    finally:
+        path.write_bytes(original)
+        freeze_path.write_bytes(frozen_original)
+
+
+def test_aspect_contract_cannot_be_rewritten_even_with_resealed_protocol(sealed):
+    path = sealed / "experiment/protocol.json"
+    freeze_path = sealed / "experiment/candidate-freeze.json"
+    original, frozen_original = path.read_bytes(), freeze_path.read_bytes()
+    protocol = json.loads(original)
+    if protocol["dataset_profile"] != "aspect_rich_curve_background_clear":
+        pytest.skip("No broadened aspect contract in this fixture")
+    try:
+        protocol["aspect_rng_policy"] = "labels choose geometry via background"
+        path.write_text(json.dumps(protocol), encoding="utf-8")
+        freeze = json.loads(frozen_original)
+        freeze["protocol_sha256"] = verifier.sha(path)
+        freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
+        with pytest.raises(ValueError, match="Aspect exposure RNG policy"):
+            check(sealed, "must-not-exist-aspect-contract.json")
     finally:
         path.write_bytes(original)
         freeze_path.write_bytes(frozen_original)

@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "source_capsule_sha256": "b3b5d834fc268810c5a04b78a0e65d3fab6dc954172e02a2d6a0d987265ed218",
+  "previous_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+  "candidate_anchor_sha256": "bdb1af182edd919439e8a9fa019e9a781ec943acdccded4b7a29b448c328f7dd",
+  "dataset_profile": "rich_curve_background_clear",
+  "background_rng_policy": "SeedSequence(scene_seed, M3BL); independent gray brightness uniform(60,205) plus RGB uniform(-6,6), never conditioned on labels",
+  "curve_rng_policy": "SeedSequence(scene_seed, side, M3UL); wider quadratic plus cubic stripes on two thirds of NEW training-style scenes, sinusoidal transfer remains held out",
+  "label_rng_policy": "SeedSequence(scene_seed, M33L); separate from rendering",
+  "independent_labels": true,
+  "seed": 12043,
+  "numeric_backend": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "steps_per_schedule": 10000,
+  "batch_size": 64,
+  "learning_rate": 0.001,
+  "schedules": [
+    "joint",
+    "curriculum"
+  ],
+  "selection": "Lowest balanced dev CE only; native/authored dev have equal weight when auxiliary data exists. Calibration and final cohorts accessed after candidate freeze.",
+  "held_combinations": [
+    [
+      "зелёный",
+      "овал"
+    ],
+    [
+      "синий",
+      "квадрат"
+    ]
+  ],
+  "scope": "Procedural two-object color/shape/pattern + bounded RU/EN queries. No animal names, anatomy, photographs, textbooks or free-form text learned.",
+  "production_admitted": false,
+  "acceptance": {
+    "task_positive_recall_min": 0.8,
+    "task_unknown_recall_min": 0.9,
+    "accepted_errors_max": 0,
+    "complete_description_recall_min": 0.8,
+    "both_targets_correct_min": 0.8,
+    "blank_image_accepted_max": 0
+  },
+  "attribute_attention": true,
+  "spatial_readout": true,
+  "shape_edges": true,
+  "label_smoothing": 0.02,
+  "reflection_consensus": true,
+  "training_reflections": true,
+  "auxiliary_images": 3000,
+  "exposure_profile": "palette",
+  "exposure_shapes": [
+    "triangle",
+    "cross",
+    "hexagon",
+    "heart",
+    "arrow",
+    "crescent",
+    "parallelogram",
+    "kite"
+  ],
+  "held_control_shapes": [
+    "star",
+    "pentagon",
+    "trapezoid"
+  ],
+  "auxiliary_calibration": true,
+  "held_control_final": true,
+  "consistency_loss": 0.2,
+  "score_semantics": "Four-view unanimity, minimum confidence; disagreement UNKNOWN. Not calibrated probability. Raw argmax is after this fixed view policy.",
+  "literature": [
+    "https://proceedings.mlr.press/v119/koh20a.html",
+    "https://arxiv.org/abs/1904.12584",
+    "https://arxiv.org/abs/2210.01936"
+  ],
+  "adaptation": "Shared own causal core, attribute supervision, explicit target binding and curriculum comparison. Not reproduction of CBM/NS-CL architectures.",
+  "capacity": {
+    "inherited_parameters": 974889,
+    "new_trainable_parameters": 923232
+  }
+}

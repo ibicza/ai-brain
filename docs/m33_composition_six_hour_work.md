@@ -862,3 +862,112 @@ recopy. V13 completeartifact backup later must use --stream-chunks to save~90MB
 of redundant temporary chunk copies; stream15-unitproof includes realGit read.
 As always no autoactivation or strictM33Uclaim; goal/heartbeatstillACTIVE and
 ~2h44mremain before earliest05:11:22UTC. Never restart oldcompleted handles.
+
+02:28 UTC actual current handoff: V8 source-only backup32626 COMPLETE101paths,
+independent remote ref confirms8bea3d5186737d6ac0eff2f719f3ff464cef8df4.
+NEXTbackup expected parent this FULLSHA. No old large datasets recopied. This
+includes latest independent-palette code/tests, new source metadata guards,
+completed662/2and separate19/21/23/15proofs plus prepared sourcev1-v6. This final
+paragraph itself is newer than backup. No deletes, main protections unchanged.
+
+Latest fullregression **7932** LIVE (v2), NEWfixturebase
+C:/Users/artio/AppData/Local/Temp/ai-brain-m33-sixhour-palette-full-20261010-v2,
+XMLqa-sixhour-palette-full-regression-v2.xml not finished. It covers latest
+independent palette/streaming backup/typed source guards together. Do NOTrestart
+35404,81554,32626or65204: complete. ONLY model72734andfullQA7932live. V13joint
+10000steps complete, last devCE0.018313; curriculum and candidate selection,
+calibration, final/replay/download still pending. Never infer winner from joint
+history or start a second GPUjob until72734completes and receipt exists.
+
+Resume72734+7932, assess frozen V13 on pristine artv5 then EXPOSEDmathv6 via
+novel transport as prescribed above, preservefailures, then freshV14independent
+palette experiment (seed13045, warm actualfrozen winner, no existing output).
+Streamlarge backups only after actualmodel/transport completion; immutable
+sourcecapsule, exactchecksums and current canonical table stayprotected.
+Current freeD513331200bytes/W438407168/C16019554304. Goal and heartbeatACTIVE;
+~2h43mremain. User requested workthrough05:11:22UTC, not a pause or completion.
+
+02:39 UTC continuation: latest combined full regression7932 COMPLETE,
+701passed/2deliberatelyinapplicable skips636.43s; no failedtests.
+This combines the independentpalette, streamingbackup and typedPDFguards.
+Subsequent diagnostic-helper tests are separate, not retroactively included.
+V13curriculum8400observed, no final/winner/source results yet.
+
+Primary literature refreshed: ShapeWorld1704.04517 supports controlled novel
+combinations as an experimental test methodology, NOTtextbook/photo transfer;
+SelectiveClassification1705.08500 supports a risk/coverage rejectoption, but
+our empirical finite-grid threshold is NOTthe paper's formal risk guarantee.
+No new calibration policy implemented or old threshold retuned.
+
+Added guarded exposed_errors() to existing diagnostic helper. It loads EXACT
+stored final NPZ pixels, independently matches every saved image hash and gold,
+rejects changed/invalid index/pixels/labels, and refuses output overwrites.
+It never rerenders, fits or changes policy; status explicitly EXPOSED_FINAL_ERRORS
+NOT_FRESH_TEST. Five new tests passed2.03s; Ruffcleanafterimportformatfix.
+V12actual saved error sheets viewed: connected wavy yellow stripes were called
+spotted (score.9738725), a blue trapezoid calledsquare(.9069292). Hashes match
+the prior two recorded false assertions exactly. Both original outcomes unchanged.
+Receipts/previews saved rootv12/exposed-transfer-errors.* and
+exposed-control-errors.*; add only these tiny diagnostics on next backup, no
+largeV12data recopy. Score is NOTa calibrated likelihood. These failures support
+broader pattern/unsupportedcontour exposure, not gold-assisted runtimefeatures.
+
+Combined701/2 XML actually resides D:/ai-brain-data/visual-lexicon,
+SHA256 c724681e98431e0db92ba6ec296a9b3d6daa0cecd4834dc87f0ef40ed59f2716.
+Diagnostic+backup supplemental V1 collection failed because this command omitted
+PYTHONPATH=src;scripts; no model/data failure. Preserved XML; corrected environment
+freshV2 completed20passed2.98s, including realGit chunk roundtrip and newdiagnostic
+guards. Separate diagnostic5passed XML and both supplemental XMLs copied to
+data-root for backup. Main source/index/workbook untouched.
+
+02:42 UTC V13transport72734 COMPLETE, REMOTE_CONTINUATION_REPLAYED and
+independent INFERENCE_AND_ARITHMETIC_VERIFIED. Actual winner curriculum,
+checkpoint fd1df777a613d518f3ce2285856260a0f4ce7ed1bd89bcd7e267f0ce9c82b7e7.
+Fresh final/combinations/transfer each0falseassertions; selectedpositive recalls
+.99847235/.99847235/.99327834, unknown1.0. Authoredheldcontrol has3falseassertions,
+all turquoise falselygreen (2stars,1spottedpentagon). Positive.97470641,
+unknown.99783550 does NOToverridezero-error criterion; NEEDS_WORK_NOT_PRODUCTION.
+All frozen thresholdssame0.9, no retuning after final. Capsule b3b5d834... exact.
+Artv5 FIRSTsource screen37104 nowLIVE; mathv6 notlaunchedyet.
+Source helperDtransport-source-v13-input.py SHA d274841b64254b29abc45017e79a256719579abf5159c3d868067c69de97facc.
+V14transport helperpinned readyDtransport-v14-input.py,
+SHA f95d709dc8825e1c2a78feaa28bf3f5484f3ad5425a60b7a0050b7e77bdaf9cf;
+notlaunchedyet. WarmactualV13curriculum, notjoint. Latest protectedHEAD/index/
+canonicalXLSX allmatchprior exacthashes. Dfree512634880,W438157312,C16005500928.
+Goal/heartbeatstillACTIVE; ~2h29mremain to earliest05:11:22UTC.
+
+02:51 UTC V13source art37104 and exposedmath69718 COMPLETE, ORIGINALcapsule
+and frozenpolicy independentreplayed. Art936queries/13correlatedassets:
+55falseassertions ALLoval->circle onthreebroadellipses; othercolors/patterns
+noacceptederrors, unknown1.0, blank0. Art source nowEXPOSED, nevercallfuture
+repeatsblind. Math660queries/11assets:13falseassertions (was71onV12),
+positive.8181818 unknown1.0 blank0; stillFAIL. Allpriormanualgoldunchanged.
+V14model **47857 LIVE**, originalcapsule alreadysealed BEFOREaspectedits,
+seed13045warmactualV13curriculum, independentpalette ONLYnewdatachange,
+nochangedoldthresholdoracceptance. Preflight37%observed, notyettraining.
+
+Addedfutureopt-in aspect_rich_curve_background_clear native style and
+palette_aspects authored style, broaderoval/rectangleminor:major.48-.88,
+freshindependentgeometryRNG(M3AL/M3AH). Oldgeometrydrawsconsumed, unaffected
+objects/background/labelsandalloldprofilesunchanged. Native sinusoidal
+transferremainsEXACToldholdout. ModelstillONLYRGB/questions, noaspectfeature.
+Newaspectpolicy is recorded BEFOREtraining and verifier independentlyrejects
+changedcontract. Tinyactualpipeline19passed74.83s; unitV1 had1failure87pass:
+a randomlycloseaspectratio rasterizedidentically; changedtest to require
+25/30changedimages plus byte-identicalunaffectedhalf onALL30. V2actual88passed
+15.26s; no generatorchangeoroldgoldrelaxation. Fullnextregressionpending.
+
+Diskmaintenance: Dfree399429632byteswouldnotfitseveralnewpreservedruns.
+ONLYisolatedprojectbackupbareGit relocated2,446,351,308bytes from
+D:/ai-brain-data/visual-lexicon/archives/catalogue-backup.git to
+C:/Users/artio/Documents/ai-brain-project-storage/archives/catalogue-backup.git.
+OriginalDpathisJUNCTIONtoC, allcurrentbackupCLIpathscontinueunchanged.
+No usermaterialdeleted. GuardinitiallystoppedbecauseGit alternates exists;
+verifiedexactABSOLUTEalternateW:/toolbox_IDEA/programs/IdeaProjects/ai-brain/.git/objects,
+which doesnotchangeonrelocation. Secondread-onlyprobehadPowerShellargument
+interpolationerror, nofilesmoved; fixedliteralargumentthenperformedmove.
+Gitfsck --full --no-dangling PASSEDbeforeANDafter, refremainedFULL8bea3d51...;
+bareHEADunbornmaster NOTICEexpectedwhileactualcatalogrefexists.
+No backup/branchmutationduringmove, maincheckout/index untouched.
+Move70203COMPLETE. LogicalD data root retained, sourcePDF/weights/dictionary
+stayintheiroriginalpaths. ContinuefromFULL8bea... onnextfreshV9backup.

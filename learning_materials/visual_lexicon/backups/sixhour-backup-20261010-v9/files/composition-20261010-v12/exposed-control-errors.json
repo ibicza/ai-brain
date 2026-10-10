@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "split": "control_final",
+  "status": "EXPOSED_FINAL_ERRORS_NOT_FRESH_TEST",
+  "production_admitted": false,
+  "false_assertions": 1,
+  "errors": [
+    {
+      "record_index": 3553,
+      "image_index": 592,
+      "image_sha256": "0015f7538535a1f5690038ddbbdef66868b2e2a1e55d6765c5a0aa1388b60f16",
+      "scene_id": "authored-control_final/592",
+      "question": "Назови форму левого предмета.",
+      "task": "shape",
+      "side": 0,
+      "gold": "UNKNOWN",
+      "predicted": "квадрат",
+      "score": 0.9069291949272156
+    }
+  ],
+  "preview_records": [
+    3553
+  ],
+  "sha256": {
+    "control_final-predictions.json.gz": "5769418b081bef2590aab70ab6c0e2ed93c9e1f09241d57b8b37aaf1b5bc1e0c",
+    "dataset-records.json.gz": "8a5c9865ea94c841db4b82a59ee45bb1007118a741b95fd62475a4b8dc6242e7",
+    "dataset.npz": "40c8021eff31a85134ad233f4167de38427f9a253047627b03d588e444ebdf7a",
+    "exposed-control-errors.png": "8bbef592dbbbb227bc0d62aef66f16fcdbbb13ce1a78568c700ecd7fbbf1dc1d"
+  },
+  "limits": "Previously evaluated errors only. No fitting, policy changes, fresh-test claim, or calibrated probability claim."
+}

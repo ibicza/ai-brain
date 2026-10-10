@@ -24,11 +24,13 @@ EXPOSURE_PROFILES = {
     "diverse": EXTENDED_EXPOSURE_SHAPES,
     "palette": PALETTE_EXPOSURE_SHAPES,
     "palette_independent": PALETTE_EXPOSURE_SHAPES,
+    "palette_aspects": PALETTE_EXPOSURE_SHAPES,
 }
 HELD_OUT_SHAPES = ("star", "pentagon", "trapezoid")
 LABEL_RNG_DOMAIN = 0x4D33434C
 PALETTE_LABEL_DOMAIN = 0x4D33504C
 PALETTE_VISUAL_DOMAIN = 0x4D335056
+ASPECT_VISUAL_DOMAIN = 0x4D334148
 PALETTE_UNKNOWN_RGB = {
     "оранжевый": (245, 140, 35),
     "розовый": (240, 135, 180),
@@ -64,7 +66,7 @@ class ControlScene:
             len(self.items) != 2
             or type(self.seed) is not int
             or self.seed < 0
-            or self.renderer_profile not in ("standard", "palette")
+            or self.renderer_profile not in ("standard", "palette", "palette_aspects")
         ):
             raise ValueError("Invalid authored control scene")
         for item in self.items:
@@ -177,7 +179,7 @@ def render(scene):
     )
     scale, size = 4, 96
     background = tuple(int(x) for x in rng.integers(210, 235, 3))
-    if scene.renderer_profile == "palette":
+    if scene.renderer_profile.startswith("palette"):
         background = tuple(int(x) for x in palette_rng.integers(246, 256, 3))
     canvas = Image.new("RGB", (size * scale, size * scale), background)
     for side, item in enumerate(scene.items):
@@ -187,6 +189,14 @@ def render(scene):
         center = 22 * scale
         if item.shape in c.SHAPES:
             ry = radius * 0.55 if item.shape in ("овал", "прямоугольник") else radius
+            if scene.renderer_profile == "palette_aspects" and item.shape in (
+                "овал",
+                "прямоугольник",
+            ):
+                aspect_rng = np.random.default_rng(
+                    np.random.SeedSequence([scene.seed, side, ASPECT_VISUAL_DOMAIN])
+                )
+                ry = radius * float(aspect_rng.uniform(0.48, 0.88))
             box = (center - radius, center - ry, center + radius, center + ry)
             if item.shape in ("круг", "овал"):
                 pen.ellipse(box, fill=255)
@@ -216,7 +226,7 @@ def render(scene):
         )
         rgb = np.asarray(base_rgb, dtype=float)
         if (
-            scene.renderer_profile == "palette"
+            scene.renderer_profile.startswith("palette")
             and item.color in PALETTE_KNOWN_ENDPOINTS
         ):
             amount = palette_rng.uniform(0, 1)
@@ -303,7 +313,7 @@ def scenes(
             color = colors[int(rng.integers(len(colors)))]
             choose_unknown_color = (
                 palette_labels.random() < 1 / 3
-                if exposure_profile == "palette_independent"
+                if exposure_profile in ("palette_independent", "palette_aspects")
                 else (i + side) % 3 == 1
             )
             if exposure_profile.startswith("palette") and choose_unknown_color:
@@ -326,7 +336,11 @@ def scenes(
                 f"authored-{cohort or split}/{i}",
                 seed + i,
                 tuple(items),
-                "palette" if exposure_profile.startswith("palette") else "standard",
+                "palette_aspects"
+                if exposure_profile == "palette_aspects"
+                else "palette"
+                if exposure_profile.startswith("palette")
+                else "standard",
             )
         )
     return rows
@@ -379,7 +393,11 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
             if split not in auxiliary:
                 continue
             if scene.get("renderer_profile", "standard") != (
-                "palette" if exposure_profile.startswith("palette") else "standard"
+                "palette_aspects"
+                if exposure_profile == "palette_aspects"
+                else "palette"
+                if exposure_profile.startswith("palette")
+                else "standard"
             ):
                 raise ValueError("Authored renderer profile differs from exposure")
             for item in scene["items"]:

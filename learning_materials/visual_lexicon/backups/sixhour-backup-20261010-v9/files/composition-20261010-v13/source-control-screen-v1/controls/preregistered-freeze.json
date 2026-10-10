@@ -1,0 +1,110 @@
+{
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-capsule.tgz": "b3b5d834fc268810c5a04b78a0e65d3fab6dc954172e02a2d6a0d987265ed218",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/experiment/curriculum/best.pt": "fd1df777a613d518f3ce2285856260a0f4ce7ed1bd89bcd7e267f0ce9c82b7e7",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/experiment/protocol.json": "c4cd8f78190aa83e22f0c05f74493cacb590ca3e2bfc86b9cedeceb71ae873c2",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/experiment/candidate-freeze.json": "76e7cf3eae0043857b7c7585dfdca752b1cf6f1239ae5968c49a4d9894bd45b8",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/experiment/policy-frozen.json": "0ab96628f7d2e6964d4ef0cc5c6386944abe65d712054793fe84486a3c2c69eb",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/experiment/result.json": "dd935188e7952ed05de7b6691b6cdd670329f4da8693854ef7952c40e7a1c7d4",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/experiment/dataset-records.json.gz": "a497cb83a937c6bccdf56194c1789483f1b5628fe51ba620932a13a9b5397fd0"
+  },
+  "screen_source_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/scripts/m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/scripts/m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/scripts/m33_composition_source_dataset.py": "7c5c83e482fdfeaf31060c7329117a99c2c2f23df57f6c7f8da2450ecb7d4b67"
+  },
+  "source_preparation_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/prepared-source/source-annotations.json": "2414290fb18be06635c25dde0fba607e4acfbfab87a57410bf106fba556a1845",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/prepared-source/dataset.npz": "1e36113a8e064f9203fc83b469d84449feed1a784eca0548334a3fc9f83a2c7a",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/prepared-source/records.json.gz": "59702ea39891971c358eceb8c354e168d3d75b7947a3e1b35bd5a2710152a1ba",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/prepared-source/source-crops.npz": "82971922bdbefaddb5f12cfbd8f68972a18c6cda134a075e963fefec999a041e",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/prepared-source/preparation-freeze.json": "ede4bf748b1d533df924dc500d43f303f74bc1c465988e2ad053fecf91d8996e",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/prepared-source/preparation-executed.py": "514a565653116aed9ce9a1c0b429c54ae26d5d1dcd52e713534227eb96d70043",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13/source-control-screen-v1/prepared-source/preparation-receipt.json": "ed357804064502571d3c404249cfd7799d5731c6fa9cad781acbe17be85f7da3"
+  },
+  "source_preparation_receipt": {
+    "status": "SOURCE_CONTROL_TENSORS_PREPARED_NOT_EVALUATED",
+    "annotation_manifest_sha256": "2414290fb18be06635c25dde0fba607e4acfbfab87a57410bf106fba556a1845",
+    "answers": [
+      "красный",
+      "синий",
+      "зелёный",
+      "жёлтый",
+      "тёмно-зелёный",
+      "коричневый",
+      "белый",
+      "чёрный",
+      "круг",
+      "овал",
+      "квадрат",
+      "прямоугольник",
+      "однотонный",
+      "полосатый",
+      "пятнистый",
+      "UNKNOWN"
+    ],
+    "unique_source_assets": 13,
+    "unique_pdf_books": 1,
+    "unique_pdf_pages": 2,
+    "paired_scenes": 156,
+    "questions": 936,
+    "independent_source_examples": false,
+    "fresh_original_rendering_verified": true,
+    "training_or_calibration": false,
+    "production_admitted": false,
+    "dataset_sha256": "1e36113a8e064f9203fc83b469d84449feed1a784eca0548334a3fc9f83a2c7a",
+    "records_sha256": "59702ea39891971c358eceb8c354e168d3d75b7947a3e1b35bd5a2710152a1ba",
+    "source_crops_sha256": "82971922bdbefaddb5f12cfbd8f68972a18c6cda134a075e963fefec999a041e",
+    "preparation_freeze_sha256": "ede4bf748b1d533df924dc500d43f303f74bc1c465988e2ad053fecf91d8996e",
+    "limits": "Thirteen source ROIs from two pages of one art textbook. Pairings reuse these assets and are not independent examples. Primary-color swatches are visibly elliptical in preserved page pixels, not circles inferred from their caption. Paint blobs are outside the four-shape scope. No whole-page, color-mixing reasoning or object-name mastery is evaluated."
+  },
+  "count": 156,
+  "seed": 0,
+  "families": [
+    "art-yellow-ellipse",
+    "art-red-ellipse",
+    "art-blue-ellipse",
+    "art-yellow-blob-1",
+    "art-red-blob-1",
+    "art-orange-blob",
+    "art-yellow-blob-2",
+    "art-blue-blob-1",
+    "art-green-blob",
+    "art-red-blob-2",
+    "art-blue-blob-2",
+    "art-purple-blob",
+    "art-empty-paper"
+  ],
+  "group_kind": "source_asset",
+  "thresholds": {
+    "color": 0.9,
+    "shape": 0.9,
+    "pattern": 0.9
+  },
+  "numeric_backend": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "acceptance": {
+    "accepted_errors_max": 0,
+    "positive_recall_min": 0.8,
+    "unknown_recall_min": 0.9,
+    "per_family_and_task": true,
+    "blank_accepted_max": 0
+  },
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Thirteen source ROIs from two pages of one art textbook. Pairings reuse these assets and are not independent examples. Primary-color swatches are visibly elliptical in preserved page pixels, not circles inferred from their caption. Paint blobs are outside the four-shape scope. No whole-page, color-mixing reasoning or object-name mastery is evaluated."
+}

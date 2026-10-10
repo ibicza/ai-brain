@@ -1,0 +1,41 @@
+{
+  "selection_split": "calibration_only",
+  "minimum_accepted_per_task": 40,
+  "allowed_observed_calibration_errors": 0,
+  "tasks": {
+    "color": {
+      "threshold": 0.9,
+      "metrics": {
+        "examples": 2400,
+        "accepted": 2196,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9990900818926297,
+        "unknown_recall": 1.0
+      }
+    },
+    "shape": {
+      "threshold": 0.9,
+      "metrics": {
+        "examples": 2400,
+        "accepted": 1448,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9917808219178083,
+        "unknown_recall": 1.0
+      }
+    },
+    "pattern": {
+      "threshold": 0.9,
+      "metrics": {
+        "examples": 2400,
+        "accepted": 2194,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9981801637852593,
+        "unknown_recall": 1.0
+      }
+    }
+  },
+  "limits": "Experimental risk/coverage policy, not a guarantee on new images. Correlated questions/views are not independent sources."
+}

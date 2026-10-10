@@ -205,7 +205,13 @@ if __name__ == "__main__":
     parser.add_argument("--auxiliary-images", type=int, default=0)
     parser.add_argument(
         "--exposure-profile",
-        choices=("standard", "diverse", "palette", "palette_independent"),
+        choices=(
+            "standard",
+            "diverse",
+            "palette",
+            "palette_independent",
+            "palette_aspects",
+        ),
         default="standard",
     )
     parser.add_argument("--consistency-loss", type=float, default=0.0)
@@ -220,6 +226,7 @@ if __name__ == "__main__":
             "background_clear",
             "curve_background_clear",
             "rich_curve_background_clear",
+            "aspect_rich_curve_background_clear",
         ),
         default="diverse",
     )

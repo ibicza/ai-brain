@@ -58,10 +58,13 @@ DATASET_PROFILES = (
     "background_clear",
     "curve_background_clear",
     "rich_curve_background_clear",
+    "aspect_rich_curve_background_clear",
 )
 CURVE_RNG_DOMAIN = 0x4D33554C
 CURVE_RNG_POLICY = "SeedSequence(scene_seed, side, M3UL); quadratic stripes on two thirds of NEW training-style scenes, sinusoidal transfer remains held out"
 RICH_CURVE_RNG_POLICY = "SeedSequence(scene_seed, side, M3UL); wider quadratic plus cubic stripes on two thirds of NEW training-style scenes, sinusoidal transfer remains held out"
+ASPECT_RNG_DOMAIN = 0x4D33414C
+ASPECT_RNG_POLICY = "SeedSequence(scene_seed, side, M3AL); elongated known shapes uniform minor/major ratio(0.48,0.88), archival geometry draws still consumed; native sinusoidal transfer unchanged"
 DIVERSE_STYLES = (
     "diverse",
     "challenge",
@@ -71,6 +74,7 @@ DIVERSE_STYLES = (
     "challenge_background_clear",
     "diverse_curve_background_clear",
     "diverse_rich_curve_background_clear",
+    "diverse_aspect_rich_curve_background_clear",
 )
 TEMPLATES = {
     "color": (
@@ -159,6 +163,7 @@ class Scene:
                 "challenge_background_clear",
                 "diverse_curve_background_clear",
                 "diverse_rich_curve_background_clear",
+                "diverse_aspect_rich_curve_background_clear",
             )
             or type(self.seed) is not int
             or self.seed < 0
@@ -318,6 +323,11 @@ def render_diverse(scene: Scene, *, background_override=None) -> np.ndarray:
             radius,
             radius * float(rng.uniform(0.48, 0.64)) if elongated else radius,
         )
+        if elongated and "_aspect_" in scene.style:
+            aspect_rng = np.random.default_rng(
+                np.random.SeedSequence([scene.seed, side, ASPECT_RNG_DOMAIN])
+            )
+            ry = radius * float(aspect_rng.uniform(0.48, 0.88))
         angle = float(rng.uniform(-np.pi / 2, np.pi / 2))
         if scene.style.endswith("_clear") and scene.seed % 5 == 0:
             angle = 0.0
@@ -452,6 +462,12 @@ def scenes(
                 tuple(items),
                 ("transfer" if split == "transfer" else "standard")
                 if profile == "legacy"
+                else (
+                    "challenge_background_clear"
+                    if split == "transfer"
+                    else "diverse_aspect_rich_curve_background_clear"
+                )
+                if profile == "aspect_rich_curve_background_clear"
                 else (
                     "challenge_background_clear"
                     if split == "transfer"

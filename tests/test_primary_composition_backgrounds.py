@@ -146,3 +146,33 @@ def test_rich_profile_keeps_labels_background_and_sinusoidal_holdout():
     assert np.array_equal(c.render(wide), c.render(wide))
     assert not np.array_equal(c.render(row)[:, :48], c.render(wide)[:, :48])
     assert np.array_equal(c.render(row)[:, 48:], c.render(wide)[:, 48:])
+
+
+def test_broader_aspects_keep_labels_background_other_objects_and_holdout():
+    prior = c.scenes("train", 20, 141000, profile="rich_curve_background_clear")
+    wider = c.scenes("train", 20, 141000, profile="aspect_rich_curve_background_clear")
+    assert [(s.seed, s.items) for s in prior] == [(s.seed, s.items) for s in wider]
+    assert c.scenes(
+        "transfer", 20, 141100, profile="aspect_rich_curve_background_clear"
+    ) == c.scenes("transfer", 20, 141100, profile="rich_curve_background_clear")
+    ratios = []
+    for seed in range(141000, 141030):
+        row = replace(
+            prior[0],
+            seed=seed,
+            items=(
+                c.Item("красный", "овал", "однотонный"),
+                c.Item("синий", "круг", "полосатый"),
+            ),
+        )
+        broad = replace(row, style="diverse_aspect_rich_curve_background_clear")
+        assert np.array_equal(c.sample_background(row), c.sample_background(broad))
+        assert np.array_equal(c.render(row)[:, 48:], c.render(broad)[:, 48:])
+        assert not np.array_equal(c.render(row)[:, :48], c.render(broad)[:, :48])
+        ratios.append(
+            np.random.default_rng(
+                np.random.SeedSequence([seed, 0, c.ASPECT_RNG_DOMAIN])
+            ).uniform(0.48, 0.88)
+        )
+    assert min(ratios) >= 0.48 and max(ratios) <= 0.88
+    assert sum(r > 0.8 for r in ratios) >= 3

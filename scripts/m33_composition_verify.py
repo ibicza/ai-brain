@@ -225,10 +225,16 @@ def verify(root, previous, capsule, output, device):
     ):
         raise ValueError("Quadratic exposure RNG policy differs from source")
     if (
-        protocol["dataset_profile"] == "rich_curve_background_clear"
+        protocol["dataset_profile"]
+        in ("rich_curve_background_clear", "aspect_rich_curve_background_clear")
         and protocol.get("curve_rng_policy") != c.RICH_CURVE_RNG_POLICY
     ):
         raise ValueError("Rich curve exposure RNG policy differs from source")
+    if (
+        protocol["dataset_profile"] == "aspect_rich_curve_background_clear"
+        and protocol.get("aspect_rng_policy") != c.ASPECT_RNG_POLICY
+    ):
+        raise ValueError("Aspect exposure RNG policy differs from source")
     if type(auxiliary_count) is not int or not 0 <= auxiliary_count <= 10000:
         raise ValueError("Invalid auxiliary protocol")
     control_splits = {"exposure", "control_calibration", "control_final", "control_dev"}

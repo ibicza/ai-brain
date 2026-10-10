@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8",
+    "m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de",
+    "m33_composition_source_dataset.py": "7c5c83e482fdfeaf31060c7329117a99c2c2f23df57f6c7f8da2450ecb7d4b67"
+  },
+  "source_inputs": {
+    "source-annotations.json": "2414290fb18be06635c25dde0fba607e4acfbfab87a57410bf106fba556a1845",
+    "dataset.npz": "1e36113a8e064f9203fc83b469d84449feed1a784eca0548334a3fc9f83a2c7a",
+    "records.json.gz": "59702ea39891971c358eceb8c354e168d3d75b7947a3e1b35bd5a2710152a1ba",
+    "source-crops.npz": "82971922bdbefaddb5f12cfbd8f68972a18c6cda134a075e963fefec999a041e",
+    "preparation-freeze.json": "ede4bf748b1d533df924dc500d43f303f74bc1c465988e2ad053fecf91d8996e",
+    "preparation-executed.py": "514a565653116aed9ce9a1c0b429c54ae26d5d1dcd52e713534227eb96d70043",
+    "preparation-receipt.json": "ed357804064502571d3c404249cfd7799d5731c6fa9cad781acbe17be85f7da3"
+  },
+  "original_capsule_sha256": "b3b5d834fc268810c5a04b78a0e65d3fab6dc954172e02a2d6a0d987265ed218",
+  "count": 156,
+  "seed": 0,
+  "production_admitted": false
+}

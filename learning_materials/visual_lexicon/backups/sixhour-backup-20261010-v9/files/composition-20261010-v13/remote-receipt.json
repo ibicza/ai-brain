@@ -1,0 +1,10 @@
+{
+  "status": "REMOTE_CONTINUATION_REPLAYED",
+  "remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v13",
+  "source_capsule_sha256": "b3b5d834fc268810c5a04b78a0e65d3fab6dc954172e02a2d6a0d987265ed218",
+  "previous_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+  "warm_candidate_sha256": "bdb1af182edd919439e8a9fa019e9a781ec943acdccded4b7a29b448c328f7dd",
+  "elapsed_seconds": 1660.6100000000006,
+  "transport_executed_sha256": "ab95fbe8fecfcb96d7ff691f10bfedbb33405024fcb795071788a85b19fae74b",
+  "production_admitted": false
+}
