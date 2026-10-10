@@ -49,7 +49,8 @@ examples; closed-head UNKNOWN examples are not a proof of universal OOD rejectio
 
 ## Results
 
-Pending authentic remote training and frozen inference/arithmetic replay.
+V19 completed authentic remote training and frozen inference/arithmetic replay.
+V20 is training under its preregistered unchanged intervention.
 Permanent dictionary, originals, prior failures and user working-tree changes
 remain untouched. Four prior textbook panels, if rechecked, are exposed
 regression diagnostics, not independent semantic blind sources.
@@ -90,3 +91,35 @@ and visually inspected (SHA256
 Authored known-shape records: 3,692 / 12,000 shape questions; the balanced rule
 expects 8.533 known authored-shape samples per full 64-question minibatch,
 versus V18's 1.641. This is sampling mass, not measured recognition accuracy.
+
+### Completed V19 (balanced, without foreground KL)
+
+Joint 10,000 steps: best DEV CE 0.0233639078 (step 7,200), 653.70 s total.
+Curriculum 10,000 steps: best DEV CE 0.0231850529 (step 10,000), 761.75 s total;
+selected checkpoint SHA256
+`a5e0b23aa38d44580fad5878fee91f746e065ab418c270860a9eb14d0af48ac8`.
+Frozen thresholds: color 0.97, shape 0.90, pattern 0.98, all selected by the
+same strict calibration rule. Shape now has eligible calibration coverage;
+the threshold was not manually lowered in response to final data.
+
+| V19 assessment | Accepted errors | Correct positive recall | Outcome |
+| --- | ---: | ---: | --- |
+| Ordinary final | 0 | 93.03% | Overall trial still rejected |
+| Held combinations | 0 | 94.07% | Overall trial still rejected |
+| Altered-style transfer | 0 | 91.26% | Pattern 78.37%; complete descriptions 74.98%, fail |
+| Authored paper final | 63 | 90.56% | Fail |
+| Exposed V4 math panel | 0 | 72.14% | Fail |
+| Exposed V3 language panel | 0 | 66.67% | Fail |
+| Exposed V2 art panel | 0 | 74.50% | Fail |
+| Exposed V1 math panels | 7 | 68.18% | Fail |
+| Paired cold contour screen | 0 | 93.11% | Fail on a per-family/task gate |
+
+All four source and the cold screen have authentic remote original-inference
+and arithmetic replay receipts. Aggregate accuracy cannot override asset/task
+failures. The 63 authored errors comprise 61 unsupported turquoise-to-green
+color assertions and 2 solid-to-spotted pattern assertions. Exact original
+96px error inputs are preserved and visually reviewed, not regenerated. The
+7 old mathematics-panel errors are shape errors. This is improved useful
+coverage with unsafe residual assertions, not an accepted model or evidence of
+photographic/object-name mastery. V19 status: NEEDS_WORK_NOT_PRODUCTION.
+No candidate is activated and no catalogue mastery percentage is raised.
