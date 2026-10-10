@@ -75,3 +75,50 @@ def test_direct_diverse_renderer_keeps_archival_background_draw_even_for_standar
         c.render_diverse(row),
         c.render_diverse(row, background_override=original_uniform),
     )
+
+
+def test_quadratic_profile_preserves_labels_and_holds_out_sinusoidal_transfer():
+    old = c.scenes("train", 20, 101000, profile="background_clear")
+    curved = c.scenes("train", 20, 101000, profile="curve_background_clear")
+    assert [(s.seed, s.items) for s in old] == [(s.seed, s.items) for s in curved]
+    assert {s.style for s in curved} == {"diverse_curve_background_clear"}
+    assert c.scenes(
+        "transfer", 20, 102000, profile="curve_background_clear"
+    ) == c.scenes("transfer", 20, 102000, profile="background_clear")
+
+
+@pytest.mark.parametrize("pattern", c.PATTERNS)
+def test_quadratic_flag_does_not_change_unrelated_textures_or_geometry(pattern):
+    original = c.scenes("train", 1, 103000, profile="background_clear")[0]
+    original = replace(
+        original,
+        items=(
+            c.Item("красный", "овал", pattern),
+            c.Item("синий", "круг", "однотонный"),
+        ),
+    )
+    curved = replace(original, style="diverse_curve_background_clear")
+    before, after = c.render(original), c.render(curved)
+    assert np.array_equal(after, c.render(curved))
+    assert np.array_equal(before[:, 48:], after[:, 48:])
+    assert np.array_equal(c.sample_background(original), c.sample_background(curved))
+    if pattern == "полосатый":
+        assert not np.array_equal(before[:, :48], after[:, :48])
+    else:
+        assert np.array_equal(before, after)
+
+
+def test_quadratic_profile_retains_one_third_exact_straight_stripe_scenes():
+    original = c.scenes("train", 1, 103002, profile="background_clear")[0]
+    original = replace(
+        original,
+        items=(
+            c.Item("красный", "овал", "полосатый"),
+            c.Item("синий", "круг", "полосатый"),
+        ),
+    )
+    assert original.seed % 3 == 0
+    assert np.array_equal(
+        c.render(original),
+        c.render(replace(original, style="diverse_curve_background_clear")),
+    )

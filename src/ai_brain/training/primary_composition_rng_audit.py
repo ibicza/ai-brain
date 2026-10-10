@@ -51,7 +51,7 @@ def audit(
         "independent_labels": independent_labels,
         "dataset_profile": profile,
         "background_rng_policy": c.BACKGROUND_RNG_POLICY
-        if profile == "background_clear"
+        if profile.endswith("background_clear")
         else None,
         "label_rng_policy": c.LABEL_RNG_POLICY
         if independent_labels

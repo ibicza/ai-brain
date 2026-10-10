@@ -215,10 +215,15 @@ def verify(root, previous, capsule, output, device):
         source_records = json.load(f)
     auxiliary_count = protocol.get("auxiliary_images", 0)
     if (
-        protocol["dataset_profile"] == "background_clear"
+        protocol["dataset_profile"].endswith("background_clear")
         and protocol.get("background_rng_policy") != c.BACKGROUND_RNG_POLICY
     ):
         raise ValueError("Wide background RNG policy differs from source")
+    if (
+        protocol["dataset_profile"] == "curve_background_clear"
+        and protocol.get("curve_rng_policy") != c.CURVE_RNG_POLICY
+    ):
+        raise ValueError("Quadratic exposure RNG policy differs from source")
     if type(auxiliary_count) is not int or not 0 <= auxiliary_count <= 10000:
         raise ValueError("Invalid auxiliary protocol")
     control_splits = {"exposure", "control_calibration", "control_final", "control_dev"}

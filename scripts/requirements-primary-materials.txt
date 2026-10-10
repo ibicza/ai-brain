@@ -1,0 +1,6 @@
+# Optional textbook extraction / PDF-integrity tests; separate from CUDA/Torch.
+# Exact versions observed in the bundled workspace runtime on 2026-10-10.
+# Install into the project venv, not the bundled runtime. Do not replace Torch.
+pdfplumber==0.11.9
+pypdfium2==5.13.0
+reportlab==4.4.9

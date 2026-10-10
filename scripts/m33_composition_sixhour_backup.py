@@ -34,6 +34,9 @@ SOURCE_FILES = (
     "scripts/m33_composition_dev_probe.py",
     "scripts/m33_composition_dev_remote.py",
     "scripts/m33_composition_numeric_probe.py",
+    "scripts/m33_composition_novel_controls.py",
+    "scripts/m33_composition_novel_screen.py",
+    "scripts/requirements-primary-materials.txt",
     "scripts/m33_composition_sixhour_backup.py",
     "tests/test_primary_composition.py",
     "tests/test_primary_composition_pipeline.py",
@@ -45,6 +48,8 @@ SOURCE_FILES = (
     "tests/test_primary_composition_numeric_probe.py",
     "tests/test_primary_numeric_backend.py",
     "tests/test_primary_composition_backgrounds.py",
+    "tests/test_primary_composition_novel_controls.py",
+    "tests/test_primary_composition_novel_screen.py",
     "tests/test_primary_zero.py",
     "tests/test_primary_relations.py",
     "docs/m33_composition_six_hour_work.md",
@@ -63,6 +68,7 @@ RUN_ROOT_FILES = (
     "comparison-executed.py",
     "development-diagnostics.json",
     "known-transfer-error-2447.png",
+    "known-transfer-error-2075.png",
     "scientific-validity-notice.json",
     "remote-preflight-failure.json",
 )
@@ -157,6 +163,8 @@ def run(repo, data, output, parent, run_names):
             "development-agreement-v1",
             "development-agreement-v2",
             "numeric-backend-v1",
+            "cold-family-screen-v1",
+            "cold-family-screen-v2",
         ):
             if (root / child).exists():
                 selected += [
@@ -176,10 +184,21 @@ def run(repo, data, output, parent, run_names):
         "qa-sixhour-rng-full-tests.xml",
         "qa-sixhour-rng-fixed-tests.xml",
         "qa-sixhour-backup-v1-tests.xml",
+        "qa-sixhour-backup-v2-tests.xml",
         "qa-sixhour-diverse-controls-v1.xml",
         "qa-sixhour-numeric-contract-v1.xml",
         "qa-sixhour-background-source-v1.xml",
         "qa-sixhour-wide-backgrounds-v1.xml",
+        "qa-sixhour-wide-full-regression-v1.xml",
+        "qa-sixhour-wide-full-regression-v2.xml",
+        "qa-sixhour-pdf-extraction-v1.xml",
+        "qa-sixhour-curve-focused-v1.xml",
+        "qa-sixhour-curve-unit-v1.xml",
+        "qa-sixhour-curve-policy-fix-v1.xml",
+        "qa-sixhour-curve-full-regression-v1.xml",
+        "qa-sixhour-cold-contours-v1.xml",
+        "qa-sixhour-cold-pipeline-v1.xml",
+        "qa-sixhour-cold-pipeline-v2.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))

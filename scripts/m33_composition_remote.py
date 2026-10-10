@@ -212,7 +212,12 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--dataset-profile",
-        choices=("diverse", "diverse_clear", "background_clear"),
+        choices=(
+            "diverse",
+            "diverse_clear",
+            "background_clear",
+            "curve_background_clear",
+        ),
         default="diverse",
     )
     args = parser.parse_args()

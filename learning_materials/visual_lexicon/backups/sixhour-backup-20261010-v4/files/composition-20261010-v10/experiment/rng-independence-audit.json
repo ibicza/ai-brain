@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "seed": 1104000000,
+  "count_per_side": 10000,
+  "independent_labels": true,
+  "label_rng_policy": "SeedSequence(scene_seed, M33L); separate from rendering",
+  "detector": "floor((base_background_channel - 100) / 80 * 3); R left, G right",
+  "confusion_gold_by_background_prediction": [
+    [
+      [
+        1093,
+        1105,
+        1139
+      ],
+      [
+        1106,
+        1135,
+        1084
+      ],
+      [
+        1124,
+        1081,
+        1133
+      ]
+    ],
+    [
+      [
+        1114,
+        1083,
+        1103
+      ],
+      [
+        1113,
+        1116,
+        1106
+      ],
+      [
+        1103,
+        1122,
+        1140
+      ]
+    ]
+  ],
+  "background_only_pattern_accuracy": [
+    0.3361,
+    0.337
+  ],
+  "known_shortcut_absent": true,
+  "limits": "Tests the discovered pattern/background shortcut only; not a comprehensive independence or semantic-understanding proof.",
+  "production_admitted": false
+}

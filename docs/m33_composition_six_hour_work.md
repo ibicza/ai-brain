@@ -439,3 +439,172 @@ until a new scoped push receipt confirms otherwise.
 275.71s. Both skips are the deliberately inapplicable exposure-family tamper
 test on fixtures with no auxiliary cohorts. It is no longer live. Combined
 latest-source regression 55521 and V10 training 52843 remain live.
+
+00:54 UTC: scoped V3 backup pushed and independently confirmed at
+`81f1cd6ff241370f2f0136c16fc891f5c8e96cfb` (126 changed paths), including complete
+V9 evidence, original V7 dev studies and the CPU failure, numeric intervention,
+new source and completed test receipts. Its predecessor was 93956e9...; every
+next backup must use the full NEW expected parent above. Main HEAD/index and
+canonical workbook hashes remain unchanged; no original files deleted. Current
+free space about D 1.06GiB, W 0.429GiB, notebook 9.5GiB: avoid unnecessary copied
+aggregate archives and duplicated old datasets in later backups.
+
+Primary literature follow-up: Concept Bottleneck Models
+https://proceedings.mlr.press/v119/koh20a.html and NS-CL
+https://arxiv.org/abs/1904.12584 motivate supervised/grounded attributes and
+compositional language, but our RGB residual model is NOT a strict concept-only
+bottleneck or NS-CL reproduction. Energy-based OOD Detection original algorithm
+https://arxiv.org/html/2010.03759v3 (sections 2, 3.1, 3.2) uses raw logit
+logsumexp and optional energy-gap loss to address softmax overconfidence. If
+diverse exposure still leaves accepted shape mistakes, a future KNOWN-DEV-only
+study can compare raw-logit energy and softmax novelty ranking before any fresh
+policy/training iteration. Do not reconstruct logit energy from normalized
+probabilities: their common logit offset has been lost. UNKNOWN-head energy and
+task-conditioned supported-class energy are different objectives; do not assume
+the paper transfers without validation. No energy policy is implemented yet.
+
+00:55 UTC handoff for automatic continuation (NOT task completion): only V10
+training/orchestration **52843** and combined latest-source regression **55521**
+are live. V10 joint 9000 done, curriculum step 600 observed. V7/V9 studies,
+numeric suite 24269, backup 83084, and graph 39515 are finished; do not restart.
+Next: inspect 55521 outcome; refresh 52843 and original capsule/receipts; diagnose
+actual held errors without changing old results; then preregister a fresh wide-
+background/IEEE image block (likely V11 seed 11040) if checks justify it. Preserve
+known versus blind family distinction and dev-only model selection. Still over
+four hours before earliest finish 05:11:22 UTC / 08:11:22 Minsk; goal and temporary
+heartbeat stay ACTIVE, not paused/complete. If current block passes before then,
+audit it and proceed to the next image block rather than stopping early.
+
+00:56 UTC: combined latest-source regression **55521 completed**: 562 passed,
+four skipped in 387.16s. It is no longer live. Receipt is
+`qa-sixhour-wide-full-regression-v1.xml`; this latest receipt was generated AFTER
+V3 backup and must be included in a future scoped backup. All six pipeline
+fixtures, including wide backgrounds/IEEE, completed. Only V10 **52843** remains
+live, curriculum step 1200. This is a tested source boundary, not a claim that
+the still-training V10 model passed its final screen.
+
+00:59 UTC: four full-suite skips were inspected individually: two deliberately
+inapplicable exposure-family checks without auxiliary cohorts, and two PDF
+extraction tests missing pdfplumber. The bundled runtime has PDF libraries but
+not pytest; the project venv lacked pdfplumber/pypdfium2/reportlab. Added only the
+three exact bundled versions to a separate optional
+`scripts/requirements-primary-materials.txt`; uv dry-run confirmed additive-only
+installation (also charset-normalizer/pdfminer-six), no Torch/Pillow/pypdf
+replacement. Actual venv remains torch 2.9.0+cu129, Pillow 12.3.0, pypdf 6.19.0.
+Dedicated PDF extraction/integrity suite then passed all nine tests in 1.39s:
+`qa-sixhour-pdf-extraction-v1.xml`. Its fresh fixture root
+`D:/ai-brain-data/visual-lexicon/pdf-extraction-qa-20261010-v1` is now preserved;
+NEVER rerun pytest --basetemp against that existing evidence directory.
+Skill pdf used for extraction/visual validation only; no textbook or workbook
+edited, no final authored PDF deliverable. Latest full suite remains its original
+562/4 result; separate rerun resolves the dependency skips, not retroactive edit.
+Next backup must include this XML and optional requirements, and future full
+runs can now execute those PDF tests. Only V10 52843 remains live, curriculum4200.
+
+PDF fixture visual review also completed on actual saved contact-sheet/page/crop
+JPEGs: source text and red illustration retained, full MediaBox preview and its
+red crop align, override does not clip the object. These are internal synthetic
+QA fixtures, not a new or edited user PDF and not a textbook-training result.
+
+01:00 UTC continuation boundary: post-PDF-dependency combined regression is
+running in **70527**, target receipt `qa-sixhour-wide-full-regression-v2.xml`.
+Do not duplicate it or reuse the preserved explicit PDF basetemp directory.
+Previous regression 55521 is finished (562/4); dedicated PDF rerun 9/0 finished.
+V10 **52843** remains the ONLY live model run, curriculum4800 observed. Next
+backup expected parent is 81f1cd6ff241370f2f0136c16fc891f5c8e96cfb, not 93956e9.
+New full receipts/PDF XML/requirements and this updated worklog are NOT yet in
+that V3 commit. D free 1.059GiB, W free 0.404GiB; no deletion authorized by this
+iteration, so reduce duplicated backup copies if nearing capacity. Continue
+model work/checks for at least four more hours until 05:11:22 UTC; no completion.
+
+01:11 UTC: V10 52843 completed; source capsule
+45a5da4cb0edceddfdf7181406d80f28f919d102f0fea64716a027f95a5ef16d,
+winning own curriculum8400 candidate
+576eed15bc3e600abe52f98c3e26871fc51f0074630ea593d19c22d07824de8d.
+Independent replay and transport receipt completed. Native ordinary/held-pair
+and authored control_final have zero accepted errors, but native transfer has
+one: index2075, transfer/345 right pattern, striped -> spotted, score0.9493251.
+Viewed exact preserved RGB (known-transfer-error-2075.png, raw RGB SHA
+45a1e56660d6c3382ff814641b0c9a216dffea89679bc0f742fc17c78c250980):
+clearly connected wavy stripes. This is a real failure, not relabeled gold.
+V10 is NOT admitted. Post-PDF full regression70527 completed564passed/2deliberate
+inapplicable skips in381.54s. No live jobs remain at this boundary.
+
+V11 preregistration BEFORE generation/training: seed11040, V10 own warm weights
+above, unchanged frozen inherited core,9000 native+1800 authored training images,
+600 each held cohort, two9000step candidates, raw balanced dev CE selection,
+four-view unanimity/JS0.2, spatial edges, smoothing0.02, diverse foreign contours.
+New native curve_background_clear uses independent broad gray backgrounds plus
+quadratic/parabolic stripes on two thirds of training-style scenes; sinusoidal
+stripes and irregular spots remain transfer-only. Numeric IEEE policy explicitly
+frozen for the new run, never backfilled into V10. This jointly changes several
+components; cannot attribute any improvement to one component alone. Acceptance
+unchanged (zero accepted errors on every cohort/task, recall and binding gates).
+AugMix primary abstract (https://arxiv.org/abs/1912.02781) confirms robustness
+benefits from training data processing under shift, but this custom curriculum
+is NOT an AugMix reproduction or a guarantee against unseen mistakes.
+
+01:17 UTC: V11 transport **38133** launched, local
+composition-20261010-v11, remote m33-composition-20261010-v11.
+Pinned driver D:/ai-brain-data/visual-lexicon/transport-v11-input.py SHA
+2281f2678dd657d5ed2ec5cf6e03fc099a0ebec9020fb274c99dc9d9bc37a294;
+original V11 source capsule SHA
+6f3fb848bea914af87f7551962a3217edec215bcc91bf1c2df2c8ec593275379.
+Preflight is still running, training not yet observed. Local curve unit73pass;
+larger tiny train/freeze/replay suite37245 remains running (not duplicate).
+
+Prepared separate cold-family screen, NOT imported by the training pilot.
+Families semicircle/teardrop/chevron are excluded from all original native/
+authored train, dev, calibration and known held controls. Preregister V11 cold
+screen600 images, seed2211040000, unchanged candidate/threshold/numeric policy;
+no model fitting/selection, reject any family/seed overlap with original course.
+Require zero accepted errors and useful recall separately for EVERY family/task,
+including known supported shapes, and zero accepted blank-image answers.
+Original inference/pilot/verifier modules must load from hash-checked original
+capsule in a fresh interpreter, never from current edited checkout. New authored
+generator shares Pillow; this is not an independent photo/semantic blind exam.
+Initial actual-capsule tiny subprocess QA8passed33.68s; it checks inference and
+arithmetic replay, altered-threshold rejection, old evidence preservation.
+Those are TOOL checks with random tiny weights, not cold mastery by V11.
+Added explicit subprocess check=False/style fixes and early argument/source-path
+checks afterwards; rerun required for latest bytes. Main index/workbook hashes
+still exactly their original protected values.
+
+01:20 UTC: local curve-focused37245 FINISHED149pass/2inapplicable skips/1FAIL
+441.89s. Failure is an incorrect expected exception text in the new hostile
+curve-policy test: actual verifier safely rejects altered protocol earlier by
+its frozen input hash. Original failed XML preserved. V11 immutable capsule
+contains this failing assertion and its remote preflight must finish/receipt
+before any next run; do NOT rewrite/retry V11 source or declare it trained.
+Fixed test now separately checks unresealed hash rejection and an adversarial
+resealed protocol's semantic curve-policy rejection. Verifier behavior and
+model acceptance unchanged. Latest cold-tool QA rerun69477 completed8pass30.19s,
+style checks clean; backup chunk unit6pass0.41s.
+
+01:22 UTC: exact affected quadratic fixture rerun30660 completed19pass,
+117other fixtures deselected,76.66s. It now verifies both the original frozen
+hash rejection and semantic policy rejection after an adversarial protocol
+hash reseal. Verifier unchanged. V11 remote preflight38133 still running and
+must fail its archived erroneous assertion; no training was observed/allowed.
+Next fresh V12 preregistration: identical corrected V11 design, fresh seed11041,
+V10 own warm checkpoint576eed15..., same sizes/criteria; it will be a NEW source
+capsule and run name, not a repaired V11. Cold follow-up stays600 images but
+use fresh seed2211041000 for V12. Its future cold families remain excluded from
+all V12 training/development/calibration cohorts by construction and audit.
+
+01:24 UTC: V11 remote38133 finished with1failed330pass2inapplicable skips,
+362.09s; failure matches preserved local diagnostic, no model trained.
+Original failed remote XML SHA
+d77d213a1e849adcd8e1c6241d4e029133572d8fec3aa2b8a4b1e58c2394060a;
+remote-preflight-failure.json statusREMOTE_PREFLIGHT_FAILED_NOT_TRAINED saved.
+Fresh V12 launched **77691**, local composition-20261010-v12, remote
+m33-composition-20261010-v12; source capsule SHA
+ac36b1499ffedf979272992d62e5bbe66f6204b67d47ec9d3fb75134e72c1b82.
+Pinned input transport-v12-input.py SHA2281f2678dd657d5ed2ec5cf6e03fc099a0ebec9020fb274c99dc9d9bc37a294.
+Latest source combined primary/lexicon/textbook regression **39498** is live;
+targetqa-sixhour-curve-full-regression-v1.xml, fresh fixture base
+C:/Users/artio/AppData/Local/Temp/ai-brain-m33-sixhour-curve-full-20261010-v1.
+Do NOT reuse this evidence base for another pytest run. Actual cold-tool fixture
+contact sheet viewed: bounded visible semicircles/drops/chevrons and supported
+shapes, distinct patterns retained. This is generator QA, not model mastery.
+Only77691and39498 are live; don't duplicate. Still3h47m before earliest finish.

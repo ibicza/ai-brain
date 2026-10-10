@@ -51,7 +51,15 @@ LABEL_RNG_DOMAIN = 0x4D33334C
 LABEL_RNG_POLICY = "SeedSequence(scene_seed, M33L); separate from rendering"
 BACKGROUND_RNG_DOMAIN = 0x4D33424C
 BACKGROUND_RNG_POLICY = "SeedSequence(scene_seed, M3BL); independent gray brightness uniform(60,205) plus RGB uniform(-6,6), never conditioned on labels"
-DATASET_PROFILES = ("legacy", "diverse", "diverse_clear", "background_clear")
+DATASET_PROFILES = (
+    "legacy",
+    "diverse",
+    "diverse_clear",
+    "background_clear",
+    "curve_background_clear",
+)
+CURVE_RNG_DOMAIN = 0x4D33554C
+CURVE_RNG_POLICY = "SeedSequence(scene_seed, side, M3UL); quadratic stripes on two thirds of NEW training-style scenes, sinusoidal transfer remains held out"
 DIVERSE_STYLES = (
     "diverse",
     "challenge",
@@ -59,6 +67,7 @@ DIVERSE_STYLES = (
     "challenge_clear",
     "diverse_background_clear",
     "challenge_background_clear",
+    "diverse_curve_background_clear",
 )
 TEMPLATES = {
     "color": (
@@ -145,6 +154,7 @@ class Scene:
                 "challenge_clear",
                 "diverse_background_clear",
                 "challenge_background_clear",
+                "diverse_curve_background_clear",
             )
             or type(self.seed) is not int
             or self.seed < 0
@@ -331,6 +341,15 @@ def render_diverse(scene: Scene, *, background_override=None) -> np.ndarray:
         if item.pattern == "полосатый":
             theta = float(rng.uniform(-np.pi, np.pi))
             stripe_axis = dx * np.cos(theta) + dy * np.sin(theta)
+            if "_curve_" in scene.style and scene.seed % 3 != 0:
+                # New exposure is quadratic, never the sinusoidal held family.
+                # Separate stream preserves other object geometry/texture RNG.
+                orthogonal = -dx * np.sin(theta) + dy * np.cos(theta)
+                curve_rng = np.random.default_rng(
+                    np.random.SeedSequence([scene.seed, side, CURVE_RNG_DOMAIN])
+                )
+                curvature = curve_rng.uniform(0.004, 0.018) * curve_rng.choice((-1, 1))
+                stripe_axis += curvature * orthogonal**2
             if scene.style.startswith("challenge"):
                 orthogonal = -dx * np.sin(theta) + dy * np.cos(theta)
                 stripe_axis += rng.uniform(1.5, 2.5) * np.sin(
@@ -425,6 +444,12 @@ def scenes(
                 tuple(items),
                 ("transfer" if split == "transfer" else "standard")
                 if profile == "legacy"
+                else (
+                    "challenge_background_clear"
+                    if split == "transfer"
+                    else "diverse_curve_background_clear"
+                )
+                if profile == "curve_background_clear"
                 else (
                     "challenge_background_clear"
                     if split == "transfer"

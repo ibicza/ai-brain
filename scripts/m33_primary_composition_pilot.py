@@ -310,7 +310,10 @@ def run(args):
         "candidate_anchor_sha256": candidate_anchor,
         "dataset_profile": args.dataset_profile,
         "background_rng_policy": course.BACKGROUND_RNG_POLICY
-        if args.dataset_profile == "background_clear"
+        if args.dataset_profile.endswith("background_clear")
+        else None,
+        "curve_rng_policy": course.CURVE_RNG_POLICY
+        if args.dataset_profile == "curve_background_clear"
         else None,
         "label_rng_policy": course.LABEL_RNG_POLICY,
         "independent_labels": True,

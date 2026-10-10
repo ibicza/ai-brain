@@ -28,7 +28,7 @@ verifier = script("m33_composition_verify")
 
 @pytest.fixture(
     scope="module",
-    params=(0, 1, 2, 3, 4, 5),
+    params=(0, 1, 2, 3, 4, 5, 6),
     ids=(
         "single-view",
         "four-view",
@@ -36,6 +36,7 @@ verifier = script("m33_composition_verify")
         "diverse-exposure",
         "ieee-exposure",
         "ieee-wide-background",
+        "ieee-quadratic-background",
     ),
 )
 def sealed(tmp_path_factory, request):
@@ -79,7 +80,13 @@ def sealed(tmp_path_factory, request):
                 numeric_precision="ieee" if request.param >= 4 else "legacy",
                 previous=previous,
                 warm_candidate=None,
-                dataset_profile="background_clear" if request.param == 5 else "diverse",
+                dataset_profile=(
+                    "curve_background_clear"
+                    if request.param == 6
+                    else "background_clear"
+                    if request.param == 5
+                    else "diverse"
+                ),
                 seed=12000,
                 steps=2,
                 eval_every=2,
@@ -113,6 +120,34 @@ def test_rng_audit_cannot_be_rewritten(sealed):
         assert not (sealed / "must-not-exist-rng.json").exists()
     finally:
         path.write_bytes(original)
+
+
+@pytest.mark.parametrize("reseal", (False, True))
+def test_quadratic_policy_cannot_be_rewritten(sealed, reseal):
+    path = sealed / "experiment/protocol.json"
+    freeze_path = sealed / "experiment/candidate-freeze.json"
+    original, frozen_original = path.read_bytes(), freeze_path.read_bytes()
+    protocol = json.loads(original)
+    if protocol["dataset_profile"] != "curve_background_clear":
+        return
+    try:
+        protocol["curve_rng_policy"] = "same generator reused for labels"
+        path.write_text(json.dumps(protocol), encoding="utf-8")
+        if reseal:
+            freeze = json.loads(frozen_original)
+            freeze["protocol_sha256"] = verifier.sha(path)
+            freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
+        expected = (
+            "Quadratic exposure RNG policy differs"
+            if reseal
+            else "Frozen inputs/status changed"
+        )
+        with pytest.raises(ValueError, match=expected):
+            check(sealed, "must-not-exist-curve.json")
+        assert not (sealed / "must-not-exist-curve.json").exists()
+    finally:
+        path.write_bytes(original)
+        freeze_path.write_bytes(frozen_original)
 
 
 def test_exact_inference_and_arithmetic_replay(sealed):
