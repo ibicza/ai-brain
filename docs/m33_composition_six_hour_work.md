@@ -1328,3 +1328,164 @@ Primaryliterature https://arxiv.org/html/2004.07780v5 read: highin-distribution
 scorescancome from unintended cues; intention-generalization cannotbe inferred
 fromsimilarbenchmarksuccessalone. Ouractualpaper-contourhypothesisneedsnew
 frozenassessment, notthatpaper's authority. No causalproof claimed.
+
+04:21 UTC handoff: V13backup58466 COMPLETE171paths/fullcommit
+df9b3cf1d101968a5756134d4e2739fe0054fc8c. Independentls-remotefullSHAconfirmed;
+sameprotectedmainHEAD/index/canonicalxlsx hashes. IncludesNEWsourceV4/prepv10,
+preservedfailedV17 andlatestfixes/proofs. NEXTbackup expected-parentFULL
+df9b3cf1d101968a5756134d4e2739fe0054fc8c, not213696... . Noactivebackup.
+Latestlocalfull45files **36029 LIVE** ~33%, currentpatchedsource/testdefinitions,
+XMLqa-sixhour-final-full-regression-v2.xml, fixturebaseC:/Users/artio/AppData/Local/Temp/ai-brain-m33-sixhour-final-full-20261010-v2.
+RemoteV18 **1529 LIVE** preflight~26%; noactualtraining/finalyetconfirmed.
+Originalsealedcapsule01be70d0... anddriver451776... mustnotrestart/overwrite.
+After1529authenticREMOTE_CONTINUATION_REPLAYED +inference/arithmeticreceipt,
+ FIRSTfreshV4/prepv10 count30 --childsource-control-screen-v1 via
+D:/ai-brain-data/visual-lexicon/transport-source-v18-input.py,
+ thenEXPOSEDlanguage/prepv9 count12 childv2,art/prepv7 count156 childv3,
+ math/prepv8 count110 childv4. Allsame44fc...nativecsource; originalV18capsule
+owns its frozeninference andthresholds. Results/trainingnotguessed inadvance.
+Noothermodeltrainerlive. Mainlatestnative/authoredcodingunchangedaftercapsule.
+Graph20219COMPLETE1005files. Latestfull16912COMPLETE830/32 (beforelatepatches),
+currentlatefocused31/30/38/15proofs asabove. Runevidence/data/sourcefailures
+mustbe preserved andfull36029mustfinish; nextbackupv14/v15freshnamesonly.
+Goal/heartbeatACTIVE,earliestfinish05:11:22UTC still~50minutesaway. Continue
+meaningfulwork/research/analysis, doNOTdisableheartbeat/completegoalearly.
+Atdeadlinefinishverification/handoff, disabletemporaryautomationm33; never
+claimwholeM33/real-objectmastery oractivatefailedcandidate fromsyntheticpass.
+
+04:30 UTC authoritativecontinuation: previousgoalturn madeactualprogress
+(V15sourceassessments, freshV4preparation, import/mockfixes, exactGitbackup),
+notno-progress. V18 **1529 LIVE** REMOTEpreflight COMPLETE503passed/32skips
+754.15s, optionalparamiko-free mock nowPASSonactualLinux. Owntraining notyet
+logged; datasetgeneration/training/freeze/final/replay/download remainpending.
+Remoteprocess314328 previouslyverifiedlive via ps (CPU188%); notstoppedfrom
+quietstdout. CurrentGPUidle138MiB/53Cafterpreflight, noothertrainerstarted.
+Latestlocalfull **36029 LIVE** >50%, freshlatestpatchedsuite stillrunning.
+Sourceassessmentcode inspected: zeroerrors AND positive≥.8/unknown≥.9 for
+EVERYasset×task, plusblank0, notonlyaggregate. V15mathglobal.81818doesNOTpass:
+individualyellow/redcircle shape,palegreenrectangle colour,pinkrectangle shape
+areallrefused; lightbluesquare colourhas8falseassertions. Conditionsunchanged.
+FirstsourceV4 forV18remainsUNEVALUATED/frozen, csource44fc...stillmatching.
+ProtectedphysicalarchiveClocation andDjunction retained, nodeletions/indexwrites.
+Earliestfinish05:11:22UTC still~41minutesaway; goal/heartbeatACTIVE.
+
+04:36 UTC latestcurrentpatchedfull45files **36029 COMPLETE832passed/32skips
+924.96s**, nofailures/errors; XMLqa-sixhour-final-full-regression-v2.xml.
+Includesactualoptional-SSH-free mockedtransport, fourboundedsource slots,
+paper/aspect/strictcalibration guards andoldcourse/cataloguecoverage.
+V18 **1529 LIVE**, actualjointGPUtraining5400observed, nativebalancedDEVCE
+.02545/authoredpaperDEVCE.06987 (rawdevonly, notacceptance proof). Jointstarted
+afterauthentic503/32preflight, nosecondtrainer. Finalpolicy/holdout/source
+results pending. No model/source/transport changesaftersealedV18capsule.
+Nextbackupv14 shouldincludecompletedV18 plus latestfullproof AFTERauthentic
+download/replay, expected-parentFULLdf9b3cf1d101968a5756134d4e2739fe0054fc8c.
+NewsourceV4/prepv10still UNEVALUATED; firstfreshthenexposedv3/v2/v1planunchanged.
+MainHEAD/index/XLSXprotected; goal/heartbeatACTIVE~35minutesremaining.
+
+04:45 UTC provenanceaudit (readonly) of frozeninheritedcf73b... checkpoint:
+torchweights-onlyload confirms width96/layers2/step1000/previousa4a168...;
+archivediteration5receipt binds SAMEcf73 checkpoint. Read ORIGINALsealed
+objects-five-iterations-20261009/source-capsule-v1.tgz memberdata/dataset.json,
+SHAc71dce559b11274b16aaf21bd9f0588e22fb5d7d99e4f7656437ef3bc9c9cf21.
+Train2869records:2337QuickDraw+62illustration+469Commons+1constant, ZEROtextbook;
+dev535/cal735/final162/regression683 also ZEROtextbook. Seven textbook records
+are exclusively INSPECTED_NONBLIND_DIAGNOSTIC_ONLY_NOT_TUNING split; source
+pilot consumesrecords['train'] anddevelopment-only mode producesno textbook
+predictions. Existingobjectpreparedmanifests across8roots corroborate same
+seventextbookdiagnostics, no textbookintrain. TheyincludeGuleckaya bookcrops:
+therefore languageV3 is FIRSTattribute panel, NOTan entirelyunseenauthor/book
+familyforallpriorprojecthistory. No independentsemanticblind-examclaim.
+NewmathV4page12 absentfromold7diagnosticcropnames (math18/28/40/80 etc); allbook
+diagnostics excludedfromweightlearning. This bounds ourfreshnessclaim toNEW
+sourceassets/attributeassessment, not unviewedbyallprojectagents or allancestry.
+No originalcapsules/sourceannotations/failedreports rewritten. Graph20219fresh
+qualifiedqueriesforuntrackedobjectscripts returnednot-indexed, notproofno
+dependencies; confirmed actualsource/immutablearchivedmanifest instead.
+V18joint10000COMPLETEbestDEV.03942, curriculum3000observed; actualfinals and
+sourceassessments stillpending. This is trainingevidence only, no acceptance.
+Latestfull832/32 XMLSHAd7dfca18ca5e74cc462acd94b5d988c0944df39bc8f99eca10d2d028fcce3e23.
+Earliestfinish05:11:22UTC, still~26minutesremaining; goal/heartbeatACTIVE.
+
+Additionalpreregisteredrobustnessscreen afterfrozenV18+fourrealsourcepanels:
+existingcoldfamilygenerator,600scenes/freshseed19053, childcold-family-screen-v1,
+NOpreparedsource, originalV18capsule/weights/thresholds only. No fitting ornew
+familieschosenfromV18errors. Sameper-familyzeroacceptederror/positive≥.8/
+unknown≥.9/blank0 guards. This is controllednovelproceduralgeometry, NOTa
+photographic/independentsemanticexam andcannotoverrideANYfailedbase/sourcegate.
+SourceV4mustremainFIRSTreal-sourceassessment; pre-existingpanels areEXPOSED.
+
+## 04:58 UTC — completed V18 and actual failure analysis
+
+V18 completed both 10,000-step schedules on the remote GPU. Development-only
+selection chose curriculum, checkpoint
+`5ea936eb17e0065a60c253d599fe60069596f042e5db5487ac1efb3698cbd724`.
+The original sealed inference and separate arithmetic replay both completed;
+the download's per-file SHA checks and `REMOTE_CONTINUATION_REPLAYED` receipt
+completed too. The original inherited tensors are preserved. No activation.
+
+Frozen thresholds: color 0.97, shape **null**, pattern 0.98. This is not a
+successful model: null means ALL shape questions are refused, not that the
+shape representation disappeared or that refusal counts as positive accuracy.
+
+| Fixed assessment | Accepted wrong answers | Correct positive recall | Outcome |
+| --- | ---: | ---: | --- |
+| Native final, 3,600 questions | 0 | 60.46% | Fail |
+| Held combinations, 3,600 questions | 0 | 58.72% | Fail |
+| Changed native style, 3,600 questions | 0 | 58.30% | Fail |
+| Authored paper-style final, 3,600 questions | 2 | 73.00% | Fail |
+| NEW V4 textbook page/assets, first assessment, 180 questions | 0 | 53.57% | Fail |
+| Exposed language V3, 72 questions | 0 | 66.67% | Fail |
+| Exposed art V2, 936 questions | 0 | 64.17% | Fail |
+| Exposed math V1, 660 questions | 0 | 48.41% | Fail |
+| Preregistered cold families, 600 scenes / 3,600 questions | 0 | 76.46% | Fail |
+
+All these panels have unknown recall 100% and zero accepted blank inputs.
+Those properties do not override positive/task/asset/binding failures. Complete
+three-attribute recall is zero with the disabled shape policy. The six, four,
+thirteen and eleven source crops respectively are the true correlated asset
+counts, not the much larger pair/question counts. V4 is now EXPOSED forever;
+none of these manually annotated panels is an independent semantic blind exam.
+
+Read-only replay of the ORIGINAL sealed V18 model on calibration explains why
+no shape threshold was eligible. At 0.90: native correct positive recall
+92.484%, authored 75.068%, accepted errors zero. At 0.95: 87.168% / 60.976%,
+zero errors. At 0.97: 76.260% / 40.379%; at 0.98: 50.871% / 21.951%;
+at 0.99: 4.125% / 4.065%; at 0.995: 0.092% / 0%; at 0.999 and 0.9999:
+both zero. All eight thresholds have zero calibration accepted errors, but
+EVERY threshold fails the authored >=80% positive requirement; the last three
+also fail the minimum 40 accepted support requirement. This was stdout-only
+diagnosis, not a fitted replacement policy or a new evaluation. Existing
+thresholds, weights, originals, annotations and receipts were not changed.
+
+The exact two stored authored-final error images were independently checked
+against saved pixel/gold hashes and viewed, not regenerated. Records 1019 and
+3485 wrongly call the RIGHT solid star spotted; consensus scores 0.9846719 and
+0.9802331, respectively. Pixel previews retain the faint paper patches. The
+paper/background interference explanation remains a hypothesis, not causal
+proof. `exposed-control-errors.json/png` preserves the images and diagnosis.
+Existing dev-only diagnostic helper also saved `development-diagnostics.json`.
+
+Read additional primary literature:
+[Guo et al., confidence calibration](https://proceedings.mlr.press/v70/guo17a.html)
+and [SelectiveNet](https://arxiv.org/html/1901.09192v4). Temperature scaling and
+joint prediction/rejection training are research alternatives, NOT implemented
+here. Temperature scaling cannot fix class/target mistakes or supply an OOD
+guarantee; our unanimity/minimum score is not a calibrated probability. A new
+learned reject head would need a separate train/calibration protocol and fresh
+holdouts. Do not simply lower thresholds or rename the disabled task as mastery.
+
+Next development hypothesis: isolate foreground-vs-paper representation and
+increase independently generated difficult shape/pattern training examples;
+compare ONE intervention at a time against an unchanged reference, before
+considering extra capacity or a learned selection head. Fit only training/dev,
+freeze a new protocol before a genuinely new final/source panel, and retain
+zero-error, useful positive, unknown, full-description and binding criteria.
+Do not train on these assessed source crops and later claim they are fresh.
+No animal/object-name batch has begun; no dictionary mastery percentages changed.
+
+Latest complete local suite remains 832 passed / 32 inapplicable-contract skips,
+864 collected, zero failures/errors, 924.96 seconds. No source/test definitions
+changed after that suite; these later edits are documentation only. V16/V17
+launch failures are preserved and are NOT counted as trained iterations.
+Goal/heartbeat remain ACTIVE until at least 05:11:22 UTC; cloud backup of V18
+and these completed assessments is next, not yet claimed successful here.

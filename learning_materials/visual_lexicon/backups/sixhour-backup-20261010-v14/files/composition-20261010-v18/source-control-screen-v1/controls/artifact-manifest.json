@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "file": "actual-source-inputs.png",
+      "sha256": "1e9ac92a4378f6f8113ff34744e9891934530e3b9baf3de442567a069ce33fcb"
+    },
+    {
+      "file": "dataset.npz",
+      "sha256": "fe9230fec8122f440ecd6272f2566b322233b140c6de86f961476d5122cb7eee"
+    },
+    {
+      "file": "m33_composition_novel_controls.py",
+      "sha256": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8"
+    },
+    {
+      "file": "m33_composition_novel_screen.py",
+      "sha256": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de"
+    },
+    {
+      "file": "m33_composition_source_dataset.py",
+      "sha256": "7c5c83e482fdfeaf31060c7329117a99c2c2f23df57f6c7f8da2450ecb7d4b67"
+    },
+    {
+      "file": "predictions.json.gz",
+      "sha256": "550f7daa10b74473798e8557d423e70f0a1b01a6f48c20ee903c02df9788f353"
+    },
+    {
+      "file": "preregistered-freeze.json",
+      "sha256": "6bc01ffe45d243930154425af332cb9f91bc7bf2822768281ac10b51b014f2b1"
+    },
+    {
+      "file": "records.json.gz",
+      "sha256": "5ab5bd12960497062365fde579bfd0904a051db60f24ff235e2e8ae0b70b4707"
+    },
+    {
+      "file": "result.json",
+      "sha256": "94d50e71c378bd3131044d2a9b455357c8012139b7454a986f10b6c06f7e20de"
+    }
+  ]
+}

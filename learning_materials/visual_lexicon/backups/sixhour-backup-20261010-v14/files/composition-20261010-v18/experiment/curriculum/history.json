@@ -1,0 +1,138 @@
+[
+  {
+    "step": 600,
+    "train_loss": 0.12780936062335968,
+    "balanced_dev_ce": 0.09748212434351444,
+    "native_balanced_dev_ce": 0.03439726307988167,
+    "auxiliary_balanced_dev_ce": 0.16056698560714722,
+    "elapsed_seconds": 40.50747876998503
+  },
+  {
+    "step": 1200,
+    "train_loss": 0.13629505038261414,
+    "balanced_dev_ce": 0.1094661969691515,
+    "native_balanced_dev_ce": 0.041372064501047134,
+    "auxiliary_balanced_dev_ce": 0.17756032943725586,
+    "elapsed_seconds": 81.05502730899025
+  },
+  {
+    "step": 1800,
+    "train_loss": 0.12062575668096542,
+    "balanced_dev_ce": 0.11338991671800613,
+    "native_balanced_dev_ce": 0.0601477175951004,
+    "auxiliary_balanced_dev_ce": 0.16663211584091187,
+    "elapsed_seconds": 121.61988257500343
+  },
+  {
+    "step": 2400,
+    "train_loss": 0.17904171347618103,
+    "balanced_dev_ce": 0.1547086089849472,
+    "native_balanced_dev_ce": 0.08575883507728577,
+    "auxiliary_balanced_dev_ce": 0.22365838289260864,
+    "elapsed_seconds": 162.60918823292013
+  },
+  {
+    "step": 3000,
+    "train_loss": 0.12124913185834885,
+    "balanced_dev_ce": 0.15707609429955482,
+    "native_balanced_dev_ce": 0.09577294439077377,
+    "auxiliary_balanced_dev_ce": 0.21837924420833588,
+    "elapsed_seconds": 204.1722510859836
+  },
+  {
+    "step": 3600,
+    "train_loss": 0.11553671211004257,
+    "balanced_dev_ce": 0.06137344054877758,
+    "native_balanced_dev_ce": 0.022167805582284927,
+    "auxiliary_balanced_dev_ce": 0.10057907551527023,
+    "elapsed_seconds": 244.62555227591656
+  },
+  {
+    "step": 4200,
+    "train_loss": 0.1091698557138443,
+    "balanced_dev_ce": 0.05549525748938322,
+    "native_balanced_dev_ce": 0.02278188429772854,
+    "auxiliary_balanced_dev_ce": 0.0882086306810379,
+    "elapsed_seconds": 286.6615721359849
+  },
+  {
+    "step": 4800,
+    "train_loss": 0.11211104691028595,
+    "balanced_dev_ce": 0.054098199121654034,
+    "native_balanced_dev_ce": 0.022976821288466454,
+    "auxiliary_balanced_dev_ce": 0.08521957695484161,
+    "elapsed_seconds": 327.25683112698607
+  },
+  {
+    "step": 5400,
+    "train_loss": 0.2095544934272766,
+    "balanced_dev_ce": 0.04455108940601349,
+    "native_balanced_dev_ce": 0.0216294527053833,
+    "auxiliary_balanced_dev_ce": 0.06747272610664368,
+    "elapsed_seconds": 369.12152339494787
+  },
+  {
+    "step": 6000,
+    "train_loss": 0.18868282437324524,
+    "balanced_dev_ce": 0.043390920385718346,
+    "native_balanced_dev_ce": 0.021669704467058182,
+    "auxiliary_balanced_dev_ce": 0.06511213630437851,
+    "elapsed_seconds": 411.5013469129335
+  },
+  {
+    "step": 6600,
+    "train_loss": 0.11078701913356781,
+    "balanced_dev_ce": 0.044541433453559875,
+    "native_balanced_dev_ce": 0.01934230327606201,
+    "auxiliary_balanced_dev_ce": 0.06974056363105774,
+    "elapsed_seconds": 452.2177020269446
+  },
+  {
+    "step": 7200,
+    "train_loss": 0.11022355407476425,
+    "balanced_dev_ce": 0.04002885986119509,
+    "native_balanced_dev_ce": 0.020581575110554695,
+    "auxiliary_balanced_dev_ce": 0.05947614461183548,
+    "elapsed_seconds": 494.1995858149603
+  },
+  {
+    "step": 7800,
+    "train_loss": 0.10830685496330261,
+    "balanced_dev_ce": 0.04126144666224718,
+    "native_balanced_dev_ce": 0.02005893923342228,
+    "auxiliary_balanced_dev_ce": 0.06246395409107208,
+    "elapsed_seconds": 536.6931254419032
+  },
+  {
+    "step": 8400,
+    "train_loss": 0.11141908168792725,
+    "balanced_dev_ce": 0.041360327042639256,
+    "native_balanced_dev_ce": 0.019360752776265144,
+    "auxiliary_balanced_dev_ce": 0.06335990130901337,
+    "elapsed_seconds": 577.2247388579417
+  },
+  {
+    "step": 9000,
+    "train_loss": 0.10977859050035477,
+    "balanced_dev_ce": 0.03792989440262318,
+    "native_balanced_dev_ce": 0.021055016666650772,
+    "auxiliary_balanced_dev_ce": 0.05480477213859558,
+    "elapsed_seconds": 619.1748601009604
+  },
+  {
+    "step": 9600,
+    "train_loss": 0.10840749740600586,
+    "balanced_dev_ce": 0.03831017389893532,
+    "native_balanced_dev_ce": 0.019778233021497726,
+    "auxiliary_balanced_dev_ce": 0.05684211477637291,
+    "elapsed_seconds": 662.1927629399579
+  },
+  {
+    "step": 10000,
+    "train_loss": 0.1137920469045639,
+    "balanced_dev_ce": 0.03918392676860094,
+    "native_balanced_dev_ce": 0.02070561982691288,
+    "auxiliary_balanced_dev_ce": 0.057662233710289,
+    "elapsed_seconds": 690.4723396759946
+  }
+]
