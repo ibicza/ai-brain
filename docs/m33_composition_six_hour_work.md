@@ -971,3 +971,111 @@ bareHEADunbornmaster NOTICEexpectedwhileactualcatalogrefexists.
 No backup/branchmutationduringmove, maincheckout/index untouched.
 Move70203COMPLETE. LogicalD data root retained, sourcePDF/weights/dictionary
 stayintheiroriginalpaths. ContinuefromFULL8bea... onnextfreshV9backup.
+
+02:57 UTC V9backup29104 COMPLETE291changedpaths, independently remoteconfirmed
+42003d2f54f06206aec14d8fd86c4b12913eb65d. NEXTbackup parent this FULLSHA.
+Actualstream-chunk path successfully backed up BOTH V12/V13largeNPZ files:
+3parts each, whole-fileSHAchecked, eachstoredGitblobreadback/hashchecked.
+No temporary chunks spooldirectory exists. V12immutableoldpartsdeduplicated
+byGitblobOID, not a second90MBlocalcopy. NewtinyV12errorpreviewsandbothV13
+sourcefollowups preserved, plusaspectcode/testproof andpreparedv1-v8.
+V9validatesrelocatedbareGitthroughoriginalDjunction, protects mainHEAD/index/XLSX.
+FinalafterrelocationfreeD2,847,264,768/C13,546,119,168/W437,604,352bytes.
+
+Futureaspectcontract hostile-test49029 COMPLETE1passed202deselected18.83s:
+resigningprotocol aftertamperingaspectRNGpolicystill rejected. Graphrefresh
+63698 COMPLETE1005files; untracked experimentalqualifiedsymbols stillnotindexed,
+so manuallyconfirmed consumers/pilot/verifier/tests fromsource; nozero-callclaim.
+Latestfullregression **23313 LIVE**, newfixturebase
+C:/Users/artio/AppData/Local/Temp/ai-brain-m33-sixhour-aspect-full-20261010-v1,
+XML D:/ai-brain-data/visual-lexicon/qa-sixhour-aspect-full-regression-v1.xml.
+Itincludes newaspectpipeline anddiagnostic helper across44testfiles; current
+38%withdeliberateinapplicableskips, doNOTrestartorclaimpassed beforecompletion.
+
+Preparednewcontrols v7(art)/v8(math) have SAMEoldsourcepixels/gold,
+butnewaspect csourceSHA44fc4a986a7d70ecba574de8a265f0e92fe580a88ecb926ae6c258f5f9b7da4f.
+Independent7hash/rawROI/reassemblyloader passedboth. V14usesPRE-ASPECTcsource,
+so its followups MUSTusev5art/v6math. FutureV15aspectcapsule MUSTusev7art/v8math.
+Do not rewrite oldpreparations to match latestcode.
+
+Additional genuinelynewsource familybeforeV14/V15final: Russianlanguagebook
+ee851748... PDF4(unnumberedinsidecover soundstable), originalSHAverified,
+wholepageandallactualcrops/modelinputgalleryviewed. FreshoriginalPDF rendering
+matchespageSHA746a8ea5f3ee82c88eb32bedbda0f674b9868529663c7a06594f746a15cc1434.
+SourceV3manifest e62b781a4de8739b02318853768a5a7d70f390633c3e5c19eee43977eb229fee,
+3blue/green/redcirclemarkers+1empty-paper, nolettersinROIs,noclipping.
+Preparedroot source-controls-20261010-v9:12pairedscenes/72queries areONLY4correlated
+sourceassets, NOT12independentexamples. No inference/fittingyet; fresh boundary
+preserved. UsesASPECTcsource44fc..., so usableforV15, NOTV14originalcapsule.
+Independentloader passed. No wholepage/sound/language/animalidentityclaim.
+V3manifest/sourcev9/fullQA pending latestV10source-onlybackup; V9 predates these.
+
+03:01 UTC exposedV13mathgroups inspected:8redcircle->square shapeassertions
+(scores.900948-.922926),5palegreenrectangle->white colorassertions(.900377-.917997).
+Yellowcircle shape refused20/20; pinkrectangle shape refused20/20. Allmanualgold
+unchanged. Actualcropgallery re-viewed: the circles are actualroundfigures,
+someROIpaperbacksquares have graygradient/shadow aroundcircle. This is a
+plausible nuisance-background hypothesis, NOTcausallyproven. Broaderaspectsalone
+may notsolve these failures. AfterV15results, futureindependentpaperpatchbackground
+exposure / lightergreenpalette / strictercalibration canbe tested asNEWvariants.
+Nonecurrentlyimplemented. Never recolor/cropaway oldgoldorretuneoldfrozenpolicy.
+
+Resume work instructions: deadline05:11:22UTC STILLACTIVE,~2h10mremain.
+ONLYactualmodel **47857** andfullQA **23313** live; don'trestartcompleted72734,
+37104,69718,29104,70203,49029,69236,63698. V14joint6600lastobserved,
+curriculum/freeze/calibration/final/replay/downloadNOTdone. FullQA48%lastobserved.
+After23313completes, parseXMLattributes ONLY(noGet-Content wholeXML), logactual
+result; thenfreshsource-onlyV10backup withparentFULL42003d2f54f06206aec14d8fd86c4b12913eb65d,
+--stream-chunks andNOold--run arguments required. Preservesnewsourcev3/v9andQA.
+
+AfterV14complete authenticremote-receipt, usepinnedDtransport-source-v13-input.py
+but--reference composition-20261010-v14 forEXPOSEDartv5childsource-control-screen-v1
+(--count156 --seed0), EXPOSEDmathv6childsource-control-screen-v2(--count110--seed0).
+Thosepreparationscsource808de3...matchesV14originalcapsule; latestv7/v8/v9doNOT.
+Thenpinlatest scripts/m33_composition_remote.py toFRESH
+D:/ai-brain-data/visual-lexicon/transport-v15-input.py (doNOToverwriteV14driver).
+LaunchFRESHv15 with--seed14047 --steps10000 --train-images9000 --holdout-images600
+--spatial-readout --shape-edges --label-smoothing0.02 --reflection-consensus
+--auxiliary-images3000 --exposure-profilepalette_aspects --consistency-loss0.2
+--numeric-precisionieee --dataset-profileaspect_rich_curve_background_clear.
+Previous remainscf73 fromV14previous.pt; warmACTUALfrozenV14winner from
+experiment/{result.winner}/best.pt, NOTassumedjoint. OriginalDremote/outputpattern
+m33-composition-20261010-v15 / composition-20261010-v15. Scopedsourcecapsule,
+newseed, acceptancecriteriaunchanged, noautomaticactivation. NeverstartV15GPUjob
+beforeV14transportcomplete. Currentcsource44fc...matchespreparedv7/v8/v9.
+AfterV15freeze FIRSTlanguagev9freshsource assessment(count12); artv7/mathv8
+diagnosticrepeats. Existingnoveltransport allowsonly TWOsourcechildrenv1/v2;
+ifassessingallthree, addexplicitboundedsource-control-screen-v3 support to
+transport+backup+tests BEFOREpinningfuturetransporthelper, orassesslanguage+art
+onlythisrun. No undocumenteddirectoryalias/reusedchild/overwrittenproofallowed.
+Future risk-firstcalibration, palegreen endpoints and paperpatch variants are
+researchideas ONLY, doNOTinferimplemented. Warmweights selectbyDEVonly.
+
+03:04 UTC latestsupplementaldiagnostic+backupguard suite20passed3.28s,
+qa-sixhour-diagnostic-backup-v3.xml (latestsourceV3/preparationv9whitelist).
+Ruffcleancurrentnewfiles. MainHEAD/index/canonicalworkbookhashesreconfirmed
+unchanged at02:58. ActualV14joint9600observed; stillnotfrozen, notadmitted.
+FullQA23313 stillLIVEandprogressing; don'tcalllongpipelinephaseshung.
+PhysicalCbackupstore and Djunction verified, no deletedmaterials; Gitfsck
+passedbefore/after. ExistingABSOLUTEW.git/objects alternate retained unchanged,
+so this is relocation, NOTa new independent self-contained localGitclone.
+Cloudbackup ref independently confirmed42003d2f...; physicalarchiveCisimportant
+and MUSTnotbe classified as olddisposablecache in latercleanup.
+
+03:06 UTC latestfull23313 COMPLETE730passed/11deliberatelyinapplicable skips
+715.45s; nofailure. Newaspect/diagnostic functionality coveredalongsideprevious
+44-filefullsuite. SourceV3/v9whitelist changes madeaftercollection separately
+proved20tests, and actualfuturebackupwillhashthoseexactinputs. V14model47857
+curriculum1200observed, stillnotdone; norestartneeded. Previousgoalturn was
+SUBSTANTIVEPROGRESS(730fullproof, V13actualoutcomes, V14training, newaspect
+variants/newfreshPDFcontrols, preservedcloudbackup, diskrelocation), notidlewait.
+
+Addedthirdboundedsourcechild slot source-control-screen-v3 so one frozen
+candidatecancompare freshlanguage +exposedart +exposedmath WITHOUT overwriting
+anypriorresult. SharedSCREEN_CHILDRENconstant nowdefinesCLI+runtimeallowlist;
+stillONLY2coldslots+3sourceslots. Fourth/escape/missingpreparedsource rejected,
+ALLsourceexistingoutputs refuseoverwrite. Newtargeted28passed1.45s plusRuffclean.
+Backupwhitelist includesv3child. In-flightV14driver/pinnedsourcev13driverunchanged;
+newthirdslot appliesONLYnewlypinnedfuturehelper. Graphrefresh54328LIVEafterAPI.
+No priorcapsule rewritten, currentcsource44fc...unchanged. NEXTV10source-only
+backup parentFULL42003d2f54f06206aec14d8fd86c4b12913eb65d, freshroot, no--run.

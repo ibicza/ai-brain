@@ -42,6 +42,7 @@ SOURCE_FILES = (
     "scripts/m33_composition_source_dataset.py",
     "examples/m33/visual_source_controls_v1.json",
     "examples/m33/visual_source_controls_v2.json",
+    "examples/m33/visual_source_controls_v3.json",
     "scripts/requirements-primary-materials.txt",
     "scripts/m33_composition_sixhour_backup.py",
     "tests/test_primary_composition.py",
@@ -244,6 +245,7 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
             "cold-family-screen-v2",
             "source-control-screen-v1",
             "source-control-screen-v2",
+            "source-control-screen-v3",
         ):
             if (root / child).exists():
                 selected += [
@@ -301,10 +303,13 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-sixhour-exposed-diagnostics-v1.xml",
         "qa-sixhour-diagnostic-backup-v1.xml",
         "qa-sixhour-diagnostic-backup-v2.xml",
+        "qa-sixhour-diagnostic-backup-v3.xml",
         "qa-sixhour-aspect-unit-v1.xml",
         "qa-sixhour-aspect-unit-v2.xml",
         "qa-sixhour-aspect-pipeline-v1.xml",
         "qa-sixhour-aspect-contract-v1.xml",
+        "qa-sixhour-aspect-full-regression-v1.xml",
+        "qa-sixhour-third-source-transport-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))
@@ -317,6 +322,7 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "source-controls-20261010-v6",
         "source-controls-20261010-v7",
         "source-controls-20261010-v8",
+        "source-controls-20261010-v9",
     ):
         root = base / name
         if not root.exists():

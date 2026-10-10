@@ -12,6 +12,14 @@ from pathlib import Path
 
 import paramiko
 
+SCREEN_CHILDREN = (
+    "cold-family-screen-v1",
+    "cold-family-screen-v2",
+    "source-control-screen-v1",
+    "source-control-screen-v2",
+    "source-control-screen-v3",
+)
+
 
 def sha(path):
     with path.open("rb") as stream:
@@ -27,13 +35,7 @@ def run(args):
     ):
         raise ValueError("Completed explicit remote reference required")
     if (
-        args.child
-        not in (
-            "cold-family-screen-v1",
-            "cold-family-screen-v2",
-            "source-control-screen-v1",
-            "source-control-screen-v2",
-        )
+        args.child not in SCREEN_CHILDREN
         or args.child.startswith("source-control-") != (prepared_source is not None)
         or type(args.count) is not int
         or not 12 <= args.count <= 6000
@@ -259,12 +261,7 @@ if __name__ == "__main__":
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument(
         "--child",
-        choices=(
-            "cold-family-screen-v1",
-            "cold-family-screen-v2",
-            "source-control-screen-v1",
-            "source-control-screen-v2",
-        ),
+        choices=SCREEN_CHILDREN,
         default="cold-family-screen-v1",
     )
     parser.add_argument("--count", type=int, default=600)
