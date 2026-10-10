@@ -742,3 +742,82 @@ files; qualified scenes queries not_found for untracked files, not proof of
 no consumers. Confirmed pilot/verifier/controls calls with rg/source. Rebuild
 again after opt-in profile structure stabilized. Next backup expected parent
 e727907de5bb6dd84e18ce7a0b29869f45a29c3b; preserve user HEAD/index/workbook.
+
+02:20 UTC continuation checkpoint, NOTcompletion: V6 backup29630 COMPLETE
+143paths, exact remote ref independently confirms
+5b60b7e4be3b26e6641be8d614682c5bfb955bd3. NEXTbackup parent this FULL SHA.
+Includes completed V12, cold/source frozen assessments and sourcepreparations
+v1-v3; main HEAD/index/XLSX exact protected hashes unchanged. New V13 artifacts
+and new art source preparations below are newer than this backup.
+
+Rich/palette local fixturev1 preserved1failed18passed75.12s (stale test message
+expectation, correct verifier rejection), correctedv2 COMPLETE19passed/136
+deselected79.97s. Scoped source/cold/package/backup regression61753 COMPLETE
+39passed41.31s. Remote V13 **72734** preflight COMPLETE363passed/2inapplicable
+skips393.53s, training observed joint1800 (NOTfinal); no other model job live.
+Pinned driverD:/ai-brain-data/visual-lexicon/transport-v13-input.py SHA
+ab95fbe8fecfcb96d7ff691f10bfedbb33405024fcb795071788a85b19fae74b.
+Original capsuleSHA b3b5d834fc268810c5a04b78a0e65d3fab6dc954172e02a2d6a0d987265ed218.
+Seed12043, V12joint warm bdb1af182edd919439e8a9fa019e9a781ec943acdccded4b7a29b448c328f7dd,
+10000steps/schedule,9000native/3000authored/600held, richcurve/palette/IEEE,
+same0.02smoothing/fourviews/JS0.2/spatialedges. Actual remote exposure preview
+copied to v13/v13-exposure-preview.png and viewed: full figures/textures/new
+colors, faint white figures on paper background. The full contact sheet will
+be downloaded with normal completion; don't overwrite evidence.
+
+Important PRE-FINALdata review: 3000palette exposure scenes have0visible
+unsupported-color targets on supported shapes;1847unsupported-color/unsupported
+shape,1846known-color/supported shape,1846known-color/unsupported shape. This
+comes from both choices using i/side modulo3, NOTbackground RNG leakage or
+oracle-as-model-input. It is nonetheless a coverage/confounding weakness.
+V13 capsule remains immutable; let it finish as diagnostic and preserve this
+limit. NEXTnew version should use independent palette-label draws so unfamiliar
+colors occur on familiar ANDunfamiliar contours. Add regression on all four
+color/shape familiarity combinations before V14. Do not retrospectively claim
+the V13 palette corpus was fully factorized. Consider broader oval aspect ratios,
+unconditional contour outlines for faint paper/white figures, and a bounded
+risk-first calibration policy chosen on CALIBRATIONONLY if remaining evidence
+warrants it. These are NEXTideas, NOTimplemented nor V13 activation.
+
+Fresh art controls frozen before V13 final from another author/book family:
+examples/m33/visual_source_controls_v2.json SHA
+2414290fb18be06635c25dde0fba607e4acfbfab87a57410bf106fba556a1845.
+Two complete page previews22/23 viewed.13ROIs:3visibly elliptical primary-color
+swatches,9irregular solid paint blobs,1empty paper. Existing four-shape/eight
+color head only; orange/purple/irregular contours outside this head are UNKNOWN.
+No color-mixing reasoning or full-page understanding tested.156ordered scenes,
+936questions are correlated pairings of13assets, not156sourceexamples. All
+original PDF/page SHA verified via exact fresh PDF110dpi JPEG rendering.
+Preparationv4 first revealed RAWCROPQA-gallery clipping with ROI>144px; actual
+model tensors/rawcrops were correct. Fixed ONLYgallery cell sizing/wrapping,
+added byte-exact large-ROI regression, v4 preserved, new v5 selected. v4/v5 model
+datasetSHAidentical1e36113a8e064f9203fc83b469d84449feed1a784eca0548334a3fc9f83a2c7a.
+v5actual gallery/modelinput sheets viewed, whole source objects without adjacent
+text, raw ROI arrays and all156scene/gold rows independently reassembled.
+Sourcegallery14passed2.63s. This remains nonblind primary-agent annotation;
+user semantic review pending. Originalmath controls regenerated as sourcev6
+with current course-source freeze: datasetSHAsame as v3, still EXPOSEDdiagnostics.
+Course source hashes in sourcev5/v6 both exactlymatchV13capsule, tested.
+
+After72734completion/actual remote receipt: pin latest novel transport to fresh
+Ddriver, run V13source-control-screen-v1 with preparedsourcev5,count156,seed0
+(unused deterministic assembly). This is FIRSTassessment on those art pixels.
+Then source-control-screen-v2 with preparedsourcev6,count110,seed0 to measure
+EXPOSEDmath improvements, never call second screen freshblind. Optionally
+fresh cold-family-screen-v1 count600 seed2312043000, originalcapsule/policy/
+numericbackend unchanged. If basefails, other diagnostics cannot promote it.
+
+Current combined regression **35404** LIVE, selected original614-test file list
+plus newsource/cold tools with fresh preserved fixture base
+C:/Users/artio/AppData/Local/Temp/ai-brain-m33-sixhour-palette-full-20261010-v1.
+XMLqa-sixhour-palette-full-regression-v1.xml not finished yet. Backup helper
+subsequently adds OPTIONAL--stream-chunks: bounded Git blobs staged as ordinary
+partNNN.bin, reread with cat-file and byte/SHA256reconstruction BEFOREref push,
+no second90MBtemporary chunk directory. Old mode/restoration unchanged. New
+separatebackup unitv1=14passed0.28s, v2=15passed1.58s including real disposable
+Git blob roundtrip and hostile stored bytes/source mutation. This new15test
+proof is separate from still-running35404's earlier imported backup module.
+Use--stream-chunks for future large V13backup to avoid disk pressure; preserve
+old chunk directories, no deletions. FreeD~491MiB,W418MiB,C14.9GiB. Only model
+72734andregression35404live; all oldhandles COMPLETE. Goal/heartbeatACTIVE,
+earliestfinish05:11:22UTC, ~2h50mstillrequired. Resume substantive work.

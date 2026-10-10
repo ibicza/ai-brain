@@ -27,23 +27,6 @@ def read(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def source_gallery(crops):
-    """Display every original ROI byte, without fixed-cell clipping/overlap."""
-    columns = min(8, len(crops))
-    cell_width = max(crop.width for crop in crops) + 8
-    cell_height = max(crop.height for crop in crops) + 8
-    sheet = Image.new(
-        "RGB",
-        (columns * cell_width, ((len(crops) + columns - 1) // columns) * cell_height),
-        (230, 230, 230),
-    )
-    for i, crop in enumerate(crops):
-        sheet.paste(
-            crop, (i % columns * cell_width + 4, i // columns * cell_height + 4)
-        )
-    return sheet
-
-
 def verified_page(source, originals, derived):
     pdf = (originals / source["pdf"]).resolve()
     preview = (derived / source["preview"]).resolve()
@@ -210,7 +193,6 @@ def prepare(manifest_path, originals, derived, output):
         raise ValueError("Preprocessing implementation changed")
     output.mkdir(parents=True)
     (output / "preparation-executed.py").write_bytes(executed_source)
-    (output / "source-annotations.json").write_bytes(manifest_path.read_bytes())
     (output / "preparation-freeze.json").write_text(
         json.dumps(
             {
@@ -225,10 +207,6 @@ def prepare(manifest_path, originals, derived, output):
         )
         + "\n",
         encoding="utf-8",
-    )
-    np.savez_compressed(
-        output / "source-crops.npz",
-        **{f"asset_{i:03d}": np.asarray(crop) for i, crop in enumerate(crops)},
     )
     np.savez_compressed(
         output / "dataset.npz",
@@ -257,11 +235,11 @@ def prepare(manifest_path, originals, derived, output):
     for i, image in enumerate(pixels[:32]):
         sheet.paste(Image.fromarray(image), (i % 8 * 96, i // 8 * 96))
     sheet.save(output / "actual-source-control-inputs.png")
-    asset_sheet = source_gallery(crops)
-    asset_sheet.save(output / "source-asset-crops.png")
-    asset_sheet.close()
-    for crop in crops:
+    asset_sheet = Image.new("RGB", (len(crops) * 144, 160), (230, 230, 230))
+    for i, crop in enumerate(crops):
+        asset_sheet.paste(crop, (i * 144, 0))
         crop.close()
+    asset_sheet.save(output / "source-asset-crops.png")
     for page in pages.values():
         page.close()
     report = {
@@ -279,7 +257,6 @@ def prepare(manifest_path, originals, derived, output):
         "production_admitted": False,
         "dataset_sha256": sha(output / "dataset.npz"),
         "records_sha256": sha(output / "records.json.gz"),
-        "source_crops_sha256": sha(output / "source-crops.npz"),
         "preparation_freeze_sha256": sha(output / "preparation-freeze.json"),
         "limits": manifest["limits"],
     }

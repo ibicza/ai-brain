@@ -40,6 +40,7 @@ SOURCE_FILES = (
     "scripts/m33_composition_source_prepare.py",
     "scripts/m33_composition_source_dataset.py",
     "examples/m33/visual_source_controls_v1.json",
+    "examples/m33/visual_source_controls_v2.json",
     "scripts/requirements-primary-materials.txt",
     "scripts/m33_composition_sixhour_backup.py",
     "tests/test_primary_composition.py",
@@ -106,7 +107,46 @@ def chunks(path, destination, *, limit=32 * 1024 * 1024):
     return {"sha256": before, "bytes": path.stat().st_size, "parts": parts}
 
 
-def run(repo, data, output, parent, run_names):
+def git_chunks(path, put, get, *, limit=32 * 1024 * 1024):
+    """Store bounded blobs directly; independently reread and reconstruct them.
+
+    No second large chunk directory. The Git tree still contains ordinary
+    partNNN.bin files, so old manifest restoration remains applicable.
+    """
+    if type(limit) is not int or not 1 <= limit <= 32 * 1024 * 1024:
+        raise ValueError("Positive bounded chunk size required")
+    before = sha(path)
+    parts, combined = [], hashlib.sha256()
+    with path.open("rb") as stream:
+        while block := stream.read(limit):
+            blob = put(block)
+            if not isinstance(blob, str) or not re.fullmatch(r"[0-9a-f]{40}", blob):
+                raise ValueError("Verified Git blob identifier required")
+            restored = get(blob)
+            if restored != block:
+                raise ValueError("Git blob bytes differ from original")
+            combined.update(restored)
+            parts.append(
+                {
+                    "file": f"part{len(parts):03d}.bin",
+                    "blob_id": blob,
+                    "sha256": hashlib.sha256(restored).hexdigest(),
+                    "bytes": len(restored),
+                }
+            )
+    if sha(path) != before or combined.hexdigest() != before:
+        raise ValueError("Original or reconstructed Git chunk bytes differ")
+    return {
+        "sha256": before,
+        "bytes": path.stat().st_size,
+        "parts": parts,
+        "storage": "git_blobs_no_temporary_chunk_copy",
+    }
+
+
+def run(repo, data, output, parent, run_names, *, stream_chunks=False):
+    if type(stream_chunks) is not bool:
+        raise ValueError("Explicit boolean chunk mode required")
     if not re.fullmatch(r"[0-9a-f]{40}", parent) or output.exists():
         raise ValueError("Expected parent and fresh output required")
     base = (data / "visual-lexicon").resolve()
@@ -131,6 +171,31 @@ def run(repo, data, output, parent, run_names):
             capture_output=True,
             check=True,
         ).stdout.strip()
+
+    def put_chunk(block):
+        result = subprocess.run(
+            [
+                "git",
+                "--git-dir=" + str(bare),
+                "hash-object",
+                "--no-filters",
+                "-w",
+                "--stdin",
+            ],
+            input=block,
+            capture_output=True,
+            check=True,
+            env=env,
+        )
+        return result.stdout.decode("ascii").strip()
+
+    def get_chunk(blob):
+        return subprocess.run(
+            ["git", "--git-dir=" + str(bare), "cat-file", "blob", blob],
+            capture_output=True,
+            check=True,
+            env=env,
+        ).stdout
 
     def protect():
         if (
@@ -218,6 +283,11 @@ def run(repo, data, output, parent, run_names):
         "qa-sixhour-palette-unit-v2.xml",
         "qa-sixhour-palette-pipeline-v1.xml",
         "qa-sixhour-palette-pipeline-v2.xml",
+        "qa-sixhour-palette-source-cold-v1.xml",
+        "qa-sixhour-source-gallery-v1.xml",
+        "qa-sixhour-stream-backup-v1.xml",
+        "qa-sixhour-stream-backup-v2.xml",
+        "qa-sixhour-palette-full-regression-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))
@@ -225,6 +295,9 @@ def run(repo, data, output, parent, run_names):
         "source-controls-20261010-v1",
         "source-controls-20261010-v2",
         "source-controls-20261010-v3",
+        "source-controls-20261010-v4",
+        "source-controls-20261010-v5",
+        "source-controls-20261010-v6",
     ):
         root = base / name
         if not root.exists():
@@ -238,15 +311,25 @@ def run(repo, data, output, parent, run_names):
             evidence.append((name + "/" + path.name, path))
     prefix = "learning_materials/visual_lexicon/backups/" + output.name + "/"
     manifest = []
+    direct_blobs, direct_hashes, original_large = {}, {}, {}
     for name, path in evidence:
         record = {"file": name, "sha256": sha(path), "bytes": path.stat().st_size}
         if record["bytes"] > 32 * 1024 * 1024:
-            destination = output / "chunks" / name
-            record.update(chunks(path, destination))
+            if stream_chunks:
+                record.update(git_chunks(path, put_chunk, get_chunk))
+                original_large[path] = record["sha256"]
+            else:
+                destination = output / "chunks" / name
+                record.update(chunks(path, destination))
             for part in record["parts"]:
-                files[prefix + "chunks/" + name + "/" + part["file"]] = (
-                    destination / part["file"]
-                )
+                key = prefix + "chunks/" + name + "/" + part["file"]
+                if stream_chunks:
+                    direct_blobs[key], direct_hashes[key] = (
+                        part["blob_id"],
+                        part["sha256"],
+                    )
+                else:
+                    files[key] = destination / part["file"]
         else:
             files[prefix + "files/" + name] = path
         manifest.append(record)
@@ -273,6 +356,10 @@ def run(repo, data, output, parent, run_names):
         if sha(path) != hashes[name]:
             raise ValueError("Source changed while backing up")
         git("update-index", "--add", "--cacheinfo", "100644," + blob + "," + name)
+    for name, blob in direct_blobs.items():
+        if hashlib.sha256(get_chunk(blob)).hexdigest() != direct_hashes[name]:
+            raise ValueError("Stored direct chunk changed before tree sealing")
+        git("update-index", "--add", "--cacheinfo", "100644," + blob + "," + name)
     commit = git(
         "commit-tree",
         git("write-tree"),
@@ -285,8 +372,9 @@ def run(repo, data, output, parent, run_names):
     ).splitlines()
     if (
         not changed
-        or not set(changed).issubset(files)
+        or not set(changed).issubset(set(files) | set(direct_blobs))
         or any(sha(files[n]) != h for n, h in hashes.items())
+        or any(sha(path) != digest for path, digest in original_large.items())
     ):
         raise ValueError("Backup scope/source changed")
     protect()
@@ -300,7 +388,11 @@ def run(repo, data, output, parent, run_names):
         "commit": commit,
         "parent": parent,
         "changed_paths": changed,
-        "source_sha256": hashes,
+        "source_sha256": {**hashes, **direct_hashes},
+        "large_original_sha256": {
+            str(path): digest for path, digest in original_large.items()
+        },
+        "stream_chunks": stream_chunks,
         "main_head_unchanged": HEAD,
         "main_index_sha256": INDEX,
         "canonical_workbook_sha256": WORKBOOK,
@@ -323,6 +415,7 @@ if __name__ == "__main__":
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--expected-parent", required=True)
     parser.add_argument("--run", action="append", default=[])
+    parser.add_argument("--stream-chunks", action="store_true")
     args = parser.parse_args()
     run(
         args.repo.resolve(),
@@ -330,4 +423,5 @@ if __name__ == "__main__":
         args.output.resolve(),
         args.expected_parent,
         args.run,
+        stream_chunks=args.stream_chunks,
     )

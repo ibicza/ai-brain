@@ -228,3 +228,17 @@ def test_rehashed_wrong_source_gold_is_rejected_from_original_annotations(inputs
     )
     with pytest.raises(ValueError, match="question/gold/pixel correspondence"):
         reader.load(output, source.c)
+
+
+def test_source_gallery_does_not_clip_large_original_rois_or_overlap_neighbors():
+    crops = [Image.new("RGB", (173, 211), (i * 20, 40, 50)) for i in range(10)]
+    original = [np.asarray(crop).copy() for crop in crops]
+    sheet = source.source_gallery(crops)
+    pixels = np.asarray(sheet)
+    assert sheet.size == (8 * 181, 2 * 219)
+    for i, crop in enumerate(crops):
+        x, y = i % 8 * 181 + 4, i // 8 * 219 + 4
+        assert np.array_equal(pixels[y : y + 211, x : x + 173], original[i])
+        assert np.array_equal(np.asarray(crop), original[i])
+        crop.close()
+    sheet.close()
