@@ -205,7 +205,7 @@ if __name__ == "__main__":
     parser.add_argument("--auxiliary-images", type=int, default=0)
     parser.add_argument(
         "--exposure-profile",
-        choices=("standard", "diverse", "palette"),
+        choices=("standard", "diverse", "palette", "palette_independent"),
         default="standard",
     )
     parser.add_argument("--consistency-loss", type=float, default=0.0)

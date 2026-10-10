@@ -287,7 +287,11 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-sixhour-source-gallery-v1.xml",
         "qa-sixhour-stream-backup-v1.xml",
         "qa-sixhour-stream-backup-v2.xml",
+        "qa-sixhour-independent-palette-unit-v1.xml",
+        "qa-sixhour-independent-palette-pipeline-v1.xml",
+        "qa-sixhour-source-metadata-v1.xml",
         "qa-sixhour-palette-full-regression-v1.xml",
+        "qa-sixhour-palette-full-regression-v2.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))

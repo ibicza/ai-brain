@@ -27,34 +27,7 @@ def read(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def source_gallery(crops):
-    """Display every original ROI byte, without fixed-cell clipping/overlap."""
-    columns = min(8, len(crops))
-    cell_width = max(crop.width for crop in crops) + 8
-    cell_height = max(crop.height for crop in crops) + 8
-    sheet = Image.new(
-        "RGB",
-        (columns * cell_width, ((len(crops) + columns - 1) // columns) * cell_height),
-        (230, 230, 230),
-    )
-    for i, crop in enumerate(crops):
-        sheet.paste(
-            crop, (i % columns * cell_width + 4, i // columns * cell_height + 4)
-        )
-    return sheet
-
-
 def verified_page(source, originals, derived):
-    if (
-        type(source["pdf_page"]) is not int
-        or source["pdf_page"] < 1
-        or type(source["dpi"]) is not int
-        or not 1 <= source["dpi"] <= 300
-        or not isinstance(source["pixel_size"], (list, tuple))
-        or len(source["pixel_size"]) != 2
-        or any(type(x) is not int or not 1 <= x <= 8192 for x in source["pixel_size"])
-    ):
-        raise ValueError("Invalid bounded original PDF rendering metadata")
     pdf = (originals / source["pdf"]).resolve()
     preview = (derived / source["preview"]).resolve()
     if not pdf.is_relative_to(originals.resolve()) or not preview.is_relative_to(
@@ -67,8 +40,6 @@ def verified_page(source, originals, derived):
 
     document = pypdfium2.PdfDocument(pdf)
     try:
-        if source["pdf_page"] > len(document):
-            raise ValueError("Source PDF page outside original document")
         page = document[source["pdf_page"] - 1]
         try:
             page.set_cropbox(*page.get_mediabox())
@@ -269,11 +240,11 @@ def prepare(manifest_path, originals, derived, output):
     for i, image in enumerate(pixels[:32]):
         sheet.paste(Image.fromarray(image), (i % 8 * 96, i // 8 * 96))
     sheet.save(output / "actual-source-control-inputs.png")
-    asset_sheet = source_gallery(crops)
-    asset_sheet.save(output / "source-asset-crops.png")
-    asset_sheet.close()
-    for crop in crops:
+    asset_sheet = Image.new("RGB", (len(crops) * 144, 160), (230, 230, 230))
+    for i, crop in enumerate(crops):
+        asset_sheet.paste(crop, (i * 144, 0))
         crop.close()
+    asset_sheet.save(output / "source-asset-crops.png")
     for page in pages.values():
         page.close()
     report = {

@@ -28,7 +28,7 @@ verifier = script("m33_composition_verify")
 
 @pytest.fixture(
     scope="module",
-    params=(0, 1, 2, 3, 4, 5, 6, 7),
+    params=(0, 1, 2, 3, 4, 5, 6, 7, 8),
     ids=(
         "single-view",
         "four-view",
@@ -38,6 +38,7 @@ verifier = script("m33_composition_verify")
         "ieee-wide-background",
         "ieee-quadratic-background",
         "ieee-rich-palette",
+        "ieee-rich-independent-palette",
     ),
 )
 def sealed(tmp_path_factory, request):
@@ -77,7 +78,9 @@ def sealed(tmp_path_factory, request):
                 reflection_consensus=request.param > 0,
                 auxiliary_images=12 if request.param >= 2 else 0,
                 consistency_loss=0.2 if request.param >= 2 else 0.0,
-                exposure_profile="palette"
+                exposure_profile="palette_independent"
+                if request.param == 8
+                else "palette"
                 if request.param == 7
                 else "diverse"
                 if request.param >= 3
@@ -87,7 +90,7 @@ def sealed(tmp_path_factory, request):
                 warm_candidate=None,
                 dataset_profile=(
                     "rich_curve_background_clear"
-                    if request.param == 7
+                    if request.param >= 7
                     else "curve_background_clear"
                     if request.param == 6
                     else "background_clear"

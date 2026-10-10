@@ -242,3 +242,34 @@ def test_source_gallery_does_not_clip_large_original_rois_or_overlap_neighbors()
         assert np.array_equal(np.asarray(crop), original[i])
         crop.close()
     sheet.close()
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    (
+        ("pdf_page", True),
+        ("pdf_page", 0),
+        ("pdf_page", -1),
+        ("dpi", True),
+        ("dpi", 0),
+        ("dpi", 301),
+        ("pixel_size", [True, 96]),
+        ("pixel_size", [96, 0]),
+    ),
+)
+def test_source_rendering_metadata_cannot_use_bool_or_negative_page_alias(
+    inputs, field, value
+):
+    manifest, originals, derived, _ = inputs
+    row = source.read(manifest)["sources"][0]
+    row[field] = value
+    with pytest.raises(ValueError, match="rendering metadata"):
+        source.verified_page(row, originals, derived)
+
+
+def test_source_page_must_be_inside_original_document(inputs):
+    manifest, originals, derived, _ = inputs
+    row = source.read(manifest)["sources"][0]
+    row["pdf_page"] = 2
+    with pytest.raises(ValueError, match="outside original"):
+        source.verified_page(row, originals, derived)

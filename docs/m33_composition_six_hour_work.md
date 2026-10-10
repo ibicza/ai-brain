@@ -821,3 +821,44 @@ Use--stream-chunks for future large V13backup to avoid disk pressure; preserve
 old chunk directories, no deletions. FreeD~491MiB,W418MiB,C14.9GiB. Only model
 72734andregression35404live; all oldhandles COMPLETE. Goal/heartbeatACTIVE,
 earliestfinish05:11:22UTC, ~2h50mstillrequired. Resume substantive work.
+
+02:27 UTC checkpoint: graph65204 COMPLETE; source-only V7backup26856 COMPLETE,
+95paths, independent ls-remote confirmed
+24294937a1086a23f0f728768ddf26f2e8f9c20d. NEXTparent this FULL SHA, NOT5b60.
+Full regression35404 COMPLETE662passed/2inapplicable skips565.32s, XML664cases,
+SHAaa4e8a12b5ed2e549c3919862de0752b378275b4b6ecb09b9ba59d4ab41a3293.
+It imported earlier backup/profile modules; do NOT falsely combine this count
+with newer separate suites or call it validation of subsequently added options.
+
+Fixed color/shape coverage weakness in NEWopt-in palette_independent profile,
+keeping archival palette behavior untouched. Separate palette-label Bernoulli
+draws choose unsupported colors independently of familiar/unfamiliar contour
+group and scene modulo. Same known endpoints, paper RGB and 8exposure contours;
+no new textbook pixels used to train. All16unsupported-color/familiar-shape
+combinations present in3000visible-training-scene review. Actual familiarity
+2x2counts:1221known/known,2471known/unknown,625unknown/known,1222unknown/unknown.
+Turquoise and star/pentagon/trapezoid still absent training/dev/cal. Unit21passed
+3.07s, actual tiny train/freeze/CUDA-contract-independent CPU replay fixture
+81554 COMPLETE19passed/155deselected74.86s. Independent source review compared
+current archival palette with actual V13capsule control code:30scene metadata
+ANDRGBinputs byteidentical, current csourceSHA matched originalcapsule. This is
+30-case compatibility proof, NOTall-possible-image proof. V13 remains original
+palette and must retain its documented co-occurrence limitation.
+
+Additional source-metadata hardening: rejectbool/zero/negative PDFpage aliases,
+out-of-document page, invalid/bool/over300DPI and non-positive/bool/over8192pixel
+dimensions BEFORErender/read. Old actualsourcev5/v6 validmetadata unchanged;
+preparation-executed.py snapshots remain immutable. New23passed2.64s (9newguards).
+No originalPDFchanged. Live V13 **72734** joint actuallyobserved6600step,
+balanced devCE0.0176397; still NOwinner/result/source-control prediction.
+
+Next model after V13 outcomes: V14 uses NEWfreshseed13045, warm frozen V13winner,
+palette_independent plus same richcurve/IEEE/schedules/criteria. Choose pending
+additional aspect/outline/risk-first experiments from real failure evidence,
+not retrospective gate relaxation. New full regressionv2 planned against latest
+independent/data/storage/metadata changes with a NEWfixture base. Source-only
+V8backup should use parent24294937... and --stream-chunks, no previous large run
+recopy. V13 completeartifact backup later must use --stream-chunks to save~90MB
+of redundant temporary chunk copies; stream15-unitproof includes realGit read.
+As always no autoactivation or strictM33Uclaim; goal/heartbeatstillACTIVE and
+~2h44mremain before earliest05:11:22UTC. Never restart oldcompleted handles.

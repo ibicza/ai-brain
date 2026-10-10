@@ -220,3 +220,46 @@ def test_palette_new_contours_have_no_right_angles_and_are_bounded(shape):
             "palette",
         )
         assert controls.render(scene).shape == (96, 96, 3)
+
+
+def test_independent_palette_covers_unknown_colors_on_every_supported_shape():
+    rows = controls.scenes(
+        "exposure", 3000, 1304500000 + 60000, exposure_profile="palette_independent"
+    )
+    pairs = {
+        (item.color, item.shape)
+        for scene in rows
+        for item in scene.items
+        if not item.hidden
+    }
+    assert {
+        (color, shape) for color in controls.PALETTE_UNKNOWN_RGB for shape in c.SHAPES
+    } <= pairs
+    counts = {
+        (color_known, shape_known): 0
+        for color_known in (False, True)
+        for shape_known in (False, True)
+    }
+    for scene in rows:
+        for item in scene.items:
+            if not item.hidden:
+                counts[item.color in c.COLORS, item.shape in c.SHAPES] += 1
+    assert min(counts.values()) > 400
+    held = controls.scenes(
+        "held_control", 600, 1304500000 + 80000, exposure_profile="palette_independent"
+    )
+    assert not {i.color for s in rows for i in s.items} & set(controls.PALETTE_HELD_RGB)
+    assert not {i.shape for s in rows for i in s.items} & set(controls.HELD_OUT_SHAPES)
+    assert not {i.color for s in held for i in s.items} & set(
+        controls.PALETTE_UNKNOWN_RGB
+    )
+
+
+def test_old_palette_profile_remains_the_archival_conditional_color_design():
+    rows = controls.scenes("exposure", 300, 90400, exposure_profile="palette")
+    assert all(
+        item.shape not in c.SHAPES
+        for scene in rows
+        for item in scene.items
+        if item.color not in c.COLORS
+    )

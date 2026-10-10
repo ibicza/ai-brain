@@ -23,6 +23,7 @@ EXPOSURE_PROFILES = {
     "standard": EXPOSURE_SHAPES,
     "diverse": EXTENDED_EXPOSURE_SHAPES,
     "palette": PALETTE_EXPOSURE_SHAPES,
+    "palette_independent": PALETTE_EXPOSURE_SHAPES,
 }
 HELD_OUT_SHAPES = ("star", "pentagon", "trapezoid")
 LABEL_RNG_DOMAIN = 0x4D33434C
@@ -300,7 +301,12 @@ def scenes(
                 if split != "exposure" or (color, shape) not in c.HELD_COMBINATIONS
             ]
             color = colors[int(rng.integers(len(colors)))]
-            if exposure_profile == "palette" and (i + side) % 3 == 1:
+            choose_unknown_color = (
+                palette_labels.random() < 1 / 3
+                if exposure_profile == "palette_independent"
+                else (i + side) % 3 == 1
+            )
+            if exposure_profile.startswith("palette") and choose_unknown_color:
                 unknown_colors = tuple(
                     PALETTE_HELD_RGB if split == "held_control" else PALETTE_UNKNOWN_RGB
                 )
@@ -320,7 +326,7 @@ def scenes(
                 f"authored-{cohort or split}/{i}",
                 seed + i,
                 tuple(items),
-                "palette" if exposure_profile == "palette" else "standard",
+                "palette" if exposure_profile.startswith("palette") else "standard",
             )
         )
     return rows
@@ -373,7 +379,7 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
             if split not in auxiliary:
                 continue
             if scene.get("renderer_profile", "standard") != (
-                "palette" if exposure_profile == "palette" else "standard"
+                "palette" if exposure_profile.startswith("palette") else "standard"
             ):
                 raise ValueError("Authored renderer profile differs from exposure")
             for item in scene["items"]:
@@ -386,7 +392,7 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
                             else PALETTE_UNKNOWN_RGB
                         ),
                     )
-                    if exposure_profile == "palette"
+                    if exposure_profile.startswith("palette")
                     else c.COLORS
                 )
                 if item["color"] not in allowed_colors:
@@ -413,10 +419,10 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
         "exposure_shapes": exposure_shapes,
         "held_control_shapes": HELD_OUT_SHAPES,
         "exposure_unknown_colors": tuple(PALETTE_UNKNOWN_RGB)
-        if exposure_profile == "palette"
+        if exposure_profile.startswith("palette")
         else (),
         "held_unknown_colors": tuple(PALETTE_HELD_RGB)
-        if exposure_profile == "palette"
+        if exposure_profile.startswith("palette")
         else (),
         "limits": "Authored generator separation, shared Pillow, not external-source independence.",
     }
