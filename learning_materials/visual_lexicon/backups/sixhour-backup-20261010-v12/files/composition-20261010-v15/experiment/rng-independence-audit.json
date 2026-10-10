@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "seed": 1404800000,
+  "count_per_side": 10000,
+  "independent_labels": true,
+  "dataset_profile": "aspect_rich_curve_background_clear",
+  "background_rng_policy": "SeedSequence(scene_seed, M3BL); independent gray brightness uniform(60,205) plus RGB uniform(-6,6), never conditioned on labels",
+  "label_rng_policy": "SeedSequence(scene_seed, M33L); separate from rendering",
+  "detector": "Equal thirds of actual base-background channel support per renderer style; R left, G right",
+  "confusion_gold_by_background_prediction": [
+    [
+      [
+        1111,
+        1226,
+        1005
+      ],
+      [
+        1054,
+        1237,
+        1096
+      ],
+      [
+        1087,
+        1147,
+        1037
+      ]
+    ],
+    [
+      [
+        1121,
+        1245,
+        1005
+      ],
+      [
+        1064,
+        1155,
+        1059
+      ],
+      [
+        1074,
+        1207,
+        1070
+      ]
+    ]
+  ],
+  "background_only_pattern_accuracy": [
+    0.3385,
+    0.3346
+  ],
+  "known_shortcut_absent": true,
+  "limits": "Tests the discovered pattern/background shortcut only; not a comprehensive independence or semantic-understanding proof.",
+  "production_admitted": false
+}

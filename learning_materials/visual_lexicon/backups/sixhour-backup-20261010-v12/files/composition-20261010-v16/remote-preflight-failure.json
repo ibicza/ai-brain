@@ -1,0 +1,7 @@
+{
+  "status": "REMOTE_PREFLIGHT_FAILED_NOT_TRAINED",
+  "source_capsule_sha256": "e5cfea82c8218a1ee00d989982a32d0e7affb306ef3cc5f0f50064854099f851",
+  "tests_sha256": "1f28a21c8eef14ee77eab1c55351c26dfc2aa82f9c12d6c0d154a81ab45aca06",
+  "remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v16",
+  "production_admitted": false
+}

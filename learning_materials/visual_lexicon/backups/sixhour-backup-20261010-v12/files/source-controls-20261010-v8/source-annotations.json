@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "status": "NONBLIND_SOURCE_ANNOTATIONS_NOT_MODEL_MASTERY",
+  "training_admitted": false,
+  "reviewer": "primary-agent visual review of full preserved pages; not independent semantic examiner",
+  "scope": "Real-source geometry/attribute crop composites for the existing four-shape eight-color readout. Not whole-page understanding or a photographic exam.",
+  "limits": "Two pages from one textbook family; many pairings reuse the SAME source assets. Do not count pairings/questions as independent source examples. Light blue, pink and orange are unsupported color answers here, not unknown words in every earlier course.",
+  "sources": [
+    {"id": "math1p35", "pdf": "matematika-muravjova-1kl-ch2-rus_2024.pdf", "pdf_sha256": "ddf715adede67a6169e46f9336a6117d21ae67f47ba65a0193dca9dfb4d5c5d6", "pdf_page": 35, "printed_page": 29, "preview": "books/ddf715adede67a61/pages/0035.jpg", "preview_sha256": "be057b12deab26253d1ab59cdf67b8720656d1974303e066ef0adc984c924ff4", "pixel_size": [750, 1083], "dpi": 110},
+    {"id": "math2p58", "pdf": "matematika_2kl_ch2_Muravyova_rus_2025.pdf", "pdf_sha256": "56a1fad813b3bea77320ef9e05b6766b4814f146a4d7545f18e5c26915352d8d", "pdf_page": 58, "printed_page": 52, "preview": "books/56a1fad813b3bea7/pages/0058.jpg", "preview_sha256": "d36758681b5a81335816cc627bb0b210000e0e8977bc2e8f4784772f483b35ad", "pixel_size": [750, 975], "dpi": 110}
+  ],
+  "assets": [
+    {"id": "red-triangle", "source": "math1p35", "bbox_pixels": [108, 533, 156, 586], "color": "красный", "shape": "triangle", "pattern": "однотонный", "absent": false},
+    {"id": "green-triangle", "source": "math1p35", "bbox_pixels": [154, 533, 201, 586], "color": "зелёный", "shape": "triangle", "pattern": "однотонный", "absent": false},
+    {"id": "yellow-circle", "source": "math1p35", "bbox_pixels": [201, 533, 249, 586], "color": "жёлтый", "shape": "круг", "pattern": "однотонный", "absent": false},
+    {"id": "red-circle", "source": "math1p35", "bbox_pixels": [247, 533, 293, 586], "color": "красный", "shape": "круг", "pattern": "однотонный", "absent": false},
+    {"id": "green-square", "source": "math1p35", "bbox_pixels": [292, 533, 340, 586], "color": "зелёный", "shape": "квадрат", "pattern": "однотонный", "absent": false},
+    {"id": "lightblue-square", "source": "math1p35", "bbox_pixels": [338, 533, 387, 586], "color": "голубой", "shape": "квадрат", "pattern": "однотонный", "absent": false},
+    {"id": "green-rectangle", "source": "math2p58", "bbox_pixels": [135, 201, 251, 263], "color": "зелёный", "shape": "прямоугольник", "pattern": "однотонный", "absent": false},
+    {"id": "orange-parallelogram", "source": "math2p58", "bbox_pixels": [277, 194, 385, 263], "color": "оранжевый", "shape": "parallelogram", "pattern": "однотонный", "absent": false},
+    {"id": "pink-rectangle", "source": "math2p58", "bbox_pixels": [403, 183, 516, 263], "color": "розовый", "shape": "прямоугольник", "pattern": "однотонный", "absent": false},
+    {"id": "lightblue-quadrilateral", "source": "math2p58", "bbox_pixels": [551, 172, 661, 264], "color": "голубой", "shape": "irregular-quadrilateral", "pattern": "однотонный", "absent": false},
+    {"id": "empty-paper", "source": "math1p35", "bbox_pixels": [701, 648, 746, 698], "color": null, "shape": null, "pattern": null, "absent": true}
+  ],
+  "assembly": {"pairs": "all ordered pairs of different source assets", "canvas": [96, 96], "background_rgb": [255, 255, 255], "target_centers": [[24, 48], [72, 48]], "fit_box": [32, 32], "preserve_aspect_ratio": true, "interpolation": "Pillow LANCZOS", "random_augmentations": false},
+  "evaluation": {"training_or_calibration": false, "candidate": "freeze before inference", "thresholds": "original frozen policy only", "per_asset_task_accepted_errors_max": 0, "positive_recall_min": 0.8, "unknown_recall_min": 0.9, "blank_accepted_max": 0, "production_admitted": false}
+}

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "status": "NONBLIND_SOURCE_ANNOTATIONS_NOT_MODEL_MASTERY",
+  "training_admitted": false,
+  "reviewer": "primary-agent visual review of complete original page previews before V13 final; not independent semantic examiner",
+  "scope": "Fresh source-asset controls from a different art textbook author family, existing eight-color/four-shape readout only.",
+  "limits": "Thirteen source ROIs from two pages of one art textbook. Pairings reuse these assets and are not independent examples. Primary-color swatches are visibly elliptical in preserved page pixels, not circles inferred from their caption. Paint blobs are outside the four-shape scope. No whole-page, color-mixing reasoning or object-name mastery is evaluated.",
+  "sources": [
+    {"id": "art22", "pdf": "izo_Sokolova_2kl_rus_2019.pdf", "pdf_sha256": "c3b508ef9abf7f5ab2d848230e41c7278384de2674f23c21f7367ce206495331", "pdf_page": 22, "printed_page": 21, "preview": "books/c3b508ef9abf7f5a/pages/0022.jpg", "preview_sha256": "e09c6afdf4fee056c0f7f870bf4e1764190135e6a03b4278cab8445231eb752d", "pixel_size": [728, 1040], "dpi": 110},
+    {"id": "art23", "pdf": "izo_Sokolova_2kl_rus_2019.pdf", "pdf_sha256": "c3b508ef9abf7f5ab2d848230e41c7278384de2674f23c21f7367ce206495331", "pdf_page": 23, "printed_page": 22, "preview": "books/c3b508ef9abf7f5a/pages/0023.jpg", "preview_sha256": "2ff3efe57589e6d638d2c0110dc4df0c791412db345c84ae2a014925b6a827b4", "pixel_size": [728, 1040], "dpi": 110}
+  ],
+  "assets": [
+    {"id": "art-yellow-ellipse", "source": "art22", "bbox_pixels": [70, 143, 243, 287], "color": "жёлтый", "shape": "овал", "pattern": "однотонный", "absent": false},
+    {"id": "art-red-ellipse", "source": "art22", "bbox_pixels": [274, 143, 447, 287], "color": "красный", "shape": "овал", "pattern": "однотонный", "absent": false},
+    {"id": "art-blue-ellipse", "source": "art22", "bbox_pixels": [477, 143, 650, 287], "color": "синий", "shape": "овал", "pattern": "однотонный", "absent": false},
+    {"id": "art-yellow-blob-1", "source": "art23", "bbox_pixels": [128, 348, 257, 448], "color": "жёлтый", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-red-blob-1", "source": "art23", "bbox_pixels": [335, 348, 437, 453], "color": "красный", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-orange-blob", "source": "art23", "bbox_pixels": [536, 348, 639, 453], "color": "оранжевый", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-yellow-blob-2", "source": "art23", "bbox_pixels": [145, 473, 247, 581], "color": "жёлтый", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-blue-blob-1", "source": "art23", "bbox_pixels": [332, 473, 456, 583], "color": "синий", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-green-blob", "source": "art23", "bbox_pixels": [536, 472, 640, 583], "color": "зелёный", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-red-blob-2", "source": "art23", "bbox_pixels": [145, 604, 249, 714], "color": "красный", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-blue-blob-2", "source": "art23", "bbox_pixels": [332, 600, 457, 714], "color": "синий", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-purple-blob", "source": "art23", "bbox_pixels": [523, 599, 637, 716], "color": "пурпурный", "shape": "irregular-paint-blob", "pattern": "однотонный", "absent": false},
+    {"id": "art-empty-paper", "source": "art22", "bbox_pixels": [667, 800, 715, 850], "color": null, "shape": null, "pattern": null, "absent": true}
+  ],
+  "assembly": {"pairs": "all ordered pairs of different source assets", "canvas": [96, 96], "background_rgb": [255, 255, 255], "target_centers": [[24, 48], [72, 48]], "fit_box": [32, 32], "preserve_aspect_ratio": true, "interpolation": "Pillow LANCZOS", "random_augmentations": false},
+  "evaluation": {"training_or_calibration": false, "candidate": "freeze before inference", "thresholds": "original frozen policy only", "per_asset_task_accepted_errors_max": 0, "positive_recall_min": 0.8, "unknown_recall_min": 0.9, "blank_accepted_max": 0, "production_admitted": false}
+}

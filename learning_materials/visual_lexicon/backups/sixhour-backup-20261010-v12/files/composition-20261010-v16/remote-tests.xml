@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="1.011" timestamp="2026-10-10T03:59:18.925861+00:00" hostname="karina"><testcase classname="" name="runs.m33-composition-20261010-v16.tests.test_primary_composition_calibration" time="0.000"><error message="collection failure">ImportError while importing test module '/home/ibicza/ai-brain/runs/m33-composition-20261010-v16/tests/test_primary_composition_calibration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../../.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_primary_composition_calibration.py:7: in &lt;module&gt;
+    from m33_primary_composition_pilot import calibrate, course
+E   ModuleNotFoundError: No module named 'm33_primary_composition_pilot'</error></testcase></testsuite></testsuites>

@@ -1152,3 +1152,99 @@ mathv8EXPOSED(childv3) usingfreshlypinnedlatestnoveltransport, notoldv13driver.
 Nativecsource44fc...unchanged, so preparedv7/v8/v9stillmatchV15capsule.
 NextV11backup shoulduseFULL9921954493034146045331dbf75e0a72a796c315 and --runv14
 --stream-chunks, notpreviousoldrunrecopy. Allgoals/heartbeatACTIVE,~1h36mremain.
+
+03:52 UTC continuation audit: graph79325 COMPLETE1005files. New hostile strict
+calibration tests COMPLETE3passed26.670s, XMLSHA
+1687375a317987d5df44474f1a339d5fe07a80730c64d5bc947d48138701b4e5.
+Combined45-file full suite stillrunning (local child1516); no duplicate run.
+V15 originalcapsule SHAe268ec44c46f2e5888848b8369e64a72222146a4f60d39786dab5e3494f28db0;
+pinnedtransport SHA062b00fd1b4ca5807c9b0affd9860fb4d420d6316cc8300966c0a4974da577f6.
+V15joint10000done, curriculum4200observed; final/replay/download notyetdone.
+V11backup94664 COMPLETE233paths, commit
+f5710404df77f1f948844ed63f7ffcba96a93d03; independently ls-remote SAMEFULLSHA.
+Nextbackup expected-parent is this fullf571... commit, not992195....
+MainHEAD38082... andindex76481... unchanged. SubsequentV14exposedcontrolerror
+diagnostic freshJSON/PNG created and actualpixels VIEWED: ALL163errors are
+unsupportedturquoise colour assertedgreen; maxscore.973888695, notpattern/shape.
+This is previously EXPOSEDfinalanalysis, never calibration/retuning oldpolicy.
+Hypothesis futurestrictgrid couldrejectthese whilekeeping calibratedcoverage,
+but no futuretransferguarantee; futureNEWrun musttestafterfrozenpolicy.
+ApparentgarbledRussian in a local readonly probe camefrom omittingUTF8 in
+Path.read_text onWindows; correctingprobe verifiedoriginalJSON/sourceRussian
+intact. No originaldata/modelrewrites were required or performed.
+
+PreregisterednextV16, onlyafterV15authenticcompletedreceipt: freshseed15049,
+warmV15DEV-selectedowncheckpoint, 10000steps EACHjoint/curriculum,
+9000nativeaspect_rich_curve_background_clear +3000authoredpalette_paper_aspects,
+600eachholdout. IEEE, spatialreadout, shapeedges, fourreflectionconsensus,
+JS.2, supportedlabel smoothing.02; new coverage_guarded_strictcalibration.
+This combines TWOinterventions (paperbackground +stricterrejectselection),
+therefore NOcausalattribution fromcomparison. Sameunchangedzero-error,
+positive/unknown/complete-description/binding/blankcriteria. Allselectedweights
+andpolicyfreeze before final/source evaluation; no oldthresholds overwritten.
+Pinnedfuturedriver70ae0f5eddbdd0116ae24dd42590ea1290c74b2874b8f42384bed9d3fbe3e37e,
+latestsourceassessmentdriver68e1221f495063cff46f90d21b1febcbf00688fcc9436761639d4e19c4e93007.
+FreshlanguageV3mustbe assessedFIRSTonfrozenV15, thenoldexposedart/math.
+Additionalprimaryliterature read:
+https://proceedings.neurips.cc/paper_files/paper/2019/hash/8fb21ee7a2207526da55a679f0332de2-Abstract.html
+Covariate-shiftconformal guarantees require particulardistribution/weighting
+assumptions; oursmallcorrelatedmanualsourcepanels doNOTsatisfy/provethose.
+No conformalguarantee/infinite-truthclaim or suchalgorithmimplemented.
+
+03:53 UTC latestfull45files COMPLETE:829passed/32inapplicableskips,
+861total,0failures,0errors,917.052s. This includespaperprofile, strictcalibration,
+newhostilecontracts andthirdsourceslotguardwork, notjusttheolder730-suite.
+XMLD:/ai-brain-data/visual-lexicon/qa-sixhour-paper-strict-full-regression-v1.xml.
+Localchild1516ended; nootherfullsuite launched. V15originalremotejob83927
+curriculum6600observed, sourcecapsule/policy stilloriginaloldmaximumcoverage.
+Ruffandgitdiffwhitespacechecks passedafterdocs-auditupdate.
+
+04:03 UTC V15 **83927 COMPLETE**, authenticREMOTE_CONTINUATION_REPLAYED and
+INFERENCE_AND_ARITHMETIC_VERIFIED, ownwinnercurriculum
+38562d8e26a4e2677329e6165edd6422ec0b2b519d422d9200656006e6095d2c.
+Final/combinations/transfer0falseerrors, positive.98411244/.98564009/.98961198.
+Authoredcontrol123falseerrors, positive.96376812, unknown.92025862 ->
+NEEDS_WORK_NOT_PRODUCTION, thresholdsall.9 (olddefaultunchanged).
+FIRSTlanguageV3source COMPLETE0falseerrors butpositive.666667, shapeALLrefused,
+colour/pattern1.0, unknown1, blank0 -> FAILURE. Only4uniqueassets/72correlated
+queries. NOWEXPOSED; futurelanguageV3repeats NOTfresh/blind.
+ArtV2EXPOSEDrepeat78542 COMPLETE0falseerrors, positive1.0,unknown1,blank0PASS.
+This shows broaderovalslearned onthissmall13-assetpanel, NOTfulltextbookmastery.
+MathV1EXPOSEDrepeat31183 COMPLETE8falseerrors,positive.8181818,unknown.9636364,
+blank0FAIL; immutableoldgold/sourcecropsunchanged.
+
+V16attempt FAILEDREMOTEpreflightcollectionbeforeANYtraining due newlydirect
+scriptimport in calibrationtest and remotePYTHONPATHonlysrc. Localpriorfull
+suite hadsrc;scripts; thus itdidnotcatchLinuxlaunchenvironmentgap. Preserved
+REMOTE_PREFLIGHT_FAILED_NOT_TRAINED receipt, capsule
+e5cfea82c8218a1ee00d989982a32d0e7affb306ef3cc5f0f50064854099f851,
+XMLSHA1f28a21c8eef14ee77eab1c55351c26dfc2aa82f9c12d6c0d154a81ab45aca06.
+No originalfailureoverwritten/restartedinplace. FixedfutureLinuxruntimeprefix
+PYTHONPATH=src:scripts; capsuleexplicitlyincludesremotehelper neededbynew
+runtime-prefix regressiontest. Mockactualrunprefixcheckedwithoutnetwork;
+realisolatedcapsulecollects12calibrationtests. FocusedfixV1 16passed9.48s,
+V2withbackupguards31passed10.45s. Ruffclean. Thesearecode/environmentfixes,
+notmodeltrainingresults.
+
+NEWV17 **26305 LIVE** (replacesuntrainedV16 only), freshlocal/remotepaths,
+SAMEpreregisteredseed15049, warmV15curriculum38562..., sizes/strictcriteria/
+paperprofile/strictcalrule exactlyasplannedbeforethefailure. Sourcecapsule
+sealedbyoriginaldriver; pinnedtransportSHA
+45177696e92ea2d8767207dc997fbf5bdacef185b5ac0df6b04561dd3b56f9bb.
+Noactualtrainingyetconfirmed (preflightrunning). Latestintegrated45-filefull
+**16912 LIVE**, freshCfixturebaseai-brain-m33-sixhour-final-full-20261010-v1,
+XMLqa-sixhour-final-full-regression-v1.xml. Previousfull829/32 XMLSHA
+df567e5b6f451085f9c31d83b127102e0b8a9db2d074c8eaead09b0fbb981498.
+NextV12backup expectedFULLf5710404df77f1f948844ed63f7ffcba96a93d03,
+includecompletedV15 andpreservedfailedV16, latestproofs; streamlargechunks.
+~68minutesremain beforeearliest05:11:22UTCfinish. Goal/heartbeatACTIVE.
+
+04:05 UTC actuallanguageV3 rawsingleviewdiagnostic frompreservedfrozenV15
+predictions: knownroundmarkers allrawshape argmaxsquare/rectangle, often
+score.94-.985; fourviewconsensus refusesALL18knownshapequestions insteadof
+assertingwrongshape. Actualrawcrops ANDactualmodelinputsheet VIEWEDagain:
+roundforeground hasa visiblewhitishrectangularpaperpatch againstpurewhitecanvas.
+This supports the background-contourshortcut hypothesis, NOTa causalproof.
+No goldchanged, cropedited, finalfitted orpolicyretuned. V17alreadypreregistered
+paperpatchvariation beforethis exposedanalysis andbeforeitsownfinals.
+Colour/patternremainacceptedcorrect onthethreeknownmarkers; scopeclosed3tasks.

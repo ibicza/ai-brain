@@ -88,7 +88,7 @@ def run(args):
         prefix = (
             "cd "
             + shlex.quote(remote)
-            + " && PYTHONPATH=src AI_BRAIN_CAPSULE_SHA256="
+            + " && PYTHONPATH=src:scripts AI_BRAIN_CAPSULE_SHA256="
             + manifest["capsule_sha256"]
             + " "
             + python

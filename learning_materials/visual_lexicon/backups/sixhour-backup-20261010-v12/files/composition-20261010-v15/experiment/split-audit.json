@@ -1,0 +1,24 @@
+{
+  "unique_images": 12000,
+  "unique_scene_seeds": 12000,
+  "unique_scene_identities": 12000,
+  "split_images": {
+    "train": 9000,
+    "dev": 600,
+    "calibration": 600,
+    "final": 600,
+    "combinations": 600,
+    "transfer": 600
+  },
+  "held_color_shape_pairs": [
+    [
+      "зелёный",
+      "овал"
+    ],
+    [
+      "синий",
+      "квадрат"
+    ]
+  ],
+  "limits": "Disjoint pixels/seeds, same procedural renderer family. Not independent photographic or textbook exam."
+}

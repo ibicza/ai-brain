@@ -319,6 +319,9 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-sixhour-strict-calibration-pipeline-v1.xml",
         "qa-sixhour-strict-calibration-hostile-v1.xml",
         "qa-sixhour-paper-strict-full-regression-v1.xml",
+        "qa-sixhour-remote-import-fix-v1.xml",
+        "qa-sixhour-remote-import-fix-v2.xml",
+        "qa-sixhour-final-full-regression-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))

@@ -46,6 +46,7 @@ def build(repo, output):
     ]
     explicit = (
         "scripts/m33_composition_package.py",
+        "scripts/m33_composition_remote.py",
         "scripts/m33_primary_composition_pilot.py",
         "scripts/m33_primary_relations_pilot.py",
         "scripts/m33_composition_verify.py",
