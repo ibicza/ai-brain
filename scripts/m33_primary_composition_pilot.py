@@ -312,7 +312,9 @@ def run(args):
         "background_rng_policy": course.BACKGROUND_RNG_POLICY
         if args.dataset_profile.endswith("background_clear")
         else None,
-        "curve_rng_policy": course.CURVE_RNG_POLICY
+        "curve_rng_policy": course.RICH_CURVE_RNG_POLICY
+        if args.dataset_profile == "rich_curve_background_clear"
+        else course.CURVE_RNG_POLICY
         if args.dataset_profile == "curve_background_clear"
         else None,
         "label_rng_policy": course.LABEL_RNG_POLICY,
@@ -438,6 +440,11 @@ def run(args):
     for i, image in enumerate(raw["train"]["pixels"][:32]):
         sheet.paste(Image.fromarray(image), (i % 8 * 96, i // 8 * 96))
     sheet.save(root / "actual-input-contact-sheet.png")
+    if auxiliary_images:
+        auxiliary_sheet = Image.new("RGB", (96 * 8, 96 * 4))
+        for i, image in enumerate(raw["exposure"]["pixels"][:32]):
+            auxiliary_sheet.paste(Image.fromarray(image), (i % 8 * 96, i // 8 * 96))
+        auxiliary_sheet.save(root / "actual-exposure-contact-sheet.png")
     train, dev = Prepared(raw["train"], device), Prepared(raw["dev"], device)
     train_tasks = np.asarray([r["task"] for r in raw["train"]["records"]])
     auxiliary_train = Prepared(raw["exposure"], device) if auxiliary_images else None

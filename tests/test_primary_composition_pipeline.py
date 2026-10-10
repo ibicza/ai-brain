@@ -28,7 +28,7 @@ verifier = script("m33_composition_verify")
 
 @pytest.fixture(
     scope="module",
-    params=(0, 1, 2, 3, 4, 5, 6),
+    params=(0, 1, 2, 3, 4, 5, 6, 7),
     ids=(
         "single-view",
         "four-view",
@@ -37,6 +37,7 @@ verifier = script("m33_composition_verify")
         "ieee-exposure",
         "ieee-wide-background",
         "ieee-quadratic-background",
+        "ieee-rich-palette",
     ),
 )
 def sealed(tmp_path_factory, request):
@@ -76,12 +77,18 @@ def sealed(tmp_path_factory, request):
                 reflection_consensus=request.param > 0,
                 auxiliary_images=12 if request.param >= 2 else 0,
                 consistency_loss=0.2 if request.param >= 2 else 0.0,
-                exposure_profile="diverse" if request.param >= 3 else "standard",
+                exposure_profile="palette"
+                if request.param == 7
+                else "diverse"
+                if request.param >= 3
+                else "standard",
                 numeric_precision="ieee" if request.param >= 4 else "legacy",
                 previous=previous,
                 warm_candidate=None,
                 dataset_profile=(
-                    "curve_background_clear"
+                    "rich_curve_background_clear"
+                    if request.param == 7
+                    else "curve_background_clear"
                     if request.param == 6
                     else "background_clear"
                     if request.param == 5
@@ -128,7 +135,10 @@ def test_quadratic_policy_cannot_be_rewritten(sealed, reseal):
     freeze_path = sealed / "experiment/candidate-freeze.json"
     original, frozen_original = path.read_bytes(), freeze_path.read_bytes()
     protocol = json.loads(original)
-    if protocol["dataset_profile"] != "curve_background_clear":
+    if protocol["dataset_profile"] not in (
+        "curve_background_clear",
+        "rich_curve_background_clear",
+    ):
         return
     try:
         protocol["curve_rng_policy"] = "same generator reused for labels"
@@ -138,7 +148,11 @@ def test_quadratic_policy_cannot_be_rewritten(sealed, reseal):
             freeze["protocol_sha256"] = verifier.sha(path)
             freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
         expected = (
-            "Quadratic exposure RNG policy differs"
+            (
+                "Rich curve exposure RNG policy differs"
+                if protocol["dataset_profile"] == "rich_curve_background_clear"
+                else "Quadratic exposure RNG policy differs"
+            )
             if reseal
             else "Frozen inputs/status changed"
         )

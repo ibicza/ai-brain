@@ -18,9 +18,29 @@ from ai_brain.training import primary_composition as c
 
 EXPOSURE_SHAPES = ("triangle", "cross")
 EXTENDED_EXPOSURE_SHAPES = (*EXPOSURE_SHAPES, "hexagon", "heart", "arrow", "crescent")
-EXPOSURE_PROFILES = {"standard": EXPOSURE_SHAPES, "diverse": EXTENDED_EXPOSURE_SHAPES}
+PALETTE_EXPOSURE_SHAPES = (*EXTENDED_EXPOSURE_SHAPES, "parallelogram", "kite")
+EXPOSURE_PROFILES = {
+    "standard": EXPOSURE_SHAPES,
+    "diverse": EXTENDED_EXPOSURE_SHAPES,
+    "palette": PALETTE_EXPOSURE_SHAPES,
+}
 HELD_OUT_SHAPES = ("star", "pentagon", "trapezoid")
 LABEL_RNG_DOMAIN = 0x4D33434C
+PALETTE_LABEL_DOMAIN = 0x4D33504C
+PALETTE_VISUAL_DOMAIN = 0x4D335056
+PALETTE_UNKNOWN_RGB = {
+    "оранжевый": (245, 140, 35),
+    "розовый": (240, 135, 180),
+    "голубой": (95, 205, 235),
+    "фиолетовый": (150, 60, 190),
+}
+PALETTE_HELD_RGB = {"бирюзовый": (40, 190, 170)}
+PALETTE_KNOWN_ENDPOINTS = {
+    "красный": (245, 75, 65),
+    "зелёный": (140, 220, 105),
+    "жёлтый": (250, 235, 90),
+    "синий": (35, 105, 230),
+}
 
 
 @dataclass(frozen=True)
@@ -36,15 +56,22 @@ class ControlScene:
     identity: str
     seed: int
     items: tuple[ControlItem, ControlItem]
+    renderer_profile: str = "standard"
 
     def validate(self):
-        if len(self.items) != 2 or type(self.seed) is not int or self.seed < 0:
+        if (
+            len(self.items) != 2
+            or type(self.seed) is not int
+            or self.seed < 0
+            or self.renderer_profile not in ("standard", "palette")
+        ):
             raise ValueError("Invalid authored control scene")
         for item in self.items:
             if (
-                item.color not in c.COLORS
+                item.color not in (*c.COLORS, *PALETTE_UNKNOWN_RGB, *PALETTE_HELD_RGB)
+                or (self.renderer_profile == "standard" and item.color not in c.COLORS)
                 or item.shape
-                not in (*c.SHAPES, *EXTENDED_EXPOSURE_SHAPES, *HELD_OUT_SHAPES)
+                not in (*c.SHAPES, *PALETTE_EXPOSURE_SHAPES, *HELD_OUT_SHAPES)
                 or item.pattern not in c.PATTERNS
                 or type(item.hidden) is not bool
             ):
@@ -84,6 +111,10 @@ def vertices(shape):
         )
     if shape == "trapezoid":
         return ((-0.45, -0.9), (0.45, -0.9), (1, 0.9), (-1, 0.9))
+    if shape == "parallelogram":
+        return ((-1, -0.6), (0.45, -0.6), (1, 0.6), (-0.45, 0.6))
+    if shape == "kite":
+        return ((0, -1), (0.7, 0.15), (0, 0.8), (-0.7, 0.15))
     if shape == "arrow":
         return (
             (-1, -0.3),
@@ -140,8 +171,13 @@ def vertices(shape):
 def render(scene):
     scene.validate()
     rng = np.random.default_rng(scene.seed)
+    palette_rng = np.random.default_rng(
+        np.random.SeedSequence([scene.seed, PALETTE_VISUAL_DOMAIN])
+    )
     scale, size = 4, 96
     background = tuple(int(x) for x in rng.integers(210, 235, 3))
+    if scene.renderer_profile == "palette":
+        background = tuple(int(x) for x in palette_rng.integers(246, 256, 3))
     canvas = Image.new("RGB", (size * scale, size * scale), background)
     for side, item in enumerate(scene.items):
         radius = rng.uniform(11, 14.5) * scale
@@ -170,11 +206,24 @@ def render(scene):
         array = np.asarray(mask)
         if array[0].any() or array[-1].any() or array[:, 0].any() or array[:, -1].any():
             raise ValueError("Control contour clipped")
-        rgb = np.clip(
-            np.asarray(c.RGB[c.COLORS.index(item.color)]) + rng.uniform(-4, 4, 3),
-            0,
-            255,
-        ).astype(int)
+        # Consume historical draws unchanged; palette changes use another stream.
+        jitter = rng.uniform(-4, 4, 3)
+        base_rgb = (
+            c.RGB[c.COLORS.index(item.color)]
+            if item.color in c.COLORS
+            else {**PALETTE_UNKNOWN_RGB, **PALETTE_HELD_RGB}[item.color]
+        )
+        rgb = np.asarray(base_rgb, dtype=float)
+        if (
+            scene.renderer_profile == "palette"
+            and item.color in PALETTE_KNOWN_ENDPOINTS
+        ):
+            amount = palette_rng.uniform(0, 1)
+            rgb = (
+                rgb * (1 - amount)
+                + np.asarray(PALETTE_KNOWN_ENDPOINTS[item.color]) * amount
+            )
+        rgb = np.clip(rgb + jitter, 0, 255).astype(int)
         surface = Image.new("RGB", mask.size, tuple(rgb))
         texture = ImageDraw.Draw(surface)
         ink = tuple(np.clip(rgb + (-75 if rgb.mean() > 100 else 75), 0, 255))
@@ -236,6 +285,9 @@ def scenes(
     rng = np.random.default_rng(
         np.random.SeedSequence([seed, LABEL_RNG_DOMAIN]) if independent_labels else seed
     )
+    palette_labels = np.random.default_rng(
+        np.random.SeedSequence([seed, PALETTE_LABEL_DOMAIN])
+    )
     rows = []
     for i in range(count):
         items = []
@@ -247,16 +299,29 @@ def scenes(
                 for color in c.COLORS
                 if split != "exposure" or (color, shape) not in c.HELD_COMBINATIONS
             ]
+            color = colors[int(rng.integers(len(colors)))]
+            if exposure_profile == "palette" and (i + side) % 3 == 1:
+                unknown_colors = tuple(
+                    PALETTE_HELD_RGB if split == "held_control" else PALETTE_UNKNOWN_RGB
+                )
+                color = unknown_colors[
+                    int(palette_labels.integers(len(unknown_colors)))
+                ]
             items.append(
                 ControlItem(
-                    colors[int(rng.integers(len(colors)))],
+                    color,
                     shape,
                     c.PATTERNS[int(rng.integers(3))],
                     (i + side * 3) % 13 == 0,
                 )
             )
         rows.append(
-            ControlScene(f"authored-{cohort or split}/{i}", seed + i, tuple(items))
+            ControlScene(
+                f"authored-{cohort or split}/{i}",
+                seed + i,
+                tuple(items),
+                "palette" if exposure_profile == "palette" else "standard",
+            )
         )
     return rows
 
@@ -307,7 +372,27 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
                 raise ValueError("Auxiliary scene identity leakage")
             if split not in auxiliary:
                 continue
+            if scene.get("renderer_profile", "standard") != (
+                "palette" if exposure_profile == "palette" else "standard"
+            ):
+                raise ValueError("Authored renderer profile differs from exposure")
             for item in scene["items"]:
+                allowed_colors = (
+                    (
+                        *c.COLORS,
+                        *(
+                            PALETTE_HELD_RGB
+                            if split == "control_final"
+                            else PALETTE_UNKNOWN_RGB
+                        ),
+                    )
+                    if exposure_profile == "palette"
+                    else c.COLORS
+                )
+                if item["color"] not in allowed_colors:
+                    raise ValueError(
+                        "Held color entered exposure or unsupported color profile"
+                    )
                 if split != "control_final" and (
                     item["shape"] not in (*c.SHAPES, *exposure_shapes)
                     or (item["color"], item["shape"]) in c.HELD_COMBINATIONS
@@ -327,5 +412,11 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
         "unique_images": len(pixels),
         "exposure_shapes": exposure_shapes,
         "held_control_shapes": HELD_OUT_SHAPES,
+        "exposure_unknown_colors": tuple(PALETTE_UNKNOWN_RGB)
+        if exposure_profile == "palette"
+        else (),
+        "held_unknown_colors": tuple(PALETTE_HELD_RGB)
+        if exposure_profile == "palette"
+        else (),
         "limits": "Authored generator separation, shared Pillow, not external-source independence.",
     }

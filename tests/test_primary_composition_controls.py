@@ -164,3 +164,59 @@ def test_audit_rejects_wrong_exposure_profile_and_extended_contours_in_final():
     extra["control_final"]["scenes"][0]["items"][0]["shape"] = "heart"
     with pytest.raises(ValueError, match="Exposure contour"):
         controls.audit(extra, native, exposure_profile="diverse")
+
+
+def test_palette_exposure_has_explicit_unknown_colors_and_separate_finals():
+    train = controls.scenes("exposure", 300, 90400, exposure_profile="palette")
+    held = controls.scenes("held_control", 300, 90500, exposure_profile="palette")
+    train_colors = {i.color for s in train for i in s.items} - set(c.COLORS)
+    held_colors = {i.color for s in held for i in s.items} - set(c.COLORS)
+    assert train_colors == set(controls.PALETTE_UNKNOWN_RGB)
+    assert held_colors == set(controls.PALETTE_HELD_RGB)
+    assert not train_colors & held_colors
+    assert all(s.renderer_profile == "palette" for s in (*train, *held))
+    assert not {i.shape for s in train for i in s.items} & set(controls.HELD_OUT_SHAPES)
+    for scene in (*train[:30], *held[:30]):
+        image = controls.render(scene)
+        assert image.dtype == np.uint8 and np.array_equal(image, controls.render(scene))
+        assert image[0, 0].min() >= 246
+        for side, item in enumerate(scene.items):
+            assert (scene.gold("color", side) == c.UNKNOWN) == (
+                item.hidden or item.color not in c.COLORS
+            )
+
+
+def test_palette_audit_rejects_held_color_in_training_even_with_correct_shape():
+    native = {"train": c.prepare(c.scenes("train", 2, 90600))}
+    extra = {
+        "exposure": controls.prepare(
+            controls.scenes("exposure", 12, 90700, exposure_profile="palette")
+        ),
+        "control_final": controls.prepare(
+            controls.scenes("held_control", 12, 90800, exposure_profile="palette")
+        ),
+    }
+    result = controls.audit(extra, native, exposure_profile="palette")
+    assert result["held_unknown_colors"] == ("бирюзовый",)
+    extra["exposure"]["scenes"][0]["items"][0]["color"] = "бирюзовый"
+    with pytest.raises(ValueError, match="Held color"):
+        controls.audit(extra, native, exposure_profile="palette")
+
+
+@pytest.mark.parametrize("shape", ("parallelogram", "kite"))
+def test_palette_new_contours_have_no_right_angles_and_are_bounded(shape):
+    points = np.asarray(controls.vertices(shape))
+    edges = np.roll(points, -1, axis=0) - points
+    assert np.abs(points).max() <= 1
+    assert np.abs((edges * np.roll(edges, -1, axis=0)).sum(axis=1)).min() > 0.01
+    for seed in range(10):
+        scene = controls.ControlScene(
+            "bounded",
+            seed,
+            (
+                controls.ControlItem("красный", shape, "однотонный"),
+                controls.ControlItem("синий", "круг", "однотонный"),
+            ),
+            "palette",
+        )
+        assert controls.render(scene).shape == (96, 96, 3)

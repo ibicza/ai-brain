@@ -204,7 +204,9 @@ if __name__ == "__main__":
     parser.add_argument("--reflection-consensus", action="store_true")
     parser.add_argument("--auxiliary-images", type=int, default=0)
     parser.add_argument(
-        "--exposure-profile", choices=("standard", "diverse"), default="standard"
+        "--exposure-profile",
+        choices=("standard", "diverse", "palette"),
+        default="standard",
     )
     parser.add_argument("--consistency-loss", type=float, default=0.0)
     parser.add_argument(
@@ -217,6 +219,7 @@ if __name__ == "__main__":
             "diverse_clear",
             "background_clear",
             "curve_background_clear",
+            "rich_curve_background_clear",
         ),
         default="diverse",
     )

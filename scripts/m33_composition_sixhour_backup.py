@@ -37,6 +37,9 @@ SOURCE_FILES = (
     "scripts/m33_composition_novel_controls.py",
     "scripts/m33_composition_novel_screen.py",
     "scripts/m33_composition_novel_remote.py",
+    "scripts/m33_composition_source_prepare.py",
+    "scripts/m33_composition_source_dataset.py",
+    "examples/m33/visual_source_controls_v1.json",
     "scripts/requirements-primary-materials.txt",
     "scripts/m33_composition_sixhour_backup.py",
     "tests/test_primary_composition.py",
@@ -52,6 +55,7 @@ SOURCE_FILES = (
     "tests/test_primary_composition_novel_controls.py",
     "tests/test_primary_composition_novel_screen.py",
     "tests/test_primary_composition_novel_remote.py",
+    "tests/test_primary_composition_source_prepare.py",
     "tests/test_primary_zero.py",
     "tests/test_primary_relations.py",
     "docs/m33_composition_six_hour_work.md",
@@ -167,6 +171,8 @@ def run(repo, data, output, parent, run_names):
             "numeric-backend-v1",
             "cold-family-screen-v1",
             "cold-family-screen-v2",
+            "source-control-screen-v1",
+            "source-control-screen-v2",
         ):
             if (root / child).exists():
                 selected += [
@@ -202,9 +208,34 @@ def run(repo, data, output, parent, run_names):
         "qa-sixhour-cold-pipeline-v1.xml",
         "qa-sixhour-cold-pipeline-v2.xml",
         "qa-sixhour-cold-transport-v1.xml",
+        "qa-sixhour-real-source-prepare-v1.xml",
+        "qa-sixhour-real-source-prepare-v2.xml",
+        "qa-sixhour-source-cold-combined-v1.xml",
+        "qa-sixhour-source-transport-v1.xml",
+        "qa-sixhour-source-subprocess-v1.xml",
+        "qa-sixhour-backup-source-v1.xml",
+        "qa-sixhour-palette-unit-v1.xml",
+        "qa-sixhour-palette-unit-v2.xml",
+        "qa-sixhour-palette-pipeline-v1.xml",
+        "qa-sixhour-palette-pipeline-v2.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))
+    for name in (
+        "source-controls-20261010-v1",
+        "source-controls-20261010-v2",
+        "source-controls-20261010-v3",
+    ):
+        root = base / name
+        if not root.exists():
+            continue
+        receipt = json.loads((root / "preparation-receipt.json").read_text())
+        if receipt["training_or_calibration"] or receipt["production_admitted"]:
+            raise ValueError("Only preserved non-training source controls allowed")
+        for path in sorted(root.iterdir()):
+            if not path.is_file() or path.is_symlink():
+                raise ValueError("Only flat regular prepared-source evidence allowed")
+            evidence.append((name + "/" + path.name, path))
     prefix = "learning_materials/visual_lexicon/backups/" + output.name + "/"
     manifest = []
     for name, path in evidence:

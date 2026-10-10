@@ -122,3 +122,27 @@ def test_quadratic_profile_retains_one_third_exact_straight_stripe_scenes():
         c.render(original),
         c.render(replace(original, style="diverse_curve_background_clear")),
     )
+
+
+def test_rich_profile_keeps_labels_background_and_sinusoidal_holdout():
+    old = c.scenes("train", 20, 109000, profile="curve_background_clear")
+    rich = c.scenes("train", 20, 109000, profile="rich_curve_background_clear")
+    assert [(s.seed, s.items) for s in old] == [(s.seed, s.items) for s in rich]
+    assert all(
+        np.array_equal(c.sample_background(a), c.sample_background(b))
+        for a, b in zip(old, rich, strict=True)
+    )
+    assert c.scenes(
+        "transfer", 20, 109100, profile="rich_curve_background_clear"
+    ) == c.scenes("transfer", 20, 109100, profile="curve_background_clear")
+    row = replace(
+        old[0],
+        items=(
+            c.Item("красный", "овал", "полосатый"),
+            c.Item("синий", "круг", "однотонный"),
+        ),
+    )
+    wide = replace(row, style="diverse_rich_curve_background_clear")
+    assert np.array_equal(c.render(wide), c.render(wide))
+    assert not np.array_equal(c.render(row)[:, :48], c.render(wide)[:, :48])
+    assert np.array_equal(c.render(row)[:, 48:], c.render(wide)[:, 48:])

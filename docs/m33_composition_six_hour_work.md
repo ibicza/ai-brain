@@ -656,3 +656,89 @@ Goal/heartbeat remainACTIVE until at least05:11:22UTC (~3h39m still required).
 Continue meaningful work, not only repeated status polling. If both bounded
 screens pass, audit exact provenance/inference and proceed to real-source image
 controls and the next image block; neither synthetic screen closes strictM33U.
+
+01:33 UTC: small source-only V5 backup pushed and independent ls-remote confirms
+e727907de5bb6dd84e18ce7a0b29869f45a29c3b (26paths). NEXT backup expected parent
+is this FULL SHA, NOT46dff68b. Previous large run artifacts were not recopied.
+Current V12 joint training actually observed through1800steps, devCE0.0191082;
+this is development only, not final accuracy/acceptance. Only model77691 live.
+Canonical index/workbook again unchanged, D823.7MB free/W432.7MB during graph
+cache refresh. Automatic goal continuation must resume77691, then complete its
+source/replay/transport checks and fresh cold screen, and continue until deadline.
+New source-only commit includes combined614/2 and separate8guard receipts;
+this final handoff paragraph itself is newer than that backup. Do not pause or
+complete goal now; user time window has not elapsed.
+
+01:57 UTC: V12 training77691 COMPLETE and original CUDA inference/arithmetic
+independently replayed. Joint checkpoint bdb1af182edd919439e8a9fa019e9a781ec943acdccded4b7a29b448c328f7dd.
+Final/combinations accepted errors0/0, positive recall0.993889/1.0; transfer
+and authored held control each1accepted error. NEEDS_WORK_NOT_PRODUCTION remains
+correct. No retrospective threshold changes; all thresholds0.9. V12 inputs,
+source capsule and exact hash are recorded above; transport receipt elapsed1492s.
+
+New frozen-source cold-family screen24028 COMPLETE: 600images/3600questions,
+0accepted errors, positive recall0.994580, unknown recall1.0, blank accepted0;
+all family/task gates passed. The new contours are semicircle/teardrop/chevron,
+not original train/dev/cal or held-control shapes. Shared Pillow, not photos.
+This success does NOT override failed original V12 acceptance.
+
+Real-source preparation completed before inspecting V12 finals: 11visually
+reviewed source ROIs from2pages/2original Russian Belarus math PDFs. Original
+bytes unchanged; fresh PDF110dpi rendering reproduced preview SHA exactly.
+Source annotations examples/m33/visual_source_controls_v1.json fixed before
+predictions. 110ordered composites/660questions are combinations of11assets,
+NOT110independent source examples. Unsupported pink/orange/light-blue and
+non-four-shape contours require UNKNOWN only within this bounded vocabulary.
+Preparation v1/v2/v3 preserved, selected v3 adds executed-source/freeze/raw-ROI
+provenance. Independent loader reconstructs actual RGB composite and gold from
+raw crops/annotation, detects hostile changes even after receipt resealing.
+Actual source-ROI/model-input contact sheets and both complete PDFpage previews
+visually inspected; no clipping/neighbor/text contamination. This is nonblind
+primary-agent labeling, not an independent semantic examiner/full-page ability.
+
+Combined source/cold regression59471 COMPLETE29passed29.486s; transport8passed
+0.245s. XMLs qa-sixhour-source-cold-combined-v1.xml and
+qa-sixhour-source-transport-v1.xml confirmed from files after tool-output
+truncation, not guessed from disappearance of a process handle. Actual original
+capsule subprocess test for prepared sources61599 now live; after pass run
+source-control-screen-v1 on remote frozen V12 with prepared v3, count110/seed0
+(deterministic assembly, seed unused). Do not fit/calibrate on this assessment.
+Temporary goal/heartbeatACTIVE; earliest finish still05:11:22UTC.
+
+02:05 UTC: actual prepared-source subprocess61599 COMPLETE4passed35.97s,
+then remote6769 COMPLETE authentic original V12 inference on real ROIs:
+660questions,375accepted,71false assertions,positive recall0.690909,
+unknown recall0.727273,blank accepted0. This is a material transfer failure,
+not a mislabeled successful textbook stage. Breakdown: unsupported orange,
+pink, light-blue irregular quad each20color mistakes; light-green rectangle
+11color mistakes. Red/green triangles, yellow/red circle and pink rectangle
+also have excessive refusal. Exact detailed per-source rows retained. Source
+control is now EXPOSED; later scores on these same11assets are diagnostics,
+NOTfresh independent exam. We must prepare untouched additional source ROIs
+before a future candidate final. No existing annotation/threshold changed.
+
+Next opt-in experiment: rich_curve_background_clear expands NEW training-only
+quadratic stripe curvature and adds cubic curvature; original sinusoidal held
+transfer remains unchanged. New palette authored exposure retains original
+standard/diverse pixel algorithms, adds8unsupported training contour families
+(parallelogram/kite included), explicit four unsupported color meanings,
+broader known red/green/yellow/blue ranges and paper246..255backgrounds.
+Held authored shapes stay star/pentagon/trapezoid; turquoise color is HELD
+and never training/dev/cal. UNKNOWN is head scope, not forgotten words.
+Independent palette-label/visual streams avoid color/background metadata cues.
+No textbook source pixels used to train this block. This is a bounded domain
+randomization/OOD exposure experiment, NOTa guarantee of external-source transfer
+or the full OE uniform-posterior algorithm. Primary references read:
+https://arxiv.org/abs/1703.06907 and https://arxiv.org/html/1812.04606v3.
+An unrelated arXiv1806.05298lookup was recognized as unrelated and NOTused.
+
+New unit QA v1 caught an unintended right angle in proposed kite geometry;
+changed kite vertex before any training, v1failure preserved. Unitv2 COMPLETE
+36passed8.82s. Tiny rich/palette training+replay regression85435 currently
+finishing; v1 includes a stale Quadratic-only assertion string for new rich
+protocol, fixed EXPECTATION, verifier rejection was correct/unmodified.
+Need complete fresh v2 before launchV13. Graph35444 rebuilt successfully1005
+files; qualified scenes queries not_found for untracked files, not proof of
+no consumers. Confirmed pilot/verifier/controls calls with rg/source. Rebuild
+again after opt-in profile structure stabilized. Next backup expected parent
+e727907de5bb6dd84e18ce7a0b29869f45a29c3b; preserve user HEAD/index/workbook.

@@ -1,0 +1,108 @@
+{
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-capsule.tgz": "ac36b1499ffedf979272992d62e5bbe66f6204b67d47ec9d3fb75134e72c1b82",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/experiment/joint/best.pt": "bdb1af182edd919439e8a9fa019e9a781ec943acdccded4b7a29b448c328f7dd",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/experiment/protocol.json": "d86d5ad868c9bf29a5e23bdce919121fa80c342740339e22fb5c8eecbc3bc102",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/experiment/candidate-freeze.json": "e060a91678ad1ea5c8c0036eaa992f57c2f8158eb74a50dc63f45e6b6b388dcf",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/experiment/policy-frozen.json": "3f917847adc71e039619a159f7b42319c499ede5f5af18ee2403f9c969117432",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/experiment/result.json": "f18c8722e97a6658f2c384850a6b4ded5e451ae31f2969f96de3be624b170c63",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/experiment/dataset-records.json.gz": "8a5c9865ea94c841db4b82a59ee45bb1007118a741b95fd62475a4b8dc6242e7"
+  },
+  "screen_source_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/scripts/m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/scripts/m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/scripts/m33_composition_source_dataset.py": "7c5c83e482fdfeaf31060c7329117a99c2c2f23df57f6c7f8da2450ecb7d4b67"
+  },
+  "source_preparation_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/prepared-source/source-annotations.json": "c614c0a0bc2e1eb640ed532d0118464fba5293133994bf4370002aa6060b44ca",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/prepared-source/dataset.npz": "c85efd2674aa17e0e8c98d362afe4fdf56716aba94637ffb893b7b606da6bda0",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/prepared-source/records.json.gz": "5e76a4d666a65126740a6f977b1f3db8d530c80cd1257736e9e25162f2838508",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/prepared-source/source-crops.npz": "17e249470fa2ee17b063db8e6d6ff64f67968cbaa5a015f9f8d9f94aa9fd9f21",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/prepared-source/preparation-freeze.json": "94a05d023aa8a65b84b5663ed9882c06e6afa3e5ebc2bde44fe2ac0efc9e99de",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/prepared-source/preparation-executed.py": "f15097940abb8e188bb02cfa8b4e4ade20b82fc44dec4c26915886b4667d5a20",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v12/source-control-screen-v1/prepared-source/preparation-receipt.json": "5a7628290a90e80d42f94c10288e5ca4c4bc2bacefc8dd2b7492d9481a6565ba"
+  },
+  "source_preparation_receipt": {
+    "status": "SOURCE_CONTROL_TENSORS_PREPARED_NOT_EVALUATED",
+    "annotation_manifest_sha256": "c614c0a0bc2e1eb640ed532d0118464fba5293133994bf4370002aa6060b44ca",
+    "answers": [
+      "красный",
+      "синий",
+      "зелёный",
+      "жёлтый",
+      "тёмно-зелёный",
+      "коричневый",
+      "белый",
+      "чёрный",
+      "круг",
+      "овал",
+      "квадрат",
+      "прямоугольник",
+      "однотонный",
+      "полосатый",
+      "пятнистый",
+      "UNKNOWN"
+    ],
+    "unique_source_assets": 11,
+    "unique_pdf_books": 2,
+    "unique_pdf_pages": 2,
+    "paired_scenes": 110,
+    "questions": 660,
+    "independent_source_examples": false,
+    "fresh_original_rendering_verified": true,
+    "training_or_calibration": false,
+    "production_admitted": false,
+    "dataset_sha256": "c85efd2674aa17e0e8c98d362afe4fdf56716aba94637ffb893b7b606da6bda0",
+    "records_sha256": "5e76a4d666a65126740a6f977b1f3db8d530c80cd1257736e9e25162f2838508",
+    "source_crops_sha256": "17e249470fa2ee17b063db8e6d6ff64f67968cbaa5a015f9f8d9f94aa9fd9f21",
+    "preparation_freeze_sha256": "94a05d023aa8a65b84b5663ed9882c06e6afa3e5ebc2bde44fe2ac0efc9e99de",
+    "limits": "Two pages from one textbook family; many pairings reuse the SAME source assets. Do not count pairings/questions as independent source examples. Light blue, pink and orange are unsupported color answers here, not unknown words in every earlier course."
+  },
+  "count": 110,
+  "seed": 0,
+  "families": [
+    "red-triangle",
+    "green-triangle",
+    "yellow-circle",
+    "red-circle",
+    "green-square",
+    "lightblue-square",
+    "green-rectangle",
+    "orange-parallelogram",
+    "pink-rectangle",
+    "lightblue-quadrilateral",
+    "empty-paper"
+  ],
+  "group_kind": "source_asset",
+  "thresholds": {
+    "color": 0.9,
+    "shape": 0.9,
+    "pattern": 0.9
+  },
+  "numeric_backend": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "acceptance": {
+    "accepted_errors_max": 0,
+    "positive_recall_min": 0.8,
+    "unknown_recall_min": 0.9,
+    "per_family_and_task": true,
+    "blank_accepted_max": 0
+  },
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Two pages from one textbook family; many pairings reuse the SAME source assets. Do not count pairings/questions as independent source examples. Light blue, pink and orange are unsupported color answers here, not unknown words in every earlier course."
+}
