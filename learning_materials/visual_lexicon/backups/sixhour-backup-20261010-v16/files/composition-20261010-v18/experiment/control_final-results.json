@@ -1,0 +1,166 @@
+{
+  "raw_argmax": {
+    "overall": {
+      "examples": 3600,
+      "accepted": 2421,
+      "false_assertions": 321,
+      "accepted_error_rate": 0.1325898389095415,
+      "answerable_recall": 0.9610983981693364,
+      "unknown_recall": 0.7872791519434629
+    },
+    "tasks": {
+      "color": {
+        "examples": 1200,
+        "accepted": 994,
+        "false_assertions": 286,
+        "accepted_error_rate": 0.28772635814889336,
+        "answerable_recall": 0.998589562764457,
+        "unknown_recall": 0.4175152749490835
+      },
+      "shape": {
+        "examples": 1200,
+        "accepted": 352,
+        "false_assertions": 19,
+        "accepted_error_rate": 0.05397727272727273,
+        "answerable_recall": 0.9024390243902439,
+        "unknown_recall": 0.9819494584837545
+      },
+      "pattern": {
+        "examples": 1200,
+        "accepted": 1075,
+        "false_assertions": 16,
+        "accepted_error_rate": 0.014883720930232559,
+        "answerable_recall": 0.9566395663956639,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 250,
+      "all_three_correct_rate": 0.88
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 196,
+        "both_correct_rate": 0.9948979591836735
+      },
+      "shape": {
+        "eligible_scene_pairs": 0,
+        "both_correct_rate": null
+      },
+      "pattern": {
+        "eligible_scene_pairs": 334,
+        "both_correct_rate": 0.9221556886227545
+      }
+    }
+  },
+  "selected": {
+    "overall": {
+      "examples": 3600,
+      "accepted": 1597,
+      "false_assertions": 2,
+      "accepted_error_rate": 0.0012523481527864746,
+      "answerable_recall": 0.7299771167048055,
+      "unknown_recall": 1.0
+    },
+    "tasks": {
+      "color": {
+        "examples": 1200,
+        "accepted": 680,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9590973201692524,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 1200,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 1200,
+        "accepted": 917,
+        "false_assertions": 2,
+        "accepted_error_rate": 0.0021810250817884407,
+        "answerable_recall": 0.8265582655826558,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 250,
+      "all_three_correct_rate": 0.0
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 196,
+        "both_correct_rate": 0.9387755102040817
+      },
+      "shape": {
+        "eligible_scene_pairs": 0,
+        "both_correct_rate": null
+      },
+      "pattern": {
+        "eligible_scene_pairs": 334,
+        "both_correct_rate": 0.6856287425149701
+      }
+    }
+  },
+  "image_count": 600,
+  "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam.",
+  "single_view_raw_argmax": {
+    "overall": {
+      "examples": 3600,
+      "accepted": 2661,
+      "false_assertions": 530,
+      "accepted_error_rate": 0.19917324314167606,
+      "answerable_recall": 0.9752860411899313,
+      "unknown_recall": 0.6593639575971731
+    },
+    "tasks": {
+      "color": {
+        "examples": 1200,
+        "accepted": 1105,
+        "false_assertions": 396,
+        "accepted_error_rate": 0.3583710407239819,
+        "answerable_recall": 1.0,
+        "unknown_recall": 0.1934826883910387
+      },
+      "shape": {
+        "examples": 1200,
+        "accepted": 449,
+        "false_assertions": 97,
+        "accepted_error_rate": 0.21603563474387527,
+        "answerable_recall": 0.9539295392953929,
+        "unknown_recall": 0.8965102286401926
+      },
+      "pattern": {
+        "examples": 1200,
+        "accepted": 1107,
+        "false_assertions": 37,
+        "accepted_error_rate": 0.03342366757000903,
+        "answerable_recall": 0.966576332429991,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 250,
+      "all_three_correct_rate": 0.944
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 196,
+        "both_correct_rate": 1.0
+      },
+      "shape": {
+        "eligible_scene_pairs": 0,
+        "both_correct_rate": null
+      },
+      "pattern": {
+        "eligible_scene_pairs": 334,
+        "both_correct_rate": 0.9431137724550899
+      }
+    }
+  }
+}

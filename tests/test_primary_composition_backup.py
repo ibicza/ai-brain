@@ -13,6 +13,17 @@ backup = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(backup)
 
 
+def test_scoped_backup_preserves_current_overview_and_both_work_journals():
+    required = {
+        "docs/m33_primary_composition.md",
+        "docs/m33_primary_composition_continuation.md",
+        "docs/m33_composition_six_hour_work.md",
+    }
+    assert required.issubset(backup.SOURCE_FILES)
+    assert len(backup.SOURCE_FILES) == len(set(backup.SOURCE_FILES))
+    assert not any(".code-review-graph/" in name for name in backup.SOURCE_FILES)
+
+
 def test_original_large_file_is_reconstructed_from_ordered_hash_bound_chunks(tmp_path):
     source = tmp_path / "original.bin"
     original = bytes(range(256)) * 17 + b"tail"

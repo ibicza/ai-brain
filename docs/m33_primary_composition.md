@@ -79,16 +79,56 @@ in the held-pair cohort are not invented: that cohort contains only green/blue.
 
 ## Verification and next boundary
 
-26 focused tests pass locally and remotely; 227 combined course/catalogue tests
-pass locally. A separate arithmetic implementation
+### Current audit boundary (2026-10-10)
+
+The V1/V2 results above are historical, not current mastery evidence. The
+six-hour continuation found a background/label RNG shortcut in native V1–V7;
+their high pattern scores must not be treated as learned pattern recognition.
+Original arrays, weights and reports remain unchanged. New experiments separate
+label, background, contour, palette and aspect-ratio random streams. Details and
+the live handoff are in [the work journal](m33_composition_six_hour_work.md).
+
+Synthetic success alone does not admit textbook or photographic recognition.
+Real textbook controls use original-byte/page hashes, preserved raw crops and
+independently reconstructed input pixels. Repeated pairs/questions from one
+crop are correlated, not additional independent source examples. Annotation is
+human-readable but primary-agent manual, not an independent semantic blind exam.
+Once evaluated, a source family is exposed; further results are regression
+diagnostics. UNKNOWN is scoped to this head's answer vocabulary, not evidence
+that other courses forgot their words. No candidate has been activated.
+
+Opt-in `coverage_guarded_strict` calibration keeps the original fixed grid,
+zero observed calibration errors and minimum support. It additionally requires
+useful positive/unknown recall in each calibration cohort before choosing the
+highest eligible threshold. It uses calibration only, after development-only
+weight selection. This is an empirical policy, not a statistical guarantee of
+zero future errors or an implementation of conformal/SGR risk bounds.
+
+The first actual strict-calibration experiment V18 completed remote training and
+frozen inference/arithmetic replay. It is **not accepted**: all fixed-grid shape
+thresholds fail authored positive coverage, so that task is entirely refused.
+Two accepted pattern mistakes remain on authored final. Four real-source panels
+have zero accepted mistakes but inadequate positive/task/asset coverage. The new
+V4 page is now exposed; neither its first assessment nor repeated old panels is
+an independent semantic blind examination. See the journal's completed-results
+table and original receipts. No candidate has been activated.
+
+Historical initial checks comprised 26 focused tests locally/remotely and 227
+combined course/catalogue tests locally. The latest six-hour patch has **832
+passed, 32 explicitly inapplicable-contract skips**, zero failures/errors.
+Model/training definitions did not change afterward. A final backup-document
+allowlist repair was checked separately with 16 passing backup tests; the full
+suite was not rerun after that helper-only repair. A separate arithmetic implementation
 replays the selected model on calibration and all reported cohorts, independently
 recomputes decisions, recalls, false assertions and complete-description rates,
 and checks source/data/checkpoint hashes. This is independent calculation, not
 independent semantic annotation. The current candidate is rejected for production.
 
-Next: diversify stripe orientation, spot geometry and rendering/backgrounds;
-diagnose shape features independently of color; repeat development and freeze
-before new evaluation. Retain explicit target-binding, UNKNOWN and old-skill
+Next: investigate foreground/paper separation and the underrepresented authored
+known-shape training group. Distinguish actual wrong/disagreeing views from
+correct low-score predictions; changing confidence alone cannot fix the former.
+Compare one preregistered intervention at a time, then freeze before new
+evaluation. Retain explicit target-binding, UNKNOWN and old-skill
 checks. Only then admit reviewed real object/part annotations, including varied
 watermelons and giraffes, with per-part visibility and separate author/source
 families. Do not fill hidden anatomy from the object name or teach identities

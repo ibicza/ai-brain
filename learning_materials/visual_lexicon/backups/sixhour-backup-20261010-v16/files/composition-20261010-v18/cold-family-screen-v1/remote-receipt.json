@@ -1,0 +1,14 @@
+{
+  "status": "REMOTE_COLD_FAMILY_CONTROLS_REPLAYED",
+  "remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v18/cold-family-screen-v1",
+  "reference_remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v18",
+  "original_capsule_sha256": "01be70d0e9714d01fdaeed453ef39860875dbfc7c5b9ab925be08d30cee09753",
+  "transport_executed_sha256": "32d8a3d508b90e0407ce191815372a75549b057e92877de0ced67c8b7a424737",
+  "screen_source_hashes": {
+    "m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8",
+    "m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de"
+  },
+  "source_inputs": {},
+  "controls_result_sha256": "e2b3ce02c98d1b6a2904c813bbc3dde7ca45a9e964d854290001a46724425159",
+  "production_admitted": false
+}

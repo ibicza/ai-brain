@@ -1588,3 +1588,23 @@ then a separately reviewed learned foreground auxiliary experiment if needed.
 Do not change both at once, reuse exposed panels as blind tests, fit thresholds
 on final outcomes, or expand capacity without a measured reason. Keep all strict
 positive/unknown/error/description/binding gates and freeze before new finals.
+
+### Final backup-allowlist repair after the timed window
+
+V15 push completed at commit
+`b64d1330ee9b744852fc2502fc32ea5ba99905d6`; independent remote SHA confirmed.
+Byte comparison found the full journal was preserved exactly, but the current
+`docs/m33_primary_composition.md` overview was omitted from SOURCE_FILES and its
+old ancestor version remained in Git. This was a backup allowlist defect, NOT
+a model/remote/source-data failure. Added the overview explicitly and a focused
+regression requiring all three composition documents (and unique scoped paths,
+no graph cache). No training/inference code or frozen artifact was changed.
+The earlier 832/32 full suite predates this backup-helper-only repair; do not
+claim it reran afterward. The new focused backup proof and V16 final scoped
+snapshot will cover this repair before the actual user handoff.
+
+Focused final backup repair proof COMPLETE: 16 passed in 1.29 seconds,
+`qa-sixhour-final-overview-backup-v1.xml`, Ruff and diff whitespace checks clean.
+No weakening of model acceptance criteria and no rerun/relabeling of failed
+models. Final backup V16 starts from exact V15 full parent above and must include
+both the current overview bytes and this journal, plus the new proof.

@@ -65,6 +65,7 @@ SOURCE_FILES = (
     "tests/test_primary_zero.py",
     "tests/test_primary_relations.py",
     "docs/m33_composition_six_hour_work.md",
+    "docs/m33_primary_composition.md",
     "docs/m33_primary_composition_continuation.md",
     "learning_materials/visual_lexicon/README.md",
 )
@@ -329,6 +330,7 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-sixhour-final-full-regression-v1.xml",
         "qa-sixhour-final-full-regression-v2.xml",
         "qa-sixhour-backup-final-whitelist-v1.xml",
+        "qa-sixhour-final-overview-backup-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))
