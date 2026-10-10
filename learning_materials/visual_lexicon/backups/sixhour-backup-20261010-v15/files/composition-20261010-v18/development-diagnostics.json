@@ -1,0 +1,304 @@
+{
+  "schema": 1,
+  "split": "dev",
+  "prediction_sha256": "4857f1fc532385a49d16414bfc3f138a27c2040f18c68aa06763bd4c511edd27",
+  "production_admitted": false,
+  "tasks": {
+    "color": {
+      "confusion": [
+        {
+          "gold": "UNKNOWN",
+          "predicted": "UNKNOWN",
+          "count": 109
+        },
+        {
+          "gold": "белый",
+          "predicted": "белый",
+          "count": 138
+        },
+        {
+          "gold": "жёлтый",
+          "predicted": "жёлтый",
+          "count": 144
+        },
+        {
+          "gold": "зелёный",
+          "predicted": "зелёный",
+          "count": 106
+        },
+        {
+          "gold": "коричневый",
+          "predicted": "коричневый",
+          "count": 137
+        },
+        {
+          "gold": "красный",
+          "predicted": "красный",
+          "count": 148
+        },
+        {
+          "gold": "синий",
+          "predicted": "синий",
+          "count": 99
+        },
+        {
+          "gold": "тёмно-зелёный",
+          "predicted": "тёмно-зелёный",
+          "count": 160
+        },
+        {
+          "gold": "чёрный",
+          "predicted": "чёрный",
+          "count": 159
+        }
+      ],
+      "groups": {
+        "diverse_aspect_rich_curve_background_clear/Russian/0": {
+          "examples": 400,
+          "raw_accuracy": 1.0
+        },
+        "diverse_aspect_rich_curve_background_clear/Russian/1": {
+          "examples": 400,
+          "raw_accuracy": 1.0
+        },
+        "diverse_aspect_rich_curve_background_clear/English/0": {
+          "examples": 200,
+          "raw_accuracy": 1.0
+        },
+        "diverse_aspect_rich_curve_background_clear/English/1": {
+          "examples": 200,
+          "raw_accuracy": 1.0
+        }
+      },
+      "first_known_errors": []
+    },
+    "shape": {
+      "confusion": [
+        {
+          "gold": "UNKNOWN",
+          "predicted": "UNKNOWN",
+          "count": 109
+        },
+        {
+          "gold": "квадрат",
+          "predicted": "UNKNOWN",
+          "count": 7
+        },
+        {
+          "gold": "квадрат",
+          "predicted": "квадрат",
+          "count": 240
+        },
+        {
+          "gold": "круг",
+          "predicted": "UNKNOWN",
+          "count": 2
+        },
+        {
+          "gold": "круг",
+          "predicted": "круг",
+          "count": 313
+        },
+        {
+          "gold": "овал",
+          "predicted": "UNKNOWN",
+          "count": 2
+        },
+        {
+          "gold": "овал",
+          "predicted": "овал",
+          "count": 238
+        },
+        {
+          "gold": "прямоугольник",
+          "predicted": "UNKNOWN",
+          "count": 11
+        },
+        {
+          "gold": "прямоугольник",
+          "predicted": "квадрат",
+          "count": 2
+        },
+        {
+          "gold": "прямоугольник",
+          "predicted": "прямоугольник",
+          "count": 276
+        }
+      ],
+      "groups": {
+        "diverse_aspect_rich_curve_background_clear/Russian/0": {
+          "examples": 400,
+          "raw_accuracy": 0.985
+        },
+        "diverse_aspect_rich_curve_background_clear/Russian/1": {
+          "examples": 400,
+          "raw_accuracy": 0.975
+        },
+        "diverse_aspect_rich_curve_background_clear/English/0": {
+          "examples": 200,
+          "raw_accuracy": 0.99
+        },
+        "diverse_aspect_rich_curve_background_clear/English/1": {
+          "examples": 200,
+          "raw_accuracy": 0.97
+        }
+      },
+      "first_known_errors": [
+        {
+          "scene_id": "dev/21",
+          "question": "Какая форма у правого предмета?",
+          "gold": "овал",
+          "predicted": "UNKNOWN",
+          "confidence": 0.5181506276130676,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/40",
+          "question": "Назови форму правого предмета.",
+          "gold": "круг",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/50",
+          "question": "What shape is the right object?",
+          "gold": "прямоугольник",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/54",
+          "question": "Какая форма у правого предмета?",
+          "gold": "круг",
+          "predicted": "UNKNOWN",
+          "confidence": 0.5291585922241211,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/78",
+          "question": "Какая форма у правого предмета?",
+          "gold": "овал",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/83",
+          "question": "What shape is the left object?",
+          "gold": "прямоугольник",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/125",
+          "question": "What shape is the left object?",
+          "gold": "прямоугольник",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/145",
+          "question": "Назови форму правого предмета.",
+          "gold": "прямоугольник",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/151",
+          "question": "Назови форму левого предмета.",
+          "gold": "прямоугольник",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/172",
+          "question": "Назови форму левого предмета.",
+          "gold": "квадрат",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/203",
+          "question": "What shape is the right object?",
+          "gold": "прямоугольник",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        },
+        {
+          "scene_id": "dev/213",
+          "question": "Какая форма у левого предмета?",
+          "gold": "квадрат",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        }
+      ]
+    },
+    "pattern": {
+      "confusion": [
+        {
+          "gold": "UNKNOWN",
+          "predicted": "UNKNOWN",
+          "count": 109
+        },
+        {
+          "gold": "однотонный",
+          "predicted": "однотонный",
+          "count": 352
+        },
+        {
+          "gold": "полосатый",
+          "predicted": "полосатый",
+          "count": 394
+        },
+        {
+          "gold": "пятнистый",
+          "predicted": "UNKNOWN",
+          "count": 1
+        },
+        {
+          "gold": "пятнистый",
+          "predicted": "пятнистый",
+          "count": 344
+        }
+      ],
+      "groups": {
+        "diverse_aspect_rich_curve_background_clear/Russian/0": {
+          "examples": 400,
+          "raw_accuracy": 1.0
+        },
+        "diverse_aspect_rich_curve_background_clear/Russian/1": {
+          "examples": 400,
+          "raw_accuracy": 0.9975
+        },
+        "diverse_aspect_rich_curve_background_clear/English/0": {
+          "examples": 200,
+          "raw_accuracy": 1.0
+        },
+        "diverse_aspect_rich_curve_background_clear/English/1": {
+          "examples": 200,
+          "raw_accuracy": 1.0
+        }
+      },
+      "first_known_errors": [
+        {
+          "scene_id": "dev/157",
+          "question": "Назови узор правого предмета.",
+          "gold": "пятнистый",
+          "predicted": "UNKNOWN",
+          "confidence": 1.0,
+          "style": "diverse_aspect_rich_curve_background_clear"
+        }
+      ]
+    }
+  },
+  "limits": "Known development errors, not blind testing or ground-truth-assisted inference."
+}

@@ -1489,3 +1489,102 @@ changed after that suite; these later edits are documentation only. V16/V17
 launch failures are preserved and are NOT counted as trained iterations.
 Goal/heartbeat remain ACTIVE until at least 05:11:22 UTC; cloud backup of V18
 and these completed assessments is next, not yet claimed successful here.
+
+### 05:05 UTC — storage integrity and deeper diagnosis
+
+Backup v14 completed normally: pushed commit
+`afd1b02ba255c9d5cedbd1fa0a3216d26aaa39de`, parent
+`df9b3cf1d101968a5756134d4e2739fe0054fc8c`, 306 changed paths.
+Independent `ls-remote` returned the exact new full commit. A separate read-only
+Git-object reconstruction checked ALL 302 manifest files / 123,181,406 original
+bytes. Three <=32MiB parts reconstructed the entire 96,491,696-byte V18 dataset
+with SHA `168af82332993ef1e0ee6cc2d4758b3510a67f68847014582b62aa2f648d9b51`.
+This checks existing local objects of the exact pushed commit, not an independent
+remote clone or a filesystem restore. Bare Git fsck exited zero; dangling old
+objects and its intentionally unborn default HEAD were NOT pruned or repaired.
+The physical C archive, D junction and W object-store alternate must all survive
+future cleanup. Main HEAD/index and canonical XLSX SHA remain unchanged.
+
+Authentic receipts count NINE trained/replayed iterations in this window:
+V6,V7,V9,V10,V12,V13,V14,V15,V18, each compared joint and curriculum.
+V8,V11,V16,V17 are preserved preflight failures, not training iterations.
+Every trained candidate remains `NEEDS_WORK_NOT_PRODUCTION`.
+
+Read-only original-capsule calibration decomposition: authored known-shape
+questions 369; original single-view argmax correct 352 (95.39%), fused known
+argmax correct 334 (90.51%), fused UNKNOWN 35, wrong fused known answer zero.
+Of those correct fused predictions, 57 are below 0.90; thus only 277/369
+(75.07%) satisfy that score. Native: 1,091 known-shape questions, 1,083 single
+correct, 1,073 fused correct, 16 fused UNKNOWN, 2 wrong fused known, 64 correct
+below 0.90. These are calibration diagnostics, not fresh results or proof of
+causality. Raising confidence does NOT resolve disagreement or wrong winners.
+
+Actual training inventory: native 54,000 questions, 16,363 known-shape questions;
+authored 18,000 questions, 1,846 known-shape / 4,154 unknown-shape questions.
+After curriculum's first third, existing 48-native / 16-authored sampling yields
+only 1.641 authored known-shape questions per 64-item batch in expectation,
+versus 14.545 native known-shape questions. Dev selection already balances
+task/answer groups within each cohort and equally weights cohorts; the remaining
+imbalance is TRAIN sampling, not an unbalanced development selector. This
+motivates an isolated 32/32 sampling comparison with all other settings fixed,
+but no sampler change/new training was implemented after V18 here.
+
+Reviewed saved actual V4 and V3 model-input galleries. Source V4 red/yellow
+circles yield fused UNKNOWN on all their known-shape questions, whereas the
+green rectangle has 10/10 correct fused predictions above 0.90. On V3 all 18
+circle questions have wrong single-view argmax and fused UNKNOWN. Therefore
+the disabled global shape threshold is NOT the sole underlying source problem;
+simply reinstating 0.90 or rescaling confidence would not make either panel pass.
+No source crop/background was repainted and no failed annotation was relabeled.
+
+Primary follow-up literature:
+[group DRO / worst-group generalization](https://arxiv.org/abs/1911.08731)
+motivates measuring weak groups rather than only global accuracy; naive DRO is
+not automatically effective, and our current code does NOT implement it.
+[U-Net](https://arxiv.org/abs/1505.04597) motivates learned pixel localization,
+but its biomedical results do not demonstrate textbook transfer. A possible
+future own-weight foreground auxiliary head would use procedural mask gold only
+as TRAINING supervision, never feed true masks/boxes/gold to inference, and need
+its own frozen test. It is NOT implemented or claimed successful here.
+
+Remote diagnostic processes exited normally; no Python trainer remains. GPU
+check: 2MiB, 43C (brief 8% sampled utilization), no foreign process killed.
+The six-hour goal and temporary heartbeat remain ACTIVE; earliest finish still
+05:11:22 UTC. Final timestamp, final scoped backup and heartbeat shutdown remain
+pending, not premature completion claims.
+
+## Six-hour stage handoff — after 05:11:22 UTC
+
+Clock confirmed 05:11:39 UTC on 2026-10-10: more than six hours since the
+23:11:22 UTC request. All started training, source screens, cold-family screen,
+diagnostics, complete local regression and artifact-integrity checks have
+authentic terminal results. Nine training/replay iterations and four preserved
+preflight failures are distinguished above. Primary literature influenced RNG
+separation, reflections/consistency, varied curves/aspects/paper backgrounds,
+explicit reject-option coverage and the next weak-group/foreground hypotheses.
+
+The timed work stage is complete, NOT visual mastery or M33 closure. The strict
+block has not passed, so there was no authorized success-triggered transition
+to the next animal/object-name batch. All candidates remain unactivated;
+source/control failures and the permanent dictionary remain unchanged. No
+statistical guarantee that a model never lies is claimed.
+
+According to the bounded stop condition, the temporary `m33` heartbeat was
+updated through the app tool to PAUSED, preserving its prompt, schedule and
+target chat. Its actual TOML status was independently confirmed. This disables
+future NIGHTLY FOLLOWUPS only; it does not mark model failure as success, pause
+an unfinished model-development goal, or archive this chat. Official OpenAI
+Docs were consulted for scheduled-task lifecycle; no raw directive/file rewrite.
+
+Final protected HEAD `38082dd1eab82ebfff46ad3c55f5021068909f83`, index SHA
+`76481e2e09d105ab876bf54c6a27e6c8c03935a9e6eab091e34e235f7498f9ef`, XLSX SHA
+`5fc720687dd2d277f9ee7f432e4f56550311a0eb811b0e53b853e9dd95c89b4e` unchanged;
+`git diff --check` clean. No running trainer remains and no process was killed.
+Final v15 scoped backup must preserve this handoff and revised overview; use
+v14's exact full parent `afd1b02ba255c9d5cedbd1fa0a3216d26aaa39de`.
+
+Next useful work is an isolated train-mixture experiment (48/16 vs 32/32),
+then a separately reviewed learned foreground auxiliary experiment if needed.
+Do not change both at once, reuse exposed panels as blind tests, fit thresholds
+on final outcomes, or expand capacity without a measured reason. Keep all strict
+positive/unknown/error/description/binding gates and freeze before new finals.

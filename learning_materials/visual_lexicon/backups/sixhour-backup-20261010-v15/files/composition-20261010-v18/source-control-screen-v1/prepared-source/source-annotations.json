@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "status": "NONBLIND_SOURCE_ANNOTATIONS_NOT_MODEL_MASTERY",
+  "training_admitted": false,
+  "reviewer": "Primary-agent complete-page visual review before V17 final/source inference; not independent semantic examiner.",
+  "scope": "Fresh page from an already exposed mathematics author family, closed eight-color/four-shape/three-pattern head only.",
+  "limits": "Six raw source assets on one previously unassessed page. Thirty ordered pairings and 180 questions reuse those assets and are correlated. This is a new page, not an independent author family or semantic blind exam. The bright blue/cyan bar was excluded before any model inference because its color naming is ambiguous at this head's vocabulary boundary. No whole-page mathematics, object names, letters or counting is evaluated. After first assessment this page is exposed.",
+  "sources": [
+    {
+      "id": "math1-firstpart-page12",
+      "pdf": "matematika-muravjova-1kl-ch1-rus_2024.pdf",
+      "pdf_sha256": "0029feb5ba132920dac33308336441fcedaee31467fb0f65fa089ace9a6c55d8",
+      "pdf_page": 12,
+      "printed_page": 6,
+      "preview": "books/0029feb5ba132920/pages/0012.jpg",
+      "preview_sha256": "5ea2b98b64977930442f454c69c857967cda621283f0fc95999e3ca392bb72a5",
+      "pixel_size": [750, 1083],
+      "dpi": 110
+    }
+  ],
+  "assets": [
+    {"id": "firstpart-yellow-square", "source": "math1-firstpart-page12", "bbox_pixels": [158, 483, 207, 532], "color": "жёлтый", "shape": "квадрат", "pattern": "однотонный", "absent": false},
+    {"id": "firstpart-yellow-circle", "source": "math1-firstpart-page12", "bbox_pixels": [212, 482, 261, 532], "color": "жёлтый", "shape": "круг", "pattern": "однотонный", "absent": false},
+    {"id": "firstpart-red-circle", "source": "math1-firstpart-page12", "bbox_pixels": [267, 480, 319, 532], "color": "красный", "shape": "круг", "pattern": "однотонный", "absent": false},
+    {"id": "firstpart-yellow-triangle", "source": "math1-firstpart-page12", "bbox_pixels": [439, 496, 475, 533], "color": "жёлтый", "shape": "triangle", "pattern": "однотонный", "absent": false},
+    {"id": "firstpart-green-rectangle", "source": "math1-firstpart-page12", "bbox_pixels": [489, 483, 583, 533], "color": "зелёный", "shape": "прямоугольник", "pattern": "однотонный", "absent": false},
+    {"id": "firstpart-empty-paper", "source": "math1-firstpart-page12", "bbox_pixels": [696, 934, 733, 970], "color": null, "shape": null, "pattern": null, "absent": true}
+  ],
+  "assembly": {"pairs": "all ordered pairs of different source assets", "canvas": [96, 96], "background_rgb": [255, 255, 255], "target_centers": [[24, 48], [72, 48]], "fit_box": [32, 32], "preserve_aspect_ratio": true, "interpolation": "Pillow LANCZOS", "random_augmentations": false},
+  "evaluation": {"training_or_calibration": false, "candidate": "freeze before inference", "thresholds": "original frozen policy only", "per_asset_task_accepted_errors_max": 0, "positive_recall_min": 0.8, "unknown_recall_min": 0.9, "blank_accepted_max": 0, "production_admitted": false}
+}

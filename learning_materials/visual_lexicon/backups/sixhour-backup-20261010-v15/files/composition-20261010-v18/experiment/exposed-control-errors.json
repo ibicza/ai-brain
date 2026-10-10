@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "split": "control_final",
+  "status": "EXPOSED_FINAL_ERRORS_NOT_FRESH_TEST",
+  "production_admitted": false,
+  "false_assertions": 2,
+  "errors": [
+    {
+      "record_index": 1019,
+      "image_index": 169,
+      "image_sha256": "4a7325e432cab282843b39837dccbde793837be07cde1f1e5c1560ceec416e59",
+      "scene_id": "authored-control_final/169",
+      "question": "Назови узор правого предмета.",
+      "task": "pattern",
+      "side": 1,
+      "gold": "однотонный",
+      "predicted": "пятнистый",
+      "score": 0.9846718907356262
+    },
+    {
+      "record_index": 3485,
+      "image_index": 580,
+      "image_sha256": "e482171b61c9415cb1f345d05ea0dff117f431099f1413c737f1d0867275ee87",
+      "scene_id": "authored-control_final/580",
+      "question": "Назови узор правого предмета.",
+      "task": "pattern",
+      "side": 1,
+      "gold": "однотонный",
+      "predicted": "пятнистый",
+      "score": 0.9802330732345581
+    }
+  ],
+  "preview_records": [
+    1019,
+    3485
+  ],
+  "sha256": {
+    "control_final-predictions.json.gz": "1499efb17785f6bfeb673fbed9e8ebef67583cb18e6ac9365cb83afb118a44a3",
+    "dataset-records.json.gz": "1949c551d61e413ac3e01e4b607671631b351bfe76e69efd697f31c381bfa3fe",
+    "dataset.npz": "168af82332993ef1e0ee6cc2d4758b3510a67f68847014582b62aa2f648d9b51",
+    "exposed-control-errors.png": "8e00ffe37362e0c54a51ca41c38bb7c674803f465837c8086117a66f737c6f30"
+  },
+  "limits": "Previously evaluated errors only. No fitting, policy changes, fresh-test claim, or calibrated probability claim."
+}
