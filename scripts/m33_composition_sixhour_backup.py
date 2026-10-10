@@ -20,6 +20,7 @@ SOURCE_FILES = (
     "src/ai_brain/training/primary_composition_views.py",
     "src/ai_brain/training/primary_composition_controls.py",
     "src/ai_brain/training/primary_composition_rng_audit.py",
+    "src/ai_brain/training/primary_numeric_backend.py",
     "src/ai_brain/training/primary_zero.py",
     "src/ai_brain/training/primary_relations.py",
     "scripts/m33_primary_composition_pilot.py",
@@ -30,6 +31,9 @@ SOURCE_FILES = (
     "scripts/m33_composition_control_remote.py",
     "scripts/m33_composition_background_probe.py",
     "scripts/m33_composition_rng_audit.py",
+    "scripts/m33_composition_dev_probe.py",
+    "scripts/m33_composition_dev_remote.py",
+    "scripts/m33_composition_numeric_probe.py",
     "scripts/m33_composition_sixhour_backup.py",
     "tests/test_primary_composition.py",
     "tests/test_primary_composition_pipeline.py",
@@ -37,6 +41,10 @@ SOURCE_FILES = (
     "tests/test_primary_composition_controls.py",
     "tests/test_primary_composition_backup.py",
     "tests/test_primary_composition_package.py",
+    "tests/test_primary_composition_dev_probe.py",
+    "tests/test_primary_composition_numeric_probe.py",
+    "tests/test_primary_numeric_backend.py",
+    "tests/test_primary_composition_backgrounds.py",
     "tests/test_primary_zero.py",
     "tests/test_primary_relations.py",
     "docs/m33_composition_six_hour_work.md",
@@ -142,9 +150,21 @@ def run(repo, data, output, parent, run_names):
         ):
             raise ValueError("Completed replay or preserved preflight failure required")
         selected = [root / n for n in RUN_ROOT_FILES if (root / n).is_file()]
-        for child in ("experiment", "control-screen-v1", "background-probe-v1"):
+        for child in (
+            "experiment",
+            "control-screen-v1",
+            "background-probe-v1",
+            "development-agreement-v1",
+            "development-agreement-v2",
+            "numeric-backend-v1",
+        ):
             if (root / child).exists():
-                selected += [p for p in (root / child).rglob("*") if p.is_file()]
+                selected += [
+                    p
+                    for p in (root / child).rglob("*")
+                    if p.is_file()
+                    and "frozen-source" not in p.relative_to(root / child).parts
+                ]
         for path in sorted(selected):
             if not path.resolve().is_relative_to(root.resolve()) or path.is_symlink():
                 raise ValueError("Non-local evidence rejected")
@@ -156,6 +176,10 @@ def run(repo, data, output, parent, run_names):
         "qa-sixhour-rng-full-tests.xml",
         "qa-sixhour-rng-fixed-tests.xml",
         "qa-sixhour-backup-v1-tests.xml",
+        "qa-sixhour-diverse-controls-v1.xml",
+        "qa-sixhour-numeric-contract-v1.xml",
+        "qa-sixhour-background-source-v1.xml",
+        "qa-sixhour-wide-backgrounds-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))

@@ -22,6 +22,9 @@ def run(args):
     if root.exists():
         raise ValueError("Fresh local continuation directory required")
     root.mkdir(parents=True)
+    transport_snapshot = root / "transport-executed.py"
+    shutil.copy2(__file__, transport_snapshot)
+    transport_hash = sha(transport_snapshot)
     capsule = root / "source-capsule.tgz"
     manifest = build(args.repo.resolve(), capsule)
     shutil.copy2(args.previous, root / "previous.pt")
@@ -95,7 +98,7 @@ def run(args):
         try:
             command(
                 prefix
-                + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_composition_package.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
+                + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_composition_package.py tests/test_primary_numeric_backend.py tests/test_primary_composition_backgrounds.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
             )
         except RuntimeError:
             # Preserve the exact failed preflight instead of inferring later
@@ -135,8 +138,12 @@ def run(args):
             + (" --reflection-consensus" if args.reflection_consensus else "")
             + " --auxiliary-images "
             + str(args.auxiliary_images)
+            + " --exposure-profile "
+            + args.exposure_profile
             + " --consistency-loss "
             + str(args.consistency_loss)
+            + " --numeric-precision "
+            + args.numeric_precision
         )
         command(
             prefix
@@ -160,6 +167,8 @@ def run(args):
         pull(remote + "/experiment", root / "experiment")
         for name in ("remote-tests.xml", "independent-arithmetic-replay.json"):
             sftp.get(remote + "/" + name, str(root / name))
+            if remote_digest(remote + "/" + name) != sha(root / name):
+                raise ValueError("Remote test/replay receipt bytes differ")
         receipt = {
             "status": "REMOTE_CONTINUATION_REPLAYED",
             "remote": remote,
@@ -167,8 +176,11 @@ def run(args):
             "previous_sha256": sha(root / "previous.pt"),
             "warm_candidate_sha256": sha(root / "warm-candidate.pt"),
             "elapsed_seconds": time.monotonic() - started,
+            "transport_executed_sha256": transport_hash,
             "production_admitted": False,
         }
+        if sha(Path(__file__)) != transport_hash:
+            raise ValueError("Transport source changed during execution")
         (root / "remote-receipt.json").write_text(
             json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
         )
@@ -191,9 +203,17 @@ if __name__ == "__main__":
     parser.add_argument("--label-smoothing", type=float, default=0.0)
     parser.add_argument("--reflection-consensus", action="store_true")
     parser.add_argument("--auxiliary-images", type=int, default=0)
+    parser.add_argument(
+        "--exposure-profile", choices=("standard", "diverse"), default="standard"
+    )
     parser.add_argument("--consistency-loss", type=float, default=0.0)
     parser.add_argument(
-        "--dataset-profile", choices=("diverse", "diverse_clear"), default="diverse"
+        "--numeric-precision", choices=("legacy", "ieee"), default="legacy"
+    )
+    parser.add_argument(
+        "--dataset-profile",
+        choices=("diverse", "diverse_clear", "background_clear"),
+        default="diverse",
     )
     args = parser.parse_args()
     if min(args.steps, args.train_images, args.holdout_images) < 1:

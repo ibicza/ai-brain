@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "status": "NATIVE_PATTERN_GATE_CONFOUNDED_NOT_MASTERY",
+  "source_capsule_sha256": "30eb69ae818a226e30a6249cbe1a5a4c218fcaecb098d50e85b57082b0e4d6b0",
+  "selected_candidate_sha256": "03d4394b9b24cbab57aa10f3c23f092695561166c4f0443fed49d5071ed3f938",
+  "unchanged_numerical_model_status": "NEEDS_WORK_NOT_PRODUCTION",
+  "known_native_confound": "Native label generation and diverse rendering reset the same RNG stream. Background R and G exactly recover left and right patterns in the 10000-scene diagnostic audit.",
+  "historical_results_modified": false,
+  "model_weights_modified": false,
+  "interpretation": "Native pattern accuracy cannot establish visual pattern understanding. Authored held-control arithmetic replay has 16 accepted shape errors, zero color or pattern errors; it also fails acceptance. Candidate may be an own-weight warm start for a fresh domain-separated experiment, never a production-admitted model.",
+  "audit_receipt": "D:/ai-brain-data/visual-lexicon/rng-shortcut-audit-20261010-v2.json",
+  "production_admitted": false
+}

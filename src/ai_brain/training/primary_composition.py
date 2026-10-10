@@ -49,6 +49,17 @@ DIVERSE_MAX_RADIUS = 15.0
 DIVERSE_CENTER_JITTER = 2.0
 LABEL_RNG_DOMAIN = 0x4D33334C
 LABEL_RNG_POLICY = "SeedSequence(scene_seed, M33L); separate from rendering"
+BACKGROUND_RNG_DOMAIN = 0x4D33424C
+BACKGROUND_RNG_POLICY = "SeedSequence(scene_seed, M3BL); independent gray brightness uniform(60,205) plus RGB uniform(-6,6), never conditioned on labels"
+DATASET_PROFILES = ("legacy", "diverse", "diverse_clear", "background_clear")
+DIVERSE_STYLES = (
+    "diverse",
+    "challenge",
+    "diverse_clear",
+    "challenge_clear",
+    "diverse_background_clear",
+    "challenge_background_clear",
+)
 TEMPLATES = {
     "color": (
         "Какой цвет у {side} предмета?",
@@ -132,6 +143,8 @@ class Scene:
                 "challenge",
                 "diverse_clear",
                 "challenge_clear",
+                "diverse_background_clear",
+                "challenge_background_clear",
             )
             or type(self.seed) is not int
             or self.seed < 0
@@ -157,7 +170,7 @@ class Scene:
 def render(scene: Scene) -> np.ndarray:
     """Reproducible graphics with independent backgrounds; never annotated pixels."""
     scene.validate()
-    if scene.style in ("diverse", "challenge", "diverse_clear", "challenge_clear"):
+    if scene.style in DIVERSE_STYLES:
         return render_diverse(scene)
     rng = np.random.default_rng(scene.seed)
     scale, size = 3, base.IMAGE_SIZE
@@ -227,6 +240,26 @@ def render(scene: Scene) -> np.ndarray:
     ).copy()
 
 
+def sample_background(scene: Scene, rng=None, *, diverse_renderer=False) -> np.ndarray:
+    """Exact base RGB; wide backgrounds use a third independent RNG domain.
+
+    Consume original draws first, preserving all old geometry streams. Wide
+    brightness is NEVER conditioned on color/shape/pattern labels for contrast.
+    """
+    scene.validate()
+    if rng is None:
+        rng = np.random.default_rng(scene.seed)
+    if not diverse_renderer and scene.style not in DIVERSE_STYLES:
+        return rng.integers(105, 175, 3).astype(float)
+    original = rng.uniform(100, 180, 3)
+    if "_background_" not in scene.style:
+        return original
+    independent = np.random.default_rng(
+        np.random.SeedSequence([scene.seed, BACKGROUND_RNG_DOMAIN])
+    )
+    return independent.uniform(60, 205) + independent.uniform(-6, 6, 3)
+
+
 def render_diverse(scene: Scene, *, background_override=None) -> np.ndarray:
     """Broader procedural family; challenge texture families never used to train.
 
@@ -242,7 +275,7 @@ def render_diverse(scene: Scene, *, background_override=None) -> np.ndarray:
     scale, size = 3, base.IMAGE_SIZE
     h = size * scale
     yy, xx = np.mgrid[:h, :h]
-    background = rng.uniform(100, 180, 3)
+    background = sample_background(scene, rng, diverse_renderer=True)
     if background_override is not None:
         replacement = np.asarray(background_override)
         if (
@@ -355,7 +388,7 @@ def scenes(
         not in ("train", "dev", "calibration", "final", "combinations", "transfer")
         or count < 1
         or seed < 0
-        or profile not in ("legacy", "diverse", "diverse_clear")
+        or profile not in DATASET_PROFILES
         or type(independent_labels) is not bool
     ):
         raise ValueError("Invalid corpus request")
@@ -392,6 +425,12 @@ def scenes(
                 tuple(items),
                 ("transfer" if split == "transfer" else "standard")
                 if profile == "legacy"
+                else (
+                    "challenge_background_clear"
+                    if split == "transfer"
+                    else "diverse_background_clear"
+                )
+                if profile == "background_clear"
                 else (
                     ("challenge_clear" if profile == "diverse_clear" else "challenge")
                     if split == "transfer"

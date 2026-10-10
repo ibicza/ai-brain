@@ -179,6 +179,13 @@ def verify(root, previous, capsule, output, device):
         raise ValueError("Result lineage metadata differs from freeze")
     prior = torch.load(previous, map_location="cpu", weights_only=True)
     torch.set_num_threads(2)
+    numeric_actual = None
+    if "numeric_backend" in protocol:
+        from ai_brain.training import primary_numeric_backend as numeric
+
+        if result.get("numeric_backend") != protocol["numeric_backend"]:
+            raise ValueError("Result numeric precision differs from frozen protocol")
+        numeric_actual = numeric.check_contract(protocol["numeric_backend"])
     model_options = {"attribute_attention": checkpoint["attribute_attention"]}
     # Replay pre-spatial capsules without rewriting their frozen source module.
     if checkpoint.get("spatial_readout", False):
@@ -207,6 +214,11 @@ def verify(root, previous, capsule, output, device):
     with gzip.open(root / "dataset-records.json.gz", "rt", encoding="utf-8") as f:
         source_records = json.load(f)
     auxiliary_count = protocol.get("auxiliary_images", 0)
+    if (
+        protocol["dataset_profile"] == "background_clear"
+        and protocol.get("background_rng_policy") != c.BACKGROUND_RNG_POLICY
+    ):
+        raise ValueError("Wide background RNG policy differs from source")
     if type(auxiliary_count) is not int or not 0 <= auxiliary_count <= 10000:
         raise ValueError("Invalid auxiliary protocol")
     control_splits = {"exposure", "control_calibration", "control_final", "control_dev"}
@@ -217,6 +229,15 @@ def verify(root, previous, capsule, output, device):
     if auxiliary_count:
         from ai_brain.training import primary_composition_controls as controls
 
+        exposure_profile = protocol.get("exposure_profile", "standard")
+        if exposure_profile not in controls.EXPOSURE_PROFILES:
+            raise ValueError("Invalid control exposure profile")
+        if "exposure_profile" in protocol and (
+            protocol.get("exposure_shapes")
+            != list(controls.EXPOSURE_PROFILES[exposure_profile])
+            or protocol.get("held_control_shapes") != list(controls.HELD_OUT_SHAPES)
+        ):
+            raise ValueError("Exposure families differ from frozen protocol")
         if len(source_records["exposure"]["scenes"]) != auxiliary_count:
             raise ValueError("Auxiliary image count differs")
         audit_data = {
@@ -226,6 +247,7 @@ def verify(root, previous, capsule, output, device):
         actual_audit = controls.audit(
             {k: v for k, v in audit_data.items() if k in control_splits},
             {k: v for k, v in audit_data.items() if k not in control_splits},
+            exposure_profile=exposure_profile,
         )
         if json.loads(json.dumps(actual_audit)) != read(
             root / "auxiliary-split-audit.json"
@@ -241,7 +263,9 @@ def verify(root, previous, capsule, output, device):
             or protocol.get("independent_labels") is not True
         ):
             raise ValueError("Independent label RNG protocol required")
-        check_rng = rng_audit.audit(seed=protocol["seed"] * 100000 + 100000)
+        check_rng = rng_audit.audit(
+            seed=protocol["seed"] * 100000 + 100000, profile=protocol["dataset_profile"]
+        )
         if (
             check_rng != read(root / "rng-independence-audit.json")
             or not check_rng["known_shortcut_absent"]
@@ -280,6 +304,7 @@ def verify(root, previous, capsule, output, device):
                     protocol["seed"] * 100000 + offset * 10000,
                     cohort=split,
                     independent_labels=True,
+                    exposure_profile=exposure_profile,
                 )
                 if json.loads(json.dumps([asdict(s) for s in regenerated])) != stored:
                     raise ValueError(
@@ -532,6 +557,7 @@ def verify(root, previous, capsule, output, device):
         "capsule_sha256": sha(capsule),
         "checkpoint_sha256": sha(checkpoint_path),
         "dataset_sha256": sha(root / "dataset.npz"),
+        "numeric_backend_actual": numeric_actual,
         "checks": checks,
         "inherited_tensors_byte_preserved": True,
         "blank_input_accepted": blank_metrics["accepted"],

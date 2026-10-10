@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "status": "DEVELOPMENT_REPLAY_OUTSIDE_STRICT_TOLERANCE",
+  "device": "cpu",
+  "schedule": "joint",
+  "frozen_dev_ce": 0.01950665656477213,
+  "actual_dev_ce_from_saved_float_probabilities": 0.01948072016805723,
+  "absolute_tolerance": 0.000002,
+  "native_actual_dev_ce": 0.017964343400335668,
+  "authored_actual_dev_ce": 0.020997096935778795,
+  "reference_weights_or_data_modified": false,
+  "result_accepted": false,
+  "limits": "CPU reproduction exceeded the strict CUDA-history tolerance. Cause not yet proven. This diagnostic prototype did not capture its own source before running, and only validation guards changed during execution; no complete diagnostic result was emitted. Future studies snapshot and hash their script at start and reject subsequent drift.",
+  "production_admitted": false
+}

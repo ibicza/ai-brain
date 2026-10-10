@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "source_capsule_sha256": "65e977f97004c3470e876fadeafa238de11ae86f0140bf88a3e3b1b1d409e80d",
+  "previous_sha256": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+  "candidate_anchor_sha256": "03d4394b9b24cbab57aa10f3c23f092695561166c4f0443fed49d5071ed3f938",
+  "dataset_profile": "diverse_clear",
+  "label_rng_policy": "SeedSequence(scene_seed, M33L); separate from rendering",
+  "independent_labels": true,
+  "seed": 11038,
+  "steps_per_schedule": 9000,
+  "batch_size": 64,
+  "learning_rate": 0.001,
+  "schedules": [
+    "joint",
+    "curriculum"
+  ],
+  "selection": "Lowest balanced dev CE only; native/authored dev have equal weight when auxiliary data exists. Calibration and final cohorts accessed after candidate freeze.",
+  "held_combinations": [
+    [
+      "зелёный",
+      "овал"
+    ],
+    [
+      "синий",
+      "квадрат"
+    ]
+  ],
+  "scope": "Procedural two-object color/shape/pattern + bounded RU/EN queries. No animal names, anatomy, photographs, textbooks or free-form text learned.",
+  "production_admitted": false,
+  "acceptance": {
+    "task_positive_recall_min": 0.8,
+    "task_unknown_recall_min": 0.9,
+    "accepted_errors_max": 0,
+    "complete_description_recall_min": 0.8,
+    "both_targets_correct_min": 0.8,
+    "blank_image_accepted_max": 0
+  },
+  "attribute_attention": true,
+  "spatial_readout": true,
+  "shape_edges": true,
+  "label_smoothing": 0.02,
+  "reflection_consensus": true,
+  "training_reflections": true,
+  "auxiliary_images": 1800,
+  "auxiliary_calibration": true,
+  "held_control_final": true,
+  "consistency_loss": 0.2,
+  "score_semantics": "Four-view unanimity, minimum confidence; disagreement UNKNOWN. Not calibrated probability. Raw argmax is after this fixed view policy.",
+  "literature": [
+    "https://proceedings.mlr.press/v119/koh20a.html",
+    "https://arxiv.org/abs/1904.12584",
+    "https://arxiv.org/abs/2210.01936"
+  ],
+  "adaptation": "Shared own causal core, attribute supervision, explicit target binding and curriculum comparison. Not reproduction of CBM/NS-CL architectures.",
+  "capacity": {
+    "inherited_parameters": 974889,
+    "new_trainable_parameters": 923232
+  }
+}

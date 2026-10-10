@@ -17,6 +17,8 @@ from PIL import Image, ImageDraw
 from ai_brain.training import primary_composition as c
 
 EXPOSURE_SHAPES = ("triangle", "cross")
+EXTENDED_EXPOSURE_SHAPES = (*EXPOSURE_SHAPES, "hexagon", "heart", "arrow", "crescent")
+EXPOSURE_PROFILES = {"standard": EXPOSURE_SHAPES, "diverse": EXTENDED_EXPOSURE_SHAPES}
 HELD_OUT_SHAPES = ("star", "pentagon", "trapezoid")
 LABEL_RNG_DOMAIN = 0x4D33434C
 
@@ -41,7 +43,8 @@ class ControlScene:
         for item in self.items:
             if (
                 item.color not in c.COLORS
-                or item.shape not in (*c.SHAPES, *EXPOSURE_SHAPES, *HELD_OUT_SHAPES)
+                or item.shape
+                not in (*c.SHAPES, *EXTENDED_EXPOSURE_SHAPES, *HELD_OUT_SHAPES)
                 or item.pattern not in c.PATTERNS
                 or type(item.hidden) is not bool
             ):
@@ -81,6 +84,45 @@ def vertices(shape):
         )
     if shape == "trapezoid":
         return ((-0.45, -0.9), (0.45, -0.9), (1, 0.9), (-1, 0.9))
+    if shape == "arrow":
+        return (
+            (-1, -0.3),
+            (0.15, -0.3),
+            (0.15, -0.85),
+            (1, 0),
+            (0.15, 0.85),
+            (0.15, 0.3),
+            (-1, 0.3),
+        )
+    if shape == "hexagon":
+        return tuple(
+            (np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 6, endpoint=False)
+        )
+    if shape == "heart":
+        # Analytic heart inside [-1, 1]^2, not an ellipse with an incidental cue.
+        return tuple(
+            (
+                np.sin(t) ** 3,
+                -(
+                    13 * np.cos(t)
+                    - 5 * np.cos(2 * t)
+                    - 2 * np.cos(3 * t)
+                    - np.cos(4 * t)
+                )
+                / 18,
+            )
+            for t in np.linspace(0, 2 * np.pi, 64, endpoint=False)
+        )
+    if shape == "crescent":
+        # Matched arc endpoints yield a simple concave polygon, not a hole mask.
+        outer = [
+            (np.cos(t), np.sin(t)) for t in np.linspace(np.pi / 3, 5 * np.pi / 3, 48)
+        ]
+        inner = [
+            (0.5 - 0.65 * np.sin(t), 0.8660254037844386 * np.cos(t))
+            for t in np.linspace(np.pi, 0, 32)
+        ]
+        return tuple(outer + inner)
     if shape in ("star", "pentagon"):
         n = 10 if shape == "star" else 5
         return tuple(
@@ -162,7 +204,15 @@ def render(scene):
     return np.asarray(canvas.resize((size, size), Image.Resampling.BOX)).copy()
 
 
-def scenes(split, count, seed, *, cohort=None, independent_labels=True):
+def scenes(
+    split,
+    count,
+    seed,
+    *,
+    cohort=None,
+    independent_labels=True,
+    exposure_profile="standard",
+):
     if (
         split not in ("exposure", "held_control")
         or type(count) is not int
@@ -170,6 +220,7 @@ def scenes(split, count, seed, *, cohort=None, independent_labels=True):
         or type(seed) is not int
         or seed < 0
         or type(independent_labels) is not bool
+        or exposure_profile not in EXPOSURE_PROFILES
     ):
         raise ValueError("Invalid control corpus request")
     if cohort is not None and cohort not in (
@@ -179,7 +230,9 @@ def scenes(split, count, seed, *, cohort=None, independent_labels=True):
         "control_final",
     ):
         raise ValueError("Invalid control cohort")
-    unknown_shapes = EXPOSURE_SHAPES if split == "exposure" else HELD_OUT_SHAPES
+    unknown_shapes = (
+        EXPOSURE_PROFILES[exposure_profile] if split == "exposure" else HELD_OUT_SHAPES
+    )
     rng = np.random.default_rng(
         np.random.SeedSequence([seed, LABEL_RNG_DOMAIN]) if independent_labels else seed
     )
@@ -240,8 +293,11 @@ def prepare(rows):
     }
 
 
-def audit(auxiliary, native):
+def audit(auxiliary, native, *, exposure_profile="standard"):
     """All source seeds/IDs/pixels separate; unknown contour families held out."""
+    if exposure_profile not in EXPOSURE_PROFILES:
+        raise ValueError("Invalid control exposure profile")
+    exposure_shapes = EXPOSURE_PROFILES[exposure_profile]
     seed_owners, identities, pixels = {}, {}, {}
     for split, group in {**native, **auxiliary}.items():
         for scene in group["scenes"]:
@@ -253,11 +309,14 @@ def audit(auxiliary, native):
                 continue
             for item in scene["items"]:
                 if split != "control_final" and (
-                    item["shape"] in HELD_OUT_SHAPES
+                    item["shape"] not in (*c.SHAPES, *exposure_shapes)
                     or (item["color"], item["shape"]) in c.HELD_COMBINATIONS
                 ):
                     raise ValueError("Held control/combination entered exposure")
-                if split == "control_final" and item["shape"] in EXPOSURE_SHAPES:
+                if split == "control_final" and item["shape"] not in (
+                    *c.SHAPES,
+                    *HELD_OUT_SHAPES,
+                ):
                     raise ValueError("Exposure contour entered held controls")
         for record in group["records"]:
             if pixels.setdefault(record["image_sha256"], split) != split:
@@ -266,7 +325,7 @@ def audit(auxiliary, native):
         "unique_scene_seeds": len(seed_owners),
         "unique_scene_identities": len(identities),
         "unique_images": len(pixels),
-        "exposure_shapes": EXPOSURE_SHAPES,
+        "exposure_shapes": exposure_shapes,
         "held_control_shapes": HELD_OUT_SHAPES,
         "limits": "Authored generator separation, shared Pillow, not external-source independence.",
     }

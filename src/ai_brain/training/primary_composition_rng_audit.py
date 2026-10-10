@@ -12,20 +12,35 @@ from ai_brain.training import primary_composition as c
 from ai_brain.training import primary_zero as z
 
 
-def audit(*, seed: int, count: int = 10000, independent_labels: bool = True):
+def audit(
+    *,
+    seed: int,
+    count: int = 10000,
+    independent_labels: bool = True,
+    profile: str = "diverse_clear",
+):
     if type(count) is not int or not 1000 <= count <= 10000:
         raise ValueError("Leakage audit requires 1000 to 10000 scenes")
     rows = c.scenes(
         "train",
         count,
         seed,
-        profile="diverse_clear",
+        profile=profile,
         independent_labels=independent_labels,
     )
     matrices = np.zeros((2, 3, 3), dtype=np.int64)
     for row in rows:
-        background = np.random.default_rng(row.seed).uniform(100, 180, 3)
-        guess = np.floor((background[:2] - 100) / 80 * 3).astype(int)
+        background = c.sample_background(row)
+        low, high = (
+            (54, 211)
+            if "_background_" in row.style
+            else (100, 180)
+            if row.style in c.DIVERSE_STYLES
+            else (105, 175)
+        )
+        guess = np.clip(
+            np.floor((background[:2] - low) / (high - low) * 3).astype(int), 0, 2
+        )
         for side, item in enumerate(row.items):
             matrices[side, c.PATTERNS.index(item.pattern), guess[side]] += 1
     accuracy = [float(m.trace() / count) for m in matrices]
@@ -34,10 +49,14 @@ def audit(*, seed: int, count: int = 10000, independent_labels: bool = True):
         "seed": seed,
         "count_per_side": count,
         "independent_labels": independent_labels,
+        "dataset_profile": profile,
+        "background_rng_policy": c.BACKGROUND_RNG_POLICY
+        if profile == "background_clear"
+        else None,
         "label_rng_policy": c.LABEL_RNG_POLICY
         if independent_labels
         else "archival shared stream",
-        "detector": "floor((base_background_channel - 100) / 80 * 3); R left, G right",
+        "detector": "Equal thirds of actual base-background channel support per renderer style; R left, G right",
         "confusion_gold_by_background_prediction": matrices.tolist(),
         "background_only_pattern_accuracy": accuracy,
         "known_shortcut_absent": all(a < 0.38 for a in accuracy),

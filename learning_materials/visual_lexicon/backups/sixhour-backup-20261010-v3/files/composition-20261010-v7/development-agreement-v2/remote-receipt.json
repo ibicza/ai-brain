@@ -1,0 +1,8 @@
+{
+  "status": "REMOTE_DEVELOPMENT_STUDY_REPLAYED",
+  "remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/development-agreement-v2",
+  "executed_source_sha256": "bdf7d9d886662584b4586de4fc169cba6fa141b38f13e6f7514a1c3cbdbc0718",
+  "exit_code": 0,
+  "training_or_calibration": false,
+  "production_admitted": false
+}

@@ -27,7 +27,16 @@ verifier = script("m33_composition_verify")
 
 
 @pytest.fixture(
-    scope="module", params=(0, 1, 2), ids=("single-view", "four-view", "exposure")
+    scope="module",
+    params=(0, 1, 2, 3, 4, 5),
+    ids=(
+        "single-view",
+        "four-view",
+        "exposure",
+        "diverse-exposure",
+        "ieee-exposure",
+        "ieee-wide-background",
+    ),
 )
 def sealed(tmp_path_factory, request):
     root = tmp_path_factory.mktemp("composition-pipeline")
@@ -64,11 +73,13 @@ def sealed(tmp_path_factory, request):
                 shape_edges=False,
                 label_smoothing=0.0,
                 reflection_consensus=request.param > 0,
-                auxiliary_images=12 if request.param == 2 else 0,
-                consistency_loss=0.2 if request.param == 2 else 0.0,
+                auxiliary_images=12 if request.param >= 2 else 0,
+                consistency_loss=0.2 if request.param >= 2 else 0.0,
+                exposure_profile="diverse" if request.param >= 3 else "standard",
+                numeric_precision="ieee" if request.param >= 4 else "legacy",
                 previous=previous,
                 warm_candidate=None,
-                dataset_profile="diverse",
+                dataset_profile="background_clear" if request.param == 5 else "diverse",
                 seed=12000,
                 steps=2,
                 eval_every=2,
@@ -325,3 +336,36 @@ def test_join_keeps_pixels_aligned_with_original_queries():
     assert len(both["pixels"]) == 4 and len(both["labels"]) == 24
     assert both["image_index"].tolist() == [0] * 6 + [1] * 6 + [2] * 6 + [3] * 6
     assert both["records"][:12] == a["records"] and both["records"][12:] == b["records"]
+
+
+def test_numeric_metadata_cannot_change_between_protocol_and_result(sealed):
+    path = sealed / "experiment/result.json"
+    original = path.read_bytes()
+    try:
+        report = json.loads(original)
+        report["numeric_backend"]["precision_settings"]["cudnn_conv"] = "forged"
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(ValueError, match="Result numeric precision"):
+            check(sealed, "must-not-exist-numeric.json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_exposure_family_metadata_cannot_be_forged(sealed):
+    path = sealed / "experiment/protocol.json"
+    freeze_path = sealed / "experiment/candidate-freeze.json"
+    original, frozen_original = path.read_bytes(), freeze_path.read_bytes()
+    if not json.loads(original)["auxiliary_images"]:
+        pytest.skip("No auxiliary cohorts in this fixture")
+    try:
+        protocol = json.loads(original)
+        protocol["exposure_shapes"].append("pentagon")
+        path.write_text(json.dumps(protocol), encoding="utf-8")
+        freeze = json.loads(frozen_original)
+        freeze["protocol_sha256"] = verifier.sha(path)
+        freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
+        with pytest.raises(ValueError, match="Exposure families"):
+            check(sealed, "must-not-exist-families.json")
+    finally:
+        path.write_bytes(original)
+        freeze_path.write_bytes(frozen_original)

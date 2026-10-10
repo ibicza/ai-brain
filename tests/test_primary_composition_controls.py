@@ -34,7 +34,11 @@ def test_unknown_families_are_separated_before_training():
 
 
 def test_render_is_deterministic_finite_and_contained():
-    for shape in (*c.SHAPES, *controls.EXPOSURE_SHAPES, *controls.HELD_OUT_SHAPES):
+    for shape in (
+        *c.SHAPES,
+        *controls.EXTENDED_EXPOSURE_SHAPES,
+        *controls.HELD_OUT_SHAPES,
+    ):
         scene = controls.ControlScene(
             "geometry",
             49,
@@ -97,3 +101,66 @@ def test_control_audit_forbids_family_and_seed_leakage():
     extra["control_final"]["scenes"][0]["seed"] = 70100
     with pytest.raises(ValueError, match="seed leakage"):
         controls.audit(extra, native)
+
+
+def test_diverse_exposure_is_opt_in_and_never_imports_held_contours():
+    standard = controls.scenes("exposure", 300, 301900)
+    diverse = controls.scenes("exposure", 300, 301900, exposure_profile="diverse")
+    assert standard == controls.scenes(
+        "exposure", 300, 301900, exposure_profile="standard"
+    )
+    assert {i.shape for s in standard for i in s.items} - set(c.SHAPES) == set(
+        controls.EXPOSURE_SHAPES
+    )
+    assert {i.shape for s in diverse for i in s.items} - set(c.SHAPES) == set(
+        controls.EXTENDED_EXPOSURE_SHAPES
+    )
+    assert not {i.shape for s in diverse for i in s.items} & set(
+        controls.HELD_OUT_SHAPES
+    )
+    held = controls.scenes("held_control", 60, 302900)
+    assert held == controls.scenes(
+        "held_control", 60, 302900, exposure_profile="diverse"
+    )
+    for item in (i for s in diverse for i in s.items if not i.hidden):
+        scene = controls.ControlScene("scope", 42, (item, item))
+        assert (scene.gold("shape", 0) == c.UNKNOWN) == (item.shape not in c.SHAPES)
+        assert scene.gold("color", 0) != c.UNKNOWN
+        assert scene.gold("pattern", 0) != c.UNKNOWN
+    with pytest.raises(ValueError, match="Invalid control"):
+        controls.scenes("exposure", 3, 42, exposure_profile="unregistered")
+
+
+@pytest.mark.parametrize("shape", controls.EXTENDED_EXPOSURE_SHAPES)
+def test_new_contours_are_bounded_visible_and_distinct_from_supported_shapes(shape):
+    points = np.asarray(controls.vertices(shape))
+    assert points.shape[1] == 2 and np.isfinite(points).all()
+    assert np.abs(points).max() <= 1.000001
+    for seed in range(20):
+        scene = controls.ControlScene(
+            "geometry",
+            seed,
+            (
+                controls.ControlItem("красный", shape, "однотонный"),
+                controls.ControlItem("синий", "круг", "однотонный"),
+            ),
+        )
+        pixels = controls.render(scene)
+        assert ((pixels[:, :48, 0] > 180) & (pixels[:, :48, 1] < 80)).sum() > 50
+
+
+def test_audit_rejects_wrong_exposure_profile_and_extended_contours_in_final():
+    native = {"train": c.prepare(c.scenes("train", 2, 80300))}
+    extra = {
+        "exposure": controls.prepare(
+            controls.scenes("exposure", 60, 80400, exposure_profile="diverse")
+        ),
+        "control_final": controls.prepare(controls.scenes("held_control", 2, 80500)),
+    }
+    result = controls.audit(extra, native, exposure_profile="diverse")
+    assert result["exposure_shapes"] == controls.EXTENDED_EXPOSURE_SHAPES
+    with pytest.raises(ValueError, match="Held control"):
+        controls.audit(extra, native)
+    extra["control_final"]["scenes"][0]["items"][0]["shape"] = "heart"
+    with pytest.raises(ValueError, match="Exposure contour"):
+        controls.audit(extra, native, exposure_profile="diverse")

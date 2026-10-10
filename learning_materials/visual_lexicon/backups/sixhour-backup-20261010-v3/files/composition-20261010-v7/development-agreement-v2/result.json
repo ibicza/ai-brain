@@ -1,0 +1,369 @@
+{
+  "schema": 1,
+  "status": "KNOWN_DEVELOPMENT_AGREEMENT_STUDY_REPLAYED",
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/source-capsule.tgz": "30eb69ae818a226e30a6249cbe1a5a4c218fcaecb098d50e85b57082b0e4d6b0",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/dataset.npz": "d7424c17a2423a80ce80bf0838e84b348c65ecfe57d4572eeb10be3040e8fbff",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/dataset-records.json.gz": "dda8c293d42a30aa9103ed0ea932529887180258255da5f4dae20adce163a6cc",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/candidate-freeze.json": "7fad56ef6e133d74b86741bbddc87db3a150be7b6df1e15645859fcb7ebaa606",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/protocol.json": "dd669d6158aad6a6bff78cc06998dc164e8f979d2f5fcb6901e5be0543eff5a7",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/policy-frozen.json": "13e96da7422ded7c3ca1bd8b9149d183ef581d03d24647bc40851b1b1ebb3c8f",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/joint/best.pt": "e8ed8c93933672f30b90b3f886718cf12a72182c51ee188aa89aa9a231cd2d45",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/curriculum/best.pt": "03d4394b9b24cbab57aa10f3c23f092695561166c4f0443fed49d5071ed3f938"
+  },
+  "splits": [
+    "dev",
+    "control_dev"
+  ],
+  "frozen_thresholds": {
+    "color": 0.9,
+    "shape": 0.9,
+    "pattern": 0.9
+  },
+  "groups": {
+    "joint": {
+      "dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3257,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9951115184845707,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1090,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.999083409715857,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1080,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9899175068744271,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1087,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9963336388634281,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9853345554537122
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 442,
+            "both_correct_rate": 0.997737556561086
+          },
+          "shape": {
+            "eligible_scene_pairs": 359,
+            "both_correct_rate": 0.9693593314763231
+          },
+          "pattern": {
+            "eligible_scene_pairs": 341,
+            "both_correct_rate": 0.9912023460410557
+          }
+        },
+        "raw_balanced_ce": 0.01796623505651951
+      },
+      "control_dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2562,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.991869918699187,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1103,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.996386630532972,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 361,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.978319783197832,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1098,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.991869918699187,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 369,
+          "all_three_correct_rate": 0.975609756097561
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 445,
+            "both_correct_rate": 0.9910112359550561
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 333,
+            "both_correct_rate": 0.978978978978979
+          }
+        },
+        "raw_balanced_ce": 0.02104707807302475
+      }
+    },
+    "curriculum": {
+      "dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3257,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9951115184845707,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1090,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.999083409715857,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1082,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9917506874427131,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1085,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9945004582951421,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9853345554537122
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 442,
+            "both_correct_rate": 0.997737556561086
+          },
+          "shape": {
+            "eligible_scene_pairs": 359,
+            "both_correct_rate": 0.9777158774373259
+          },
+          "pattern": {
+            "eligible_scene_pairs": 341,
+            "both_correct_rate": 0.9853372434017595
+          }
+        },
+        "raw_balanced_ce": 0.01796293631196022
+      },
+      "control_dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2561,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9914827719705769,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1103,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.996386630532972,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 359,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9728997289972899,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1099,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.992773261065944,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 369,
+          "all_three_correct_rate": 0.9728997289972899
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 445,
+            "both_correct_rate": 0.9910112359550561
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 333,
+            "both_correct_rate": 0.9819819819819819
+          }
+        },
+        "raw_balanced_ce": 0.019878217950463295
+      }
+    },
+    "two_candidate_agreement": {
+      "dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3249,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9926672777268561,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1090,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.999083409715857,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1076,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9862511457378552,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1083,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9926672777268561,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.9780018331805683
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 442,
+            "both_correct_rate": 0.997737556561086
+          },
+          "shape": {
+            "eligible_scene_pairs": 359,
+            "both_correct_rate": 0.9610027855153204
+          },
+          "pattern": {
+            "eligible_scene_pairs": 341,
+            "both_correct_rate": 0.9794721407624634
+          }
+        }
+      },
+      "control_dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2551,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9876113046844754,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1102,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.995483288166215,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 357,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.967479674796748,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1092,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.986449864498645,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 369,
+          "all_three_correct_rate": 0.964769647696477
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 445,
+            "both_correct_rate": 0.9887640449438202
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 333,
+            "both_correct_rate": 0.9669669669669669
+          }
+        }
+      }
+    }
+  },
+  "balanced_dev_ce": {
+    "joint": 0.01950665656477213,
+    "curriculum": 0.018920577131211758
+  },
+  "device": "cuda",
+  "executed_script_sha256": "bdf7d9d886662584b4586de4fc169cba6fa141b38f13e6f7514a1c3cbdbc0718",
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Known development data only, original frozen inference code. Two models share the same inherited tensors; not a full independent deep ensemble, not a blind final, not a calibrated uncertainty guarantee."
+}

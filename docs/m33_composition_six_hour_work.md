@@ -326,3 +326,116 @@ The next safe study can compare dev-only own joint/curriculum model agreement
 or expand disjoint auxiliary shape diversity, guided by OOD literature. It must
 preserve held star/pentagon/trapezoid from exposure and use a new frozen final.
 Next backup includes completed V7 and the preserved untrained V8 preflight fail.
+
+00:29 UTC: that backup finished and remote push is confirmed at
+`93956e9137781e179c0828cc1205035f6ef97411` (52 changed paths), receipt in
+`sixhour-backup-20261010-v2/push-receipt.json`. No files deleted.
+V7 development agreement study V1 on CPU failed its strict CUDA-history CE
+tolerance: joint CE 0.01948072 versus original 0.01950666. Failure and partial
+scores preserved; no acceptance claimed. The prototype also lacked a start-time
+script snapshot; later studies pin/hash their script before imports and reject
+script drift. New helper's seven pure fusion validation tests pass.
+V7 development agreement V2 on the original GPU successfully reproduced both
+original dev scores exactly: joint 0.01950665656477213, curriculum
+0.018920577131211758. Pinned script SHA256
+`bdf7d9d886662584b4586de4fc169cba6fa141b38f13e6f7514a1c3cbdbc0718`;
+known dev/control-dev only, no training/calibration/final access. Both candidates
+and their unanimity have zero accepted errors on these easy development sets,
+so this study does not establish an ensemble advantage on unfamiliar contours.
+Original model/source/checkpoint/data hashes remain unchanged. CPU/GPU difference
+cause is not yet proven; official PyTorch 2.9 notes document separate cuDNN TF32
+control and rounding effects: https://docs.pytorch.org/docs/2.9/notes/cuda.html .
+Future protocols should record numeric backend settings and test portability,
+not silently loosen numerical tolerances or rewrite historical GPU results.
+
+00:40 UTC: V9 session 5408 completed with independent inference/arithmetic replay
+and SHA-checked local evidence. First clean, domain-separated native run has
+zero accepted errors on ordinary, held-pair and transfer finals, with positive
+recall 99.76% / 99.60% / 97.86%. Authored held controls still have seven accepted
+errors, all unsupported shape assertions; overall safe positive recall 98.64%.
+Result remains NEEDS_WORK_NOT_PRODUCTION. Own selected curriculum checkpoint
+SHA256 `2c306583a9df3b5b549f0e2ba4660ca46c4f64c5d08bcad2b6ec882568344385`.
+The V7-to-V9 numerical difference is not a controlled causal comparison: seeds
+and native label-generation policy changed. It does not prove a seven-versus-
+sixteen error improvement on the same test. Native clean result is evidence
+against needing the discovered background shortcut, not a general vision proof.
+
+Next preregistration, V10 (before generation/training): keep own inherited core,
+verified V9 warm candidate, 9,000 native and 1,800 authored training images,
+600 images per held/dev/calibration cohort, seed 11039, 9,000 steps per schedule,
+four-view unanimity/JS 0.2, shape edges, smoothing 0.02 and original acceptance
+criteria. Change only the authored exposure profile from triangle/cross to those
+plus hexagon/heart/arrow/crescent. These are offline unsupported-contour examples,
+not new lexical shape classes. Original supported four-shape scope stays intact.
+Star/pentagon/trapezoid remain wholly excluded from training, development and
+calibration. New final pixels/seeds are held out, but these contour families are
+already known from earlier examinations: do not call this an unfamiliar-family
+blind external-source exam. Existing standard/archival profile remains default
+and its labels/rendering unchanged. Frozen V9 capsule is not modified.
+The new exposure profile is recorded before training, independently regenerated
+and family-audited by the verifier; source tests include opt-in replay, hidden
+targets, bounded contour pixels, wrong-profile and held-family rejection.
+This adapts the diversity lesson from Outlier Exposure, not its full uniform-
+posterior objective: https://arxiv.org/html/1812.04606v3 . The paper also warns
+against easy synthetic anomaly cues, so passing these contours alone is not
+enough to graduate to unrestricted photographs or textbook pages.
+
+00:42 UTC: V10 started in orchestration session **52843**, local
+`D:/ai-brain-data/visual-lexicon/composition-20261010-v10`, remote
+`/home/ibicza/ai-brain/runs/m33-composition-20261010-v10`. Sealed capsule SHA256
+`45a5da4cb0edceddfdf7181406d80f28f919d102f0fea64716a027f95a5ef16d`.
+Transport input is pinned at `D:/ai-brain-data/visual-lexicon/transport-v10-input.py`
+and start-time copy `v10/transport-executed.py`. An initial invocation without
+scripts on PYTHONPATH failed at import before making a run directory; the same
+fresh run was then launched with explicit src/scripts PYTHONPATH. No duplicate
+training. V9 session 5408 is finished; do not restart it. Local new-contour /
+tiny train-freeze-replay tests: 78 passed in 212.95s; backup/capsule/dev diagnostic
+tests: 23 passed in 4.33s (separate suites, not one claimed full regression).
+
+Pinned V7 numeric intervention `numeric-backend-v1` completed on the notebook,
+script SHA256 `e9496434e2571d7639fff2b10b8bf7fdb0fdc61f52000fd3f4e6f09d44814dce`.
+Same original capsule, joint checkpoint, batch size and dev/control-dev inputs:
+CPU CE 0.019480719231069088; CUDA TF32 convolution reproduces historical CE
+exactly 0.01950665656477213; CUDA IEEE convolution gives 0.019480731338262558.
+Authored max score distance to CPU falls from 0.0328304 to 0.0000027418, raw
+argmax disagreements from one to zero. This controlled intervention identifies
+cuDNN TF32 as the material source of this specific prior CPU/GPU discrepancy.
+It is not a universal bit-equality proof; the old failed CPU study remains failed.
+Only new runs may preregister an explicit IEEE backend; V10 original capsule/
+default training backend stay unchanged. No training or final access in study.
+
+00:50 UTC: V10 remote capsule preflight passed 244 tests in 193.67s and is now
+training (joint step 3000 observed). Same source capsule remains unchanged.
+Local development for a FUTURE image block now adds an opt-in background_clear
+profile: independent gray brightness 60..205 plus per-channel jitter -6..6 using
+its own SeedSequence domain M3BL. No label-conditioned background/contrast choice;
+old geometry RNG draws and all standard/default pixels stay unchanged. Transfer
+still reserves waves/irregular spots; the broader background is not a new animal
+or word class. Statistical shortcut audit now samples each selected actual
+renderer family, including legacy's integer background, rather than assuming
+every renderer uses the same floating RGB draw. Source-level stream separation
+plus that specific detector still does not prove absence of every shortcut.
+Eighty focused source/geometry tests passed before adding one extra direct-call
+archival renderer test and the sixth end-to-end wide-profile fixture.
+
+Numeric backend contract is opt-in for future runs, with IEEE settings separately
+fixed for global/CUDA matmul/cuDNN/conv/RNN using PyTorch >=2.9 API. New protocols
+record exact precision settings and backend versions; new verifier reapplies the
+declared precision and rejects result/protocol drift, without pretending runtime
+version metadata guarantees all-device bit equality. Archived capsules do not
+receive a backfilled contract. Neither future feature is in the active V10 run.
+
+Fresh combined course/catalogue regression is running in session **55521**,
+receipt `D:/ai-brain-data/visual-lexicon/qa-sixhour-wide-full-regression-v1.xml`.
+It includes six tiny train/freeze/replay fixtures (the sixth is wide background
+plus IEEE), all primary course tests and lexicon tests. Do not claim it passed
+until completion. Earlier numeric-only suite session **24269** is still running
+its already-loaded five fixtures; it predates the latest background integration.
+Resume exact handles, not duplicate test/training jobs. Goal/heartbeat ACTIVE;
+earliest finish remains 05:11:22 UTC. Backup parent stays 93956e9137781e179c0828cc1205035f6ef97411
+until a new scoped push receipt confirms otherwise.
+
+00:50 UTC: numeric-contract suite 24269 completed: 94 passed, two skipped in
+275.71s. Both skips are the deliberately inapplicable exposure-family tamper
+test on fixtures with no auxiliary cohorts. It is no longer live. Combined
+latest-source regression 55521 and V10 training 52843 remain live.

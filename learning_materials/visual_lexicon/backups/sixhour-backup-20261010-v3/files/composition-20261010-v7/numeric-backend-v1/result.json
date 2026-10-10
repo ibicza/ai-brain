@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "status": "KNOWN_DEV_NUMERIC_INTERVENTION_COMPLETE",
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/source-capsule.tgz": "30eb69ae818a226e30a6249cbe1a5a4c218fcaecb098d50e85b57082b0e4d6b0",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/dataset.npz": "d7424c17a2423a80ce80bf0838e84b348c65ecfe57d4572eeb10be3040e8fbff",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/dataset-records.json.gz": "dda8c293d42a30aa9103ed0ea932529887180258255da5f4dae20adce163a6cc",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/candidate-freeze.json": "7fad56ef6e133d74b86741bbddc87db3a150be7b6df1e15645859fcb7ebaa606",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/protocol.json": "dd669d6158aad6a6bff78cc06998dc164e8f979d2f5fcb6901e5be0543eff5a7",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v7/experiment/joint/best.pt": "e8ed8c93933672f30b90b3f886718cf12a72182c51ee188aa89aa9a231cd2d45"
+  },
+  "executed_script_sha256": "e9496434e2571d7639fff2b10b8bf7fdb0fdc61f52000fd3f4e6f09d44814dce",
+  "torch_version": "2.9.0+cu129",
+  "cuda_version": "12.9",
+  "cudnn_version": 91002,
+  "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "initial_backend": {
+    "global": "none",
+    "cuda_matmul": "none",
+    "cudnn_conv": "tf32"
+  },
+  "splits": [
+    "dev",
+    "control_dev"
+  ],
+  "losses": {
+    "cpu_ieee": {
+      "split_balanced_ce": {
+        "dev": 0.01796434074640274,
+        "control_dev": 0.020997097715735435
+      },
+      "balanced_ce": 0.019480719231069088
+    },
+    "cuda_tf32_conv": {
+      "split_balanced_ce": {
+        "dev": 0.01796623505651951,
+        "control_dev": 0.02104707807302475
+      },
+      "balanced_ce": 0.01950665656477213
+    },
+    "cuda_ieee_conv": {
+      "split_balanced_ce": {
+        "dev": 0.01796434260904789,
+        "control_dev": 0.020997120067477226
+      },
+      "balanced_ce": 0.019480731338262558
+    }
+  },
+  "comparisons_to_cpu": {
+    "cuda_tf32_conv": {
+      "dev": {
+        "examples": 3600,
+        "max_absolute_score_difference": 0.0004057474434375763,
+        "mean_absolute_score_difference": 6.345536007756891e-07,
+        "raw_argmax_disagreements": 0
+      },
+      "control_dev": {
+        "examples": 3600,
+        "max_absolute_score_difference": 0.032830387353897095,
+        "mean_absolute_score_difference": 3.4096565286745317e-06,
+        "raw_argmax_disagreements": 1
+      }
+    },
+    "cuda_ieee_conv": {
+      "dev": {
+        "examples": 3600,
+        "max_absolute_score_difference": 7.152557373046875e-07,
+        "mean_absolute_score_difference": 2.74715805659298e-09,
+        "raw_argmax_disagreements": 0
+      },
+      "control_dev": {
+        "examples": 3600,
+        "max_absolute_score_difference": 2.7418136596679688e-06,
+        "mean_absolute_score_difference": 3.6653025059507627e-09,
+        "raw_argmax_disagreements": 0
+      }
+    }
+  },
+  "original_joint_dev_ce": 0.01950665656477213,
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Known dev only, fixed original source/checkpoint/data and batch size. Numeric intervention, not a final model exam. Precision tolerance is not relaxed and old failed study is not retroactively accepted. Similarity is not universal CPU/GPU bit equality."
+}

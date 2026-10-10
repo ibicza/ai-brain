@@ -254,6 +254,9 @@ def run(args):
             "Scene counts must respect the disjoint 10,000-seed split spacing"
         )
     auxiliary_images = getattr(args, "auxiliary_images", 0)
+    exposure_profile = getattr(args, "exposure_profile", "standard")
+    if exposure_profile not in controls.EXPOSURE_PROFILES:
+        raise ValueError("Invalid control exposure profile")
     consistency_amount = getattr(args, "consistency_loss", 0.0)
     if type(auxiliary_images) is not int or not 0 <= auxiliary_images <= 10000:
         raise ValueError("Bounded auxiliary scene count required")
@@ -264,6 +267,9 @@ def run(args):
     ):
         raise ValueError("Invalid consistency strength")
     torch.set_num_threads(2)
+    from ai_brain.training import primary_numeric_backend as numeric
+
+    numeric_backend = numeric.configure(getattr(args, "numeric_precision", "legacy"))
     torch.manual_seed(args.seed)
     if args.device.startswith("cuda") and not torch.cuda.is_available():
         raise ValueError("Requested CUDA unavailable")
@@ -303,9 +309,13 @@ def run(args):
         "previous_sha256": warm_sha,
         "candidate_anchor_sha256": candidate_anchor,
         "dataset_profile": args.dataset_profile,
+        "background_rng_policy": course.BACKGROUND_RNG_POLICY
+        if args.dataset_profile == "background_clear"
+        else None,
         "label_rng_policy": course.LABEL_RNG_POLICY,
         "independent_labels": True,
         "seed": args.seed,
+        "numeric_backend": numeric_backend,
         "steps_per_schedule": args.steps,
         "batch_size": 64,
         "learning_rate": 0.001,
@@ -329,6 +339,9 @@ def run(args):
         "reflection_consensus": model.reflection_consensus,
         "training_reflections": model.reflection_consensus,
         "auxiliary_images": auxiliary_images,
+        "exposure_profile": exposure_profile,
+        "exposure_shapes": controls.EXPOSURE_PROFILES[exposure_profile],
+        "held_control_shapes": controls.HELD_OUT_SHAPES,
         "auxiliary_calibration": auxiliary_images > 0,
         "held_control_final": auxiliary_images > 0,
         "consistency_loss": consistency_amount,
@@ -353,7 +366,9 @@ def run(args):
     write(root / "protocol.json", protocol)
     from ai_brain.training import primary_composition_rng_audit as rng_audit
 
-    leakage_audit = rng_audit.audit(seed=args.seed * 100000 + 100000)
+    leakage_audit = rng_audit.audit(
+        seed=args.seed * 100000 + 100000, profile=args.dataset_profile
+    )
     write(root / "rng-independence-audit.json", leakage_audit)
     if not leakage_audit["known_shortcut_absent"]:
         raise ValueError("Background/label RNG leakage detected before training")
@@ -380,6 +395,7 @@ def run(args):
                     auxiliary_images if split == "exposure" else args.holdout_images,
                     args.seed * 100000 + (6 + offset) * 10000,
                     cohort=split,
+                    exposure_profile=exposure_profile,
                 )
             )
             for offset, split in enumerate(
@@ -392,9 +408,13 @@ def run(args):
                 args.holdout_images,
                 args.seed * 100000 + 90000,
                 cohort="control_dev",
+                exposure_profile=exposure_profile,
             )
         )
-        write(root / "auxiliary-split-audit.json", controls.audit(auxiliary, raw))
+        write(
+            root / "auxiliary-split-audit.json",
+            controls.audit(auxiliary, raw, exposure_profile=exposure_profile),
+        )
         raw.update(auxiliary)
     arrays = {}
     for split, group in raw.items():
@@ -655,6 +675,7 @@ def run(args):
         if passed
         else "NEEDS_WORK_NOT_PRODUCTION",
         "production_admitted": False,
+        "numeric_backend": numeric_backend,
         "scope": protocol["scope"],
         "winner": winner["schedule"],
         "checkpoint_sha256": winner["checkpoint_sha256"],
@@ -693,7 +714,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=11031)
     parser.add_argument(
         "--dataset-profile",
-        choices=("legacy", "diverse", "diverse_clear"),
+        choices=course.DATASET_PROFILES,
         default="legacy",
     )
     parser.add_argument("--warm-candidate", type=Path)
@@ -702,7 +723,15 @@ if __name__ == "__main__":
     parser.add_argument("--label-smoothing", type=float, default=0.0)
     parser.add_argument("--reflection-consensus", action="store_true")
     parser.add_argument("--auxiliary-images", type=int, default=0)
+    parser.add_argument(
+        "--exposure-profile",
+        choices=tuple(controls.EXPOSURE_PROFILES),
+        default="standard",
+    )
     parser.add_argument("--consistency-loss", type=float, default=0.0)
+    parser.add_argument(
+        "--numeric-precision", choices=("legacy", "ieee"), default="legacy"
+    )
     args = parser.parse_args()
     if min(args.steps, args.eval_every, args.train_images, args.holdout_images) < 1:
         parser.error("Positive experiment sizes required")
