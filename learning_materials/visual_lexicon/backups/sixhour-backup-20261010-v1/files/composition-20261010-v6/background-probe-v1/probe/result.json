@@ -1,0 +1,435 @@
+{
+  "schema": 1,
+  "status": "KNOWN_DEV_PAIRED_BACKGROUND_PROBE_REPLAYED",
+  "reports": {
+    "original": {
+      "selected": {
+        "overall": {
+          "examples": 720,
+          "accepted": 648,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9908256880733946,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 240,
+            "accepted": 218,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 1.0,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 240,
+            "accepted": 215,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9862385321100917,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 240,
+            "accepted": 215,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9862385321100917,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 218,
+          "all_three_correct_rate": 0.9770642201834863
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 88,
+            "both_correct_rate": 1.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 76,
+            "both_correct_rate": 0.9605263157894737
+          },
+          "pattern": {
+            "eligible_scene_pairs": 67,
+            "both_correct_rate": 0.9552238805970149
+          }
+        }
+      },
+      "decisions_changed_from_original": 0,
+      "first_accepted_errors": []
+    },
+    "dark": {
+      "selected": {
+        "overall": {
+          "examples": 720,
+          "accepted": 227,
+          "false_assertions": 11,
+          "accepted_error_rate": 0.048458149779735685,
+          "answerable_recall": 0.3302752293577982,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 240,
+            "accepted": 9,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.04128440366972477,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 240,
+            "accepted": 183,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8394495412844036,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 240,
+            "accepted": 35,
+            "false_assertions": 11,
+            "accepted_error_rate": 0.3142857142857143,
+            "answerable_recall": 0.11009174311926606,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 218,
+          "all_three_correct_rate": 0.0
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 88,
+            "both_correct_rate": 0.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 76,
+            "both_correct_rate": 0.6578947368421053
+          },
+          "pattern": {
+            "eligible_scene_pairs": 67,
+            "both_correct_rate": 0.0
+          }
+        }
+      },
+      "decisions_changed_from_original": 438,
+      "first_accepted_errors": [
+        {
+          "scene_id": "dev/6",
+          "task": "pattern",
+          "side": 1,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9015892148017883
+        },
+        {
+          "scene_id": "dev/15",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9219362139701843
+        },
+        {
+          "scene_id": "dev/20",
+          "task": "pattern",
+          "side": 0,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9015345573425293
+        },
+        {
+          "scene_id": "dev/28",
+          "task": "pattern",
+          "side": 1,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9173578023910522
+        },
+        {
+          "scene_id": "dev/33",
+          "task": "pattern",
+          "side": 1,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9400020241737366
+        },
+        {
+          "scene_id": "dev/35",
+          "task": "pattern",
+          "side": 0,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9650376439094543
+        },
+        {
+          "scene_id": "dev/52",
+          "task": "pattern",
+          "side": 0,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9377792477607727
+        },
+        {
+          "scene_id": "dev/57",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9663700461387634
+        },
+        {
+          "scene_id": "dev/74",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9236910939216614
+        },
+        {
+          "scene_id": "dev/78",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9188340902328491
+        },
+        {
+          "scene_id": "dev/113",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9430911540985107
+        }
+      ]
+    },
+    "light": {
+      "selected": {
+        "overall": {
+          "examples": 720,
+          "accepted": 463,
+          "false_assertions": 181,
+          "accepted_error_rate": 0.39092872570194387,
+          "answerable_recall": 0.43119266055045874,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 240,
+            "accepted": 104,
+            "false_assertions": 71,
+            "accepted_error_rate": 0.6826923076923077,
+            "answerable_recall": 0.15137614678899083,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 240,
+            "accepted": 188,
+            "false_assertions": 2,
+            "accepted_error_rate": 0.010638297872340425,
+            "answerable_recall": 0.8532110091743119,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 240,
+            "accepted": 171,
+            "false_assertions": 108,
+            "accepted_error_rate": 0.631578947368421,
+            "answerable_recall": 0.2889908256880734,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 218,
+          "all_three_correct_rate": 0.0045871559633027525
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 88,
+            "both_correct_rate": 0.0
+          },
+          "shape": {
+            "eligible_scene_pairs": 76,
+            "both_correct_rate": 0.7631578947368421
+          },
+          "pattern": {
+            "eligible_scene_pairs": 67,
+            "both_correct_rate": 0.0
+          }
+        }
+      },
+      "decisions_changed_from_original": 370,
+      "first_accepted_errors": [
+        {
+          "scene_id": "dev/1",
+          "task": "color",
+          "side": 0,
+          "gold": "чёрный",
+          "predicted": "белый",
+          "score": 0.9726414084434509
+        },
+        {
+          "scene_id": "dev/1",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9337976574897766
+        },
+        {
+          "scene_id": "dev/2",
+          "task": "pattern",
+          "side": 0,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9066594243049622
+        },
+        {
+          "scene_id": "dev/2",
+          "task": "color",
+          "side": 1,
+          "gold": "синий",
+          "predicted": "белый",
+          "score": 0.953842282295227
+        },
+        {
+          "scene_id": "dev/2",
+          "task": "pattern",
+          "side": 1,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9222483038902283
+        },
+        {
+          "scene_id": "dev/3",
+          "task": "color",
+          "side": 0,
+          "gold": "чёрный",
+          "predicted": "белый",
+          "score": 0.9376714825630188
+        },
+        {
+          "scene_id": "dev/3",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9373649954795837
+        },
+        {
+          "scene_id": "dev/4",
+          "task": "pattern",
+          "side": 0,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9320275783538818
+        },
+        {
+          "scene_id": "dev/4",
+          "task": "shape",
+          "side": 1,
+          "gold": "квадрат",
+          "predicted": "прямоугольник",
+          "score": 0.9324225783348083
+        },
+        {
+          "scene_id": "dev/5",
+          "task": "color",
+          "side": 0,
+          "gold": "чёрный",
+          "predicted": "белый",
+          "score": 0.9194890260696411
+        },
+        {
+          "scene_id": "dev/6",
+          "task": "pattern",
+          "side": 0,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9601383805274963
+        },
+        {
+          "scene_id": "dev/7",
+          "task": "color",
+          "side": 1,
+          "gold": "синий",
+          "predicted": "белый",
+          "score": 0.9683992266654968
+        },
+        {
+          "scene_id": "dev/8",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9028992652893066
+        },
+        {
+          "scene_id": "dev/9",
+          "task": "color",
+          "side": 0,
+          "gold": "синий",
+          "predicted": "белый",
+          "score": 0.9654678106307983
+        },
+        {
+          "scene_id": "dev/9",
+          "task": "pattern",
+          "side": 0,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9704777598381042
+        },
+        {
+          "scene_id": "dev/10",
+          "task": "color",
+          "side": 0,
+          "gold": "чёрный",
+          "predicted": "белый",
+          "score": 0.9810187816619873
+        },
+        {
+          "scene_id": "dev/10",
+          "task": "pattern",
+          "side": 0,
+          "gold": "полосатый",
+          "predicted": "однотонный",
+          "score": 0.9175838232040405
+        },
+        {
+          "scene_id": "dev/11",
+          "task": "color",
+          "side": 1,
+          "gold": "чёрный",
+          "predicted": "белый",
+          "score": 0.9433246850967407
+        },
+        {
+          "scene_id": "dev/11",
+          "task": "pattern",
+          "side": 1,
+          "gold": "пятнистый",
+          "predicted": "однотонный",
+          "score": 0.9379593133926392
+        },
+        {
+          "scene_id": "dev/12",
+          "task": "color",
+          "side": 0,
+          "gold": "синий",
+          "predicted": "белый",
+          "score": 0.9222052693367004
+        }
+      ]
+    }
+  },
+  "independent_inference_and_arithmetic_replayed": true,
+  "production_admitted": false,
+  "input_sha256": "19bedef237db2c18f0b4dc6f38bb84799cd9746290222bb4f648f37e4c8eb61f",
+  "frozen_reference_sha256": "cb790dc98eafd6c128838677fed992f433b67b3c52bae568dc90b13ae38e8556",
+  "limits": "Known development intervention, not independent sources or new blind final. Do not use it to retune the original frozen policy."
+}

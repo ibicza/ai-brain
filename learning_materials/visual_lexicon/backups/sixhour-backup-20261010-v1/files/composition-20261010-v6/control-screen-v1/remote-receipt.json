@@ -1,0 +1,7 @@
+{
+  "status": "REMOTE_FIXED_POLICY_CONTROLS_REPLAYED",
+  "remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v6/control-screen-v1",
+  "reference_remote": "/home/ibicza/ai-brain/runs/m33-composition-20261010-v6",
+  "source_capsule_sha256": "13245d159dbc190a4aee41c5f738bff9675cfb61c50b252ad03bd22c40bdd24a",
+  "production_admitted": false
+}

@@ -302,3 +302,88 @@ def test_clear_profile_holds_out_waves_and_irregular_spots():
     transfer = c.scenes("transfer", 20, 33100, profile="diverse_clear")
     assert {s.style for s in train} == {"diverse_clear"}
     assert {s.style for s in transfer} == {"challenge_clear"}
+
+
+def test_split_audit_checks_seeds_even_when_different_rendering_hides_pixel_match():
+    train = c.prepare(c.scenes("train", 2, 50100, profile="legacy"))
+    dev = c.prepare(c.scenes("dev", 2, 50100, profile="diverse_clear"))
+    assert train["records"][0]["image_sha256"] != dev["records"][0]["image_sha256"]
+    with pytest.raises(ValueError, match="seed leakage"):
+        c.audit({"train": train, "dev": dev})
+
+
+def test_split_audit_checks_scene_identity_and_reports_distinct_seed_count():
+    train = c.prepare(c.scenes("train", 2, 50200))
+    dev = c.prepare(c.scenes("dev", 2, 50300))
+    good = c.audit({"train": train, "dev": dev})
+    assert good["unique_scene_seeds"] == good["unique_scene_identities"] == 4
+    dev["scenes"][0]["identity"] = train["scenes"][0]["identity"]
+    with pytest.raises(ValueError, match="identity leakage"):
+        c.audit({"train": train, "dev": dev})
+
+
+@pytest.mark.parametrize(
+    "seed,digest",
+    (
+        (
+            1103610000,
+            "267e7b21fd515a7ba03134011a82cf944de23752ae23a22764a1396f5cb42762",
+        ),
+        (
+            1200310000,
+            "1c78071da228fa0991a809ff71e742d4dd7d3189094ef6f87952c4b6f9858852",
+        ),
+    ),
+)
+def test_background_probe_option_preserves_default_pixels(seed, digest):
+    import hashlib
+
+    row = c.scenes("dev", 1, seed, profile="diverse_clear", independent_labels=False)[0]
+    assert hashlib.sha256(c.render_diverse(row).tobytes()).hexdigest() == digest
+    assert not np.array_equal(
+        c.render_diverse(row),
+        c.render_diverse(row, background_override=(225, 225, 225)),
+    )
+
+
+def test_background_probe_changes_no_opaque_surface_pixels():
+    scene = c.Scene(
+        "paired-background",
+        150,
+        (
+            c.Item("красный", "квадрат", "однотонный"),
+            c.Item("синий", "круг", "однотонный"),
+        ),
+        "diverse_clear",
+    )
+    a = c.render_diverse(scene, background_override=(45, 45, 45))
+    b = c.render_diverse(scene, background_override=(225, 225, 225))
+    # Deep inside the exactly same opaque foreground RGB pixels are equal.
+    red = (a[..., 0] > 180) & (a[..., 1] < 70) & (a[..., 2] < 70)
+    blue = (a[..., 2] > 180) & (a[..., 0] < 60) & (a[..., 1] < 110)
+    same = (a == b).all(-1)
+    assert (same & red).sum() >= 100 and (same & blue).sum() >= 100
+    for bad in ((1, 2), (1, 2, float("nan")), (1, 2, 256)):
+        with pytest.raises(ValueError, match="background"):
+            c.render_diverse(scene, background_override=bad)
+
+
+def test_label_render_rng_domains_remove_the_reproduced_background_shortcut():
+    from ai_brain.training.primary_composition_rng_audit import audit
+
+    archival = audit(seed=55150000, independent_labels=False)
+    fixed = audit(seed=55150000)
+    assert archival["background_only_pattern_accuracy"] == [1.0, 1.0]
+    assert archival["confusion_gold_by_background_prediction"] == [
+        [[3396, 0, 0], [0, 3307, 0], [0, 0, 3297]],
+        [[3352, 0, 0], [0, 3353, 0], [0, 0, 3295]],
+    ]
+    assert not archival["known_shortcut_absent"]
+    assert fixed["known_shortcut_absent"]
+    assert all(0.30 < a < 0.38 for a in fixed["background_only_pattern_accuracy"])
+    assert c.scenes("train", 5, 18000) == c.scenes("train", 5, 18000)
+    assert c.scenes("train", 5, 18000) != c.scenes(
+        "train", 5, 18000, independent_labels=False
+    )
+    with pytest.raises(ValueError, match="Invalid corpus"):
+        c.scenes("train", 5, 18000, independent_labels=1)

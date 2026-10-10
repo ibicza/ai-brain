@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "reference_hashes": {
+    "D:\\ai-brain-data\\visual-lexicon\\composition-20261010-v6\\experiment\\joint\\best.pt": "b041fd887b5a8b87b19ea4e2cf1ed785b39920163d0cd0c4cc04605f2a49541a",
+    "D:\\ai-brain-data\\visual-lexicon\\composition-20261010-v6\\previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "D:\\ai-brain-data\\visual-lexicon\\composition-20261010-v6\\experiment\\dataset.npz": "8632b8e96f2efcd4f87ae4254750013bfbd397430123a2a8be3ea89cd178d393",
+    "D:\\ai-brain-data\\visual-lexicon\\composition-20261010-v6\\experiment\\dataset-records.json.gz": "d6369c6d7748ff6d524bc79d84b2f705e3158635dea993bf50a169b10e254927",
+    "D:\\ai-brain-data\\visual-lexicon\\composition-20261010-v6\\experiment\\policy-frozen.json": "8016e33ee496cf1c03be2d2527b8a26f7523a9ad78965b0f73848d2c331cef6b",
+    "D:\\ai-brain-data\\visual-lexicon\\composition-20261010-v6\\experiment\\protocol.json": "0954d2382d03086951dbd75d415c404081ec953026a75f41a8b2a2e7a362eaf1"
+  },
+  "capsule_sha256": "2d101d511af8036c061677bea7961a135006aed27cab7813754abdb0ea2576a3",
+  "backgrounds": {
+    "dark": [
+      45,
+      45,
+      45
+    ],
+    "light": [
+      225,
+      225,
+      225
+    ]
+  },
+  "count": 120,
+  "split": "known_dev_only",
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Only the base background changes. Foreground geometry/color/pattern and RNG draws are fixed; antialias boundary RGB changes with background. Faint contrast may affect visibility. Not a blind exam or proof of photographic transfer."
+}

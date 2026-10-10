@@ -154,3 +154,15 @@ The user's checkout/index and workbook must match recorded hashes. Evidence
 uses <=32MiB parts with per-part and reconstructed-archive SHA256. Concatenate
 parts in manifest order, verify the archive, then safely extract; individual
 source/data hashes are also recorded.
+
+## Audit correction: historical background shortcut
+
+The 2026-10-10 continuation reproduced a deterministic label/RGB background
+confound in native V1-V7. A background-only rule predicts all 10,000 left and
+right patterns correctly. Their native high pattern scores are not evidence of
+pattern understanding; keep original numbers but do not declare mastery. New
+source defaults use domain-separated label RNGs, with an explicit archival-only
+compatibility option. Stored original Scene renderings, source capsules and
+inherited tensors remain untouched. Fresh independent-label V8 is a new
+experiment, not a repair of old finals. Full audit, earliest finishing time and
+current job handoffs: `docs/m33_composition_six_hour_work.md`.

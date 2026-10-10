@@ -1,0 +1,302 @@
+[
+  {
+    "scene_id": "final/0",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "UNKNOWN",
+        "shape": "UNKNOWN",
+        "pattern": "UNKNOWN"
+      },
+      "right": {
+        "color": "зелёный",
+        "shape": "круг",
+        "pattern": "однотонный"
+      }
+    },
+    "gold": [
+      "UNKNOWN",
+      "UNKNOWN",
+      "UNKNOWN",
+      "зелёный",
+      "круг",
+      "однотонный"
+    ]
+  },
+  {
+    "scene_id": "final/1",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "тёмно-зелёный",
+        "shape": "круг",
+        "pattern": "однотонный"
+      },
+      "right": {
+        "color": "зелёный",
+        "shape": "прямоугольник",
+        "pattern": "однотонный"
+      }
+    },
+    "gold": [
+      "тёмно-зелёный",
+      "круг",
+      "однотонный",
+      "зелёный",
+      "прямоугольник",
+      "однотонный"
+    ]
+  },
+  {
+    "scene_id": "final/2",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "чёрный",
+        "shape": "прямоугольник",
+        "pattern": "полосатый"
+      },
+      "right": {
+        "color": "синий",
+        "shape": "прямоугольник",
+        "pattern": "UNKNOWN"
+      }
+    },
+    "gold": [
+      "чёрный",
+      "прямоугольник",
+      "полосатый",
+      "синий",
+      "прямоугольник",
+      "полосатый"
+    ]
+  },
+  {
+    "scene_id": "final/3",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "синий",
+        "shape": "овал",
+        "pattern": "пятнистый"
+      },
+      "right": {
+        "color": "тёмно-зелёный",
+        "shape": "круг",
+        "pattern": "однотонный"
+      }
+    },
+    "gold": [
+      "синий",
+      "овал",
+      "пятнистый",
+      "тёмно-зелёный",
+      "круг",
+      "однотонный"
+    ]
+  },
+  {
+    "scene_id": "final/4",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "зелёный",
+        "shape": "квадрат",
+        "pattern": "полосатый"
+      },
+      "right": {
+        "color": "тёмно-зелёный",
+        "shape": "квадрат",
+        "pattern": "полосатый"
+      }
+    },
+    "gold": [
+      "зелёный",
+      "квадрат",
+      "полосатый",
+      "тёмно-зелёный",
+      "квадрат",
+      "полосатый"
+    ]
+  },
+  {
+    "scene_id": "final/5",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "жёлтый",
+        "shape": "овал",
+        "pattern": "полосатый"
+      },
+      "right": {
+        "color": "красный",
+        "shape": "круг",
+        "pattern": "однотонный"
+      }
+    },
+    "gold": [
+      "жёлтый",
+      "овал",
+      "полосатый",
+      "красный",
+      "круг",
+      "однотонный"
+    ]
+  },
+  {
+    "scene_id": "final/6",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "коричневый",
+        "shape": "круг",
+        "pattern": "однотонный"
+      },
+      "right": {
+        "color": "зелёный",
+        "shape": "прямоугольник",
+        "pattern": "однотонный"
+      }
+    },
+    "gold": [
+      "коричневый",
+      "круг",
+      "однотонный",
+      "зелёный",
+      "прямоугольник",
+      "однотонный"
+    ]
+  },
+  {
+    "scene_id": "final/7",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "коричневый",
+        "shape": "квадрат",
+        "pattern": "полосатый"
+      },
+      "right": {
+        "color": "жёлтый",
+        "shape": "круг",
+        "pattern": "полосатый"
+      }
+    },
+    "gold": [
+      "коричневый",
+      "квадрат",
+      "полосатый",
+      "жёлтый",
+      "круг",
+      "полосатый"
+    ]
+  },
+  {
+    "scene_id": "final/8",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "синий",
+        "shape": "прямоугольник",
+        "pattern": "пятнистый"
+      },
+      "right": {
+        "color": "UNKNOWN",
+        "shape": "UNKNOWN",
+        "pattern": "UNKNOWN"
+      }
+    },
+    "gold": [
+      "синий",
+      "прямоугольник",
+      "пятнистый",
+      "UNKNOWN",
+      "UNKNOWN",
+      "UNKNOWN"
+    ]
+  },
+  {
+    "scene_id": "final/9",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "синий",
+        "shape": "прямоугольник",
+        "pattern": "полосатый"
+      },
+      "right": {
+        "color": "тёмно-зелёный",
+        "shape": "квадрат",
+        "pattern": "пятнистый"
+      }
+    },
+    "gold": [
+      "синий",
+      "прямоугольник",
+      "полосатый",
+      "тёмно-зелёный",
+      "квадрат",
+      "пятнистый"
+    ]
+  },
+  {
+    "scene_id": "final/10",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "коричневый",
+        "shape": "круг",
+        "pattern": "однотонный"
+      },
+      "right": {
+        "color": "коричневый",
+        "shape": "овал",
+        "pattern": "однотонный"
+      }
+    },
+    "gold": [
+      "коричневый",
+      "круг",
+      "однотонный",
+      "коричневый",
+      "овал",
+      "однотонный"
+    ]
+  },
+  {
+    "scene_id": "final/11",
+    "description": {
+      "object_identity": "UNKNOWN",
+      "scope": "Visible color/shape/pattern only; no animal identity, anatomy or general language.",
+      "left": {
+        "color": "UNKNOWN",
+        "shape": "UNKNOWN",
+        "pattern": "UNKNOWN"
+      },
+      "right": {
+        "color": "белый",
+        "shape": "овал",
+        "pattern": "пятнистый"
+      }
+    },
+    "gold": [
+      "UNKNOWN",
+      "UNKNOWN",
+      "UNKNOWN",
+      "белый",
+      "овал",
+      "пятнистый"
+    ]
+  }
+]

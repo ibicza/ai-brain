@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v6/experiment/joint/best.pt": "b041fd887b5a8b87b19ea4e2cf1ed785b39920163d0cd0c4cc04605f2a49541a",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v6/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v6/experiment/policy-frozen.json": "8016e33ee496cf1c03be2d2527b8a26f7523a9ad78965b0f73848d2c331cef6b",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v6/experiment/protocol.json": "0954d2382d03086951dbd75d415c404081ec953026a75f41a8b2a2e7a362eaf1"
+  },
+  "source_capsule_sha256": "13245d159dbc190a4aee41c5f738bff9675cfb61c50b252ad03bd22c40bdd24a",
+  "count": 600,
+  "seed": 2110360000,
+  "thresholds": {
+    "color": 0.9,
+    "shape": 0.9,
+    "pattern": 0.9
+  },
+  "reflection_consensus": true,
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "unknown_shape_families": [
+    "star",
+    "pentagon",
+    "trapezoid"
+  ],
+  "limits": "Separate authored synthetic generator sharing Pillow, not independent photographic or semantic annotation. Unknown means unsupported by this four-shape readout, not absent from all legacy knowledge."
+}

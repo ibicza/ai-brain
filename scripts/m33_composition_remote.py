@@ -49,6 +49,27 @@ def run(args):
         if code:
             raise RuntimeError(f"Remote command failed ({code})")
 
+    def remote_digest(path):
+        # Hash original remote bytes in place instead of re-downloading each
+        # large dataset through a serial SFTP read merely to compute its hash.
+        # The downloaded local bytes still get a separate independent hash.
+        script = "import hashlib,sys; print(hashlib.file_digest(open(sys.argv[1], 'rb'), 'sha256').hexdigest())"
+        _, stdout, stderr = client.exec_command(
+            "/home/ibicza/ai-brain/.venv/bin/python -c "
+            + shlex.quote(script)
+            + " "
+            + shlex.quote(path)
+        )
+        digest = stdout.read().decode("ascii").strip()
+        error = stderr.read().decode("utf-8", errors="replace")
+        if (
+            stdout.channel.recv_exit_status()
+            or error
+            or not re.fullmatch(r"[0-9a-f]{64}", digest)
+        ):
+            raise ValueError("Remote original byte hash failed")
+        return digest
+
     try:
         sftp = client.open_sftp()
         sftp.mkdir(remote)
@@ -73,7 +94,7 @@ def run(args):
         command(prefix + "-c " + shlex.quote(unpack))
         command(
             prefix
-            + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py -q --junitxml=remote-tests.xml"
+            + "-m pytest tests/test_primary_composition.py tests/test_primary_composition_pipeline.py tests/test_primary_composition_views.py tests/test_primary_composition_controls.py tests/test_primary_zero.py tests/test_primary_relations.py -q --junitxml=remote-tests.xml"
         )
         started = time.monotonic()
         command(
@@ -92,6 +113,11 @@ def run(args):
             + (" --shape-edges" if args.shape_edges else "")
             + " --label-smoothing "
             + str(args.label_smoothing)
+            + (" --reflection-consensus" if args.reflection_consensus else "")
+            + " --auxiliary-images "
+            + str(args.auxiliary_images)
+            + " --consistency-loss "
+            + str(args.consistency_loss)
         )
         command(
             prefix
@@ -107,11 +133,8 @@ def run(args):
                     pull(source, destination)
                 elif stat.S_ISREG(entry.st_mode):
                     sftp.get(source, str(destination))
-                    with sftp.open(source, "rb") as stream:
-                        if hashlib.file_digest(stream, "sha256").hexdigest() != sha(
-                            destination
-                        ):
-                            raise ValueError("Downloaded evidence mismatch")
+                    if remote_digest(source) != sha(destination):
+                        raise ValueError("Downloaded evidence mismatch")
                 else:
                     raise ValueError("Nonregular evidence file")
 
@@ -147,6 +170,9 @@ if __name__ == "__main__":
     parser.add_argument("--spatial-readout", action="store_true")
     parser.add_argument("--shape-edges", action="store_true")
     parser.add_argument("--label-smoothing", type=float, default=0.0)
+    parser.add_argument("--reflection-consensus", action="store_true")
+    parser.add_argument("--auxiliary-images", type=int, default=0)
+    parser.add_argument("--consistency-loss", type=float, default=0.0)
     parser.add_argument(
         "--dataset-profile", choices=("diverse", "diverse_clear"), default="diverse"
     )

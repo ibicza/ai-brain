@@ -47,6 +47,8 @@ UNKNOWN = len(ANSWERS) - 1
 HELD_COMBINATIONS = {("зелёный", "овал"), ("синий", "квадрат")}
 DIVERSE_MAX_RADIUS = 15.0
 DIVERSE_CENTER_JITTER = 2.0
+LABEL_RNG_DOMAIN = 0x4D33334C
+LABEL_RNG_POLICY = "SeedSequence(scene_seed, M33L); separate from rendering"
 TEMPLATES = {
     "color": (
         "Какой цвет у {side} предмета?",
@@ -225,12 +227,15 @@ def render(scene: Scene) -> np.ndarray:
     ).copy()
 
 
-def render_diverse(scene: Scene) -> np.ndarray:
+def render_diverse(scene: Scene, *, background_override=None) -> np.ndarray:
     """Broader procedural family; challenge texture families never used to train.
 
     Shapes are wholly contained in separate input halves, including rotation.
     The visible base color occupies a majority of the surface. Textures and
-    backgrounds are sampled independently of labels. No labels are painted.
+    backgrounds are independent of labels in new domain-separated cohorts.
+    Archival scenes made with independent_labels=False retain the old confound;
+    exact renderer replay must not silently change their original pixels.
+    No labels are painted.
     """
     scene.validate()
     rng = np.random.default_rng(scene.seed)
@@ -238,6 +243,17 @@ def render_diverse(scene: Scene) -> np.ndarray:
     h = size * scale
     yy, xx = np.mgrid[:h, :h]
     background = rng.uniform(100, 180, 3)
+    if background_override is not None:
+        replacement = np.asarray(background_override)
+        if (
+            replacement.shape != (3,)
+            or not np.isfinite(replacement).all()
+            or np.any((replacement < 0) | (replacement > 255))
+        ):
+            raise ValueError("Expected finite three-channel background")
+        # Still consume the original background RNG draw. Only the base
+        # background changes; geometry, surface colors and patterns do not.
+        background = replacement.astype(float)
     gradient = (xx / h - 0.5) * rng.uniform(-30, 30, 3)[:, None, None]
     gradient = gradient.transpose(1, 2, 0)
     noise = rng.normal(0, rng.uniform(0, 2), (h, h, 1))
@@ -327,7 +343,12 @@ def render_diverse(scene: Scene) -> np.ndarray:
 
 
 def scenes(
-    split: str, count: int, seed: int, *, profile: str = "legacy"
+    split: str,
+    count: int,
+    seed: int,
+    *,
+    profile: str = "legacy",
+    independent_labels: bool = True,
 ) -> list[Scene]:
     if (
         split
@@ -335,6 +356,7 @@ def scenes(
         or count < 1
         or seed < 0
         or profile not in ("legacy", "diverse", "diverse_clear")
+        or type(independent_labels) is not bool
     ):
         raise ValueError("Invalid corpus request")
     combos = [
@@ -345,7 +367,13 @@ def scenes(
     ]
     rows = []
     for i in range(count):
-        rng = np.random.default_rng(seed + i)
+        # Reusing the renderer's initial stream leaked patterns through RGB
+        # backgrounds. False is exclusively for historical reproduction.
+        rng = np.random.default_rng(
+            np.random.SeedSequence([seed + i, LABEL_RNG_DOMAIN])
+            if independent_labels
+            else seed + i
+        )
         items = []
         for side in (0, 1):
             c, s = combos[int(rng.integers(len(combos)))]
@@ -411,18 +439,25 @@ def prepare(rows: list[Scene]) -> dict:
 
 def audit(data: dict) -> dict:
     owners = {}
+    seed_owners, scene_owners = {}, {}
     for split, group in data.items():
         for row in group["records"]:
             prior = owners.setdefault(row["image_sha256"], split)
             if prior != split:
                 raise ValueError("Pixel leakage between composition splits")
         for scene in group["scenes"]:
+            if seed_owners.setdefault(scene["seed"], split) != split:
+                raise ValueError("Scene seed leakage between composition splits")
+            if scene_owners.setdefault(scene["identity"], split) != split:
+                raise ValueError("Scene identity leakage between composition splits")
             for item in scene["items"]:
                 held = (item["color"], item["shape"]) in HELD_COMBINATIONS
                 if held != (split == "combinations"):
                     raise ValueError("Held combination escaped its split")
     return {
         "unique_images": len(owners),
+        "unique_scene_seeds": len(seed_owners),
+        "unique_scene_identities": len(scene_owners),
         "split_images": {k: len(v["pixels"]) for k, v in data.items()},
         "held_color_shape_pairs": sorted(HELD_COMBINATIONS),
         "limits": "Disjoint pixels/seeds, same procedural renderer family. Not independent photographic or textbook exam.",

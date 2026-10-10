@@ -71,7 +71,7 @@ def decisions(p, records, thresholds):
     ]
 
 
-def replay(model, arrays, split, device, *, blank=False):
+def replay(model, arrays, split, device, *, blank=False, reflection_consensus=False):
     pieces = []
     with torch.no_grad():
         for start in range(0, len(arrays[split + "_labels"]), 96):
@@ -88,7 +88,34 @@ def replay(model, arrays, split, device, *, blank=False):
             ).to(device)
             if blank:
                 pixels = torch.full_like(pixels, 0.5)
-            pieces.append(model(pixels, questions).softmax(-1).cpu().numpy())
+            if reflection_consensus:
+                # Deliberately separate implementation from the pilot's helper.
+                # Only token remapping, image flips and model outputs enter here.
+                reflected_questions = questions.clone()
+                for left, right in (("левого", "правого"), ("left", "right")):
+                    a, b = c.WORD_IDS[left], c.WORD_IDS[right]
+                    reflected_questions[questions == a] = b
+                    reflected_questions[questions == b] = a
+                view_arrays = []
+                for x, q in (
+                    (pixels, questions),
+                    (pixels.flip(3), reflected_questions),
+                    (pixels.flip(2), questions),
+                    (pixels.flip((2, 3)), reflected_questions),
+                ):
+                    view_arrays.append(model(x, q).softmax(-1).cpu().numpy())
+                pp = np.stack(view_arrays)
+                winners = pp.argmax(2)
+                agreed = (winners == winners[0]).all(0) & (winners[0] != c.UNKNOWN)
+                low = pp.max(2).min(0)
+                fused = np.zeros_like(pp[0])
+                fused[:, c.UNKNOWN] = 1
+                indices_agreed = np.flatnonzero(agreed)
+                fused[indices_agreed, winners[0, agreed]] = low[agreed]
+                fused[indices_agreed, c.UNKNOWN] = 1 - low[agreed]
+                pieces.append(fused)
+            else:
+                pieces.append(model(pixels, questions).softmax(-1).cpu().numpy())
     return np.concatenate(pieces)
 
 
@@ -179,6 +206,85 @@ def verify(root, previous, capsule, output, device):
         arrays = {key: stored_arrays[key] for key in stored_arrays.files}
     with gzip.open(root / "dataset-records.json.gz", "rt", encoding="utf-8") as f:
         source_records = json.load(f)
+    auxiliary_count = protocol.get("auxiliary_images", 0)
+    if type(auxiliary_count) is not int or not 0 <= auxiliary_count <= 10000:
+        raise ValueError("Invalid auxiliary protocol")
+    control_splits = {"exposure", "control_calibration", "control_final", "control_dev"}
+    if (source_records.keys() & control_splits) != (
+        control_splits if auxiliary_count else set()
+    ):
+        raise ValueError("Auxiliary cohorts differ from frozen protocol")
+    if auxiliary_count:
+        from ai_brain.training import primary_composition_controls as controls
+
+        if len(source_records["exposure"]["scenes"]) != auxiliary_count:
+            raise ValueError("Auxiliary image count differs")
+        audit_data = {
+            split: {**source, "pixels": arrays[split + "_pixels"]}
+            for split, source in source_records.items()
+        }
+        actual_audit = controls.audit(
+            {k: v for k, v in audit_data.items() if k in control_splits},
+            {k: v for k, v in audit_data.items() if k not in control_splits},
+        )
+        if json.loads(json.dumps(actual_audit)) != read(
+            root / "auxiliary-split-audit.json"
+        ):
+            raise ValueError("Auxiliary source audit differs")
+    if "label_rng_policy" in protocol:
+        from dataclasses import asdict
+
+        from ai_brain.training import primary_composition_rng_audit as rng_audit
+
+        if (
+            protocol["label_rng_policy"] != c.LABEL_RNG_POLICY
+            or protocol.get("independent_labels") is not True
+        ):
+            raise ValueError("Independent label RNG protocol required")
+        check_rng = rng_audit.audit(seed=protocol["seed"] * 100000 + 100000)
+        if (
+            check_rng != read(root / "rng-independence-audit.json")
+            or not check_rng["known_shortcut_absent"]
+        ):
+            raise ValueError("Label RNG leakage audit differs")
+        native_splits = (
+            "train",
+            "dev",
+            "calibration",
+            "final",
+            "combinations",
+            "transfer",
+        )
+        for offset, split in enumerate(native_splits):
+            stored = source_records[split]["scenes"]
+            regenerated = c.scenes(
+                split,
+                len(stored),
+                protocol["seed"] * 100000 + offset * 10000,
+                profile=protocol["dataset_profile"],
+                independent_labels=True,
+            )
+            if json.loads(json.dumps([asdict(s) for s in regenerated])) != stored:
+                raise ValueError("Native scenes differ from independent label RNG")
+        if auxiliary_count:
+            for split, offset in (
+                ("exposure", 6),
+                ("control_calibration", 7),
+                ("control_final", 8),
+                ("control_dev", 9),
+            ):
+                stored = source_records[split]["scenes"]
+                regenerated = controls.scenes(
+                    "held_control" if split == "control_final" else "exposure",
+                    len(stored),
+                    protocol["seed"] * 100000 + offset * 10000,
+                    cohort=split,
+                    independent_labels=True,
+                )
+                if json.loads(json.dumps([asdict(s) for s in regenerated])) != stored:
+                    raise ValueError(
+                        "Authored scenes differ from independent label RNG"
+                    )
     for split in source_records:
         records = source_records[split]["records"]
         if [r["answer"] for r in records] != arrays[split + "_labels"].tolist():
@@ -198,22 +304,45 @@ def verify(root, previous, capsule, output, device):
             ):
                 raise ValueError("Question target/input correspondence differs")
             stored_scene = source_records[split]["scenes"][index // 6]
-            scene = c.Scene(
-                stored_scene["identity"],
-                stored_scene["seed"],
-                tuple(c.Item(**item) for item in stored_scene["items"]),
-                stored_scene["style"],
-            )
+            if split in control_splits:
+                scene = controls.ControlScene(
+                    stored_scene["identity"],
+                    stored_scene["seed"],
+                    tuple(
+                        controls.ControlItem(**item) for item in stored_scene["items"]
+                    ),
+                )
+            else:
+                scene = c.Scene(
+                    stored_scene["identity"],
+                    stored_scene["seed"],
+                    tuple(c.Item(**item) for item in stored_scene["items"]),
+                    stored_scene["style"],
+                )
             if (
                 record["scene_id"] != scene.identity
                 or scene.gold(record["task"], record["side"]) != record["answer"]
             ):
                 raise ValueError("Oracle scene and target label differ")
-    calibration = replay(model, arrays, "calibration", device)
+    reflection_consensus = protocol.get("reflection_consensus", False)
+    if type(reflection_consensus) is not bool:
+        raise ValueError("Invalid reflection policy")
+    if result.get("reflection_consensus", False) != reflection_consensus:
+        raise ValueError("Reflection policy differs from protocol")
+    replay_options = {"reflection_consensus": reflection_consensus}
+    calibration = replay(model, arrays, "calibration", device, **replay_options)
     thresholds = {task: entry["threshold"] for task, entry in policy["tasks"].items()}
     if thresholds != result["thresholds"]:
         raise ValueError("Result thresholds differ from frozen calibration")
     records = source_records["calibration"]["records"]
+    if auxiliary_count:
+        calibration = np.concatenate(
+            (
+                calibration,
+                replay(model, arrays, "control_calibration", device, **replay_options),
+            )
+        )
+        records = records + source_records["control_calibration"]["records"]
     predicted = decisions(calibration, records, thresholds)
     for task in c.VALUES:
         indices = [i for i, r in enumerate(records) if r["task"] == task]
@@ -241,7 +370,12 @@ def verify(root, previous, capsule, output, device):
         if thresholds[task] != (best[1] if best else None):
             raise ValueError("Calibration threshold not selected by frozen rule")
     checks = {}
-    for split in ("dev", "final", "combinations", "transfer"):
+    final_splits = ("final", "combinations", "transfer") + (
+        ("control_final",) if auxiliary_count else ()
+    )
+    if set(result["reports"]) != {"dev", *final_splits}:
+        raise ValueError("Final cohort reports differ from protocol")
+    for split in ("dev", *final_splits):
         with gzip.open(
             root / (split + "-predictions.json.gz"), "rt", encoding="utf-8"
         ) as f:
@@ -250,7 +384,7 @@ def verify(root, previous, capsule, output, device):
         if records != saved["records"]:
             raise ValueError("Evaluation source rows changed")
         p = np.asarray(saved["probabilities"])
-        actual_p = replay(model, arrays, split, device)
+        actual_p = replay(model, arrays, split, device, **replay_options)
         if not np.allclose(actual_p, p, atol=2e-6, rtol=2e-5):
             raise ValueError("Model inference replay differs")
         predicted = decisions(p, records, thresholds)
@@ -266,6 +400,35 @@ def verify(root, previous, capsule, output, device):
             raise ValueError("Saved answer decisions differ")
         gold = [r["answer"] for r in records]
         report = result["reports"][split]
+        if "single_view_probabilities" in saved:
+            single = (
+                replay(model, arrays, split, device)
+                if reflection_consensus
+                else actual_p
+            )
+            if (
+                not np.allclose(
+                    single, saved["single_view_probabilities"], atol=2e-6, rtol=2e-5
+                )
+                or single.argmax(1).tolist() != saved["single_view_raw_predictions"]
+            ):
+                raise ValueError("Single-view inference replay differs")
+            single_gold = [r["answer"] for r in records]
+            equal(
+                measure(single_gold, saved["single_view_raw_predictions"]),
+                report["single_view_raw_argmax"]["overall"],
+            )
+            for task in c.VALUES:
+                idx = [i for i, r in enumerate(records) if r["task"] == task]
+                equal(
+                    measure(
+                        [single_gold[i] for i in idx],
+                        [saved["single_view_raw_predictions"][i] for i in idx],
+                    ),
+                    report["single_view_raw_argmax"]["tasks"][task],
+                )
+        elif reflection_consensus:
+            raise ValueError("Reflection policy requires honest single-view evidence")
         equal(measure(gold, predicted), report["selected"]["overall"])
         equal(measure(gold, saved["raw_predictions"]), report["raw_argmax"]["overall"])
         for task in c.VALUES:
@@ -318,7 +481,7 @@ def verify(root, previous, capsule, output, device):
             "arithmetic_verified": True,
             **measure(gold, predicted),
         }
-    blank_p = replay(model, arrays, "final", device, blank=True)
+    blank_p = replay(model, arrays, "final", device, blank=True, **replay_options)
     final_records = source_records["final"]["records"]
     blank_predictions = decisions(blank_p, final_records, thresholds)
     blank_gold = [r["answer"] for r in final_records]
@@ -331,7 +494,7 @@ def verify(root, previous, capsule, output, device):
             and m["unknown_recall"] >= 0.9
             for m in result["reports"][split]["selected"]["tasks"].values()
         )
-        for split in ("final", "combinations", "transfer")
+        for split in final_splits
     )
     if "acceptance" in protocol:
         if protocol["acceptance"] != {

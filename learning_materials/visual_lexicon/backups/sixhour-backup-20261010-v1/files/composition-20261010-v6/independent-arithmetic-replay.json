@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "status": "INFERENCE_AND_ARITHMETIC_VERIFIED",
+  "model_status": "NEEDS_WORK_NOT_PRODUCTION",
+  "capsule_sha256": "20041279dad1fb2afb8e4c5c86deacac887702da8b42a5ffc46dc0c31a258f06",
+  "checkpoint_sha256": "b041fd887b5a8b87b19ea4e2cf1ed785b39920163d0cd0c4cc04605f2a49541a",
+  "dataset_sha256": "8632b8e96f2efcd4f87ae4254750013bfbd397430123a2a8be3ea89cd178d393",
+  "checks": {
+    "dev": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 3250,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.9929728078215704,
+      "unknown_recall": 1.0
+    },
+    "final": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 3257,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.9951115184845707,
+      "unknown_recall": 1.0
+    },
+    "combinations": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 3258,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.995417048579285,
+      "unknown_recall": 1.0
+    },
+    "transfer": {
+      "inference_replayed": true,
+      "arithmetic_verified": true,
+      "examples": 3600,
+      "accepted": 3185,
+      "false_assertions": 1,
+      "accepted_error_rate": 0.0003139717425431711,
+      "answerable_recall": 0.9728078215704247,
+      "unknown_recall": 1.0
+    }
+  },
+  "inherited_tensors_byte_preserved": true,
+  "blank_input_accepted": 1200,
+  "blank_inference_replayed": true,
+  "question_and_oracle_correspondence_verified": true,
+  "production_admitted": false,
+  "limits": "Separate arithmetic implementation and inference replay, not independent semantic annotation or external-source blind examination."
+}

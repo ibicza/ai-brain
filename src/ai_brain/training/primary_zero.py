@@ -131,9 +131,20 @@ class Scene:
 
 
 def make_scene(
-    split: str, index: int, *, seed: int, final_style: bool = False
+    split: str,
+    index: int,
+    *,
+    seed: int,
+    final_style: bool = False,
+    independent_labels: bool = True,
 ) -> Scene:
-    rng = np.random.default_rng(seed)
+    if type(independent_labels) is not bool:
+        raise ValueError("Expected explicit label RNG policy")
+    # Prevent label bits from reappearing in the textured renderer's noise.
+    # False is reserved for reproducing archived original scenes.
+    rng = np.random.default_rng(
+        np.random.SeedSequence([seed, 0x4D335A4C]) if independent_labels else seed
+    )
     kind = ("normal", "normal", "normal", "normal", "mixed", "masked", "missing")[
         index % 7
     ]

@@ -107,3 +107,15 @@ improvements. Numerical replay is separate from independent semantic/blind revie
 Never replace observed anatomy with typical species anatomy: a hidden leg is
 unknown, not missing or implicitly seen. Known final scenes are regression assets
 now. These additions do not admit any previously unreviewed textbook media.
+
+### Generator audit correction, 2026-10-10
+
+Historical native composition V1-V7 reused RNG bits for pattern labels and image
+backgrounds. Background RGB alone recovers both patterns on 10,000/10,000 scenes.
+Their high native pattern accuracy is **not proof of visual pattern understanding**.
+Numerical results and source capsules remain immutable; future experiments use
+independent label/render RNG domains. Early zero-class textured transfer also
+correlates background noise with labels; its ordinary fixed-background training
+is not thereby shown to have been shortcut-driven. See
+`docs/m33_composition_six_hour_work.md` and the persistent RNG audit receipts.
+Do not promote historical scores into catalogue mastery percentages.

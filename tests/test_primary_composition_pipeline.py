@@ -26,8 +26,10 @@ pilot = script("m33_primary_composition_pilot")
 verifier = script("m33_composition_verify")
 
 
-@pytest.fixture(scope="module")
-def sealed(tmp_path_factory):
+@pytest.fixture(
+    scope="module", params=(0, 1, 2), ids=("single-view", "four-view", "exposure")
+)
+def sealed(tmp_path_factory, request):
     root = tmp_path_factory.mktemp("composition-pipeline")
     torch.manual_seed(500)
     prior = old.ObjectsModel(width=32, layers=1)
@@ -61,6 +63,9 @@ def sealed(tmp_path_factory):
                 spatial_readout=False,
                 shape_edges=False,
                 label_smoothing=0.0,
+                reflection_consensus=request.param > 0,
+                auxiliary_images=12 if request.param == 2 else 0,
+                consistency_loss=0.2 if request.param == 2 else 0.0,
                 previous=previous,
                 warm_candidate=None,
                 dataset_profile="diverse",
@@ -83,6 +88,20 @@ def check(root, name):
         root / name,
         "cpu",
     )
+
+
+def test_rng_audit_cannot_be_rewritten(sealed):
+    path = sealed / "experiment/rng-independence-audit.json"
+    original = path.read_bytes()
+    try:
+        changed = json.loads(original)
+        changed["background_only_pattern_accuracy"] = [0.0, 0.0]
+        path.write_text(json.dumps(changed), encoding="utf-8")
+        with pytest.raises(ValueError, match="RNG leakage audit differs"):
+            check(sealed, "must-not-exist-rng.json")
+        assert not (sealed / "must-not-exist-rng.json").exists()
+    finally:
+        path.write_bytes(original)
 
 
 def test_exact_inference_and_arithmetic_replay(sealed):
@@ -130,7 +149,10 @@ def test_dataset_archive_expands_each_array_only_once(sealed, monkeypatch):
         lambda *args, **kwargs: CountedArchive(original_load(*args, **kwargs)),
     )
     check(sealed, "verified-single-decompression.json")
-    assert len(accessed) == 24
+    auxiliary = verifier.read(sealed / "experiment/protocol.json").get(
+        "auxiliary_images", 0
+    )
+    assert len(accessed) == (40 if auxiliary else 24)
     assert set(accessed.values()) == {1}
 
 
@@ -251,3 +273,55 @@ def test_record_question_target_tamper_rejected(sealed):
     finally:
         path.write_bytes(original)
         freeze_path.write_bytes(original_freeze)
+
+
+def test_single_view_evidence_cannot_be_replaced_with_consensus(sealed):
+    path = sealed / "experiment/final-predictions.json.gz"
+    original = path.read_bytes()
+    try:
+        report = json.loads(gzip.decompress(original))
+        report["single_view_raw_predictions"][0] = (
+            report["single_view_raw_predictions"][0] + 1
+        ) % len(pilot.course.ANSWERS)
+        path.write_bytes(gzip.compress(json.dumps(report).encode()))
+        with pytest.raises(ValueError, match="Single-view inference"):
+            check(sealed, "must-not-exist-single-view.json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_reflection_policy_result_tampering_is_rejected(sealed):
+    path = sealed / "experiment/result.json"
+    original = path.read_bytes()
+    try:
+        report = json.loads(original)
+        report["reflection_consensus"] = not report["reflection_consensus"]
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(ValueError, match="Reflection policy"):
+            check(sealed, "must-not-exist-reflection.json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_js_handles_unsupported_classes_and_has_finite_gradient():
+    a = torch.tensor([[2.0, 1.0, float("-inf")]], requires_grad=True)
+    b = torch.tensor([[1.0, 2.0, float("-inf")]], requires_grad=True)
+    loss = pilot.consistency_loss(a, b)
+    assert 0 < loss < 0.7
+    assert pilot.consistency_loss(a, a) == 0
+    loss.backward()
+    assert torch.isfinite(a.grad).all() and torch.isfinite(b.grad).all()
+    assert a.grad[0, 2] == b.grad[0, 2] == 0
+    with pytest.raises(ValueError, match="scope"):
+        pilot.consistency_loss(a, torch.tensor([[1.0, float("-inf"), 2.0]]))
+
+
+def test_join_keeps_pixels_aligned_with_original_queries():
+    a = pilot.course.prepare(pilot.course.scenes("calibration", 2, 770100))
+    b = pilot.controls.prepare(
+        pilot.controls.scenes("exposure", 2, 780100, cohort="control_calibration")
+    )
+    both = pilot.join_data(a, b)
+    assert len(both["pixels"]) == 4 and len(both["labels"]) == 24
+    assert both["image_index"].tolist() == [0] * 6 + [1] * 6 + [2] * 6 + [3] * 6
+    assert both["records"][:12] == a["records"] and both["records"][12:] == b["records"]

@@ -16,6 +16,8 @@ import torch
 from torch.nn import functional as F
 
 from ai_brain.training import primary_composition as course
+from ai_brain.training import primary_composition_controls as controls
+from ai_brain.training import primary_composition_views as views
 from ai_brain.training import primary_objects as old
 from ai_brain.training import primary_relations as relations
 from ai_brain.training import primary_zero as base
@@ -52,6 +54,37 @@ class Prepared:
         )
 
 
+def join_data(left, right):
+    """Join sealed calibration sources without losing image/target correspondence."""
+    return {
+        "pixels": np.concatenate((left["pixels"], right["pixels"])),
+        "questions": np.concatenate((left["questions"], right["questions"])),
+        "labels": np.concatenate((left["labels"], right["labels"])),
+        "image_index": np.concatenate(
+            (left["image_index"], right["image_index"] + len(left["pixels"]))
+        ),
+        "records": left["records"] + right["records"],
+        "scenes": left["scenes"] + right["scenes"],
+    }
+
+
+def consistency_loss(first, second):
+    """Two-view JS with zero probability for masked, unsupported answer classes."""
+    if first.shape != second.shape or first.ndim != 2:
+        raise ValueError("Consistent answer spaces required")
+    p, q = first.softmax(-1), second.softmax(-1)
+    if not torch.isfinite(p).all() or not torch.isfinite(q).all():
+        raise ValueError("Invalid consistency logits")
+    if not torch.equal(torch.isfinite(first), torch.isfinite(second)):
+        raise ValueError("View changed supported answer scope")
+    m = (p + q) / 2
+    logm = m.clamp_min(1e-12).log()
+    return (
+        0.5 * (p * (p.clamp_min(1e-12).log() - logm)).sum(-1)
+        + 0.5 * (q * (q.clamp_min(1e-12).log() - logm)).sum(-1)
+    ).mean()
+
+
 def masked_smoothing_loss(logits, labels, amount):
     """Smooth only supported answers; masked -inf must not enter the average."""
     if (
@@ -74,7 +107,7 @@ def masked_smoothing_loss(logits, labels, amount):
 
 
 @torch.no_grad()
-def probabilities(model, prepared, batch=96, ablation=None):
+def probabilities(model, prepared, batch=96, ablation=None, *, single_view=False):
     model.eval()
     result = []
     for start in range(0, len(prepared.labels), batch):
@@ -87,7 +120,11 @@ def probabilities(model, prepared, batch=96, ablation=None):
         )
         if ablation == "blank":
             x = torch.full_like(x, 0.5)
-        result.append(model(x, q).softmax(-1).cpu().numpy())
+        if getattr(model, "reflection_consensus", False) and not single_view:
+            p = views.consistent_probabilities(model, x, q)
+        else:
+            p = model(x, q).softmax(-1)
+        result.append(p.cpu().numpy())
     return np.concatenate(result)
 
 
@@ -212,6 +249,20 @@ def run(args):
     root = args.output.resolve()
     if root.exists():
         raise ValueError("Fresh experiment directory required")
+    if max(args.train_images, args.holdout_images) > 10000 or args.seed < 0:
+        raise ValueError(
+            "Scene counts must respect the disjoint 10,000-seed split spacing"
+        )
+    auxiliary_images = getattr(args, "auxiliary_images", 0)
+    consistency_amount = getattr(args, "consistency_loss", 0.0)
+    if type(auxiliary_images) is not int or not 0 <= auxiliary_images <= 10000:
+        raise ValueError("Bounded auxiliary scene count required")
+    if (
+        type(consistency_amount) not in (float, int)
+        or not math.isfinite(consistency_amount)
+        or not 0 <= consistency_amount <= 1
+    ):
+        raise ValueError("Invalid consistency strength")
     torch.set_num_threads(2)
     torch.manual_seed(args.seed)
     if args.device.startswith("cuda") and not torch.cuda.is_available():
@@ -227,6 +278,7 @@ def run(args):
         spatial_readout=args.spatial_readout,
         shape_edges=args.shape_edges,
     ).to(device)
+    model.reflection_consensus = getattr(args, "reflection_consensus", False)
     candidate_anchor = None
     if args.warm_candidate is not None:
         candidate_anchor = sha(args.warm_candidate)
@@ -251,12 +303,14 @@ def run(args):
         "previous_sha256": warm_sha,
         "candidate_anchor_sha256": candidate_anchor,
         "dataset_profile": args.dataset_profile,
+        "label_rng_policy": course.LABEL_RNG_POLICY,
+        "independent_labels": True,
         "seed": args.seed,
         "steps_per_schedule": args.steps,
         "batch_size": 64,
         "learning_rate": 0.001,
         "schedules": ["joint", "curriculum"],
-        "selection": "Lowest balanced dev CE only. Calibration and three final cohorts accessed after candidate freeze.",
+        "selection": "Lowest balanced dev CE only; native/authored dev have equal weight when auxiliary data exists. Calibration and final cohorts accessed after candidate freeze.",
         "held_combinations": sorted(course.HELD_COMBINATIONS),
         "scope": "Procedural two-object color/shape/pattern + bounded RU/EN queries. No animal names, anatomy, photographs, textbooks or free-form text learned.",
         "production_admitted": False,
@@ -272,6 +326,15 @@ def run(args):
         "spatial_readout": model.spatial_readout_enabled,
         "shape_edges": model.shape_edges_enabled,
         "label_smoothing": args.label_smoothing,
+        "reflection_consensus": model.reflection_consensus,
+        "training_reflections": model.reflection_consensus,
+        "auxiliary_images": auxiliary_images,
+        "auxiliary_calibration": auxiliary_images > 0,
+        "held_control_final": auxiliary_images > 0,
+        "consistency_loss": consistency_amount,
+        "score_semantics": "Four-view unanimity, minimum confidence; disagreement UNKNOWN. Not calibrated probability. Raw argmax is after this fixed view policy."
+        if model.reflection_consensus
+        else "Single-view softmax",
         "literature": [
             "https://proceedings.mlr.press/v119/koh20a.html",
             "https://arxiv.org/abs/1904.12584",
@@ -288,6 +351,12 @@ def run(args):
         },
     }
     write(root / "protocol.json", protocol)
+    from ai_brain.training import primary_composition_rng_audit as rng_audit
+
+    leakage_audit = rng_audit.audit(seed=args.seed * 100000 + 100000)
+    write(root / "rng-independence-audit.json", leakage_audit)
+    if not leakage_audit["known_shortcut_absent"]:
+        raise ValueError("Background/label RNG leakage detected before training")
     raw = {
         split: course.prepare(
             course.scenes(
@@ -295,6 +364,7 @@ def run(args):
                 args.train_images if split == "train" else args.holdout_images,
                 args.seed * 100000 + offset * 10000,
                 profile=args.dataset_profile,
+                independent_labels=True,
             )
         )
         for offset, split in enumerate(
@@ -302,6 +372,30 @@ def run(args):
         )
     }
     write(root / "split-audit.json", course.audit(raw))
+    if auxiliary_images:
+        auxiliary = {
+            split: controls.prepare(
+                controls.scenes(
+                    "held_control" if split == "control_final" else "exposure",
+                    auxiliary_images if split == "exposure" else args.holdout_images,
+                    args.seed * 100000 + (6 + offset) * 10000,
+                    cohort=split,
+                )
+            )
+            for offset, split in enumerate(
+                ("exposure", "control_calibration", "control_final")
+            )
+        }
+        auxiliary["control_dev"] = controls.prepare(
+            controls.scenes(
+                "exposure",
+                args.holdout_images,
+                args.seed * 100000 + 90000,
+                cohort="control_dev",
+            )
+        )
+        write(root / "auxiliary-split-audit.json", controls.audit(auxiliary, raw))
+        raw.update(auxiliary)
     arrays = {}
     for split, group in raw.items():
         for key in ("pixels", "questions", "labels", "image_index"):
@@ -323,6 +417,10 @@ def run(args):
     sheet.save(root / "actual-input-contact-sheet.png")
     train, dev = Prepared(raw["train"], device), Prepared(raw["dev"], device)
     train_tasks = np.asarray([r["task"] for r in raw["train"]["records"]])
+    auxiliary_train = Prepared(raw["exposure"], device) if auxiliary_images else None
+    auxiliary_dev = Prepared(raw["control_dev"], device) if auxiliary_images else None
+    if auxiliary_train is not None:
+        auxiliary_tasks = np.asarray([r["task"] for r in raw["exposure"]["records"]])
     trials = []
     for schedule in ("joint", "curriculum"):
         torch.manual_seed(args.seed + 1)
@@ -346,26 +444,59 @@ def run(args):
                 if schedule == "curriculum" and step <= args.steps // 3
                 else np.arange(len(train.labels))
             )
-            indices = torch.tensor(rng.choice(pool, size=64), device=device)
+            indices = torch.tensor(
+                rng.choice(pool, size=48 if auxiliary_train is not None else 64),
+                device=device,
+            )
             x, q, y = train.batch(indices)
+            if auxiliary_train is not None:
+                auxiliary_pool = (
+                    np.flatnonzero(auxiliary_tasks != "pattern")
+                    if schedule == "curriculum" and step <= args.steps // 3
+                    else np.arange(len(auxiliary_train.labels))
+                )
+                ax, aq, ay = auxiliary_train.batch(
+                    torch.tensor(rng.choice(auxiliary_pool, size=16), device=device)
+                )
+                x, q, y = torch.cat((x, ax)), torch.cat((q, aq)), torch.cat((y, ay))
+            if model.reflection_consensus:
+                x, q = views.augment_batch(x, q, rng)
             optimizer.param_groups[0]["lr"] = 0.001 * (
                 0.2 + 0.8 * 0.5 * (1 + math.cos(math.pi * step / args.steps))
             )
             optimizer.zero_grad(set_to_none=True)
-            loss = masked_smoothing_loss(model(x, q), y, args.label_smoothing)
+            logits = model(x, q)
+            loss = masked_smoothing_loss(logits, y, args.label_smoothing)
+            if consistency_amount:
+                second_x, second_q = views.augment_batch(x, q, rng)
+                loss = loss + consistency_amount * consistency_loss(
+                    logits, model(second_x, second_q)
+                )
             loss.backward()
             torch.nn.utils.clip_grad_norm_(
                 [p for p in model.parameters() if p.requires_grad], 1.0
             )
             optimizer.step()
             if step % args.eval_every == 0 or step == args.steps:
-                p = probabilities(model, dev)
+                # Checkpoint selection remains raw single-view dev CE, not
+                # conservative scores with deliberately zeroed alternatives.
+                p = probabilities(model, dev, single_view=True)
                 score = balanced_loss(dev, p)
+                native_score = score
+                auxiliary_score = None
+                if auxiliary_dev is not None:
+                    auxiliary_score = balanced_loss(
+                        auxiliary_dev,
+                        probabilities(model, auxiliary_dev, single_view=True),
+                    )
+                    score = (native_score + auxiliary_score) / 2
                 verify_inherited(model, inherited_state)
                 point = {
                     "step": step,
                     "train_loss": float(loss.detach()),
                     "balanced_dev_ce": score,
+                    "native_balanced_dev_ce": native_score,
+                    "auxiliary_balanced_dev_ce": auxiliary_score,
                     "elapsed_seconds": time.monotonic() - started,
                 }
                 history.append(point)
@@ -416,11 +547,19 @@ def run(args):
     model.load_candidate(selected["candidate"])
     verify_inherited(model, inherited_state)
     model.eval()
-    calibration = Prepared(raw["calibration"], device)
+    calibration_data = (
+        join_data(raw["calibration"], raw["control_calibration"])
+        if auxiliary_images
+        else raw["calibration"]
+    )
+    calibration = Prepared(calibration_data, device)
     thresholds, policy = calibrate(calibration, probabilities(model, calibration))
     write(root / "policy-frozen.json", policy)
+    final_splits = ("final", "combinations", "transfer") + (
+        ("control_final",) if auxiliary_images else ()
+    )
     reports = {}
-    for split in ("dev", "final", "combinations", "transfer"):
+    for split in ("dev", *final_splits):
         group = dev if split == "dev" else Prepared(raw[split], device)
         p = probabilities(model, group)
         raw_eval = evaluate(group, p, {task: 0 for task in course.VALUES})
@@ -430,6 +569,15 @@ def run(args):
             "selected": {k: v for k, v in safe_eval.items() if k != "predictions"},
             "image_count": len(group.pixels),
             "independence": "Same renderer family, unseen seeds. Not an independent blind external-source exam.",
+        }
+        single_p = (
+            probabilities(model, group, single_view=True)
+            if model.reflection_consensus
+            else p
+        )
+        single_eval = evaluate(group, single_p, {task: 0 for task in course.VALUES})
+        report["single_view_raw_argmax"] = {
+            k: v for k, v in single_eval.items() if k != "predictions"
         }
         reports[split] = report
         write(root / (split + "-results.json"), report)
@@ -442,6 +590,8 @@ def run(args):
                     "probabilities": p.tolist(),
                     "selected": safe_eval["predictions"],
                     "raw_predictions": raw_eval["predictions"],
+                    "single_view_probabilities": single_p.tolist(),
+                    "single_view_raw_predictions": single_eval["predictions"],
                 },
                 f,
                 ensure_ascii=False,
@@ -486,7 +636,7 @@ def run(args):
             and task["unknown_recall"] >= 0.9
             for task in reports[split]["selected"]["tasks"].values()
         )
-        for split in ("final", "combinations", "transfer")
+        for split in final_splits
     )
     passed = passed and all(
         reports[split]["selected"]["complete_visible_descriptions"][
@@ -515,6 +665,7 @@ def run(args):
         "new_word_tokens": course.NEW_WORDS,
         "capacity": protocol["capacity"],
         "thresholds": thresholds,
+        "reflection_consensus": model.reflection_consensus,
         "limits": "No claim that these procedural attributes transfer to photographs, giraffes, watermelons or textbooks. Language is closed RU/EN queries, not a generative language model. Successful stage is not production admission.",
     }
     write(root / "result.json", result)
@@ -549,6 +700,9 @@ if __name__ == "__main__":
     parser.add_argument("--spatial-readout", action="store_true")
     parser.add_argument("--shape-edges", action="store_true")
     parser.add_argument("--label-smoothing", type=float, default=0.0)
+    parser.add_argument("--reflection-consensus", action="store_true")
+    parser.add_argument("--auxiliary-images", type=int, default=0)
+    parser.add_argument("--consistency-loss", type=float, default=0.0)
     args = parser.parse_args()
     if min(args.steps, args.eval_every, args.train_images, args.holdout_images) < 1:
         parser.error("Positive experiment sizes required")
