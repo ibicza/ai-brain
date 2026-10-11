@@ -106,3 +106,29 @@ def test_reflection_keeps_mask_and_question_target_aligned_without_extra_rng_dra
     ordinary_x, ordinary_q = views.augment_batch(images, q, np.random.default_rng(51))
     assert torch.equal(x, ordinary_x) and torch.equal(questions, ordinary_q)
     assert torch.equal(targets, x[:, :1])
+
+
+def test_color_only_training_masks_do_not_supervise_shape_pattern_or_hidden():
+    from m33_primary_composition_pilot import Prepared
+
+    scene = controls.scenes(
+        "exposure", 1, 3134567, exposure_profile="palette_boundary_paper_aspects"
+    )[0]
+    scene = replace(
+        scene,
+        items=(
+            replace(scene.items[0], hidden=False),
+            replace(scene.items[1], hidden=True),
+        ),
+    )
+    data = controls.prepare([scene], include_foreground=True)
+    prepared = Prepared(data, "cpu")
+    indices = torch.arange(6)
+    original = prepared.target_masks(indices)
+    scoped = prepared.target_masks(indices, task_scope="color")
+    assert torch.equal(scoped[0], original[0]) and scoped[0].sum() > 0
+    assert scoped[1:].sum() == 0
+    assert original[1].sum() > 0 and original[2].sum() > 0
+    assert torch.equal(original, prepared.target_masks(indices))
+    with pytest.raises(ValueError, match="scope"):
+        prepared.target_masks(indices, task_scope="all_except_shape")

@@ -218,6 +218,11 @@ def verify(root, previous, capsule, output, device):
     sampling_rule = protocol.get("sampling_rule", "legacy_48_16")
     foreground_amount = protocol.get("foreground_loss", 0.0)
     if (
+        protocol.get("foreground_tasks", "all")
+        not in supervision.FOREGROUND_TASK_SCOPES
+    ):
+        raise ValueError("Invalid sealed foreground task scope")
+    if (
         sampling_rule not in supervision.SAMPLING_RULES
         or (sampling_rule != "legacy_48_16" and not protocol.get("auxiliary_images", 0))
         or type(foreground_amount) not in (int, float)
@@ -311,12 +316,17 @@ def verify(root, previous, capsule, output, device):
 
         exposure_profile = protocol.get("exposure_profile", "standard")
         if (
-            exposure_profile == "palette_paper_aspects"
+            exposure_profile in controls.PAPER_PROFILES
             and protocol.get("paper_rng_policy") != controls.PAPER_RNG_POLICY
         ):
             raise ValueError("Paper exposure RNG policy differs from source")
         if exposure_profile not in controls.EXPOSURE_PROFILES:
             raise ValueError("Invalid control exposure profile")
+        if (
+            exposure_profile == "palette_boundary_paper_aspects"
+            and protocol.get("boundary_rng_policy") != controls.BOUNDARY_RNG_POLICY
+        ):
+            raise ValueError("Unsupported hue RNG policy differs from source")
         if "exposure_profile" in protocol and (
             protocol.get("exposure_shapes")
             != list(controls.EXPOSURE_PROFILES[exposure_profile])
@@ -515,6 +525,7 @@ def verify(root, previous, capsule, output, device):
                 raise ValueError("Strict calibration cohort metrics differ")
             for name, measured in grouped_actual.items():
                 equal(measured, stored_cohorts[name])
+        grid_audit = []
         for threshold in (0.9, 0.95, 0.97, 0.98, 0.99, 0.995, 0.999, 0.9999):
             candidate = decisions(calibration[indices], task_records, {task: threshold})
             metrics = measure(task_gold, candidate)
@@ -527,16 +538,32 @@ def verify(root, previous, capsule, output, device):
                 and (m["unknown_recall"] is None or m["unknown_recall"] >= 0.9)
                 for m in cohort_metrics.values()
             )
-            if (
+            qualifies = (
                 metrics["false_assertions"] == 0
                 and metrics["accepted"] >= policy["minimum_accepted_per_task"]
                 and recall_ok
-            ):
+            )
+            grid_audit.append(
+                {
+                    "threshold": threshold,
+                    "metrics": metrics,
+                    "cohort_metrics": cohort_metrics,
+                    "eligible": qualifies,
+                }
+            )
+            if qualifies:
                 eligible.append(
                     (threshold, metrics["accepted"])
                     if strict_calibration
                     else (metrics["accepted"], threshold)
                 )
+        if (
+            "grid_audit" in policy["tasks"][task]
+            and policy["tasks"][task]["grid_audit"] != grid_audit
+        ):
+            raise ValueError(
+                "Calibration grid audit differs from independent arithmetic"
+            )
         best = max(eligible) if eligible else None
         if thresholds[task] != (best[0 if strict_calibration else 1] if best else None):
             raise ValueError("Calibration threshold not selected by frozen rule")

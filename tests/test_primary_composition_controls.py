@@ -268,6 +268,69 @@ def test_old_palette_profile_remains_the_archival_conditional_color_design():
     )
 
 
+def test_boundary_palette_diversity_and_held_families_do_not_enter_training():
+    profile = "palette_boundary_paper_aspects"
+    train = controls.scenes("exposure", 1800, 2210100, exposure_profile=profile)
+    held = controls.scenes("held_control", 600, 2230100, exposure_profile=profile)
+    train_palette, held_palette = controls.unknown_palettes(profile)
+    assert set(train_palette).isdisjoint(held_palette)
+    assert {i.color for row in train for i in row.items} - set(c.COLORS) == set(
+        train_palette
+    )
+    assert {i.color for row in held for i in row.items} - set(c.COLORS) == set(
+        held_palette
+    )
+    pairs = {(i.color, i.shape) for row in train for i in row.items if not i.hidden}
+    assert {(color, shape) for color in train_palette for shape in c.SHAPES} <= pairs
+    assert not (
+        {(i.color, i.shape) for row in train for i in row.items} & c.HELD_COMBINATIONS
+    )
+    assert set(c.VALUES["color"]) == set(c.COLORS)  # no answer-head expansion
+    for row in [*train[:8], *held[:8]]:
+        pixels, masks = controls.render(row, return_foreground=True)
+        assert np.array_equal(pixels, controls.render(row))
+        assert masks.shape == (2, 96, 96)
+        for side, item in enumerate(row.items):
+            assert (row.gold("color", side) == c.UNKNOWN) == (
+                item.hidden or item.color not in c.COLORS
+            )
+    native = {"train": c.prepare(c.scenes("train", 2, 2290100))}
+    extra = {
+        "exposure": controls.prepare(train[:10]),
+        "control_final": controls.prepare(held[:10]),
+    }
+    audit = controls.audit(extra, native, exposure_profile=profile)
+    assert set(audit["exposure_unknown_colors"]) == set(train_palette)
+    extra["exposure"]["scenes"][0]["items"][0]["color"] = "серо-синий"
+    with pytest.raises(ValueError, match="Held color"):
+        controls.audit(extra, native, exposure_profile=profile)
+
+
+def test_boundary_profile_cannot_change_archived_labels_rgb_or_accept_new_hues():
+    from dataclasses import replace
+
+    scene = controls.scenes(
+        "exposure", 2, 2510100, exposure_profile="palette_paper_aspects"
+    )[1]
+    scene = replace(
+        scene,
+        items=tuple(
+            replace(item, color="красный", hidden=False) for item in scene.items
+        ),
+    )
+    boundary = replace(scene, renderer_profile="palette_boundary_paper_aspects")
+    assert np.array_equal(controls.render(scene), controls.render(boundary))
+    altered = replace(
+        scene, items=(replace(scene.items[0], color="оливковый"), scene.items[1])
+    )
+    with pytest.raises(ValueError, match="Invalid authored"):
+        controls.render(altered)
+    assert controls.unknown_palettes("palette_paper_aspects") == (
+        controls.PALETTE_UNKNOWN_RGB,
+        controls.PALETTE_HELD_RGB,
+    )
+
+
 def test_aspect_profile_changes_only_elongated_geometry_not_labels_or_other_items():
     from dataclasses import replace
 

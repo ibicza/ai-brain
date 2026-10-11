@@ -29,7 +29,7 @@ verifier = script("m33_composition_verify")
 
 @pytest.fixture(
     scope="module",
-    params=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13),
+    params=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
     ids=(
         "single-view",
         "four-view",
@@ -45,6 +45,8 @@ verifier = script("m33_composition_verify")
         "ieee-strict-paper-aspect-palette",
         "balanced-paper-aspect-palette",
         "balanced-foreground-paper-aspect-palette",
+        "boundary-balanced-paper-aspect-palette",
+        "boundary-color-foreground-paper-aspect-palette",
     ),
 )
 def sealed(tmp_path_factory, request):
@@ -87,11 +89,18 @@ def sealed(tmp_path_factory, request):
                 sampling_rule="balanced_task_answer_32_32"
                 if request.param >= 12
                 else "legacy_48_16",
-                foreground_loss=0.1 if request.param == 13 else 0.0,
+                foreground_loss=0.02
+                if request.param == 15
+                else 0.1
+                if request.param == 13
+                else 0.0,
+                foreground_tasks="color" if request.param == 15 else "all",
                 calibration_rule="coverage_guarded_strict"
                 if request.param >= 11
                 else "maximum_coverage",
-                exposure_profile="palette_paper_aspects"
+                exposure_profile="palette_boundary_paper_aspects"
+                if request.param >= 14
+                else "palette_paper_aspects"
                 if request.param >= 10
                 else "palette_aspects"
                 if request.param == 9
@@ -286,6 +295,42 @@ def test_calibration_rule_cannot_change_after_candidate_freeze(sealed):
             check(sealed, "must-not-exist-calibration-rule.json")
     finally:
         path.write_bytes(original)
+
+
+def test_calibration_grid_audit_cannot_hide_a_rejected_threshold(sealed):
+    path = sealed / "experiment/policy-frozen.json"
+    original = path.read_bytes()
+    try:
+        policy = json.loads(original)
+        policy["tasks"]["shape"]["grid_audit"][0]["eligible"] = not policy["tasks"][
+            "shape"
+        ]["grid_audit"][0]["eligible"]
+        path.write_text(json.dumps(policy), encoding="utf-8")
+        with pytest.raises(ValueError, match="Calibration grid audit"):
+            check(sealed, "must-not-exist-grid.json")
+    finally:
+        path.write_bytes(original)
+
+
+def test_boundary_rng_policy_cannot_be_rewritten(sealed):
+    path = sealed / "experiment/protocol.json"
+    original = path.read_bytes()
+    protocol = json.loads(original)
+    if protocol["exposure_profile"] != "palette_boundary_paper_aspects":
+        pytest.skip("No boundary hue contract in this fixture")
+    freeze_path = sealed / "experiment/candidate-freeze.json"
+    freeze_original = freeze_path.read_bytes()
+    try:
+        protocol["boundary_rng_policy"] = "held colors also train"
+        path.write_text(json.dumps(protocol), encoding="utf-8")
+        freeze = json.loads(freeze_original)
+        freeze["protocol_sha256"] = verifier.sha(path)
+        freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
+        with pytest.raises(ValueError, match="Unsupported hue RNG policy"):
+            check(sealed, "must-not-exist-boundary.json")
+    finally:
+        path.write_bytes(original)
+        freeze_path.write_bytes(freeze_original)
 
 
 def test_calibration_support_count_cannot_be_reduced_or_bool_aliased(sealed):

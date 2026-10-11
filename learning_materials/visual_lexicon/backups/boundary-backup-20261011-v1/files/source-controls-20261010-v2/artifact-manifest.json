@@ -1,0 +1,32 @@
+{
+  "files": [
+    {
+      "file": "actual-source-control-inputs.png",
+      "sha256": "3a8d1f3ada928575f6a4e353d1d09c38fbf8d83507e0067e3aef2d2dceacac89"
+    },
+    {
+      "file": "dataset.npz",
+      "sha256": "c85efd2674aa17e0e8c98d362afe4fdf56716aba94637ffb893b7b606da6bda0"
+    },
+    {
+      "file": "preparation-executed.py",
+      "sha256": "bde1f42064b7b137da4eab1b411e8ed1b7d7a22bb9e361698f9c82827daa93cb"
+    },
+    {
+      "file": "preparation-freeze.json",
+      "sha256": "56eb47cee6178f6265df11a4a0e15216d68f6e79f09d685ddc653a017c81dbac"
+    },
+    {
+      "file": "preparation-receipt.json",
+      "sha256": "388ec27c29315c015d6211d826426726820363cec96a2d0f672b334ab1ad520e"
+    },
+    {
+      "file": "records.json.gz",
+      "sha256": "6f81ae128f5863b8bd9460aa7203c25f02e1e9dd05743fc090b6657b032d8a1a"
+    },
+    {
+      "file": "source-asset-crops.png",
+      "sha256": "5e7df9a570838820e0a6fd253ebb9a4455f06ac5d7f61f0ca0dfd0f9c14d8c69"
+    }
+  ]
+}

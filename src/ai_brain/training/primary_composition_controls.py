@@ -26,7 +26,9 @@ EXPOSURE_PROFILES = {
     "palette_independent": PALETTE_EXPOSURE_SHAPES,
     "palette_aspects": PALETTE_EXPOSURE_SHAPES,
     "palette_paper_aspects": PALETTE_EXPOSURE_SHAPES,
+    "palette_boundary_paper_aspects": PALETTE_EXPOSURE_SHAPES,
 }
+PAPER_PROFILES = ("palette_paper_aspects", "palette_boundary_paper_aspects")
 HELD_OUT_SHAPES = ("star", "pentagon", "trapezoid")
 LABEL_RNG_DOMAIN = 0x4D33434C
 PALETTE_LABEL_DOMAIN = 0x4D33504C
@@ -41,12 +43,39 @@ PALETTE_UNKNOWN_RGB = {
     "фиолетовый": (150, 60, 190),
 }
 PALETTE_HELD_RGB = {"бирюзовый": (40, 190, 170)}
+BOUNDARY_EXPOSURE_RGB = {
+    "серый": (145, 150, 155),
+    "оливковый": (145, 145, 45),
+    "лиловый": (170, 125, 200),
+    "бежевый": (215, 190, 140),
+    "бордовый": (125, 30, 75),
+    "сине-зелёный": (30, 140, 135),
+}
+BOUNDARY_HELD_RGB = {
+    "коралловый": (230, 125, 110),
+    "серо-синий": (110, 145, 180),
+    "серо-лавандовый": (170, 155, 190),
+    "песочный": (205, 155, 90),
+}
+BOUNDARY_VISUAL_DOMAIN = 0x4D334250
+BOUNDARY_RNG_POLICY = "SeedSequence(scene_seed, side, M3BP); unsupported hues get independent achromatic uniform(-12,12) plus per-channel uniform(-8,8); no labels choose RNG draws; train/final hue families separated"
 PALETTE_KNOWN_ENDPOINTS = {
     "красный": (245, 75, 65),
     "зелёный": (140, 220, 105),
     "жёлтый": (250, 235, 90),
     "синий": (35, 105, 230),
 }
+
+
+def unknown_palettes(profile):
+    if profile not in EXPOSURE_PROFILES:
+        raise ValueError("Registered palette profile required")
+    if profile == "palette_boundary_paper_aspects":
+        return (
+            {**PALETTE_UNKNOWN_RGB, **BOUNDARY_EXPOSURE_RGB},
+            {**PALETTE_HELD_RGB, **BOUNDARY_HELD_RGB},
+        )
+    return PALETTE_UNKNOWN_RGB, PALETTE_HELD_RGB
 
 
 @dataclass(frozen=True)
@@ -70,12 +99,13 @@ class ControlScene:
             or type(self.seed) is not int
             or self.seed < 0
             or self.renderer_profile
-            not in ("standard", "palette", "palette_aspects", "palette_paper_aspects")
+            not in ("standard", "palette", "palette_aspects", *PAPER_PROFILES)
         ):
             raise ValueError("Invalid authored control scene")
+        train_palette, held_palette = unknown_palettes(self.renderer_profile)
         for item in self.items:
             if (
-                item.color not in (*c.COLORS, *PALETTE_UNKNOWN_RGB, *PALETTE_HELD_RGB)
+                item.color not in (*c.COLORS, *train_palette, *held_palette)
                 or (self.renderer_profile == "standard" and item.color not in c.COLORS)
                 or item.shape
                 not in (*c.SHAPES, *PALETTE_EXPOSURE_SHAPES, *HELD_OUT_SHAPES)
@@ -202,7 +232,7 @@ def paper_patch(seed, side, scale=4):
 def renderer_profile(exposure_profile):
     if exposure_profile not in EXPOSURE_PROFILES:
         raise ValueError("Invalid authored exposure renderer request")
-    if exposure_profile in ("palette_aspects", "palette_paper_aspects"):
+    if exposure_profile in ("palette_aspects", *PAPER_PROFILES):
         return exposure_profile
     return "palette" if exposure_profile.startswith("palette") else "standard"
 
@@ -211,6 +241,7 @@ def render(scene, *, return_foreground=False):
     if type(return_foreground) is not bool:
         raise ValueError("Boolean foreground supervision request required")
     scene.validate()
+    train_palette, held_palette = unknown_palettes(scene.renderer_profile)
     rng = np.random.default_rng(scene.seed)
     palette_rng = np.random.default_rng(
         np.random.SeedSequence([scene.seed, PALETTE_VISUAL_DOMAIN])
@@ -230,7 +261,7 @@ def render(scene, *, return_foreground=False):
             ry = radius * 0.55 if item.shape in ("овал", "прямоугольник") else radius
             if scene.renderer_profile in (
                 "palette_aspects",
-                "palette_paper_aspects",
+                *PAPER_PROFILES,
             ) and item.shape in (
                 "овал",
                 "прямоугольник",
@@ -264,7 +295,7 @@ def render(scene, *, return_foreground=False):
         base_rgb = (
             c.RGB[c.COLORS.index(item.color)]
             if item.color in c.COLORS
-            else {**PALETTE_UNKNOWN_RGB, **PALETTE_HELD_RGB}[item.color]
+            else {**train_palette, **held_palette}[item.color]
         )
         rgb = np.asarray(base_rgb, dtype=float)
         if (
@@ -277,6 +308,18 @@ def render(scene, *, return_foreground=False):
                 + np.asarray(PALETTE_KNOWN_ENDPOINTS[item.color]) * amount
             )
         rgb = np.clip(rgb + jitter, 0, 255).astype(int)
+        if (
+            scene.renderer_profile == "palette_boundary_paper_aspects"
+            and item.color not in c.COLORS
+        ):
+            boundary_rng = np.random.default_rng(
+                np.random.SeedSequence([scene.seed, side, BOUNDARY_VISUAL_DOMAIN])
+            )
+            rgb = np.clip(
+                rgb + boundary_rng.uniform(-12, 12) + boundary_rng.uniform(-8, 8, 3),
+                0,
+                255,
+            ).astype(int)
         surface = Image.new("RGB", mask.size, tuple(rgb))
         texture = ImageDraw.Draw(surface)
         ink = tuple(np.clip(rgb + (-75 if rgb.mean() > 100 else 75), 0, 255))
@@ -297,7 +340,7 @@ def render(scene, *, return_foreground=False):
                     )
         cx, cy = (24, 72)[side], float(rng.uniform(29, 67))
         position = ((cx - 22) * scale, int((cy - 22) * scale))
-        if scene.renderer_profile == "palette_paper_aspects" and not item.hidden:
+        if scene.renderer_profile in PAPER_PROFILES and not item.hidden:
             paper = Image.fromarray(paper_patch(scene.seed, side, scale))
             canvas.paste(
                 paper,
@@ -374,12 +417,13 @@ def scenes(
             choose_unknown_color = (
                 palette_labels.random() < 1 / 3
                 if exposure_profile
-                in ("palette_independent", "palette_aspects", "palette_paper_aspects")
+                in ("palette_independent", "palette_aspects", *PAPER_PROFILES)
                 else (i + side) % 3 == 1
             )
             if exposure_profile.startswith("palette") and choose_unknown_color:
+                train_palette, held_palette = unknown_palettes(exposure_profile)
                 unknown_colors = tuple(
-                    PALETTE_HELD_RGB if split == "held_control" else PALETTE_UNKNOWN_RGB
+                    held_palette if split == "held_control" else train_palette
                 )
                 color = unknown_colors[
                     int(palette_labels.integers(len(unknown_colors)))
@@ -446,6 +490,7 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
     if exposure_profile not in EXPOSURE_PROFILES:
         raise ValueError("Invalid control exposure profile")
     exposure_shapes = EXPOSURE_PROFILES[exposure_profile]
+    train_palette, held_palette = unknown_palettes(exposure_profile)
     seed_owners, identities, pixels = {}, {}, {}
     for split, group in {**native, **auxiliary}.items():
         for scene in group["scenes"]:
@@ -463,11 +508,7 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
                 allowed_colors = (
                     (
                         *c.COLORS,
-                        *(
-                            PALETTE_HELD_RGB
-                            if split == "control_final"
-                            else PALETTE_UNKNOWN_RGB
-                        ),
+                        *(held_palette if split == "control_final" else train_palette),
                     )
                     if exposure_profile.startswith("palette")
                     else c.COLORS
@@ -495,10 +536,10 @@ def audit(auxiliary, native, *, exposure_profile="standard"):
         "unique_images": len(pixels),
         "exposure_shapes": exposure_shapes,
         "held_control_shapes": HELD_OUT_SHAPES,
-        "exposure_unknown_colors": tuple(PALETTE_UNKNOWN_RGB)
+        "exposure_unknown_colors": tuple(train_palette)
         if exposure_profile.startswith("palette")
         else (),
-        "held_unknown_colors": tuple(PALETTE_HELD_RGB)
+        "held_unknown_colors": tuple(held_palette)
         if exposure_profile.startswith("palette")
         else (),
         "limits": "Authored generator separation, shared Pillow, not external-source independence.",

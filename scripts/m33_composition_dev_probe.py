@@ -15,6 +15,16 @@ def sha(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def restore_precision(protocol, numeric):
+    """Apply the original contract, not the GPU process's incidental defaults."""
+    contract = protocol.get("numeric_backend")
+    return (
+        numeric.check_contract(contract)
+        if contract is not None
+        else numeric.configure("legacy")
+    )
+
+
 def fuse(scores, unknown):
     """Unanimous argmax, minimum score; disagreement is explicitly UNKNOWN."""
     import numpy as np
@@ -93,6 +103,7 @@ def run(reference, output, device):
     )
 
     from ai_brain.training import primary_composition as c
+    from ai_brain.training import primary_numeric_backend as numeric
     from ai_brain.training import primary_objects as old
 
     if (
@@ -101,6 +112,7 @@ def run(reference, output, device):
     ):
         raise ValueError("Inference module escaped frozen source")
     torch.set_num_threads(2)
+    numeric_backend = restore_precision(protocol, numeric)
     splits = ("dev", "control_dev") if protocol.get("auxiliary_images", 0) else ("dev",)
     with np.load(root / "dataset.npz", allow_pickle=False) as store:
         arrays = {
@@ -206,6 +218,7 @@ def run(reference, output, device):
         "groups": groups,
         "balanced_dev_ce": summary,
         "device": str(device),
+        "numeric_backend": numeric_backend,
         "executed_script_sha256": executed_hash,
         "training_or_calibration": False,
         "production_admitted": False,

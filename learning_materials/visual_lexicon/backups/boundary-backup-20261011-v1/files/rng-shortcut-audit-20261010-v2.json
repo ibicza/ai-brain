@@ -1,0 +1,364 @@
+{
+  "schema": 1,
+  "status": "KNOWN_RNG_SHORTCUT_REPRODUCED_AND_DOMAIN_SEPARATED",
+  "archival_reproduction": {
+    "schema": 1,
+    "seed": 55150000,
+    "count_per_side": 10000,
+    "independent_labels": false,
+    "label_rng_policy": "archival shared stream",
+    "detector": "floor((base_background_channel - 100) / 80 * 3); R left, G right",
+    "confusion_gold_by_background_prediction": [
+      [
+        [
+          3396,
+          0,
+          0
+        ],
+        [
+          0,
+          3307,
+          0
+        ],
+        [
+          0,
+          0,
+          3297
+        ]
+      ],
+      [
+        [
+          3352,
+          0,
+          0
+        ],
+        [
+          0,
+          3353,
+          0
+        ],
+        [
+          0,
+          0,
+          3295
+        ]
+      ]
+    ],
+    "background_only_pattern_accuracy": [
+      1.0,
+      1.0
+    ],
+    "known_shortcut_absent": false,
+    "limits": "Tests the discovered pattern/background shortcut only; not a comprehensive independence or semantic-understanding proof.",
+    "production_admitted": false
+  },
+  "future_generator": {
+    "schema": 1,
+    "seed": 55150000,
+    "count_per_side": 10000,
+    "independent_labels": true,
+    "label_rng_policy": "SeedSequence(scene_seed, M33L); separate from rendering",
+    "detector": "floor((base_background_channel - 100) / 80 * 3); R left, G right",
+    "confusion_gold_by_background_prediction": [
+      [
+        [
+          1124,
+          1092,
+          1061
+        ],
+        [
+          1124,
+          1146,
+          1116
+        ],
+        [
+          1148,
+          1069,
+          1120
+        ]
+      ],
+      [
+        [
+          1102,
+          1158,
+          1092
+        ],
+        [
+          1134,
+          1064,
+          1067
+        ],
+        [
+          1116,
+          1131,
+          1136
+        ]
+      ]
+    ],
+    "background_only_pattern_accuracy": [
+      0.339,
+      0.3302
+    ],
+    "known_shortcut_absent": true,
+    "limits": "Tests the discovered pattern/background shortcut only; not a comprehensive independence or semantic-understanding proof.",
+    "production_admitted": false
+  },
+  "archival_zero_textured_transfer": {
+    "seed": 76100000,
+    "total_scenes": 10000,
+    "count_examples": 5716,
+    "shape_examples": 4782,
+    "independent_labels": false,
+    "background_only_count_shape_accuracy": [
+      0.8617914625612316,
+      0.8636553743203681
+    ],
+    "confusion_gold_by_background_prediction": [
+      [
+        [
+          934,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          98,
+          840,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          176,
+          528,
+          241,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          802,
+          194,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          819,
+          81
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1003
+        ]
+      ],
+      [
+        [
+          792,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          68,
+          748,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          145,
+          414,
+          204,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          698,
+          169,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          732,
+          66
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          746
+        ]
+      ]
+    ],
+    "known_shortcut_absent": false,
+    "limits": "Textured transfer backgrounds only. Ordinary training backgrounds are fixed. Does not show that historical models exploited this shortcut or invalidate their every skill."
+  },
+  "future_zero_textured_transfer": {
+    "seed": 76100000,
+    "total_scenes": 10000,
+    "count_examples": 5716,
+    "shape_examples": 4773,
+    "independent_labels": true,
+    "background_only_count_shape_accuracy": [
+      0.15832750174947516,
+      0.16635239891053843
+    ],
+    "confusion_gold_by_background_prediction": [
+      [
+        [
+          155,
+          161,
+          96,
+          170,
+          168,
+          193
+        ],
+        [
+          181,
+          160,
+          94,
+          179,
+          153,
+          185
+        ],
+        [
+          167,
+          161,
+          75,
+          174,
+          170,
+          159
+        ],
+        [
+          176,
+          171,
+          83,
+          163,
+          179,
+          196
+        ],
+        [
+          174,
+          204,
+          99,
+          168,
+          177,
+          176
+        ],
+        [
+          179,
+          159,
+          81,
+          189,
+          166,
+          175
+        ]
+      ],
+      [
+        [
+          132,
+          142,
+          60,
+          123,
+          155,
+          141
+        ],
+        [
+          139,
+          135,
+          72,
+          158,
+          157,
+          125
+        ],
+        [
+          153,
+          171,
+          73,
+          143,
+          148,
+          149
+        ],
+        [
+          138,
+          163,
+          75,
+          160,
+          148,
+          126
+        ],
+        [
+          138,
+          140,
+          64,
+          145,
+          138,
+          143
+        ],
+        [
+          145,
+          140,
+          68,
+          157,
+          153,
+          156
+        ]
+      ]
+    ],
+    "known_shortcut_absent": true,
+    "limits": "Textured transfer backgrounds only. Ordinary training backgrounds are fixed. Does not show that historical models exploited this shortcut or invalidate their every skill."
+  },
+  "interpretation": "High native pattern scores of historical V1-V7 are not proof of visual pattern understanding. Do not alter their frozen sources, weights or numerical results. Future scores need freshly generated domain-separated cohorts.",
+  "sources": [
+    {
+      "file": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\scripts\\m33_composition_rng_audit.py",
+      "sha256": "e3e95dd64159b591c9c6a320231614b8ab21c325c3f280e6d1d1c0f630b0aec4"
+    },
+    {
+      "file": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\src\\ai_brain\\training\\primary_composition.py",
+      "sha256": "e210cb6be1eb30a6a68239cc7c2e61a4d00eb18d087d3f2010cd8552f290c5b6"
+    },
+    {
+      "file": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\src\\ai_brain\\training\\primary_composition_rng_audit.py",
+      "sha256": "9ffb01a07da2f430dd3295a31d5fe3b9d025dce99ba9cdc235ca0d5683345516"
+    },
+    {
+      "file": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\src\\ai_brain\\training\\primary_composition_controls.py",
+      "sha256": "4af89e34ec2c05decd1ed92b38a1f0870d30004427a30ca4ba1c23c0e4d77046"
+    },
+    {
+      "file": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\src\\ai_brain\\training\\primary_zero.py",
+      "sha256": "5bd4214f56f88b412d18e843bad1b0a50cf495d94bf326954d2a4163781b80f8"
+    },
+    {
+      "file": "W:\\toolbox_IDEA\\programs\\IdeaProjects\\ai-brain\\src\\ai_brain\\training\\primary_relations.py",
+      "sha256": "6d62e9ce4c1347e3bd73db114ff29c1dea471307d33fe3e3446830a0faa5b7fb"
+    }
+  ],
+  "production_admitted": false
+}

@@ -150,6 +150,8 @@ def run(args):
             + getattr(args, "sampling_rule", "legacy_48_16")
             + " --foreground-loss "
             + str(getattr(args, "foreground_loss", 0.0))
+            + " --foreground-tasks "
+            + getattr(args, "foreground_tasks", "all")
         )
         command(
             prefix
@@ -218,6 +220,7 @@ if __name__ == "__main__":
             "palette_independent",
             "palette_aspects",
             "palette_paper_aspects",
+            "palette_boundary_paper_aspects",
         ),
         default="standard",
     )
@@ -228,6 +231,7 @@ if __name__ == "__main__":
         default="legacy_48_16",
     )
     parser.add_argument("--foreground-loss", type=float, default=0.0)
+    parser.add_argument("--foreground-tasks", choices=("all", "color"), default="all")
     parser.add_argument(
         "--calibration-rule",
         choices=("maximum_coverage", "coverage_guarded_strict"),

@@ -1,0 +1,101 @@
+{
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-capsule.tgz": "59c87f06258bbd3b63fb668edf71700c4eccc3cc234b9ad84277061c363f44ff",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/curriculum/best.pt": "1b742d02a6dd2736c43b9c07d0ee9dede585c97adc0aa102d3617d445d6644be",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/protocol.json": "700fd38a3faf28e1997ac66781088a89996cf83a8fe9d8f606e5064318a97953",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/candidate-freeze.json": "07d07880115a69bdaed5cf8892b890ad21562e646c6c749aae6885142034a7b5",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/policy-frozen.json": "d2222ef61624eee3984ecebba1bc97cdfbd9c6177d8c64da25cb0e90983273a1",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/result.json": "030c20b1d43c9bc6597f5e60a9616d42d50bf8f3f3c08c88d0ba36279ab8f3e7",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/experiment/dataset-records.json.gz": "36cc6d1c15fa3e674c3a0684eb05a0973dda2a7a43dbc484c5776ee651ad5a44"
+  },
+  "screen_source_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/scripts/m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/scripts/m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/scripts/m33_composition_source_dataset.py": "7c5c83e482fdfeaf31060c7329117a99c2c2f23df57f6c7f8da2450ecb7d4b67"
+  },
+  "source_preparation_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/prepared-source/source-annotations.json": "e62b781a4de8739b02318853768a5a7d70f390633c3e5c19eee43977eb229fee",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/prepared-source/dataset.npz": "8091b213fc812bb817bf1b3a8671154413ac717830379fb447587ff3010e856b",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/prepared-source/records.json.gz": "3a36f5d1f6c76c3ef9692c58bf8649c3c33a33f0be3d791373c73a66f4152782",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/prepared-source/source-crops.npz": "95a548ce565e45a782da00587f4cde849101733974bbe59cd0f09708d7a57eb4",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/prepared-source/preparation-freeze.json": "9a680d9944aa2f18112718f3e167603f4d9314aa241fe05a1c8f2029e29b8a2d",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/prepared-source/preparation-executed.py": "9f4f0c15f3ee2079cf7f63e3c01252d98c311f599a7ed0ca2514019c7cf63632",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v20/source-control-screen-v2/prepared-source/preparation-receipt.json": "1f7c006f458552e1c1875e83f336d5dfe6f8f85ddbdd575ca03e26ceac40256c"
+  },
+  "source_preparation_receipt": {
+    "status": "SOURCE_CONTROL_TENSORS_PREPARED_NOT_EVALUATED",
+    "annotation_manifest_sha256": "e62b781a4de8739b02318853768a5a7d70f390633c3e5c19eee43977eb229fee",
+    "answers": [
+      "красный",
+      "синий",
+      "зелёный",
+      "жёлтый",
+      "тёмно-зелёный",
+      "коричневый",
+      "белый",
+      "чёрный",
+      "круг",
+      "овал",
+      "квадрат",
+      "прямоугольник",
+      "однотонный",
+      "полосатый",
+      "пятнистый",
+      "UNKNOWN"
+    ],
+    "unique_source_assets": 4,
+    "unique_pdf_books": 1,
+    "unique_pdf_pages": 1,
+    "paired_scenes": 12,
+    "questions": 72,
+    "independent_source_examples": false,
+    "fresh_original_rendering_verified": true,
+    "training_or_calibration": false,
+    "production_admitted": false,
+    "dataset_sha256": "8091b213fc812bb817bf1b3a8671154413ac717830379fb447587ff3010e856b",
+    "records_sha256": "3a36f5d1f6c76c3ef9692c58bf8649c3c33a33f0be3d791373c73a66f4152782",
+    "source_crops_sha256": "95a548ce565e45a782da00587f4cde849101733974bbe59cd0f09708d7a57eb4",
+    "preparation_freeze_sha256": "9a680d9944aa2f18112718f3e167603f4d9314aa241fe05a1c8f2029e29b8a2d",
+    "limits": "Three colored circle markers and one empty-paper ROI from one page. Twelve pairings are correlated reuse of four source assets, not twelve independent examples. No letter recognition, sound concepts, page understanding, animal or object identity is evaluated. After first model assessment this source is exposed, not a fresh blind test."
+  },
+  "count": 12,
+  "seed": 20061,
+  "families": [
+    "language-blue-circle",
+    "language-green-circle",
+    "language-red-circle",
+    "language-empty-paper"
+  ],
+  "group_kind": "source_asset",
+  "thresholds": {
+    "color": 0.97,
+    "shape": null,
+    "pattern": 0.97
+  },
+  "numeric_backend": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "acceptance": {
+    "accepted_errors_max": 0,
+    "positive_recall_min": 0.8,
+    "unknown_recall_min": 0.9,
+    "per_family_and_task": true,
+    "blank_accepted_max": 0
+  },
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Three colored circle markers and one empty-paper ROI from one page. Twelve pairings are correlated reuse of four source assets, not twelve independent examples. No letter recognition, sound concepts, page understanding, animal or object identity is evaluated. After first model assessment this source is exposed, not a fresh blind test."
+}

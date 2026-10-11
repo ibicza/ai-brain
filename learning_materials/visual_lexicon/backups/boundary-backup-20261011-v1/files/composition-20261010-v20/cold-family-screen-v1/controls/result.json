@@ -1,0 +1,302 @@
+{
+  "status": "COLD_FAMILY_FAILURE_NOT_PRODUCTION",
+  "selected": {
+    "overall": {
+      "examples": 3600,
+      "accepted": 2086,
+      "false_assertions": 0,
+      "accepted_error_rate": 0.0,
+      "answerable_recall": 0.8075880758807588,
+      "unknown_recall": 1.0
+    },
+    "tasks": {
+      "color": {
+        "examples": 1200,
+        "accepted": 1069,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9656729900632339,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 1200,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 1200,
+        "accepted": 1017,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9186991869918699,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 369,
+      "all_three_correct_rate": 0.0
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 435,
+        "both_correct_rate": 0.9264367816091954
+      },
+      "shape": {
+        "eligible_scene_pairs": 0,
+        "both_correct_rate": null
+      },
+      "pattern": {
+        "eligible_scene_pairs": 311,
+        "both_correct_rate": 0.8456591639871383
+      }
+    }
+  },
+  "single_view_raw_argmax": {
+    "overall": {
+      "examples": 3600,
+      "accepted": 2858,
+      "false_assertions": 280,
+      "accepted_error_rate": 0.0979706088173548,
+      "answerable_recall": 0.9980642663569493,
+      "unknown_recall": 0.7295968534906588
+    },
+    "tasks": {
+      "color": {
+        "examples": 1200,
+        "accepted": 1109,
+        "false_assertions": 2,
+        "accepted_error_rate": 0.0018034265103697023,
+        "answerable_recall": 1.0,
+        "unknown_recall": 0.978494623655914
+      },
+      "shape": {
+        "examples": 1200,
+        "accepted": 642,
+        "false_assertions": 277,
+        "accepted_error_rate": 0.43146417445482865,
+        "answerable_recall": 0.989159891598916,
+        "unknown_recall": 0.6714801444043321
+      },
+      "pattern": {
+        "examples": 1200,
+        "accepted": 1107,
+        "false_assertions": 1,
+        "accepted_error_rate": 0.0009033423667570009,
+        "answerable_recall": 0.999096657633243,
+        "unknown_recall": 1.0
+      }
+    },
+    "complete_visible_descriptions": {
+      "eligible_objects": 369,
+      "all_three_correct_rate": 0.989159891598916
+    },
+    "target_binding": {
+      "color": {
+        "eligible_scene_pairs": 435,
+        "both_correct_rate": 1.0
+      },
+      "shape": {
+        "eligible_scene_pairs": 0,
+        "both_correct_rate": null
+      },
+      "pattern": {
+        "eligible_scene_pairs": 311,
+        "both_correct_rate": 1.0
+      }
+    }
+  },
+  "per_family": {
+    "semicircle": {
+      "color": {
+        "examples": 270,
+        "accepted": 240,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9523809523809523,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 270,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 270,
+        "accepted": 235,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9325396825396826,
+        "unknown_recall": 1.0
+      }
+    },
+    "teardrop": {
+      "color": {
+        "examples": 277,
+        "accepted": 254,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9806949806949807,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 277,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 277,
+        "accepted": 256,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9884169884169884,
+        "unknown_recall": 1.0
+      }
+    },
+    "chevron": {
+      "color": {
+        "examples": 253,
+        "accepted": 212,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.933920704845815,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 253,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": null,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 253,
+        "accepted": 159,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.7004405286343612,
+        "unknown_recall": 1.0
+      }
+    },
+    "круг": {
+      "color": {
+        "examples": 108,
+        "accepted": 101,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9901960784313726,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 108,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 108,
+        "accepted": 102,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      }
+    },
+    "овал": {
+      "color": {
+        "examples": 97,
+        "accepted": 85,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9659090909090909,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 97,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 97,
+        "accepted": 87,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9886363636363636,
+        "unknown_recall": 1.0
+      }
+    },
+    "квадрат": {
+      "color": {
+        "examples": 88,
+        "accepted": 81,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 88,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 88,
+        "accepted": 81,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 1.0,
+        "unknown_recall": 1.0
+      }
+    },
+    "прямоугольник": {
+      "color": {
+        "examples": 107,
+        "accepted": 96,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9795918367346939,
+        "unknown_recall": 1.0
+      },
+      "shape": {
+        "examples": 107,
+        "accepted": 0,
+        "false_assertions": 0,
+        "accepted_error_rate": null,
+        "answerable_recall": 0.0,
+        "unknown_recall": 1.0
+      },
+      "pattern": {
+        "examples": 107,
+        "accepted": 97,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9897959183673469,
+        "unknown_recall": 1.0
+      }
+    }
+  },
+  "blank_accepted": 0,
+  "independent_inference_and_arithmetic_replayed": true,
+  "dataset_sha256": "39b75f9b8615281dcb0917e6827b2376a4bc31def6092f746b012d1a361b1dde",
+  "records_sha256": "826559d52a6391197752c4053c67b5f0131c3687266ee1dab7eba2f762e08aa2",
+  "preregistered_freeze_sha256": "9f040ca5f831ee383cbeae231173e2f71ed42fb12c9a8f50b2f0ac1d5f701b9d",
+  "original_inference_capsule_sha256": "59c87f06258bbd3b63fb668edf71700c4eccc3cc234b9ad84277061c363f44ff",
+  "production_admitted": false
+}

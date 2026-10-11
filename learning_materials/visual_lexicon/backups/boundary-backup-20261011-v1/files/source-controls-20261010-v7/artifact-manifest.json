@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "file": "actual-source-control-inputs.png",
+      "sha256": "f431ca1ce84038cc7c6f3683e50c7ca23c137b49777c334ed36e5afce80a08da"
+    },
+    {
+      "file": "dataset.npz",
+      "sha256": "1e36113a8e064f9203fc83b469d84449feed1a784eca0548334a3fc9f83a2c7a"
+    },
+    {
+      "file": "preparation-executed.py",
+      "sha256": "9f4f0c15f3ee2079cf7f63e3c01252d98c311f599a7ed0ca2514019c7cf63632"
+    },
+    {
+      "file": "preparation-freeze.json",
+      "sha256": "53ea5786c14be59de7a84e0c8328fc6c03e63c6b3a256e2bcc2841293809891e"
+    },
+    {
+      "file": "preparation-receipt.json",
+      "sha256": "8b95e5c747882577ccf1eaef63e2c2f31b9e864f444ed8654a5c6bf97da1ca23"
+    },
+    {
+      "file": "records.json.gz",
+      "sha256": "f6b62732db9559ddb6e698723e90212e3fcc49b00beee527e9a06fdf9a8278e1"
+    },
+    {
+      "file": "source-annotations.json",
+      "sha256": "2414290fb18be06635c25dde0fba607e4acfbfab87a57410bf106fba556a1845"
+    },
+    {
+      "file": "source-asset-crops.png",
+      "sha256": "8d8b1b067cb489d78ebca31e919058882b2929800c0c80cffec1eaf4c99db760"
+    },
+    {
+      "file": "source-crops.npz",
+      "sha256": "82971922bdbefaddb5f12cfbd8f68972a18c6cda134a075e963fefec999a041e"
+    }
+  ]
+}

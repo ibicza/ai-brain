@@ -1,0 +1,384 @@
+{
+  "schema": 1,
+  "status": "KNOWN_DEVELOPMENT_AGREEMENT_STUDY_REPLAYED",
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/source-capsule.tgz": "5a252b40582116c350248a66e4dc3f5444699d3f79b7be9ee16d8bd46adfa6c9",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/dataset.npz": "763f06122561ef3188833c9aadb0c56c7e169869ba57de4db5c46a4a63353c7c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/dataset-records.json.gz": "340cf83453967fc955b74f9933c463abe994ee6d62b30d12297622e42e506b08",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/candidate-freeze.json": "c44820ebf76183c16dc0bece246f75a28edbf5dd628b2759c06a1114717c1669",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/protocol.json": "375a2ce8d186cbe4d9076f593378265229662de45f434f21c2fffab6f77e59ff",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/policy-frozen.json": "79be9ce61e727b1a32e69a89f13b8be038b043f1979113409e0cedce65d8c5c7",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/joint/best.pt": "c04a49725766fddb5d8b5f2fc2d5c8a047e6d3e6dc5b9adff64362094d38cd9e",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/curriculum/best.pt": "a5e0b23aa38d44580fad5878fee91f746e065ab418c270860a9eb14d0af48ac8"
+  },
+  "splits": [
+    "dev",
+    "control_dev"
+  ],
+  "frozen_thresholds": {
+    "color": 0.97,
+    "shape": 0.9,
+    "pattern": 0.98
+  },
+  "groups": {
+    "joint": {
+      "dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3079,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9407271616254201,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1085,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9945004582951421,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1011,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9266727772685609,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 983,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9010082493125573,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.8322639780018332
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 0.9882352941176471
+          },
+          "shape": {
+            "eligible_scene_pairs": 371,
+            "both_correct_rate": 0.8571428571428571
+          },
+          "pattern": {
+            "eligible_scene_pairs": 323,
+            "both_correct_rate": 0.7832817337461301
+          }
+        },
+        "raw_balanced_ce": 0.02029014192521572
+      },
+      "control_dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2056,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.927797833935018,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 730,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9864864864864865,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 307,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8319783197831978,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1019,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9205058717253839,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 238,
+          "all_three_correct_rate": 0.7899159663865546
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 186,
+            "both_correct_rate": 0.967741935483871
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 347,
+            "both_correct_rate": 0.8530259365994236
+          }
+        },
+        "raw_balanced_ce": 0.026437673717737198
+      }
+    },
+    "curriculum": {
+      "dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 3051,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9321723189734189,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1080,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9899175068744271,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 1029,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9431714023831348,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 942,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8634280476626948,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.8075160403299725
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 0.9835294117647059
+          },
+          "shape": {
+            "eligible_scene_pairs": 371,
+            "both_correct_rate": 0.9002695417789758
+          },
+          "pattern": {
+            "eligible_scene_pairs": 323,
+            "both_correct_rate": 0.7120743034055728
+          }
+        },
+        "raw_balanced_ce": 0.018415506929159164
+      },
+      "control_dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2086,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9413357400722022,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 729,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9851351351351352,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 326,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8834688346883469,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 1031,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.931345980126468,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 238,
+          "all_three_correct_rate": 0.8319327731092437
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 186,
+            "both_correct_rate": 0.967741935483871
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 347,
+            "both_correct_rate": 0.861671469740634
+          }
+        },
+        "raw_balanced_ce": 0.027954598888754845
+      }
+    },
+    "two_candidate_agreement": {
+      "dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2949,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9010082493125573,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 1078,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9880843263061412,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 987,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9046746104491292,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 884,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8102658111824015,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 1091,
+          "all_three_correct_rate": 0.7341888175985335
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 425,
+            "both_correct_rate": 0.9788235294117648
+          },
+          "shape": {
+            "eligible_scene_pairs": 371,
+            "both_correct_rate": 0.816711590296496
+          },
+          "pattern": {
+            "eligible_scene_pairs": 323,
+            "both_correct_rate": 0.6130030959752322
+          }
+        }
+      },
+      "control_dev": {
+        "overall": {
+          "examples": 3600,
+          "accepted": 2002,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9034296028880866,
+          "unknown_recall": 1.0
+        },
+        "tasks": {
+          "color": {
+            "examples": 1200,
+            "accepted": 724,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9783783783783784,
+            "unknown_recall": 1.0
+          },
+          "shape": {
+            "examples": 1200,
+            "accepted": 300,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8130081300813008,
+            "unknown_recall": 1.0
+          },
+          "pattern": {
+            "examples": 1200,
+            "accepted": 978,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8834688346883469,
+            "unknown_recall": 1.0
+          }
+        },
+        "complete_visible_descriptions": {
+          "eligible_objects": 238,
+          "all_three_correct_rate": 0.7521008403361344
+        },
+        "target_binding": {
+          "color": {
+            "eligible_scene_pairs": 186,
+            "both_correct_rate": 0.9516129032258065
+          },
+          "shape": {
+            "eligible_scene_pairs": 0,
+            "both_correct_rate": null
+          },
+          "pattern": {
+            "eligible_scene_pairs": 347,
+            "both_correct_rate": 0.7809798270893372
+          }
+        }
+      }
+    }
+  },
+  "balanced_dev_ce": {
+    "joint": 0.02336390782147646,
+    "curriculum": 0.023185052908957005
+  },
+  "device": "cuda",
+  "numeric_backend": {
+    "policy": "ieee",
+    "precision_settings": {
+      "global": "ieee",
+      "cuda_matmul": "ieee",
+      "cudnn": "ieee",
+      "cudnn_conv": "ieee",
+      "cudnn_rnn": "ieee"
+    },
+    "torch_version": "2.9.0+cu129",
+    "cuda_version": "12.9",
+    "cudnn_version": 91002,
+    "cpu_threads": 2,
+    "limits": "Explicit precision, not cross-device bit equality or global determinism. Legacy leaves existing process defaults unchanged."
+  },
+  "executed_script_sha256": "c6c9a11f657bba74af3d3043100d84d732e6b0cc0af2fb1723e63c9bcb3f8447",
+  "training_or_calibration": false,
+  "production_admitted": false,
+  "limits": "Known development data only, original frozen inference code. Two models share the same inherited tensors; not a full independent deep ensemble, not a blind final, not a calibrated uncertainty guarantee."
+}

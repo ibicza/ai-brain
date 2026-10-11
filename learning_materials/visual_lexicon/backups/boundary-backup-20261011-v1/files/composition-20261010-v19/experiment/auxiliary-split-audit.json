@@ -1,0 +1,30 @@
+{
+  "unique_scene_seeds": 19800,
+  "unique_scene_identities": 19800,
+  "unique_images": 19800,
+  "exposure_shapes": [
+    "triangle",
+    "cross",
+    "hexagon",
+    "heart",
+    "arrow",
+    "crescent",
+    "parallelogram",
+    "kite"
+  ],
+  "held_control_shapes": [
+    "star",
+    "pentagon",
+    "trapezoid"
+  ],
+  "exposure_unknown_colors": [
+    "оранжевый",
+    "розовый",
+    "голубой",
+    "фиолетовый"
+  ],
+  "held_unknown_colors": [
+    "бирюзовый"
+  ],
+  "limits": "Authored generator separation, shared Pillow, not external-source independence."
+}

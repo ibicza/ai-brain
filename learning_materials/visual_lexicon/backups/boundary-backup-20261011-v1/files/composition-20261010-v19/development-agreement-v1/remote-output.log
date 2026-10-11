@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/development-agreement-v1/diagnostic-input.py", line 226, in <module>
+    run(args.reference.resolve(), args.output.resolve(), args.device)
+  File "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/development-agreement-v1/diagnostic-input.py", line 182, in run
+    raise ValueError(
+ValueError: Original development score not reproduced: 0.02318830881267786 versus 0.023185052908957005

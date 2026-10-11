@@ -38,3 +38,18 @@ def test_agreement_uses_the_weakest_candidate_and_refuses_disagreement():
 def test_invalid_scores_or_unknown_scope_are_rejected(scores, unknown):
     with pytest.raises(ValueError, match="agreement"):
         probe.fuse(scores, unknown)
+
+
+def test_development_replay_restores_exact_numeric_contract_not_defaults():
+    from types import SimpleNamespace
+
+    calls = []
+    numeric = SimpleNamespace(
+        check_contract=lambda contract: calls.append(("check", contract)) or contract,
+        configure=lambda policy: calls.append(("legacy", policy)) or policy,
+    )
+    contract = {"policy": "ieee", "precision_settings": {"cudnn_conv": "ieee"}}
+    assert probe.restore_precision({"numeric_backend": contract}, numeric) == contract
+    assert calls == [("check", contract)]
+    assert probe.restore_precision({}, numeric) == "legacy"
+    assert calls[-1] == ("legacy", "legacy")

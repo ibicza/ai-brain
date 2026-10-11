@@ -58,6 +58,9 @@ class Prepared:
             else None
         )
         self.sides = torch.tensor([r["side"] for r in data["records"]], device=device)
+        self.color_queries = torch.tensor(
+            [r["task"] == "color" for r in data["records"]], device=device
+        )
 
     def batch(self, indices):
         return (
@@ -66,10 +69,17 @@ class Prepared:
             self.labels[indices],
         )
 
-    def target_masks(self, indices):
+    def target_masks(self, indices, *, task_scope="all"):
+        if task_scope not in supervision.FOREGROUND_TASK_SCOPES:
+            raise ValueError("Registered foreground task scope required")
         if self.foreground is None:
             raise ValueError("Training foreground supervision not prepared")
-        return self.foreground[self.image_index[indices], self.sides[indices]][:, None]
+        masks = self.foreground[self.image_index[indices], self.sides[indices]][:, None]
+        return (
+            masks
+            if task_scope == "all"
+            else masks * self.color_queries[indices, None, None, None]
+        )
 
 
 def join_data(left, right):
@@ -225,7 +235,7 @@ def calibrate(prepared, p, min_accepted=40, *, rule="maximum_coverage", cohorts=
             if rule == "coverage_guarded_strict"
             else {}
         )
-        choices = []
+        choices, grid_audit = [], []
         for threshold in (0.9, 0.95, 0.97, 0.98, 0.99, 0.995, 0.999, 0.9999):
             predictions = course.select(pp, [threshold] * len(pp))
             metrics = course.statistics(gold, predictions)
@@ -240,11 +250,20 @@ def calibrate(prepared, p, min_accepted=40, *, rule="maximum_coverage", cohorts=
                 and (v["unknown_recall"] is None or v["unknown_recall"] >= 0.9)
                 for v in grouped.values()
             )
-            if (
+            eligible = (
                 metrics["false_assertions"] == 0
                 and metrics["accepted"] >= min_accepted
                 and recall_ok
-            ):
+            )
+            grid_audit.append(
+                {
+                    "threshold": threshold,
+                    "metrics": metrics,
+                    "cohort_metrics": grouped,
+                    "eligible": eligible,
+                }
+            )
+            if eligible:
                 choices.append((metrics["accepted"], threshold, metrics, grouped))
         best = (
             max(
@@ -259,6 +278,7 @@ def calibrate(prepared, p, min_accepted=40, *, rule="maximum_coverage", cohorts=
         thresholds[task] = best[1] if best else None
         report[task] = {
             "threshold": thresholds[task],
+            "grid_audit": grid_audit,
             "metrics": best[2]
             if best
             else course.statistics(gold, [course.UNKNOWN] * len(gold)),
@@ -345,6 +365,9 @@ def run(args):
         raise ValueError("Invalid calibration selection rule")
     sampling_rule = getattr(args, "sampling_rule", "legacy_48_16")
     foreground_amount = getattr(args, "foreground_loss", 0.0)
+    foreground_tasks = getattr(args, "foreground_tasks", "all")
+    if foreground_tasks not in supervision.FOREGROUND_TASK_SCOPES:
+        raise ValueError("Registered foreground task scope required")
     if sampling_rule not in supervision.SAMPLING_RULES or (
         sampling_rule != "legacy_48_16" and not auxiliary_images
     ):
@@ -428,6 +451,7 @@ def run(args):
         "batch_size": 64,
         "sampling_rule": sampling_rule,
         "foreground_loss": foreground_amount,
+        "foreground_tasks": foreground_tasks,
         "foreground_scope": "Authored exposure TRAIN only; per-query visible foreground KL, empty targets skipped; masks never model inputs or evaluation inputs.",
         "learning_rate": 0.001,
         "schedules": ["joint", "curriculum"],
@@ -457,7 +481,10 @@ def run(args):
         "exposure_profile": exposure_profile,
         "exposure_shapes": controls.EXPOSURE_PROFILES[exposure_profile],
         "paper_rng_policy": controls.PAPER_RNG_POLICY
-        if exposure_profile == "palette_paper_aspects"
+        if exposure_profile in controls.PAPER_PROFILES
+        else None,
+        "boundary_rng_policy": controls.BOUNDARY_RNG_POLICY
+        if exposure_profile == "palette_boundary_paper_aspects"
         else None,
         "held_control_shapes": controls.HELD_OUT_SHAPES,
         "auxiliary_calibration": auxiliary_images > 0,
@@ -651,7 +678,9 @@ def run(args):
                 masks = torch.cat(
                     (
                         torch.zeros(len(indices), 1, 96, 96, device=device),
-                        auxiliary_train.target_masks(auxiliary_indices),
+                        auxiliary_train.target_masks(
+                            auxiliary_indices, task_scope=foreground_tasks
+                        ),
                     )
                 )
             if model.reflection_consensus:
@@ -929,6 +958,9 @@ if __name__ == "__main__":
         "--sampling-rule", choices=supervision.SAMPLING_RULES, default="legacy_48_16"
     )
     parser.add_argument("--foreground-loss", type=float, default=0.0)
+    parser.add_argument(
+        "--foreground-tasks", choices=supervision.FOREGROUND_TASK_SCOPES, default="all"
+    )
     parser.add_argument(
         "--calibration-rule", choices=CALIBRATION_RULES, default="maximum_coverage"
     )

@@ -69,6 +69,7 @@ SOURCE_FILES = (
     "docs/m33_composition_six_hour_work.md",
     "docs/m33_primary_composition.md",
     "docs/m33_composition_balanced_foreground.md",
+    "docs/m33_composition_boundary_continuation.md",
     "docs/m33_primary_composition_continuation.md",
     "learning_materials/visual_lexicon/README.md",
 )
@@ -342,6 +343,12 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-balanced-supplement-v1.xml",
         "qa-balanced-backup-v1.xml",
         "qa-balanced-backup-v2.xml",
+        "qa-boundary-diagnostic-v1.xml",
+        "qa-boundary-initial-v1.xml",
+        "qa-boundary-unit-v1.xml",
+        "qa-boundary-hostile-v1.xml",
+        "qa-boundary-full-v1.xml",
+        "qa-boundary-supplement-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))

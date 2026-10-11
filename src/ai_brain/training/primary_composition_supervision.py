@@ -9,6 +9,7 @@ import torch
 from torch.nn import functional as F
 
 SAMPLING_RULES = ("legacy_48_16", "balanced_task_answer_32_32")
+FOREGROUND_TASK_SCOPES = ("all", "color")
 
 
 class GroupSampler:
