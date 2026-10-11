@@ -1,0 +1,830 @@
+{
+  "selection_split": "calibration_only",
+  "selection_rule": "coverage_guarded_strict",
+  "cohort_constraints": {
+    "minimum_answerable_recall": 0.8,
+    "minimum_unknown_recall": 0.9
+  },
+  "cohort_names": [
+    "authored",
+    "native"
+  ],
+  "minimum_accepted_per_task": 40,
+  "allowed_observed_calibration_errors": 0,
+  "tasks": {
+    "color": {
+      "threshold": 0.97,
+      "grid_audit": [
+        {
+          "threshold": 0.9,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1841,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9989148128052089,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 751,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9986702127659575,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 1090,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.999083409715857,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.95,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1837,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9967444384156267,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 750,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9973404255319149,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 1087,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9963336388634281,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.97,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1803,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9782962561041779,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 737,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9800531914893617,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 1066,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9770852428964253,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.98,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1285,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.6972327726532827,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 471,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.6263297872340425,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 814,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.7461044912923923,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.99,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.995,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.999,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.9999,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        }
+      ],
+      "metrics": {
+        "examples": 2400,
+        "accepted": 1803,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.9782962561041779,
+        "unknown_recall": 1.0
+      },
+      "cohort_metrics": {
+        "authored": {
+          "examples": 1200,
+          "accepted": 737,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9800531914893617,
+          "unknown_recall": 1.0
+        },
+        "native": {
+          "examples": 1200,
+          "accepted": 1066,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.9770852428964253,
+          "unknown_recall": 1.0
+        }
+      }
+    },
+    "shape": {
+      "threshold": 0.95,
+      "grid_audit": [
+        {
+          "threshold": 0.9,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1339,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9171232876712329,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 324,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.8780487804878049,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 1015,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9303391384051329,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.95,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1243,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.8513698630136987,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 301,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.8157181571815718,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 942,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.8634280476626948,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.97,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1071,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.7335616438356164,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 259,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.7018970189701897,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 812,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.7442713107241063,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.98,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 771,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.5280821917808219,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 184,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.4986449864498645,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 587,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.538038496791934,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.99,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 21,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.014383561643835616,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 5,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.013550135501355014,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 16,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.01466544454628781,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.995,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.999,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.9999,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        }
+      ],
+      "metrics": {
+        "examples": 2400,
+        "accepted": 1243,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.8513698630136987,
+        "unknown_recall": 1.0
+      },
+      "cohort_metrics": {
+        "authored": {
+          "examples": 1200,
+          "accepted": 301,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.8157181571815718,
+          "unknown_recall": 1.0
+        },
+        "native": {
+          "examples": 1200,
+          "accepted": 942,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.8634280476626948,
+          "unknown_recall": 1.0
+        }
+      }
+    },
+    "pattern": {
+      "threshold": 0.98,
+      "grid_audit": [
+        {
+          "threshold": 0.9,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 2187,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9949954504094631,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 1103,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.996386630532972,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 1084,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9935838680109991,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.95,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 2172,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9881710646041856,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 1099,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.992773261065944,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 1073,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9835013748854262,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.97,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 2144,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.9754322111010009,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 1094,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.988256549232159,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 1050,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.9624197983501375,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.98,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1961,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.892174704276615,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 1023,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.924119241192412,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 938,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.8597616865261228,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": true
+        },
+        {
+          "threshold": 0.99,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 1,
+            "false_assertions": 0,
+            "accepted_error_rate": 0.0,
+            "answerable_recall": 0.00045495905368516835,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 1,
+              "false_assertions": 0,
+              "accepted_error_rate": 0.0,
+              "answerable_recall": 0.0009165902841429881,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.995,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.999,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        },
+        {
+          "threshold": 0.9999,
+          "metrics": {
+            "examples": 2400,
+            "accepted": 0,
+            "false_assertions": 0,
+            "accepted_error_rate": null,
+            "answerable_recall": 0.0,
+            "unknown_recall": 1.0
+          },
+          "cohort_metrics": {
+            "authored": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            },
+            "native": {
+              "examples": 1200,
+              "accepted": 0,
+              "false_assertions": 0,
+              "accepted_error_rate": null,
+              "answerable_recall": 0.0,
+              "unknown_recall": 1.0
+            }
+          },
+          "eligible": false
+        }
+      ],
+      "metrics": {
+        "examples": 2400,
+        "accepted": 1961,
+        "false_assertions": 0,
+        "accepted_error_rate": 0.0,
+        "answerable_recall": 0.892174704276615,
+        "unknown_recall": 1.0
+      },
+      "cohort_metrics": {
+        "authored": {
+          "examples": 1200,
+          "accepted": 1023,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.924119241192412,
+          "unknown_recall": 1.0
+        },
+        "native": {
+          "examples": 1200,
+          "accepted": 938,
+          "false_assertions": 0,
+          "accepted_error_rate": 0.0,
+          "answerable_recall": 0.8597616865261228,
+          "unknown_recall": 1.0
+        }
+      }
+    }
+  },
+  "limits": "Experimental risk/coverage policy, not a guarantee on new images. Correlated questions/views are not independent sources."
+}

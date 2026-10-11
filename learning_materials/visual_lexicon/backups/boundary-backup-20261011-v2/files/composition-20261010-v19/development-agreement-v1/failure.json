@@ -1,0 +1,21 @@
+{
+  "status": "DEVELOPMENT_REPLAY_OUTSIDE_STRICT_TOLERANCE",
+  "device": "cuda",
+  "schedule": "curriculum",
+  "actual_dev_ce": 0.02318830881267786,
+  "frozen_dev_ce": 0.023185052908957005,
+  "absolute_tolerance": 2e-06,
+  "reference_hashes": {
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/source-capsule.tgz": "5a252b40582116c350248a66e4dc3f5444699d3f79b7be9ee16d8bd46adfa6c9",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/previous.pt": "cf73b898fb95220525d4c4f9df61bd6fa5030c0dd28e160090a7211b4fe2086c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/dataset.npz": "763f06122561ef3188833c9aadb0c56c7e169869ba57de4db5c46a4a63353c7c",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/dataset-records.json.gz": "340cf83453967fc955b74f9933c463abe994ee6d62b30d12297622e42e506b08",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/candidate-freeze.json": "c44820ebf76183c16dc0bece246f75a28edbf5dd628b2759c06a1114717c1669",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/protocol.json": "375a2ce8d186cbe4d9076f593378265229662de45f434f21c2fffab6f77e59ff",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/policy-frozen.json": "79be9ce61e727b1a32e69a89f13b8be038b043f1979113409e0cedce65d8c5c7",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/joint/best.pt": "c04a49725766fddb5d8b5f2fc2d5c8a047e6d3e6dc5b9adff64362094d38cd9e",
+    "/home/ibicza/ai-brain/runs/m33-composition-20261010-v19/experiment/curriculum/best.pt": "a5e0b23aa38d44580fad5878fee91f746e065ab418c270860a9eb14d0af48ac8"
+  },
+  "executed_script_sha256": "bdf7d9d886662584b4586de4fc169cba6fa141b38f13e6f7514a1c3cbdbc0718",
+  "production_admitted": false
+}

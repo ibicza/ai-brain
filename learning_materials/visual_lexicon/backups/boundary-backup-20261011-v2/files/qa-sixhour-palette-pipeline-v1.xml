@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="19" time="75.074" timestamp="2026-10-10T05:03:22.549285+03:00" hostname="ibicza"><testcase classname="tests.test_primary_composition_pipeline" name="test_rng_audit_cannot_be_rewritten[ieee-rich-palette]" time="17.510" /><testcase classname="tests.test_primary_composition_pipeline" name="test_quadratic_policy_cannot_be_rewritten[ieee-rich-palette-False]" time="0.013" /><testcase classname="tests.test_primary_composition_pipeline" name="test_quadratic_policy_cannot_be_rewritten[ieee-rich-palette-True]" time="0.045"><failure message="AssertionError: Regex pattern did not match.&#10;  Expected regex: 'Quadratic exposure RNG policy differs'&#10;  Actual message: 'Rich curve exposure RNG policy differs from source'">sealed = WindowsPath('C:/Users/artio/AppData/Local/Temp/pytest-of-artio/pytest-1927/composition-pipeline0')
+reseal = True
+
+    @pytest.mark.parametrize("reseal", (False, True))
+    def test_quadratic_policy_cannot_be_rewritten(sealed, reseal):
+        path = sealed / "experiment/protocol.json"
+        freeze_path = sealed / "experiment/candidate-freeze.json"
+        original, frozen_original = path.read_bytes(), freeze_path.read_bytes()
+        protocol = json.loads(original)
+        if protocol["dataset_profile"] not in (
+            "curve_background_clear",
+            "rich_curve_background_clear",
+        ):
+            return
+        try:
+            protocol["curve_rng_policy"] = "same generator reused for labels"
+            path.write_text(json.dumps(protocol), encoding="utf-8")
+            if reseal:
+                freeze = json.loads(frozen_original)
+                freeze["protocol_sha256"] = verifier.sha(path)
+                freeze_path.write_text(json.dumps(freeze), encoding="utf-8")
+            expected = (
+                "Quadratic exposure RNG policy differs"
+                if reseal
+                else "Frozen inputs/status changed"
+            )
+&gt;           with pytest.raises(ValueError, match=expected):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'Quadratic exposure RNG policy differs'
+E             Actual message: 'Rich curve exposure RNG policy differs from source'
+
+tests\test_primary_composition_pipeline.py:155: AssertionError</failure></testcase><testcase classname="tests.test_primary_composition_pipeline" name="test_exact_inference_and_arithmetic_replay[ieee-rich-palette]" time="8.283" /><testcase classname="tests.test_primary_composition_pipeline" name="test_replay_pre_spatial_constructor_without_source_rewrite[ieee-rich-palette]" time="8.345" /><testcase classname="tests.test_primary_composition_pipeline" name="test_dataset_archive_expands_each_array_only_once[ieee-rich-palette]" time="8.241" /><testcase classname="tests.test_primary_composition_pipeline" name="test_source_manifest_cannot_be_rewritten_alongside_source[ieee-rich-palette]" time="0.011" /><testcase classname="tests.test_primary_composition_pipeline" name="test_report_metric_tamper_rejected[ieee-rich-palette-answerable_recall]" time="4.642" /><testcase classname="tests.test_primary_composition_pipeline" name="test_report_metric_tamper_rejected[ieee-rich-palette-false_assertions]" time="4.515" /><testcase classname="tests.test_primary_composition_pipeline" name="test_raw_task_metric_tamper_rejected[ieee-rich-palette]" time="4.793" /><testcase classname="tests.test_primary_composition_pipeline" name="test_blank_image_result_is_recomputed_not_trusted[ieee-rich-palette]" time="8.231" /><testcase classname="tests.test_primary_composition_pipeline" name="test_result_lineage_tamper_rejected[ieee-rich-palette-checkpoint_sha256-forged]" time="0.017" /><testcase classname="tests.test_primary_composition_pipeline" name="test_result_lineage_tamper_rejected[ieee-rich-palette-winner-forged]" time="0.021" /><testcase classname="tests.test_primary_composition_pipeline" name="test_result_threshold_tamper_rejected[ieee-rich-palette]" time="1.772" /><testcase classname="tests.test_primary_composition_pipeline" name="test_record_question_target_tamper_rejected[ieee-rich-palette]" time="1.080" /><testcase classname="tests.test_primary_composition_pipeline" name="test_single_view_evidence_cannot_be_replaced_with_consensus[ieee-rich-palette]" time="4.565" /><testcase classname="tests.test_primary_composition_pipeline" name="test_reflection_policy_result_tampering_is_rejected[ieee-rich-palette]" time="1.082" /><testcase classname="tests.test_primary_composition_pipeline" name="test_numeric_metadata_cannot_change_between_protocol_and_result[ieee-rich-palette]" time="0.030" /><testcase classname="tests.test_primary_composition_pipeline" name="test_exposure_family_metadata_cannot_be_forged[ieee-rich-palette]" time="0.058" /></testsuite></testsuites>

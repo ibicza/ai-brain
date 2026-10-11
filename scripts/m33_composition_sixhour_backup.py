@@ -33,6 +33,7 @@ SOURCE_FILES = (
     "scripts/m33_composition_background_probe.py",
     "scripts/m33_composition_rng_audit.py",
     "scripts/m33_composition_dev_probe.py",
+    "scripts/m33_composition_compare.py",
     "scripts/m33_composition_diagnostics.py",
     "scripts/m33_composition_dev_remote.py",
     "scripts/m33_composition_numeric_probe.py",
@@ -56,6 +57,7 @@ SOURCE_FILES = (
     "tests/test_primary_composition_backup.py",
     "tests/test_primary_composition_package.py",
     "tests/test_primary_composition_dev_probe.py",
+    "tests/test_primary_composition_comparison.py",
     "tests/test_primary_composition_diagnostics.py",
     "tests/test_primary_composition_numeric_probe.py",
     "tests/test_primary_numeric_backend.py",
@@ -349,6 +351,7 @@ def run(repo, data, output, parent, run_names, *, stream_chunks=False):
         "qa-boundary-hostile-v1.xml",
         "qa-boundary-full-v1.xml",
         "qa-boundary-supplement-v1.xml",
+        "qa-boundary-comparison-v1.xml",
     ):
         if (base / name).is_file():
             evidence.append((name, base / name))

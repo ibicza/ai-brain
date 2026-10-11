@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "m33_composition_novel_controls.py": "92c3eda7826281a0356224fd3cb0b95449d32eaf3a9430d77f6e6779350dddf8",
+    "m33_composition_novel_screen.py": "568d47264c0c1638ed5f035bf2dd9789f76ad1faf54a72f00b443fd99def54de"
+  },
+  "source_inputs": {},
+  "original_capsule_sha256": "304363048f29ecc7cc8a2a80fcb1a84cc58e927c5cd6943fce4fa7138da3457b",
+  "count": 600,
+  "seed": 21061,
+  "production_admitted": false
+}

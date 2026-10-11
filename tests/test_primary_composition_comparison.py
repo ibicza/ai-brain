@@ -55,3 +55,34 @@ def test_comparison_rejects_partial_or_misaligned_records():
         module.score(rows()[:3], [c.UNKNOWN] * 3)
     with pytest.raises(ValueError):
         module.score(rows(), [c.UNKNOWN])
+
+
+def test_comparison_restores_original_precision_and_keeps_legacy_explicit():
+    calls = []
+
+    class Backend:
+        def check_contract(self, contract):
+            calls.append(("check", contract))
+            return contract
+
+        def configure(self, policy):
+            calls.append(("configure", policy))
+            return {"policy": policy}
+
+    contract = {"policy": "ieee", "precision_settings": {"global": "ieee"}}
+    assert module.restore_precision({"numeric_backend": contract}, Backend()) == contract
+    assert calls == [("check", contract)]
+    assert module.restore_precision({}, Backend()) == {"policy": "legacy"}
+    assert calls[-1] == ("configure", "legacy")
+
+
+def test_comparison_does_not_fall_back_when_precision_contract_is_invalid():
+    class Backend:
+        def check_contract(self, contract):
+            raise ValueError("Frozen precision differs")
+
+        def configure(self, policy):
+            pytest.fail("Invalid frozen contract must not fall back")
+
+    with pytest.raises(ValueError, match="Frozen precision differs"):
+        module.restore_precision({"numeric_backend": {}}, Backend())

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "split": "combinations",
+  "status": "EXPOSED_FINAL_ERRORS_NOT_FRESH_TEST",
+  "production_admitted": false,
+  "false_assertions": 1,
+  "errors": [
+    {
+      "record_index": 1846,
+      "image_index": 307,
+      "image_sha256": "aa55e5cd875b5fa71481d13f3f93636fcf8cbfc73a27042809526bc2b13db30e",
+      "scene_id": "combinations/307",
+      "question": "Назови форму правого предмета.",
+      "task": "shape",
+      "side": 1,
+      "gold": "овал",
+      "predicted": "круг",
+      "score": 0.961074709892273
+    }
+  ],
+  "preview_records": [
+    1846
+  ],
+  "sha256": {
+    "combinations-predictions.json.gz": "4d34bf1cfedc224931aff5c178fe7def0072abf3812c307c8ca031b1bd0ff0fa",
+    "dataset-records.json.gz": "57107e6094fd24f6afa01ae695bab99ef8e556d1bc45cbd61f9c4c7f79545be8",
+    "dataset.npz": "e767c94180a0a90e40264b980b702e8ac4caced51a2e150ddb795f0cc18f86c4",
+    "exposed-combination-errors.png": "ee102556d08e32f78f2f36849f25509bc31499d30502d975adc579339258c50e"
+  },
+  "limits": "Previously evaluated errors only. No fitting, policy changes, fresh-test claim, or calibrated probability claim."
+}

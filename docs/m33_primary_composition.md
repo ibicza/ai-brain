@@ -140,9 +140,26 @@ passed 572 / 58. Failed intermediate archive-count assertions are retained in
 their original XML receipts. These are experimental regressions, not an
 independent semantic blind exam or M33 closure.
 
-Next: improve near-boundary unsupported-color diversity and contour/pattern
-evidence while preserving useful shape coverage; the first balanced sampling
-and foreground-supervision interventions are now measured, not merely planned.
+The next authorized [boundary-hue / color-scoped foreground pair](m33_composition_boundary_continuation.md)
+completed V21/V22: both used exactly the same 40 base arrays, 9,000 native plus
+6,000 authored TRAIN scenes, and 10,000 joint + 10,000 curriculum steps.
+V22 has zero accepted mistakes on all four synthetic final cohorts; V21 has
+one oval/circle error each in held combinations and authored control. Ordinary
+positive recall is 91.63% / 91.41%. Neither is admitted: complete-description
+coverage remains insufficient; exposed V1 textbook color mistakes persist
+(23 total mistakes in V21, 20 in V22), and cold pattern-family coverage fails.
+Both courses and all ten follow-up screens were independently replayed. Original
+PDF hashes/pages/crop pixels were revalidated without source edits. The permanent
+dictionary, inherited weights and old failures remain unchanged. This does not
+close M33 or demonstrate general textbook/photographic recognition.
+Scoped engineering checks passed 771 / 76 explicit fixture-contract skips plus
+215 disjoint supplementary tests. A later diagnostic-only numeric-contract repair
+was checked separately with 29 tests, not counted as 29 additional unique tests
+or as a rerun of the entire scoped collection after that repair.
+
+Next: improve real-source hue/style transfer and contour/pattern evidence while
+preserving useful shape coverage; sampling, diverse unsupported hues and
+foreground-supervision interventions are now measured, not merely planned.
 Distinguish actual wrong/disagreeing views from
 correct low-score predictions; changing confidence alone cannot fix the former.
 Compare one preregistered intervention at a time, then freeze before new

@@ -1,0 +1,25 @@
+{
+  "annotation_manifest_sha256": "ed3a2105a4cf3c802607c6e6d4009ae0a87037436dc3f819828beb05c088faf2",
+  "preparation_source_sha256": "9f4f0c15f3ee2079cf7f63e3c01252d98c311f599a7ed0ca2514019c7cf63632",
+  "course_source_sha256": "44fc4a986a7d70ecba574de8a265f0e92fe580a88ecb926ae6c258f5f9b7da4f",
+  "answers": [
+    "\u043a\u0440\u0430\u0441\u043d\u044b\u0439",
+    "\u0441\u0438\u043d\u0438\u0439",
+    "\u0437\u0435\u043b\u0451\u043d\u044b\u0439",
+    "\u0436\u0451\u043b\u0442\u044b\u0439",
+    "\u0442\u0451\u043c\u043d\u043e-\u0437\u0435\u043b\u0451\u043d\u044b\u0439",
+    "\u043a\u043e\u0440\u0438\u0447\u043d\u0435\u0432\u044b\u0439",
+    "\u0431\u0435\u043b\u044b\u0439",
+    "\u0447\u0451\u0440\u043d\u044b\u0439",
+    "\u043a\u0440\u0443\u0433",
+    "\u043e\u0432\u0430\u043b",
+    "\u043a\u0432\u0430\u0434\u0440\u0430\u0442",
+    "\u043f\u0440\u044f\u043c\u043e\u0443\u0433\u043e\u043b\u044c\u043d\u0438\u043a",
+    "\u043e\u0434\u043d\u043e\u0442\u043e\u043d\u043d\u044b\u0439",
+    "\u043f\u043e\u043b\u043e\u0441\u0430\u0442\u044b\u0439",
+    "\u043f\u044f\u0442\u043d\u0438\u0441\u0442\u044b\u0439",
+    "UNKNOWN"
+  ],
+  "training_or_calibration": false,
+  "production_admitted": false
+}

@@ -10,7 +10,18 @@ import torch
 from m33_composition_verify import decisions, measure, read, replay, sha
 
 from ai_brain.training import primary_composition as c
+from ai_brain.training import primary_numeric_backend as numeric
 from ai_brain.training import primary_objects as old
+
+
+def restore_precision(protocol, backend=numeric):
+    """Check the baseline's original contract before any inference."""
+    contract = protocol.get("numeric_backend")
+    return (
+        backend.check_contract(contract)
+        if contract is not None
+        else backend.configure("legacy")
+    )
 
 
 def score(records, predicted):
@@ -60,6 +71,16 @@ def compare(root, baselines, output, device):
         baseline_freeze = read(baseline_root / "candidate-freeze.json")
         baseline_policy = read(baseline_root / "policy-frozen.json")
         baseline_result = read(baseline_root / "result.json")
+        baseline_protocol = read(baseline_root / "protocol.json")
+        if sha(baseline_root / "protocol.json") != baseline_freeze["protocol_sha256"]:
+            raise ValueError("Past frozen inference protocol changed")
+        numeric_contract = restore_precision(baseline_protocol)
+        reflections = baseline_protocol.get("reflection_consensus", False)
+        if (
+            type(reflections) is not bool
+            or baseline_result.get("reflection_consensus", False) != reflections
+        ):
+            raise ValueError("Past reflection policy differs from frozen protocol")
         if {
             task: value["threshold"] for task, value in baseline_policy["tasks"].items()
         } != baseline_result["thresholds"]:
@@ -99,7 +120,7 @@ def compare(root, baselines, output, device):
         }
         reports = {}
         for split in ("final", "combinations", "transfer"):
-            p = replay(model, arrays, split, device)
+            p = replay(model, arrays, split, device, reflection_consensus=reflections)
             rows = records[split]["records"]
             raw, safe = p.argmax(1).tolist(), decisions(p, rows, thresholds)
             reports[split] = {
@@ -112,6 +133,8 @@ def compare(root, baselines, output, device):
                 "checkpoint_sha256": sha(checkpoint_path),
                 "policy_sha256": sha(baseline_root / "policy-frozen.json"),
                 "thresholds": thresholds,
+                "reflection_consensus": reflections,
+                "numeric_backend": numeric_contract,
                 "reports": reports,
             }
         )

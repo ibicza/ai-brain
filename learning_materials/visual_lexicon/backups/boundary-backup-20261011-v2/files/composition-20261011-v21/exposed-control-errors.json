@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "split": "control_final",
+  "status": "EXPOSED_FINAL_ERRORS_NOT_FRESH_TEST",
+  "production_admitted": false,
+  "false_assertions": 1,
+  "errors": [
+    {
+      "record_index": 3490,
+      "image_index": 581,
+      "image_sha256": "d11ea09f5379d3143c01ae9950faebdd4f152334ebc495c161ec16bd19f72d02",
+      "scene_id": "authored-control_final/581",
+      "question": "What shape is the right object?",
+      "task": "shape",
+      "side": 1,
+      "gold": "овал",
+      "predicted": "круг",
+      "score": 0.9332679510116577
+    }
+  ],
+  "preview_records": [
+    3490
+  ],
+  "sha256": {
+    "control_final-predictions.json.gz": "d2ef523a22008fdc80bcd0d718f212b6b91fcb68caf74518614e069c94ccfdad",
+    "dataset-records.json.gz": "57107e6094fd24f6afa01ae695bab99ef8e556d1bc45cbd61f9c4c7f79545be8",
+    "dataset.npz": "e767c94180a0a90e40264b980b702e8ac4caced51a2e150ddb795f0cc18f86c4",
+    "exposed-control-errors.png": "28e892938c22f82c3f1ad9ea64346d0ee94e95d910219c301eb150e200de3ce4"
+  },
+  "limits": "Previously evaluated errors only. No fitting, policy changes, fresh-test claim, or calibrated probability claim."
+}
